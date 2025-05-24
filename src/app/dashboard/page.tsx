@@ -1,10 +1,19 @@
-import { headers } from "next/headers";
-import { auth } from "@/auth";
+"use client";
+import { authClient } from "@/auth-client";
+import { Button } from "@/components/ui/button";
+import { RedirectToSignIn } from "@daveyplate/better-auth-ui";
 
-export default async function Home() {
-    const session = await auth.api.getSession({
-        headers: await headers(), // you need to pass the headers object.
-    });
+export default function Home() {
+    const handleClick = async () => {
+        await authClient.signOut();
+    };
 
-    return <div>{JSON.stringify(session)}</div>;
+    return (
+        <>
+            <RedirectToSignIn />
+            <div>
+                <Button onClick={handleClick}>Ausloggen</Button>
+            </div>
+        </>
+    );
 }

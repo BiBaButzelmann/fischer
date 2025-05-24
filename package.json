@@ -9,6 +9,7 @@
         "lint": "next lint"
     },
     "dependencies": {
+        "@daveyplate/better-auth-ui": "^1.7.3",
         "@neondatabase/serverless": "^1.0.0",
         "@radix-ui/react-label": "^2.1.7",
         "@radix-ui/react-slot": "^1.2.3",

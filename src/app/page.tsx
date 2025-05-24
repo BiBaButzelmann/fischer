@@ -24,7 +24,7 @@ export default function Home() {
                 callbackURL: "/dashboard",
             },
             {
-                onRequest: (ctx) => {
+                onRequest: () => {
                     setIsLoading(true);
                 },
                 onSuccess: () => {
@@ -34,7 +34,7 @@ export default function Home() {
                     setIsLoading(false);
                     console.error("Error during sign up:", error);
                 },
-            }
+            },
         );
     };
 
@@ -55,7 +55,7 @@ export default function Home() {
                 <Label htmlFor="password">Passwort</Label>
                 <Input id="password" type="password" />
             </div>
-            <Button>Registrieren</Button>
+            <Button disabled={isLoading}>Registrieren</Button>
         </form>
     );
 }
