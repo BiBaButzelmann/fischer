@@ -29,17 +29,17 @@ export function AppSidebar() {
                         <SidebarMenu>
                             <SidebarMenuItem>
                                 <SidebarMenuButton asChild>
-                                    <Link href="/game">
-                                        <SwordsIcon />
-                                        <span>Meine Partien</span>
+                                    <Link href="/tournament">
+                                        <NotepadTextIcon />
+                                        <span>Turnierplan</span>
                                     </Link>
                                 </SidebarMenuButton>
                             </SidebarMenuItem>
                             <SidebarMenuItem>
                                 <SidebarMenuButton asChild>
-                                    <Link href="/tournament">
-                                        <NotepadTextIcon />
-                                        <span>Turnierplan</span>
+                                    <Link href="/game">
+                                        <SwordsIcon />
+                                        <span>Meine Partien</span>
                                     </Link>
                                 </SidebarMenuButton>
                             </SidebarMenuItem>

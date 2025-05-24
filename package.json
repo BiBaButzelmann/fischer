@@ -10,6 +10,10 @@
     },
     "dependencies": {
         "@daveyplate/better-auth-ui": "^1.7.3",
+        "@fullcalendar/core": "^6.1.17",
+        "@fullcalendar/daygrid": "^6.1.17",
+        "@fullcalendar/interaction": "^6.1.17",
+        "@fullcalendar/react": "^6.1.17",
         "@neondatabase/serverless": "^1.0.0",
         "@radix-ui/react-avatar": "^1.1.10",
         "@radix-ui/react-dialog": "^1.1.14",
