@@ -1,13 +1,15 @@
 "use client";
 
 import { authClient } from "@/auth-client";
-import { Button } from "./ui/button";
+import { Button } from "../ui/button";
 import {
     Sidebar,
     SidebarContent,
     SidebarFooter,
     SidebarHeader,
-} from "./ui/sidebar";
+} from "../ui/sidebar";
+import { SignedIn } from "@daveyplate/better-auth-ui";
+import { NavUser } from "./nav-user";
 
 export function AppSidebar() {
     const handleClick = async () => {
@@ -21,7 +23,7 @@ export function AppSidebar() {
             </SidebarHeader>
             <SidebarContent></SidebarContent>
             <SidebarFooter>
-                <Button onClick={handleClick}>Ausloggen</Button>
+                <NavUser />
             </SidebarFooter>
         </Sidebar>
     );
