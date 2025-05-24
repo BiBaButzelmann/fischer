@@ -3,10 +3,10 @@ import { AppSidebar } from "@/components/sidebar";
 
 export default function RootLayout({
     children,
-    event,
+    events,
 }: Readonly<{
     children: React.ReactNode;
-    event: React.ReactNode;
+    events: React.ReactNode;
 }>) {
     return (
         <>
@@ -15,7 +15,7 @@ export default function RootLayout({
                 {/* <SidebarTrigger className="absolute top-2 left-2 text-foreground" /> */}
                 <div className="px-4 py-4">
                     {children}
-                    {event}
+                    {events}
                 </div>
             </main>
         </>

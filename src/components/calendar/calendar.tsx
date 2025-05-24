@@ -30,7 +30,7 @@ export function Calendar() {
             selectable
             eventDrop={console.log}
             eventClick={() => {
-                router.push("/event/1");
+                router.push("/events/1");
             }}
         />
     );
