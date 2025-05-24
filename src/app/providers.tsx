@@ -1,6 +1,7 @@
 "use client";
 
 import { authClient } from "@/auth-client";
+import { SidebarProvider } from "@/components/ui/sidebar";
 import { AuthUIProvider } from "@daveyplate/better-auth-ui";
 import { ThemeProvider } from "next-themes";
 import Link from "next/link";
@@ -43,7 +44,7 @@ export function Providers({ children }: { children: ReactNode }) {
                     alreadyHaveAnAccount: "Bereits einen Account?",
                 }}
             >
-                {children}
+                <SidebarProvider>{children}</SidebarProvider>
             </AuthUIProvider>
         </ThemeProvider>
     );
