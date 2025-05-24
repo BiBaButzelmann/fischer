@@ -1,19 +1,13 @@
 "use client";
 
 import { createAuthClient } from "better-auth/react";
-import { Avatar, AvatarFallback, AvatarImage } from "../ui/avatar";
 import { Skeleton } from "../ui/skeleton";
-import { Button } from "../ui/button";
 import { UserButton } from "@daveyplate/better-auth-ui";
 
-const { useSession, signOut } = createAuthClient();
+const { useSession } = createAuthClient();
 
 export function NavUser() {
     const session = useSession();
-
-    const handleLogout = async () => {
-        await signOut();
-    };
 
     if (session.data == null) {
         return (
@@ -28,8 +22,6 @@ export function NavUser() {
             </div>
         );
     }
-
-    const user = session.data.user;
 
     return (
         <div className="flex flex-col gap-2">
