@@ -1,4 +1,5 @@
 import { auth } from "@/auth";
+import CreateTournamentForm from "@/components/admin/create-tournament-form";
 import { headers } from "next/headers";
 
 export default async function Page() {
@@ -11,5 +12,9 @@ export default async function Page() {
         return null;
     }
 
-    return <div>hehe admin</div>;
+    return (
+        <div>
+            <CreateTournamentForm />
+        </div>
+    );
 }
