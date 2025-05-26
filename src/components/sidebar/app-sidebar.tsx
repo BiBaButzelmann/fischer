@@ -1,5 +1,3 @@
-"use client";
-
 import Link from "next/link";
 import {
     Sidebar,
@@ -15,6 +13,8 @@ import {
 } from "../ui/sidebar";
 import { NavUser } from "./nav-user";
 import { NotepadTextIcon, SwordsIcon } from "lucide-react";
+import { Suspense } from "react";
+import NavAdmin from "./nav-admin";
 
 export function AppSidebar() {
     return (
@@ -48,6 +48,9 @@ export function AppSidebar() {
                 </SidebarGroup>
             </SidebarContent>
             <SidebarFooter>
+                <Suspense fallback={<div>Loading admin...</div>}>
+                    <NavAdmin />
+                </Suspense>
                 <NavUser />
             </SidebarFooter>
         </Sidebar>
