@@ -6,7 +6,7 @@ import { address } from "./address";
 export const profile = pgTable("profile", {
   id: integer("id").generatedAlwaysAsIdentity().primaryKey(),
   name: text("name").notNull(),
-  fideId: integer("fide_id").notNull(),
+  fideId: integer("fide_id"),
 
   userId: text("user_id"),
   addressId: integer("address_id"),

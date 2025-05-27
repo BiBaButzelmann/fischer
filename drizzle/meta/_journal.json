@@ -15,6 +15,13 @@
       "when": 1748369217618,
       "tag": "0001_clever_wendigo",
       "breakpoints": true
+    },
+    {
+      "idx": 2,
+      "version": "7",
+      "when": 1748370199466,
+      "tag": "0002_thankful_the_stranger",
+      "breakpoints": true
     }
   ]
 }
