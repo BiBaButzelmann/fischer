@@ -8,6 +8,16 @@ import { Label } from "@/components/ui/label";
 import { Switch } from "@/components/ui/switch";
 import { Separator } from "@/components/ui/separator";
 import { Textarea } from "../ui/textarea";
+import { SelectProfile } from "@/db/types/profile";
+import { SelectAddress } from "@/db/types/address";
+import {
+    Select,
+    SelectContent,
+    SelectItem,
+    SelectTrigger,
+    SelectValue,
+} from "../ui/select";
+import { PlusIcon } from "lucide-react";
 
 interface TournamentFormData {
     clubName: string;
@@ -23,6 +33,8 @@ interface TournamentFormData {
     phone: string;
     email: string;
 
+    organizerId?: number;
+
     organizerName: string;
     fideId: string;
     coLine?: string;
@@ -31,7 +43,14 @@ interface TournamentFormData {
     postalCode: string;
 }
 
-export default function CreateTournamentForm() {
+type ProfileWithAddress = SelectProfile & {
+    address: SelectAddress | null;
+};
+
+type Props = {
+    profiles: ProfileWithAddress[];
+};
+export default function CreateTournamentForm({ profiles }: Props) {
     const {
         register,
         handleSubmit,
@@ -55,6 +74,7 @@ export default function CreateTournamentForm() {
     });
 
     const allClocksValue = watch("allClocksDigital");
+    const organizerId = watch("organizerId");
 
     const onSubmit = async (data: TournamentFormData) => {
         // Simulate form submission
@@ -66,7 +86,7 @@ export default function CreateTournamentForm() {
     return (
         <div>
             <div className="max-w-4xl mx-auto">
-                <div className="text-center mb-8">
+                <div className="mb-8">
                     <h1 className="text-3xl font-bold text-gray-900 mb-2">
                         Tournament Registration
                     </h1>
@@ -81,7 +101,7 @@ export default function CreateTournamentForm() {
                     <Card>
                         <CardHeader>
                             <CardTitle className="text-xl font-semibold text-gray-800">
-                                Part 1: Tournament Information
+                                Turnierinformationen
                             </CardTitle>
                         </CardHeader>
                         <CardContent className="space-y-6">
@@ -91,9 +111,9 @@ export default function CreateTournamentForm() {
                                     <Input
                                         id="clubName"
                                         {...register("clubName", {
-                                            required: "Club name is required",
+                                            required: "Verein ist erforderlich",
                                         })}
-                                        placeholder="Enter club name"
+                                        placeholder="Verein Name"
                                     />
                                     {errors.clubName && (
                                         <p className="text-sm text-red-600">
@@ -104,15 +124,15 @@ export default function CreateTournamentForm() {
 
                                 <div className="space-y-2">
                                     <Label htmlFor="tournamentType">
-                                        Tournament Type *
+                                        Turniertyp *
                                     </Label>
                                     <Input
                                         id="tournamentType"
                                         {...register("tournamentType", {
                                             required:
-                                                "Tournament type is required",
+                                                "Turniertyp ist erforderlich",
                                         })}
-                                        placeholder="e.g., Swiss System, Round Robin"
+                                        placeholder="z.B. Rundenturnier, Schweizer System"
                                     />
                                     {errors.tournamentType && (
                                         <p className="text-sm text-red-600">
@@ -123,7 +143,7 @@ export default function CreateTournamentForm() {
 
                                 <div className="space-y-2">
                                     <Label htmlFor="numberOfRounds">
-                                        Number of Rounds *
+                                        Rundenanzahl *
                                     </Label>
                                     <Input
                                         id="numberOfRounds"
@@ -131,7 +151,7 @@ export default function CreateTournamentForm() {
                                         min="1"
                                         {...register("numberOfRounds", {
                                             required:
-                                                "Number of rounds is required",
+                                                "Rundenanzahl ist erforderlich",
                                             valueAsNumber: true,
                                             min: {
                                                 value: 1,
@@ -139,7 +159,7 @@ export default function CreateTournamentForm() {
                                                     "Must be at least 1 round",
                                             },
                                         })}
-                                        placeholder="Enter number of rounds"
+                                        placeholder="Rundenanzahl"
                                     />
                                     {errors.numberOfRounds && (
                                         <p className="text-sm text-red-600">
@@ -150,14 +170,14 @@ export default function CreateTournamentForm() {
 
                                 <div className="space-y-2">
                                     <Label htmlFor="timeLimit">
-                                        Time Limit *
+                                        Zeitlimit *
                                     </Label>
                                     <Textarea
                                         id="timeLimit"
                                         {...register("timeLimit", {
-                                            required: "Time limit is required",
+                                            required:
+                                                "Zeitlimit ist erforderlich",
                                         })}
-                                        placeholder="e.g., 90 minutes + 30 seconds increment"
                                     />
                                     {errors.timeLimit && (
                                         <p className="text-sm text-red-600">
@@ -168,13 +188,14 @@ export default function CreateTournamentForm() {
 
                                 <div className="space-y-2">
                                     <Label htmlFor="startDate">
-                                        Start Date *
+                                        Turnierstart *
                                     </Label>
                                     <Input
                                         id="startDate"
                                         type="date"
                                         {...register("startDate", {
-                                            required: "Start date is required",
+                                            required:
+                                                "Turnierstart ist erforderlich",
                                         })}
                                     />
                                     {errors.startDate && (
@@ -185,12 +206,15 @@ export default function CreateTournamentForm() {
                                 </div>
 
                                 <div className="space-y-2">
-                                    <Label htmlFor="endDate">End Date *</Label>
+                                    <Label htmlFor="endDate">
+                                        Turnierende *
+                                    </Label>
                                     <Input
                                         id="endDate"
                                         type="date"
                                         {...register("endDate", {
-                                            required: "End date is required",
+                                            required:
+                                                "Turnierende ist erforderlich",
                                         })}
                                     />
                                     {errors.endDate && (
@@ -202,13 +226,13 @@ export default function CreateTournamentForm() {
                             </div>
 
                             <div className="space-y-2">
-                                <Label htmlFor="location">Location *</Label>
+                                <Label htmlFor="location">Ort *</Label>
                                 <Input
                                     id="location"
                                     {...register("location", {
-                                        required: "Location is required",
+                                        required: "Ort ist erforderlich",
                                     })}
-                                    placeholder="Enter tournament venue address"
+                                    placeholder="Hamburg"
                                 />
                                 {errors.location && (
                                     <p className="text-sm text-red-600">
@@ -220,15 +244,15 @@ export default function CreateTournamentForm() {
                             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                                 <div className="space-y-2">
                                     <Label htmlFor="tieBreakMethod">
-                                        Tie Break Method *
+                                        Tie Break Methode *
                                     </Label>
                                     <Input
                                         id="tieBreakMethod"
                                         {...register("tieBreakMethod", {
                                             required:
-                                                "Tie break method is required",
+                                                "Tie Break Methode ist erforderlich",
                                         })}
-                                        placeholder="e.g., Buchholz, Sonneborn-Berger"
+                                        placeholder="z.B. Buchholz, Sonneborn-Berger"
                                     />
                                     {errors.tieBreakMethod && (
                                         <p className="text-sm text-red-600">
@@ -239,15 +263,15 @@ export default function CreateTournamentForm() {
 
                                 <div className="space-y-2">
                                     <Label htmlFor="softwareUsed">
-                                        Software Used *
+                                        Software *
                                     </Label>
                                     <Input
                                         id="softwareUsed"
                                         {...register("softwareUsed", {
                                             required:
-                                                "Software used is required",
+                                                "Software ist erforderlich",
                                         })}
-                                        placeholder="e.g., Swiss Manager, ChessManager"
+                                        placeholder="z.B. Swiss Manager, ChessManager"
                                     />
                                     {errors.softwareUsed && (
                                         <p className="text-sm text-red-600">
@@ -269,7 +293,7 @@ export default function CreateTournamentForm() {
                                     htmlFor="allClocksDigital"
                                     className="text-sm font-medium"
                                 >
-                                    All Clocks Digital
+                                    Alle Uhren digital
                                 </Label>
                             </div>
 
@@ -298,14 +322,9 @@ export default function CreateTournamentForm() {
                                         id="email"
                                         type="email"
                                         {...register("email", {
-                                            required: "Email is required",
-                                            pattern: {
-                                                value: /^[A-Z0-9._%+-]+@[A-Z0-9.-]+\.[A-Z]{2,}$/i,
-                                                message:
-                                                    "Invalid email address",
-                                            },
+                                            required: "Email ist erforderlich",
                                         })}
-                                        placeholder="Enter email address"
+                                        placeholder="Email Adresse"
                                     />
                                     {errors.email && (
                                         <p className="text-sm text-red-600">
@@ -323,10 +342,108 @@ export default function CreateTournamentForm() {
                     <Card>
                         <CardHeader>
                             <CardTitle className="text-xl font-semibold text-gray-800">
-                                Part 2: Organizer Information
+                                Organisator
                             </CardTitle>
                         </CardHeader>
                         <CardContent className="space-y-6">
+                            {/* Existing Organizer Selection */}
+                            <div className="space-y-2">
+                                <Label htmlFor="existingOrganizer">
+                                    Organisator auswählen (Optional)
+                                </Label>
+                                <Select
+                                    value={organizerId?.toString() ?? ""}
+                                    onValueChange={(value) => {
+                                        if (value === "new") {
+                                            // Clear all fields for new organizer
+                                            setValue("organizerId", undefined);
+                                            setValue("organizerName", "");
+                                            setValue("fideId", "");
+                                            setValue("coLine", "");
+                                            setValue("street", "");
+                                            setValue("city", "");
+                                            setValue("postalCode", "");
+                                        } else if (value) {
+                                            // Populate fields with selected organizer data
+                                            const selectedOrganizer =
+                                                profiles.find(
+                                                    // TODO: parseInt :(
+                                                    (org) =>
+                                                        org.id ===
+                                                        parseInt(value),
+                                                );
+                                            if (selectedOrganizer) {
+                                                setValue(
+                                                    "organizerId",
+                                                    parseInt(value),
+                                                );
+                                                setValue(
+                                                    "organizerName",
+                                                    selectedOrganizer.name,
+                                                );
+                                                setValue(
+                                                    "fideId",
+                                                    selectedOrganizer.fideId.toString(),
+                                                );
+                                                // You would populate other fields here if they exist in your data
+                                                setValue(
+                                                    "street",
+                                                    selectedOrganizer.address
+                                                        ?.street ?? "",
+                                                );
+                                                setValue(
+                                                    "city",
+                                                    selectedOrganizer.address
+                                                        ?.city ?? "",
+                                                );
+                                                setValue(
+                                                    "postalCode",
+                                                    selectedOrganizer.address
+                                                        ?.postalCode ?? "",
+                                                );
+                                                setValue(
+                                                    "coLine",
+                                                    selectedOrganizer.address
+                                                        ?.coLine ?? "",
+                                                );
+                                            }
+                                        }
+                                    }}
+                                >
+                                    <SelectTrigger>
+                                        <SelectValue placeholder="Organisator auswählen oder neuen erstellen" />
+                                    </SelectTrigger>
+                                    <SelectContent>
+                                        <SelectItem value="new">
+                                            <div className="flex items-center space-x-2">
+                                                <PlusIcon className="h-4 w-4" />
+                                                <span>
+                                                    Neuen Organisator anlegen
+                                                </span>
+                                            </div>
+                                        </SelectItem>
+                                        {profiles.map((profile) => (
+                                            <SelectItem
+                                                key={profile.id}
+                                                value={profile.id.toString()}
+                                            >
+                                                <div className="flex flex-col">
+                                                    <span className="font-medium">
+                                                        {profile.name}
+                                                    </span>
+                                                    <span className="text-sm text-gray-500">
+                                                        FIDE ID:{" "}
+                                                        {profile.fideId} •{" "}
+                                                        {profile.address?.city}
+                                                    </span>
+                                                </div>
+                                            </SelectItem>
+                                        ))}
+                                    </SelectContent>
+                                </Select>
+                            </div>
+
+                            {/* Organizer Form Fields - Always Visible */}
                             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                                 <div className="space-y-2">
                                     <Label htmlFor="organizerName">
@@ -335,8 +452,7 @@ export default function CreateTournamentForm() {
                                     <Input
                                         id="organizerName"
                                         {...register("organizerName", {
-                                            required:
-                                                "Organizer name is required",
+                                            required: "Name ist erforderlich",
                                         })}
                                         placeholder="Enter organizer name"
                                     />
@@ -352,7 +468,8 @@ export default function CreateTournamentForm() {
                                     <Input
                                         id="fideId"
                                         {...register("fideId", {
-                                            required: "FIDE Id is required",
+                                            required:
+                                                "FIDE Id ist erforderlich",
                                         })}
                                         placeholder="Enter FIDE Id"
                                     />
@@ -366,27 +483,28 @@ export default function CreateTournamentForm() {
 
                             <div className="space-y-4">
                                 <h3 className="text-lg font-medium text-gray-800">
-                                    Address
+                                    Adresse
                                 </h3>
 
                                 <div className="space-y-2">
-                                    <Label htmlFor="coLine">C/O Line</Label>
+                                    <Label htmlFor="coLine">
+                                        C/O Zeile (Optional)
+                                    </Label>
                                     <Input
                                         id="coLine"
                                         {...register("coLine")}
-                                        placeholder="Zu Händen (optional)"
+                                        placeholder="Zu Händen von..."
                                     />
                                 </div>
 
                                 <div className="space-y-2">
-                                    <Label htmlFor="street">Street *</Label>
+                                    <Label htmlFor="street">Straße *</Label>
                                     <Input
                                         id="street"
                                         {...register("street", {
-                                            required:
-                                                "Street address is required",
+                                            required: "Straße ist erforderlich",
                                         })}
-                                        placeholder="Enter street address"
+                                        placeholder="Straße eingeben"
                                     />
                                     {errors.street && (
                                         <p className="text-sm text-red-600">
@@ -397,13 +515,14 @@ export default function CreateTournamentForm() {
 
                                 <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                                     <div className="space-y-2">
-                                        <Label htmlFor="city">City *</Label>
+                                        <Label htmlFor="city">Stadt *</Label>
                                         <Input
                                             id="city"
                                             {...register("city", {
-                                                required: "City is required",
+                                                required:
+                                                    "Stadt ist erforderlich",
                                             })}
-                                            placeholder="Enter city"
+                                            placeholder="Stadt eingeben"
                                         />
                                         {errors.city && (
                                             <p className="text-sm text-red-600">
@@ -414,15 +533,15 @@ export default function CreateTournamentForm() {
 
                                     <div className="space-y-2">
                                         <Label htmlFor="postalCode">
-                                            Postal Code *
+                                            Postleitzahl *
                                         </Label>
                                         <Input
                                             id="postalCode"
                                             {...register("postalCode", {
                                                 required:
-                                                    "Postal code is required",
+                                                    "Postleitzahl ist erforderlich",
                                             })}
-                                            placeholder="Enter postal code"
+                                            placeholder="Postleitzahl eingeben"
                                         />
                                         {errors.postalCode && (
                                             <p className="text-sm text-red-600">
@@ -452,3 +571,5 @@ export default function CreateTournamentForm() {
         </div>
     );
 }
+
+function 

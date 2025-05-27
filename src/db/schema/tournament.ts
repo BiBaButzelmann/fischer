@@ -1,3 +1,4 @@
+import { relations } from "drizzle-orm";
 import {
     boolean,
     date,
@@ -7,6 +8,7 @@ import {
     text,
     timestamp,
 } from "drizzle-orm/pg-core";
+import { profile } from "./profile";
 
 export const tournament = pgTable("tournament", {
     id: integer("id").generatedAlwaysAsIdentity().primaryKey(),
@@ -23,6 +25,7 @@ export const tournament = pgTable("tournament", {
     softwareUsed: text("software").notNull(),
     phone: text("phone").notNull(),
     email: text("email").notNull(),
+    organizerProfileId: integer("organizer_profile_id"),
 
     createdAt: timestamp("created_at")
         .$defaultFn(() => /* @__PURE__ */ new Date())
@@ -31,3 +34,10 @@ export const tournament = pgTable("tournament", {
         .$defaultFn(() => /* @__PURE__ */ new Date())
         .notNull(),
 });
+
+export const tournamentRelations = relations(tournament, ({ one }) => ({
+    organizer: one(profile, {
+        fields: [tournament.organizerProfileId],
+        references: [profile.id],
+    }),
+}));
