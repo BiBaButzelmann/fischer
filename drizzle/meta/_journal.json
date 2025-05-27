@@ -8,6 +8,13 @@
       "when": 1748289013644,
       "tag": "0000_wild_santa_claus",
       "breakpoints": true
+    },
+    {
+      "idx": 1,
+      "version": "7",
+      "when": 1748369217618,
+      "tag": "0001_clever_wendigo",
+      "breakpoints": true
     }
   ]
 }

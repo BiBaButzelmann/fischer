@@ -4,21 +4,21 @@ import { user } from "./auth";
 import { address } from "./address";
 
 export const profile = pgTable("profile", {
-    id: integer("id").generatedAlwaysAsIdentity().primaryKey(),
-    name: text("name").notNull(),
-    fideId: integer("fide_id").notNull(),
+  id: integer("id").generatedAlwaysAsIdentity().primaryKey(),
+  name: text("name").notNull(),
+  fideId: integer("fide_id").notNull(),
 
-    userId: integer("user_id"),
-    addressId: integer("address_id"),
+  userId: text("user_id"),
+  addressId: integer("address_id"),
 });
 
 export const profileRelations = relations(profile, ({ one }) => ({
-    user: one(user, {
-        fields: [profile.userId],
-        references: [user.id],
-    }),
-    address: one(address, {
-        fields: [profile.addressId],
-        references: [address.id],
-    }),
+  user: one(user, {
+    fields: [profile.userId],
+    references: [user.id],
+  }),
+  address: one(address, {
+    fields: [profile.addressId],
+    references: [address.id],
+  }),
 }));
