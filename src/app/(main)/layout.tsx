@@ -13,7 +13,7 @@ export default function RootLayout({
       <AppSidebar />
       <main className="w-full relative">
         {/* <SidebarTrigger className="absolute top-2 left-2 text-foreground" /> */}
-        <div className="px-4 py-4">
+        <div className="px-4 py-4 max-w-4xl mx-auto">
           {children}
           {events}
         </div>
