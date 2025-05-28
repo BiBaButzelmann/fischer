@@ -19,15 +19,7 @@ export const createTournamentFormDataSchema = z.object({
     .min(1, "E-Mail ist erforderlich"),
 
   // Organisatorauswahl
-  existingOrganizerId: z.string().optional(),
-
-  // Organisatorinformationen
-  organizerName: z.string().min(1, "Name des Organisators ist erforderlich"),
-  fideId: z.string().min(1, "FIDE-ID ist erforderlich"),
-  coLine: z.string().optional(),
-  street: z.string().min(1, "Straße ist erforderlich"),
-  city: z.string().min(1, "Stadt ist erforderlich"),
-  postalCode: z.string().min(1, "Postleitzahl ist erforderlich"),
+  organizerProfileId: z.string().min(1, "Organisator ist erforderlich"),
 });
 
 export type CreateTournamentFormData = z.infer<

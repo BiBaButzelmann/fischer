@@ -22,13 +22,14 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { Plus } from "lucide-react";
 import { zodResolver } from "@hookform/resolvers/zod";
-import invariant from "tiny-invariant";
 import {
   CreateTournamentFormData,
   createTournamentFormDataSchema,
 } from "./schema";
+import { useTransition } from "react";
+import { createTournament } from "./actions";
+import { Button } from "@/components/ui/button";
 
 type ProfileWithAddress = SelectProfile & {
   address: SelectAddress | null;
@@ -38,10 +39,10 @@ type Props = {
   profiles: ProfileWithAddress[];
 };
 export default function CreateTournament({ profiles }: Props) {
+  const [loading, startTransition] = useTransition();
   const form = useForm({
     resolver: zodResolver(createTournamentFormDataSchema),
     defaultValues: {
-      coLine: "",
       clubName: "Hamburger Schachklub von 1830 e.V.",
       tournamentType: "Rundenturnier",
       numberOfRounds: 9,
@@ -57,27 +58,25 @@ export default function CreateTournament({ profiles }: Props) {
   });
 
   const handleSubmit = async (data: CreateTournamentFormData) => {
-    // Simulate form submission
-    console.log("Form submitted:", data);
-    await new Promise((resolve) => setTimeout(resolve, 1000));
-    alert("Tournament registration submitted successfully!");
+    startTransition(async () => {
+      await createTournament(data);
+    });
   };
 
   return (
     <div>
-      <div className="max-w-4xl mx-auto">
-        <div className="mb-8">
-          <h1 className="text-3xl font-bold text-gray-900 mb-2">
-            Turnieranmeldung
-          </h1>
-        </div>
-
-        <CreateTournamentForm
-          form={form}
-          onSubmit={handleSubmit}
-          profiles={profiles}
-        />
+      <div className="mb-8">
+        <h1 className="text-3xl font-bold text-gray-900 mb-2">
+          Turnieranmeldung
+        </h1>
       </div>
+
+      <CreateTournamentForm
+        form={form}
+        onSubmit={handleSubmit}
+        profiles={profiles}
+        isLoading={loading}
+      />
     </div>
   );
 }
@@ -88,44 +87,16 @@ function CreateTournamentForm({
   form,
   onSubmit,
   profiles,
+  isLoading,
 }: {
   form: UseFormReturn<CreateTournamentFormData>;
   onSubmit: (data: CreateTournamentFormData) => void;
   profiles: ProfileWithAddress[];
+  isLoading: boolean;
 }) {
-  const handleSelectedOrganizerChange = (id: string) => {
-    const selectedOrganizer = profiles.find((org) => org.id === parseInt(id));
-    invariant(selectedOrganizer != null);
-
-    form.setValue("organizerName", selectedOrganizer.name);
-    form.setValue("fideId", selectedOrganizer.fideId.toString());
-    form.setValue("street", selectedOrganizer.address?.street ?? "");
-    form.setValue("city", selectedOrganizer.address?.city ?? "");
-    form.setValue("postalCode", selectedOrganizer.address?.postalCode ?? "");
-    form.setValue("coLine", selectedOrganizer.address?.coLine ?? "");
-  };
-
-  const handleClearOrganizerFields = () => {
-    form.setValue("organizerName", "");
-    form.setValue("fideId", "");
-    form.setValue("street", "");
-    form.setValue("city", "");
-    form.setValue("postalCode", "");
-    form.setValue("coLine", "");
-  };
-
-  const handleOrganizerIdChange = (value: string) => {
-    form.setValue("existingOrganizerId", value);
-    if (value === NEW_ORGANIZER_ITEM_ID) {
-      handleClearOrganizerFields();
-    } else if (value) {
-      handleSelectedOrganizerChange(value);
-    }
-  };
-
   return (
     <Form {...form}>
-      <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-8">
+      <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
         {/* Teil 1: Turnierinformationen */}
         <Card>
           <CardHeader>
@@ -352,31 +323,19 @@ function CreateTournamentForm({
             </CardTitle>
           </CardHeader>
           <CardContent className="space-y-6">
-            {/* Bestehender Organisator-Auswahl */}
             <FormField
               control={form.control}
-              name="existingOrganizerId"
+              name="organizerProfileId"
               render={({ field }) => (
                 <FormItem>
-                  <FormLabel>
-                    Bestehenden Organisator auswählen (Optional)
-                  </FormLabel>
-                  <Select
-                    value={field.value || ""}
-                    onValueChange={handleOrganizerIdChange}
-                  >
+                  <FormLabel>Organisator auswählen</FormLabel>
+                  <Select value={field.value} onValueChange={field.onChange}>
                     <FormControl>
                       <SelectTrigger>
-                        <SelectValue placeholder="Bestehenden Organisator auswählen oder neuen erstellen" />
+                        <SelectValue placeholder="Organisator auswählen" />
                       </SelectTrigger>
                     </FormControl>
                     <SelectContent>
-                      <SelectItem value={NEW_ORGANIZER_ITEM_ID}>
-                        <div className="flex items-center space-x-2">
-                          <Plus className="h-4 w-4" />
-                          <span>Neuen Organisator erstellen</span>
-                        </div>
-                      </SelectItem>
                       {profiles.map((organizer) => (
                         <SelectItem
                           key={organizer.id}
@@ -395,110 +354,11 @@ function CreateTournamentForm({
                 </FormItem>
               )}
             />
-
-            {/* Organisator-Formularfelder - Immer sichtbar */}
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-              <FormField
-                control={form.control}
-                name="organizerName"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>Name *</FormLabel>
-                    <FormControl>
-                      <Input
-                        placeholder="Name des Organisators eingeben"
-                        {...field}
-                      />
-                    </FormControl>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
-
-              <FormField
-                control={form.control}
-                name="fideId"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>FIDE-ID *</FormLabel>
-                    <FormControl>
-                      <Input placeholder="FIDE-ID eingeben" {...field} />
-                    </FormControl>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
-            </div>
-
-            <div className="space-y-4">
-              <h3 className="text-lg font-medium text-gray-800">Adresse</h3>
-
-              <FormField
-                control={form.control}
-                name="coLine"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>c/o Zeile (Optional)</FormLabel>
-                    <FormControl>
-                      <Input
-                        placeholder="Zu Händen eingeben (optional)"
-                        {...field}
-                      />
-                    </FormControl>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
-
-              <FormField
-                control={form.control}
-                name="street"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>Straße *</FormLabel>
-                    <FormControl>
-                      <Input
-                        placeholder="Straße und Hausnummer eingeben"
-                        {...field}
-                      />
-                    </FormControl>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
-
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                <FormField
-                  control={form.control}
-                  name="city"
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormLabel>Stadt *</FormLabel>
-                      <FormControl>
-                        <Input placeholder="Stadt eingeben" {...field} />
-                      </FormControl>
-                      <FormMessage />
-                    </FormItem>
-                  )}
-                />
-
-                <FormField
-                  control={form.control}
-                  name="postalCode"
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormLabel>Postleitzahl *</FormLabel>
-                      <FormControl>
-                        <Input placeholder="Postleitzahl eingeben" {...field} />
-                      </FormControl>
-                      <FormMessage />
-                    </FormItem>
-                  )}
-                />
-              </div>
-            </div>
           </CardContent>
         </Card>
+        <Button type="submit" disabled={isLoading}>
+          Speichern
+        </Button>
       </form>
     </Form>
   );

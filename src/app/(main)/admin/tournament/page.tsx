@@ -17,6 +17,14 @@ export default async function Page() {
     return null;
   }
 
+  const activeTournament = await db.query.tournament.findFirst({
+    where: (tournament, { gte }) => {
+      const now = new Date();
+      const startOfYear = new Date(now.getFullYear(), 0, 1);
+      return gte(tournament.startDate, startOfYear);
+    },
+  });
+
   // TODO: parallelize queries
   const adminProfiles = await db
     .select({
@@ -30,6 +38,7 @@ export default async function Page() {
 
   return (
     <div>
+      {activeTournament && <p>turnier läuft</p>}
       <CreateTournament profiles={adminProfiles} />
     </div>
   );
