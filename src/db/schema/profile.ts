@@ -1,5 +1,5 @@
 import { relations } from "drizzle-orm";
-import { integer, pgTable, text } from "drizzle-orm/pg-core";
+import { integer, pgTable, text, timestamp } from "drizzle-orm/pg-core";
 import { user } from "./auth";
 import { address } from "./address";
 
@@ -10,6 +10,13 @@ export const profile = pgTable("profile", {
 
   userId: text("user_id"),
   addressId: integer("address_id"),
+
+  createdAt: timestamp("created_at")
+    .$defaultFn(() => /* @__PURE__ */ new Date())
+    .notNull(),
+  updatedAt: timestamp("updated_at")
+    .$defaultFn(() => /* @__PURE__ */ new Date())
+    .notNull(),
 });
 
 export const profileRelations = relations(profile, ({ one }) => ({
