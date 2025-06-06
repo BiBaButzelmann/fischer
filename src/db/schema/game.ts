@@ -1,6 +1,6 @@
 import { integer, pgEnum, pgTable, timestamp, date } from "drizzle-orm/pg-core";
 
-const resultEnum = pgEnum("result", [
+export const resultEnum = pgEnum("result", [
   "draw", // 0
   "white_wins", // 1
   "black_wins", // 2
@@ -14,7 +14,7 @@ export const game = pgTable("game", {
   groupId: integer("group_id").notNull(),
   round: integer("round").notNull(),
   boardNumber: integer("board_number").notNull(),
-  result: resultEnum("result"),
+  result: resultEnum(),
   pgnId: integer("pgn_id"),
 
   scheduled: date("scheduled", { mode: "date" }).notNull(),

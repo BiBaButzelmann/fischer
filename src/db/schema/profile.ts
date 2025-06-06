@@ -12,11 +12,9 @@ export const profile = pgTable("profile", {
   addressId: integer("address_id"),
 
   createdAt: timestamp("created_at")
-    .$defaultFn(() => /* @__PURE__ */ new Date())
-    .notNull(),
+    .$defaultFn(() => /* @__PURE__ */ new Date()).notNull(),
   updatedAt: timestamp("updated_at")
-    .$defaultFn(() => /* @__PURE__ */ new Date())
-    .notNull(),
+    .$defaultFn(() => /* @__PURE__ */ new Date()).notNull(),
 });
 
 export const profileRelations = relations(profile, ({ one }) => ({
