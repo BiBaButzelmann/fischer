@@ -35,7 +35,7 @@ export function NavUser() {
         className="hover:bg-secondary hover:text-sidebar-foreground"
         additionalLinks={[
           {
-            href: "/profile/create",
+            href: "/profile",
             label: "Profil verwalten",
             icon: <UserIcon />,
             signedIn: true,
