@@ -3,9 +3,8 @@ import { profile } from "../schema/profile";
 import { participant } from "../schema/participant";
 import { seed } from "drizzle-seed";
 import { fideIds } from "./data/fideIds";
-import { fideRatings } from "./data/fideRatings";
 import { profileIds } from "./data/profileIds";
-import { gte } from "drizzle-orm";
+import { eq, gte, isNull } from "drizzle-orm";
 
 async function main() {
   const db = drizzle(process.env.DATABASE_URL!);
@@ -48,18 +47,25 @@ async function main() {
           values: fideIds,
           isUnique: true,
         }),
-        fideRating: f.valuesFromArray({
-          values: fideRatings,
-          isUnique: true,
-        }),
-        dwzRating: f.valuesFromArray({
-          values: fideRatings,
-          isUnique: true,
+        fideRating: f.weightedRandom([
+          { weight: 0.7, value: f.int({ minValue: 1000, maxValue: 2500 }) },
+          { weight: 0.3, value: f.default({ defaultValue: null }) },
+        ]),
+        dwzRating: f.int({
+          minValue: 1000,
+          maxValue: 2500,
         }),
       },
       count: 100,
     },
   }));
+
+  await db
+    .update(participant)
+    .set({
+      fideId: null,
+    })
+    .where(isNull(participant.fideRating));
 }
 
 main();
