@@ -9,6 +9,8 @@
         "lint": "next lint"
     },
     "dependencies": {
+        "@atlaskit/pragmatic-drag-and-drop": "^1.7.2",
+        "@atlaskit/pragmatic-drag-and-drop-react-drop-indicator": "^3.2.1",
         "@daveyplate/better-auth-ui": "^1.7.3",
         "@fullcalendar/core": "^6.1.17",
         "@fullcalendar/daygrid": "^6.1.17",
