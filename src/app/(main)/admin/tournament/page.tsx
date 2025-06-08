@@ -2,8 +2,6 @@ import { auth } from "@/auth";
 import { EditGroups } from "@/components/admin/tournament/edit-groups";
 import EditTournamentDetails from "@/components/admin/tournament/edit-tournament-details";
 import { ParticipantsList } from "@/components/admin/tournament/participants-list";
-import { Badge } from "@/components/ui/badge";
-import { Card, CardHeader } from "@/components/ui/card";
 import {
   Collapsible,
   CollapsibleContent,
@@ -13,11 +11,9 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { db } from "@/db/client";
 import { user } from "@/db/schema/auth";
 import { profile } from "@/db/schema/profile";
-import { Participant, ParticipantWithName } from "@/db/types/participant";
 import { eq, getTableColumns } from "drizzle-orm";
 import { ChevronDownIcon } from "lucide-react";
 import { headers } from "next/headers";
-import invariant from "tiny-invariant";
 
 export default async function Page() {
   // TODO: improve this
@@ -54,6 +50,14 @@ export default async function Page() {
 }
 
 async function ManageTournament() {
+  const activeTournament = await db.query.tournament.findFirst({
+    where: (tournament, { gte }) => {
+      const now = new Date();
+      const startOfYear = new Date(now.getFullYear(), 0, 1);
+      return gte(tournament.startDate, startOfYear);
+    },
+  });
+
   const adminProfiles = await db
     .select(getTableColumns(profile))
     .from(profile)
@@ -62,7 +66,10 @@ async function ManageTournament() {
 
   return (
     <div className="space-y-4">
-      <Collapsible className="border border-primary rounded-md p-4">
+      <Collapsible
+        open={activeTournament == null}
+        className="border border-primary rounded-md p-4"
+      >
         <CollapsibleTrigger className="w-full">
           <div className="flex">
             <span className="flex-grow text-left">
@@ -75,16 +82,30 @@ async function ManageTournament() {
           <EditTournamentDetails profiles={adminProfiles} />
         </CollapsibleContent>
       </Collapsible>
-      <Collapsible className="border border-primary rounded-md p-4">
+      <Collapsible
+        open={activeTournament != null}
+        className="border border-primary rounded-md p-4"
+      >
         <CollapsibleTrigger className="w-full">
           <div className="flex">
             <span className="flex-grow text-left">Gruppen verwalten</span>
             <ChevronDownIcon />
           </div>
         </CollapsibleTrigger>
-        <CollapsibleContent>
-          <EditGroups />
+        <CollapsibleContent className="mt-4">
+          {activeTournament ? (
+            <EditGroups tournament={activeTournament} />
+          ) : null}
         </CollapsibleContent>
+      </Collapsible>
+      <Collapsible disabled className="border border-primary rounded-md p-4">
+        <CollapsibleTrigger className="w-full">
+          <div className="flex">
+            <span className="flex-grow text-left">Turnier starten</span>
+            <ChevronDownIcon />
+          </div>
+        </CollapsibleTrigger>
+        <CollapsibleContent className="mt-4"></CollapsibleContent>
       </Collapsible>
     </div>
   );
