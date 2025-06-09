@@ -1,12 +1,14 @@
 import { relations } from "drizzle-orm";
 import { integer, pgTable, text, timestamp } from "drizzle-orm/pg-core";
 import { profile } from "./profile";
+import { group } from "./group";
 
 export const participant = pgTable("participant", {
   id: integer("id").generatedAlwaysAsIdentity().primaryKey(),
 
   profileId: integer("profile_id").notNull(),
   tournamentId: integer("tournament_id").notNull(),
+  groupId: integer("group_id"),
 
   fideId: text("fide_id"),
 
@@ -27,5 +29,9 @@ export const participantRelations = relations(participant, ({ one }) => ({
   profile: one(profile, {
     fields: [participant.profileId],
     references: [profile.id],
+  }),
+  group: one(group, {
+    fields: [participant.groupId],
+    references: [group.id],
   }),
 }));
