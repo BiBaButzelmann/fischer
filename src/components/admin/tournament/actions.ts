@@ -14,6 +14,7 @@ import { participant } from "@/db/schema/participant";
 import { and, eq } from "drizzle-orm";
 import { GridGroup } from "./types";
 import { ParticipantWithName } from "@/db/types/participant";
+import { MatchDay } from "@/db/types/group";
 
 // TODO: authentication / authorization
 export async function createTournament(formData: CreateTournamentFormData) {
@@ -169,6 +170,23 @@ export async function updateGroups(
         );
     }
   }
+
+  revalidatePath("/admin/tournament");
+}
+
+export async function updateGroupMatchDay(
+  groupId: number,
+  matchDay: MatchDay | null,
+) {
+  const session = await auth.api.getSession({
+    headers: await headers(),
+  });
+
+  if (session?.user.role !== "admin") {
+    throw new Error("Unauthorized");
+  }
+
+  await db.update(group).set({ matchDay }).where(eq(group.id, groupId));
 
   revalidatePath("/admin/tournament");
 }

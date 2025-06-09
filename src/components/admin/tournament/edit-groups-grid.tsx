@@ -17,8 +17,8 @@ export async function EditGroupsGrid({
     id: group.id,
     groupNumber: group.groupNumber,
     groupName: group.groupName,
+    matchDay: group.matchDay,
     participants: group.participants,
-    isNew: false,
   }));
 
   return (

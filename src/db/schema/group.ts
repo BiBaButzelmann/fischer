@@ -1,12 +1,20 @@
 import { relations } from "drizzle-orm";
 import {
   integer,
+  pgEnum,
   pgTable,
   primaryKey,
   text,
   timestamp,
 } from "drizzle-orm/pg-core";
 import { participant } from "./participant";
+
+export const matchDay = pgEnum("match_day", [
+  "monday",
+  "tuesday",
+  "thursday",
+  "friday",
+]);
 
 export const group = pgTable(
   "group",
@@ -15,6 +23,7 @@ export const group = pgTable(
 
     groupNumber: integer("group_number").notNull(),
     groupName: text("group_name").notNull(),
+    matchDay: matchDay("match_day"),
     tournamentId: integer("tournament_id").notNull(),
 
     createdAt: timestamp("created_at")

@@ -28,6 +28,14 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { generateGroups, updateGroups } from "./actions";
 import { Button } from "@/components/ui/button";
 import { GridGroup } from "./types";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
+import { GroupMatchDay } from "./group-match-day";
 
 export const UNASSIGNED_CONTAINER_ID = "unassigned-droppable";
 
@@ -141,6 +149,9 @@ export function GroupContainer({ group }: { group: GridGroup }) {
         </CardTitle>
       </CardHeader>
       <CardContent ref={setNodeRef}>
+        <div className="px-2 mb-2">
+          <GroupMatchDay group={group} />
+        </div>
         <SortableContext items={participantIds}>
           {group.participants.map((p) => (
             <ParticipantItem key={p.id} participant={p} />

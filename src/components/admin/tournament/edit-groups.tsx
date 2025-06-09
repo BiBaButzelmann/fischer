@@ -19,6 +19,7 @@ export async function EditGroups({ tournament }: { tournament: Tournament }) {
         },
       },
     },
+    orderBy: (group, { asc }) => [asc(group.groupNumber)],
   });
 
   const unassignedParticipants = await db.query.participant.findMany({
