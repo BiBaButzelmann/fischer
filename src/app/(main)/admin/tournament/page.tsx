@@ -67,7 +67,7 @@ async function ManageTournament() {
   return (
     <div className="space-y-4">
       <Collapsible
-        open={activeTournament == null}
+        defaultOpen={activeTournament == null}
         className="border border-primary rounded-md p-4"
       >
         <CollapsibleTrigger className="w-full">
@@ -83,7 +83,7 @@ async function ManageTournament() {
         </CollapsibleContent>
       </Collapsible>
       <Collapsible
-        open={activeTournament != null}
+        defaultOpen={activeTournament != null}
         className="border border-primary rounded-md p-4"
       >
         <CollapsibleTrigger className="w-full">
@@ -94,7 +94,7 @@ async function ManageTournament() {
         </CollapsibleTrigger>
         <CollapsibleContent className="mt-4">
           {activeTournament ? (
-            <EditGroups tournament={activeTournament} />
+            <EditGroups tournament={activeTournament!} />
           ) : null}
         </CollapsibleContent>
       </Collapsible>

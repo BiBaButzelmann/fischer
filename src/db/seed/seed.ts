@@ -3,26 +3,24 @@ import { profile } from "../schema/profile";
 import { participant } from "../schema/participant";
 import { seed } from "drizzle-seed";
 import { fideIds } from "./data/fideIds";
-import { profileIds } from "./data/profileIds";
-import { eq, gte, isNull } from "drizzle-orm";
+import { gte, isNull } from "drizzle-orm";
 
 async function main() {
   const db = drizzle(process.env.DATABASE_URL!);
   await seed(db, { profile }).refine((f) => ({
     profile: {
       columns: {
-        id: f.valuesFromArray({
-          values: profileIds,
+        id: f.int({
+          minValue: 100,
           isUnique: true,
         }),
         name: f.fullName(),
-
         coLine: f.default({ defaultValue: null }),
         city: f.city(),
         street: f.streetAddress(),
         postalCode: f.postcode(),
       },
-      count: 100,
+      count: 105,
     },
   }));
 
@@ -56,7 +54,7 @@ async function main() {
           maxValue: 2500,
         }),
       },
-      count: 100,
+      count: 105,
     },
   }));
 

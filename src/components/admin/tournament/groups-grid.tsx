@@ -1,3 +1,5 @@
+"use client";
+
 import { ParticipantWithName } from "@/db/types/participant";
 import { arrayMove, SortableContext, useSortable } from "@dnd-kit/sortable";
 import {
@@ -13,18 +15,16 @@ import {
   useSensors,
 } from "@dnd-kit/core";
 import { CSS } from "@dnd-kit/utilities";
-import { useMemo, useState } from "react";
+import { useMemo, useState, useTransition } from "react";
 import invariant from "tiny-invariant";
 import { ParticipantEntry } from "./participant-entry";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { generateGroups, saveGroups } from "./actions";
+import { Button } from "@/components/ui/button";
+import { GridGroup } from "./types";
 
-type Group = {
-  id: number;
-  name: string;
-  participants: ParticipantWithName[];
-};
-
-export function GroupsGrid({ groups: initialGroups }: { groups: Group[] }) {
+export function GroupsGrid({ groups: initialGroups }: { groups: GridGroup[] }) {
+  const [isPending, startTransition] = useTransition();
   const [groups, setGroups] = useState(initialGroups);
   const [activeItem, setActiveItem] = useState<ParticipantWithName | null>(
     null,
@@ -142,8 +142,33 @@ export function GroupsGrid({ groups: initialGroups }: { groups: Group[] }) {
     }
   };
 
+  const handleSave = () => {
+    startTransition(async () => {
+      // TODO: tournament ID should be dynamic
+      await saveGroups(1, groups);
+    });
+  };
+
+  const handleGenerateGroups = () => {
+    startTransition(async () => {
+      // TODO: tournament ID should be dynamic
+      await generateGroups(1);
+    });
+  };
+
+  if (groups.length === 0) {
+    return (
+      <div className="flex flex-col items-center justify-center gap-4 p-4">
+        <span>Keine Gruppen vorhanden</span>
+        <Button onClick={handleGenerateGroups} disabled={isPending}>
+          Gruppen generieren
+        </Button>
+      </div>
+    );
+  }
+
   return (
-    <div>
+    <div className="flex flex-col gap-4">
       <DndContext
         sensors={sensors}
         collisionDetection={closestCorners}
@@ -164,11 +189,14 @@ export function GroupsGrid({ groups: initialGroups }: { groups: Group[] }) {
           ) : null}
         </DragOverlay>
       </DndContext>
+      <Button onClick={handleSave} disabled={isPending}>
+        Gruppenaufteilung Speichern
+      </Button>
     </div>
   );
 }
 
-export function GroupContainer({ group }: { group: Group }) {
+export function GroupContainer({ group }: { group: GridGroup }) {
   const { setNodeRef } = useDroppable({
     id: group.id,
     data: {
@@ -185,7 +213,7 @@ export function GroupContainer({ group }: { group: Group }) {
   return (
     <Card>
       <CardHeader>
-        <CardTitle>{group.name}</CardTitle>
+        <CardTitle>Gruppe {group.groupNumber}</CardTitle>
       </CardHeader>
       <CardContent ref={setNodeRef}>
         <SortableContext items={participantIds}>
