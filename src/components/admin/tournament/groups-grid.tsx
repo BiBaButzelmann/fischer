@@ -23,9 +23,21 @@ import { generateGroups, updateGroups } from "./actions";
 import { Button } from "@/components/ui/button";
 import { GridGroup } from "./types";
 
-export function GroupsGrid({ groups: initialGroups }: { groups: GridGroup[] }) {
+export const UNASSIGNED_CONTAINER_ID = "unassigned-droppable";
+
+export function GroupsGrid({
+  groups: initialGroups,
+  unassignedParticipants: initialUnassignedParticipants,
+}: {
+  groups: GridGroup[];
+  unassignedParticipants: ParticipantWithName[];
+}) {
   const [isPending, startTransition] = useTransition();
+
   const [groups, setGroups] = useState(initialGroups);
+  const [unassignedParticipants, setUnassignedParticipants] = useState(
+    initialUnassignedParticipants,
+  );
   const [activeItem, setActiveItem] = useState<ParticipantWithName | null>(
     null,
   );
@@ -38,8 +50,16 @@ export function GroupsGrid({ groups: initialGroups }: { groups: GridGroup[] }) {
     }),
   );
 
-  const findContainer = (id: number) => {
-    return groups.find((group) => group.participants.some((p) => p.id === id));
+  const findContainerId = (id: number) => {
+    if (unassignedParticipants.some((p) => p.id === id)) {
+      return UNASSIGNED_CONTAINER_ID;
+    }
+    for (const group of groups) {
+      if (group.participants.some((p) => p.id === id)) {
+        return group.id;
+      }
+    }
+    return null;
   };
 
   const handleDragStart = (event: DragStartEvent) => {
@@ -50,51 +70,61 @@ export function GroupsGrid({ groups: initialGroups }: { groups: GridGroup[] }) {
 
   const handleDragOver = (event: DragOverEvent) => {
     const { active, over } = event;
-    if (!over || active.id === over.id) return;
+    if (!over) return;
 
-    const activeContainer = findContainer(active.id as number);
-    const overContainer = findContainer(over.id as number);
+    const originalContainerId = findContainerId(active.id as number);
+    const overContainerId =
+      over.data.current?.type === "Group"
+        ? over.id
+        : over.data.current?.type === "UnassignedGroup"
+          ? UNASSIGNED_CONTAINER_ID
+          : findContainerId(over.id as number);
 
     if (
-      !activeContainer ||
-      !overContainer ||
-      activeContainer === overContainer
+      !originalContainerId ||
+      !overContainerId ||
+      originalContainerId === overContainerId
     ) {
       return;
     }
 
-    setGroups((prev) => {
-      const activeItems = activeContainer.participants;
-      const overItems = overContainer.participants;
+    // Handle moving an item to a new container
+    setGroups((prevGroups) => {
+      let newGroups = [...prevGroups];
+      let newUnassigned = [...unassignedParticipants];
+      const participant = active.data.current?.participant;
 
-      const activeIndex = activeItems.findIndex((p) => p.id === active.id);
-      const overIndex = overItems.findIndex((p) => p.id === over.id);
-
-      let newIndex;
-      if (over.id in prev.map((g) => g.id)) {
-        newIndex = overItems.length;
+      // Remove from original container
+      if (originalContainerId === UNASSIGNED_CONTAINER_ID) {
+        newUnassigned = newUnassigned.filter((p) => p.id !== active.id);
       } else {
-        newIndex = overIndex >= 0 ? overIndex : overItems.length;
-      }
-
-      const newGroups = prev.map((group) => {
-        if (group.id === activeContainer.id) {
-          return {
-            ...group,
-            participants: group.participants.filter((p) => p.id !== active.id),
+        const groupIndex = newGroups.findIndex(
+          (g) => g.id === originalContainerId,
+        );
+        if (groupIndex > -1) {
+          newGroups[groupIndex] = {
+            ...newGroups[groupIndex],
+            participants: newGroups[groupIndex].participants.filter(
+              (p) => p.id !== active.id,
+            ),
           };
         }
-        if (group.id === overContainer.id) {
-          const [movedItem] = activeContainer.participants.splice(
-            activeIndex,
-            1,
-          );
-          group.participants.splice(newIndex, 0, movedItem);
-          return { ...group, participants: [...group.participants] };
-        }
-        return group;
-      });
+      }
 
+      // Add to new container
+      if (overContainerId === UNASSIGNED_CONTAINER_ID) {
+        newUnassigned.push(participant);
+      } else {
+        const groupIndex = newGroups.findIndex((g) => g.id === overContainerId);
+        if (groupIndex > -1) {
+          newGroups[groupIndex] = {
+            ...newGroups[groupIndex],
+            participants: [...newGroups[groupIndex].participants, participant],
+          };
+        }
+      }
+
+      setUnassignedParticipants(newUnassigned);
       return newGroups;
     });
   };
@@ -105,47 +135,56 @@ export function GroupsGrid({ groups: initialGroups }: { groups: GridGroup[] }) {
 
     if (!over) return;
 
-    const activeContainer = findContainer(active.id as number);
-    const overContainer = findContainer(over.id as number);
+    const originalContainerId = findContainerId(active.id as number);
+    const overContainerId =
+      over.data.current?.type === "Group"
+        ? over.id
+        : over.data.current?.type === "UnassignedGroup"
+          ? UNASSIGNED_CONTAINER_ID
+          : findContainerId(over.id as number);
 
     if (
-      !activeContainer ||
-      !overContainer ||
-      activeContainer !== overContainer
+      !originalContainerId ||
+      !overContainerId ||
+      originalContainerId === overContainerId
     ) {
-      return;
-    }
-
-    const activeIndex = activeContainer.participants.findIndex(
-      (p) => p.id === active.id,
-    );
-    const overIndex = overContainer.participants.findIndex(
-      (p) => p.id === over.id,
-    );
-
-    if (activeIndex !== overIndex) {
-      setGroups((prev) => {
-        return prev.map((group) => {
-          if (group.id === activeContainer.id) {
-            return {
-              ...group,
-              participants: arrayMove(
-                group.participants,
-                activeIndex,
-                overIndex,
-              ),
-            };
-          }
-          return group;
+      // This handles re-ordering within the same list
+      if (originalContainerId === UNASSIGNED_CONTAINER_ID) {
+        setUnassignedParticipants((prev) => {
+          const oldIndex = prev.findIndex((p) => p.id === active.id);
+          const newIndex = prev.findIndex((p) => p.id === over.id);
+          return arrayMove(prev, oldIndex, newIndex);
         });
-      });
+      } else {
+        setGroups((prev) => {
+          const groupIndex = prev.findIndex(
+            (g) => g.id === originalContainerId,
+          );
+          const group = prev[groupIndex];
+          const oldIndex = group.participants.findIndex(
+            (p) => p.id === active.id,
+          );
+          const newIndex = group.participants.findIndex(
+            (p) => p.id === over.id,
+          );
+          const newParticipants = arrayMove(
+            group.participants,
+            oldIndex,
+            newIndex,
+          );
+          const newGroups = [...prev];
+          newGroups[groupIndex] = { ...group, participants: newParticipants };
+          return newGroups;
+        });
+      }
+      return;
     }
   };
 
   const handleSave = () => {
     startTransition(async () => {
       // TODO: tournament ID should be dynamic
-      await updateGroups(1, groups);
+      await updateGroups(1, groups, unassignedParticipants);
     });
   };
 
@@ -178,6 +217,7 @@ export function GroupsGrid({ groups: initialGroups }: { groups: GridGroup[] }) {
       >
         <div className="flex flex-col gap-4">
           <div className="grid grid-cols-1 sm:grid-cols-1 lg:grid-cols-2 gap-4">
+            <UnassignedContainer participants={unassignedParticipants} />
             {groups.map((group) => (
               <GroupContainer key={group.id} group={group} />
             ))}
@@ -218,6 +258,39 @@ export function GroupContainer({ group }: { group: GridGroup }) {
       <CardContent ref={setNodeRef}>
         <SortableContext items={participantIds}>
           {group.participants.map((p) => (
+            <ParticipantItem key={p.id} participant={p} />
+          ))}
+        </SortableContext>
+      </CardContent>
+    </Card>
+  );
+}
+
+export function UnassignedContainer({
+  participants,
+}: {
+  participants: ParticipantWithName[];
+}) {
+  const { setNodeRef } = useDroppable({
+    id: UNASSIGNED_CONTAINER_ID,
+    data: {
+      type: "unassigned",
+    },
+  });
+
+  const participantIds = useMemo(
+    () => participants.map((p) => p.id),
+    [participants],
+  );
+
+  return (
+    <Card>
+      <CardHeader>
+        <CardTitle>Nicht zugewiesene Teilnehmer</CardTitle>
+      </CardHeader>
+      <CardContent ref={setNodeRef}>
+        <SortableContext items={participants.map((p) => p.id)}>
+          {participants.map((p) => (
             <ParticipantItem key={p.id} participant={p} />
           ))}
         </SortableContext>

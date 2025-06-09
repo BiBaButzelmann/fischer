@@ -125,13 +125,32 @@ export async function generateGroups(tournamentId: number) {
 }
 
 // TODO: maybe add flag to only update participant if participant was moved to a different group/position
-export async function updateGroups(tournmanetId: number, groups: GridGroup[]) {
+export async function updateGroups(
+  tournamentId: number,
+  groups: GridGroup[],
+  unassignedParticipants: ParticipantWithName[],
+) {
   const session = await auth.api.getSession({
     headers: await headers(),
   });
 
   if (session?.user.role !== "admin") {
     throw new Error("Unauthorized");
+  }
+
+  for (const unassignedParticipant of unassignedParticipants) {
+    await db
+      .update(participant)
+      .set({
+        groupId: null,
+        groupPosition: null,
+      })
+      .where(
+        and(
+          eq(participant.tournamentId, tournamentId),
+          eq(participant.profileId, unassignedParticipant.profileId),
+        ),
+      );
   }
 
   for (const insertGroup of groups) {
@@ -144,7 +163,7 @@ export async function updateGroups(tournmanetId: number, groups: GridGroup[]) {
         })
         .where(
           and(
-            eq(participant.tournamentId, tournmanetId),
+            eq(participant.tournamentId, tournamentId),
             eq(participant.profileId, p.profileId),
           ),
         );
