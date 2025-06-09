@@ -19,7 +19,7 @@ import { useMemo, useState, useTransition } from "react";
 import invariant from "tiny-invariant";
 import { ParticipantEntry } from "./participant-entry";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { generateGroups, saveGroups } from "./actions";
+import { generateGroups, updateGroups } from "./actions";
 import { Button } from "@/components/ui/button";
 import { GridGroup } from "./types";
 
@@ -145,7 +145,7 @@ export function GroupsGrid({ groups: initialGroups }: { groups: GridGroup[] }) {
   const handleSave = () => {
     startTransition(async () => {
       // TODO: tournament ID should be dynamic
-      await saveGroups(1, groups);
+      await updateGroups(1, groups);
     });
   };
 

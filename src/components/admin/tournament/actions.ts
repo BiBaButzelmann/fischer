@@ -11,12 +11,11 @@ import { headers } from "next/headers";
 import { revalidatePath } from "next/cache";
 import { group } from "@/db/schema/group";
 import { participant } from "@/db/schema/participant";
-import { and, eq, InferInsertModel } from "drizzle-orm";
+import { and, eq } from "drizzle-orm";
 import { GridGroup } from "./types";
 import { ParticipantWithName } from "@/db/types/participant";
 
 // TODO: authentication / authorization
-
 export async function createTournament(formData: CreateTournamentFormData) {
   const session = await auth.api.getSession({
     headers: await headers(),
@@ -106,15 +105,46 @@ export async function generateGroups(tournamentId: number) {
       })
       .returning();
 
-    for (const p of participantsInGroup) {
+    for (const [index, p] of participantsInGroup.entries()) {
       await db
         .update(participant)
         .set({
           groupId: insertedGroup[0].id,
+          groupPosition: index + 1,
         })
         .where(
           and(
             eq(participant.tournamentId, tournamentId),
+            eq(participant.profileId, p.profileId),
+          ),
+        );
+    }
+  }
+
+  revalidatePath("/admin/tournament");
+}
+
+// TODO: maybe add flag to only update participant if participant was moved to a different group/position
+export async function updateGroups(tournmanetId: number, groups: GridGroup[]) {
+  const session = await auth.api.getSession({
+    headers: await headers(),
+  });
+
+  if (session?.user.role !== "admin") {
+    throw new Error("Unauthorized");
+  }
+
+  for (const insertGroup of groups) {
+    for (const [index, p] of insertGroup.participants.entries()) {
+      await db
+        .update(participant)
+        .set({
+          groupId: insertGroup.id,
+          groupPosition: index + 1,
+        })
+        .where(
+          and(
+            eq(participant.tournamentId, tournmanetId),
             eq(participant.profileId, p.profileId),
           ),
         );
@@ -146,53 +176,4 @@ function getParticipantsGroupDistribution(
     participantGroups,
     unassignedParticipants,
   };
-}
-
-export async function saveGroups(tournmanetId: number, groups: GridGroup[]) {
-  const session = await auth.api.getSession({
-    headers: await headers(),
-  });
-
-  if (session?.user.role !== "admin") {
-    throw new Error("Unauthorized");
-  }
-
-  for (const insertGroup of groups) {
-    await db
-      .insert(group)
-      .values({
-        groupName: `Gruppe ${insertGroup.groupNumber}`,
-        groupNumber: insertGroup.groupNumber,
-        tournamentId: tournmanetId,
-      })
-      // this will probably be necessary if we allow setting specific dates for groups
-      .onConflictDoUpdate({
-        target: [group.tournamentId, group.groupNumber],
-        set: {
-          groupNumber: insertGroup.groupNumber,
-        },
-      });
-
-    await db
-      .insert(participant)
-      .values(
-        insertGroup.participants.map(
-          (p) =>
-            ({
-              profileId: p.profileId,
-              tournamentId: tournmanetId,
-              groupId: insertGroup.id,
-              fideId: p.fideId,
-              fideRating: p.fideRating,
-              dwzRating: p.dwzRating,
-            }) as InferInsertModel<typeof participant>,
-        ),
-      )
-      .onConflictDoUpdate({
-        target: [participant.tournamentId, participant.profileId],
-        set: { groupId: insertGroup.id },
-      });
-  }
-
-  revalidatePath("/admin/tournament");
 }

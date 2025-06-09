@@ -10,10 +10,11 @@ export const participant = pgTable(
 
     profileId: integer("profile_id").notNull(),
     tournamentId: integer("tournament_id").notNull(),
+
     groupId: integer("group_id"),
+    groupPosition: integer("group_position"),
 
     fideId: text("fide_id"),
-
     fideRating: integer("fide_rating"),
     dwzRating: integer("dwz_rating"),
 

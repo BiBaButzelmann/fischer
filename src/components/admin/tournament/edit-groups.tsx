@@ -25,6 +25,7 @@ export async function EditGroups({ tournament }: { tournament: Tournament }) {
     where: (group, { eq }) => eq(group.tournamentId, tournament.id),
     with: {
       participants: {
+        orderBy: (participant, { asc }) => [asc(participant.groupPosition)],
         with: {
           profile: {
             columns: {
