@@ -25,7 +25,7 @@ import {
   createTournamentFormDataSchema,
 } from "./schema";
 import { useTransition } from "react";
-import { createTournament } from "./actions";
+import { createTournament } from "./actions/tournament";
 import { Button } from "@/components/ui/button";
 
 type Props = {
