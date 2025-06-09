@@ -64,6 +64,111 @@
       "when": 1749224437665,
       "tag": "0008_bouncy_virginia_dare",
       "breakpoints": true
+    },
+    {
+      "idx": 9,
+      "version": "7",
+      "when": 1749287114524,
+      "tag": "0009_illegal_starbolt",
+      "breakpoints": true
+    },
+    {
+      "idx": 10,
+      "version": "7",
+      "when": 1749287350369,
+      "tag": "0010_icy_pyro",
+      "breakpoints": true
+    },
+    {
+      "idx": 11,
+      "version": "7",
+      "when": 1749288170572,
+      "tag": "0011_medical_giant_man",
+      "breakpoints": true
+    },
+    {
+      "idx": 12,
+      "version": "7",
+      "when": 1749288214056,
+      "tag": "0012_brave_nightmare",
+      "breakpoints": true
+    },
+    {
+      "idx": 13,
+      "version": "7",
+      "when": 1749299899663,
+      "tag": "0013_slippery_puma",
+      "breakpoints": true
+    },
+    {
+      "idx": 14,
+      "version": "7",
+      "when": 1749300709964,
+      "tag": "0014_shallow_hellfire_club",
+      "breakpoints": true
+    },
+    {
+      "idx": 15,
+      "version": "7",
+      "when": 1749460590377,
+      "tag": "0015_needy_lady_mastermind",
+      "breakpoints": true
+    },
+    {
+      "idx": 16,
+      "version": "7",
+      "when": 1749466163630,
+      "tag": "0016_lazy_pretty_boy",
+      "breakpoints": true
+    },
+    {
+      "idx": 17,
+      "version": "7",
+      "when": 1749466633086,
+      "tag": "0017_lumpy_electro",
+      "breakpoints": true
+    },
+    {
+      "idx": 18,
+      "version": "7",
+      "when": 1749467180903,
+      "tag": "0018_ambiguous_rage",
+      "breakpoints": true
+    },
+    {
+      "idx": 19,
+      "version": "7",
+      "when": 1749475569486,
+      "tag": "0019_lying_meggan",
+      "breakpoints": true
+    },
+    {
+      "idx": 20,
+      "version": "7",
+      "when": 1749475690072,
+      "tag": "0020_amusing_trish_tilby",
+      "breakpoints": true
+    },
+    {
+      "idx": 21,
+      "version": "7",
+      "when": 1749475750763,
+      "tag": "0021_tough_alex_wilder",
+      "breakpoints": true
+    },
+    {
+      "idx": 22,
+      "version": "7",
+      "when": 1749476972333,
+      "tag": "0022_past_greymalkin",
+      "breakpoints": true
+    },
+    {
+      "idx": 23,
+      "version": "7",
+      "when": 1749479670789,
+      "tag": "0023_crazy_ben_parker",
+      "breakpoints": true
     }
   ]
 }

@@ -1,0 +1,1 @@
+ALTER TABLE "participant" ADD COLUMN "group_position" integer;
