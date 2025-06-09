@@ -15,7 +15,13 @@ import {
   useSensors,
 } from "@dnd-kit/core";
 import { CSS } from "@dnd-kit/utilities";
-import { useMemo, useState, useTransition } from "react";
+import {
+  Dispatch,
+  SetStateAction,
+  useMemo,
+  useState,
+  useTransition,
+} from "react";
 import invariant from "tiny-invariant";
 import { ParticipantEntry } from "./participant-entry";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -50,6 +56,190 @@ export function GroupsGrid({
     }),
   );
 
+  const { handleDragStart, handleDragOver, handleDragEnd } = useDragAndDrop({
+    groups,
+    unassignedParticipants,
+    setGroups,
+    setUnassignedParticipants,
+    setActiveItem,
+  });
+
+  const handleSave = () => {
+    startTransition(async () => {
+      // TODO: tournament ID should be dynamic
+      await updateGroups(1, groups, unassignedParticipants);
+    });
+  };
+
+  const handleGenerateGroups = () => {
+    startTransition(async () => {
+      // TODO: tournament ID should be dynamic
+      await generateGroups(1);
+    });
+  };
+
+  if (groups.length === 0) {
+    return (
+      <div className="flex flex-col items-center justify-center gap-4 p-4">
+        <span>Keine Gruppen vorhanden</span>
+        <Button onClick={handleGenerateGroups} disabled={isPending}>
+          Gruppen generieren
+        </Button>
+      </div>
+    );
+  }
+
+  return (
+    <div className="flex flex-col gap-4">
+      <DndContext
+        sensors={sensors}
+        collisionDetection={closestCorners}
+        onDragStart={handleDragStart}
+        onDragOver={handleDragOver}
+        onDragEnd={handleDragEnd}
+      >
+        <div className="flex flex-col gap-4">
+          <div className="grid grid-cols-1 sm:grid-cols-1 lg:grid-cols-2 gap-4">
+            {groups.map((group) => (
+              <GroupContainer key={group.id} group={group} />
+            ))}
+          </div>
+        </div>
+        <UnassignedContainer participants={unassignedParticipants} />
+        <DragOverlay>
+          {activeItem ? (
+            <ParticipantItem participant={activeItem} isOverlay />
+          ) : null}
+        </DragOverlay>
+      </DndContext>
+      <Button onClick={handleSave} disabled={isPending}>
+        Gruppenaufteilung Speichern
+      </Button>
+    </div>
+  );
+}
+
+export function GroupContainer({ group }: { group: GridGroup }) {
+  const { setNodeRef } = useDroppable({
+    id: group.id,
+    data: {
+      type: "group",
+      group,
+    },
+  });
+
+  const participantIds = useMemo(
+    () => group.participants.map((p) => p.id),
+    [group],
+  );
+
+  return (
+    <Card>
+      <CardHeader>
+        <CardTitle>
+          Gruppe {group.groupNumber} -- {group.participants.length} Teilnehmer
+        </CardTitle>
+      </CardHeader>
+      <CardContent ref={setNodeRef}>
+        <SortableContext items={participantIds}>
+          {group.participants.map((p) => (
+            <ParticipantItem key={p.id} participant={p} />
+          ))}
+        </SortableContext>
+      </CardContent>
+    </Card>
+  );
+}
+
+export function UnassignedContainer({
+  participants,
+}: {
+  participants: ParticipantWithName[];
+}) {
+  const { setNodeRef } = useDroppable({
+    id: UNASSIGNED_CONTAINER_ID,
+    data: {
+      type: "unassigned",
+    },
+  });
+
+  const participantIds = useMemo(
+    () => participants.map((p) => p.id),
+    [participants],
+  );
+
+  return (
+    <Card>
+      <CardHeader>
+        <CardTitle>Nicht zugewiesene Teilnehmer</CardTitle>
+      </CardHeader>
+      <CardContent ref={setNodeRef}>
+        <SortableContext items={participants.map((p) => p.id)}>
+          {participants.map((p) => (
+            <ParticipantItem key={p.id} participant={p} />
+          ))}
+        </SortableContext>
+      </CardContent>
+    </Card>
+  );
+}
+
+export function ParticipantItem({
+  participant,
+  isOverlay,
+}: {
+  participant: ParticipantWithName;
+  isOverlay?: boolean;
+}) {
+  const {
+    attributes,
+    listeners,
+    setNodeRef,
+    transform,
+    transition,
+    isDragging,
+  } = useSortable({
+    id: participant.id,
+    data: {
+      type: "Participant",
+      participant,
+    },
+  });
+
+  const style = {
+    transform: CSS.Transform.toString(transform),
+    transition,
+  };
+
+  const overlayClasses = isOverlay ? "shadow-lg" : "";
+  const draggingClasses = isDragging ? "opacity-30" : "";
+
+  return (
+    <div
+      ref={setNodeRef}
+      style={style}
+      {...attributes}
+      {...listeners}
+      className={`px-2 py-1 rounded-md shadow-sm cursor-grab active:cursor-grabbing ${draggingClasses} ${overlayClasses}`}
+    >
+      <ParticipantEntry participant={participant} />
+    </div>
+  );
+}
+
+function useDragAndDrop({
+  groups,
+  unassignedParticipants,
+  setGroups,
+  setUnassignedParticipants,
+  setActiveItem,
+}: {
+  groups: GridGroup[];
+  unassignedParticipants: ParticipantWithName[];
+  setGroups: Dispatch<SetStateAction<GridGroup[]>>;
+  setUnassignedParticipants: Dispatch<SetStateAction<ParticipantWithName[]>>;
+  setActiveItem: Dispatch<SetStateAction<ParticipantWithName | null>>;
+}) {
   const findContainerId = (id: number) => {
     if (unassignedParticipants.some((p) => p.id === id)) {
       return UNASSIGNED_CONTAINER_ID;
@@ -181,163 +371,9 @@ export function GroupsGrid({
     }
   };
 
-  const handleSave = () => {
-    startTransition(async () => {
-      // TODO: tournament ID should be dynamic
-      await updateGroups(1, groups, unassignedParticipants);
-    });
+  return {
+    handleDragStart,
+    handleDragOver,
+    handleDragEnd,
   };
-
-  const handleGenerateGroups = () => {
-    startTransition(async () => {
-      // TODO: tournament ID should be dynamic
-      await generateGroups(1);
-    });
-  };
-
-  if (groups.length === 0) {
-    return (
-      <div className="flex flex-col items-center justify-center gap-4 p-4">
-        <span>Keine Gruppen vorhanden</span>
-        <Button onClick={handleGenerateGroups} disabled={isPending}>
-          Gruppen generieren
-        </Button>
-      </div>
-    );
-  }
-
-  return (
-    <div className="flex flex-col gap-4">
-      <DndContext
-        sensors={sensors}
-        collisionDetection={closestCorners}
-        onDragStart={handleDragStart}
-        onDragOver={handleDragOver}
-        onDragEnd={handleDragEnd}
-      >
-        <div className="flex flex-col gap-4">
-          <div className="grid grid-cols-1 sm:grid-cols-1 lg:grid-cols-2 gap-4">
-            <UnassignedContainer participants={unassignedParticipants} />
-            {groups.map((group) => (
-              <GroupContainer key={group.id} group={group} />
-            ))}
-          </div>
-        </div>
-        <DragOverlay>
-          {activeItem ? (
-            <ParticipantItem participant={activeItem} isOverlay />
-          ) : null}
-        </DragOverlay>
-      </DndContext>
-      <Button onClick={handleSave} disabled={isPending}>
-        Gruppenaufteilung Speichern
-      </Button>
-    </div>
-  );
-}
-
-export function GroupContainer({ group }: { group: GridGroup }) {
-  const { setNodeRef } = useDroppable({
-    id: group.id,
-    data: {
-      type: "group",
-      group,
-    },
-  });
-
-  const participantIds = useMemo(
-    () => group.participants.map((p) => p.id),
-    [group],
-  );
-
-  return (
-    <Card>
-      <CardHeader>
-        <CardTitle>Gruppe {group.groupNumber}</CardTitle>
-      </CardHeader>
-      <CardContent ref={setNodeRef}>
-        <SortableContext items={participantIds}>
-          {group.participants.map((p) => (
-            <ParticipantItem key={p.id} participant={p} />
-          ))}
-        </SortableContext>
-      </CardContent>
-    </Card>
-  );
-}
-
-export function UnassignedContainer({
-  participants,
-}: {
-  participants: ParticipantWithName[];
-}) {
-  const { setNodeRef } = useDroppable({
-    id: UNASSIGNED_CONTAINER_ID,
-    data: {
-      type: "unassigned",
-    },
-  });
-
-  const participantIds = useMemo(
-    () => participants.map((p) => p.id),
-    [participants],
-  );
-
-  return (
-    <Card>
-      <CardHeader>
-        <CardTitle>Nicht zugewiesene Teilnehmer</CardTitle>
-      </CardHeader>
-      <CardContent ref={setNodeRef}>
-        <SortableContext items={participants.map((p) => p.id)}>
-          {participants.map((p) => (
-            <ParticipantItem key={p.id} participant={p} />
-          ))}
-        </SortableContext>
-      </CardContent>
-    </Card>
-  );
-}
-
-export function ParticipantItem({
-  participant,
-  isOverlay,
-}: {
-  participant: ParticipantWithName;
-  isOverlay?: boolean;
-}) {
-  const {
-    attributes,
-    listeners,
-    setNodeRef,
-    transform,
-    transition,
-    isDragging,
-  } = useSortable({
-    id: participant.id,
-    data: {
-      type: "Participant",
-      participant,
-    },
-  });
-
-  const style = {
-    transform: CSS.Transform.toString(transform),
-    transition,
-  };
-
-  const overlayClasses = isOverlay ? "shadow-lg" : "";
-  const draggingClasses = isDragging ? "opacity-30" : "";
-
-  return (
-    <div
-      ref={setNodeRef}
-      style={style}
-      {...attributes}
-      {...listeners}
-      className={`px-2 py-1 rounded-md shadow-sm cursor-grab active:cursor-grabbing ${draggingClasses} ${overlayClasses}`}
-    >
-      <ParticipantEntry participant={participant} />
-    </div>
-  );
 }
