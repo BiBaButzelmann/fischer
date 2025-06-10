@@ -1,5 +1,6 @@
 import { auth } from "@/auth";
 import { EditGroups } from "@/components/admin/tournament/edit-groups";
+import { EditPairings } from "@/components/admin/tournament/edit-pairings";
 import EditTournamentDetails from "@/components/admin/tournament/edit-tournament-details";
 import { ParticipantsList } from "@/components/admin/tournament/participants-list";
 import {
@@ -64,6 +65,10 @@ async function ManageTournament() {
     .leftJoin(user, eq(profile.userId, user.id))
     .where(eq(user.role, "admin"));
 
+  // TODO: improve default open logic
+  // no active tournament -> open edit tournament details
+  // active tournament -> open edit groups
+  // valid groups (same size + match days are set) -> open generate matches
   return (
     <div className="space-y-4">
       <Collapsible
@@ -94,18 +99,22 @@ async function ManageTournament() {
         </CollapsibleTrigger>
         <CollapsibleContent className="mt-4">
           {activeTournament ? (
-            <EditGroups tournament={activeTournament!} />
+            <EditGroups tournament={activeTournament} />
           ) : null}
         </CollapsibleContent>
       </Collapsible>
-      <Collapsible disabled className="border border-primary rounded-md p-4">
+      <Collapsible className="border border-primary rounded-md p-4">
         <CollapsibleTrigger className="w-full">
           <div className="flex">
-            <span className="flex-grow text-left">Turnier starten</span>
+            <span className="flex-grow text-left">Paarungen generieren</span>
             <ChevronDownIcon />
           </div>
         </CollapsibleTrigger>
-        <CollapsibleContent className="mt-4"></CollapsibleContent>
+        <CollapsibleContent className="mt-4">
+          {activeTournament ? (
+            <EditPairings tournament={activeTournament} />
+          ) : null}
+        </CollapsibleContent>
       </Collapsible>
     </div>
   );

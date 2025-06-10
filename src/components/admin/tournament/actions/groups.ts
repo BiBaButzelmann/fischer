@@ -1,56 +1,17 @@
 "use server";
-
-import { db } from "@/db/client";
-import { tournament } from "@/db/schema/tournament";
-import {
-  CreateTournamentFormData,
-  createTournamentFormDataSchema,
-} from "./schema";
-import { auth } from "@/auth";
-import { headers } from "next/headers";
-import { revalidatePath } from "next/cache";
-import { group } from "@/db/schema/group";
-import { participant } from "@/db/schema/participant";
-import { and, eq } from "drizzle-orm";
-import { GridGroup } from "./types";
-import { ParticipantWithName } from "@/db/types/participant";
-import { MatchDay } from "@/db/types/group";
-
-// TODO: authentication / authorization
-export async function createTournament(formData: CreateTournamentFormData) {
-  const session = await auth.api.getSession({
-    headers: await headers(),
-  });
-
-  if (session?.user.role !== "admin") {
-    throw new Error("Unauthorized");
-  }
-
-  const data = createTournamentFormDataSchema.parse(formData);
-
-  const newTournament: typeof tournament.$inferInsert = {
-    name: "TODO: HSK Klubturnier",
-    allClocksDigital: true,
-    club: data.clubName,
-    startDate: new Date(data.startDate),
-    endDate: new Date(data.endDate),
-    email: data.email,
-    location: data.location,
-    numberOfRounds: data.numberOfRounds,
-    phone: data.phone,
-    softwareUsed: data.softwareUsed,
-    timeLimit: data.timeLimit,
-    tieBreakMethod: data.tieBreakMethod,
-    type: data.tournamentType,
-    organizerProfileId: parseInt(data.organizerProfileId),
-  };
-
-  await db.insert(tournament).values(newTournament);
-
-  revalidatePath("/admin/tournament");
-}
-
 // TODO: check if this can be optimized
+
+import { auth } from "@/auth";
+import { db } from "@/db/client";
+import { participant } from "@/db/schema/participant";
+import { MatchDay } from "@/db/types/group";
+import { ParticipantWithName } from "@/db/types/participant";
+import { and, eq } from "drizzle-orm";
+import { revalidatePath } from "next/cache";
+import { headers } from "next/headers";
+import { GridGroup } from "../types";
+import { group } from "@/db/schema/group";
+
 // TODO: find out why revalidatePath doesn't work here
 export async function generateGroups(tournamentId: number) {
   const session = await auth.api.getSession({

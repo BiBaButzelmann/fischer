@@ -8,6 +8,7 @@ import {
   timestamp,
 } from "drizzle-orm/pg-core";
 import { participant } from "./participant";
+import { game } from "./game";
 
 export const matchDay = pgEnum("match_day", [
   "monday",
@@ -38,4 +39,5 @@ export const group = pgTable(
 
 export const groupRelations = relations(group, ({ many }) => ({
   participants: many(participant),
+  games: many(game),
 }));

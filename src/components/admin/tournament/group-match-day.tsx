@@ -10,7 +10,7 @@ import {
 import { GridGroup } from "./types";
 import { MatchDay } from "@/db/types/group";
 import { useMemo, useTransition } from "react";
-import { updateGroupMatchDay } from "./actions";
+import { updateGroupMatchDay } from "./actions/groups";
 
 const matchDays: Record<MatchDay, string> = {
   monday: "Montag",
