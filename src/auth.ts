@@ -17,18 +17,6 @@ export const auth = betterAuth({
     autoSignIn: true,
     requireEmailVerification: false,
   },
-  databaseHooks: {
-    user: {
-      create: {
-        async after(user, context) {
-          await db.insert(profile).values({
-            userId: user.id,
-            name: user.name,
-          });
-        },
-      },
-    },
-  },
   plugins: [
     adminPlugin({
       defaultRole: "user",
