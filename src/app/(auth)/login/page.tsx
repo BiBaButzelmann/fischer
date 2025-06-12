@@ -1,23 +1,34 @@
 import { authClient } from "@/auth-client";
 import { LoginForm, loginFormSchema } from "@/components/auth/login-form";
+import { Button } from "@/components/ui/button";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { db } from "@/db/client";
+import { ArrowLeft } from "lucide-react";
+import Link from "next/link";
 import { redirect } from "next/navigation";
 import z from "zod";
 
 export default async function Page() {
   const login = async (data: z.infer<typeof loginFormSchema>) => {
     "use server";
-    await authClient.signIn.email({
+
+    const { data: loginData } = await authClient.signIn.email({
       email: data.email,
       password: data.password,
       rememberMe: true,
     });
-
+    if (!loginData) {
+      // login failed
+      //add Error logic here
+      // setError("Ungültige E-Mail-Adresse oder Passwort")
+      return {
+        error: "Ungültige E-Mail-Adresse oder Passwort",
+      };
+    }
     const tournament = await db.query.tournament.findFirst({
       where: (tournament, { gte, and }) =>
         and(gte(tournament.endDate, new Date())),
     });
-
     console.log("tournament", tournament);
 
     // TODO: check assumptions
@@ -35,10 +46,54 @@ export default async function Page() {
   };
 
   return (
-    <div>
-      <h1 className="text-3xl font-bold text-center">Anmelden</h1>
-      <p className="text-center my-4">Bla bla bla</p>
-      <LoginForm onSubmit={login} />
+    <div className="min-h-screen flex items-center justify-center bg-gray-50 px-4">
+      <div className="w-full max-w-md">
+        {/* Back Button */}
+        <div className="mb-6">
+          <Button variant="ghost" asChild>
+            <Link href="/welcome" className="flex items-center gap-2">
+              <ArrowLeft className="h-4 w-4" />
+              Zurück zur Startseite
+            </Link>
+          </Button>
+        </div>
+
+        {/* Login Card */}
+        <Card className="shadow-lg">
+          <CardHeader className="text-center">
+            <CardTitle className="text-2xl font-bold">Anmelden</CardTitle>
+            <p className="text-muted-foreground">
+              Melden Sie sich mit Ihren Zugangsdaten an
+            </p>
+          </CardHeader>
+          <CardContent>
+            <LoginForm onSubmit={login}></LoginForm>
+
+            {/* Register Link */}
+            <div className="mt-6 text-center">
+              <p className="text-muted-foreground">
+                Noch kein Konto?{" "}
+                <Link
+                  href="/signup"
+                  className="text-primary hover:underline font-medium"
+                >
+                  Jetzt registrieren
+                </Link>
+              </p>
+            </div>
+
+            {/* Forgot Password */}
+            <div className="mt-4 text-center">
+              <Link
+                href="/passwort-vergessen"
+                className="text-sm text-muted-foreground hover:underline"
+              >
+                Passwort vergessen?
+              </Link>
+            </div>
+          </CardContent>
+        </Card>
+      </div>
     </div>
   );
 }
