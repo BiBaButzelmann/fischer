@@ -1,47 +1,11 @@
-import { authClient } from "@/auth-client";
-import { LoginForm, loginFormSchema } from "@/components/auth/login-form";
+import { login } from "@/components/auth/actions";
+import { LoginForm } from "@/components/auth/login-form";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { db } from "@/db/client";
 import { ArrowLeft } from "lucide-react";
 import Link from "next/link";
-import { redirect } from "next/navigation";
-import z from "zod";
 
 export default async function Page() {
-  const login = async (data: z.infer<typeof loginFormSchema>) => {
-    "use server";
-
-    const { data: loginData } = await authClient.signIn.email({
-      email: data.email,
-      password: data.password,
-      rememberMe: true,
-    });
-    if (!loginData) {
-      return {
-        error: "Ungültige E-Mail-Adresse oder Passwort",
-      };
-    }
-    const tournament = await db.query.tournament.findFirst({
-      where: (tournament, { gte, and }) =>
-        and(gte(tournament.endDate, new Date())),
-    });
-    console.log("tournament", tournament);
-
-    // TODO: check assumptions
-    // assume if end date of tournament tournament is not active
-    if (!tournament) {
-      // no tournament found
-      redirect("/welcome");
-    }
-    if (new Date() < tournament.startDate) {
-      // tournament is not started yet -> participation form is open
-      redirect("/participate");
-    }
-    // tournament is active
-    redirect("/home");
-  };
-
   return (
     <div className="w-full max-w-md px-4 py-8">
       {/* Back Button */}
