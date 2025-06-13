@@ -5,6 +5,7 @@ import z from "zod";
 import { loginFormSchema } from "./login-form";
 import { db } from "@/db/client";
 import { redirect } from "next/navigation";
+import { signupFormSchema } from "./signup-form";
 
 export type LoginResponse = { error: string };
 
@@ -36,4 +37,21 @@ export async function login(data: z.infer<typeof loginFormSchema>) {
   }
   // tournament is active
   redirect("/home");
+}
+
+export type SignupResponse = { error: string };
+export async function signup(data: z.infer<typeof signupFormSchema>) {
+  const { data: signupData } = await authClient.signUp.email({
+    name: `${data.firstName} ${data.lastName}`,
+    email: data.email,
+    password: data.password,
+  });
+
+  if (!signupData) {
+    return {
+      error: "Fehler bei der Registrierung. Bitte versuchen Sie es erneut.",
+    };
+  }
+
+  redirect("/participate");
 }
