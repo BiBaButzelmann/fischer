@@ -1,7 +1,13 @@
 import { signup } from "@/components/auth/actions";
 import { SignupForm } from "@/components/auth/signup-form";
 import { Button } from "@/components/ui/button";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle,
+} from "@/components/ui/card";
 import { ArrowLeft } from "lucide-react";
 import Link from "next/link";
 
@@ -20,9 +26,9 @@ export default async function Page() {
       <Card className="shadow-lg">
         <CardHeader className="text-center">
           <CardTitle className="text-2xl font-bold">Registrieren</CardTitle>
-          <p className="text-muted-foreground">
+          <CardDescription>
             Erstellen Sie Ihr Konto für das HSK Klubturnier
-          </p>
+          </CardDescription>
         </CardHeader>
         <CardContent>
           <SignupForm onSubmit={signup} />
