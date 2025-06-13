@@ -5,35 +5,36 @@ import { Providers } from "./providers";
 import { RedirectToSignIn } from "@daveyplate/better-auth-ui";
 
 const geistSans = Geist({
-    variable: "--font-geist-sans",
-    subsets: ["latin"],
+  variable: "--font-geist-sans",
+  subsets: ["latin"],
 });
 
 const geistMono = Geist_Mono({
-    variable: "--font-geist-mono",
-    subsets: ["latin"],
+  variable: "--font-geist-mono",
+  subsets: ["latin"],
 });
 
 export const metadata: Metadata = {
-    title: "fischer",
-    description: "HSK Klubturnier",
+  title: "fischer",
+  description: "HSK Klubturnier",
 };
 
 export default function RootLayout({
-    children,
+  children,
 }: Readonly<{
-    children: React.ReactNode;
+  children: React.ReactNode;
 }>) {
-    return (
-        <html lang="en" suppressHydrationWarning className="h-full">
-            <body
-                className={`${geistSans.variable} ${geistMono.variable} antialiased h-full`}
-            >
-                <Providers>
-                    <RedirectToSignIn />
-                    {children}
-                </Providers>
-            </body>
-        </html>
-    );
+  return (
+    <html lang="en" suppressHydrationWarning className="min-h-screen">
+      <body
+        className={`${geistSans.variable} ${geistMono.variable} antialiased min-h-screen bg-background text-foreground font-sans`}
+      >
+        <Providers>
+          <div className="flex w-full items-center justify-center">
+            {children}
+          </div>
+        </Providers>
+      </body>
+    </html>
+  );
 }

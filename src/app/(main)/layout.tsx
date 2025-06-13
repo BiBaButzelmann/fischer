@@ -1,4 +1,5 @@
 import { AppSidebar } from "@/components/sidebar";
+import { RedirectToSignIn } from "@daveyplate/better-auth-ui";
 // import { SidebarTrigger } from "@/components/ui/sidebar";
 
 export default function RootLayout({
@@ -10,6 +11,8 @@ export default function RootLayout({
 }>) {
   return (
     <>
+      {/* TODO: if user is not authed, redirect to welcome page */}
+      <RedirectToSignIn />
       <AppSidebar />
       <main className="w-full relative">
         {/* <SidebarTrigger className="absolute top-2 left-2 text-foreground" /> */}
