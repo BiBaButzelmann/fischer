@@ -1,7 +1,14 @@
 "use client";
 
 import z from "zod";
-import { Form, FormField, FormMessage } from "../ui/form";
+import {
+  Form,
+  FormControl,
+  FormField,
+  FormItem,
+  FormLabel,
+  FormMessage,
+} from "../ui/form";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { Input } from "../ui/input";
@@ -42,54 +49,48 @@ export function LoginForm({
     <Form {...form}>
       <form onSubmit={form.handleSubmit(handleSubmit)} className="space-y-8">
         {/* Email Field */}
-        <div className="space-y-2">
-          <Label htmlFor="email">E-Mail-Adresse</Label>
-          <div className="relative">
-            <Mail className="absolute left-3 top-3 h-4 w-4 text-muted-foreground" />
-            <FormField
-              control={form.control}
-              name="email"
-              render={({ field }) => (
-                <>
-                  <Input
-                    id="email"
-                    type="email"
-                    placeholder="ihre.email@beispiel.de"
-                    className="pl-10"
-                    required
-                    {...field}
-                  />
-                  <FormMessage />
-                </>
-              )}
-            />
-          </div>
-        </div>
+        <FormField
+          control={form.control}
+          name="email"
+          render={({ field }) => (
+            <FormItem>
+              <FormLabel>E-Mail-Adresse</FormLabel>
+              <FormControl>
+                <Input
+                  id="email"
+                  type="email"
+                  placeholder="ihre.email@beispiel.de"
+                  required
+                  icon={Mail}
+                  {...field}
+                />
+              </FormControl>
+              <FormMessage />
+            </FormItem>
+          )}
+        />
 
         {/* Password Field */}
-        <div className="space-y-2">
-          <Label htmlFor="password">Passwort</Label>
-          <div className="relative">
-            <Lock className="absolute left-3 top-3 h-4 w-4 text-muted-foreground" />
-            <FormField
-              control={form.control}
-              name="password"
-              render={({ field }) => (
-                <>
-                  <Input
-                    id="password"
-                    type="password"
-                    placeholder="Ihr Passwort"
-                    className="pl-10"
-                    required
-                    {...field}
-                  />
-                  <FormMessage />
-                </>
-              )}
-            />
-          </div>
-        </div>
+        <FormField
+          control={form.control}
+          name="password"
+          render={({ field }) => (
+            <FormItem>
+              <FormLabel>Passwort</FormLabel>
+              <FormControl>
+                <Input
+                  id="password"
+                  type="password"
+                  placeholder="Ihr Passwort"
+                  required
+                  icon={Lock}
+                  {...field}
+                />
+              </FormControl>
+              <FormMessage />
+            </FormItem>
+          )}
+        />
 
         {/* Error Message */}
         {error && (
