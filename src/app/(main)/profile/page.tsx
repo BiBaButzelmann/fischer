@@ -1,21 +1,12 @@
-import { auth } from "@/auth";
+import { auth } from "@/auth/utils";
 import { Profile } from "@/components/profile/profile";
 import { db } from "@/db/client";
-import { headers } from "next/headers";
 import invariant from "tiny-invariant";
 
 export default async function Page() {
-  const session = await auth.api.getSession({
-    headers: await headers(),
-  });
-  // TODO: find better way to make sure session is not null
-  invariant(session, "Session not found");
-
+  const session = await auth();
   const profile = await db.query.profile.findFirst({
     where: (profile, { eq }) => eq(profile.userId, session.user.id),
-    with: {
-      address: true,
-    },
   });
   invariant(profile, "Profile not found");
 

@@ -1,4 +1,4 @@
-import { auth } from "@/auth";
+import { auth } from "@/auth/utils";
 import { EditGroups } from "@/components/admin/tournament/edit-groups";
 import { EditPairings } from "@/components/admin/tournament/edit-pairings";
 import EditTournamentDetails from "@/components/admin/tournament/edit-tournament-details";
@@ -14,17 +14,9 @@ import { user } from "@/db/schema/auth";
 import { profile } from "@/db/schema/profile";
 import { eq, getTableColumns } from "drizzle-orm";
 import { ChevronDownIcon } from "lucide-react";
-import { headers } from "next/headers";
 
 export default async function Page() {
-  // TODO: improve this
-  const session = await auth.api.getSession({
-    headers: await headers(),
-  });
-
-  if (session?.user.role != "admin") {
-    return null;
-  }
+  await auth();
 
   return (
     <div>

@@ -7,11 +7,7 @@ import { timestamps } from "./columns.helpers";
 export const profile = pgTable("profile", {
   id: integer("id").generatedAlwaysAsIdentity().primaryKey(),
   name: text("name").notNull(),
-
-  coLine: text("co_line"),
-  street: text("street"),
-  city: text("city"),
-  postalCode: text("postal_code"),
+  phoneNumber: text("phone_number"),
 
   userId: text("user_id").notNull(),
   participantId: integer("participant_id"),
