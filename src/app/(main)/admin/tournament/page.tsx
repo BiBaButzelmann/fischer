@@ -44,11 +44,8 @@ export default async function Page() {
 
 async function ManageTournament() {
   const activeTournament = await db.query.tournament.findFirst({
-    where: (tournament, { gte }) => {
-      const now = new Date();
-      const startOfYear = new Date(now.getFullYear(), 0, 1);
-      return gte(tournament.startDate, startOfYear);
-    },
+    where: (tournament, { or, eq }) =>
+      or(eq(tournament.stage, "registration"), eq(tournament.stage, "running")),
   });
 
   const adminProfiles = await db

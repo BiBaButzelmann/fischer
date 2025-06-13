@@ -21,19 +21,15 @@ export async function login(data: z.infer<typeof loginFormSchema>) {
     };
   }
   const tournament = await db.query.tournament.findFirst({
-    where: (tournament, { gte, and }) =>
-      and(gte(tournament.endDate, new Date())),
+    orderBy: (tournament, { desc }) => [desc(tournament.startDate)],
   });
 
-  // TODO: check assumptions
-  // assume if end date of tournament tournament is not active
   if (!tournament) {
-    // no tournament found
     redirect("/welcome");
   }
-  if (new Date() < tournament.startDate) {
+  if (tournament.stage === "registration") {
     // tournament is not started yet -> participation form is open
-    redirect("/participate");
+    redirect("/register");
   }
   // tournament is active
   redirect("/home");
