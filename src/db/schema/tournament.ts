@@ -6,9 +6,9 @@ import {
   pgTable,
   smallint,
   text,
-  timestamp,
 } from "drizzle-orm/pg-core";
 import { profile } from "./profile";
+import { timestamps } from "./columns.helpers";
 
 export const tournament = pgTable("tournament", {
   id: integer("id").generatedAlwaysAsIdentity().primaryKey(),
@@ -29,12 +29,7 @@ export const tournament = pgTable("tournament", {
 
   started: boolean("started").default(false).notNull(),
 
-  createdAt: timestamp("created_at")
-    .$defaultFn(() => /* @__PURE__ */ new Date())
-    .notNull(),
-  updatedAt: timestamp("updated_at")
-    .$defaultFn(() => /* @__PURE__ */ new Date())
-    .notNull(),
+  ...timestamps,
 });
 
 export const tournamentRelations = relations(tournament, ({ one }) => ({

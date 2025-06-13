@@ -5,10 +5,10 @@ import {
   pgTable,
   primaryKey,
   text,
-  timestamp,
 } from "drizzle-orm/pg-core";
 import { participant } from "./participant";
 import { game } from "./game";
+import { timestamps } from "./columns.helpers";
 
 export const matchDay = pgEnum("match_day", [
   "monday",
@@ -27,12 +27,7 @@ export const group = pgTable(
     matchDay: matchDay("match_day"),
     tournamentId: integer("tournament_id").notNull(),
 
-    createdAt: timestamp("created_at")
-      .$defaultFn(() => /* @__PURE__ */ new Date())
-      .notNull(),
-    updatedAt: timestamp("updated_at")
-      .$defaultFn(() => /* @__PURE__ */ new Date())
-      .notNull(),
+    ...timestamps,
   },
   (table) => [primaryKey({ columns: [table.tournamentId, table.groupNumber] })],
 );
