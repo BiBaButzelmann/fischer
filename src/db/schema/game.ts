@@ -1,8 +1,9 @@
 import { relations } from "drizzle-orm";
-import { integer, pgEnum, pgTable, timestamp, date } from "drizzle-orm/pg-core";
+import { integer, pgEnum, pgTable, date } from "drizzle-orm/pg-core";
 import { participant } from "./participant";
 import { tournament } from "./tournament";
 import { group } from "./group";
+import { timestamps } from "./columns.helpers";
 
 export const resultEnum = pgEnum("result", [
   "draw", // 0
@@ -25,13 +26,7 @@ export const game = pgTable("game", {
   result: resultEnum(),
   pgnId: integer("pgn_id"),
 
-  // TODO: cleanup - stop repeating these fields
-  createdAt: timestamp("created_at")
-    .$defaultFn(() => /* @__PURE__ */ new Date())
-    .notNull(),
-  updatedAt: timestamp("updated_at")
-    .$defaultFn(() => /* @__PURE__ */ new Date())
-    .notNull(),
+  ...timestamps,
 });
 
 export const gameRelations = relations(game, ({ one }) => ({

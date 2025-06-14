@@ -1,7 +1,8 @@
 import { relations } from "drizzle-orm";
-import { integer, pgTable, text, timestamp, unique } from "drizzle-orm/pg-core";
+import { integer, pgTable, text, unique } from "drizzle-orm/pg-core";
 import { profile } from "./profile";
 import { group } from "./group";
+import { timestamps } from "./columns.helpers";
 
 export const participant = pgTable(
   "participant",
@@ -20,12 +21,7 @@ export const participant = pgTable(
 
     // TODO: aufbauhelfer, schiedsrichter, etc.
 
-    createdAt: timestamp("created_at")
-      .$defaultFn(() => /* @__PURE__ */ new Date())
-      .notNull(),
-    updatedAt: timestamp("updated_at")
-      .$defaultFn(() => /* @__PURE__ */ new Date())
-      .notNull(),
+    ...timestamps,
   },
   (table) => [unique().on(table.tournamentId, table.profileId)],
 );
