@@ -8,3 +8,5 @@ export const timestamps = {
     .$defaultFn(() => /* @__PURE__ */ new Date())
     .notNull(),
 };
+
+export const availableMatchDays = ["tuesday", "thursday", "friday"] as const;

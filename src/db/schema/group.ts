@@ -8,14 +8,9 @@ import {
 } from "drizzle-orm/pg-core";
 import { participant } from "./participant";
 import { game } from "./game";
-import { timestamps } from "./columns.helpers";
+import { availableMatchDays, timestamps } from "./columns.helpers";
 
-export const matchDay = pgEnum("match_day", [
-  "monday",
-  "tuesday",
-  "thursday",
-  "friday",
-]);
+export const matchDay = pgEnum("match_day", availableMatchDays);
 
 export const group = pgTable(
   "group",
