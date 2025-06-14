@@ -6,6 +6,9 @@ import { loginFormSchema } from "./login-form";
 import { db } from "@/db/client";
 import { redirect } from "next/navigation";
 import { signupFormSchema } from "./signup-form";
+import { participant } from "@/db/schema/participant";
+import { profile } from "@/db/schema/profile";
+import { eq } from "drizzle-orm";
 
 export type LoginResponse = { error: string };
 
@@ -29,6 +32,15 @@ export async function login(data: z.infer<typeof loginFormSchema>) {
   }
   if (tournament.stage === "registration") {
     // tournament is not started yet -> participation form is open
+    const participation = await db
+      .select({ userId: profile.userId })
+      .from(participant)
+      .leftJoin(profile, eq(participant.profileId, profile.id))
+      .where(eq(profile.userId, loginData.user.id));
+
+    if (participation.length > 0) {
+      redirect("/home");
+    }
     redirect("/register");
   }
   // tournament is active
@@ -49,5 +61,6 @@ export async function signup(data: z.infer<typeof signupFormSchema>) {
     };
   }
 
+  // TODO: where to redirect if registration is not open?
   redirect("/participate");
 }
