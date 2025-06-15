@@ -14,11 +14,9 @@ async function main() {
           minValue: 100,
           isUnique: true,
         }),
-        name: f.fullName(),
-        coLine: f.default({ defaultValue: null }),
-        city: f.city(),
-        street: f.streetAddress(),
-        postalCode: f.postcode(),
+        firstName: f.firstName(),
+        lastName: f.lastName(),
+        email: f.email(),
       },
       count: 105,
     },
@@ -41,18 +39,72 @@ async function main() {
           isUnique: true,
         }),
         tournamentId: f.default({ defaultValue: 1 }),
-        fideId: f.valuesFromArray({
-          values: fideIds,
-          isUnique: true,
+        dwzRating: f.int({
+          minValue: 1000,
+          maxValue: 2500,
         }),
         fideRating: f.weightedRandom([
           { weight: 0.7, value: f.int({ minValue: 1000, maxValue: 2500 }) },
           { weight: 0.3, value: f.default({ defaultValue: null }) },
         ]),
-        dwzRating: f.int({
-          minValue: 1000,
-          maxValue: 2500,
+        fideId: f.valuesFromArray({
+          values: fideIds,
+          isUnique: true,
         }),
+        groupId: f.default({ defaultValue: null }),
+        groupPosition: f.default({ defaultValue: null }),
+        helpAsReferee: f.weightedRandom([
+          {
+            weight: 0.2,
+            value: f.valuesFromArray({
+              values: ["tuesday", "thursday", "friday"],
+            }),
+          },
+          {
+            weight: 0.8,
+            value: f.default({
+              defaultValue: [],
+            }),
+          },
+        ]),
+        helpSetupRoom: f.weightedRandom([
+          {
+            weight: 0.2,
+            value: f.valuesFromArray({
+              values: ["tuesday", "thursday", "friday"],
+            }),
+          },
+          {
+            weight: 0.8,
+            value: f.default({
+              defaultValue: [],
+            }),
+          },
+        ]),
+        helpEnterMatches: f.weightedRandom([
+          {
+            weight: 0.2,
+            value: f.default({ defaultValue: true }),
+          },
+          {
+            weight: 0.8,
+            value: f.default({
+              defaultValue: false,
+            }),
+          },
+        ]),
+        helpAsTournamentJury: f.weightedRandom([
+          {
+            weight: 0.2,
+            value: f.default({ defaultValue: true }),
+          },
+          {
+            weight: 0.8,
+            value: f.default({
+              defaultValue: false,
+            }),
+          },
+        ]),
       },
       count: 105,
     },

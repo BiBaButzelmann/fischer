@@ -6,7 +6,7 @@ import {
   createAuthMiddleware,
 } from "better-auth/plugins";
 import { ac, admin, user } from "./permissions";
-import { profile } from "./db/schema/profile";
+import { nextCookies } from "better-auth/next-js";
 
 export const auth = betterAuth({
   database: drizzleAdapter(db, {
@@ -18,6 +18,7 @@ export const auth = betterAuth({
     requireEmailVerification: false,
   },
   plugins: [
+    nextCookies(),
     adminPlugin({
       defaultRole: "user",
       adminRoles: ["admin"],

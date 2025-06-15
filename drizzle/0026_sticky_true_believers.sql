@@ -1,0 +1,1 @@
+ALTER TABLE "tournament" DROP COLUMN "started";

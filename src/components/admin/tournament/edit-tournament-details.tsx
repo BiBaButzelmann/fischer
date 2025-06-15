@@ -11,7 +11,7 @@ import {
   FormLabel,
   FormMessage,
 } from "@/components/ui/form";
-import { SelectProfile } from "@/db/types/profile";
+import { Profile } from "@/db/types/profile";
 import {
   Select,
   SelectContent,
@@ -29,7 +29,7 @@ import { createTournament } from "./actions/tournament";
 import { Button } from "@/components/ui/button";
 
 type Props = {
-  profiles: SelectProfile[];
+  profiles: Profile[];
 };
 export default function EditTournamentDetails({ profiles }: Props) {
   const [loading, startTransition] = useTransition();

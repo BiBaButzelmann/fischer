@@ -3,12 +3,19 @@ import {
   boolean,
   date,
   integer,
+  pgEnum,
   pgTable,
   smallint,
   text,
-  timestamp,
 } from "drizzle-orm/pg-core";
 import { profile } from "./profile";
+import { timestamps } from "./columns.helpers";
+
+export const tournamentStage = pgEnum("tournament_stage", [
+  "registration",
+  "running",
+  "done",
+]);
 
 export const tournament = pgTable("tournament", {
   id: integer("id").generatedAlwaysAsIdentity().primaryKey(),
@@ -25,16 +32,10 @@ export const tournament = pgTable("tournament", {
   softwareUsed: text("software").notNull(),
   phone: text("phone").notNull(),
   email: text("email").notNull(),
+  stage: tournamentStage("stage").default("registration").notNull(),
   organizerProfileId: integer("organizer_profile_id"),
 
-  started: boolean("started").default(false).notNull(),
-
-  createdAt: timestamp("created_at")
-    .$defaultFn(() => /* @__PURE__ */ new Date())
-    .notNull(),
-  updatedAt: timestamp("updated_at")
-    .$defaultFn(() => /* @__PURE__ */ new Date())
-    .notNull(),
+  ...timestamps,
 });
 
 export const tournamentRelations = relations(tournament, ({ one }) => ({

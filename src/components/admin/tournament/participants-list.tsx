@@ -1,9 +1,5 @@
-import { Badge } from "@/components/ui/badge";
 import { Card, CardHeader } from "@/components/ui/card";
 import { db } from "@/db/client";
-import { participant } from "@/db/schema/participant";
-import { profile } from "@/db/schema/profile";
-import { getTableColumns } from "drizzle-orm";
 import { ParticipantEntry } from "./participant-entry";
 
 export async function ParticipantsList() {

@@ -1,23 +1,17 @@
-import { authClient } from "@/auth-client";
-import { SignupForm, signupFormSchema } from "@/components/auth/signup-form";
+import { signup } from "@/components/auth/actions";
+import { SignupForm } from "@/components/auth/signup-form";
 import { Button } from "@/components/ui/button";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle,
+} from "@/components/ui/card";
 import { ArrowLeft } from "lucide-react";
 import Link from "next/link";
-import { redirect } from "next/navigation";
-import { z } from "zod";
 
 export default async function Page() {
-  const signup = async (data: z.infer<typeof signupFormSchema>) => {
-    "use server";
-    await authClient.signUp.email({
-      name: `${data.firstName} ${data.lastName}`,
-      email: data.email,
-      password: data.password,
-    });
-    redirect("/participate");
-  };
-
   return (
     <div className="w-full max-w-md px-4 py-8">
       <div className="mb-6">
@@ -32,9 +26,9 @@ export default async function Page() {
       <Card className="shadow-lg">
         <CardHeader className="text-center">
           <CardTitle className="text-2xl font-bold">Registrieren</CardTitle>
-          <p className="text-muted-foreground">
+          <CardDescription>
             Erstellen Sie Ihr Konto für das HSK Klubturnier
-          </p>
+          </CardDescription>
         </CardHeader>
         <CardContent>
           <SignupForm onSubmit={signup} />

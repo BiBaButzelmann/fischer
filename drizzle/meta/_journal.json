@@ -169,6 +169,55 @@
       "when": 1749479670789,
       "tag": "0023_crazy_ben_parker",
       "breakpoints": true
+    },
+    {
+      "idx": 24,
+      "version": "7",
+      "when": 1749847111347,
+      "tag": "0024_tranquil_toro",
+      "breakpoints": true
+    },
+    {
+      "idx": 25,
+      "version": "7",
+      "when": 1749848092040,
+      "tag": "0025_yummy_doctor_strange",
+      "breakpoints": true
+    },
+    {
+      "idx": 26,
+      "version": "7",
+      "when": 1749848149794,
+      "tag": "0026_sticky_true_believers",
+      "breakpoints": true
+    },
+    {
+      "idx": 27,
+      "version": "7",
+      "when": 1749915631220,
+      "tag": "0027_tidy_lady_vermin",
+      "breakpoints": true
+    },
+    {
+      "idx": 28,
+      "version": "7",
+      "when": 1749915826882,
+      "tag": "0028_noisy_cerise",
+      "breakpoints": true
+    },
+    {
+      "idx": 29,
+      "version": "7",
+      "when": 1749933813548,
+      "tag": "0029_youthful_star_brand",
+      "breakpoints": true
+    },
+    {
+      "idx": 30,
+      "version": "7",
+      "when": 1749982006960,
+      "tag": "0030_legal_nextwave",
+      "breakpoints": true
     }
   ]
 }

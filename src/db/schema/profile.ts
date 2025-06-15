@@ -1,26 +1,20 @@
 import { relations } from "drizzle-orm";
-import { integer, pgTable, text, timestamp } from "drizzle-orm/pg-core";
+import { integer, pgTable, text } from "drizzle-orm/pg-core";
 import { user } from "./auth";
 import { participant } from "./participant";
+import { timestamps } from "./columns.helpers";
 
 export const profile = pgTable("profile", {
   id: integer("id").generatedAlwaysAsIdentity().primaryKey(),
-  name: text("name").notNull(),
-
-  coLine: text("co_line"),
-  street: text("street"),
-  city: text("city"),
-  postalCode: text("postal_code"),
+  firstName: text("first_name").notNull(),
+  lastName: text("last_name").notNull(),
+  email: text("email").notNull().unique(),
+  phoneNumber: text("phone_number"),
 
   userId: text("user_id").notNull(),
   participantId: integer("participant_id"),
 
-  createdAt: timestamp("created_at")
-    .$defaultFn(() => /* @__PURE__ */ new Date())
-    .notNull(),
-  updatedAt: timestamp("updated_at")
-    .$defaultFn(() => /* @__PURE__ */ new Date())
-    .notNull(),
+  ...timestamps,
 });
 
 export const profileRelations = relations(profile, ({ one }) => ({

@@ -14,7 +14,7 @@ import { Input } from "../ui/input";
 import { Button } from "../ui/button";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { Label } from "../ui/label";
+import { type SignupResponse } from "./actions";
 import { Mail, User, Lock } from "lucide-react";
 
 export const signupFormSchema = z
@@ -33,9 +33,7 @@ export const signupFormSchema = z
 export function SignupForm({
   onSubmit,
 }: {
-  onSubmit: (
-    data: z.infer<typeof signupFormSchema>,
-  ) => Promise<{ error?: string } | void>;
+  onSubmit: (data: z.infer<typeof signupFormSchema>) => Promise<SignupResponse>;
 }) {
   const [error, setError] = useState("");
   const [isPending, startTransition] = useTransition();
@@ -72,18 +70,15 @@ export function SignupForm({
             render={({ field }) => (
               <FormItem>
                 <FormLabel>Vorname</FormLabel>
-                <div className="relative">
-                  <User className="absolute left-3 top-3 h-4 w-4 text-muted-foreground" />
-                  <FormControl>
-                    <Input
-                      id="firstName"
-                      placeholder="Max"
-                      className="pl-10"
-                      required
-                      {...field}
-                    />
-                  </FormControl>
-                </div>
+                <FormControl>
+                  <Input
+                    id="firstName"
+                    placeholder="Max"
+                    required
+                    icon={User}
+                    {...field}
+                  />
+                </FormControl>
                 <FormMessage />
               </FormItem>
             )}
@@ -114,19 +109,16 @@ export function SignupForm({
           render={({ field }) => (
             <FormItem>
               <FormLabel>E-Mail-Adresse</FormLabel>
-              <div className="relative">
-                <Mail className="absolute left-3 top-3 h-4 w-4 text-muted-foreground" />
-                <FormControl>
-                  <Input
-                    id="email"
-                    type="email"
-                    placeholder="max.mustermann@beispiel.de"
-                    className="pl-10"
-                    required
-                    {...field}
-                  />
-                </FormControl>
-              </div>
+              <FormControl>
+                <Input
+                  id="email"
+                  type="email"
+                  placeholder="max.mustermann@beispiel.de"
+                  required
+                  icon={Mail}
+                  {...field}
+                />
+              </FormControl>
               <FormMessage />
             </FormItem>
           )}
@@ -138,19 +130,17 @@ export function SignupForm({
           render={({ field }) => (
             <FormItem>
               <FormLabel>Passwort</FormLabel>
-              <div className="relative">
-                <Lock className="absolute left-3 top-3 h-4 w-4 text-muted-foreground" />
-                <FormControl>
-                  <Input
-                    id="password"
-                    type="password"
-                    placeholder="Mindestens 6 Zeichen"
-                    className="pl-10"
-                    required
-                    {...field}
-                  />
-                </FormControl>
-              </div>
+              <FormControl>
+                <Input
+                  id="password"
+                  type="password"
+                  placeholder="Mindestens 6 Zeichen"
+                  className="pl-10"
+                  required
+                  icon={Lock}
+                  {...field}
+                />
+              </FormControl>
               <FormMessage />
             </FormItem>
           )}
@@ -162,19 +152,16 @@ export function SignupForm({
           render={({ field }) => (
             <FormItem>
               <FormLabel>Passwort bestätigen</FormLabel>
-              <div className="relative">
-                <Lock className="absolute left-3 top-3 h-4 w-4 text-muted-foreground" />
-                <FormControl>
-                  <Input
-                    id="confirmPassword"
-                    type="password"
-                    placeholder="Passwort wiederholen"
-                    className="pl-10"
-                    required
-                    {...field}
-                  />
-                </FormControl>
-              </div>
+              <FormControl>
+                <Input
+                  id="confirmPassword"
+                  type="password"
+                  placeholder="Passwort wiederholen"
+                  required
+                  icon={Lock}
+                  {...field}
+                />
+              </FormControl>
               <FormMessage />
             </FormItem>
           )}

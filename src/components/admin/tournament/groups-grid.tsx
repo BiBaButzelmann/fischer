@@ -28,13 +28,6 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { generateGroups, updateGroups } from "./actions/groups";
 import { Button } from "@/components/ui/button";
 import { GridGroup } from "./types";
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select";
 import { GroupMatchDay } from "./group-match-day";
 
 export const UNASSIGNED_CONTAINER_ID = "unassigned-droppable";
