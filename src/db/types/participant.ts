@@ -5,6 +5,7 @@ export type Participant = InferSelectModel<typeof participant>;
 
 export type ParticipantWithName = Participant & {
   profile: {
-    name: string;
+    firstName: string;
+    lastName: string;
   };
 };
