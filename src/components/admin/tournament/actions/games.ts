@@ -4,6 +4,7 @@ import { db } from "@/db/client";
 import { game } from "@/db/schema/game";
 import { eq, InferInsertModel } from "drizzle-orm";
 import { revalidatePath } from "next/cache";
+import invariant from "tiny-invariant";
 
 const weekdayToIndex = {
   monday: 1,
@@ -61,15 +62,14 @@ export async function removeScheduledGames(tournamentId: number) {
 
 // TODO: find out how to do transactions with drizzle and neon
 export async function scheduleGames(tournamentId: number) {
-  // TODO: change tournamentId to be dynamic
   const tournament = await db.query.tournament.findFirst({
-    where: (t, { eq }) => eq(t.id, 1),
+    where: (t, { eq }) => eq(t.id, tournamentId),
   });
-  if (!tournament) throw new Error("Tournament #1 not found");
+  invariant(tournament, `Tournament #${tournamentId} not found`);
   const startDate = tournament.startDate;
 
   const groups = await db.query.group.findMany({
-    where: (g, { eq }) => eq(g.tournamentId, tournamentId),
+    where: (group, { eq }) => eq(group.tournamentId, tournamentId),
     with: {
       participants: true,
     },
@@ -112,48 +112,9 @@ export async function scheduleGames(tournamentId: number) {
           round: roundIdx + 1,
           boardNumber: boardIdx + 1,
           scheduled: roundDate,
-          createdAt: new Date(),
-          updatedAt: new Date(),
         });
       });
     });
-  }
-  /* ──────────────────────────────────────────────────────────────── */
-  /* ▶▶ pairing logic ends here                                       */
-  /* ──────────────────────────────────────────────────────────────── */
-  console.log("Scheduled games:");
-
-  for (const g of scheduledGames) {
-    // fetch player names via participant → profile
-    const whiteParticipant = await db.query.participant.findFirst({
-      where: (p, { eq }) => eq(p.id, g.whiteParticipantId),
-      with: {
-        profile: true,
-      },
-    });
-
-    const blackParticipant = await db.query.participant.findFirst({
-      where: (p, { eq }) => eq(p.id, g.blackParticipantId),
-      with: {
-        profile: true,
-      },
-    });
-
-    // fetch group name
-    const grp = await db.query.group.findFirst({
-      where: (gr, { eq }) => eq(gr.id, g.groupId),
-    });
-
-    const whiteName =
-      whiteParticipant?.profile?.lastName ?? `#${g.whiteParticipantId}`;
-    const blackName =
-      blackParticipant?.profile?.lastName ?? `#${g.blackParticipantId}`;
-    const groupName = grp?.groupName ?? `Group ${g.groupId}`;
-
-    console.log(
-      `Round ${g.round}, Board ${g.boardNumber}, ${groupName}: ${whiteName} (White) vs ${blackName} (Black)`,
-    );
-    console.log(`→ Scheduled on: ${g.scheduled.toDateString()}`);
   }
   if (scheduledGames.length) {
     await db.insert(game).values(scheduledGames);
