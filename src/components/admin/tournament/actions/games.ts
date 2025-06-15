@@ -82,6 +82,12 @@ export async function scheduleGames(tournamentId: number) {
   /* ──────────────────────────────────────────────────────────────── */
   for (const group of groups) {
     // ignore groups with no declared match-day
+    if (!group.matchDay) {
+      console.warn(
+        `Skipping group ${group.groupNumber} (id=${group.id}) – no matchDay set`,
+      );
+      continue;
+    }
     if (!group.matchDay) continue;
 
     // players that actually have a position inside this group
@@ -149,8 +155,8 @@ export async function scheduleGames(tournamentId: number) {
     );
     console.log(`→ Scheduled on: ${g.scheduled.toDateString()}`);
   }
-  // if (scheduledGames.length) {
-  //   await db.insert(game).values(scheduledGames);
-  //   revalidatePath("/admin/tournament");
-  // }
+  if (scheduledGames.length) {
+    await db.insert(game).values(scheduledGames);
+    revalidatePath("/admin/tournament");
+  }
 }
