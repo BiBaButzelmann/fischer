@@ -1,8 +1,8 @@
-import { relations } from "drizzle-orm";
-import { integer, pgTable, text, unique } from "drizzle-orm/pg-core";
+import { relations, sql } from "drizzle-orm";
+import { boolean, integer, pgTable, text, unique } from "drizzle-orm/pg-core";
 import { profile } from "./profile";
 import { group } from "./group";
-import { timestamps } from "./columns.helpers";
+import { matchDay, timestamps } from "./columns.helpers";
 
 export const participant = pgTable(
   "participant",
@@ -15,11 +15,18 @@ export const participant = pgTable(
     groupId: integer("group_id"),
     groupPosition: integer("group_position"),
 
-    fideId: text("fide_id"),
-    fideRating: integer("fide_rating"),
+    chessClub: text("chess_club").notNull(),
     dwzRating: integer("dwz_rating"),
+    fideRating: integer("fide_rating"),
+    fideId: text("fide_id"),
 
-    // TODO: aufbauhelfer, schiedsrichter, etc.
+    preferredMatchDay: matchDay("preferred_match_day").notNull(),
+    secondaryMatchDays: matchDay("secondary_match_days").array().notNull(),
+
+    helpAsReferee: matchDay("help_as_referee").array().notNull(),
+    helpSetupRoom: matchDay("help_setup_room").array().notNull(),
+    helpEnterMatches: boolean("help_enter_matches").notNull(),
+    helpAsTournamentJury: boolean("help_as_tournament_jury").notNull(),
 
     ...timestamps,
   },

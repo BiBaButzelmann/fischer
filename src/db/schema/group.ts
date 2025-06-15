@@ -1,16 +1,8 @@
 import { relations } from "drizzle-orm";
-import {
-  integer,
-  pgEnum,
-  pgTable,
-  primaryKey,
-  text,
-} from "drizzle-orm/pg-core";
+import { integer, pgTable, primaryKey, text } from "drizzle-orm/pg-core";
 import { participant } from "./participant";
 import { game } from "./game";
-import { availableMatchDays, timestamps } from "./columns.helpers";
-
-export const matchDay = pgEnum("match_day", availableMatchDays);
+import { matchDay, timestamps } from "./columns.helpers";
 
 export const group = pgTable(
   "group",

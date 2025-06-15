@@ -1,4 +1,4 @@
-import { timestamp } from "drizzle-orm/pg-core";
+import { pgEnum, timestamp } from "drizzle-orm/pg-core";
 
 export const timestamps = {
   createdAt: timestamp("created_at")
@@ -10,3 +10,5 @@ export const timestamps = {
 };
 
 export const availableMatchDays = ["tuesday", "thursday", "friday"] as const;
+
+export const matchDay = pgEnum("match_day", availableMatchDays);

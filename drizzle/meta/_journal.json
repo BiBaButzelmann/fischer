@@ -211,6 +211,13 @@
       "when": 1749933813548,
       "tag": "0029_youthful_star_brand",
       "breakpoints": true
+    },
+    {
+      "idx": 30,
+      "version": "7",
+      "when": 1749982006960,
+      "tag": "0030_legal_nextwave",
+      "breakpoints": true
     }
   ]
 }
