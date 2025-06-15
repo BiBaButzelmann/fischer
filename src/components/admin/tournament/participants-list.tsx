@@ -10,7 +10,8 @@ export async function ParticipantsList() {
     with: {
       profile: {
         columns: {
-          name: true,
+          firstName: true,
+          lastName: true,
         },
       },
     },

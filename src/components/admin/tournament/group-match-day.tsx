@@ -13,7 +13,6 @@ import { useMemo, useTransition } from "react";
 import { updateGroupMatchDay } from "./actions/groups";
 
 const matchDays: Record<MatchDay, string> = {
-  monday: "Montag",
   tuesday: "Dienstag",
   thursday: "Donnerstag",
   friday: "Freitag",
