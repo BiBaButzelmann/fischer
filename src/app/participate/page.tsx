@@ -19,6 +19,13 @@ import { redirect } from "next/navigation";
 export default async function RegisterPage() {
   const session = await auth();
 
+  const activeTournament = await db.query.tournament.findFirst({
+    where: (tournament, { eq }) => eq(tournament.stage, "registration"),
+  });
+  if (activeTournament == null) {
+    redirect("/welcome");
+  }
+
   const currentProfile = await db.query.profile.findFirst({
     where: eq(profile.userId, session.user.id),
   });
@@ -54,7 +61,10 @@ export default async function RegisterPage() {
           </CardDescription>
         </CardHeader>
         <CardContent>
-          <ParticipateForm profile={currentProfile} />
+          <ParticipateForm
+            tournamentId={activeTournament.id}
+            profile={currentProfile}
+          />
         </CardContent>
       </Card>
     </div>

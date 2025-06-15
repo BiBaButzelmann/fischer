@@ -10,7 +10,7 @@ import { auth } from "@/auth";
 import { headers } from "next/headers";
 import { participant } from "@/db/schema/participant";
 
-export async function participateInTournament(
+export async function createTournamentParticipant(
   tournamentId: number,
   data: z.infer<typeof registerFormSchema>,
 ) {
@@ -24,7 +24,7 @@ export async function participateInTournament(
   });
   invariant(tournament, "Tournament not found");
 
-  const participantProfile = await db
+  const currentProfile = await db
     .update(profile)
     .set({
       phoneNumber: data.phoneNumber,
@@ -34,12 +34,21 @@ export async function participateInTournament(
       id: profile.id,
     });
 
-  // TODO: update schema
-  await db.insert(participant).values({
-    profileId: participantProfile[0].id,
-    tournamentId: tournament.id,
-    dwzRating: data.dwzRating,
-    fideRating: data.fideRating,
-    fideId: data.fideId,
-  });
+  await db
+    .insert(participant)
+    .values({
+      profileId: currentProfile[0].id,
+      tournamentId: tournament.id,
+      chessClub: data.chessClub,
+      dwzRating: data.dwzRating,
+      fideRating: data.fideRating,
+      fideId: data.fideId,
+      preferredMatchDay: data.preferredMatchDay,
+      secondaryMatchDays: data.secondaryMatchDays,
+      helpAsReferee: data.helpAsReferee,
+      helpSetupRoom: data.helpSetupRoom,
+      helpEnterMatches: data.helpEnterMatches ?? false,
+      helpAsTournamentJury: data.helpAsTournamentJury ?? false,
+    })
+    .onConflictDoNothing();
 }

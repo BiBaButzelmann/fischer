@@ -1,7 +1,5 @@
+import { availableMatchDays } from "@/db/schema/columns.helpers";
 import z from "zod";
-
-// define available match days somewhere to be used in the schema and form
-const availableMatchDays = ["tuesday", "thursday", "friday"] as const;
 
 export const registerFormSchema = z.object({
   firstName: z.string().min(1, "Vorname ist erforderlich"),
@@ -10,11 +8,11 @@ export const registerFormSchema = z.object({
   phoneNumber: z.string().min(1, "Telefonnummer ist erforderlich"),
 
   chessClub: z.string().min(1, "Schachverein ist erforderlich"),
-  dwzRating: z
+  dwzRating: z.coerce
     .number()
     .min(0, "DWZ-Punktzahl muss mindestens 0 sein")
     .optional(),
-  fideRating: z
+  fideRating: z.coerce
     .number()
     .min(0, "FIDE-Punktzahl muss mindestens 0 sein")
     .optional(),

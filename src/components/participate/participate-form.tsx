@@ -12,15 +12,9 @@ import {
   FormField,
   FormItem,
   FormLabel,
+  FormMessage,
 } from "../ui/form";
-import {
-  Calendar,
-  LinkIcon,
-  Phone,
-  Star,
-  User,
-  UsersRound,
-} from "lucide-react";
+import { Calendar, Phone, Star, User, UsersRound } from "lucide-react";
 import { Input } from "../ui/input";
 import {
   Select,
@@ -35,11 +29,14 @@ import Link from "next/link";
 import { Button } from "../ui/button";
 import { registerFormSchema } from "./schema";
 import { MatchDay } from "@/db/types/group";
+import { createTournamentParticipant } from "./actions";
+import { redirect } from "next/navigation";
 
 type Props = {
+  tournamentId: number;
   profile?: Profile;
 };
-export function ParticipateForm({ profile }: Props) {
+export function ParticipateForm({ tournamentId, profile }: Props) {
   const [isPending, startTransition] = useTransition();
   const form = useForm<z.infer<typeof registerFormSchema>>({
     resolver: zodResolver(registerFormSchema),
@@ -63,15 +60,14 @@ export function ParticipateForm({ profile }: Props) {
     },
   });
 
-  const fideRating = form.watch("fideRating");
-
   const handleSubmit = (data: z.infer<typeof registerFormSchema>) => {
     startTransition(async () => {
-      // Handle form submission logic here
-      console.log("Form submitted with data:", data);
+      await createTournamentParticipant(tournamentId, data);
+      redirect("/home");
     });
   };
 
+  const fideRating = form.watch("fideRating");
   return (
     <Form {...form}>
       <form onSubmit={form.handleSubmit(handleSubmit)} className="space-y-8">
@@ -90,6 +86,7 @@ export function ParticipateForm({ profile }: Props) {
                   <FormControl>
                     <Input id="firstName" disabled required {...field} />
                   </FormControl>
+                  <FormMessage />
                 </FormItem>
               )}
             />
@@ -102,6 +99,7 @@ export function ParticipateForm({ profile }: Props) {
                   <FormControl>
                     <Input id="lastName" disabled required {...field} />
                   </FormControl>
+                  <FormMessage />
                 </FormItem>
               )}
             />
@@ -115,6 +113,7 @@ export function ParticipateForm({ profile }: Props) {
                 <FormControl>
                   <Input id="email" disabled required {...field} />
                 </FormControl>
+                <FormMessage />
               </FormItem>
             )}
           />
@@ -127,6 +126,7 @@ export function ParticipateForm({ profile }: Props) {
                 <FormControl>
                   <Input icon={Phone} id="phoneNumber" required {...field} />
                 </FormControl>
+                <FormMessage />
               </FormItem>
             )}
           />
@@ -146,6 +146,7 @@ export function ParticipateForm({ profile }: Props) {
                 <FormControl>
                   <Input id="chessClub" required {...field} />
                 </FormControl>
+                <FormMessage />
               </FormItem>
             )}
           />
@@ -159,6 +160,7 @@ export function ParticipateForm({ profile }: Props) {
                   <FormControl>
                     <Input type="number" id="dwzRating" {...field} />
                   </FormControl>
+                  <FormMessage />
                 </FormItem>
               )}
             />
@@ -173,6 +175,7 @@ export function ParticipateForm({ profile }: Props) {
                   <FormControl>
                     <Input type="number" id="fideRating" {...field} />
                   </FormControl>
+                  <FormMessage />
                 </FormItem>
               )}
             />
@@ -192,6 +195,7 @@ export function ParticipateForm({ profile }: Props) {
                       {...field}
                     />
                   </FormControl>
+                  <FormMessage />
                 </FormItem>
               )}
             />
@@ -221,6 +225,7 @@ export function ParticipateForm({ profile }: Props) {
                     </SelectContent>
                   </Select>
                 </FormControl>
+                <FormMessage />
                 <FormDescription>
                   A-Klasse nur Fr., B-Klasse nur Di. und Fr.
                 </FormDescription>
@@ -239,6 +244,7 @@ export function ParticipateForm({ profile }: Props) {
                     onChange={field.onChange}
                   />
                 </FormControl>
+                <FormMessage />
                 <FormDescription>
                   Wer nicht flexibel ist, könnte unter Umständen bei dem Turnier
                   nicht berücksichtigt werden.
@@ -273,6 +279,7 @@ export function ParticipateForm({ profile }: Props) {
                       onChange={field.onChange}
                     />
                   </FormControl>
+                  <FormMessage />
                   <FormDescription>
                     Voraussetzung: mindestens regionaler Schiedsrichter.
                     Zeitbedarf: 9 Abende zzgl. Ausweichterminen laut Zeitplan.
@@ -296,6 +303,7 @@ export function ParticipateForm({ profile }: Props) {
                       onChange={field.onChange}
                     />
                   </FormControl>
+                  <FormMessage />
                   <FormDescription>
                     Bretter, gestellte Uhren, Notationsunterlagen und
                     Namensschilder aufbauen. Zeitbedarf: ca. 20-40 Min. an 9
@@ -323,6 +331,7 @@ export function ParticipateForm({ profile }: Props) {
                       </Label>
                     </div>
                   </FormControl>
+                  <FormMessage />
                 </FormItem>
               )}
             />
@@ -351,12 +360,13 @@ export function ParticipateForm({ profile }: Props) {
                       </Label>
                     </div>
                   </FormControl>
+                  <FormMessage />
                 </FormItem>
               )}
             />
           </div>
         </section>
-        <Button type="submit" className="w-full">
+        <Button type="submit" className="w-full" disabled={isPending}>
           Turnieranmeldung abschließen
         </Button>
       </form>
