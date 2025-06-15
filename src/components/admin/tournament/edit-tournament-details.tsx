@@ -295,7 +295,7 @@ export default function EditTournamentDetails({ profiles }: Props) {
                         >
                           <div className="flex flex-col">
                             <span className="font-medium">
-                              {organizer.name}
+                              {organizer.lastName}, {organizer.firstName}
                             </span>
                           </div>
                         </SelectItem>
