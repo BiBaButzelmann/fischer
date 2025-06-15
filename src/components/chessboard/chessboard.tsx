@@ -1,41 +1,40 @@
 "use client";
 
-import useResizeObserver from "@react-hook/resize-observer";
-import { useState, useRef, useLayoutEffect } from "react";
+import { Chess } from "chess.js";
+import dynamic from "next/dynamic";
 
-export function ChessBoard() {
-    const [size, setSize] = useState<{ width: number; height: number } | null>(
-        null,
-    );
+/* --- lazy-load the DnD board so it never runs on the server --- */
+const Board = dynamic(
+  () => import("react-chessboard").then((m) => m.Chessboard),
+  { ssr: false },
+);
 
-    const target = useRef<HTMLDivElement>(null);
-    useResizeObserver(target, (entry) =>
-        setSize({
-            width: entry.contentRect.width,
-            height: entry.contentRect.height,
-        }),
-    );
+export interface ChessBoardProps {
+  /** live Chess.js instance */
+  game: Chess;
+  /** called after every legal drag-drop */
+  onMove: (from: string, to: string) => void;
+  /** optional pixel width (defaults 480) */
+  boardWidth?: number;
+}
 
-    useLayoutEffect(() => {
-        if (target.current == null) {
-            return;
-        }
-        const { width, height } = target.current.getBoundingClientRect();
-        setSize({
-            width,
-            height,
-        });
-    }, []);
+export function ChessBoard({
+  game,
+  onMove,
+  boardWidth = 480,
+}: ChessBoardProps) {
+  // translate react-chessboard’s callback into your domain handler
+  const handleDrop = (from: string, to: string): boolean => {
+    onMove(from, to);
+    return true; // tells react-chessboard the drop was accepted
+  };
 
-    return (
-        <div ref={target} className="h-full">
-            <iframe
-                src="https://fritz.chessbase.com?pos=wKe3,Re4/bKd5"
-                style={{
-                    width: size?.width,
-                    height: size?.height,
-                }}
-            />
-        </div>
-    );
+  return (
+    <Board
+      id="AnalysisBoard"
+      boardWidth={boardWidth}
+      position={game.fen()}
+      onPieceDrop={handleDrop}
+    />
+  );
 }

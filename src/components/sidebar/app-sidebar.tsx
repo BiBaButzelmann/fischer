@@ -42,7 +42,7 @@ export function AppSidebar() {
                 <SidebarMenuButton asChild>
                   <Link href="/game">
                     <SwordsIcon />
-                    <span>Meine Partien</span>
+                    <span>Partien</span>
                   </Link>
                 </SidebarMenuButton>
               </SidebarMenuItem>

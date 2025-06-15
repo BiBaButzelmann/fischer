@@ -1,7 +1,7 @@
-"use client";
+import React from "react";
 
-import { ChessBoard } from "@/components/chessboard";
+const page = () => {
+  return <div>Homepage</div>;
+};
 
-export default function Home() {
-    return <ChessBoard />;
-}
+export default page;
