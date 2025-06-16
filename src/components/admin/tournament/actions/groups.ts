@@ -35,7 +35,8 @@ export async function generateGroups(tournamentId: number) {
     with: {
       profile: {
         columns: {
-          name: true,
+          firstName: true,
+          lastName: true,
         },
       },
     },

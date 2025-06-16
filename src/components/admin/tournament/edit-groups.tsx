@@ -13,7 +13,8 @@ export async function EditGroups({ tournament }: { tournament: Tournament }) {
         with: {
           profile: {
             columns: {
-              name: true,
+              lastName: true,
+              firstName: true,
             },
           },
         },
@@ -31,7 +32,8 @@ export async function EditGroups({ tournament }: { tournament: Tournament }) {
     with: {
       profile: {
         columns: {
-          name: true,
+          lastName: true,
+          firstName: true,
         },
       },
     },

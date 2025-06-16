@@ -1,3 +1,5 @@
+//TODO: is this needed?
+/*
 import { and } from "drizzle-orm";
 import { db } from "../client";
 
@@ -7,3 +9,4 @@ export async function getUser(email: string, passwordHash: string) {
             and(eq(users.email, email), eq(users.password, passwordHash)),
     });
 }
+*/

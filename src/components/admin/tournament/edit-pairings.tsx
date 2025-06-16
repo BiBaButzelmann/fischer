@@ -13,7 +13,8 @@ export async function EditPairings({ tournament }: { tournament: Tournament }) {
             with: {
               profile: {
                 columns: {
-                  name: true,
+                  firstName: true,
+                  lastName: true,
                 },
               },
             },
@@ -22,7 +23,8 @@ export async function EditPairings({ tournament }: { tournament: Tournament }) {
             with: {
               profile: {
                 columns: {
-                  name: true,
+                  firstName: true,
+                  lastName: true,
                 },
               },
             },
