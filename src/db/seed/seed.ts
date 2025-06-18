@@ -53,11 +53,34 @@ async function main() {
         }),
         groupId: f.default({ defaultValue: null }),
         groupPosition: f.default({ defaultValue: null }),
+        secondaryMatchDays: f.weightedRandom([
+          {
+            weight: 0.6,
+            value: f.valuesFromArray({
+              values: ["tuesday", "thursday", "friday"],
+              arraySize: 1,
+            }),
+          },
+          {
+            weight: 0.1,
+            value: f.valuesFromArray({
+              values: ["tuesday", "thursday", "friday"],
+              arraySize: 3,
+            }),
+          },
+          {
+            weight: 0.3,
+            value: f.default({
+              defaultValue: [],
+            }),
+          },
+        ]),
         helpAsReferee: f.weightedRandom([
           {
             weight: 0.2,
             value: f.valuesFromArray({
               values: ["tuesday", "thursday", "friday"],
+              arraySize: 2,
             }),
           },
           {
@@ -72,6 +95,7 @@ async function main() {
             weight: 0.2,
             value: f.valuesFromArray({
               values: ["tuesday", "thursday", "friday"],
+              arraySize: 2,
             }),
           },
           {
