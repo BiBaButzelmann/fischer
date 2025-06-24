@@ -21,6 +21,7 @@ export const game = pgTable("game", {
 
   round: integer("round").notNull(),
   boardNumber: integer("board_number").notNull(),
+  // TODO: probably make this datetime instead of date
   scheduled: date("scheduled", { mode: "date" }).notNull(),
 
   result: resultEnum(),
@@ -33,10 +34,12 @@ export const gameRelations = relations(game, ({ one }) => ({
   whiteParticipant: one(participant, {
     fields: [game.whiteParticipantId],
     references: [participant.id],
+    relationName: "whiteParticipant",
   }),
   blackParticipant: one(participant, {
     fields: [game.blackParticipantId],
     references: [participant.id],
+    relationName: "blackParticipant",
   }),
   tournament: one(tournament, {
     fields: [game.tournamentId],
