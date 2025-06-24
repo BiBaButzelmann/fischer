@@ -102,6 +102,7 @@ export async function scheduleGames(tournamentId: number) {
     const firstDate = firstMatchDate(startDate, group.matchDay);
 
     pairings.forEach((pairsInRound, roundIdx) => {
+      // TODO: set the time from the tournament settings
       const roundDate = addDays(firstDate, roundIdx * 7); // weekly cadence
       pairsInRound.forEach(([whiteNo, blackNo], boardIdx) => {
         scheduledGames.push({
