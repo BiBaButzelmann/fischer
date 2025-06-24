@@ -1,8 +1,12 @@
 import { db } from "@/db/client";
 import { Tournament } from "@/db/types/tournament";
-import { Pairing } from "./pairing";
+import { Pairings } from "./pairings";
 
-export async function EditPairings({ tournament }: { tournament: Tournament }) {
+export async function PairingsOverview({
+  tournament,
+}: {
+  tournament: Tournament;
+}) {
   const groupGames = await db.query.group.findMany({
     where: (group, { eq }) => eq(group.tournamentId, tournament.id),
     with: {
@@ -35,5 +39,5 @@ export async function EditPairings({ tournament }: { tournament: Tournament }) {
     orderBy: (group, { asc }) => [asc(group.groupNumber)],
   });
 
-  return <Pairing groups={groupGames} />;
+  return <Pairings groups={groupGames} />;
 }

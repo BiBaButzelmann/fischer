@@ -10,6 +10,7 @@ import {
 } from "drizzle-orm/pg-core";
 import { profile } from "./profile";
 import { timestamps } from "./columns.helpers";
+import { group } from "./group";
 
 export const tournamentStage = pgEnum("tournament_stage", [
   "registration",
@@ -38,9 +39,10 @@ export const tournament = pgTable("tournament", {
   ...timestamps,
 });
 
-export const tournamentRelations = relations(tournament, ({ one }) => ({
+export const tournamentRelations = relations(tournament, ({ one, many }) => ({
   organizer: one(profile, {
     fields: [tournament.organizerProfileId],
     references: [profile.id],
   }),
+  groups: many(group),
 }));
