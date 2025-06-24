@@ -1,5 +1,12 @@
 import { relations } from "drizzle-orm";
-import { integer, pgEnum, pgTable, date } from "drizzle-orm/pg-core";
+import {
+  integer,
+  pgEnum,
+  pgTable,
+  date,
+  time,
+  timestamp,
+} from "drizzle-orm/pg-core";
 import { participant } from "./participant";
 import { tournament } from "./tournament";
 import { group } from "./group";
@@ -21,8 +28,10 @@ export const game = pgTable("game", {
 
   round: integer("round").notNull(),
   boardNumber: integer("board_number").notNull(),
-  // TODO: probably make this datetime instead of date
-  scheduled: date("scheduled", { mode: "date" }).notNull(),
+  scheduled: timestamp("scheduled", {
+    mode: "date",
+    withTimezone: true,
+  }).notNull(),
 
   result: resultEnum(),
   pgnId: integer("pgn_id"),
