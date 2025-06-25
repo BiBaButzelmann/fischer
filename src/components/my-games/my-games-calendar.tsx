@@ -1,7 +1,7 @@
 import { GameWithParticipants } from "@/db/types/game";
 import { Calendar } from "../calendar";
 import { type EventInput } from "@fullcalendar/core/index.js";
-import { getParticipantFullName } from "@/utils/participant-name";
+import { getParticipantFullName } from "@/utils/participant";
 
 export function MyGamesCalendar({ games }: { games: GameWithParticipants[] }) {
   const events = games.map(

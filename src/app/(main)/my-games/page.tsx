@@ -1,10 +1,10 @@
 import { auth } from "@/auth/utils";
 import { MyGamesCalendar } from "@/components/my-games/my-games-calendar";
+import { MyGamesList } from "@/components/my-games/my-games-list";
 import { db } from "@/db/client";
-import { game } from "@/db/schema/game";
 import { participant } from "@/db/schema/participant";
 import { profile } from "@/db/schema/profile";
-import { eq, or } from "drizzle-orm";
+import { eq } from "drizzle-orm";
 
 export default async function Page() {
   const session = await auth();
@@ -51,8 +51,13 @@ export default async function Page() {
 
   return (
     <div>
-      <span className="text-xl font-bold">Turnierplan</span>
-      <MyGamesCalendar games={games} />
+      <div className="mb-8">
+        <h1 className="text-3xl font-bold text-gray-900 mb-2">Meine Spiele</h1>
+      </div>
+      <div className="flex flex-col gap-4 mt-4">
+        <MyGamesCalendar games={games} />
+        <MyGamesList games={games} />
+      </div>
     </div>
   );
 }
