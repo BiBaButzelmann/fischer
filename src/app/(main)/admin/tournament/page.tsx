@@ -1,6 +1,6 @@
 import { auth } from "@/auth/utils";
 import { EditGroups } from "@/components/admin/tournament/edit-groups";
-import { EditPairings } from "@/components/admin/tournament/edit-pairings";
+import { PairingsOverview } from "@/components/admin/tournament/pairings-overview";
 import EditTournamentDetails from "@/components/admin/tournament/edit-tournament-details";
 import { ParticipantsList } from "@/components/admin/tournament/participants-list";
 import {
@@ -46,6 +46,9 @@ async function ManageTournament() {
   const activeTournament = await db.query.tournament.findFirst({
     where: (tournament, { or, eq }) =>
       or(eq(tournament.stage, "registration"), eq(tournament.stage, "running")),
+    with: {
+      groups: true,
+    },
   });
 
   const adminProfiles = await db
@@ -54,14 +57,17 @@ async function ManageTournament() {
     .leftJoin(user, eq(profile.userId, user.id))
     .where(eq(user.role, "admin"));
 
-  // TODO: improve default open logic
-  // no active tournament -> open edit tournament details
-  // active tournament -> open edit groups
-  // valid groups (same size + match days are set) -> open generate matches
+  const openCollapsible =
+    activeTournament == null
+      ? "details"
+      : activeTournament.groups.length > 0
+        ? "pairings"
+        : "groups";
+
   return (
     <div className="space-y-4">
       <Collapsible
-        defaultOpen={activeTournament == null}
+        defaultOpen={openCollapsible === "details"}
         className="border border-primary rounded-md p-4"
       >
         <CollapsibleTrigger className="w-full">
@@ -77,7 +83,7 @@ async function ManageTournament() {
         </CollapsibleContent>
       </Collapsible>
       <Collapsible
-        defaultOpen={activeTournament != null}
+        defaultOpen={openCollapsible === "groups"}
         className="border border-primary rounded-md p-4"
       >
         <CollapsibleTrigger className="w-full">
@@ -92,7 +98,10 @@ async function ManageTournament() {
           ) : null}
         </CollapsibleContent>
       </Collapsible>
-      <Collapsible className="border border-primary rounded-md p-4">
+      <Collapsible
+        defaultOpen={openCollapsible === "pairings"}
+        className="border border-primary rounded-md p-4"
+      >
         <CollapsibleTrigger className="w-full">
           <div className="flex">
             <span className="flex-grow text-left">Paarungen generieren</span>
@@ -101,7 +110,7 @@ async function ManageTournament() {
         </CollapsibleTrigger>
         <CollapsibleContent className="mt-4">
           {activeTournament ? (
-            <EditPairings tournament={activeTournament} />
+            <PairingsOverview tournament={activeTournament} />
           ) : null}
         </CollapsibleContent>
       </Collapsible>
