@@ -1,6 +1,7 @@
 import { db } from "@/db/client";
 import { Tournament } from "@/db/types/tournament";
 import { Pairings } from "./pairings";
+import { GeneratePairings } from "./generate-pairings";
 
 export async function PairingsOverview({
   tournament,
@@ -39,5 +40,12 @@ export async function PairingsOverview({
     orderBy: (group, { asc }) => [asc(group.groupNumber)],
   });
 
-  return <Pairings groups={groupGames} />;
+  return (
+    <div className="flex gap-2">
+      <div className="flex-grow">
+        <Pairings groups={groupGames} />
+      </div>
+      <GeneratePairings tournamentId={tournament.id} />
+    </div>
+  );
 }

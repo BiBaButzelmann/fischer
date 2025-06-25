@@ -33,8 +33,8 @@ export function Pairings({ groups }: { groups: GroupWithGames[] }) {
     <div className="flex flex-col gap-4">
       {groupedGames.map(({ group, gamesByRound }) => (
         <GroupCard name={group.groupName} key={group.id}>
-          {Array.from(gamesByRound.entries()).map(([round, games]) => (
-            <div key={group.id + round} className="ml-4 mt-1">
+          {Array.from(gamesByRound.entries()).map(([round, games], i) => (
+            <div key={group.id + "-" + round} className="ml-4 mt-1">
               <p className="font-semibold">Runde {round}</p>
               {games.map((game) => (
                 <div className="flex items-center gap-2">
@@ -99,7 +99,7 @@ function groupGamesByGroupAndRound(groups: GroupWithGames[]): GroupedResult[] {
     };
   });
 
-  result.sort((a, b) => a.group.groupName.localeCompare(b.group.groupName));
+  result.sort((a, b) => a.group.groupNumber - b.group.groupNumber);
 
   return result;
 }

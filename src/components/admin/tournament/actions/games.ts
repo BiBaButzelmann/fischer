@@ -122,3 +122,9 @@ export async function scheduleGames(tournamentId: number) {
     revalidatePath("/admin/tournament");
   }
 }
+
+export async function rescheduleGames(tournamentId: number) {
+  await removeScheduledGames(tournamentId);
+  await scheduleGames(tournamentId);
+  revalidatePath("/admin/tournament");
+}
