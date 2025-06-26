@@ -17,13 +17,10 @@ import MoveHistory from "@/components/chessboard/move-history";
 import SavePGNButton from "@/components/chessboard/save-pgn-button";
 
 export interface ChessGameContainerProps {
-  /** PGN string loaded from the server (may be empty/undefined) */
   initialPGN?: string;
-  /** Async function which persists the current PGN */
-  savePGN: (pgn: string) => Promise<void>;
+  gameId: number;
 }
 
-// Helper — returns an **array** of Move objects parsed from a PGN string.
 function movesFromPGN(pgn?: string): Move[] {
   const game = new Chess();
   if (pgn?.trim()) {
@@ -34,7 +31,7 @@ function movesFromPGN(pgn?: string): Move[] {
 
 export default function ChessGameContainer({
   initialPGN,
-  savePGN,
+  gameId,
 }: ChessGameContainerProps) {
   const [moves, setMoves] = useState<Move[]>(() => movesFromPGN(initialPGN));
   /** Index of the half‑move currently being shown (‑1 = before any move). */
@@ -54,7 +51,6 @@ export default function ChessGameContainer({
 
   const [fen, setFen] = useState(() => computeFenForIndex(currentIndex));
 
-  // Re‑compute FEN whenever we jump to a different index or the history mutates
   useEffect(() => {
     setFen(computeFenForIndex(currentIndex));
   }, [currentIndex, moves, computeFenForIndex]);
@@ -110,9 +106,6 @@ export default function ChessGameContainer({
     return g.pgn();
   })();
 
-  // ---------------------------------------------------------------------
-  // Render
-  // ---------------------------------------------------------------------
   return (
     <div className="flex gap-4 items-start flex-nowrap">
       <Chessboard position={fen} arePiecesDraggable onPieceDrop={handleDrop} />
@@ -125,7 +118,7 @@ export default function ChessGameContainer({
         />
 
         <div className="w-full md:ml-8 md:w-auto">
-          <SavePGNButton onClick={async () => savePGN(fullPGN)} />
+          <SavePGNButton newValue={fullPGN} gameId={gameId} />
         </div>
       </div>
     </div>
