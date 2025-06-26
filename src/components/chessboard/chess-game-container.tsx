@@ -1,138 +1,133 @@
+// components/ChessGameContainer.tsx
 "use client";
 
-import { useState } from "react";
-import { ChessBoard } from "./chessboard";
-import { PlayerSelector } from "./player-selector";
-import { MoveHistory } from "./move-history";
-import { GameControls } from "./game-controls";
-import { Button } from "@/components/ui/button";
-import { Upload } from "lucide-react";
+/* -------------------------------------------------------------------------
+ * Interactive chessboard + move list that **persists** the full history even
+ * when the user jumps backward. New moves taken from an earlier position will
+ * truncate the "future" branch (like typical chess GUIs) rather than wiping
+ * everything. The PGN list in the sidebar therefore never mysteriously
+ * disappears while the user is browsing.
+ * ----------------------------------------------------------------------- */
 
-interface PlayerPairing {
-  id: string;
-  white: string;
-  black: string;
+import { useState, useEffect, useCallback } from "react";
+import { Chess, Move } from "chess.js";
+import { Chessboard } from "react-chessboard";
+
+import MoveHistory from "@/components/chessboard/move-history";
+import SavePGNButton from "@/components/chessboard/save-pgn-button";
+
+export interface ChessGameContainerProps {
+  /** PGN string loaded from the server (may be empty/undefined) */
+  initialPGN?: string;
+  /** Async function which persists the current PGN */
+  savePGN: (pgn: string) => Promise<void>;
 }
 
-interface PlayerGroups {
-  [key: string]: PlayerPairing[];
+// Helper — returns an **array** of Move objects parsed from a PGN string.
+function movesFromPGN(pgn?: string): Move[] {
+  const game = new Chess();
+  if (pgn?.trim()) {
+    game.loadPgn(pgn);
+  }
+  return game.history({ verbose: true });
 }
 
-interface ChessGameContainerProps {
-  playerGroups: PlayerGroups;
-}
+export default function ChessGameContainer({
+  initialPGN,
+  savePGN,
+}: ChessGameContainerProps) {
+  const [moves, setMoves] = useState<Move[]>(() => movesFromPGN(initialPGN));
+  /** Index of the half‑move currently being shown (‑1 = before any move). */
+  const [currentIndex, setCurrentIndex] = useState<number>(moves.length - 1);
 
-export function ChessGameContainer({ playerGroups }: ChessGameContainerProps) {
-  const [selectedGroup, setSelectedGroup] = useState<string>("");
-  const [selectedPairing, setSelectedPairing] = useState<PlayerPairing | null>(
-    null,
+  // ---------------------------------------------------------------------
+  // Utilities
+  // ---------------------------------------------------------------------
+  const computeFenForIndex = useCallback(
+    (index: number) => {
+      const chess = new Chess();
+      for (let i = 0; i <= index; i++) chess.move(moves[i]);
+      return chess.fen();
+    },
+    [moves],
   );
-  const [moves, setMoves] = useState<string[]>([]);
-  const [currentMoveIndex, setCurrentMoveIndex] = useState(-1);
 
-  const handleGroupChange = (group: string) => {
-    setSelectedGroup(group);
-    setSelectedPairing(null);
-    resetGame();
-  };
+  const [fen, setFen] = useState(() => computeFenForIndex(currentIndex));
 
-  const handlePairingChange = (pairing: PlayerPairing) => {
-    setSelectedPairing(pairing);
-    resetGame();
-  };
+  // Re‑compute FEN whenever we jump to a different index or the history mutates
+  useEffect(() => {
+    setFen(computeFenForIndex(currentIndex));
+  }, [currentIndex, moves, computeFenForIndex]);
 
-  const resetGame = () => {
-    setMoves([]);
-    setCurrentMoveIndex(-1);
-  };
+  // ---------------------------------------------------------------------
+  // Drag‑and‑drop move handling
+  // ---------------------------------------------------------------------
+  const handleDrop = useCallback(
+    (sourceSquare: string, targetSquare: string): boolean => {
+      const chess = new Chess();
+      // Play all moves up to the current index to reach that position
+      for (let i = 0; i <= currentIndex; i++) chess.move(moves[i]);
 
-  const handleMove = (move: string) => {
-    const newMoves = [...moves, move];
-    setMoves(newMoves);
-    setCurrentMoveIndex(newMoves.length - 1);
-  };
+      const move = chess.move({
+        from: sourceSquare,
+        to: targetSquare,
+        promotion: "q",
+      });
+      if (!move) return false; // illegal move
 
-  const handleSaveGame = () => {
-    if (!selectedPairing || moves.length === 0) return;
+      // If we were not at the end, truncate the future branch first
+      const updatedMoves = moves.slice(0, currentIndex + 1).concat(move);
+      setMoves(updatedMoves);
+      setCurrentIndex(updatedMoves.length - 1);
+      // chess now has the new position
+      setFen(chess.fen());
+      return true;
+    },
+    [moves, currentIndex],
+  );
 
-    const gameData = {
-      pairing: selectedPairing,
-      moves: moves,
-      pgn: moves.join(" "),
-      timestamp: new Date().toISOString(),
-    };
+  // ---------------------------------------------------------------------
+  // Keyboard navigation
+  // ---------------------------------------------------------------------
+  useEffect(() => {
+    function onKey(e: KeyboardEvent) {
+      if (e.key === "ArrowLeft") {
+        setCurrentIndex((i) => Math.max(-1, i - 1));
+      } else if (e.key === "ArrowRight") {
+        setCurrentIndex((i) => Math.min(moves.length - 1, i + 1));
+      }
+    }
+    window.addEventListener("keydown", onKey);
+    return () => window.removeEventListener("keydown", onKey);
+  }, [moves.length]);
 
-    console.log("Saving game:", gameData);
-    alert(
-      `Game saved successfully for ${selectedPairing.white} vs ${selectedPairing.black}!`,
-    );
-  };
+  // ---------------------------------------------------------------------
+  // PGN string derived from **all** moves (not truncated by navigation)
+  // ---------------------------------------------------------------------
+  const fullPGN = (() => {
+    const g = new Chess();
+    moves.forEach((m) => g.move(m));
+    return g.pgn();
+  })();
 
+  // ---------------------------------------------------------------------
+  // Render
+  // ---------------------------------------------------------------------
   return (
-    <div className="space-y-6">
-      {/* Player Selection */}
-      <div className="bg-gray-800 rounded-lg p-6">
-        <h2 className="text-xl font-semibold mb-4">Spieler auswählen</h2>
-        <PlayerSelector
-          playerGroups={playerGroups}
-          selectedGroup={selectedGroup}
-          selectedPairing={selectedPairing}
-          onGroupChange={handleGroupChange}
-          onPairingChange={handlePairingChange}
+    <div className="flex gap-4 items-start flex-nowrap">
+      <Chessboard position={fen} arePiecesDraggable onPieceDrop={handleDrop} />
+
+      <div>
+        <MoveHistory
+          history={moves}
+          currentMoveIndex={currentIndex}
+          goToMove={setCurrentIndex}
         />
+
+        <div className="w-full md:ml-8 md:w-auto">
+          <SavePGNButton onClick={async () => savePGN(fullPGN)} />
+        </div>
       </div>
-
-      {/* Game Area - Only show when pairing is selected */}
-      {selectedPairing ? (
-        <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-          {/* Left side - Chess Board */}
-          <div className="lg:col-span-2">
-            <div className="bg-gray-800 rounded-lg p-6">
-              <div className="mb-4">
-                <h3 className="text-lg font-medium">
-                  {selectedPairing.white} (White) vs {selectedPairing.black}{" "}
-                  (Black)
-                </h3>
-              </div>
-              <ChessBoard
-                onMove={handleMove}
-                currentMoveIndex={currentMoveIndex}
-                moves={moves}
-              />
-              <div className="mt-4 flex justify-between items-center">
-                <GameControls
-                  moves={moves}
-                  currentMoveIndex={currentMoveIndex}
-                  onMoveIndexChange={setCurrentMoveIndex}
-                />
-                <Button
-                  onClick={handleSaveGame}
-                  disabled={moves.length === 0}
-                  className="bg-blue-600 hover:bg-blue-700"
-                >
-                  <Upload className="w-4 h-4 mr-2" />
-                  Save Game
-                </Button>
-              </div>
-            </div>
-          </div>
-
-          {/* Right side - Move History */}
-          <div className="lg:col-span-1">
-            <MoveHistory
-              moves={moves}
-              currentMoveIndex={currentMoveIndex}
-              onMoveClick={setCurrentMoveIndex}
-            />
-          </div>
-        </div>
-      ) : (
-        <div className="bg-gray-800 rounded-lg p-12 text-center">
-          <p className="text-gray-400 text-lg">
-            Please select a player pairing to start the game
-          </p>
-        </div>
-      )}
     </div>
   );
 }

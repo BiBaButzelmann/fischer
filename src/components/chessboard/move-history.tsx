@@ -1,80 +1,65 @@
 "use client";
 
-import { ScrollArea } from "@/components/ui/scroll-area";
+import clsx from "clsx";
 
 interface MoveHistoryProps {
-  moves: string[];
+  /** Verbose move objects (must at least have `san`). */
+  history: { san: string }[];
+  /** 0‑based ply index of the current board position (‑1 = before first move). */
   currentMoveIndex: number;
-  onMoveClick: (index: number) => void;
+  /** Jump to the given ply index. */
+  goToMove: (ply: number) => void;
 }
 
-export function MoveHistory({
-  moves,
+/**
+ * Renders the moves in two columns (white / black) and highlights the cell
+ * whose ply index equals `currentMoveIndex`.
+ */
+const MoveHistory: React.FC<MoveHistoryProps> = ({
+  history,
   currentMoveIndex,
-  onMoveClick,
-}: MoveHistoryProps) {
-  const formatMoveNumber = (index: number) => {
-    return Math.floor(index / 2) + 1;
-  };
+  goToMove,
+}) => {
+  const rows: React.ReactNode[] = [];
+  for (let i = 0; i < history.length; i += 2) {
+    const white = history[i];
+    const black = history[i + 1];
 
-  const isWhiteMove = (index: number) => {
-    return index % 2 === 0;
-  };
+    const whitePly = i;
+    const blackPly = i + 1;
 
-  // Group moves into pairs (white, black)
-  const movePairs = [];
-  for (let i = 0; i < moves.length; i += 2) {
-    const whiteMove = moves[i];
-    const blackMove = moves[i + 1] || "";
-    const moveNumber = Math.floor(i / 2) + 1;
-
-    movePairs.push({
-      moveNumber,
-      whiteMove,
-      blackMove,
-      whiteIndex: i,
-      blackIndex: i + 1,
-    });
+    rows.push(
+      <tr key={i} className="align-top">
+        <td className="pr-1 text-right select-none">{i / 2 + 1}.</td>
+        <td
+          className={clsx(
+            "pr-2 cursor-pointer",
+            currentMoveIndex === whitePly && "text-red-600 font-semibold",
+          )}
+          onClick={() => goToMove(whitePly)}
+        >
+          {white ? white.san : "…"}
+        </td>
+        <td
+          className={clsx(
+            "cursor-pointer",
+            currentMoveIndex === blackPly && "text-red-600 font-semibold",
+          )}
+          onClick={() => goToMove(blackPly)}
+        >
+          {black ? black.san : "…"}
+        </td>
+      </tr>,
+    );
   }
 
   return (
-    <div className="bg-gray-800 rounded-lg p-4 h-96">
-      <h3 className="text-lg font-semibold mb-4">Move History</h3>
-      <ScrollArea className="h-80">
-        <div className="space-y-1">
-          {movePairs.map((pair) => (
-            <div
-              key={pair.moveNumber}
-              className="grid grid-cols-12 gap-1 text-sm"
-            >
-              {/* Move number */}
-              <div className="col-span-2 text-gray-400 text-right pr-2">
-                {pair.moveNumber}
-              </div>
-
-              {/* White move */}
-              <div
-                className={`col-span-5 p-1 rounded cursor-pointer hover:bg-gray-700 font-mono ${
-                  pair.whiteIndex === currentMoveIndex ? "bg-blue-600" : ""
-                }`}
-                onClick={() => onMoveClick(pair.whiteIndex)}
-              >
-                {pair.whiteMove}
-              </div>
-
-              {/* Black move */}
-              <div
-                className={`col-span-5 p-1 rounded cursor-pointer hover:bg-gray-700 font-mono ${
-                  pair.blackIndex === currentMoveIndex ? "bg-blue-600" : ""
-                } ${!pair.blackMove ? "text-gray-600" : ""}`}
-                onClick={() => pair.blackMove && onMoveClick(pair.blackIndex)}
-              >
-                {pair.blackMove || "..."}
-              </div>
-            </div>
-          ))}
-        </div>
-      </ScrollArea>
+    <div className="h-full overflow-y-auto pr-1">
+      <table className="text-sm leading-5">
+        <tbody>{rows}</tbody>
+      </table>
     </div>
   );
-}
+};
+
+export default MoveHistory;

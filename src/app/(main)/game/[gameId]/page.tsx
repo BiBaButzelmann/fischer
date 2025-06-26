@@ -1,54 +1,99 @@
-import { ChessGameContainer } from "@/components/chessboard/chess-game-container";
 import { db } from "@/db/client";
+import { pgn } from "@/db/schema/pgn";
+import { eq } from "drizzle-orm";
+import ChessGameContainer from "@/components/chessboard/chess-game-container";
+import z from "zod";
+import { getParticipantFullName } from "@/utils/participant";
 
-// Server component that provides the initial data
-function getPlayerGroups() {
-  return {
-    A: [
-      { id: "a1", white: "Magnus Carlsen", black: "Fabiano Caruana" },
-      { id: "a2", white: "Ding Liren", black: "Ian Nepomniachtchi" },
-      { id: "a3", white: "Hikaru Nakamura", black: "Wesley So" },
-    ],
-    B: [
-      { id: "b1", white: "Anish Giri", black: "Maxime Vachier-Lagrave" },
-      { id: "b2", white: "Levon Aronian", black: "Teimour Radjabov" },
-      { id: "b3", white: "Alexander Grischuk", black: "Pentala Harikrishna" },
-    ],
-    C: [
-      { id: "c1", white: "Vidit Gujrathi", black: "Sergey Karjakin" },
-      { id: "c2", white: "Richard Rapport", black: "Jan-Krzysztof Duda" },
-      { id: "c3", white: "Alireza Firouzja", black: "Shakhriyar Mamedyarov" },
-    ],
-    D: [
-      { id: "d1", white: "Vladimir Kramnik", black: "Veselin Topalov" },
-      { id: "d2", white: "Boris Gelfand", black: "Peter Svidler" },
-      { id: "d3", white: "Dmitry Andreikin", black: "Radoslaw Wojtaszek" },
-    ],
-  };
-}
+const INITIAL_PGN = `[\nEvent "?"\nSite "?"\nDate "????.??.??"\nRound "?"\nWhite "?"\nBlack "?"\nResult "*"\n]\n\n*`;
 
-export default async function GamesPage({
-  params,
-}: {
+type PageProps = {
   params: Promise<{ gameId: string }>;
-}) {
-  const { gameId } = await params;
-  /*const playerGroups = getPlayerGroups();
-  const groups = db.query.group.findMany({
-    // TODO: torunamentId is hardcoded
-    where: (group, { eq }) => eq(group.tournamentId, 1),
-  });*/
+};
 
-  const game = await db.query.game.findFirst({
-    where: (game, { eq }) => eq(game.id, parseInt(gameId)),
+export default async function GamePage({ params }: PageProps) {
+  const { gameId } = await params;
+
+  const parsedGameIdResult = z.coerce.number().safeParse(gameId);
+  if (!parsedGameIdResult.success) {
+    return <p className="p-4 text-red-600">Invalid game ID.</p>;
+  }
+
+  const gameRow = await db.query.game.findFirst({
+    where: (game, { eq }) => eq(game.id, parsedGameIdResult.data),
+    with: {
+      whiteParticipant: {
+        with: {
+          profile: {
+            columns: {
+              firstName: true,
+              lastName: true,
+            },
+          },
+        },
+      },
+      blackParticipant: {
+        with: {
+          profile: {
+            columns: {
+              firstName: true,
+              lastName: true,
+            },
+          },
+        },
+      },
+    },
   });
 
+  if (!gameRow) {
+    return <p className="p-4 text-red-600">Game with ID {gameId} not found.</p>;
+  }
+  const { whiteParticipant, blackParticipant } = gameRow;
+
+  const formatDisplayName = (p: typeof whiteParticipant) => {
+    if (!p) return "Unknown";
+
+    const rating = p.fideRating ?? p.dwzRating;
+    return `${getParticipantFullName(p)}${rating ? ` (${rating})` : ""}`;
+  };
+
+  const whiteDisplay = formatDisplayName(gameRow.whiteParticipant);
+  const blackDisplay = formatDisplayName(gameRow.blackParticipant);
+
+  let [pgnRow] = await db
+    .select()
+    .from(pgn)
+    .where(eq(pgn.gameId, parsedGameIdResult.data));
+
+  if (!pgnRow) {
+    const [inserted] = await db
+      .insert(pgn)
+      .values({ gameId: parsedGameIdResult.data, value: INITIAL_PGN })
+      .returning();
+    pgnRow = inserted;
+  }
+
+  // 5. Define a server action so the client can persist edits to the PGN
+  async function savePGN(newValue: string) {
+    "use server";
+
+    await db
+      .insert(pgn)
+      .values({ gameId: parsedGameIdResult.data!, value: newValue })
+      .onConflictDoUpdate({
+        target: pgn.gameId,
+        set: { value: newValue },
+      });
+  }
+
+  // 6. Render the interactive client component
   return (
-    <div className="min-h-screen bg-gray-900 text-white p-6">
-      <div className="max-w-7xl mx-auto">
-        <h1 className="text-3xl font-bold mb-8">Chess Game Analysis</h1>
-        {/*<ChessGameContainer playerGroups={playerGroups} />*/}
-      </div>
+    <div className="p-4">
+      <h1 className="mb-4 text-2xl font-semibold">
+        {whiteDisplay} vs {blackDisplay}
+      </h1>
+
+      <ChessGameContainer initialPGN={pgnRow.value} savePGN={savePGN} />
     </div>
   );
 }

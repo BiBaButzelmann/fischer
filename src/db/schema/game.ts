@@ -26,7 +26,7 @@ export const game = pgTable("game", {
   blackParticipantId: integer("black_player_id").notNull(),
   tournamentId: integer("tournament_id").notNull(),
   groupId: integer("group_id").notNull(),
-
+  pgnId: integer("pgn_id"),
   round: integer("round").notNull(),
   boardNumber: integer("board_number").notNull(),
   scheduled: timestamp("scheduled", {

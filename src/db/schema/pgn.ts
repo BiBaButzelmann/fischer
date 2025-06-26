@@ -3,7 +3,6 @@ import {
   serial,
   integer,
   text,
-  timestamp,
   uniqueIndex,
 } from "drizzle-orm/pg-core";
 import { game } from "./game";
