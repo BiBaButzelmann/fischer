@@ -20,7 +20,9 @@ export function AppSidebar() {
   return (
     <Sidebar>
       <SidebarHeader>
-        <p className="text-xl font-semibold px-2 py-2">fischer</p>
+        <Link href="/home">
+          <p className="text-xl font-semibold px-2 py-2">fischer</p>
+        </Link>
       </SidebarHeader>
       <SidebarContent>
         <SidebarGroup>
