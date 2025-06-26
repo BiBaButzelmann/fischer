@@ -11,6 +11,7 @@ import { participant } from "./participant";
 import { tournament } from "./tournament";
 import { group } from "./group";
 import { timestamps } from "./columns.helpers";
+import { pgn } from "./pgn";
 
 export const resultEnum = pgEnum("result", [
   "draw", // 0
@@ -25,7 +26,7 @@ export const game = pgTable("game", {
   blackParticipantId: integer("black_player_id").notNull(),
   tournamentId: integer("tournament_id").notNull(),
   groupId: integer("group_id").notNull(),
-
+  pgnId: integer("pgn_id"),
   round: integer("round").notNull(),
   boardNumber: integer("board_number").notNull(),
   scheduled: timestamp("scheduled", {
@@ -34,7 +35,6 @@ export const game = pgTable("game", {
   }).notNull(),
 
   result: resultEnum(),
-  pgnId: integer("pgn_id"),
 
   ...timestamps,
 });
@@ -57,5 +57,10 @@ export const gameRelations = relations(game, ({ one }) => ({
   group: one(group, {
     fields: [game.groupId],
     references: [group.id],
+  }),
+  //relation to pgn table
+  pgn: one(pgn, {
+    fields: [game.id],
+    references: [pgn.gameId],
   }),
 }));
