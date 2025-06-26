@@ -3,6 +3,7 @@ import { integer, pgTable, primaryKey, text } from "drizzle-orm/pg-core";
 import { participant } from "./participant";
 import { game } from "./game";
 import { matchDay, timestamps } from "./columns.helpers";
+import { tournament } from "./tournament";
 
 export const group = pgTable(
   "group",
@@ -19,7 +20,11 @@ export const group = pgTable(
   (table) => [primaryKey({ columns: [table.tournamentId, table.groupNumber] })],
 );
 
-export const groupRelations = relations(group, ({ many }) => ({
+export const groupRelations = relations(group, ({ one, many }) => ({
+  tournament: one(tournament, {
+    fields: [group.tournamentId],
+    references: [tournament.id],
+  }),
   participants: many(participant),
   games: many(game),
 }));

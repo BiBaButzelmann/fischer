@@ -1,5 +1,12 @@
 import { relations } from "drizzle-orm";
-import { integer, pgEnum, pgTable, date } from "drizzle-orm/pg-core";
+import {
+  integer,
+  pgEnum,
+  pgTable,
+  date,
+  time,
+  timestamp,
+} from "drizzle-orm/pg-core";
 import { participant } from "./participant";
 import { tournament } from "./tournament";
 import { group } from "./group";
@@ -22,7 +29,10 @@ export const game = pgTable("game", {
 
   round: integer("round").notNull(),
   boardNumber: integer("board_number").notNull(),
-  scheduled: date("scheduled", { mode: "date" }).notNull(),
+  scheduled: timestamp("scheduled", {
+    mode: "date",
+    withTimezone: true,
+  }).notNull(),
 
   result: resultEnum(),
 
@@ -33,10 +43,12 @@ export const gameRelations = relations(game, ({ one }) => ({
   whiteParticipant: one(participant, {
     fields: [game.whiteParticipantId],
     references: [participant.id],
+    relationName: "whiteParticipant",
   }),
   blackParticipant: one(participant, {
     fields: [game.blackParticipantId],
     references: [participant.id],
+    relationName: "blackParticipant",
   }),
   tournament: one(tournament, {
     fields: [game.tournamentId],

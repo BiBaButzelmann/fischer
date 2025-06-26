@@ -102,6 +102,7 @@ export async function scheduleGames(tournamentId: number) {
     const firstDate = firstMatchDate(startDate, group.matchDay);
 
     pairings.forEach((pairsInRound, roundIdx) => {
+      // TODO: set the time from the tournament settings
       const roundDate = addDays(firstDate, roundIdx * 7); // weekly cadence
       pairsInRound.forEach(([whiteNo, blackNo], boardIdx) => {
         scheduledGames.push({
@@ -120,4 +121,10 @@ export async function scheduleGames(tournamentId: number) {
     await db.insert(game).values(scheduledGames);
     revalidatePath("/admin/tournament");
   }
+}
+
+export async function rescheduleGames(tournamentId: number) {
+  await removeScheduledGames(tournamentId);
+  await scheduleGames(tournamentId);
+  revalidatePath("/admin/tournament");
 }
