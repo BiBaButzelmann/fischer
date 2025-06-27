@@ -1,9 +1,7 @@
 import { betterAuth } from "better-auth";
 import { drizzleAdapter } from "better-auth/adapters/drizzle";
 import { db } from "./db/client";
-import {
-  admin as adminPlugin,
-} from "better-auth/plugins";
+import { admin as adminPlugin } from "better-auth/plugins";
 import { ac, admin, user } from "./permissions";
 import { nextCookies } from "better-auth/next-js";
 // TODO: implement email sending

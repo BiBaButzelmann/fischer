@@ -1,6 +1,5 @@
 "use server";
 
-import { authClient } from "@/auth-client";
 import z from "zod";
 import { loginFormSchema } from "./login-form";
 import { db } from "@/db/client";

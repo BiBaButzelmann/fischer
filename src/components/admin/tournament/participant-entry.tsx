@@ -4,7 +4,6 @@ import {
   HoverCardContent,
   HoverCardTrigger,
 } from "@/components/ui/hover-card";
-import { Separator } from "@/components/ui/separator";
 import { MatchDay } from "@/db/types/group";
 import { ParticipantWithName } from "@/db/types/participant";
 
