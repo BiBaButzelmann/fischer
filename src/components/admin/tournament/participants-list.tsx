@@ -1,25 +1,10 @@
 import { Card, CardHeader } from "@/components/ui/card";
-import { db } from "@/db/client";
 import { ParticipantEntry } from "./participant-entry";
+import { getParticipantsByTournamentId } from "@/db/repositories/participant";
 
 export async function ParticipantsList() {
-  const participants = await db.query.participant.findMany({
-    // TODO: replace with active tournament id
-    // This is just a placeholder for demonstration purposes
-    where: (participant, { eq }) => eq(participant.tournamentId, 1),
-    with: {
-      profile: {
-        columns: {
-          firstName: true,
-          lastName: true,
-        },
-      },
-    },
-    orderBy: (participant, { desc, sql }) => [
-      sql`${participant.fideRating} IS NULL`,
-      desc(participant.fideRating),
-    ],
-  });
+  // TODO: dynamic tournament ID
+  const participants = await getParticipantsByTournamentId(1);
 
   return (
     <div className="flex flex-col gap-2">

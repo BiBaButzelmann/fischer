@@ -1,4 +1,3 @@
-
 import { ParticipantWithName } from "@/db/types/participant";
 
 export function getParticipantFullName(participant: ParticipantWithName) {

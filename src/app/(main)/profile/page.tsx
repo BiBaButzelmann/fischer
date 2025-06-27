@@ -1,12 +1,11 @@
 import { auth } from "@/auth/utils";
 import { db } from "@/db/client";
+import { getProfileByUserId } from "@/db/repositories/profile";
 import invariant from "tiny-invariant";
 
 export default async function Page() {
   const session = await auth();
-  const profile = await db.query.profile.findFirst({
-    where: (profile, { eq }) => eq(profile.userId, session.user.id),
-  });
+  const profile = await getProfileByUserId(session.user.id);
   invariant(profile, "Profile not found");
 
   return (

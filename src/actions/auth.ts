@@ -9,6 +9,7 @@ import { participant } from "@/db/schema/participant";
 import { profile } from "@/db/schema/profile";
 import { eq } from "drizzle-orm";
 import { auth } from "@/auth";
+import { getActiveTournament } from "@/db/repositories/tournament";
 
 export type LoginResponse = { error: string };
 
@@ -25,10 +26,7 @@ export async function login(data: z.infer<typeof loginFormSchema>) {
       error: "Ungültige E-Mail-Adresse oder Passwort",
     };
   }
-  const tournament = await db.query.tournament.findFirst({
-    orderBy: (tournament, { desc }) => [desc(tournament.startDate)],
-  });
-
+  const tournament = await getActiveTournament();
   if (!tournament) {
     redirect("/welcome");
   }
@@ -45,7 +43,6 @@ export async function login(data: z.infer<typeof loginFormSchema>) {
     }
     redirect("/participate");
   }
-  // tournament is active
   redirect("/home");
 }
 
