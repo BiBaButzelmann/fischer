@@ -15,7 +15,7 @@ import { Input } from "../ui/input";
 import { Button } from "../ui/button";
 import { useState, useTransition } from "react";
 import { Mail, Lock } from "lucide-react";
-import { LoginResponse } from "./actions";
+import { LoginResponse } from "@/actions/auth";
 
 export const loginFormSchema = z.object({
   email: z.string().email("Ungültige E-Mail-Adresse"),

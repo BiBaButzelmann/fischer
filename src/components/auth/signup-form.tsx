@@ -14,7 +14,7 @@ import { Input } from "../ui/input";
 import { Button } from "../ui/button";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { type SignupResponse } from "./actions";
+import { type SignupResponse } from "@/actions/auth";
 import { Mail, User, Lock } from "lucide-react";
 
 export const signupFormSchema = z

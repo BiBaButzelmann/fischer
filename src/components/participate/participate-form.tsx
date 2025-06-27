@@ -29,7 +29,7 @@ import Link from "next/link";
 import { Button } from "../ui/button";
 import { registerFormSchema } from "./schema";
 import { MatchDay } from "@/db/types/group";
-import { createTournamentParticipant } from "./actions";
+import { createTournamentParticipant } from "@/actions/participant";
 import { redirect } from "next/navigation";
 
 type Props = {

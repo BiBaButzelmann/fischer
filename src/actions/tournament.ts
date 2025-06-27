@@ -5,7 +5,7 @@ import { tournament } from "@/db/schema/tournament";
 import {
   CreateTournamentFormData,
   createTournamentFormDataSchema,
-} from "../schema";
+} from "@/components/admin/tournament/schema";
 import { auth } from "@/auth";
 import { headers } from "next/headers";
 import { revalidatePath } from "next/cache";

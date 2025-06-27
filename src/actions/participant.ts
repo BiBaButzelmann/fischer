@@ -1,7 +1,7 @@
 "use server";
 
 import z from "zod";
-import { registerFormSchema } from "./schema";
+import { registerFormSchema } from "@/components/participate/schema";
 import { db } from "@/db/client";
 import invariant from "tiny-invariant";
 import { profile } from "@/db/schema/profile";

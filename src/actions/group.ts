@@ -9,7 +9,7 @@ import { ParticipantWithName } from "@/db/types/participant";
 import { and, eq } from "drizzle-orm";
 import { revalidatePath } from "next/cache";
 import { headers } from "next/headers";
-import { GridGroup } from "../types";
+import { GridGroup } from "@/components/admin/tournament/types";
 import { group } from "@/db/schema/group";
 
 // TODO: find out why revalidatePath doesn't work here

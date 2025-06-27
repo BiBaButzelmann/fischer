@@ -2,7 +2,7 @@
 
 import { useTransition } from "react";
 import { Button } from "@/components/ui/button";
-import { savePGN } from "./actions/save-pgn";
+import { savePGN } from "@/actions/pgn";
 
 export default function SavePGNButton({
   newValue,

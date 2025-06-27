@@ -1,10 +1,10 @@
 "use server";
 
 import z from "zod";
-import { loginFormSchema } from "./login-form";
+import { loginFormSchema } from "@/components/auth/login-form";
 import { db } from "@/db/client";
 import { redirect } from "next/navigation";
-import { signupFormSchema } from "./signup-form";
+import { signupFormSchema } from "@/components/auth/signup-form";
 import { participant } from "@/db/schema/participant";
 import { profile } from "@/db/schema/profile";
 import { eq } from "drizzle-orm";

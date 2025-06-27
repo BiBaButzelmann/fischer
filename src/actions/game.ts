@@ -30,7 +30,7 @@ function firstMatchDate(start: Date, weekday: keyof typeof weekdayToIndex) {
   return d;
 }
 
-/** Berger “circle” algorithm – works for 3 … 16 players (and beyond)  */
+/** Berger "circle" algorithm – works for 3 … 16 players (and beyond)  */
 function roundRobinPairs(n: number): Array<Array<[number, number]>> {
   const odd = n % 2 === 1;
   const players: number[] = Array.from(
