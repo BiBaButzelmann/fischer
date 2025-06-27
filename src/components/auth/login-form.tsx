@@ -15,18 +15,14 @@ import { Input } from "../ui/input";
 import { Button } from "../ui/button";
 import { useState, useTransition } from "react";
 import { Mail, Lock } from "lucide-react";
-import { LoginResponse } from "@/actions/auth";
+import { login } from "@/actions/auth";
 
 export const loginFormSchema = z.object({
   email: z.string().email("Ungültige E-Mail-Adresse"),
   password: z.string().min(6, "Passwort muss mindestens 6 Zeichen lang sein"),
 });
 
-export function LoginForm({
-  onSubmit,
-}: {
-  onSubmit: (data: z.infer<typeof loginFormSchema>) => Promise<LoginResponse>;
-}) {
+export function LoginForm() {
   const [isPending, startTransition] = useTransition();
   const form = useForm<z.infer<typeof loginFormSchema>>({
     resolver: zodResolver(loginFormSchema),
@@ -38,7 +34,7 @@ export function LoginForm({
   const [error, setError] = useState("");
   const handleSubmit = (data: z.infer<typeof loginFormSchema>) => {
     startTransition(async () => {
-      const result = await onSubmit(data);
+      const result = await login(data);
       //TODO: maybe redirect client side
       setError(result.error);
     });
