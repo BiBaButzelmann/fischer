@@ -1,7 +1,6 @@
 import { ParticipantWithName } from "@/db/types/participant";
 import { GroupsGrid } from "./groups-grid";
 import { GroupWithParticipants } from "@/db/types/group";
-import { db } from "@/db/client";
 import { GridGroup } from "./types";
 
 // TODO: remove this component, put logic into EditGroups

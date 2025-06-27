@@ -14,7 +14,6 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import { Input } from "../ui/input";
 import { Button } from "../ui/button";
 import { useState, useTransition } from "react";
-import { Label } from "../ui/label";
 import { Mail, Lock } from "lucide-react";
 import { LoginResponse } from "./actions";
 

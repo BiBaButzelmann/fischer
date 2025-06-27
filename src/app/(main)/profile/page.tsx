@@ -1,5 +1,4 @@
 import { auth } from "@/auth/utils";
-import { Profile } from "@/components/profile/profile";
 import { db } from "@/db/client";
 import invariant from "tiny-invariant";
 
@@ -15,7 +14,7 @@ export default async function Page() {
       <div className="mb-8">
         <h1 className="text-3xl font-bold text-gray-900 mb-2">Profil</h1>
       </div>
-      <Profile profile={profile} />
+      Profil
     </div>
   );
 }
