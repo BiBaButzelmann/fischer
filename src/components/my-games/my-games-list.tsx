@@ -7,8 +7,8 @@ import {
   TableHeader,
   TableRow,
 } from "../ui/table";
-import { getParticipantFullName } from "@/utils/participant";
-import { getDatetimeString } from "@/utils/date";
+import { getParticipantFullName } from "@/lib/participant";
+import { getDatetimeString } from "@/lib/date";
 
 export function MyGamesList({ games }: { games: GameWithParticipants[] }) {
   return (

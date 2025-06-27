@@ -1,7 +1,7 @@
 import { db } from "@/db/client";
 import ChessGameContainer from "@/components/chessboard/chess-game-container";
 import z from "zod";
-import { getParticipantFullName } from "@/utils/participant";
+import { getParticipantFullName } from "@/lib/participant";
 import { ParticipantWithName } from "@/db/types/participant";
 
 const INITIAL_PGN = `[\nEvent "?"\nSite "?"\nDate "????.??.??"\nRound "?"\nWhite "?"\nBlack "?"\nResult "*"\n]\n\n*`;
