@@ -46,7 +46,7 @@ export function ParticipateForm({ tournamentId, profile }: Props) {
       email: profile?.email || "",
       phoneNumber: profile?.phoneNumber || "",
 
-      chessClub: "",
+      chessClub: "Hamburger Schachklub von 1830 e.V.",
       dwzRating: undefined,
       fideRating: undefined,
       fideId: "",
@@ -123,6 +123,10 @@ export function ParticipateForm({ tournamentId, profile }: Props) {
             render={({ field }) => (
               <FormItem>
                 <FormLabel required>Telefonnummer</FormLabel>
+                <FormDescription>
+                  Die Telefonnummer wird benötigt, um im Falle einer
+                  Partieverlegung erreichbar zu sein.
+                </FormDescription>
                 <FormControl>
                   <Input icon={Phone} id="phoneNumber" required {...field} />
                 </FormControl>

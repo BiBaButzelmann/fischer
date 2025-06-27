@@ -20,7 +20,7 @@ import { LoginResponse } from "./actions";
 
 export const loginFormSchema = z.object({
   email: z.string().email("Ungültige E-Mail-Adresse"),
-  password: z.string().min(6, "Passwort muss mindestens 6 Zeichen lang sein"),
+  password: z.string(),
 });
 
 export function LoginForm({

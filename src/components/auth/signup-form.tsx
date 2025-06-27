@@ -22,7 +22,7 @@ export const signupFormSchema = z
     firstName: z.string().min(1, "Vorname ist erforderlich"),
     lastName: z.string().min(1, "Nachname ist erforderlich"),
     email: z.string().email("Ungültige E-Mail-Adresse"),
-    password: z.string().min(6, "Passwort muss mindestens 6 Zeichen lang sein"),
+    password: z.string().min(1),
     confirmPassword: z.string(),
   })
   .refine((data) => data.password === data.confirmPassword, {
@@ -134,7 +134,7 @@ export function SignupForm({
                 <Input
                   id="password"
                   type="password"
-                  placeholder="Mindestens 6 Zeichen"
+                  placeholder="Passwort eingeben"
                   className="pl-10"
                   required
                   icon={Lock}

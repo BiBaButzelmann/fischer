@@ -13,6 +13,7 @@ export const auth = betterAuth({
     provider: "pg", // or "mysql", "sqlite"
   }),
   emailAndPassword: {
+    minPasswordLength: 1,
     enabled: true,
     autoSignIn: true,
     requireEmailVerification: false,

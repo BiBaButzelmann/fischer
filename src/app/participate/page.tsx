@@ -23,7 +23,7 @@ export default async function RegisterPage() {
     where: (tournament, { eq }) => eq(tournament.stage, "registration"),
   });
   if (activeTournament == null) {
-    redirect("/welcome");
+    redirect("/willkommen");
   }
 
   const currentProfile = await db.query.profile.findFirst({
@@ -40,10 +40,10 @@ export default async function RegisterPage() {
   }
 
   return (
-    <div className="w-full max-w-4xl px-4 py-8">
+    <div className="w-full max-w-4xl px-4 py-8 mx-auto">
       <div className="mb-6">
         <Button variant="ghost" asChild>
-          <Link href="/welcome" className="flex items-center gap-2">
+          <Link href="/willkommen" className="flex items-center gap-2">
             <ArrowLeft className="h-4 w-4" />
             Zurück zur Startseite
           </Link>
@@ -60,7 +60,7 @@ export default async function RegisterPage() {
             Vervollständigen Sie Ihre Anmeldung für das HSK Klubturnier
           </CardDescription>
         </CardHeader>
-        <CardContent>
+        <CardContent className="mt-3">
           <ParticipateForm
             tournamentId={activeTournament.id}
             profile={currentProfile}
