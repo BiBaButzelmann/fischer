@@ -222,6 +222,9 @@ export function ParticipateForm({ tournamentId, profile }: Props) {
                     <SelectTrigger>
                       <SelectValue placeholder="Wählen Sie einen Spieltag" />
                     </SelectTrigger>
+                    <FormDescription>
+                      Die A-Klasse spielt nur an Freitagen
+                    </FormDescription>
                     <SelectContent>
                       <SelectItem value="tuesday">Dienstag</SelectItem>
                       <SelectItem value="thursday">Donnerstag</SelectItem>
@@ -230,9 +233,6 @@ export function ParticipateForm({ tournamentId, profile }: Props) {
                   </Select>
                 </FormControl>
                 <FormMessage />
-                <FormDescription>
-                  A-Klasse nur Fr., B-Klasse nur Di. und Fr.
-                </FormDescription>
               </FormItem>
             )}
           />

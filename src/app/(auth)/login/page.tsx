@@ -13,7 +13,7 @@ import Link from "next/link";
 
 export default async function Page() {
   return (
-    <div className="w-full max-w-md px-4 py-8">
+    <div className="w-full max-w-md px-4 py-8 mx-auto">
       {/* Back Button */}
       <div className="mb-6">
         <Button variant="ghost" asChild>
