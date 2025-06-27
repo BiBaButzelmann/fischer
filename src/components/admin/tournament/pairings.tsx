@@ -5,7 +5,7 @@ import { Group, GroupWithGames } from "@/db/types/group";
 import { useTransition } from "react";
 import { scheduleGames } from "./actions/games";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Game, GameWithParticipants } from "@/db/types/game";
+import { GameWithParticipants } from "@/db/types/game";
 
 export function Pairings({ groups }: { groups: GroupWithGames[] }) {
   const [isPending, startTransition] = useTransition();
@@ -33,11 +33,11 @@ export function Pairings({ groups }: { groups: GroupWithGames[] }) {
     <div className="flex flex-col gap-4">
       {groupedGames.map(({ group, gamesByRound }) => (
         <GroupCard name={group.groupName} key={group.id}>
-          {Array.from(gamesByRound.entries()).map(([round, games], i) => (
+          {Array.from(gamesByRound.entries()).map(([round, games]) => (
             <div key={group.id + "-" + round} className="ml-4 mt-1">
               <p className="font-semibold">Runde {round}</p>
               {games.map((game) => (
-                <div className="flex items-center gap-2">
+                <div key={game.id} className="flex items-center gap-2">
                   <span className="font-semibold">{game.boardNumber}</span>
                   <span>
                     {game.scheduled.toLocaleString("de-DE", {

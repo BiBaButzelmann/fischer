@@ -167,11 +167,6 @@ export function UnassignedContainer({
     },
   });
 
-  const participantIds = useMemo(
-    () => participants.map((p) => p.id),
-    [participants],
-  );
-
   return (
     <Card>
       <CardHeader>
@@ -284,7 +279,7 @@ function useDragAndDrop({
 
     // Handle moving an item to a new container
     setGroups((prevGroups) => {
-      let newGroups = [...prevGroups];
+      const newGroups = [...prevGroups];
       let newUnassigned = [...unassignedParticipants];
       const participant = active.data.current?.participant;
 

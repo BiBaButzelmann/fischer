@@ -18,6 +18,8 @@ const Collapsible = React.forwardRef<
   />
 ));
 
+Collapsible.displayName = CollapsiblePrimitive.Root.displayName;
+
 const CollapsibleTrigger = CollapsiblePrimitive.CollapsibleTrigger;
 
 const CollapsibleContent = CollapsiblePrimitive.CollapsibleContent;
