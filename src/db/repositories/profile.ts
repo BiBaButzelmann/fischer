@@ -14,5 +14,5 @@ export async function getProfileByUserRole(role: "admin" | "user") {
     .select(getTableColumns(profile))
     .from(profile)
     .leftJoin(user, eq(profile.userId, user.id))
-    .where(eq(user.role, "admin"));
+    .where(eq(user.role, role));
 }

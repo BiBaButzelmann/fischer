@@ -1,9 +1,9 @@
 "use client";
 
 import { useTransition } from "react";
-import { rescheduleGames } from "./actions/games";
 import { Button } from "@/components/ui/button";
 import { RotateCw } from "lucide-react";
+import { rescheduleGames } from "@/actions/game";
 
 export function GeneratePairings({ tournamentId }: { tournamentId: number }) {
   const [isPending, startTransition] = useTransition();

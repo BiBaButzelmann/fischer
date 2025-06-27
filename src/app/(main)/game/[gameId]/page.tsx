@@ -1,4 +1,3 @@
-import { db } from "@/db/client";
 import ChessGameContainer from "@/components/chessboard/chess-game-container";
 import z from "zod";
 import { getParticipantFullName } from "@/lib/participant";
