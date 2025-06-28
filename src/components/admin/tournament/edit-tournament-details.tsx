@@ -1,6 +1,6 @@
 "use client";
 
-import { useForm } from "react-hook-form";
+import { Controller, useForm } from "react-hook-form";
 import { Input } from "@/components/ui/input";
 import { Switch } from "@/components/ui/switch";
 import {
@@ -27,6 +27,7 @@ import {
 import { useTransition } from "react";
 import { createTournament } from "@/actions/tournament";
 import { Button } from "@/components/ui/button";
+import { EditTournamentWeeks } from "./edit-tournament-weeks/edit-tournament-weeks";
 
 type Props = {
   profiles: Profile[];
@@ -47,6 +48,8 @@ export default function EditTournamentDetails({ profiles }: Props) {
       allClocksDigital: true,
       phone: "040 20981411",
       email: "klubturnier@hsk1830.de",
+
+      selectedCalendarWeeks: [],
     },
   });
 
@@ -307,6 +310,24 @@ export default function EditTournamentDetails({ profiles }: Props) {
               )}
             />
           </div>
+
+          {/* Teil 3: Wochen */}
+          <span className="inline-block text-xl font-semibold text-gray-800">
+            Spielwochen
+          </span>
+          <div>
+            <Controller
+              control={form.control}
+              name="selectedCalendarWeeks"
+              render={({ field }) => (
+                <EditTournamentWeeks
+                  weeks={field.value}
+                  onChange={field.onChange}
+                />
+              )}
+            />
+          </div>
+
           <Button type="submit" disabled={loading}>
             Speichern
           </Button>

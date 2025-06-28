@@ -20,6 +20,26 @@ export const createTournamentFormDataSchema = z.object({
 
   // Organisatorauswahl
   organizerProfileId: z.string().min(1, "Organisator ist erforderlich"),
+
+  // Spielwochen
+  selectedCalendarWeeks: z
+    .array(
+      z.object({
+        index: z.number(),
+        status: z.enum(["regular", "catch-up"]),
+        weekNumber: z.number(),
+        tuesday: z.object({
+          refereeNeeded: z.boolean(),
+        }),
+        thursday: z.object({
+          refereeNeeded: z.boolean(),
+        }),
+        friday: z.object({
+          refereeNeeded: z.boolean(),
+        }),
+      }),
+    )
+    .min(1, "Mindestens eine Spielwoche ist erforderlich"),
 });
 
 export type CreateTournamentFormData = z.infer<
