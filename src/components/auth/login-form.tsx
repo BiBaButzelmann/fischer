@@ -19,7 +19,7 @@ import { LoginResponse } from "./actions";
 
 export const loginFormSchema = z.object({
   email: z.string().email("Ungültige E-Mail-Adresse"),
-  password: z.string(),
+  password: z.string().min(6, "Passwort muss mindestens 6 Zeichen lang sein"),
 });
 
 export function LoginForm({
@@ -80,7 +80,7 @@ export function LoginForm({
                 <Input
                   id="password"
                   type="password"
-                  placeholder="Ihr Passwort"
+                  placeholder="Passwort eingeben"
                   required
                   icon={Lock}
                   {...field}
