@@ -14,7 +14,7 @@ import { Input } from "../ui/input";
 import { Button } from "../ui/button";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { type SignupResponse } from "./actions";
+import { signup } from "@/actions/auth";
 import { Mail, User, Lock } from "lucide-react";
 
 export const signupFormSchema = z
@@ -30,11 +30,7 @@ export const signupFormSchema = z
     path: ["confirmPassword"],
   });
 
-export function SignupForm({
-  onSubmit,
-}: {
-  onSubmit: (data: z.infer<typeof signupFormSchema>) => Promise<SignupResponse>;
-}) {
+export function SignupForm() {
   const [error, setError] = useState("");
   const [isPending, startTransition] = useTransition();
 
@@ -51,7 +47,7 @@ export function SignupForm({
 
   const handleSubmit = (data: z.infer<typeof signupFormSchema>) => {
     startTransition(async () => {
-      const result = await onSubmit(data);
+      const result = await signup(data);
       if (result?.error) {
         setError(result.error);
       } else {

@@ -9,11 +9,9 @@ import {
   CollapsibleTrigger,
 } from "@/components/ui/collapsible";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { db } from "@/db/client";
-import { user } from "@/db/schema/auth";
-import { profile } from "@/db/schema/profile";
-import { eq, getTableColumns } from "drizzle-orm";
 import { ChevronDownIcon } from "lucide-react";
+import { getProfileByUserRole } from "@/db/repositories/profile";
+import { getActiveTournamentWithGroups } from "@/db/repositories/tournament";
 
 export default async function Page() {
   await auth();
@@ -43,19 +41,8 @@ export default async function Page() {
 }
 
 async function ManageTournament() {
-  const activeTournament = await db.query.tournament.findFirst({
-    where: (tournament, { or, eq }) =>
-      or(eq(tournament.stage, "registration"), eq(tournament.stage, "running")),
-    with: {
-      groups: true,
-    },
-  });
-
-  const adminProfiles = await db
-    .select(getTableColumns(profile))
-    .from(profile)
-    .leftJoin(user, eq(profile.userId, user.id))
-    .where(eq(user.role, "admin"));
+  const adminProfiles = await getProfileByUserRole("admin");
+  const activeTournament = await getActiveTournamentWithGroups();
 
   const openCollapsible =
     activeTournament == null

@@ -8,10 +8,9 @@ import {
   CardHeader,
   CardTitle,
 } from "@/components/ui/card";
-import { db } from "@/db/client";
-import { participant } from "@/db/schema/participant";
-import { profile } from "@/db/schema/profile";
-import { eq } from "drizzle-orm";
+import { getParticipantByProfileId } from "@/db/repositories/participant";
+import { getProfileByUserId } from "@/db/repositories/profile";
+import { getActiveTournament } from "@/db/repositories/tournament";
 import { ArrowLeft, Trophy } from "lucide-react";
 import Link from "next/link";
 import { redirect } from "next/navigation";
@@ -19,22 +18,15 @@ import { redirect } from "next/navigation";
 export default async function RegisterPage() {
   const session = await auth();
 
-  const activeTournament = await db.query.tournament.findFirst({
-    where: (tournament, { eq }) => eq(tournament.stage, "registration"),
-  });
-  if (activeTournament == null) {
+  const activeTournament = await getActiveTournament();
+  if (activeTournament?.stage !== "registration") {
     redirect("/willkommen");
   }
 
-  const currentProfile = await db.query.profile.findFirst({
-    where: eq(profile.userId, session.user.id),
-  });
-
+  const currentProfile = await getProfileByUserId(session.user.id);
   if (currentProfile != null) {
-    const existingParticipant = await db.query.participant.findFirst({
-      where: eq(participant.profileId, currentProfile.id),
-    });
-    if (existingParticipant != null) {
+    const p = await getParticipantByProfileId(currentProfile.id);
+    if (p != null) {
       redirect("/home");
     }
   }

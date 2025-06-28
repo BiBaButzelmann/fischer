@@ -1,8 +1,8 @@
-import { db } from "@/db/client";
 import ChessGameContainer from "@/components/chessboard/chess-game-container";
 import z from "zod";
-import { getParticipantFullName } from "@/utils/participant";
+import { getParticipantFullName } from "@/lib/participant";
 import { ParticipantWithName } from "@/db/types/participant";
+import { getGameById } from "@/db/repositories/game";
 
 const INITIAL_PGN = `[\nEvent "?"\nSite "?"\nDate "????.??.??"\nRound "?"\nWhite "?"\nBlack "?"\nResult "*"\n]\n\n*`;
 
@@ -18,33 +18,7 @@ export default async function GamePage({ params }: PageProps) {
     return <p className="p-4 text-red-600">Invalid game ID.</p>;
   }
 
-  const game = await db.query.game.findFirst({
-    where: (game, { eq }) => eq(game.id, parsedGameIdResult.data),
-    with: {
-      whiteParticipant: {
-        with: {
-          profile: {
-            columns: {
-              firstName: true,
-              lastName: true,
-            },
-          },
-        },
-      },
-      blackParticipant: {
-        with: {
-          profile: {
-            columns: {
-              firstName: true,
-              lastName: true,
-            },
-          },
-        },
-      },
-      pgn: true,
-    },
-  });
-
+  const game = await getGameById(parsedGameIdResult.data);
   if (!game) {
     return <p className="p-4 text-red-600">Game with ID {gameId} not found.</p>;
   }

@@ -1,4 +1,3 @@
-import { login } from "@/components/auth/actions";
 import { LoginForm } from "@/components/auth/login-form";
 import { Button } from "@/components/ui/button";
 import {
@@ -33,7 +32,7 @@ export default async function Page() {
           </CardDescription>
         </CardHeader>
         <CardContent>
-          <LoginForm onSubmit={login}></LoginForm>
+          <LoginForm></LoginForm>
 
           {/* Register Link */}
           <div className="mt-6 text-center">

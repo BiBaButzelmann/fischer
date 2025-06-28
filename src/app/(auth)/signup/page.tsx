@@ -1,4 +1,3 @@
-import { signup } from "@/components/auth/actions";
 import { SignupForm } from "@/components/auth/signup-form";
 import { Button } from "@/components/ui/button";
 import {
@@ -31,7 +30,7 @@ export default async function Page() {
           </CardDescription>
         </CardHeader>
         <CardContent>
-          <SignupForm onSubmit={signup} />
+          <SignupForm />
           <div className="mt-6 text-center">
             <p className="text-muted-foreground">
               Bereits ein Konto?{" "}

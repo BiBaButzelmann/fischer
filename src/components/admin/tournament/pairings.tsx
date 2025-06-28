@@ -3,7 +3,7 @@
 import { Button } from "@/components/ui/button";
 import { Group, GroupWithGames } from "@/db/types/group";
 import { useTransition } from "react";
-import { scheduleGames } from "./actions/games";
+import { scheduleGames } from "@/actions/game";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { GameWithParticipants } from "@/db/types/game";
 
