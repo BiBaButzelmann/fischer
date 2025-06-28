@@ -5,7 +5,6 @@ import { admin as adminPlugin } from "better-auth/plugins";
 import { ac, admin, user } from "./permissions";
 import { nextCookies } from "better-auth/next-js";
 // TODO: implement email sending
-// import { sendEmail } from './email';
 
 export const auth = betterAuth({
   database: drizzleAdapter(db, {
@@ -19,15 +18,6 @@ export const auth = betterAuth({
     enabled: true,
     autoSignIn: true,
     requireEmailVerification: false,
-    /*
-    sendResetPassword: async ({ user, url, token }, request) => {
-            await sendEmail({
-                to: user.email,
-                subject: 'Reset your password',
-                text: `Click the link to reset your password: ${url}`
-            })
-        }
-            */
   },
   plugins: [
     nextCookies(),
