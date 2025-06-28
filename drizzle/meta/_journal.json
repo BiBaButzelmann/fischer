@@ -232,6 +232,13 @@
       "when": 1750015178800,
       "tag": "0032_mute_black_bird",
       "breakpoints": true
+    },
+    {
+      "idx": 33,
+      "version": "7",
+      "when": 1751129407826,
+      "tag": "0033_smiling_red_hulk",
+      "breakpoints": true
     }
   ]
 }
