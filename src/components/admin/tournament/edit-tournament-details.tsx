@@ -135,7 +135,7 @@ export default function EditTournamentDetails({ profiles }: Props) {
               )}
             />
 
-            <FormField
+            <Controller
               control={form.control}
               name="startDate"
               render={({ field }) => (
@@ -149,7 +149,7 @@ export default function EditTournamentDetails({ profiles }: Props) {
               )}
             />
 
-            <FormField
+            <Controller
               control={form.control}
               name="endDate"
               render={({ field }) => (
