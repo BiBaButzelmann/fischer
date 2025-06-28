@@ -13,11 +13,11 @@ import Link from "next/link";
 
 export default async function Page() {
   return (
-    <div className="w-full max-w-md px-4 py-8">
+    <div className="w-full max-w-md px-4 py-8 mx-auto">
       {/* Back Button */}
       <div className="mb-6">
         <Button variant="ghost" asChild>
-          <Link href="/welcome" className="flex items-center gap-2">
+          <Link href="/willkommen" className="flex items-center gap-2">
             <ArrowLeft className="h-4 w-4" />
             Zurück zur Startseite
           </Link>

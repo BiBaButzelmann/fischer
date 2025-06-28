@@ -80,7 +80,7 @@ export function LoginForm({
                 <Input
                   id="password"
                   type="password"
-                  placeholder="Ihr Passwort"
+                  placeholder="Passwort eingeben"
                   required
                   icon={Lock}
                   {...field}
