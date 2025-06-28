@@ -1,5 +1,4 @@
 import { auth } from "@/auth/utils";
-import { db } from "@/db/client";
 import { getProfileByUserId } from "@/db/repositories/profile";
 import { getLatestTournament } from "@/db/repositories/tournament";
 import React from "react";
