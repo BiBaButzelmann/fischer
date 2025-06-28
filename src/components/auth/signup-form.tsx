@@ -130,7 +130,7 @@ export function SignupForm() {
                 <Input
                   id="password"
                   type="password"
-                  placeholder="Mindestens 6 Zeichen"
+                  placeholder="Passwort muss mindestens 6 Zeichen lang sein"
                   className="pl-10"
                   required
                   icon={Lock}

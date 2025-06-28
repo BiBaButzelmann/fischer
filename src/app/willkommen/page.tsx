@@ -12,19 +12,14 @@ import Link from "next/link";
 
 export default async function Page() {
   return (
-    <div className="min-h-screen flex flex-col">
-      {/* Hero Section */}
-      <main className="flex-1 container mx-auto px-4 py-16">
-        {/* Hero Section */}
+    <div className="min-h-screen flex justify-center pt-[10vh]">
+      <main className="w-full max-w-screen-xl px-4 pb-5">
         <section className="text-center mb-16 max-w-3xl mx-auto">
           <h2 className="text-3xl md:text-4xl font-bold mb-6">
             Willkommen beim HSK Klubturnier
           </h2>
         </section>
-
-        {/* Options Section */}
         <section className="grid gap-8 md:grid-cols-3 max-w-5xl mx-auto">
-          {/* Register Card */}
           <Card className="shadow-md h-full flex flex-col">
             <CardHeader>
               <div className="w-12 h-12 rounded-full bg-green-100 flex items-center justify-center mb-4">
@@ -98,7 +93,7 @@ export default async function Page() {
             <CardFooter className="mt-auto">
               <Button className="w-full text-lg py-6" asChild variant="default">
                 <Link href="/zuschauen">
-                  Als Zuschauer fortfahren{" "}
+                  Zuschauen
                   <ChevronRight className="ml-2 h-5 w-5" />
                 </Link>
               </Button>

@@ -28,7 +28,7 @@ export async function login(data: z.infer<typeof loginFormSchema>) {
   }
   const tournament = await getActiveTournament();
   if (!tournament) {
-    redirect("/welcome");
+    redirect("/willkommen");
   }
   if (tournament.stage === "registration") {
     // tournament is not started yet -> participation form is open
