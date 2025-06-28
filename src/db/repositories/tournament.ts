@@ -17,3 +17,9 @@ export async function getActiveTournamentWithGroups() {
     },
   });
 }
+
+export async function getLatestTournament() {
+  return await db.query.tournament.findFirst({
+    orderBy: (tournament, { desc }) => [desc(tournament.createdAt)],
+  });
+}
