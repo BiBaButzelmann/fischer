@@ -9,6 +9,7 @@ import {
 import { auth } from "@/auth";
 import { headers } from "next/headers";
 import { revalidatePath } from "next/cache";
+import { tournamentWeek } from "@/db/schema/tournamentWeek";
 
 // TODO: authentication / authorization
 export async function createTournament(formData: CreateTournamentFormData) {
@@ -38,8 +39,24 @@ export async function createTournament(formData: CreateTournamentFormData) {
     type: data.tournamentType,
     organizerProfileId: parseInt(data.organizerProfileId),
   };
+  const inserted = await db
+    .insert(tournament)
+    .values(newTournament)
+    .returning({ id: tournament.id });
+  const insertedTournamentId = inserted[0].id;
 
-  await db.insert(tournament).values(newTournament);
+  const newWeeks = data.selectedCalendarWeeks.map(
+    (week) =>
+      ({
+        tournamentId: insertedTournamentId,
+        status: week.status,
+        weekNumber: week.weekNumber,
+        refereeNeededTuesday: week.tuesday.refereeNeeded,
+        refereeNeededThursday: week.thursday.refereeNeeded,
+        refereeNeededFriday: week.friday.refereeNeeded,
+      }) satisfies typeof tournamentWeek.$inferInsert,
+  );
+  await db.insert(tournamentWeek).values(newWeeks);
 
   revalidatePath("/admin/tournament");
 }
