@@ -1,9 +1,7 @@
 "use client";
 
-import { useState } from "react";
 import { Accordion } from "@/components/ui/accordion";
 import { Button } from "@/components/ui/button";
-import type { Role, RoleInfo } from "@/lib/types";
 import { User, Shield, Wrench, ClipboardEdit, Gavel } from "lucide-react";
 import { RoleCard } from "./role-card";
 import { ParticipateForm } from "./forms/participate-form";
@@ -11,60 +9,23 @@ import { RefereeForm } from "./forms/referee-form";
 import { MatchEnteringForm } from "./forms/match-entering-form";
 import { SetupHelperForm } from "./forms/setup-helper-form";
 import { JurorForm } from "./forms/juror-form";
+import { Role } from "@/db/types/role";
 
-const rolesData: RoleInfo[] = [
-  {
-    id: "spieler",
-    name: "Spieler",
-    description: "Zum Klubturnier anmelden",
-    icon: User,
-  },
-  {
-    id: "schiedsrichter",
-    name: "Schiedsrichter",
-    description: "Als Schiedsrichter anmelden",
-    icon: Shield,
-  },
-  {
-    id: "aufbauhelfer",
-    name: "Aufbauhelfer",
-    description: "Als Aufbauhelfer anmelden",
-    icon: Wrench,
-  },
-  {
-    id: "eingabehelfer",
-    name: "Eingabehelfer",
-    description: "Als Eingabehelfer anmelden",
-    icon: ClipboardEdit,
-  },
-  {
-    id: "turniergericht",
-    name: "Turniergericht",
-    description: "Am Turniergericht teilnehmen",
-    icon: Gavel,
-  },
-];
-
-export function RolesManager() {
-  const [submittedData, setSubmittedData] = useState<Record<string, any>>({});
-  const [accordionValue, setAccordionValue] = useState<string | undefined>();
-
-  const isAnyRoleCompleted = Object.keys(submittedData).length > 0;
-
+export function RolesManager({ roles }: { roles: Role[] }) {
   return (
     <div className="space-y-6">
       <Accordion
         type="single"
         collapsible
-        value={accordionValue}
-        onValueChange={setAccordionValue}
+        // value={accordionValue}
+        // onValueChange={setAccordionValue}
         className="w-full"
       >
         <RoleCard
           accordionId="participant"
           name="Spieler"
           description="Zum Klubturnier anmelden"
-          completed={false}
+          completed={roles.includes("participant")}
           icon={User}
         >
           {/* TODO: dynamic tournament id */}
@@ -74,7 +35,7 @@ export function RolesManager() {
           accordionId="referee"
           name="Schiedsrichter"
           description="Als Schiedsrichter anmelden"
-          completed={false}
+          completed={roles.includes("referee")}
           icon={Shield}
         >
           <RefereeForm tournamentId={1} />
@@ -83,7 +44,7 @@ export function RolesManager() {
           accordionId="matchEnteringHelper"
           name="Eingabehelfer"
           description="Als Eingabehelfer anmelden"
-          completed={false}
+          completed={roles.includes("matchEnteringHelper")}
           icon={ClipboardEdit}
         >
           <MatchEnteringForm tournamentId={1} />
@@ -92,29 +53,32 @@ export function RolesManager() {
           accordionId="setupHelper"
           name="Aufbauhelfer"
           description="Als Aufbauhelfer anmelden"
-          completed={false}
+          completed={roles.includes("setupHelper")}
           icon={Wrench}
         >
           <SetupHelperForm tournamentId={1} />
         </RoleCard>
         <RoleCard
-          accordionId="jury"
+          accordionId="juror"
           name="Turniergericht"
           description="Am Turniergericht teilnehmen"
-          completed={false}
+          completed={roles.includes("juror")}
           icon={Gavel}
         >
           <JurorForm tournamentId={1} />
         </RoleCard>
       </Accordion>
-
-      {isAnyRoleCompleted && (
+      {roles.length > 0 ? (
         <div className="flex justify-center pt-6">
           <Button size="lg" className="w-full sm:w-auto">
             Rollen-Auswahl abschließen
           </Button>
         </div>
-      )}
+      ) : null}
     </div>
   );
+}
+
+function getAccordionValue(roles: Role[]) {
+  return "participant";
 }
