@@ -3,9 +3,16 @@ import { participant } from "../schema/participant";
 import { profile } from "../schema/profile";
 import { eq, getTableColumns } from "drizzle-orm";
 
-export async function getParticipantByProfileId(profileId: number) {
+export async function getParticipantByProfileIdAndTournamentId(
+  profileId: number,
+  tournamentId: number,
+) {
   return await db.query.participant.findFirst({
-    where: (participant, { eq }) => eq(participant.profileId, profileId),
+    where: (participant, { eq, and }) =>
+      and(
+        eq(participant.profileId, profileId),
+        eq(participant.tournamentId, tournamentId),
+      ),
   });
 }
 

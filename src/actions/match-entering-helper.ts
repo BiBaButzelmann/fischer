@@ -21,9 +21,17 @@ export async function createMatchEnteringHelper(
   const currentProfile = await getProfileByUserId(session.user.id);
   invariant(currentProfile, "Profile not found");
 
-  await db.insert(matchEnteringHelper).values({
-    profileId: currentProfile.id,
-    tournamentId: tournament.id,
-    numberOfGroupsToEnter: data.numberOfGroupsToEnter,
-  });
+  await db
+    .insert(matchEnteringHelper)
+    .values({
+      profileId: currentProfile.id,
+      tournamentId: tournament.id,
+      numberOfGroupsToEnter: data.numberOfGroupsToEnter,
+    })
+    .onConflictDoUpdate({
+      target: [matchEnteringHelper.tournamentId, matchEnteringHelper.profileId],
+      set: {
+        numberOfGroupsToEnter: data.numberOfGroupsToEnter,
+      },
+    });
 }

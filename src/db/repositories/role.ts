@@ -1,3 +1,5 @@
+"use server";
+
 import { eq, sql } from "drizzle-orm";
 import { db } from "../client";
 import { participant } from "../schema/participant";
@@ -8,17 +10,10 @@ import { matchEnteringHelper } from "../schema/matchEnteringHelper";
 import { setupHelper } from "../schema/setupHelper";
 import { auth } from "@/auth";
 import { headers } from "next/headers";
-
-type Role =
-  | "admin"
-  | "participant"
-  | "referee"
-  | "juror"
-  | "matchEnteringHelper"
-  | "setupHelper";
+import { Role } from "../types/role";
 
 // TODO: should we add admin here?
-export async function getRoleByProfileId(profileId: number): Promise<Role[]> {
+export async function getRolesByProfileId(profileId: number): Promise<Role[]> {
   const participantQuery = db
     .select({ tableName: sql<Role>`'participant'::text`.as("tableName") })
     .from(participant)
