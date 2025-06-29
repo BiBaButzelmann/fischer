@@ -1,11 +1,11 @@
-export default function setupLayout({
+export default function RootLayout({
   children,
 }: Readonly<{
   children: React.ReactNode;
 }>) {
   return (
-    <main className="w-full relative">
-      <div className="px-4 py-4 max-w-4xl mx-auto">{children}</div>
-    </main>
+    <div className="flex flex-grow justify-center items-center">
+      <div className="w-2/3 max-w-4xl">{children}</div>
+    </div>
   );
 }
