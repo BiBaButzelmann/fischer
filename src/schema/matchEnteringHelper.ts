@@ -1,11 +1,7 @@
-import { availableMatchDays } from "@/db/schema/columns.helpers";
 import z from "zod";
 
-export const createSetupHelperFormSchema = z.object({
-  preferredMatchDay: z.enum(availableMatchDays, {
-    errorMap: () => ({ message: "Bevorzugter Spieltag ist erforderlich" }),
-  }),
-  secondaryMatchDays: z
-    .array(z.enum(availableMatchDays))
-    .min(1, "Sekundärer Spieltag ist erforderlich"),
+export const matchEnteringHelperFormSchema = z.object({
+  numberOfGroupsToEnter: z
+    .number()
+    .min(1, "Anzahl der Gruppen muss mindestens 1 sein"),
 });

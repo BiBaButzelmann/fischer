@@ -13,7 +13,7 @@ export const setupHelper = pgTable(
     tournamentId: integer("tournament_id").notNull(),
 
     preferredMatchDay: matchDay("preferred_match_day").notNull(),
-    secondaryMatchDay: matchDay("secondary_match_day").array().notNull(),
+    secondaryMatchDays: matchDay("secondary_match_day").array().notNull(),
   },
   (table) => [unique().on(table.tournamentId, table.profileId)],
 );

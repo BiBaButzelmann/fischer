@@ -2,24 +2,18 @@
 
 import { db } from "@/db/client";
 import { tournament } from "@/db/schema/tournament";
-import { auth } from "@/auth";
-import { headers } from "next/headers";
 import { revalidatePath } from "next/cache";
 import { tournamentWeek } from "@/db/schema/tournamentWeek";
 import { z } from "zod";
 import { createTournamentFormSchema } from "@/schema/tournament";
+import { auth } from "@/auth/utils";
+import invariant from "tiny-invariant";
 
-// TODO: authentication / authorization
 export async function createTournament(
   formData: z.infer<typeof createTournamentFormSchema>,
 ) {
-  const session = await auth.api.getSession({
-    headers: await headers(),
-  });
-
-  if (session?.user.role !== "admin") {
-    throw new Error("Unauthorized");
-  }
+  const session = await auth();
+  invariant(session?.user.role === "admin", "Unauthorized");
 
   const data = createTournamentFormSchema.parse(formData);
 
