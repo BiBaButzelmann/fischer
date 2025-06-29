@@ -16,8 +16,11 @@ export async function createJuror(tournamentId: number) {
   const currentProfile = await getProfileByUserId(session.user.id);
   invariant(currentProfile, "Profile not found");
 
-  await db.insert(juror).values({
-    profileId: currentProfile.id,
-    tournamentId: tournament.id,
-  });
+  await db
+    .insert(juror)
+    .values({
+      profileId: currentProfile.id,
+      tournamentId: tournament.id,
+    })
+    .onConflictDoNothing();
 }

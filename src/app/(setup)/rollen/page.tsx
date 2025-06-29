@@ -1,7 +1,12 @@
 import { auth } from "@/auth/utils";
 import { RolesManager } from "@/components/roles/roles-manager";
+import { getJurorByProfileIdAndTournamentId } from "@/db/repositories/juror";
+import { getMatchEnteringHelperByProfileIdAndTournamentId } from "@/db/repositories/match-entering-helper";
+import { getParticipantByProfileIdAndTournamentId } from "@/db/repositories/participant";
 import { getProfileByUserId } from "@/db/repositories/profile";
+import { getRefereeByProfileIdAndTournamentId } from "@/db/repositories/referee";
 import { getRolesByProfileId } from "@/db/repositories/role";
+import { getSetupHelperByProfileIdAndTournamentId } from "@/db/repositories/setup-helper";
 import { getLatestTournament } from "@/db/repositories/tournament";
 import { redirect } from "next/navigation";
 
@@ -16,7 +21,24 @@ export default async function RolesPage() {
     redirect("/willkommen");
   }
 
-  const roles = await getRolesByProfileId(profile.id);
+  const [participant, referee, matchEnteringHelper, setupHelper, juror] =
+    await Promise.all([
+      getParticipantByProfileIdAndTournamentId(profile.id, tournament.id),
+      getRefereeByProfileIdAndTournamentId(profile.id, tournament.id),
+      getMatchEnteringHelperByProfileIdAndTournamentId(
+        profile.id,
+        tournament.id,
+      ),
+      getSetupHelperByProfileIdAndTournamentId(profile.id, tournament.id),
+      getJurorByProfileIdAndTournamentId(profile.id, tournament.id),
+    ]);
+
+  console.log("participant", participant);
+  console.log("referee", referee);
+  console.log("matchEnteringHelper", matchEnteringHelper);
+  console.log("setupHelper", setupHelper);
+  console.log("juror", juror);
+
   return (
     <div className="space-y-8">
       <header className="text-center">
@@ -28,7 +50,16 @@ export default async function RolesPage() {
           an.
         </p>
       </header>
-      <RolesManager tournamentId={tournament.id} roles={roles} />
+      <RolesManager
+        tournamentId={tournament.id}
+        initialValues={{
+          participant,
+          referee,
+          matchEnteringHelper,
+          setupHelper,
+          juror,
+        }}
+      />
     </div>
   );
 }

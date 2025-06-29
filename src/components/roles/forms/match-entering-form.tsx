@@ -24,17 +24,18 @@ import { useTransition } from "react";
 import { matchEnteringHelperFormSchema } from "@/schema/matchEnteringHelper";
 
 type Props = {
+  initialValues?: z.infer<typeof matchEnteringHelperFormSchema>;
   onSubmit: (
     data: z.infer<typeof matchEnteringHelperFormSchema>,
   ) => Promise<void>;
 };
 
-export function MatchEnteringForm({ onSubmit }: Props) {
+export function MatchEnteringForm({ initialValues, onSubmit }: Props) {
   const [isPending, startTransition] = useTransition();
   const form = useForm<z.infer<typeof matchEnteringHelperFormSchema>>({
     resolver: zodResolver(matchEnteringHelperFormSchema),
     defaultValues: {
-      numberOfGroupsToEnter: 1,
+      numberOfGroupsToEnter: initialValues?.numberOfGroupsToEnter ?? 1,
     },
   });
 

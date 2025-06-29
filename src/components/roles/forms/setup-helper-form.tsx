@@ -25,15 +25,16 @@ import { MatchDaysCheckboxes } from "./matchday-selection";
 import { setupHelperFormSchema } from "@/schema/setupHelper";
 
 type Props = {
+  initialValues?: z.infer<typeof setupHelperFormSchema>;
   onSubmit: (data: z.infer<typeof setupHelperFormSchema>) => Promise<void>;
 };
-export function SetupHelperForm({ onSubmit }: Props) {
+export function SetupHelperForm({ initialValues, onSubmit }: Props) {
   const [isPending, startTransition] = useTransition();
   const form = useForm<z.infer<typeof setupHelperFormSchema>>({
     resolver: zodResolver(setupHelperFormSchema),
     defaultValues: {
-      preferredMatchDay: undefined,
-      secondaryMatchDays: [],
+      preferredMatchDay: initialValues?.preferredMatchDay ?? undefined,
+      secondaryMatchDays: initialValues?.secondaryMatchDays ?? [],
     },
   });
 

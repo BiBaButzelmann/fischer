@@ -17,15 +17,16 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import z from "zod";
 
 type Props = {
+  initiallyParticipating?: boolean;
   onSubmit: () => Promise<void>;
 };
 
-export function JurorForm({ onSubmit }: Props) {
+export function JurorForm({ initiallyParticipating, onSubmit }: Props) {
   const [isPending, startTransition] = useTransition();
   const form = useForm<z.infer<typeof jurorFormSchema>>({
     resolver: zodResolver(jurorFormSchema),
     defaultValues: {
-      participating: false,
+      participating: initiallyParticipating ?? false,
     },
   });
 
