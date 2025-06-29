@@ -3,12 +3,11 @@
 import z from "zod";
 import { db } from "@/db/client";
 import invariant from "tiny-invariant";
-import { profile } from "@/db/schema/profile";
-import { eq } from "drizzle-orm";
 import { participant } from "@/db/schema/participant";
 import { createParticipantFormSchema } from "@/schema/participant";
 import { auth } from "@/auth/utils";
 import { getTournamentById } from "@/db/repositories/tournament";
+import { getProfileByUserId } from "@/db/repositories/profile";
 
 export async function createTournamentParticipant(
   tournamentId: number,
@@ -19,20 +18,13 @@ export async function createTournamentParticipant(
   const tournament = await getTournamentById(tournamentId);
   invariant(tournament, "Tournament not found");
 
-  const currentProfile = await db
-    .update(profile)
-    .set({
-      phoneNumber: data.phoneNumber,
-    })
-    .where(eq(profile.userId, session.user.id))
-    .returning({
-      id: profile.id,
-    });
+  const currentProfile = await getProfileByUserId(session.user.id);
+  invariant(currentProfile, "Profile not found");
 
   await db
     .insert(participant)
     .values({
-      profileId: currentProfile[0].id,
+      profileId: currentProfile.id,
       tournamentId: tournament.id,
       chessClub: data.chessClub,
       dwzRating: data.dwzRating,

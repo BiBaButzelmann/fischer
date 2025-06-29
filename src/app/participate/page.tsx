@@ -1,5 +1,5 @@
 import { auth } from "@/auth/utils";
-import { ParticipateForm } from "@/components/participate/participate-form";
+import { ParticipateForm } from "@/components/roles/forms/participate-form";
 import { Button } from "@/components/ui/button";
 import {
   Card,
