@@ -26,16 +26,17 @@ import { useTransition } from "react";
 import { MatchDaysCheckboxes } from "./matchday-selection";
 
 type Props = {
+  initialValues?: z.infer<typeof refereeFormSchema>;
   onSubmit: (data: z.infer<typeof refereeFormSchema>) => Promise<void>;
 };
 
-export function RefereeForm({ onSubmit }: Props) {
+export function RefereeForm({ initialValues, onSubmit }: Props) {
   const [isPending, startTransition] = useTransition();
   const form = useForm<z.infer<typeof refereeFormSchema>>({
     resolver: zodResolver(refereeFormSchema),
     defaultValues: {
-      preferredMatchDay: undefined,
-      secondaryMatchDays: [],
+      preferredMatchDay: initialValues?.preferredMatchDay ?? undefined,
+      secondaryMatchDays: initialValues?.secondaryMatchDays ?? [],
     },
   });
 

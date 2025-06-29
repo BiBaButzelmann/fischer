@@ -26,19 +26,21 @@ import { participantFormSchema } from "@/schema/participant";
 import { MatchDaysCheckboxes } from "./matchday-selection";
 
 type Props = {
+  initialValues?: z.infer<typeof participantFormSchema>;
   onSubmit: (data: z.infer<typeof participantFormSchema>) => Promise<void>;
 };
-export function ParticipateForm({ onSubmit }: Props) {
+export function ParticipateForm({ initialValues, onSubmit }: Props) {
   const [isPending, startTransition] = useTransition();
   const form = useForm<z.infer<typeof participantFormSchema>>({
     resolver: zodResolver(participantFormSchema),
     defaultValues: {
-      chessClub: "Hamburger Schachklub von 1830 e.V.",
-      dwzRating: undefined,
-      fideRating: undefined,
-      fideId: "",
-      preferredMatchDay: undefined,
-      secondaryMatchDays: [],
+      chessClub:
+        initialValues?.chessClub ?? "Hamburger Schachklub von 1830 e.V.",
+      dwzRating: initialValues?.dwzRating,
+      fideRating: initialValues?.fideRating,
+      fideId: initialValues?.fideId,
+      preferredMatchDay: initialValues?.preferredMatchDay,
+      secondaryMatchDays: initialValues?.secondaryMatchDays ?? [],
     },
   });
 
