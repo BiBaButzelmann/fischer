@@ -24,9 +24,4 @@ export const registerFormSchema = z.object({
   secondaryMatchDays: z
     .array(z.enum(availableMatchDays))
     .min(1, "Sekundärer Spieltag ist erforderlich"),
-
-  helpAsReferee: z.array(z.enum(availableMatchDays)),
-  helpSetupRoom: z.array(z.enum(availableMatchDays)),
-  helpEnterMatches: z.boolean().optional(),
-  helpAsTournamentJury: z.boolean().optional(),
 });
