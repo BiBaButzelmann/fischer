@@ -2,17 +2,17 @@
 
 import { db } from "@/db/client";
 import { tournament } from "@/db/schema/tournament";
-import {
-  CreateTournamentFormData,
-  createTournamentFormDataSchema,
-} from "@/components/admin/tournament/schema";
 import { auth } from "@/auth";
 import { headers } from "next/headers";
 import { revalidatePath } from "next/cache";
 import { tournamentWeek } from "@/db/schema/tournamentWeek";
+import { z } from "zod";
+import { createTournamentFormSchema } from "@/schema/tournament";
 
 // TODO: authentication / authorization
-export async function createTournament(formData: CreateTournamentFormData) {
+export async function createTournament(
+  formData: z.infer<typeof createTournamentFormSchema>,
+) {
   const session = await auth.api.getSession({
     headers: await headers(),
   });
@@ -21,7 +21,7 @@ export async function createTournament(formData: CreateTournamentFormData) {
     throw new Error("Unauthorized");
   }
 
-  const data = createTournamentFormDataSchema.parse(formData);
+  const data = createTournamentFormSchema.parse(formData);
 
   const newTournament: typeof tournament.$inferInsert = {
     name: "TODO: HSK Klubturnier",

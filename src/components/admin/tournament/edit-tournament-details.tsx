@@ -20,14 +20,12 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { zodResolver } from "@hookform/resolvers/zod";
-import {
-  CreateTournamentFormData,
-  createTournamentFormDataSchema,
-} from "./schema";
 import { useTransition } from "react";
 import { createTournament } from "@/actions/tournament";
 import { Button } from "@/components/ui/button";
 import { EditTournamentWeeks } from "./edit-tournament-weeks/edit-tournament-weeks";
+import { createTournamentFormSchema } from "@/schema/tournament";
+import { z } from "zod";
 
 type Props = {
   profiles: Profile[];
@@ -35,7 +33,7 @@ type Props = {
 export default function EditTournamentDetails({ profiles }: Props) {
   const [loading, startTransition] = useTransition();
   const form = useForm({
-    resolver: zodResolver(createTournamentFormDataSchema),
+    resolver: zodResolver(createTournamentFormSchema),
     defaultValues: {
       clubName: "Hamburger Schachklub von 1830 e.V.",
       tournamentType: "Rundenturnier",
@@ -53,7 +51,9 @@ export default function EditTournamentDetails({ profiles }: Props) {
     },
   });
 
-  const handleSubmit = async (data: CreateTournamentFormData) => {
+  const handleSubmit = async (
+    data: z.infer<typeof createTournamentFormSchema>,
+  ) => {
     startTransition(async () => {
       await createTournament(data);
     });

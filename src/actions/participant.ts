@@ -1,7 +1,6 @@
 "use server";
 
 import z from "zod";
-import { registerFormSchema } from "@/components/participate/schema";
 import { db } from "@/db/client";
 import invariant from "tiny-invariant";
 import { profile } from "@/db/schema/profile";
@@ -9,6 +8,7 @@ import { eq } from "drizzle-orm";
 import { auth } from "@/auth";
 import { headers } from "next/headers";
 import { participant } from "@/db/schema/participant";
+import { registerFormSchema } from "@/schema/participate";
 
 export async function createTournamentParticipant(
   tournamentId: number,
@@ -45,10 +45,6 @@ export async function createTournamentParticipant(
       fideId: data.fideId,
       preferredMatchDay: data.preferredMatchDay,
       secondaryMatchDays: data.secondaryMatchDays,
-      helpAsReferee: data.helpAsReferee,
-      helpSetupRoom: data.helpSetupRoom,
-      helpEnterMatches: data.helpEnterMatches ?? false,
-      helpAsTournamentJury: data.helpAsTournamentJury ?? false,
     })
     .onConflictDoNothing();
 }
