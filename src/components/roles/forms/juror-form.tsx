@@ -15,12 +15,12 @@ import { useTransition } from "react";
 import { jurorFormSchema } from "@/schema/juror";
 import { zodResolver } from "@hookform/resolvers/zod";
 import z from "zod";
-import { createJuror } from "@/actions/juror";
+
 type Props = {
-  tournamentId: number;
+  onSubmit: () => Promise<void>;
 };
 
-export function JurorForm({ tournamentId }: Props) {
+export function JurorForm({ onSubmit }: Props) {
   const [isPending, startTransition] = useTransition();
   const form = useForm<z.infer<typeof jurorFormSchema>>({
     resolver: zodResolver(jurorFormSchema),
@@ -34,8 +34,7 @@ export function JurorForm({ tournamentId }: Props) {
       return;
     }
     startTransition(async () => {
-      await createJuror(tournamentId);
-      // TODO: manage accordion state etc.
+      await onSubmit();
     });
   };
 
@@ -71,7 +70,7 @@ export function JurorForm({ tournamentId }: Props) {
             </FormItem>
           )}
         />
-        <Button type="submit" className="w-full sm:w-auto">
+        <Button disabled={isPending} type="submit" className="w-full sm:w-auto">
           Antwort speichern
         </Button>
       </form>

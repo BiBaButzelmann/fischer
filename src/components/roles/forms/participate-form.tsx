@@ -1,6 +1,5 @@
 "use client";
 
-import { Profile } from "@/db/types/profile";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useTransition } from "react";
 import { useForm } from "react-hook-form";
@@ -14,7 +13,6 @@ import {
   FormLabel,
   FormMessage,
 } from "../../ui/form";
-import { Calendar, Star, UsersRound } from "lucide-react";
 import { Input } from "../../ui/input";
 import {
   Select,
@@ -23,21 +21,17 @@ import {
   SelectTrigger,
   SelectValue,
 } from "../../ui/select";
-import { Checkbox } from "../../ui/checkbox";
-import { Label } from "../../ui/label";
 import { Button } from "../../ui/button";
-import { MatchDay } from "@/db/types/group";
-import { createTournamentParticipant } from "@/actions/participant";
-import { createParticipantFormSchema } from "@/schema/participant";
+import { participantFormSchema } from "@/schema/participant";
 import { MatchDaysCheckboxes } from "./matchday-selection";
 
 type Props = {
-  tournamentId: number;
+  onSubmit: (data: z.infer<typeof participantFormSchema>) => Promise<void>;
 };
-export function ParticipateForm({ tournamentId }: Props) {
+export function ParticipateForm({ onSubmit }: Props) {
   const [isPending, startTransition] = useTransition();
-  const form = useForm<z.infer<typeof createParticipantFormSchema>>({
-    resolver: zodResolver(createParticipantFormSchema),
+  const form = useForm<z.infer<typeof participantFormSchema>>({
+    resolver: zodResolver(participantFormSchema),
     defaultValues: {
       chessClub: "Hamburger Schachklub von 1830 e.V.",
       dwzRating: undefined,
@@ -48,10 +42,9 @@ export function ParticipateForm({ tournamentId }: Props) {
     },
   });
 
-  const handleSubmit = (data: z.infer<typeof createParticipantFormSchema>) => {
+  const handleSubmit = (data: z.infer<typeof participantFormSchema>) => {
     startTransition(async () => {
-      await createTournamentParticipant(tournamentId, data);
-      // TODO: manage accordion state etc.
+      await onSubmit(data);
     });
   };
 
@@ -165,7 +158,7 @@ export function ParticipateForm({ tournamentId }: Props) {
             </FormItem>
           )}
         />
-        <Button type="submit" className="w-full sm:w-auto">
+        <Button disabled={isPending} type="submit" className="w-full sm:w-auto">
           Änderungen speichern
         </Button>
       </form>

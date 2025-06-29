@@ -2,7 +2,6 @@
 
 import { useForm } from "react-hook-form";
 import { Button } from "@/components/ui/button";
-import { Checkbox } from "@/components/ui/checkbox";
 import {
   Select,
   SelectContent,
@@ -22,16 +21,15 @@ import {
 import { zodResolver } from "@hookform/resolvers/zod";
 import z from "zod";
 import { useTransition } from "react";
-import { Calendar } from "lucide-react";
-import { MatchDaysCheckboxes } from "./matchday-selection";
 import { matchEnteringHelperFormSchema } from "@/schema/matchEnteringHelper";
-import { match } from "assert";
-import { createMatchEnteringHelper } from "@/actions/match-entering-helper";
 
 type Props = {
-  tournamentId: number;
+  onSubmit: (
+    data: z.infer<typeof matchEnteringHelperFormSchema>,
+  ) => Promise<void>;
 };
-export function MatchEnteringForm({ tournamentId }: Props) {
+
+export function MatchEnteringForm({ onSubmit }: Props) {
   const [isPending, startTransition] = useTransition();
   const form = useForm<z.infer<typeof matchEnteringHelperFormSchema>>({
     resolver: zodResolver(matchEnteringHelperFormSchema),
@@ -44,8 +42,7 @@ export function MatchEnteringForm({ tournamentId }: Props) {
     data: z.infer<typeof matchEnteringHelperFormSchema>,
   ) => {
     startTransition(async () => {
-      await createMatchEnteringHelper(tournamentId, data);
-      // TODO: manage accordion state etc.
+      await onSubmit(data);
     });
   };
 
@@ -88,7 +85,7 @@ export function MatchEnteringForm({ tournamentId }: Props) {
           )}
         />
 
-        <Button type="submit" className="w-full sm:w-auto">
+        <Button disabled={isPending} type="submit" className="w-full sm:w-auto">
           Änderungen speichern
         </Button>
       </form>

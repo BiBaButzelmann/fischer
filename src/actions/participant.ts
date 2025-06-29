@@ -4,14 +4,14 @@ import z from "zod";
 import { db } from "@/db/client";
 import invariant from "tiny-invariant";
 import { participant } from "@/db/schema/participant";
-import { createParticipantFormSchema } from "@/schema/participant";
+import { participantFormSchema } from "@/schema/participant";
 import { auth } from "@/auth/utils";
 import { getTournamentById } from "@/db/repositories/tournament";
 import { getProfileByUserId } from "@/db/repositories/profile";
 
-export async function createTournamentParticipant(
+export async function createParticipant(
   tournamentId: number,
-  data: z.infer<typeof createParticipantFormSchema>,
+  data: z.infer<typeof participantFormSchema>,
 ) {
   const session = await auth();
 

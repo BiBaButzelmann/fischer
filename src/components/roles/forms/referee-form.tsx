@@ -19,31 +19,29 @@ import {
   FormLabel,
   FormMessage,
 } from "@/components/ui/form";
-import { createRefereeFormSchema } from "@/schema/referee";
+import { refereeFormSchema } from "@/schema/referee";
 import { zodResolver } from "@hookform/resolvers/zod";
 import z from "zod";
-import { createReferee } from "@/actions/referee";
 import { useTransition } from "react";
-import { Calendar } from "lucide-react";
 import { MatchDaysCheckboxes } from "./matchday-selection";
 
 type Props = {
-  tournamentId: number;
+  onSubmit: (data: z.infer<typeof refereeFormSchema>) => Promise<void>;
 };
-export function RefereeForm({ tournamentId }: Props) {
+
+export function RefereeForm({ onSubmit }: Props) {
   const [isPending, startTransition] = useTransition();
-  const form = useForm<z.infer<typeof createRefereeFormSchema>>({
-    resolver: zodResolver(createRefereeFormSchema),
+  const form = useForm<z.infer<typeof refereeFormSchema>>({
+    resolver: zodResolver(refereeFormSchema),
     defaultValues: {
       preferredMatchDay: undefined,
       secondaryMatchDays: [],
     },
   });
 
-  const handleFormSubmit = (data: z.infer<typeof createRefereeFormSchema>) => {
+  const handleFormSubmit = (data: z.infer<typeof refereeFormSchema>) => {
     startTransition(async () => {
-      await createReferee(tournamentId, data);
-      // TODO: manage accordion state etc.
+      await onSubmit(data);
     });
   };
 
@@ -97,7 +95,7 @@ export function RefereeForm({ tournamentId }: Props) {
             </FormItem>
           )}
         />
-        <Button type="submit" className="w-full sm:w-auto">
+        <Button disabled={isPending} type="submit" className="w-full sm:w-auto">
           Änderungen speichern
         </Button>
       </form>
