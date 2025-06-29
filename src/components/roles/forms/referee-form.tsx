@@ -53,10 +53,6 @@ export function RefereeForm({ tournamentId }: Props) {
         onSubmit={form.handleSubmit(handleFormSubmit)}
         className="space-y-6 pt-4"
       >
-        <div className="flex items-center gap-4">
-          <Calendar size={20} />
-          <h2 className="text-xl font-bold">Spieltage</h2>
-        </div>
         <FormField
           control={form.control}
           name="preferredMatchDay"
@@ -88,7 +84,7 @@ export function RefereeForm({ tournamentId }: Props) {
           name="secondaryMatchDays"
           render={({ field }) => (
             <FormItem>
-              <FormLabel required>
+              <FormLabel>
                 Ich könnte zusätzlich an folgenden Wochentagen:
               </FormLabel>
               <FormControl>
@@ -98,7 +94,6 @@ export function RefereeForm({ tournamentId }: Props) {
                 />
               </FormControl>
               <FormMessage />
-              <FormDescription>Vielen Dank!</FormDescription>
             </FormItem>
           )}
         />
