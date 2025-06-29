@@ -8,7 +8,7 @@ export async function auth() {
   });
 
   if (!session) {
-    redirect("/login");
+    redirect("/willkommen");
   }
 
   return session;
