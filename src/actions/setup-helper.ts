@@ -3,7 +3,7 @@
 import z from "zod";
 import { db } from "@/db/client";
 import invariant from "tiny-invariant";
-import { createSetupHelperFormSchema } from "@/schema/setupHelper";
+import { setupHelperFormSchema } from "@/schema/setupHelper";
 import { setupHelper } from "@/db/schema/setupHelper";
 import { getProfileByUserId } from "@/db/repositories/profile";
 import { getTournamentById } from "@/db/repositories/tournament";
@@ -11,7 +11,7 @@ import { auth } from "@/auth/utils";
 
 export async function createSetupHelper(
   tournamentId: number,
-  data: z.infer<typeof createSetupHelperFormSchema>,
+  data: z.infer<typeof setupHelperFormSchema>,
 ) {
   const session = await auth();
 
