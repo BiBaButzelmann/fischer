@@ -30,7 +30,7 @@ import { Button } from "../ui/button";
 import { MatchDay } from "@/db/types/group";
 import { createTournamentParticipant } from "@/actions/participant";
 import { redirect } from "next/navigation";
-import { registerFormSchema } from "@/schema/participate";
+import { createParticipantFormSchema } from "@/schema/participant";
 
 type Props = {
   tournamentId: number;
@@ -38,8 +38,8 @@ type Props = {
 };
 export function ParticipateForm({ tournamentId, profile }: Props) {
   const [isPending, startTransition] = useTransition();
-  const form = useForm<z.infer<typeof registerFormSchema>>({
-    resolver: zodResolver(registerFormSchema),
+  const form = useForm<z.infer<typeof createParticipantFormSchema>>({
+    resolver: zodResolver(createParticipantFormSchema),
     defaultValues: {
       firstName: profile?.firstName || "",
       lastName: profile?.lastName || "",
@@ -55,7 +55,7 @@ export function ParticipateForm({ tournamentId, profile }: Props) {
     },
   });
 
-  const handleSubmit = (data: z.infer<typeof registerFormSchema>) => {
+  const handleSubmit = (data: z.infer<typeof createParticipantFormSchema>) => {
     startTransition(async () => {
       await createTournamentParticipant(tournamentId, data);
       redirect("/home");

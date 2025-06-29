@@ -8,11 +8,11 @@ import { eq } from "drizzle-orm";
 import { auth } from "@/auth";
 import { headers } from "next/headers";
 import { participant } from "@/db/schema/participant";
-import { registerFormSchema } from "@/schema/participate";
+import { createParticipantFormSchema } from "@/schema/participant";
 
 export async function createTournamentParticipant(
   tournamentId: number,
-  data: z.infer<typeof registerFormSchema>,
+  data: z.infer<typeof createParticipantFormSchema>,
 ) {
   const session = await auth.api.getSession({
     headers: await headers(),
