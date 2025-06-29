@@ -2,7 +2,7 @@ import { relations } from "drizzle-orm";
 import { integer, pgTable, unique } from "drizzle-orm/pg-core";
 import { profile } from "./profile";
 import { tournament } from "./tournament";
-import { matchDay } from "./columns.helpers";
+import { matchDay, timestamps } from "./columns.helpers";
 
 export const setupHelper = pgTable(
   "setup_helper",
@@ -14,6 +14,8 @@ export const setupHelper = pgTable(
 
     preferredMatchDay: matchDay("preferred_match_day").notNull(),
     secondaryMatchDays: matchDay("secondary_match_day").array().notNull(),
+
+    ...timestamps,
   },
   (table) => [unique().on(table.tournamentId, table.profileId)],
 );

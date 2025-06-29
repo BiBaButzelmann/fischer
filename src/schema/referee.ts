@@ -5,7 +5,5 @@ export const refereeFormSchema = z.object({
   preferredMatchDay: z.enum(availableMatchDays, {
     errorMap: () => ({ message: "Bevorzugter Spieltag ist erforderlich" }),
   }),
-  secondaryMatchDays: z
-    .array(z.enum(availableMatchDays))
-    .min(1, "Sekundärer Spieltag ist erforderlich"),
+  secondaryMatchDays: z.array(z.enum(availableMatchDays)),
 });
