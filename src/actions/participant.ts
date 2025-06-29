@@ -33,5 +33,15 @@ export async function createParticipant(
       preferredMatchDay: data.preferredMatchDay,
       secondaryMatchDays: data.secondaryMatchDays,
     })
-    .onConflictDoNothing();
+    .onConflictDoUpdate({
+      target: [participant.tournamentId, participant.profileId],
+      set: {
+        chessClub: data.chessClub,
+        dwzRating: data.dwzRating,
+        fideRating: data.fideRating,
+        fideId: data.fideId,
+        preferredMatchDay: data.preferredMatchDay,
+        secondaryMatchDays: data.secondaryMatchDays,
+      },
+    });
 }

@@ -21,10 +21,19 @@ export async function createReferee(
   const currentProfile = await getProfileByUserId(session.user.id);
   invariant(currentProfile, "Profile not found");
 
-  await db.insert(referee).values({
-    profileId: currentProfile.id,
-    tournamentId: tournament.id,
-    preferredMatchDay: data.preferredMatchDay,
-    secondaryMatchDays: data.secondaryMatchDays,
-  });
+  await db
+    .insert(referee)
+    .values({
+      profileId: currentProfile.id,
+      tournamentId: tournament.id,
+      preferredMatchDay: data.preferredMatchDay,
+      secondaryMatchDays: data.secondaryMatchDays,
+    })
+    .onConflictDoUpdate({
+      target: [referee.tournamentId, referee.profileId],
+      set: {
+        preferredMatchDay: data.preferredMatchDay,
+        secondaryMatchDays: data.secondaryMatchDays,
+      },
+    });
 }

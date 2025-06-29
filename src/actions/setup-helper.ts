@@ -21,10 +21,19 @@ export async function createSetupHelper(
   const currentProfile = await getProfileByUserId(session.user.id);
   invariant(currentProfile, "Profile not found");
 
-  await db.insert(setupHelper).values({
-    profileId: currentProfile.id,
-    tournamentId: tournament.id,
-    preferredMatchDay: data.preferredMatchDay,
-    secondaryMatchDays: data.secondaryMatchDays,
-  });
+  await db
+    .insert(setupHelper)
+    .values({
+      profileId: currentProfile.id,
+      tournamentId: tournament.id,
+      preferredMatchDay: data.preferredMatchDay,
+      secondaryMatchDays: data.secondaryMatchDays,
+    })
+    .onConflictDoUpdate({
+      target: [setupHelper.tournamentId, setupHelper.profileId],
+      set: {
+        preferredMatchDay: data.preferredMatchDay,
+        secondaryMatchDays: data.secondaryMatchDays,
+      },
+    });
 }

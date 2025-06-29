@@ -23,22 +23,34 @@ import { createReferee } from "@/actions/referee";
 import { createMatchEnteringHelper } from "@/actions/match-entering-helper";
 import { createSetupHelper } from "@/actions/setup-helper";
 import { createJuror } from "@/actions/juror";
+import { Participant } from "@/db/types/participant";
+import { Referee } from "@/db/types/referee";
+import { MatchEnteringHelper } from "@/db/types/match-entering-helper";
+import { SetupHelper } from "@/db/types/setup-helper";
+import { Juror } from "@/db/types/juror";
 
-export function RolesManager({
-  tournamentId,
-  roles,
-}: {
+type InitialValues = {
+  participant: Participant | undefined;
+  referee: Referee | undefined;
+  matchEnteringHelper: MatchEnteringHelper | undefined;
+  setupHelper: SetupHelper | undefined;
+  juror: Juror | undefined;
+};
+
+type Props = {
   tournamentId: number;
-  roles: Role[];
-}) {
+  initialValues: InitialValues;
+};
+
+export function RolesManager({ tournamentId, initialValues }: Props) {
   const router = useRouter();
   const [accordionValue, setAccordionValue] = useState(
-    getAccordionValue(roles),
+    getAccordionValue(initialValues),
   );
 
   useEffect(() => {
-    setAccordionValue(getAccordionValue(roles));
-  }, [roles]);
+    setAccordionValue(getAccordionValue(initialValues));
+  }, [initialValues]);
 
   const handleParticipateFormSubmit = async (
     data: z.infer<typeof participantFormSchema>,
@@ -54,7 +66,7 @@ export function RolesManager({
     router.refresh();
   };
 
-  const handleMatchEnteringFormSubmit = async (
+  const handleMatchEnteringHelperFormSubmit = async (
     data: z.infer<typeof matchEnteringHelperFormSchema>,
   ) => {
     await createMatchEnteringHelper(tournamentId, data);
@@ -88,49 +100,78 @@ export function RolesManager({
           accordionId="participant"
           name="Spieler"
           description="Zum Klubturnier anmelden"
-          completed={roles.includes("participant")}
+          completed={initialValues.participant != null}
           icon={User}
         >
-          <ParticipateForm onSubmit={handleParticipateFormSubmit} />
+          <ParticipateForm
+            initialValues={
+              initialValues.participant
+                ? {
+                    chessClub: initialValues.participant.chessClub,
+                    preferredMatchDay:
+                      initialValues.participant.preferredMatchDay,
+                    secondaryMatchDays:
+                      initialValues.participant.secondaryMatchDays,
+                    dwzRating: initialValues.participant.dwzRating ?? undefined,
+                    fideRating:
+                      initialValues.participant.fideRating ?? undefined,
+                    fideId: initialValues.participant.fideId ?? undefined,
+                  }
+                : undefined
+            }
+            onSubmit={handleParticipateFormSubmit}
+          />
         </RoleCard>
         <RoleCard
           accordionId="referee"
           name="Schiedsrichter"
           description="Als Schiedsrichter anmelden"
-          completed={roles.includes("referee")}
+          completed={initialValues.referee != null}
           icon={Shield}
         >
-          <RefereeForm onSubmit={handleRefereeFormSubmit} />
+          <RefereeForm
+            initialValues={initialValues.referee ?? undefined}
+            onSubmit={handleRefereeFormSubmit}
+          />
         </RoleCard>
         <RoleCard
           accordionId="matchEnteringHelper"
           name="Eingabehelfer"
           description="Als Eingabehelfer anmelden"
-          completed={roles.includes("matchEnteringHelper")}
+          completed={initialValues.matchEnteringHelper != null}
           icon={ClipboardEdit}
         >
-          <MatchEnteringForm onSubmit={handleMatchEnteringFormSubmit} />
+          <MatchEnteringForm
+            initialValues={initialValues.matchEnteringHelper ?? undefined}
+            onSubmit={handleMatchEnteringHelperFormSubmit}
+          />
         </RoleCard>
         <RoleCard
           accordionId="setupHelper"
           name="Aufbauhelfer"
           description="Als Aufbauhelfer anmelden"
-          completed={roles.includes("setupHelper")}
+          completed={initialValues.setupHelper != null}
           icon={Wrench}
         >
-          <SetupHelperForm onSubmit={handleSetupHelperFormSubmit} />
+          <SetupHelperForm
+            initialValues={initialValues.setupHelper ?? undefined}
+            onSubmit={handleSetupHelperFormSubmit}
+          />
         </RoleCard>
         <RoleCard
           accordionId="juror"
           name="Turniergericht"
           description="Am Turniergericht teilnehmen"
-          completed={roles.includes("juror")}
+          completed={initialValues.juror != null}
           icon={Gavel}
         >
-          <JurorForm onSubmit={handleJurorFormSubmit} />
+          <JurorForm
+            initiallyParticipating={initialValues.juror != null}
+            onSubmit={handleJurorFormSubmit}
+          />
         </RoleCard>
       </Accordion>
-      {roles.length > 0 ? (
+      {hasSelectedMoreThanOneRole(initialValues) ? (
         <div className="flex justify-center pt-6">
           <Button size="lg" className="w-full sm:w-auto">
             Rollen-Auswahl abschließen
@@ -151,10 +192,16 @@ const ROLES = [
 
 type RolesWithoutAdmin = Exclude<Role, "admin">;
 
-function getAccordionValue(roles: Role[]): RolesWithoutAdmin | undefined {
+function getAccordionValue(
+  roles: InitialValues,
+): RolesWithoutAdmin | undefined {
   for (const role of ROLES) {
-    if (!roles.includes(role)) {
+    if (roles[role] === undefined) {
       return role;
     }
   }
+}
+
+function hasSelectedMoreThanOneRole(roles: InitialValues): boolean {
+  return Object.values(roles).filter((role) => role !== undefined).length > 1;
 }
