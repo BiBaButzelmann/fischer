@@ -55,10 +55,6 @@ export function MatchEnteringForm({ tournamentId }: Props) {
         onSubmit={form.handleSubmit(handleFormSubmit)}
         className="space-y-6 pt-4"
       >
-        <div className="flex items-center gap-4">
-          <Calendar size={20} />
-          <h2 className="text-xl font-bold">Partieneingabe</h2>
-        </div>
         <FormField
           control={form.control}
           name="numberOfGroupsToEnter"
@@ -83,8 +79,9 @@ export function MatchEnteringForm({ tournamentId }: Props) {
                 </Select>
               </FormControl>
               <FormDescription>
-                Wähle die Anzahl der Gruppen, die du eintragen möchtest. Wenn
-                möglich, weisen wir dir deine eigene Gruppe präferiert zu.
+                Wähle die Anzahl der Gruppen, für die du Partien eingeben
+                möchtest. Wenn möglich, weisen wir dir deine eigene Gruppe für
+                die Eingabe zu.
               </FormDescription>
               <FormMessage />
             </FormItem>

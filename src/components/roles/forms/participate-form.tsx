@@ -59,125 +59,114 @@ export function ParticipateForm({ tournamentId }: Props) {
   return (
     <Form {...form}>
       <form onSubmit={form.handleSubmit(handleSubmit)} className="space-y-8">
-        <section className="space-y-4">
+        <FormField
+          control={form.control}
+          name="chessClub"
+          render={({ field }) => (
+            <FormItem>
+              <FormLabel required>Schachverein</FormLabel>
+              <FormControl>
+                <Input id="chessClub" required {...field} />
+              </FormControl>
+              <FormMessage />
+            </FormItem>
+          )}
+        />
+        <div className="flex gap-4">
           <FormField
             control={form.control}
-            name="chessClub"
+            name="dwzRating"
             render={({ field }) => (
-              <FormItem>
-                <FormLabel required>Schachverein</FormLabel>
+              <FormItem className="flex-1">
+                <FormLabel>DWZ</FormLabel>
                 <FormControl>
-                  <Input id="chessClub" required {...field} />
+                  <Input type="number" id="dwzRating" {...field} />
                 </FormControl>
                 <FormMessage />
               </FormItem>
             )}
           />
-          <div className="flex gap-4">
-            <FormField
-              control={form.control}
-              name="dwzRating"
-              render={({ field }) => (
-                <FormItem className="flex-1">
-                  <FormLabel>DWZ</FormLabel>
-                  <FormControl>
-                    <Input type="number" id="dwzRating" {...field} />
-                  </FormControl>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
-            <FormField
-              control={form.control}
-              name="fideRating"
-              render={({ field }) => (
-                <FormItem className="flex-1">
-                  <FormLabel required={fideRating ? true : false}>
-                    Elo
-                  </FormLabel>
-                  <FormControl>
-                    <Input type="number" id="fideRating" {...field} />
-                  </FormControl>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
-          </div>
-          {fideRating ? (
-            <FormField
-              control={form.control}
-              name="fideId"
-              render={({ field }) => (
-                <FormItem>
-                  <FormLabel required>FIDE ID</FormLabel>
-                  <FormControl>
-                    <Input
-                      id="fideId"
-                      required
-                      placeholder="10245154"
-                      {...field}
-                    />
-                  </FormControl>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
-          ) : null}
-        </section>
-
-        <section className="space-y-4">
-          <div className="flex items-center gap-4">
-            <Calendar size={20} />
-            <h2 className="text-xl font-bold">Spieltage</h2>
-          </div>
           <FormField
             control={form.control}
-            name="preferredMatchDay"
+            name="fideRating"
             render={({ field }) => (
-              <FormItem>
-                <FormLabel required>Bevorzugter Spieltag</FormLabel>
+              <FormItem className="flex-1">
+                <FormLabel required={fideRating ? true : false}>Elo</FormLabel>
                 <FormControl>
-                  <Select value={field.value} onValueChange={field.onChange}>
-                    <SelectTrigger>
-                      <SelectValue placeholder="Wählen Sie einen Spieltag" />
-                    </SelectTrigger>
-                    <SelectContent>
-                      <SelectItem value="tuesday">Dienstag</SelectItem>
-                      <SelectItem value="thursday">Donnerstag</SelectItem>
-                      <SelectItem value="friday">Freitag</SelectItem>
-                    </SelectContent>
-                  </Select>
+                  <Input type="number" id="fideRating" {...field} />
                 </FormControl>
-                <FormDescription>
-                  Die A-Klasse spielt nur an Freitagen
-                </FormDescription>
                 <FormMessage />
               </FormItem>
             )}
           />
+        </div>
+        {fideRating ? (
           <FormField
             control={form.control}
-            name="secondaryMatchDays"
+            name="fideId"
             render={({ field }) => (
               <FormItem>
-                <FormLabel>Ich könnte aber auch spielen am</FormLabel>
+                <FormLabel required>FIDE ID</FormLabel>
                 <FormControl>
-                  <MatchDaysCheckboxes
-                    value={field.value}
-                    onChange={field.onChange}
+                  <Input
+                    id="fideId"
+                    required
+                    placeholder="10245154"
+                    {...field}
                   />
                 </FormControl>
                 <FormMessage />
-                <FormDescription>
-                  Wer nicht flexibel ist, könnte unter Umständen bei dem Turnier
-                  nicht berücksichtigt werden.
-                </FormDescription>
               </FormItem>
             )}
           />
-        </section>
-        <Button type="submit" className="w-full" disabled={isPending}>
-          Turnieranmeldung abschließen
+        ) : null}
+        <FormField
+          control={form.control}
+          name="preferredMatchDay"
+          render={({ field }) => (
+            <FormItem>
+              <FormLabel required>Bevorzugter Spieltag</FormLabel>
+              <FormControl>
+                <Select value={field.value} onValueChange={field.onChange}>
+                  <SelectTrigger>
+                    <SelectValue placeholder="Wählen Sie einen Spieltag" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="tuesday">Dienstag</SelectItem>
+                    <SelectItem value="thursday">Donnerstag</SelectItem>
+                    <SelectItem value="friday">Freitag</SelectItem>
+                  </SelectContent>
+                </Select>
+              </FormControl>
+              <FormDescription>
+                Die A-Klasse spielt nur an Freitagen
+              </FormDescription>
+              <FormMessage />
+            </FormItem>
+          )}
+        />
+        <FormField
+          control={form.control}
+          name="secondaryMatchDays"
+          render={({ field }) => (
+            <FormItem>
+              <FormLabel>Ich könnte aber auch spielen am</FormLabel>
+              <FormControl>
+                <MatchDaysCheckboxes
+                  value={field.value}
+                  onChange={field.onChange}
+                />
+              </FormControl>
+              <FormMessage />
+              <FormDescription>
+                Wer nicht flexibel ist, könnte unter Umständen bei dem Turnier
+                nicht berücksichtigt werden.
+              </FormDescription>
+            </FormItem>
+          )}
+        />
+        <Button type="submit" className="w-full sm:w-auto">
+          Änderungen speichern
         </Button>
       </form>
     </Form>
