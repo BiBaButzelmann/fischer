@@ -1,54 +1,31 @@
 "use server";
-// TODO: check if this can be optimized
 
-import { auth } from "@/auth";
 import { db } from "@/db/client";
 import { participant } from "@/db/schema/participant";
 import { MatchDay } from "@/db/types/group";
 import { ParticipantWithName } from "@/db/types/participant";
 import { and, eq } from "drizzle-orm";
 import { revalidatePath } from "next/cache";
-import { headers } from "next/headers";
 import { GridGroup } from "@/components/admin/tournament/types";
 import { group } from "@/db/schema/group";
+import { auth } from "@/auth/utils";
+import { getTournamentById } from "@/db/repositories/tournament";
+import invariant from "tiny-invariant";
+import { getParticipantsByTournamentId } from "@/db/repositories/participant";
 
 // TODO: find out why revalidatePath doesn't work here
 export async function generateGroups(tournamentId: number) {
-  const session = await auth.api.getSession({
-    headers: await headers(),
-  });
+  const session = await auth();
+  invariant(session?.user.role === "admin", "Unauthorized");
 
-  if (session?.user.role !== "admin") {
-    throw new Error("Unauthorized");
-  }
+  const tournament = await getTournamentById(tournamentId);
+  invariant(tournament != null, "Tournament not found");
 
-  const tournament = await db.query.tournament.findFirst({
-    where: (tournament, { eq }) => eq(tournament.id, tournamentId),
-  });
-
-  if (!tournament) {
-    throw new Error("Tournament not found");
-  }
-
-  const participants = await db.query.participant.findMany({
-    where: (participant, { eq }) => eq(participant.tournamentId, tournamentId),
-    with: {
-      profile: {
-        columns: {
-          firstName: true,
-          lastName: true,
-        },
-      },
-    },
-    orderBy: (participant, { desc, sql }) => [
-      sql`${participant.fideRating} IS NULL`,
-      desc(participant.fideRating),
-    ],
-  });
-
-  if (participants.length === 0) {
-    throw new Error("No participants found for this tournament");
-  }
+  const participants = await getParticipantsByTournamentId(tournamentId);
+  invariant(
+    participants.length > 0,
+    "No participants found for this tournament",
+  );
 
   const { participantGroups } = getParticipantsGroupDistribution(
     tournament.numberOfRounds + 1,
@@ -93,13 +70,8 @@ export async function updateGroups(
   groups: GridGroup[],
   unassignedParticipants: ParticipantWithName[],
 ) {
-  const session = await auth.api.getSession({
-    headers: await headers(),
-  });
-
-  if (session?.user.role !== "admin") {
-    throw new Error("Unauthorized");
-  }
+  const session = await auth();
+  invariant(session?.user.role === "admin", "Unauthorized");
 
   for (const unassignedParticipant of unassignedParticipants) {
     await db
@@ -140,13 +112,8 @@ export async function updateGroupMatchDay(
   groupId: number,
   matchDay: MatchDay | null,
 ) {
-  const session = await auth.api.getSession({
-    headers: await headers(),
-  });
-
-  if (session?.user.role !== "admin") {
-    throw new Error("Unauthorized");
-  }
+  const session = await auth();
+  invariant(session?.user.role === "admin", "Unauthorized");
 
   await db.update(group).set({ matchDay }).where(eq(group.id, groupId));
 

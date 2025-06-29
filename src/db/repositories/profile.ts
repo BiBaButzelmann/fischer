@@ -9,7 +9,7 @@ export async function getProfileByUserId(userId: string) {
   });
 }
 
-export async function getProfileByUserRole(role: "admin" | "user") {
+export async function getProfilesByUserRole(role: "admin" | "user") {
   return await db
     .select(getTableColumns(profile))
     .from(profile)

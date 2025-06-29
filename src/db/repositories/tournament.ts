@@ -1,5 +1,11 @@
 import { db } from "../client";
 
+export async function getTournamentById(tournamentId: number) {
+  return await db.query.tournament.findFirst({
+    where: (tournament, { eq }) => eq(tournament.id, tournamentId),
+  });
+}
+
 export async function getActiveTournament() {
   return await db.query.tournament.findFirst({
     where: (tournament, { or, eq }) =>

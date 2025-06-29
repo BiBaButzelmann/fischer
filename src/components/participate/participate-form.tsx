@@ -25,12 +25,11 @@ import {
 } from "../ui/select";
 import { Checkbox } from "../ui/checkbox";
 import { Label } from "../ui/label";
-import Link from "next/link";
 import { Button } from "../ui/button";
-import { registerFormSchema } from "./schema";
 import { MatchDay } from "@/db/types/group";
 import { createTournamentParticipant } from "@/actions/participant";
 import { redirect } from "next/navigation";
+import { createParticipantFormSchema } from "@/schema/participant";
 
 type Props = {
   tournamentId: number;
@@ -38,8 +37,8 @@ type Props = {
 };
 export function ParticipateForm({ tournamentId, profile }: Props) {
   const [isPending, startTransition] = useTransition();
-  const form = useForm<z.infer<typeof registerFormSchema>>({
-    resolver: zodResolver(registerFormSchema),
+  const form = useForm<z.infer<typeof createParticipantFormSchema>>({
+    resolver: zodResolver(createParticipantFormSchema),
     defaultValues: {
       firstName: profile?.firstName || "",
       lastName: profile?.lastName || "",
@@ -52,15 +51,10 @@ export function ParticipateForm({ tournamentId, profile }: Props) {
       fideId: "",
       preferredMatchDay: undefined,
       secondaryMatchDays: [],
-
-      helpAsReferee: [],
-      helpSetupRoom: [],
-      helpEnterMatches: undefined,
-      helpAsTournamentJury: undefined,
     },
   });
 
-  const handleSubmit = (data: z.infer<typeof registerFormSchema>) => {
+  const handleSubmit = (data: z.infer<typeof createParticipantFormSchema>) => {
     startTransition(async () => {
       await createTournamentParticipant(tournamentId, data);
       redirect("/home");
@@ -230,8 +224,8 @@ export function ParticipateForm({ tournamentId, profile }: Props) {
                   </Select>
                 </FormControl>
                 <FormDescription>
-                      Die A-Klasse spielt nur an Freitagen
-                    </FormDescription>
+                  Die A-Klasse spielt nur an Freitagen
+                </FormDescription>
                 <FormMessage />
               </FormItem>
             )}
@@ -269,106 +263,6 @@ export function ParticipateForm({ tournamentId, profile }: Props) {
             sind auch aufteilbar), desto geringer fallen die genannten Zeiten
             für den Einzelnen aus.
           </p>
-
-          <div className="px-4 py-3 border rounded-md border-input">
-            <FormField
-              control={form.control}
-              name="helpAsReferee"
-              render={({ field }) => (
-                <FormItem>
-                  <FormLabel>als lizensierter Schiedsrichter</FormLabel>
-                  <FormControl>
-                    <MatchDaysCheckboxes
-                      value={field.value}
-                      onChange={field.onChange}
-                    />
-                  </FormControl>
-                  <FormMessage />
-                  <FormDescription>
-                    Voraussetzung: mindestens regionaler Schiedsrichter.
-                    Zeitbedarf: 9 Abende zzgl. Ausweichterminen laut Zeitplan.
-                  </FormDescription>
-                </FormItem>
-              )}
-            />
-          </div>
-          <div className="px-4 py-3 border rounded-md border-input">
-            <FormField
-              control={form.control}
-              name="helpSetupRoom"
-              render={({ field }) => (
-                <FormItem>
-                  <FormLabel>
-                    als Helfer beim Vorbereiten des Spielsaals
-                  </FormLabel>
-                  <FormControl>
-                    <MatchDaysCheckboxes
-                      value={field.value}
-                      onChange={field.onChange}
-                    />
-                  </FormControl>
-                  <FormMessage />
-                  <FormDescription>
-                    Bretter, gestellte Uhren, Notationsunterlagen und
-                    Namensschilder aufbauen. Zeitbedarf: ca. 20-40 Min. an 9
-                    Abenden zzgl. Ausweichterminen laut Zeitplan.
-                  </FormDescription>
-                </FormItem>
-              )}
-            />
-          </div>
-          <div className="px-4 py-3 border rounded-md border-input">
-            <FormField
-              control={form.control}
-              name="helpEnterMatches"
-              render={({ field }) => (
-                <FormItem>
-                  <FormControl>
-                    <div className="flex items-center gap-3">
-                      <Checkbox
-                        id="helpEnterMatches"
-                        checked={field.value}
-                        onCheckedChange={field.onChange}
-                      />
-                      <Label htmlFor="helpEnterMatches">
-                        bei Partiieneingabe
-                      </Label>
-                    </div>
-                  </FormControl>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
-          </div>
-          <div className="px-4 py-3 border rounded-md border-input">
-            <FormField
-              control={form.control}
-              name="helpAsTournamentJury"
-              render={({ field }) => (
-                <FormItem>
-                  <FormControl>
-                    <div className="flex items-center gap-3">
-                      <Checkbox
-                        id="helpAsTournamentJury"
-                        checked={field.value}
-                        onCheckedChange={field.onChange}
-                      />
-                      <Label htmlFor="helpAsTournamentJury">
-                        als Mitglied im Turniergericht{" "}
-                        <Link
-                          href="/TODO"
-                          className="text-primary inline-flex items-center"
-                        >
-                          (siehe Turnierordnung)
-                        </Link>
-                      </Label>
-                    </div>
-                  </FormControl>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
-          </div>
         </section>
         <Button type="submit" className="w-full" disabled={isPending}>
           Turnieranmeldung abschließen
