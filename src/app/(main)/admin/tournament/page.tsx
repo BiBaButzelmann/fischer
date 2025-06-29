@@ -10,7 +10,7 @@ import {
 } from "@/components/ui/collapsible";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { ChevronDownIcon } from "lucide-react";
-import { getProfileByUserRole } from "@/db/repositories/profile";
+import { getProfilesByUserRole } from "@/db/repositories/profile";
 import { getActiveTournamentWithGroups } from "@/db/repositories/tournament";
 
 export default async function Page() {
@@ -41,7 +41,7 @@ export default async function Page() {
 }
 
 async function ManageTournament() {
-  const adminProfiles = await getProfileByUserRole("admin");
+  const adminProfiles = await getProfilesByUserRole("admin");
   const activeTournament = await getActiveTournamentWithGroups();
 
   const openCollapsible =

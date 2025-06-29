@@ -1,6 +1,8 @@
 "use server";
 
 import { db } from "@/db/client";
+import { getGroupsByTournamentId } from "@/db/repositories/group";
+import { getTournamentById } from "@/db/repositories/tournament";
 import { game } from "@/db/schema/game";
 import { eq, InferInsertModel } from "drizzle-orm";
 import { revalidatePath } from "next/cache";
@@ -62,18 +64,11 @@ export async function removeScheduledGames(tournamentId: number) {
 
 // TODO: find out how to do transactions with drizzle and neon
 export async function scheduleGames(tournamentId: number) {
-  const tournament = await db.query.tournament.findFirst({
-    where: (t, { eq }) => eq(t.id, tournamentId),
-  });
+  const tournament = await getTournamentById(tournamentId);
   invariant(tournament, `Tournament #${tournamentId} not found`);
   const startDate = tournament.startDate;
 
-  const groups = await db.query.group.findMany({
-    where: (group, { eq }) => eq(group.tournamentId, tournamentId),
-    with: {
-      participants: true,
-    },
-  });
+  const groups = await getGroupsByTournamentId(tournamentId);
 
   const scheduledGames: InferInsertModel<typeof game>[] = [];
 

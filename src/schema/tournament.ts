@@ -1,6 +1,6 @@
 import z from "zod";
 
-export const createTournamentFormDataSchema = z.object({
+export const createTournamentFormSchema = z.object({
   // Turnierinformationen
   clubName: z.string().min(1, "Vereinsname ist erforderlich"),
   tournamentType: z.string().min(1, "Turnierart ist erforderlich"),
@@ -41,7 +41,3 @@ export const createTournamentFormDataSchema = z.object({
     )
     .min(1, "Mindestens eine Spielwoche ist erforderlich"),
 });
-
-export type CreateTournamentFormData = z.infer<
-  typeof createTournamentFormDataSchema
->;

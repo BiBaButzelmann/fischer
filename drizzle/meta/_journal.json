@@ -239,6 +239,13 @@
       "when": 1751129407826,
       "tag": "0033_smiling_red_hulk",
       "breakpoints": true
+    },
+    {
+      "idx": 34,
+      "version": "7",
+      "when": 1751195010619,
+      "tag": "0034_slim_xavin",
+      "breakpoints": true
     }
   ]
 }

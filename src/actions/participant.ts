@@ -1,27 +1,22 @@
 "use server";
 
 import z from "zod";
-import { registerFormSchema } from "@/components/participate/schema";
 import { db } from "@/db/client";
 import invariant from "tiny-invariant";
 import { profile } from "@/db/schema/profile";
 import { eq } from "drizzle-orm";
-import { auth } from "@/auth";
-import { headers } from "next/headers";
 import { participant } from "@/db/schema/participant";
+import { createParticipantFormSchema } from "@/schema/participant";
+import { auth } from "@/auth/utils";
+import { getTournamentById } from "@/db/repositories/tournament";
 
 export async function createTournamentParticipant(
   tournamentId: number,
-  data: z.infer<typeof registerFormSchema>,
+  data: z.infer<typeof createParticipantFormSchema>,
 ) {
-  const session = await auth.api.getSession({
-    headers: await headers(),
-  });
-  invariant(session, "You must be logged in to participate in a tournament");
+  const session = await auth();
 
-  const tournament = await db.query.tournament.findFirst({
-    where: (tournament, { eq }) => eq(tournament.id, tournamentId),
-  });
+  const tournament = await getTournamentById(tournamentId);
   invariant(tournament, "Tournament not found");
 
   const currentProfile = await db
@@ -45,10 +40,6 @@ export async function createTournamentParticipant(
       fideId: data.fideId,
       preferredMatchDay: data.preferredMatchDay,
       secondaryMatchDays: data.secondaryMatchDays,
-      helpAsReferee: data.helpAsReferee,
-      helpSetupRoom: data.helpSetupRoom,
-      helpEnterMatches: data.helpEnterMatches ?? false,
-      helpAsTournamentJury: data.helpAsTournamentJury ?? false,
     })
     .onConflictDoNothing();
 }

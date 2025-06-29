@@ -23,10 +23,7 @@ export const participant = pgTable(
     preferredMatchDay: matchDay("preferred_match_day").notNull(),
     secondaryMatchDays: matchDay("secondary_match_days").array().notNull(),
 
-    helpAsReferee: matchDay("help_as_referee").array().notNull(),
-    helpSetupRoom: matchDay("help_setup_room").array().notNull(),
-    helpEnterMatches: boolean("help_enter_matches").notNull(),
-    helpAsTournamentJury: boolean("help_as_tournament_jury").notNull(),
+    entryFeePayed: boolean("entry_fee_payed"),
 
     ...timestamps,
   },
