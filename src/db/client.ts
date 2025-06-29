@@ -6,6 +6,7 @@ import * as participantSchema from "./schema/participant";
 import * as groupSchema from "./schema/group";
 import * as gameSchema from "./schema/game";
 import * as pgnSchema from "./schema/pgn";
+import * as tournamentWeekSchema from "./schema/tournamentWeek";
 
 export const db = drizzle({
   schema: {
@@ -15,7 +16,8 @@ export const db = drizzle({
     ...participantSchema,
     ...groupSchema,
     ...gameSchema,
-    ...pgnSchema
+    ...pgnSchema,
+    ...tournamentWeekSchema,
   },
   connection: process.env.DATABASE_URL!,
 });

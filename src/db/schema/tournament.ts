@@ -11,6 +11,7 @@ import {
 import { profile } from "./profile";
 import { timestamps } from "./columns.helpers";
 import { group } from "./group";
+import { tournamentWeek } from "./tournamentWeek";
 
 export const tournamentStage = pgEnum("tournament_stage", [
   "registration",
@@ -34,6 +35,7 @@ export const tournament = pgTable("tournament", {
   phone: text("phone").notNull(),
   email: text("email").notNull(),
   stage: tournamentStage("stage").default("registration").notNull(),
+
   organizerProfileId: integer("organizer_profile_id"),
 
   ...timestamps,
@@ -45,4 +47,5 @@ export const tournamentRelations = relations(tournament, ({ one, many }) => ({
     references: [profile.id],
   }),
   groups: many(group),
+  weeks: many(tournamentWeek),
 }));

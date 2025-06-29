@@ -1,6 +1,6 @@
 {
-  "id": "15ac1365-0829-4d23-81dd-7034d17eb2bd",
-  "prevId": "0608e0b8-fa4d-4913-a304-9043e34e436f",
+  "id": "cece01b6-68c2-4b78-b0b4-a1a57e864d8c",
+  "prevId": "15ac1365-0829-4d23-81dd-7034d17eb2bd",
   "version": "7",
   "dialect": "postgresql",
   "tables": {
@@ -93,8 +93,12 @@
           "name": "account_user_id_user_id_fk",
           "tableFrom": "account",
           "tableTo": "user",
-          "columnsFrom": ["user_id"],
-          "columnsTo": ["id"],
+          "columnsFrom": [
+            "user_id"
+          ],
+          "columnsTo": [
+            "id"
+          ],
           "onDelete": "cascade",
           "onUpdate": "no action"
         }
@@ -170,8 +174,12 @@
           "name": "session_user_id_user_id_fk",
           "tableFrom": "session",
           "tableTo": "user",
-          "columnsFrom": ["user_id"],
-          "columnsTo": ["id"],
+          "columnsFrom": [
+            "user_id"
+          ],
+          "columnsTo": [
+            "id"
+          ],
           "onDelete": "cascade",
           "onUpdate": "no action"
         }
@@ -181,7 +189,9 @@
         "session_token_unique": {
           "name": "session_token_unique",
           "nullsNotDistinct": false,
-          "columns": ["token"]
+          "columns": [
+            "token"
+          ]
         }
       },
       "policies": {},
@@ -266,7 +276,9 @@
         "user_email_unique": {
           "name": "user_email_unique",
           "nullsNotDistinct": false,
-          "columns": ["email"]
+          "columns": [
+            "email"
+          ]
         }
       },
       "policies": {},
@@ -367,6 +379,12 @@
           "primaryKey": false,
           "notNull": true
         },
+        "pgn_id": {
+          "name": "pgn_id",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": false
+        },
         "round": {
           "name": "round",
           "type": "integer",
@@ -381,7 +399,7 @@
         },
         "scheduled": {
           "name": "scheduled",
-          "type": "date",
+          "type": "timestamp with time zone",
           "primaryKey": false,
           "notNull": true
         },
@@ -477,7 +495,10 @@
       "compositePrimaryKeys": {
         "group_tournament_id_group_number_pk": {
           "name": "group_tournament_id_group_number_pk",
-          "columns": ["tournament_id", "group_number"]
+          "columns": [
+            "tournament_id",
+            "group_number"
+          ]
         }
       },
       "uniqueConstraints": {},
@@ -614,7 +635,10 @@
         "participant_tournament_id_profile_id_unique": {
           "name": "participant_tournament_id_profile_id_unique",
           "nullsNotDistinct": false,
-          "columns": ["tournament_id", "profile_id"]
+          "columns": [
+            "tournament_id",
+            "profile_id"
+          ]
         }
       },
       "policies": {},
@@ -678,8 +702,12 @@
           "name": "pgn_game_id_game_id_fk",
           "tableFrom": "pgn",
           "tableTo": "game",
-          "columnsFrom": ["game_id"],
-          "columnsTo": ["id"],
+          "columnsFrom": [
+            "game_id"
+          ],
+          "columnsTo": [
+            "id"
+          ],
           "onDelete": "cascade",
           "onUpdate": "no action"
         }
@@ -767,7 +795,9 @@
         "profile_email_unique": {
           "name": "profile_email_unique",
           "nullsNotDistinct": false,
-          "columns": ["email"]
+          "columns": [
+            "email"
+          ]
         }
       },
       "policies": {},
@@ -907,23 +937,111 @@
       "policies": {},
       "checkConstraints": {},
       "isRLSEnabled": false
+    },
+    "public.tournament_week": {
+      "name": "tournament_week",
+      "schema": "",
+      "columns": {
+        "id": {
+          "name": "id",
+          "type": "integer",
+          "primaryKey": true,
+          "notNull": true,
+          "identity": {
+            "type": "always",
+            "name": "tournament_week_id_seq",
+            "schema": "public",
+            "increment": "1",
+            "startWith": "1",
+            "minValue": "1",
+            "maxValue": "2147483647",
+            "cache": "1",
+            "cycle": false
+          }
+        },
+        "tournament_id": {
+          "name": "tournament_id",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "status": {
+          "name": "status",
+          "type": "tournament_week_status",
+          "typeSchema": "public",
+          "primaryKey": false,
+          "notNull": true,
+          "default": "'regular'"
+        },
+        "week_number": {
+          "name": "week_number",
+          "type": "smallint",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "referee_needed_tuesday": {
+          "name": "referee_needed_tuesday",
+          "type": "boolean",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "referee_needed_thursday": {
+          "name": "referee_needed_thursday",
+          "type": "boolean",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "referee_needed_saturday": {
+          "name": "referee_needed_saturday",
+          "type": "boolean",
+          "primaryKey": false,
+          "notNull": true
+        }
+      },
+      "indexes": {},
+      "foreignKeys": {},
+      "compositePrimaryKeys": {},
+      "uniqueConstraints": {},
+      "policies": {},
+      "checkConstraints": {},
+      "isRLSEnabled": false
     }
   },
   "enums": {
     "public.match_day": {
       "name": "match_day",
       "schema": "public",
-      "values": ["tuesday", "thursday", "friday"]
+      "values": [
+        "tuesday",
+        "thursday",
+        "friday"
+      ]
     },
     "public.result": {
       "name": "result",
       "schema": "public",
-      "values": ["draw", "white_wins", "black_wins"]
+      "values": [
+        "draw",
+        "white_wins",
+        "black_wins"
+      ]
     },
     "public.tournament_stage": {
       "name": "tournament_stage",
       "schema": "public",
-      "values": ["registration", "running", "done"]
+      "values": [
+        "registration",
+        "running",
+        "done"
+      ]
+    },
+    "public.tournament_week_status": {
+      "name": "tournament_week_status",
+      "schema": "public",
+      "values": [
+        "regular",
+        "catch-up"
+      ]
     }
   },
   "schemas": {},
