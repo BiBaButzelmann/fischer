@@ -5,7 +5,6 @@ import { getMatchEnteringHelperByProfileIdAndTournamentId } from "@/db/repositor
 import { getParticipantByProfileIdAndTournamentId } from "@/db/repositories/participant";
 import { getProfileByUserId } from "@/db/repositories/profile";
 import { getRefereeByProfileIdAndTournamentId } from "@/db/repositories/referee";
-import { getRolesByProfileId } from "@/db/repositories/role";
 import { getSetupHelperByProfileIdAndTournamentId } from "@/db/repositories/setup-helper";
 import { getLatestTournament } from "@/db/repositories/tournament";
 import { redirect } from "next/navigation";
@@ -32,12 +31,6 @@ export default async function RolesPage() {
       getSetupHelperByProfileIdAndTournamentId(profile.id, tournament.id),
       getJurorByProfileIdAndTournamentId(profile.id, tournament.id),
     ]);
-
-  console.log("participant", participant);
-  console.log("referee", referee);
-  console.log("matchEnteringHelper", matchEnteringHelper);
-  console.log("setupHelper", setupHelper);
-  console.log("juror", juror);
 
   return (
     <div className="space-y-8">

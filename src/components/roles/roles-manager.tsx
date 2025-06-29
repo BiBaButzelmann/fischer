@@ -10,13 +10,12 @@ import { MatchEnteringForm } from "./forms/match-entering-form";
 import { SetupHelperForm } from "./forms/setup-helper-form";
 import { JurorForm } from "./forms/juror-form";
 import { Role } from "@/db/types/role";
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useState } from "react";
 import { z } from "zod";
 import { participantFormSchema } from "@/schema/participant";
 import { refereeFormSchema } from "@/schema/referee";
 import { matchEnteringHelperFormSchema } from "@/schema/matchEnteringHelper";
 import { setupHelperFormSchema } from "@/schema/setupHelper";
-import { jurorFormSchema } from "@/schema/juror";
 import { useRouter } from "next/navigation";
 import { createParticipant } from "@/actions/participant";
 import { createReferee } from "@/actions/referee";
@@ -28,6 +27,7 @@ import { Referee } from "@/db/types/referee";
 import { MatchEnteringHelper } from "@/db/types/match-entering-helper";
 import { SetupHelper } from "@/db/types/setup-helper";
 import { Juror } from "@/db/types/juror";
+import Link from "next/link";
 
 type InitialValues = {
   participant: Participant | undefined;
@@ -173,8 +173,8 @@ export function RolesManager({ tournamentId, initialValues }: Props) {
       </Accordion>
       {hasSelectedMoreThanOneRole(initialValues) ? (
         <div className="flex justify-center pt-6">
-          <Button size="lg" className="w-full sm:w-auto">
-            Rollen-Auswahl abschließen
+          <Button size="lg" className="w-full sm:w-auto" asChild>
+            <Link href="/home">Rollen-Auswahl abschließen</Link>
           </Button>
         </div>
       ) : null}
