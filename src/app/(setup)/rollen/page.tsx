@@ -1,20 +1,29 @@
+import { auth } from "@/auth/utils";
 import { RolesManager } from "@/components/roles/roles-manager";
+import { getProfileByUserId } from "@/db/repositories/profile";
+import { getRolesByProfileId } from "@/db/repositories/role";
+import { redirect } from "next/navigation";
 
-export default function RolesPage() {
+export default async function RolesPage() {
+  const session = await auth();
+  const profile = await getProfileByUserId(session.user.id);
+  if (!profile) {
+    redirect("/willkommen");
+  }
+
+  const roles = await getRolesByProfileId(profile.id);
   return (
-    <div className="min-h-screen w-full mx-auto bg-gray-50 dark:bg-gray-950 flex flex-col items-center justify-start p-4 sm:p-6 md:p-8 pt-16">
-      <div className="w-full max-w-3xl mx-auto space-y-8">
-        <header className="text-center">
-          <h1 className="text-3xl sm:text-4xl font-bold tracking-tight">
-            Rollen-Auswahl
-          </h1>
-          <p className="text-muted-foreground mt-2">
-            Wähle eine oder mehrere Rollen aus und gib deine Informationen dazu
-            an.
-          </p>
-        </header>
-        <RolesManager />
-      </div>
+    <div className="space-y-8">
+      <header className="text-center">
+        <h1 className="text-3xl sm:text-4xl font-bold tracking-tight">
+          Rollen-Auswahl
+        </h1>
+        <p className="text-muted-foreground mt-2">
+          Wähle eine oder mehrere Rollen aus und gib deine Informationen dazu
+          an.
+        </p>
+      </header>
+      <RolesManager roles={roles} />
     </div>
   );
 }
