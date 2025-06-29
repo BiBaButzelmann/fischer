@@ -11,29 +11,33 @@ import {
   FormMessage,
 } from "@/components/ui/form";
 import { ToggleGroup, ToggleGroupItem } from "@/components/ui/toggle-group";
+import { useTransition } from "react";
+import { jurorFormSchema } from "@/schema/juror";
+import { zodResolver } from "@hookform/resolvers/zod";
+import z from "zod";
+import { createJuror } from "@/actions/juror";
+type Props = {
+  tournamentId: number;
+};
 
-export function JuryForm({
-  onSubmit,
-  initialData = {},
-}: {
-  onSubmit: (data: any) => void;
-  initialData?: any;
-}) {
-  const getInitialValue = () => {
-    if (initialData.participating === true) return "yes";
-    if (initialData.participating === false) return "no";
-    return "";
-  };
-
-  const form = useForm({
+export function JurorForm({ tournamentId }: Props) {
+  const [isPending, startTransition] = useTransition();
+  const form = useForm<z.infer<typeof jurorFormSchema>>({
+    resolver: zodResolver(jurorFormSchema),
     defaultValues: {
-      participating: getInitialValue(),
+      participating: false,
     },
   });
 
-  function handleFormSubmit(values: any) {
-    onSubmit({ participating: values.participating === "yes" });
-  }
+  const handleFormSubmit = (data: z.infer<typeof jurorFormSchema>) => {
+    if (data.participating === false) {
+      return;
+    }
+    startTransition(async () => {
+      await createJuror(tournamentId);
+      // TODO: manage accordion state etc.
+    });
+  };
 
   return (
     <Form {...form}>
@@ -52,7 +56,6 @@ export function JuryForm({
                 <ToggleGroup
                   type="single"
                   onValueChange={field.onChange}
-                  defaultValue={field.value}
                   className="justify-start"
                   variant="outline"
                 >
