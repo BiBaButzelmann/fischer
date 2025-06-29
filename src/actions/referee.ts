@@ -4,14 +4,14 @@ import z from "zod";
 import { db } from "@/db/client";
 import invariant from "tiny-invariant";
 import { referee } from "@/db/schema/referee";
-import { refereeFormSchema } from "@/schema/referee";
+import { createRefereeFormSchema } from "@/schema/referee";
 import { getProfileByUserId } from "@/db/repositories/profile";
 import { getTournamentById } from "@/db/repositories/tournament";
 import { auth } from "@/auth/utils";
 
 export async function createReferee(
   tournamentId: number,
-  data: z.infer<typeof refereeFormSchema>,
+  data: z.infer<typeof createRefereeFormSchema>,
 ) {
   const session = await auth();
 

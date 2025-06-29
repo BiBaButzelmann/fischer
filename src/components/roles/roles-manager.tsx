@@ -6,6 +6,11 @@ import { Button } from "@/components/ui/button";
 import type { Role, RoleInfo } from "@/lib/types";
 import { User, Shield, Wrench, ClipboardEdit, Gavel } from "lucide-react";
 import { RoleCard } from "./role-card";
+import { ParticipateForm } from "./forms/participate-form";
+import { RefereeForm } from "./forms/referee-form";
+import { MatchEnteringForm } from "./forms/match-entering-form";
+import { SetupHelperForm } from "./forms/setup-helper-form";
+import { JurorForm } from "./forms/juror-form";
 
 const rolesData: RoleInfo[] = [
   {
@@ -44,12 +49,6 @@ export function RolesManager() {
   const [submittedData, setSubmittedData] = useState<Record<string, any>>({});
   const [accordionValue, setAccordionValue] = useState<string | undefined>();
 
-  const handleRoleSubmit = (roleId: Role, data: any) => {
-    console.log("Submitted data for", roleId, data);
-    setSubmittedData((prev) => ({ ...prev, [roleId]: data }));
-    setAccordionValue(undefined); // Collapse the accordion item after submit
-  };
-
   const isAnyRoleCompleted = Object.keys(submittedData).length > 0;
 
   return (
@@ -61,15 +60,52 @@ export function RolesManager() {
         onValueChange={setAccordionValue}
         className="w-full"
       >
-        {rolesData.map((role) => (
-          <RoleCard
-            key={role.id}
-            role={role}
-            isCompleted={!!submittedData[role.id]}
-            initialData={submittedData[role.id]}
-            onSubmit={(data: any) => handleRoleSubmit(role.id, data)}
-          />
-        ))}
+        <RoleCard
+          accordionId="participant"
+          name="Spieler"
+          description="Zum Klubturnier anmelden"
+          completed={false}
+          icon={User}
+        >
+          {/* TODO: dynamic tournament id */}
+          <ParticipateForm tournamentId={1} />
+        </RoleCard>
+        <RoleCard
+          accordionId="referee"
+          name="Schiedsrichter"
+          description="Als Schiedsrichter anmelden"
+          completed={false}
+          icon={Shield}
+        >
+          <RefereeForm tournamentId={1} />
+        </RoleCard>
+        <RoleCard
+          accordionId="matchEnteringHelper"
+          name="Eingabehelfer"
+          description="Als Eingabehelfer anmelden"
+          completed={false}
+          icon={ClipboardEdit}
+        >
+          <MatchEnteringForm tournamentId={1} />
+        </RoleCard>
+        <RoleCard
+          accordionId="setupHelper"
+          name="Aufbauhelfer"
+          description="Als Aufbauhelfer anmelden"
+          completed={false}
+          icon={Wrench}
+        >
+          <SetupHelperForm tournamentId={1} />
+        </RoleCard>
+        <RoleCard
+          accordionId="jury"
+          name="Turniergericht"
+          description="Am Turniergericht teilnehmen"
+          completed={false}
+          icon={Gavel}
+        >
+          <JurorForm tournamentId={1} />
+        </RoleCard>
       </Accordion>
 
       {isAnyRoleCompleted && (
