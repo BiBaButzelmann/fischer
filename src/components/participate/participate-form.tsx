@@ -25,7 +25,6 @@ import {
 } from "../ui/select";
 import { Checkbox } from "../ui/checkbox";
 import { Label } from "../ui/label";
-import Link from "next/link";
 import { Button } from "../ui/button";
 import { MatchDay } from "@/db/types/group";
 import { createTournamentParticipant } from "@/actions/participant";

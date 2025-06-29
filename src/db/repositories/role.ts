@@ -55,16 +55,8 @@ export async function getRoleByProfileId(profileId: number): Promise<Role[]> {
     }),
   ]);
 
-  const results = await unionAll(
-    participantQuery,
-    refereeQuery,
-    jurorQuery,
-    matchEnteringHelperQuery,
-    setupHelperQuery,
-  );
-
   return [
-    ...results.map((row) => row.tableName),
+    ...unionResult.map((row) => row.tableName),
     ...(sessionResult?.user.role === "admin" ? (["admin"] as const) : []),
   ];
 }

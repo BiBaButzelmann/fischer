@@ -24,5 +24,6 @@ export async function createJuror(
   await db.insert(juror).values({
     profileId: currentProfile.id,
     tournamentId: tournament.id,
+    ...data,
   });
 }
