@@ -39,7 +39,7 @@ function NoWeeksSelected() {
       <CalendarIcon className="h-12 w-12 mx-auto mb-4 opacity-50" />
       <p className="font-medium">Keine Wochen ausgewählt</p>
       <p className="text-sm">
-        Klicken Sie auf "Woche hinzufügen", um zu beginnen
+        Klicken Sie auf &quot;Woche hinzufügen&quot;, um zu beginnen
       </p>
       <p className="text-xs mt-2 text-muted-foreground/80">
         Die erste Woche wird automatisch auf die aktuelle Woche gesetzt
