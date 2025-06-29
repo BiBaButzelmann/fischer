@@ -2,12 +2,17 @@ import { auth } from "@/auth/utils";
 import { RolesManager } from "@/components/roles/roles-manager";
 import { getProfileByUserId } from "@/db/repositories/profile";
 import { getRolesByProfileId } from "@/db/repositories/role";
+import { getLatestTournament } from "@/db/repositories/tournament";
 import { redirect } from "next/navigation";
 
 export default async function RolesPage() {
   const session = await auth();
-  const profile = await getProfileByUserId(session.user.id);
-  if (!profile) {
+
+  const [profile, tournament] = await Promise.all([
+    getProfileByUserId(session.user.id),
+    getLatestTournament(),
+  ]);
+  if (!profile || !tournament) {
     redirect("/willkommen");
   }
 
@@ -23,7 +28,7 @@ export default async function RolesPage() {
           an.
         </p>
       </header>
-      <RolesManager roles={roles} />
+      <RolesManager tournamentId={tournament.id} roles={roles} />
     </div>
   );
 }

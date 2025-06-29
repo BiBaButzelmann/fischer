@@ -10,15 +10,78 @@ import { MatchEnteringForm } from "./forms/match-entering-form";
 import { SetupHelperForm } from "./forms/setup-helper-form";
 import { JurorForm } from "./forms/juror-form";
 import { Role } from "@/db/types/role";
+import { useEffect, useMemo, useState } from "react";
+import { z } from "zod";
+import { participantFormSchema } from "@/schema/participant";
+import { refereeFormSchema } from "@/schema/referee";
+import { matchEnteringHelperFormSchema } from "@/schema/matchEnteringHelper";
+import { setupHelperFormSchema } from "@/schema/setupHelper";
+import { jurorFormSchema } from "@/schema/juror";
+import { useRouter } from "next/navigation";
+import { createParticipant } from "@/actions/participant";
+import { createReferee } from "@/actions/referee";
+import { createMatchEnteringHelper } from "@/actions/match-entering-helper";
+import { createSetupHelper } from "@/actions/setup-helper";
+import { createJuror } from "@/actions/juror";
 
-export function RolesManager({ roles }: { roles: Role[] }) {
+export function RolesManager({
+  tournamentId,
+  roles,
+}: {
+  tournamentId: number;
+  roles: Role[];
+}) {
+  const router = useRouter();
+  const [accordionValue, setAccordionValue] = useState(
+    getAccordionValue(roles),
+  );
+
+  useEffect(() => {
+    setAccordionValue(getAccordionValue(roles));
+  }, [roles]);
+
+  const handleParticipateFormSubmit = async (
+    data: z.infer<typeof participantFormSchema>,
+  ) => {
+    await createParticipant(tournamentId, data);
+    router.refresh();
+  };
+
+  const handleRefereeFormSubmit = async (
+    data: z.infer<typeof refereeFormSchema>,
+  ) => {
+    await createReferee(tournamentId, data);
+    router.refresh();
+  };
+
+  const handleMatchEnteringFormSubmit = async (
+    data: z.infer<typeof matchEnteringHelperFormSchema>,
+  ) => {
+    await createMatchEnteringHelper(tournamentId, data);
+    router.refresh();
+  };
+
+  const handleSetupHelperFormSubmit = async (
+    data: z.infer<typeof setupHelperFormSchema>,
+  ) => {
+    await createSetupHelper(tournamentId, data);
+    router.refresh();
+  };
+
+  const handleJurorFormSubmit = async () => {
+    await createJuror(tournamentId);
+    router.refresh();
+  };
+
   return (
     <div className="space-y-6">
       <Accordion
         type="single"
         collapsible
-        // value={accordionValue}
-        // onValueChange={setAccordionValue}
+        value={accordionValue}
+        onValueChange={(value) =>
+          setAccordionValue(value as RolesWithoutAdmin | undefined)
+        }
         className="w-full"
       >
         <RoleCard
@@ -28,8 +91,7 @@ export function RolesManager({ roles }: { roles: Role[] }) {
           completed={roles.includes("participant")}
           icon={User}
         >
-          {/* TODO: dynamic tournament id */}
-          <ParticipateForm tournamentId={1} />
+          <ParticipateForm onSubmit={handleParticipateFormSubmit} />
         </RoleCard>
         <RoleCard
           accordionId="referee"
@@ -38,7 +100,7 @@ export function RolesManager({ roles }: { roles: Role[] }) {
           completed={roles.includes("referee")}
           icon={Shield}
         >
-          <RefereeForm tournamentId={1} />
+          <RefereeForm onSubmit={handleRefereeFormSubmit} />
         </RoleCard>
         <RoleCard
           accordionId="matchEnteringHelper"
@@ -47,7 +109,7 @@ export function RolesManager({ roles }: { roles: Role[] }) {
           completed={roles.includes("matchEnteringHelper")}
           icon={ClipboardEdit}
         >
-          <MatchEnteringForm tournamentId={1} />
+          <MatchEnteringForm onSubmit={handleMatchEnteringFormSubmit} />
         </RoleCard>
         <RoleCard
           accordionId="setupHelper"
@@ -56,7 +118,7 @@ export function RolesManager({ roles }: { roles: Role[] }) {
           completed={roles.includes("setupHelper")}
           icon={Wrench}
         >
-          <SetupHelperForm tournamentId={1} />
+          <SetupHelperForm onSubmit={handleSetupHelperFormSubmit} />
         </RoleCard>
         <RoleCard
           accordionId="juror"
@@ -65,7 +127,7 @@ export function RolesManager({ roles }: { roles: Role[] }) {
           completed={roles.includes("juror")}
           icon={Gavel}
         >
-          <JurorForm tournamentId={1} />
+          <JurorForm onSubmit={handleJurorFormSubmit} />
         </RoleCard>
       </Accordion>
       {roles.length > 0 ? (
@@ -79,6 +141,20 @@ export function RolesManager({ roles }: { roles: Role[] }) {
   );
 }
 
-function getAccordionValue(roles: Role[]) {
-  return "participant";
+const ROLES = [
+  "participant",
+  "referee",
+  "juror",
+  "matchEnteringHelper",
+  "setupHelper",
+] as const;
+
+type RolesWithoutAdmin = Exclude<Role, "admin">;
+
+function getAccordionValue(roles: Role[]): RolesWithoutAdmin | undefined {
+  for (const role of ROLES) {
+    if (!roles.includes(role)) {
+      return role;
+    }
+  }
 }

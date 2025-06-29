@@ -1,7 +1,7 @@
 import { availableMatchDays } from "@/db/schema/columns.helpers";
 import z from "zod";
 
-export const createParticipantFormSchema = z.object({
+export const participantFormSchema = z.object({
   chessClub: z.string().min(1, "Schachverein ist erforderlich"),
   dwzRating: z.coerce
     .number()

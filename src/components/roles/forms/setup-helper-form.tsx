@@ -2,7 +2,6 @@
 
 import { useForm } from "react-hook-form";
 import { Button } from "@/components/ui/button";
-import { Checkbox } from "@/components/ui/checkbox";
 import {
   Select,
   SelectContent,
@@ -22,30 +21,25 @@ import {
 import { zodResolver } from "@hookform/resolvers/zod";
 import z from "zod";
 import { useTransition } from "react";
-import { Calendar } from "lucide-react";
 import { MatchDaysCheckboxes } from "./matchday-selection";
-import { createSetupHelper } from "@/actions/setup-helper";
-import { createSetupHelperFormSchema } from "@/schema/setupHelper";
+import { setupHelperFormSchema } from "@/schema/setupHelper";
 
 type Props = {
-  tournamentId: number;
+  onSubmit: (data: z.infer<typeof setupHelperFormSchema>) => Promise<void>;
 };
-export function SetupHelperForm({ tournamentId }: Props) {
+export function SetupHelperForm({ onSubmit }: Props) {
   const [isPending, startTransition] = useTransition();
-  const form = useForm<z.infer<typeof createSetupHelperFormSchema>>({
-    resolver: zodResolver(createSetupHelperFormSchema),
+  const form = useForm<z.infer<typeof setupHelperFormSchema>>({
+    resolver: zodResolver(setupHelperFormSchema),
     defaultValues: {
       preferredMatchDay: undefined,
       secondaryMatchDays: [],
     },
   });
 
-  const handleFormSubmit = (
-    data: z.infer<typeof createSetupHelperFormSchema>,
-  ) => {
+  const handleFormSubmit = (data: z.infer<typeof setupHelperFormSchema>) => {
     startTransition(async () => {
-      await createSetupHelper(tournamentId, data);
-      // TODO: manage accordion state etc.
+      await onSubmit(data);
     });
   };
 
@@ -99,7 +93,7 @@ export function SetupHelperForm({ tournamentId }: Props) {
             </FormItem>
           )}
         />
-        <Button type="submit" className="w-full sm:w-auto">
+        <Button disabled={isPending} type="submit" className="w-full sm:w-auto">
           Änderungen speichern
         </Button>
       </form>
