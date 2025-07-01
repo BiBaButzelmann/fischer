@@ -17,7 +17,7 @@ import { refereeFormSchema } from "@/schema/referee";
 import { matchEnteringHelperFormSchema } from "@/schema/matchEnteringHelper";
 import { setupHelperFormSchema } from "@/schema/setupHelper";
 import { useRouter } from "next/navigation";
-import { createParticipant } from "@/actions/participant";
+import { createParticipant, deleteParticipant } from "@/actions/participant";
 import { createReferee } from "@/actions/referee";
 import { createMatchEnteringHelper } from "@/actions/match-entering-helper";
 import { createSetupHelper } from "@/actions/setup-helper";
@@ -48,15 +48,18 @@ export function RolesManager({ tournamentId, initialValues }: Props) {
     getAccordionValue(initialValues),
   );
 
-  useEffect(() => {
-    setAccordionValue(getAccordionValue(initialValues));
-  }, [initialValues]);
-
   const handleParticipateFormSubmit = async (
     data: z.infer<typeof participantFormSchema>,
   ) => {
     await createParticipant(tournamentId, data);
     router.refresh();
+  };
+
+  const handleDeleteParticipant = async () => {
+    if (initialValues.participant) {
+      await deleteParticipant(initialValues.participant.id);
+      router.refresh();
+    }
   };
 
   const handleRefereeFormSubmit = async (
@@ -120,6 +123,7 @@ export function RolesManager({ tournamentId, initialValues }: Props) {
                 : undefined
             }
             onSubmit={handleParticipateFormSubmit}
+            onDelete={handleDeleteParticipant}
           />
         </RoleCard>
         <RoleCard
