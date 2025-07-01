@@ -55,14 +55,24 @@ export function JurorForm({ initiallyParticipating, onSubmit }: Props) {
               <FormControl>
                 <ToggleGroup
                   type="single"
-                  onValueChange={field.onChange}
+                  value={
+                    field.value === true
+                      ? "true"
+                      : field.value === false
+                        ? "false"
+                        : undefined
+                  }
+                  onValueChange={(val) => {
+                    if (val === "true") field.onChange(true);
+                    else if (val === "false") field.onChange(false);
+                  }}
                   className="justify-start"
                   variant="outline"
                 >
-                  <ToggleGroupItem value="yes" aria-label="Ja">
+                  <ToggleGroupItem value="true" aria-label="Ja">
                     Ja
                   </ToggleGroupItem>
-                  <ToggleGroupItem value="no" aria-label="Nein">
+                  <ToggleGroupItem value="false" aria-label="Nein">
                     Nein
                   </ToggleGroupItem>
                 </ToggleGroup>
@@ -71,9 +81,25 @@ export function JurorForm({ initiallyParticipating, onSubmit }: Props) {
             </FormItem>
           )}
         />
-        <Button disabled={isPending} type="submit" className="w-full sm:w-auto">
-          Antwort speichern
-        </Button>
+        <div className="flex items-center gap-2">
+          <Button
+            disabled={isPending}
+            type="submit"
+            className="w-full sm:w-auto"
+          >
+            Antwort speichern
+          </Button>
+          {initiallyParticipating !== undefined ? (
+            <Button
+              disabled={isPending}
+              type="submit"
+              className="w-full sm:w-auto "
+              variant={"outline"}
+            >
+              Änderungen verwerfen
+            </Button>
+          ) : null}
+        </div>
       </form>
     </Form>
   );

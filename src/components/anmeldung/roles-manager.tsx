@@ -174,7 +174,7 @@ export function RolesManager({ tournamentId, initialValues }: Props) {
       {hasSelectedMoreThanOneRole(initialValues) ? (
         <div className="flex justify-center pt-6">
           <Button size="lg" className="w-full sm:w-auto" asChild>
-            <Link href="/home">Rollen-Auswahl abschließen</Link>
+            <Link href="/home">Anmeldung abschließen</Link>
           </Button>
         </div>
       ) : null}

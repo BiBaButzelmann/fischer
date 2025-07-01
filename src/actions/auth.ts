@@ -36,7 +36,7 @@ export async function login(data: z.infer<typeof loginFormSchema>) {
     if (roles.length > 0) {
       redirect("/home");
     }
-    redirect("/rollen");
+    redirect("/anmeldung");
   }
   redirect("/home");
 }
@@ -66,10 +66,10 @@ export async function signup(data: z.infer<typeof signupFormSchema>) {
 
   const tournament = await getActiveTournament();
   if (!tournament) {
-    redirect("/willkommen");
+    redirect("/home");
   }
   if (tournament.stage === "registration") {
-    redirect("/rollen");
+    redirect("/anmeldung");
   }
   redirect("/home");
 }
