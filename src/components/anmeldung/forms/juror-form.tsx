@@ -10,7 +10,6 @@ import {
   FormLabel,
   FormMessage,
 } from "@/components/ui/form";
-import { ToggleGroup, ToggleGroupItem } from "@/components/ui/toggle-group";
 import { useTransition } from "react";
 import { jurorFormSchema } from "@/schema/juror";
 import { zodResolver } from "@hookform/resolvers/zod";
