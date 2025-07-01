@@ -28,9 +28,14 @@ type Props = {
   onSubmit: (
     data: z.infer<typeof matchEnteringHelperFormSchema>,
   ) => Promise<void>;
+  onDelete: () => Promise<void>;
 };
 
-export function MatchEnteringForm({ initialValues, onSubmit }: Props) {
+export function MatchEnteringForm({
+  initialValues,
+  onSubmit,
+  onDelete,
+}: Props) {
   const [isPending, startTransition] = useTransition();
   const form = useForm<z.infer<typeof matchEnteringHelperFormSchema>>({
     resolver: zodResolver(matchEnteringHelperFormSchema),
@@ -44,6 +49,12 @@ export function MatchEnteringForm({ initialValues, onSubmit }: Props) {
   ) => {
     startTransition(async () => {
       await onSubmit(data);
+    });
+  };
+
+  const handleDelete = () => {
+    startTransition(async () => {
+      await onDelete();
     });
   };
 
@@ -97,7 +108,7 @@ export function MatchEnteringForm({ initialValues, onSubmit }: Props) {
           {initialValues !== undefined ? (
             <Button
               disabled={isPending}
-              type="submit"
+              onClick={handleDelete}
               className="w-full sm:w-auto "
               variant={"outline"}
             >

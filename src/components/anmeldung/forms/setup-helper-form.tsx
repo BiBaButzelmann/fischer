@@ -27,8 +27,9 @@ import { setupHelperFormSchema } from "@/schema/setupHelper";
 type Props = {
   initialValues?: z.infer<typeof setupHelperFormSchema>;
   onSubmit: (data: z.infer<typeof setupHelperFormSchema>) => Promise<void>;
+  onDelete: () => Promise<void>;
 };
-export function SetupHelperForm({ initialValues, onSubmit }: Props) {
+export function SetupHelperForm({ initialValues, onSubmit, onDelete }: Props) {
   const [isPending, startTransition] = useTransition();
   const form = useForm<z.infer<typeof setupHelperFormSchema>>({
     resolver: zodResolver(setupHelperFormSchema),
@@ -41,6 +42,11 @@ export function SetupHelperForm({ initialValues, onSubmit }: Props) {
   const handleFormSubmit = (data: z.infer<typeof setupHelperFormSchema>) => {
     startTransition(async () => {
       await onSubmit(data);
+    });
+  };
+  const handleDelete = () => {
+    startTransition(async () => {
+      await onDelete();
     });
   };
 
@@ -105,7 +111,7 @@ export function SetupHelperForm({ initialValues, onSubmit }: Props) {
           {initialValues !== undefined ? (
             <Button
               disabled={isPending}
-              type="submit"
+              onClick={handleDelete}
               className="w-full sm:w-auto "
               variant={"outline"}
             >

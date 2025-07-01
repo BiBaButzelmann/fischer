@@ -15,13 +15,20 @@ import { useTransition } from "react";
 import { jurorFormSchema } from "@/schema/juror";
 import { zodResolver } from "@hookform/resolvers/zod";
 import z from "zod";
+import { Switch } from "@/components/ui/switch";
 
 type Props = {
   initiallyParticipating?: boolean;
   onSubmit: () => Promise<void>;
+  onDelete: () => Promise<void>;
 };
 
-export function JurorForm({ initiallyParticipating, onSubmit }: Props) {
+export function JurorForm({
+  initiallyParticipating,
+  onSubmit,
+  onDelete,
+}: Props) {
+  console.log("initiallyParticipating", initiallyParticipating);
   const [isPending, startTransition] = useTransition();
   const form = useForm<z.infer<typeof jurorFormSchema>>({
     resolver: zodResolver(jurorFormSchema),
@@ -39,6 +46,12 @@ export function JurorForm({ initiallyParticipating, onSubmit }: Props) {
     });
   };
 
+  const handleDelete = () => {
+    startTransition(async () => {
+      await onDelete();
+    });
+  };
+
   return (
     <Form {...form}>
       <form
@@ -50,32 +63,13 @@ export function JurorForm({ initiallyParticipating, onSubmit }: Props) {
           name="participating"
           rules={{ required: "Bitte triff eine Auswahl." }}
           render={({ field }) => (
-            <FormItem className="space-y-3">
+            <FormItem className="flex flex-row items-center space-x-3 space-y-0">
               <FormLabel>Möchtest du am Turniergericht teilnehmen?</FormLabel>
               <FormControl>
-                <ToggleGroup
-                  type="single"
-                  value={
-                    field.value === true
-                      ? "true"
-                      : field.value === false
-                        ? "false"
-                        : undefined
-                  }
-                  onValueChange={(val) => {
-                    if (val === "true") field.onChange(true);
-                    else if (val === "false") field.onChange(false);
-                  }}
-                  className="justify-start"
-                  variant="outline"
-                >
-                  <ToggleGroupItem value="true" aria-label="Ja">
-                    Ja
-                  </ToggleGroupItem>
-                  <ToggleGroupItem value="false" aria-label="Nein">
-                    Nein
-                  </ToggleGroupItem>
-                </ToggleGroup>
+                <Switch
+                  checked={field.value}
+                  onCheckedChange={field.onChange}
+                />
               </FormControl>
               <FormMessage />
             </FormItem>
@@ -92,7 +86,7 @@ export function JurorForm({ initiallyParticipating, onSubmit }: Props) {
           {initiallyParticipating !== undefined ? (
             <Button
               disabled={isPending}
-              type="submit"
+              onClick={handleDelete}
               className="w-full sm:w-auto "
               variant={"outline"}
             >
