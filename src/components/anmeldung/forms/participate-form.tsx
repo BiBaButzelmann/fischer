@@ -1,7 +1,7 @@
 "use client";
 
 import { zodResolver } from "@hookform/resolvers/zod";
-import { useTransition } from "react";
+import { useEffect, useTransition } from "react";
 import { useForm } from "react-hook-form";
 import z from "zod";
 import {
@@ -28,8 +28,10 @@ import { MatchDaysCheckboxes } from "./matchday-selection";
 type Props = {
   initialValues?: z.infer<typeof participantFormSchema>;
   onSubmit: (data: z.infer<typeof participantFormSchema>) => Promise<void>;
+  onDelete: () => Promise<void>;
 };
-export function ParticipateForm({ initialValues, onSubmit }: Props) {
+
+export function ParticipateForm({ initialValues, onSubmit, onDelete }: Props) {
   const [isPending, startTransition] = useTransition();
   const form = useForm<z.infer<typeof participantFormSchema>>({
     resolver: zodResolver(participantFormSchema),
@@ -47,6 +49,12 @@ export function ParticipateForm({ initialValues, onSubmit }: Props) {
   const handleSubmit = (data: z.infer<typeof participantFormSchema>) => {
     startTransition(async () => {
       await onSubmit(data);
+    });
+  };
+
+  const handleDelete = () => {
+    startTransition(async () => {
+      await onDelete();
     });
   };
 
@@ -171,9 +179,9 @@ export function ParticipateForm({ initialValues, onSubmit }: Props) {
           {initialValues !== undefined ? (
             <Button
               disabled={isPending}
-              type="submit"
               className="w-full sm:w-auto "
               variant={"outline"}
+              onClick={handleDelete}
             >
               Änderungen verwerfen
             </Button>

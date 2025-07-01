@@ -8,6 +8,7 @@ import { matchEnteringHelperFormSchema } from "@/schema/matchEnteringHelper";
 import { auth } from "@/auth/utils";
 import { getTournamentById } from "@/db/repositories/tournament";
 import { getProfileByUserId } from "@/db/repositories/profile";
+import { and, eq } from "drizzle-orm";
 
 export async function createMatchEnteringHelper(
   tournamentId: number,
@@ -34,4 +35,19 @@ export async function createMatchEnteringHelper(
         numberOfGroupsToEnter: data.numberOfGroupsToEnter,
       },
     });
+}
+export async function deleteMatchEnteringHelper(matchEnteringHelperId: number) {
+  const session = await auth();
+
+  const currentProfile = await getProfileByUserId(session.user.id);
+  invariant(currentProfile, "Profile not found");
+
+  await db
+    .delete(matchEnteringHelper)
+    .where(
+      and(
+        eq(matchEnteringHelper.id, matchEnteringHelperId),
+        eq(matchEnteringHelper.profileId, currentProfile.id),
+      ),
+    );
 }
