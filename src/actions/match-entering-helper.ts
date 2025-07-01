@@ -40,7 +40,7 @@ export async function deleteMatchEnteringHelper(matchEnteringHelperId: number) {
   const session = await auth();
 
   const currentProfile = await getProfileByUserId(session.user.id);
-  invariant(currentProfile, "Profile not found");
+  invariant(currentProfile, "Match Entering Helper not found");
 
   await db
     .delete(matchEnteringHelper)

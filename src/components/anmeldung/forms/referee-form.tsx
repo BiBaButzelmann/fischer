@@ -27,9 +27,10 @@ import { MatchDaysCheckboxes } from "./matchday-selection";
 type Props = {
   initialValues?: z.infer<typeof refereeFormSchema>;
   onSubmit: (data: z.infer<typeof refereeFormSchema>) => Promise<void>;
+  onDelete: () => Promise<void>;
 };
 
-export function RefereeForm({ initialValues, onSubmit }: Props) {
+export function RefereeForm({ initialValues, onSubmit, onDelete }: Props) {
   const [isPending, startTransition] = useTransition();
   const form = useForm<z.infer<typeof refereeFormSchema>>({
     resolver: zodResolver(refereeFormSchema),
@@ -42,6 +43,12 @@ export function RefereeForm({ initialValues, onSubmit }: Props) {
   const handleFormSubmit = (data: z.infer<typeof refereeFormSchema>) => {
     startTransition(async () => {
       await onSubmit(data);
+    });
+  };
+
+  const handleDelete = () => {
+    startTransition(async () => {
+      await onDelete();
     });
   };
 
@@ -106,7 +113,7 @@ export function RefereeForm({ initialValues, onSubmit }: Props) {
           {initialValues !== undefined ? (
             <Button
               disabled={isPending}
-              type="submit"
+              onClick={handleDelete}
               className="w-full sm:w-auto "
               variant={"outline"}
             >

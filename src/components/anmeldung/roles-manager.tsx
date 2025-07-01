@@ -18,10 +18,13 @@ import { matchEnteringHelperFormSchema } from "@/schema/matchEnteringHelper";
 import { setupHelperFormSchema } from "@/schema/setupHelper";
 import { useRouter } from "next/navigation";
 import { createParticipant, deleteParticipant } from "@/actions/participant";
-import { createReferee } from "@/actions/referee";
-import { createMatchEnteringHelper } from "@/actions/match-entering-helper";
-import { createSetupHelper } from "@/actions/setup-helper";
-import { createJuror } from "@/actions/juror";
+import { createReferee, deleteReferee } from "@/actions/referee";
+import {
+  createMatchEnteringHelper,
+  deleteMatchEnteringHelper,
+} from "@/actions/match-entering-helper";
+import { createSetupHelper, deleteSetupHelper } from "@/actions/setup-helper";
+import { createJuror, deleteJuror } from "@/actions/juror";
 import { Participant } from "@/db/types/participant";
 import { Referee } from "@/db/types/referee";
 import { MatchEnteringHelper } from "@/db/types/match-entering-helper";
@@ -69,11 +72,24 @@ export function RolesManager({ tournamentId, initialValues }: Props) {
     router.refresh();
   };
 
+  const handleDeleteReferee = async () => {
+    if (initialValues.referee) {
+      await deleteReferee(initialValues.referee.id);
+      router.refresh();
+    }
+  };
   const handleMatchEnteringHelperFormSubmit = async (
     data: z.infer<typeof matchEnteringHelperFormSchema>,
   ) => {
     await createMatchEnteringHelper(tournamentId, data);
     router.refresh();
+  };
+
+  const handleDeleteMatchEnteringHelper = async () => {
+    if (initialValues.matchEnteringHelper) {
+      await deleteMatchEnteringHelper(initialValues.matchEnteringHelper.id);
+      router.refresh();
+    }
   };
 
   const handleSetupHelperFormSubmit = async (
@@ -83,9 +99,23 @@ export function RolesManager({ tournamentId, initialValues }: Props) {
     router.refresh();
   };
 
+  const handleDeleteSetupHelper = async () => {
+    if (initialValues.setupHelper) {
+      await deleteSetupHelper(initialValues.setupHelper.id);
+      router.refresh();
+    }
+  };
+
   const handleJurorFormSubmit = async () => {
     await createJuror(tournamentId);
     router.refresh();
+  };
+
+  const handleDeleteJuror = async () => {
+    if (initialValues.juror) {
+      await deleteJuror(initialValues.juror.id);
+      router.refresh();
+    }
   };
 
   return (
@@ -136,6 +166,7 @@ export function RolesManager({ tournamentId, initialValues }: Props) {
           <RefereeForm
             initialValues={initialValues.referee ?? undefined}
             onSubmit={handleRefereeFormSubmit}
+            onDelete={handleDeleteReferee}
           />
         </RoleCard>
         <RoleCard
@@ -148,6 +179,7 @@ export function RolesManager({ tournamentId, initialValues }: Props) {
           <MatchEnteringForm
             initialValues={initialValues.matchEnteringHelper ?? undefined}
             onSubmit={handleMatchEnteringHelperFormSubmit}
+            onDelete={handleDeleteMatchEnteringHelper}
           />
         </RoleCard>
         <RoleCard
@@ -160,6 +192,7 @@ export function RolesManager({ tournamentId, initialValues }: Props) {
           <SetupHelperForm
             initialValues={initialValues.setupHelper ?? undefined}
             onSubmit={handleSetupHelperFormSubmit}
+            onDelete={handleDeleteSetupHelper}
           />
         </RoleCard>
         <RoleCard
@@ -170,8 +203,11 @@ export function RolesManager({ tournamentId, initialValues }: Props) {
           icon={Gavel}
         >
           <JurorForm
-            initiallyParticipating={initialValues.juror != null}
+            initiallyParticipating={
+              initialValues.juror != null ? true : undefined
+            }
             onSubmit={handleJurorFormSubmit}
+            onDelete={handleDeleteJuror}
           />
         </RoleCard>
       </Accordion>
