@@ -8,6 +8,7 @@ import { setupHelper } from "@/db/schema/setupHelper";
 import { getProfileByUserId } from "@/db/repositories/profile";
 import { getTournamentById } from "@/db/repositories/tournament";
 import { auth } from "@/auth/utils";
+import { and, eq } from "drizzle-orm";
 
 export async function createSetupHelper(
   tournamentId: number,
@@ -36,4 +37,19 @@ export async function createSetupHelper(
         secondaryMatchDays: data.secondaryMatchDays,
       },
     });
+}
+export async function deleteSetupHelper(setupHelperId: number) {
+  const session = await auth();
+
+  const currentProfile = await getProfileByUserId(session.user.id);
+  invariant(currentProfile, "Profile not found");
+
+  await db
+    .delete(setupHelper)
+    .where(
+      and(
+        eq(setupHelper.id, setupHelperId),
+        eq(setupHelper.profileId, currentProfile.id),
+      ),
+    );
 }

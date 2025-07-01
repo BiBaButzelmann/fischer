@@ -8,6 +8,7 @@ import { participantFormSchema } from "@/schema/participant";
 import { auth } from "@/auth/utils";
 import { getTournamentById } from "@/db/repositories/tournament";
 import { getProfileByUserId } from "@/db/repositories/profile";
+import { and, eq } from "drizzle-orm";
 
 export async function createParticipant(
   tournamentId: number,
@@ -44,4 +45,20 @@ export async function createParticipant(
         secondaryMatchDays: data.secondaryMatchDays,
       },
     });
+}
+
+export async function deleteParticipant(participantId: number) {
+  const session = await auth();
+
+  const currentProfile = await getProfileByUserId(session.user.id);
+  invariant(currentProfile, "Profile not found");
+
+  await db
+    .delete(participant)
+    .where(
+      and(
+        eq(participant.id, participantId),
+        eq(participant.profileId, currentProfile.id),
+      ),
+    );
 }
