@@ -10,7 +10,7 @@ import { MatchEnteringForm } from "./forms/match-entering-form";
 import { SetupHelperForm } from "./forms/setup-helper-form";
 import { JurorForm } from "./forms/juror-form";
 import { Role } from "@/db/types/role";
-import { useEffect, useState } from "react";
+import { useState } from "react";
 import { z } from "zod";
 import { participantFormSchema } from "@/schema/participant";
 import { refereeFormSchema } from "@/schema/referee";
