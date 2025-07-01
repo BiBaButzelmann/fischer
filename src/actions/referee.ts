@@ -8,6 +8,7 @@ import { refereeFormSchema } from "@/schema/referee";
 import { getProfileByUserId } from "@/db/repositories/profile";
 import { getTournamentById } from "@/db/repositories/tournament";
 import { auth } from "@/auth/utils";
+import { and, eq } from "drizzle-orm";
 
 export async function createReferee(
   tournamentId: number,
@@ -21,10 +22,32 @@ export async function createReferee(
   const currentProfile = await getProfileByUserId(session.user.id);
   invariant(currentProfile, "Profile not found");
 
-  await db.insert(referee).values({
-    profileId: currentProfile.id,
-    tournamentId: tournament.id,
-    preferredMatchDay: data.preferredMatchDay,
-    secondaryMatchDays: data.secondaryMatchDays,
-  });
+  await db
+    .insert(referee)
+    .values({
+      profileId: currentProfile.id,
+      tournamentId: tournament.id,
+      preferredMatchDay: data.preferredMatchDay,
+      secondaryMatchDays: data.secondaryMatchDays,
+    })
+    .onConflictDoUpdate({
+      target: [referee.tournamentId, referee.profileId],
+      set: {
+        preferredMatchDay: data.preferredMatchDay,
+        secondaryMatchDays: data.secondaryMatchDays,
+      },
+    });
+}
+
+export async function deleteReferee(refereeId: number) {
+  const session = await auth();
+
+  const currentProfile = await getProfileByUserId(session.user.id);
+  invariant(currentProfile, "Profile not found");
+
+  await db
+    .delete(referee)
+    .where(
+      and(eq(referee.id, refereeId), eq(referee.profileId, currentProfile.id)),
+    );
 }

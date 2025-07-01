@@ -35,8 +35,8 @@ export function NavUser() {
         className="hover:bg-secondary hover:text-sidebar-foreground"
         additionalLinks={[
           {
-            href: "/profile",
-            label: "Profil verwalten",
+            href: "/anmeldung",
+            label: "Turnierbeteiligung verwalten",
             icon: <UserIcon />,
             signedIn: true,
           },

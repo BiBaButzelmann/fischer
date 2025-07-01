@@ -3,36 +3,29 @@
 import z from "zod";
 import { db } from "@/db/client";
 import invariant from "tiny-invariant";
-import { profile } from "@/db/schema/profile";
-import { eq } from "drizzle-orm";
 import { participant } from "@/db/schema/participant";
-import { createParticipantFormSchema } from "@/schema/participant";
+import { participantFormSchema } from "@/schema/participant";
 import { auth } from "@/auth/utils";
 import { getTournamentById } from "@/db/repositories/tournament";
+import { getProfileByUserId } from "@/db/repositories/profile";
+import { and, eq } from "drizzle-orm";
 
-export async function createTournamentParticipant(
+export async function createParticipant(
   tournamentId: number,
-  data: z.infer<typeof createParticipantFormSchema>,
+  data: z.infer<typeof participantFormSchema>,
 ) {
   const session = await auth();
 
   const tournament = await getTournamentById(tournamentId);
   invariant(tournament, "Tournament not found");
 
-  const currentProfile = await db
-    .update(profile)
-    .set({
-      phoneNumber: data.phoneNumber,
-    })
-    .where(eq(profile.userId, session.user.id))
-    .returning({
-      id: profile.id,
-    });
+  const currentProfile = await getProfileByUserId(session.user.id);
+  invariant(currentProfile, "Profile not found");
 
   await db
     .insert(participant)
     .values({
-      profileId: currentProfile[0].id,
+      profileId: currentProfile.id,
       tournamentId: tournament.id,
       chessClub: data.chessClub,
       dwzRating: data.dwzRating,
@@ -41,5 +34,31 @@ export async function createTournamentParticipant(
       preferredMatchDay: data.preferredMatchDay,
       secondaryMatchDays: data.secondaryMatchDays,
     })
-    .onConflictDoNothing();
+    .onConflictDoUpdate({
+      target: [participant.tournamentId, participant.profileId],
+      set: {
+        chessClub: data.chessClub,
+        dwzRating: data.dwzRating,
+        fideRating: data.fideRating,
+        fideId: data.fideId,
+        preferredMatchDay: data.preferredMatchDay,
+        secondaryMatchDays: data.secondaryMatchDays,
+      },
+    });
+}
+
+export async function deleteParticipant(participantId: number) {
+  const session = await auth();
+
+  const currentProfile = await getProfileByUserId(session.user.id);
+  invariant(currentProfile, "Profile not found");
+
+  await db
+    .delete(participant)
+    .where(
+      and(
+        eq(participant.id, participantId),
+        eq(participant.profileId, currentProfile.id),
+      ),
+    );
 }

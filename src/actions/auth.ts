@@ -5,11 +5,12 @@ import { loginFormSchema } from "@/components/auth/login-form";
 import { db } from "@/db/client";
 import { redirect } from "next/navigation";
 import { signupFormSchema } from "@/components/auth/signup-form";
-import { participant } from "@/db/schema/participant";
 import { profile } from "@/db/schema/profile";
-import { eq } from "drizzle-orm";
 import { auth } from "@/auth";
 import { getActiveTournament } from "@/db/repositories/tournament";
+import { getRolesByProfileId } from "@/db/repositories/role";
+import { getProfileByUserId } from "@/db/repositories/profile";
+import invariant from "tiny-invariant";
 
 export type LoginResponse = { error: string };
 
@@ -27,21 +28,15 @@ export async function login(data: z.infer<typeof loginFormSchema>) {
     };
   }
   const tournament = await getActiveTournament();
-  if (!tournament) {
-    redirect("/willkommen");
-  }
-  if (tournament.stage === "registration") {
-    // tournament is not started yet -> participation form is open
-    const participation = await db
-      .select({ userId: profile.userId })
-      .from(participant)
-      .leftJoin(profile, eq(participant.profileId, profile.id))
-      .where(eq(profile.userId, result.user.id));
+  if (tournament?.stage === "registration") {
+    const profile = await getProfileByUserId(result.user.id);
+    invariant(profile, "Profile not found for user");
+    const roles = await getRolesByProfileId(profile.id);
 
-    if (participation.length > 0) {
+    if (roles.length > 0) {
       redirect("/home");
     }
-    redirect("/participate");
+    redirect("/anmeldung");
   }
   redirect("/home");
 }
@@ -69,6 +64,12 @@ export async function signup(data: z.infer<typeof signupFormSchema>) {
     email: data.email,
   });
 
-  // TODO: where to redirect if registration is not open?
-  redirect("/participate");
+  const tournament = await getActiveTournament();
+  if (!tournament) {
+    redirect("/home");
+  }
+  if (tournament.stage === "registration") {
+    redirect("/anmeldung");
+  }
+  redirect("/home");
 }
