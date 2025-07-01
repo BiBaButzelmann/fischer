@@ -4,7 +4,7 @@ import { db } from "./db/client";
 import { admin as adminPlugin } from "better-auth/plugins";
 import { ac, admin, user } from "./permissions";
 import { nextCookies } from "better-auth/next-js";
-// TODO: implement email sending
+import { sendConfirmRegistrationEmail } from "@/email/confirmRegistration";
 
 export const auth = betterAuth({
   database: drizzleAdapter(db, {
@@ -12,6 +12,9 @@ export const auth = betterAuth({
   }),
   emailVerification: {
     sendOnSignUp: true,
+    sendVerificationEmail: async (data, _request) => {
+      await sendConfirmRegistrationEmail(data.user.email);
+    },
   },
   emailAndPassword: {
     minPasswordLength: 6,
