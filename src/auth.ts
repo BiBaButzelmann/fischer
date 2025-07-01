@@ -5,10 +5,11 @@ import { admin as adminPlugin } from "better-auth/plugins";
 import { ac, admin, user } from "./permissions";
 import { nextCookies } from "better-auth/next-js";
 import { sendConfirmRegistrationEmail } from "@/email/confirmRegistration";
+import { sendPasswordResetEmail } from "./email/passwordReset";
 
 export const auth = betterAuth({
   database: drizzleAdapter(db, {
-    provider: "pg", // or "mysql", "sqlite"
+    provider: "pg", //postgres
   }),
   emailVerification: {
     sendOnSignUp: true,
@@ -21,6 +22,9 @@ export const auth = betterAuth({
     enabled: true,
     autoSignIn: true,
     requireEmailVerification: false,
+    sendResetPassword: async ({ user, url, token }, request) => {
+      await sendPasswordResetEmail(user.email, user.name, url);
+    },
   },
   plugins: [
     nextCookies(),
