@@ -243,5 +243,5 @@ function getAccordionValue(
 }
 
 function hasSelectedMoreThanOneRole(roles: InitialValues): boolean {
-  return Object.values(roles).filter((role) => role !== undefined).length > 1;
+  return Object.values(roles).filter((role) => role !== undefined).length > 0;
 }
