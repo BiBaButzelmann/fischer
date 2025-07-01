@@ -18,28 +18,27 @@ import {
   FormLabel,
   FormMessage,
 } from "@/components/ui/form";
-import { refereeFormSchema } from "@/schema/referee";
 import { zodResolver } from "@hookform/resolvers/zod";
 import z from "zod";
 import { useTransition } from "react";
 import { MatchDaysCheckboxes } from "./matchday-selection";
+import { setupHelperFormSchema } from "@/schema/setupHelper";
 
 type Props = {
-  initialValues?: z.infer<typeof refereeFormSchema>;
-  onSubmit: (data: z.infer<typeof refereeFormSchema>) => Promise<void>;
+  initialValues?: z.infer<typeof setupHelperFormSchema>;
+  onSubmit: (data: z.infer<typeof setupHelperFormSchema>) => Promise<void>;
 };
-
-export function RefereeForm({ initialValues, onSubmit }: Props) {
+export function SetupHelperForm({ initialValues, onSubmit }: Props) {
   const [isPending, startTransition] = useTransition();
-  const form = useForm<z.infer<typeof refereeFormSchema>>({
-    resolver: zodResolver(refereeFormSchema),
+  const form = useForm<z.infer<typeof setupHelperFormSchema>>({
+    resolver: zodResolver(setupHelperFormSchema),
     defaultValues: {
       preferredMatchDay: initialValues?.preferredMatchDay ?? undefined,
       secondaryMatchDays: initialValues?.secondaryMatchDays ?? [],
     },
   });
 
-  const handleFormSubmit = (data: z.infer<typeof refereeFormSchema>) => {
+  const handleFormSubmit = (data: z.infer<typeof setupHelperFormSchema>) => {
     startTransition(async () => {
       await onSubmit(data);
     });
@@ -70,8 +69,7 @@ export function RefereeForm({ initialValues, onSubmit }: Props) {
                 </Select>
               </FormControl>
               <FormDescription>
-                Besonders für Dienstage und Freitage werden Schiedsrichter
-                gesucht.
+                Bitte wähle deinen bevorzugten Spieltag als Aufbauhelfer aus.
               </FormDescription>
               <FormMessage />
             </FormItem>
@@ -83,7 +81,7 @@ export function RefereeForm({ initialValues, onSubmit }: Props) {
           render={({ field }) => (
             <FormItem>
               <FormLabel>
-                Ich könnte zusätzlich an folgenden Wochentagen:
+                Ich könnte zusätzlich an folgenden Wochentagen aufbauen :
               </FormLabel>
               <FormControl>
                 <MatchDaysCheckboxes
@@ -92,12 +90,29 @@ export function RefereeForm({ initialValues, onSubmit }: Props) {
                 />
               </FormControl>
               <FormMessage />
+              <FormDescription>Vielen Dank!</FormDescription>
             </FormItem>
           )}
         />
-        <Button disabled={isPending} type="submit" className="w-full sm:w-auto">
-          Änderungen speichern
-        </Button>
+        <div className="flex items-center gap-2">
+          <Button
+            disabled={isPending}
+            type="submit"
+            className="w-full sm:w-auto"
+          >
+            Änderungen speichern
+          </Button>
+          {initialValues !== undefined ? (
+            <Button
+              disabled={isPending}
+              type="submit"
+              className="w-full sm:w-auto "
+              variant={"outline"}
+            >
+              Änderungen verwerfen
+            </Button>
+          ) : null}
+        </div>
       </form>
     </Form>
   );

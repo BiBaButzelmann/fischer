@@ -86,9 +86,25 @@ export function MatchEnteringForm({ initialValues, onSubmit }: Props) {
           )}
         />
 
-        <Button disabled={isPending} type="submit" className="w-full sm:w-auto">
-          Änderungen speichern
-        </Button>
+        <div className="flex items-center gap-2">
+          <Button
+            disabled={isPending}
+            type="submit"
+            className="w-full sm:w-auto"
+          >
+            Änderungen speichern
+          </Button>
+          {initialValues !== undefined ? (
+            <Button
+              disabled={isPending}
+              type="submit"
+              className="w-full sm:w-auto "
+              variant={"outline"}
+            >
+              Änderungen verwerfen
+            </Button>
+          ) : null}
+        </div>
       </form>
     </Form>
   );

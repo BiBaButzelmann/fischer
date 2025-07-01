@@ -1,5 +1,5 @@
 import { auth } from "@/auth/utils";
-import { RolesManager } from "@/components/roles/roles-manager";
+import { RolesManager } from "@/components/anmeldung/roles-manager";
 import { getJurorByProfileIdAndTournamentId } from "@/db/repositories/juror";
 import { getMatchEnteringHelperByProfileIdAndTournamentId } from "@/db/repositories/match-entering-helper";
 import { getParticipantByProfileIdAndTournamentId } from "@/db/repositories/participant";
@@ -36,11 +36,11 @@ export default async function RolesPage() {
     <div className="space-y-8">
       <header className="text-center">
         <h1 className="text-3xl sm:text-4xl font-bold tracking-tight">
-          Rollen-Auswahl
+          Anmeldung zum Klubturnier
         </h1>
         <p className="text-muted-foreground mt-2">
-          Wähle eine oder mehrere Rollen aus und gib deine Informationen dazu
-          an.
+          Führe eine oder mehrere Anmeldungen durch und gib deine Informationen
+          dazu an.
         </p>
       </header>
       <RolesManager
