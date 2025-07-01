@@ -32,6 +32,14 @@ export default async function RolesPage() {
       getJurorByProfileIdAndTournamentId(profile.id, tournament.id),
     ]);
 
+  const initialValues = {
+    participant,
+    referee,
+    matchEnteringHelper,
+    setupHelper,
+    juror,
+  };
+
   return (
     <div className="space-y-8">
       <header className="text-center">
@@ -44,14 +52,9 @@ export default async function RolesPage() {
         </p>
       </header>
       <RolesManager
+        key={JSON.stringify(initialValues)}
         tournamentId={tournament.id}
-        initialValues={{
-          participant,
-          referee,
-          matchEnteringHelper,
-          setupHelper,
-          juror,
-        }}
+        initialValues={initialValues}
       />
     </div>
   );
