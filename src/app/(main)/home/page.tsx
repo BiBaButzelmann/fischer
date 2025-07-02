@@ -1,10 +1,10 @@
-import { auth } from "@/auth/utils";
+import { authWithRedirect } from "@/auth/utils";
 import { getProfileByUserId } from "@/db/repositories/profile";
 import { getLatestTournament } from "@/db/repositories/tournament";
 import React from "react";
 
 async function home() {
-  const session = await auth();
+  const session = await authWithRedirect();
   const [profile, tournament] = await Promise.all([
     getProfileByUserId(session.user.id),
     getLatestTournament(),

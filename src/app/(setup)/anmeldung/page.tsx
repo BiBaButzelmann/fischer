@@ -1,4 +1,4 @@
-import { auth } from "@/auth/utils";
+import { authWithRedirect } from "@/auth/utils";
 import { RolesManager } from "@/components/anmeldung/roles-manager";
 import { getJurorByProfileIdAndTournamentId } from "@/db/repositories/juror";
 import { getMatchEnteringHelperByProfileIdAndTournamentId } from "@/db/repositories/match-entering-helper";
@@ -10,7 +10,7 @@ import { getLatestTournament } from "@/db/repositories/tournament";
 import { redirect } from "next/navigation";
 
 export default async function RolesPage() {
-  const session = await auth();
+  const session = await authWithRedirect();
 
   const [profile, tournament] = await Promise.all([
     getProfileByUserId(session.user.id),

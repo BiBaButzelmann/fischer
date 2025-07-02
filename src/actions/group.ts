@@ -8,14 +8,14 @@ import { and, eq } from "drizzle-orm";
 import { revalidatePath } from "next/cache";
 import { GridGroup } from "@/components/admin/tournament/types";
 import { group } from "@/db/schema/group";
-import { auth } from "@/auth/utils";
+import { authWithRedirect } from "@/auth/utils";
 import { getTournamentById } from "@/db/repositories/tournament";
 import invariant from "tiny-invariant";
 import { getParticipantsByTournamentId } from "@/db/repositories/participant";
 
 // TODO: find out why revalidatePath doesn't work here
 export async function generateGroups(tournamentId: number) {
-  const session = await auth();
+  const session = await authWithRedirect();
   invariant(session?.user.role === "admin", "Unauthorized");
 
   const tournament = await getTournamentById(tournamentId);
@@ -70,7 +70,7 @@ export async function updateGroups(
   groups: GridGroup[],
   unassignedParticipants: ParticipantWithName[],
 ) {
-  const session = await auth();
+  const session = await authWithRedirect();
   invariant(session?.user.role === "admin", "Unauthorized");
 
   for (const unassignedParticipant of unassignedParticipants) {
@@ -112,7 +112,7 @@ export async function updateGroupMatchDay(
   groupId: number,
   matchDay: MatchDay | null,
 ) {
-  const session = await auth();
+  const session = await authWithRedirect();
   invariant(session?.user.role === "admin", "Unauthorized");
 
   await db.update(group).set({ matchDay }).where(eq(group.id, groupId));
