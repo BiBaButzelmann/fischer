@@ -1,16 +1,14 @@
-import { authWithRedirect } from "@/auth/utils";
+import { auth } from "@/auth/utils";
 import { getProfileByUserId } from "@/db/repositories/profile";
 import { getLatestTournament } from "@/db/repositories/tournament";
 import React from "react";
 
 async function home() {
-  const session = await authWithRedirect();
-  const [profile, tournament] = await Promise.all([
-    getProfileByUserId(session.user.id),
+  const [session, tournament] = await Promise.all([
+    auth(),
     getLatestTournament(),
   ]);
 
-  // Datum formatieren: TT.MM.JJJJ
   const formattedStartDate = tournament?.startDate.toLocaleDateString("de-DE");
   const formattedEndDate = tournament?.endDate?.toLocaleDateString("de-DE");
 
@@ -18,7 +16,7 @@ async function home() {
     <div className="space-y-8">
       <section className="bg-card border rounded-lg p-6 md:p-8 shadow-sm">
         <h1 className="text-3xl md:text-4xl font-bold tracking-tight text-primary">
-          Hallo, {profile?.firstName}!
+          Hallo, {session != null ? getProfileName(session.user.id) : "Gast"}!
         </h1>
 
         {tournament?.stage === "registration" ? (
@@ -65,6 +63,11 @@ async function home() {
       </section>
     </div>
   );
+}
+
+async function getProfileName(userId: string) {
+  const profile = await getProfileByUserId(userId);
+  return profile ? profile.firstName : "Gast";
 }
 
 export default home;

@@ -1,3 +1,5 @@
+import { signupRedirect } from "@/actions/auth";
+import { auth } from "@/auth/utils";
 import { SignupForm } from "@/components/auth/signup-form";
 import { Button } from "@/components/ui/button";
 import {
@@ -11,6 +13,11 @@ import { ArrowLeft } from "lucide-react";
 import Link from "next/link";
 
 export default async function Page() {
+  const session = await auth();
+  if (session) {
+    await signupRedirect(session.user.id);
+  }
+
   return (
     <div className="w-full max-w-md px-4 py-8 mx-auto">
       <div className="mb-6">

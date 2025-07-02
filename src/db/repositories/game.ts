@@ -60,3 +60,39 @@ export async function getGamesOfParticipant(participantId: number) {
     },
   });
 }
+
+export async function isUserParticipantInGame(
+  gameId: number,
+  userId: string,
+): Promise<boolean> {
+  const game = await db.query.game.findFirst({
+    where: (game, { eq }) => eq(game.id, gameId),
+    with: {
+      whiteParticipant: {
+        with: {
+          profile: {
+            columns: {
+              userId: true,
+            },
+          },
+        },
+      },
+      blackParticipant: {
+        with: {
+          profile: {
+            columns: {
+              userId: true,
+            },
+          },
+        },
+      },
+    },
+  });
+
+  if (!game) return false;
+
+  return (
+    game.whiteParticipant.profile.userId === userId ||
+    game.blackParticipant.profile.userId === userId
+  );
+}
