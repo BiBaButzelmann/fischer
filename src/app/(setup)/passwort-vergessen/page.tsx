@@ -30,7 +30,7 @@ export default async function Page() {
             Passwort vergessen
           </CardTitle>
           <CardDescription>
-            Wir senden Ihnen einen Link zum Zurücksetzen zu.
+            Wir senden dir einen Link zum Zurücksetzen zu.
           </CardDescription>
         </CardHeader>
         <CardContent>
