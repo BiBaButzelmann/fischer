@@ -9,6 +9,7 @@ import {
 } from "@/components/ui/card";
 import { ArrowLeft } from "lucide-react";
 import Link from "next/link";
+import { Suspense } from "react";
 
 // Route: /passwort-zurücksetzen?token=xxx&error=invalid_token
 export default async function Page() {
@@ -36,7 +37,9 @@ export default async function Page() {
         </CardHeader>
 
         <CardContent>
-          <ResetPasswordForm />
+          <Suspense fallback={<p>Loading...</p>}>
+            <ResetPasswordForm />
+          </Suspense>
         </CardContent>
       </Card>
     </div>
