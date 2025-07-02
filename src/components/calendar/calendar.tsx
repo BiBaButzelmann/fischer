@@ -23,9 +23,6 @@ export function Calendar({ events }: { events: EventInput[] }) {
       eventStartEditable
       selectable
       eventDrop={console.log}
-      eventClick={() => {
-        router.push("/events/1");
-      }}
     />
   );
 }
