@@ -2,7 +2,6 @@ import React from "react";
 
 type Props = {
   firstName: string;
-  email: string;
   url: string;
 };
 

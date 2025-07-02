@@ -15,7 +15,6 @@ export async function sendPasswordResetEmail(
       to: recipientAddress,
       subject: "Password bla bla",
       react: PasswordResetMail({
-        email: recipientAddress,
         firstName: firstName,
         url: url,
       }),

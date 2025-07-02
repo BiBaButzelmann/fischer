@@ -1,4 +1,4 @@
-import { ForgotPasswordForm } from "@/components/auth/forgot-password-form";
+import { ResetPasswordForm } from "@/components/auth/reset-password-form";
 import { Button } from "@/components/ui/button";
 import {
   Card,
@@ -10,7 +10,14 @@ import {
 import { ArrowLeft } from "lucide-react";
 import Link from "next/link";
 
-export default async function Page() {
+// Route: /passwort-zurücksetzen?token=xxx&error=invalid_token
+export default async function Page({
+  searchParams,
+}: {
+  searchParams: { token?: string; error?: string };
+}) {
+  const { token, error } = searchParams;
+
   return (
     <div className="w-full max-w-md px-4 py-8 mx-auto">
       {/* Zurück-Button */}
@@ -27,15 +34,16 @@ export default async function Page() {
       <Card className="shadow-lg">
         <CardHeader className="text-center">
           <CardTitle className="text-2xl font-bold">
-            Passwort vergessen
+            Passwort zurücksetzen
           </CardTitle>
           <CardDescription>
-            Wir senden Ihnen einen Link zum Zurücksetzen zu.
+            Bitte vergeben Sie ein neues Passwort für Ihr Konto.
           </CardDescription>
         </CardHeader>
+
         <CardContent>
-          {/* Client Component */}
-          <ForgotPasswordForm />
+          {/* Client-Formular */}
+          <ResetPasswordForm token={token} serverError={error} />
         </CardContent>
       </Card>
     </div>
