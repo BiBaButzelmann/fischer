@@ -1,4 +1,4 @@
-import { RegistrationMail } from "@/email/templates/registration-mail";
+import { ConfirmRegistrationMail } from "@/email/templates/confirm-registration-mail";
 import { resend } from "./client";
 
 export async function sendConfirmRegistrationEmail(
@@ -14,8 +14,8 @@ export async function sendConfirmRegistrationEmail(
     from: "noreply@hsk1830.de",
     to: recipientAddress,
     subject: "Bla bla bla",
-    react: RegistrationMail({
-      firstName: firstName,
+    react: ConfirmRegistrationMail({
+      name: firstName,
       email: recipientAddress,
     }),
   });

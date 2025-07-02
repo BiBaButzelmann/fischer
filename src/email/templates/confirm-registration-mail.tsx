@@ -1,11 +1,11 @@
 import * as React from "react";
 
 type Props = {
-  firstName: string;
+  name: string;
   email: string;
 };
 
-export function RegistrationMail({ firstName, email }: Props) {
+export function ConfirmRegistrationMail({ name, email }: Props) {
   return (
     <div
       style={{
@@ -14,7 +14,7 @@ export function RegistrationMail({ firstName, email }: Props) {
         lineHeight: 1.6,
       }}
     >
-      <h1 style={{ color: "#2c3e50" }}>Hallo {firstName},</h1>
+      <h1 style={{ color: "#2c3e50" }}>Hallo {name},</h1>
       <p>
         deine Registrierung mit der E-Mail-Adresse <strong>{email}</strong> war
         erfolgreich!
