@@ -1,11 +1,16 @@
-import { Role } from "@/db/types/role";
 import { resend } from "./client";
 import { RoleSelectionSummaryMail } from "./templates/roles-selection-summary-mail";
+import { Participant } from "@/db/types/participant";
+import { Juror } from "@/db/types/juror";
+import { MatchEnteringHelper } from "@/db/types/match-entering-helper";
+import { Referee } from "@/db/types/referee";
+import { SetupHelper } from "@/db/types/setup-helper";
+import { RolesData } from "@/db/types/role";
 
 export async function sendRolesSelectionSummaryMail(
   to: string,
   firstName: string,
-  roles: Role[],
+  roles: RolesData,
 ) {
   let recipientAddress = to;
   if (process.env.NODE_ENV === "development") {

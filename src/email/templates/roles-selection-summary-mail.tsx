@@ -1,11 +1,13 @@
-import { Role } from "@/db/types/role";
+import { RolesData } from "@/db/types/role";
 
 type Props = {
   name: string;
-  roles: Role[];
+  roles: RolesData;
 };
 
 export function RoleSelectionSummaryMail({ name, roles }: Props) {
+  const { participant, juror, referee, setupHelper } = roles;
+
   return (
     <div
       style={{
@@ -19,13 +21,23 @@ export function RoleSelectionSummaryMail({ name, roles }: Props) {
         vielen Dank für deine Auswahl. Hier ist eine Zusammenfassung der von dir
         gewählten Rollen:
       </p>
-      <ul style={{ paddingLeft: "20px", listStyleType: "disc" }}>
-        {roles.map((role, index) => (
-          <li key={index} style={{ paddingBottom: "4px" }}>
-            {role}
+      <ul style={{ paddingLeft: 20, listStyleType: "disc" }}>
+        {participant && <li style={{ paddingBottom: 4 }}>Teilnehmer</li>}
+        {juror && <li style={{ paddingBottom: 4 }}>Juror</li>}
+        {referee && (
+          <li style={{ paddingBottom: 4 }}>
+            Schiedsrichter – Bevorzugter Spieltag: {referee.preferredMatchDay};
+            Sekundäre Spieltage: {referee.secondaryMatchDays}
           </li>
-        ))}
+        )}
+        {setupHelper && (
+          <li style={{ paddingBottom: 4 }}>
+            Aufbauhelfer – Bevorzugter Spieltag: {setupHelper.preferredMatchDay}
+            ; Sekundäre Spieltage: {setupHelper.secondaryMatchDays}
+          </li>
+        )}
       </ul>
+
       <p>Bei Fragen stehen wir dir jederzeit gerne zur Verfügung.</p>
       <p>
         Viele Grüße,

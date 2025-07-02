@@ -9,8 +9,8 @@ import { RefereeForm } from "./forms/referee-form";
 import { MatchEnteringForm } from "./forms/match-entering-form";
 import { SetupHelperForm } from "./forms/setup-helper-form";
 import { JurorForm } from "./forms/juror-form";
-import { Role } from "@/db/types/role";
-import { useState } from "react";
+import { Role, RolesData } from "@/db/types/role";
+import { useState, useTransition } from "react";
 import { z } from "zod";
 import { participantFormSchema } from "@/schema/participant";
 import { refereeFormSchema } from "@/schema/referee";
@@ -25,30 +25,20 @@ import {
 } from "@/actions/match-entering-helper";
 import { createSetupHelper, deleteSetupHelper } from "@/actions/setup-helper";
 import { createJuror, deleteJuror } from "@/actions/juror";
-import { Participant } from "@/db/types/participant";
-import { Referee } from "@/db/types/referee";
-import { MatchEnteringHelper } from "@/db/types/match-entering-helper";
-import { SetupHelper } from "@/db/types/setup-helper";
-import { Juror } from "@/db/types/juror";
 import Link from "next/link";
-
-type InitialValues = {
-  participant: Participant | undefined;
-  referee: Referee | undefined;
-  matchEnteringHelper: MatchEnteringHelper | undefined;
-  setupHelper: SetupHelper | undefined;
-  juror: Juror | undefined;
-};
+import { sendRolesSelectionSummaryEmail } from "@/actions/email/roles";
 
 type Props = {
   tournamentId: number;
-  initialValues: InitialValues;
+  userId: string;
+  rolesData: RolesData;
 };
 
-export function RolesManager({ tournamentId, initialValues }: Props) {
+export function RolesManager({ tournamentId, userId, rolesData }: Props) {
+  const [isPending, startTransition] = useTransition();
   const router = useRouter();
   const [accordionValue, setAccordionValue] = useState(
-    getAccordionValue(initialValues),
+    getAccordionValue(rolesData),
   );
 
   const handleParticipateFormSubmit = async (
@@ -59,8 +49,8 @@ export function RolesManager({ tournamentId, initialValues }: Props) {
   };
 
   const handleDeleteParticipant = async () => {
-    if (initialValues.participant) {
-      await deleteParticipant(initialValues.participant.id);
+    if (rolesData.participant) {
+      await deleteParticipant(rolesData.participant.id);
       router.refresh();
     }
   };
@@ -73,8 +63,8 @@ export function RolesManager({ tournamentId, initialValues }: Props) {
   };
 
   const handleDeleteReferee = async () => {
-    if (initialValues.referee) {
-      await deleteReferee(initialValues.referee.id);
+    if (rolesData.referee) {
+      await deleteReferee(rolesData.referee.id);
       router.refresh();
     }
   };
@@ -86,8 +76,8 @@ export function RolesManager({ tournamentId, initialValues }: Props) {
   };
 
   const handleDeleteMatchEnteringHelper = async () => {
-    if (initialValues.matchEnteringHelper) {
-      await deleteMatchEnteringHelper(initialValues.matchEnteringHelper.id);
+    if (rolesData.matchEnteringHelper) {
+      await deleteMatchEnteringHelper(rolesData.matchEnteringHelper.id);
       router.refresh();
     }
   };
@@ -100,8 +90,8 @@ export function RolesManager({ tournamentId, initialValues }: Props) {
   };
 
   const handleDeleteSetupHelper = async () => {
-    if (initialValues.setupHelper) {
-      await deleteSetupHelper(initialValues.setupHelper.id);
+    if (rolesData.setupHelper) {
+      await deleteSetupHelper(rolesData.setupHelper.id);
       router.refresh();
     }
   };
@@ -112,10 +102,16 @@ export function RolesManager({ tournamentId, initialValues }: Props) {
   };
 
   const handleDeleteJuror = async () => {
-    if (initialValues.juror) {
-      await deleteJuror(initialValues.juror.id);
+    if (rolesData.juror) {
+      await deleteJuror(rolesData.juror.id);
       router.refresh();
     }
+  };
+
+  const handleSubmitRoleSelection = async () => {
+    startTransition(async () => {
+      await sendRolesSelectionSummaryEmail(userId, rolesData);
+    });
   };
 
   return (
@@ -133,22 +129,20 @@ export function RolesManager({ tournamentId, initialValues }: Props) {
           accordionId="participant"
           name="Spieler"
           description="Zum Klubturnier anmelden"
-          completed={initialValues.participant != null}
+          completed={rolesData.participant != null}
           icon={User}
         >
           <ParticipateForm
             initialValues={
-              initialValues.participant
+              rolesData.participant
                 ? {
-                    chessClub: initialValues.participant.chessClub,
-                    preferredMatchDay:
-                      initialValues.participant.preferredMatchDay,
+                    chessClub: rolesData.participant.chessClub,
+                    preferredMatchDay: rolesData.participant.preferredMatchDay,
                     secondaryMatchDays:
-                      initialValues.participant.secondaryMatchDays,
-                    dwzRating: initialValues.participant.dwzRating ?? undefined,
-                    fideRating:
-                      initialValues.participant.fideRating ?? undefined,
-                    fideId: initialValues.participant.fideId ?? undefined,
+                      rolesData.participant.secondaryMatchDays,
+                    dwzRating: rolesData.participant.dwzRating ?? undefined,
+                    fideRating: rolesData.participant.fideRating ?? undefined,
+                    fideId: rolesData.participant.fideId ?? undefined,
                   }
                 : undefined
             }
@@ -160,11 +154,11 @@ export function RolesManager({ tournamentId, initialValues }: Props) {
           accordionId="referee"
           name="Schiedsrichter"
           description="Als Schiedsrichter anmelden"
-          completed={initialValues.referee != null}
+          completed={rolesData.referee != null}
           icon={Shield}
         >
           <RefereeForm
-            initialValues={initialValues.referee ?? undefined}
+            initialValues={rolesData.referee ?? undefined}
             onSubmit={handleRefereeFormSubmit}
             onDelete={handleDeleteReferee}
           />
@@ -173,11 +167,11 @@ export function RolesManager({ tournamentId, initialValues }: Props) {
           accordionId="matchEnteringHelper"
           name="Eingabehelfer"
           description="Als Eingabehelfer anmelden"
-          completed={initialValues.matchEnteringHelper != null}
+          completed={rolesData.matchEnteringHelper != null}
           icon={ClipboardEdit}
         >
           <MatchEnteringForm
-            initialValues={initialValues.matchEnteringHelper ?? undefined}
+            initialValues={rolesData.matchEnteringHelper ?? undefined}
             onSubmit={handleMatchEnteringHelperFormSubmit}
             onDelete={handleDeleteMatchEnteringHelper}
           />
@@ -186,11 +180,11 @@ export function RolesManager({ tournamentId, initialValues }: Props) {
           accordionId="setupHelper"
           name="Aufbauhelfer"
           description="Als Aufbauhelfer anmelden"
-          completed={initialValues.setupHelper != null}
+          completed={rolesData.setupHelper != null}
           icon={Wrench}
         >
           <SetupHelperForm
-            initialValues={initialValues.setupHelper ?? undefined}
+            initialValues={rolesData.setupHelper ?? undefined}
             onSubmit={handleSetupHelperFormSubmit}
             onDelete={handleDeleteSetupHelper}
           />
@@ -199,21 +193,25 @@ export function RolesManager({ tournamentId, initialValues }: Props) {
           accordionId="juror"
           name="Turniergericht"
           description="Am Turniergericht teilnehmen"
-          completed={initialValues.juror != null}
+          completed={rolesData.juror != null}
           icon={Gavel}
         >
           <JurorForm
-            initiallyParticipating={
-              initialValues.juror != null ? true : undefined
-            }
+            initiallyParticipating={rolesData.juror != null ? true : undefined}
             onSubmit={handleJurorFormSubmit}
             onDelete={handleDeleteJuror}
           />
         </RoleCard>
       </Accordion>
-      {hasSelectedMoreThanOneRole(initialValues) ? (
+      {hasSelectedMoreThanOneRole(rolesData) ? (
         <div className="flex justify-center pt-6">
-          <Button size="lg" className="w-full sm:w-auto" asChild>
+          <Button
+            disabled={isPending}
+            onClick={handleSubmitRoleSelection}
+            size="lg"
+            className="w-full sm:w-auto"
+            asChild
+          >
             <Link href="/home">Anmeldung abschließen</Link>
           </Button>
         </div>
@@ -232,9 +230,7 @@ const ROLES = [
 
 type RolesWithoutAdmin = Exclude<Role, "admin">;
 
-function getAccordionValue(
-  roles: InitialValues,
-): RolesWithoutAdmin | undefined {
+function getAccordionValue(roles: RolesData): RolesWithoutAdmin | undefined {
   for (const role of ROLES) {
     if (roles[role] === undefined) {
       return role;
@@ -242,6 +238,6 @@ function getAccordionValue(
   }
 }
 
-function hasSelectedMoreThanOneRole(roles: InitialValues): boolean {
+function hasSelectedMoreThanOneRole(roles: RolesData): boolean {
   return Object.values(roles).filter((role) => role !== undefined).length > 0;
 }
