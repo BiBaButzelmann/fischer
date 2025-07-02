@@ -1,4 +1,4 @@
-import * as React from "react";
+import React from "react";
 
 type Props = {
   firstName: string;
@@ -6,7 +6,7 @@ type Props = {
   url: string;
 };
 
-export function PasswordResetMail({ firstName, email, url }: Props) {
+export function PasswordResetMail({ firstName, url }: Props) {
   return (
     <div
       style={{
