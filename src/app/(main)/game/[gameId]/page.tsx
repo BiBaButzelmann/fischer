@@ -1,10 +1,13 @@
-import ChessGameContainer from "@/components/chessboard/chess-game-container";
 import z from "zod";
 import { getParticipantFullName } from "@/lib/participant";
 import { ParticipantWithName } from "@/db/types/participant";
 import { getGameById, isUserParticipantInGame } from "@/db/repositories/game";
 import { auth } from "@/auth/utils";
 import { redirect } from "next/navigation";
+import { PasswordProtection } from "@/components/game/password-protection";
+import { verifyPgnPassword } from "@/actions/game";
+import ChessGameContainer from "@/components/game/chessboard/chess-game-container";
+import { Suspense } from "react";
 
 const INITIAL_PGN = `[\nEvent "?"\nSite "?"\nDate "????.??.??"\nRound "?"\nWhite "?"\nBlack "?"\nResult "*"\n]\n\n*`;
 
@@ -31,31 +34,39 @@ export default async function GamePage({ params }: PageProps) {
     (await gameBelongsToUser(gameId, session.user.id)) ||
     (await gameBelongsToReferee(gameId, session.user.id))
   ) {
-    return <div>Hier soll der PGN editor angezeigt werden</div>;
+    return <PgnEditor gameId={gameId} />;
   }
 
+  // TODO: pgn editor needs to be split up in viewer and editor.
+  // The editor should not be rendered here only the viewer.
   return (
-    <div>Hier soll der Passwort geschützte PGN viewer angezeigt werden</div>
+    <PasswordProtection gameId={gameId} onVerify={verifyPgnPassword}>
+      <Suspense fallback={<p className="p-4">Loading game...</p>}>
+        <PgnEditor gameId={gameId} />
+      </Suspense>
+    </PasswordProtection>
   );
+}
 
-  // const game = await getGameById(parsedGameIdResult.data);
-  // if (!game) {
-  //   return <p className="p-4 text-red-600">Game with ID {gameId} not found.</p>;
-  // }
+async function PgnEditor({ gameId }: { gameId: number }) {
+  const game = await getGameById(gameId);
+  if (!game) {
+    return <p className="p-4 text-red-600">Game with ID {gameId} not found.</p>;
+  }
 
-  // const whiteDisplay = formatDisplayName(game.whiteParticipant);
-  // const blackDisplay = formatDisplayName(game.blackParticipant);
-  // const pgn = game.pgn.value ?? INITIAL_PGN;
+  const whiteDisplay = formatDisplayName(game.whiteParticipant);
+  const blackDisplay = formatDisplayName(game.blackParticipant);
+  const pgn = game.pgn.value ?? INITIAL_PGN;
 
-  // return (
-  //   <div className="p-4">
-  //     <h1 className="mb-4 text-2xl font-semibold">
-  //       {whiteDisplay} vs {blackDisplay}
-  //     </h1>
+  return (
+    <div className="p-4">
+      <h1 className="mb-4 text-2xl font-semibold">
+        {whiteDisplay} vs {blackDisplay}
+      </h1>
 
-  //     <ChessGameContainer gameId={parsedGameIdResult.data} initialPGN={pgn} />
-  //   </div>
-  // );
+      <ChessGameContainer gameId={gameId} initialPGN={pgn} />
+    </div>
+  );
 }
 
 async function gameBelongsToUser(gameId: number, userId: string) {

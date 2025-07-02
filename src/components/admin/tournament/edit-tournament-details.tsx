@@ -6,6 +6,7 @@ import { Switch } from "@/components/ui/switch";
 import {
   Form,
   FormControl,
+  FormDescription,
   FormField,
   FormItem,
   FormLabel,
@@ -324,6 +325,34 @@ export default function EditTournamentDetails({ profiles }: Props) {
                   weeks={field.value}
                   onChange={field.onChange}
                 />
+              )}
+            />
+          </div>
+
+          {/* Teil 4: PGN Viewer */}
+          <span className="inline-block text-xl font-semibold text-gray-800">
+            Passwort für den PGN Viewer
+          </span>
+          <div>
+            <FormField
+              control={form.control}
+              name="pgnViewerPassword"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>PGN Viewer Passwort *</FormLabel>
+                  <FormControl>
+                    <Input
+                      type="password"
+                      placeholder="Mindestens 6 Zeichen lang"
+                      {...field}
+                    />
+                  </FormControl>
+                  <FormDescription>
+                    Nur Spieler mit diesem Passwort können alle Partien
+                    anschauen.
+                  </FormDescription>
+                  <FormMessage />
+                </FormItem>
               )}
             />
           </div>

@@ -12,9 +12,8 @@
 import { useState, useEffect, useCallback } from "react";
 import { Chess, Move } from "chess.js";
 import { Chessboard } from "react-chessboard";
-
-import MoveHistory from "@/components/chessboard/move-history";
-import SavePGNButton from "@/components/chessboard/save-pgn-button";
+import MoveHistory from "./move-history";
+import SavePGNButton from "./save-pgn-button";
 
 export interface ChessGameContainerProps {
   initialPGN?: string;
