@@ -11,13 +11,7 @@ import { ArrowLeft } from "lucide-react";
 import Link from "next/link";
 
 // Route: /passwort-zurücksetzen?token=xxx&error=invalid_token
-export default async function Page({
-  searchParams,
-}: {
-  searchParams: { token?: string; error?: string };
-}) {
-  const { token, error } = searchParams;
-
+export default async function Page() {
   return (
     <div className="w-full max-w-md px-4 py-8 mx-auto">
       {/* Zurück-Button */}
@@ -42,8 +36,7 @@ export default async function Page({
         </CardHeader>
 
         <CardContent>
-          {/* Client-Formular */}
-          <ResetPasswordForm token={token} serverError={error} />
+          <ResetPasswordForm />
         </CardContent>
       </Card>
     </div>

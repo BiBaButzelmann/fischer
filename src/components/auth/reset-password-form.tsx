@@ -3,8 +3,9 @@
 import { useState } from "react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
-import z from "zod";
+import { useSearchParams } from "next/navigation";
 import Link from "next/link";
+import z from "zod";
 
 import { Button } from "@/components/ui/button";
 import {
@@ -23,9 +24,7 @@ import { authClient } from "@/auth-client";
 /* ---------- Schema ---------- */
 const resetSchema = z
   .object({
-    newPassword: z
-      .string()
-      .min(6, "Passwort muss mindestens 6 Zeichen lang sein"),
+    newPassword: z.string().min(6, "Mindestens 6 Zeichen"),
     confirmPassword: z.string(),
   })
   .refine((d) => d.newPassword === d.confirmPassword, {
@@ -34,14 +33,11 @@ const resetSchema = z
   });
 type FormValues = z.infer<typeof resetSchema>;
 
-/* ---------- Props ---------- */
-interface Props {
-  token?: string;
-  serverError?: string;
-}
+export function ResetPasswordForm() {
+  const searchParams = useSearchParams();
+  const token = searchParams.get("token") ?? undefined;
+  const urlError = searchParams.get("error") ?? undefined;
 
-/* ---------- Component ---------- */
-export function ResetPasswordForm({ token, serverError }: Props) {
   const form = useForm<FormValues>({
     resolver: zodResolver(resetSchema),
     defaultValues: { newPassword: "", confirmPassword: "" },
@@ -54,9 +50,8 @@ export function ResetPasswordForm({ token, serverError }: Props) {
   } = form;
 
   const [success, setSuccess] = useState(false);
-  const [apiError, setApiError] = useState(serverError ?? "");
+  const [apiError, setApiError] = useState(urlError ?? "");
 
-  /* ---------- Submit ---------- */
   const onSubmit = async ({ newPassword }: FormValues) => {
     if (!token) {
       setApiError("Ungültiger oder fehlender Token.");
