@@ -47,7 +47,7 @@ export function ForgotPasswordForm() {
 
     const { error } = await authClient.forgetPassword({
       email,
-      redirectTo: "/reset-password",
+      redirectTo: "/passwort-zuruecksetzen",
     });
 
     if (error) {
