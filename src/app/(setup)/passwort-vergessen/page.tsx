@@ -1,4 +1,4 @@
-import { SignupForm } from "@/components/auth/signup-form";
+import { ForgotPasswordForm } from "@/components/auth/forgot-password-form";
 import { Button } from "@/components/ui/button";
 import {
   Card,
@@ -13,6 +13,7 @@ import Link from "next/link";
 export default async function Page() {
   return (
     <div className="w-full max-w-md px-4 py-8 mx-auto">
+      {/* Zurück-Button */}
       <div className="mb-6">
         <Button variant="ghost" asChild>
           <Link href="/willkommen" className="flex items-center gap-2">
@@ -22,26 +23,19 @@ export default async function Page() {
         </Button>
       </div>
 
+      {/* Karte mit Formular */}
       <Card className="shadow-lg">
         <CardHeader className="text-center">
-          <CardTitle className="text-2xl font-bold">Registrieren</CardTitle>
+          <CardTitle className="text-2xl font-bold">
+            Passwort vergessen
+          </CardTitle>
           <CardDescription>
-            Erstelle ein Konto für das HSK Klubturnier
+            Wir senden dir einen Link zum Zurücksetzen zu.
           </CardDescription>
         </CardHeader>
         <CardContent>
-          <SignupForm />
-          <div className="mt-6 text-center">
-            <p className="text-muted-foreground">
-              Bereits ein Konto?{" "}
-              <Link
-                href="/login"
-                className="text-primary hover:underline font-medium"
-              >
-                Jetzt anmelden
-              </Link>
-            </p>
-          </div>
+          {/* Client Component */}
+          <ForgotPasswordForm />
         </CardContent>
       </Card>
     </div>

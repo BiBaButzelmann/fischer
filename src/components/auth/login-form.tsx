@@ -54,7 +54,7 @@ export function LoginForm() {
                 <Input
                   id="email"
                   type="email"
-                  placeholder="ihre.email@beispiel.de"
+                  placeholder="deine.email@beispiel.de"
                   required
                   icon={Mail}
                   {...field}
