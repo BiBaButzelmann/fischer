@@ -32,7 +32,7 @@ export default async function Page() {
             </CardHeader>
             <CardContent className="flex-1">
               <p className="text-base">
-                Erstelle ein neues Konto, um sich für Turniere anzumelden, Ihre
+                Erstelle ein neues Konto, um dich für Turniere anzumelden, deine
                 Spielstatistiken zu verfolgen und mit anderen Spielern zu
                 interagieren.
               </p>
@@ -59,7 +59,7 @@ export default async function Page() {
             </CardHeader>
             <CardContent className="flex-1">
               <p className="text-base">
-                Melden dich mit Ihrem bestehenden Konto an, um auf Ihre
+                Melde dich mit deinem bestehenden Konto an, um auf deine
                 Turniere, Spielpläne und Ergebnisse zuzugreifen.
               </p>
             </CardContent>

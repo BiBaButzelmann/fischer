@@ -20,17 +20,8 @@ import { Input } from "@/components/ui/input";
 
 import { Lock, CheckCircle } from "lucide-react";
 import { authClient } from "@/auth-client";
+import { resetSchema } from "@/schema/forgotpassword";
 
-/* ---------- Schema ---------- */
-const resetSchema = z
-  .object({
-    newPassword: z.string().min(6, "Mindestens 6 Zeichen"),
-    confirmPassword: z.string(),
-  })
-  .refine((d) => d.newPassword === d.confirmPassword, {
-    path: ["confirmPassword"],
-    message: "Passwörter stimmen nicht überein",
-  });
 type FormValues = z.infer<typeof resetSchema>;
 
 export function ResetPasswordForm() {
@@ -74,7 +65,7 @@ export function ResetPasswordForm() {
       <div className="text-center p-4 bg-green-50 rounded-lg">
         <CheckCircle className="w-8 h-8 text-green-600 mx-auto mb-2" />
         <p className="text-green-800">
-          Ihr Passwort wurde erfolgreich geändert.
+          Dein Passwort wurde erfolgreich geändert.
         </p>
         <Button asChild className="mt-4 w-full">
           <Link href="/login">Zur Anmeldung</Link>

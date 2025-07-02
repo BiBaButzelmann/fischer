@@ -19,11 +19,8 @@ import { Input } from "@/components/ui/input";
 
 import { Mail, Lock, CheckCircle } from "lucide-react";
 import { authClient } from "@/auth-client";
+import { forgotSchema } from "@/schema/forgotpassword";
 
-/* ---------- Schema ---------- */
-const forgotSchema = z.object({
-  email: z.string().email("Ungültige E-Mail-Adresse"),
-});
 type FormValues = z.infer<typeof forgotSchema>;
 
 export function ForgotPasswordForm() {
@@ -88,7 +85,7 @@ export function ForgotPasswordForm() {
                   <Input
                     id="email"
                     type="email"
-                    placeholder="ihre.email@beispiel.de"
+                    placeholder="deine.email@beispiel.de"
                     className="pl-10"
                     disabled={isSubmitting}
                     {...register("email")}
