@@ -137,7 +137,7 @@ export function ResetPasswordForm() {
           className="w-full text-lg py-6"
           disabled={isSubmitting}
         >
-          {isSubmitting ? "Speichere..." : "Passwort ändern"}
+          {isSubmitting ? "Speichern..." : "Passwort ändern"}
         </Button>
 
         {/* Link zurück zum Login */}

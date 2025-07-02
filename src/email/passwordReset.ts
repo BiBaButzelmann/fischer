@@ -9,15 +9,14 @@ export async function sendPasswordResetEmail(
   let recipientAddress = to;
   if (process.env.NODE_ENV === "development") {
     recipientAddress = "delivered@resend.dev";
-
-    await resend.emails.send({
-      from: "noreply@hsk1830.de",
-      to: recipientAddress,
-      subject: "Password bla bla",
-      react: PasswordResetMail({
-        firstName: firstName,
-        url: url,
-      }),
-    });
   }
+  await resend.emails.send({
+    from: "noreply@hsk1830.de",
+    to: recipientAddress,
+    subject: "Password bla bla",
+    react: PasswordResetMail({
+      firstName: firstName,
+      url: url,
+    }),
+  });
 }

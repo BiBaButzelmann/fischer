@@ -11,7 +11,6 @@ import { ArrowLeft } from "lucide-react";
 import Link from "next/link";
 import { Suspense } from "react";
 
-// Route: /passwort-zurücksetzen?token=xxx&error=invalid_token
 export default async function Page() {
   return (
     <div className="w-full max-w-md px-4 py-8 mx-auto">
