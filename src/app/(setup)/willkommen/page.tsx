@@ -32,8 +32,8 @@ export default async function Page() {
             </CardHeader>
             <CardContent className="flex-1">
               <p className="text-base">
-                Erstellen Sie ein neues Konto, um sich für Turniere anzumelden,
-                Ihre Spielstatistiken zu verfolgen und mit anderen Spielern zu
+                Erstelle ein neues Konto, um sich für Turniere anzumelden, Ihre
+                Spielstatistiken zu verfolgen und mit anderen Spielern zu
                 interagieren.
               </p>
             </CardContent>
@@ -59,7 +59,7 @@ export default async function Page() {
             </CardHeader>
             <CardContent className="flex-1">
               <p className="text-base">
-                Melden Sie sich mit Ihrem bestehenden Konto an, um auf Ihre
+                Melden dich mit Ihrem bestehenden Konto an, um auf Ihre
                 Turniere, Spielpläne und Ergebnisse zuzugreifen.
               </p>
             </CardContent>
@@ -85,9 +85,9 @@ export default async function Page() {
             </CardHeader>
             <CardContent className="flex-1">
               <p className="text-base">
-                Verfolgen Sie aktuelle Turniere, sehen Sie sich Spielpläne an
-                und bleiben Sie über alle Ereignisse informiert, ohne sich
-                registrieren zu müssen.
+                Verfolge aktuelle Turniere, sieh dir Spielpläne an und bleibe
+                über alle Ereignisse informiert, ohne sich registrieren zu
+                müssen.
               </p>
             </CardContent>
             <CardFooter className="mt-auto">

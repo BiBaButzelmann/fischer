@@ -32,7 +32,7 @@ export default async function Page() {
             Passwort zurücksetzen
           </CardTitle>
           <CardDescription>
-            Bitte vergeben Sie ein neues Passwort für Ihr Konto.
+            Bitte vergib ein neues Passwort für Ihr Konto.
           </CardDescription>
         </CardHeader>
 

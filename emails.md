@@ -1,6 +1,6 @@
 - Emails
 
-- Registrierungsbestätigungsmail; immer wenn user registration abgeschlossen ist
+- Registrierungsbestätigungsmail; immer wenn user registration abgeschlossen ist √
 - PGN Passwort (später); an ausgewählte teilnehmer (maybe all in turnier)
 - Turnieranmeldung bestätigung; gesammelte mail mit allen rollen
 - Wenn Rolle geupdated wird; gesammelte mail mit allen rollen

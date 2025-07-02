@@ -132,7 +132,7 @@ export function ParticipateForm({ initialValues, onSubmit, onDelete }: Props) {
               <FormControl>
                 <Select value={field.value} onValueChange={field.onChange}>
                   <SelectTrigger>
-                    <SelectValue placeholder="Wählen Sie einen Spieltag" />
+                    <SelectValue placeholder="Wähle einen Spieltag" />
                   </SelectTrigger>
                   <SelectContent>
                     <SelectItem value="tuesday">Dienstag</SelectItem>
