@@ -7,14 +7,14 @@ import { setupHelperFormSchema } from "@/schema/setupHelper";
 import { setupHelper } from "@/db/schema/setupHelper";
 import { getProfileByUserId } from "@/db/repositories/profile";
 import { getTournamentById } from "@/db/repositories/tournament";
-import { auth } from "@/auth/utils";
+import { authWithRedirect } from "@/auth/utils";
 import { and, eq } from "drizzle-orm";
 
 export async function createSetupHelper(
   tournamentId: number,
   data: z.infer<typeof setupHelperFormSchema>,
 ) {
-  const session = await auth();
+  const session = await authWithRedirect();
 
   const tournament = await getTournamentById(tournamentId);
   invariant(tournament, "Tournament not found");
@@ -39,7 +39,7 @@ export async function createSetupHelper(
     });
 }
 export async function deleteSetupHelper(setupHelperId: number) {
-  const session = await auth();
+  const session = await authWithRedirect();
 
   const currentProfile = await getProfileByUserId(session.user.id);
   invariant(currentProfile, "Profile not found");

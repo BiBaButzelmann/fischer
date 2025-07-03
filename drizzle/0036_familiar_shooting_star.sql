@@ -1,0 +1,1 @@
+ALTER TABLE "tournament" ADD COLUMN "pgn_viewer_password" text;

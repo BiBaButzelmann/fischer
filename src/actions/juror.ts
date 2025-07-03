@@ -3,13 +3,13 @@
 import { db } from "@/db/client";
 import invariant from "tiny-invariant";
 import { juror } from "@/db/schema/juror";
-import { auth } from "@/auth/utils";
+import { authWithRedirect } from "@/auth/utils";
 import { getTournamentById } from "@/db/repositories/tournament";
 import { getProfileByUserId } from "@/db/repositories/profile";
 import { and, eq } from "drizzle-orm";
 
 export async function createJuror(tournamentId: number) {
-  const session = await auth();
+  const session = await authWithRedirect();
 
   const tournament = await getTournamentById(tournamentId);
   invariant(tournament, "Tournament not found");
@@ -27,7 +27,7 @@ export async function createJuror(tournamentId: number) {
 }
 
 export async function deleteJuror(jurorId: number) {
-  const session = await auth();
+  const session = await authWithRedirect();
 
   const currentProfile = await getProfileByUserId(session.user.id);
   invariant(currentProfile, "Juror not found");

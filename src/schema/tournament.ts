@@ -40,4 +40,9 @@ export const createTournamentFormSchema = z.object({
       }),
     )
     .min(1, "Mindestens eine Spielwoche ist erforderlich"),
+
+  // PGN Viewer Passwort
+  pgnViewerPassword: z
+    .string()
+    .min(6, "PGN Viewer Passwort muss mindestens 6 Zeichen lang sein"),
 });

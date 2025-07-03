@@ -11,6 +11,7 @@ import { setupHelper } from "../schema/setupHelper";
 import { auth } from "@/auth";
 import { headers } from "next/headers";
 import { Role } from "../types/role";
+import { getProfileByUserId } from "./profile";
 
 // TODO: should we add admin here?
 export async function getRolesByProfileId(profileId: number): Promise<Role[]> {
@@ -54,4 +55,12 @@ export async function getRolesByProfileId(profileId: number): Promise<Role[]> {
     ...unionResult.map((row) => row.tableName),
     ...(sessionResult?.user.role === "admin" ? (["admin"] as const) : []),
   ];
+}
+
+export async function getRolesByUserId(userId: string): Promise<Role[]> {
+  const profile = await getProfileByUserId(userId);
+  if (!profile) {
+    return [];
+  }
+  return getRolesByProfileId(profile.id);
 }

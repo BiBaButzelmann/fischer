@@ -35,8 +35,9 @@ export function LoginForm() {
   const handleSubmit = (data: z.infer<typeof loginFormSchema>) => {
     startTransition(async () => {
       const result = await login(data);
-      //TODO: maybe redirect client side
-      setError(result.error);
+      if (result?.error) {
+        setError(result.error);
+      }
     });
   };
 
