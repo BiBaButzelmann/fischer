@@ -6,7 +6,7 @@ import { auth } from "@/auth/utils";
 import { redirect } from "next/navigation";
 import { PasswordProtection } from "@/components/game/password-protection";
 import { verifyPgnPassword } from "@/actions/game";
-import ChessGameContainer from "@/components/game/chessboard/chess-game-container";
+import PgnViewer from "@/components/game/chessboard/pgn-viewer";
 import { Suspense } from "react";
 
 const INITIAL_PGN = `[\nEvent "?"\nSite "?"\nDate "????.??.??"\nRound "?"\nWhite "?"\nBlack "?"\nResult "*"\n]\n\n*`;
@@ -34,21 +34,25 @@ export default async function GamePage({ params }: PageProps) {
     (await gameBelongsToUser(gameId, session.user.id)) ||
     (await gameBelongsToReferee(gameId, session.user.id))
   ) {
-    return <PgnEditor gameId={gameId} />;
+    return <PgnContainer allowEdit={true} gameId={gameId} />;
   }
 
-  // TODO: pgn editor needs to be split up in viewer and editor.
-  // The editor should not be rendered here only the viewer.
   return (
     <PasswordProtection gameId={gameId} onVerify={verifyPgnPassword}>
       <Suspense fallback={<p className="p-4">Loading game...</p>}>
-        <PgnEditor gameId={gameId} />
+        <PgnContainer allowEdit={false} gameId={gameId} />
       </Suspense>
     </PasswordProtection>
   );
 }
 
-async function PgnEditor({ gameId }: { gameId: number }) {
+async function PgnContainer({
+  gameId,
+  allowEdit,
+}: {
+  gameId: number;
+  allowEdit: boolean;
+}) {
   const game = await getGameById(gameId);
   if (!game) {
     return <p className="p-4 text-red-600">Game with ID {gameId} not found.</p>;
@@ -64,7 +68,7 @@ async function PgnEditor({ gameId }: { gameId: number }) {
         {whiteDisplay} vs {blackDisplay}
       </h1>
 
-      <ChessGameContainer gameId={gameId} initialPGN={pgn} />
+      <PgnViewer gameId={gameId} initialPGN={pgn} allowEdit={allowEdit} />
     </div>
   );
 }
