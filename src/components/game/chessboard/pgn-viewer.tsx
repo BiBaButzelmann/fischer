@@ -118,5 +118,5 @@ const useChessboardControls = ({
     }
     window.addEventListener("keydown", onKey);
     return () => window.removeEventListener("keydown", onKey);
-  }, []);
+  }, [onArrowLeft, onArrowRight]);
 };

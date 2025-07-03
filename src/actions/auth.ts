@@ -45,7 +45,7 @@ export async function login(data: z.infer<typeof loginFormSchema>) {
   await loginRedirect(result.user.id);
 }
 
-export async function signupRedirect(userId: string) {
+export async function signupRedirect() {
   const tournament = await getActiveTournament();
   if (!tournament) {
     redirect("/home");
@@ -80,5 +80,5 @@ export async function signup(data: z.infer<typeof signupFormSchema>) {
     email: data.email,
   });
 
-  await signupRedirect(result.user.id);
+  await signupRedirect();
 }

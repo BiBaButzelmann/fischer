@@ -5,11 +5,8 @@ import dayGridPlugin from "@fullcalendar/daygrid";
 import type { EventContentArg, EventInput } from "@fullcalendar/core/index.js";
 import deLocale from "@fullcalendar/core/locales/de.js";
 import interactionPlugin from "@fullcalendar/interaction";
-import { useRouter } from "next/navigation";
 
 export function Calendar({ events }: { events: EventInput[] }) {
-  const router = useRouter();
-
   return (
     <FullCalendar
       plugins={[dayGridPlugin, interactionPlugin]}

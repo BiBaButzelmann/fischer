@@ -15,7 +15,7 @@ import Link from "next/link";
 export default async function Page() {
   const session = await auth();
   if (session) {
-    await signupRedirect(session.user.id);
+    await signupRedirect();
   }
 
   return (

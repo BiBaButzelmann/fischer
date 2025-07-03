@@ -32,7 +32,7 @@ export default async function GamePage({ params }: PageProps) {
 
   if (
     (await gameBelongsToUser(gameId, session.user.id)) ||
-    (await gameBelongsToReferee(gameId, session.user.id))
+    (await gameBelongsToReferee())
   ) {
     return <PgnContainer allowEdit={true} gameId={gameId} />;
   }
@@ -77,7 +77,7 @@ async function gameBelongsToUser(gameId: number, userId: string) {
   return await isUserParticipantInGame(gameId, userId);
 }
 
-async function gameBelongsToReferee(gameId: number, userId: string) {
+async function gameBelongsToReferee() {
   // TODO: Implement logic to check if the user is a referee for the game
   return false;
 }
