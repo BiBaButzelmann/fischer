@@ -32,7 +32,8 @@ export default async function GamePage({ params }: PageProps) {
 
   if (
     (await gameBelongsToUser(gameId, session.user.id)) ||
-    (await gameBelongsToReferee())
+    (await gameBelongsToMatchEnteringHelper()) ||
+    session.user.role === "admin"
   ) {
     return <PgnContainer allowEdit={true} gameId={gameId} />;
   }
@@ -77,8 +78,8 @@ async function gameBelongsToUser(gameId: number, userId: string) {
   return await isUserParticipantInGame(gameId, userId);
 }
 
-async function gameBelongsToReferee() {
-  // TODO: Implement logic to check if the user is a referee for the game
+async function gameBelongsToMatchEnteringHelper() {
+  // TODO: Implement logic to check if the user is a match enterhin helper for the game
   return false;
 }
 

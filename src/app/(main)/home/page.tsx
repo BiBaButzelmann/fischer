@@ -16,7 +16,7 @@ async function home() {
     <div className="space-y-8">
       <section className="bg-card border rounded-lg p-6 md:p-8 shadow-sm">
         <h1 className="text-3xl md:text-4xl font-bold tracking-tight text-primary">
-          Hallo, {session != null ? getProfileName(session.user.id) : "Gast"}!
+          Hallo, {getProfileName(session?.user.id)}!
         </h1>
 
         {tournament?.stage === "registration" ? (
@@ -65,7 +65,10 @@ async function home() {
   );
 }
 
-async function getProfileName(userId: string) {
+async function getProfileName(userId: string | undefined) {
+  if (!userId) {
+    return "Gast";
+  }
   const profile = await getProfileByUserId(userId);
   return profile ? profile.firstName : "Gast";
 }

@@ -8,7 +8,7 @@ import { pgn } from "@/db/schema/pgn";
 export const savePGN = async (newValue: string, gameId: number) => {
   const session = await authWithRedirect();
 
-  // TODO: check for referee permissions
+  // TODO: check for match entering helper permissions
   if ((await isUserParticipantInGame(gameId, session.user.id)) === false) {
     throw new Error("You are not a participant in this game.");
   }

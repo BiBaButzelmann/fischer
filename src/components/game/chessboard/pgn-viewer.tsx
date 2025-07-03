@@ -6,11 +6,11 @@ import { Chessboard } from "react-chessboard";
 import MoveHistory from "./move-history";
 import SavePGNButton from "./save-pgn-button";
 
-export interface Props {
+export type Props = {
   gameId: number;
   initialPGN: string;
   allowEdit?: boolean;
-}
+};
 
 export default function PgnViewer({
   gameId,
