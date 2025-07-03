@@ -27,6 +27,7 @@ import { Button } from "@/components/ui/button";
 import { EditTournamentWeeks } from "./edit-tournament-weeks/edit-tournament-weeks";
 import { createTournamentFormSchema } from "@/schema/tournament";
 import { z } from "zod";
+import { DEFAULT_CLUB } from "@/constants/constants";
 
 type Props = {
   profiles: Profile[];
@@ -36,7 +37,7 @@ export default function EditTournamentDetails({ profiles }: Props) {
   const form = useForm({
     resolver: zodResolver(createTournamentFormSchema),
     defaultValues: {
-      clubName: "Hamburger Schachklub von 1830 e.V.",
+      clubName: DEFAULT_CLUB,
       tournamentType: "Rundenturnier",
       numberOfRounds: 9,
       timeLimit:

@@ -69,7 +69,7 @@ export async function signup(data: z.infer<typeof signupFormSchema>) {
 
   if (!result) {
     return {
-      error: "Fehler bei der Registrierung. Bitte versuchen Sie es erneut.",
+      error: "Fehler bei der Registrierung. Bitte versuche es erneut.",
     };
   }
 

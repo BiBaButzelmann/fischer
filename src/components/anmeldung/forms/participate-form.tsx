@@ -24,6 +24,7 @@ import {
 import { Button } from "../../ui/button";
 import { participantFormSchema } from "@/schema/participant";
 import { MatchDaysCheckboxes } from "./matchday-selection";
+import { DEFAULT_CLUB } from "@/constants/constants";
 
 type Props = {
   initialValues?: z.infer<typeof participantFormSchema>;
@@ -36,8 +37,7 @@ export function ParticipateForm({ initialValues, onSubmit, onDelete }: Props) {
   const form = useForm<z.infer<typeof participantFormSchema>>({
     resolver: zodResolver(participantFormSchema),
     defaultValues: {
-      chessClub:
-        initialValues?.chessClub ?? "Hamburger Schachklub von 1830 e.V.",
+      chessClub: initialValues?.chessClub ?? DEFAULT_CLUB,
       dwzRating: initialValues?.dwzRating,
       fideRating: initialValues?.fideRating,
       fideId: initialValues?.fideId,
@@ -132,7 +132,7 @@ export function ParticipateForm({ initialValues, onSubmit, onDelete }: Props) {
               <FormControl>
                 <Select value={field.value} onValueChange={field.onChange}>
                   <SelectTrigger>
-                    <SelectValue placeholder="Wählen Sie einen Spieltag" />
+                    <SelectValue placeholder="Wähle einen Spieltag" />
                   </SelectTrigger>
                   <SelectContent>
                     <SelectItem value="tuesday">Dienstag</SelectItem>

@@ -35,7 +35,7 @@ export default async function Page() {
         <CardHeader className="text-center">
           <CardTitle className="text-2xl font-bold">Anmelden</CardTitle>
           <CardDescription>
-            Melden Sie sich mit Ihren Zugangsdaten an
+            Melde dich mit deinen Zugangsdaten an
           </CardDescription>
         </CardHeader>
         <CardContent>

@@ -1,6 +1,4 @@
-import { signupRedirect } from "@/actions/auth";
-import { auth } from "@/auth/utils";
-import { SignupForm } from "@/components/auth/signup-form";
+import { ResetPasswordForm } from "@/components/auth/reset-password-form";
 import { Button } from "@/components/ui/button";
 import {
   Card,
@@ -11,15 +9,12 @@ import {
 } from "@/components/ui/card";
 import { ArrowLeft } from "lucide-react";
 import Link from "next/link";
+import { Suspense } from "react";
 
 export default async function Page() {
-  const session = await auth();
-  if (session) {
-    await signupRedirect();
-  }
-
   return (
     <div className="w-full max-w-md px-4 py-8 mx-auto">
+      {/* Zurück-Button */}
       <div className="mb-6">
         <Button variant="ghost" asChild>
           <Link href="/willkommen" className="flex items-center gap-2">
@@ -29,26 +24,21 @@ export default async function Page() {
         </Button>
       </div>
 
+      {/* Karte mit Formular */}
       <Card className="shadow-lg">
         <CardHeader className="text-center">
-          <CardTitle className="text-2xl font-bold">Registrieren</CardTitle>
+          <CardTitle className="text-2xl font-bold">
+            Passwort zurücksetzen
+          </CardTitle>
           <CardDescription>
-            Erstelle ein Konto für das HSK Klubturnier
+            Bitte vergib ein neues Passwort für dein Konto.
           </CardDescription>
         </CardHeader>
+
         <CardContent>
-          <SignupForm />
-          <div className="mt-6 text-center">
-            <p className="text-muted-foreground">
-              Bereits ein Konto?{" "}
-              <Link
-                href="/login"
-                className="text-primary hover:underline font-medium"
-              >
-                Jetzt anmelden
-              </Link>
-            </p>
-          </div>
+          <Suspense fallback={<p>Loading...</p>}>
+            <ResetPasswordForm />
+          </Suspense>
         </CardContent>
       </Card>
     </div>

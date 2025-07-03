@@ -11,12 +11,7 @@ import { GridGroup } from "./types";
 import { MatchDay } from "@/db/types/group";
 import { useMemo, useTransition } from "react";
 import { updateGroupMatchDay } from "@/actions/group";
-
-const matchDays: Record<MatchDay, string> = {
-  tuesday: "Dienstag",
-  thursday: "Donnerstag",
-  friday: "Freitag",
-};
+import { matchDays } from "@/constants/constants";
 
 export function GroupMatchDay({ group }: { group: GridGroup }) {
   const [isPending, startTransition] = useTransition();
