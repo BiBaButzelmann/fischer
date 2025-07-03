@@ -13,7 +13,7 @@ export async function AppSidebar() {
   if (session) {
     return (
       <Suspense fallback={null}>
-        <AuthedSidebar stage={stage} session={session.session} />
+        <AuthedSidebar stage={stage} />
       </Suspense>
     );
   }

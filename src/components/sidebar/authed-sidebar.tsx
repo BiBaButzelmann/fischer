@@ -14,14 +14,12 @@ import {
 import { buildNavKeys, navItems } from "./sidebar-nav";
 import NavAdmin from "./nav-admin";
 import { TournamentStage } from "@/db/types/tournament";
-import { Session, User } from "better-auth";
 
 type Props = {
   stage: TournamentStage | undefined;
-  session: Session;
 };
 
-export default function AuthedSidebar({ stage, session }: Props) {
+export default function AuthedSidebar({ stage }: Props) {
   const menuKeys = buildNavKeys({ authed: true, stage });
 
   return (
