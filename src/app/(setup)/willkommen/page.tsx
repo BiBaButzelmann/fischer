@@ -1,3 +1,4 @@
+import { auth } from "@/auth/utils";
 import { Button } from "@/components/ui/button";
 import {
   Card,
@@ -7,10 +8,29 @@ import {
   CardHeader,
   CardTitle,
 } from "@/components/ui/card";
+import { getRolesByUserId } from "@/db/repositories/role";
+import { getLatestTournament } from "@/db/repositories/tournament";
 import { ChevronRight, Eye, LogIn, UserPlus } from "lucide-react";
 import Link from "next/link";
+import { redirect } from "next/navigation";
 
 export default async function Page() {
+  const [session, tournament] = await Promise.all([
+    auth(),
+    getLatestTournament(),
+  ]);
+
+  if (session != null) {
+    if (tournament?.stage !== "registration") {
+      redirect("/home");
+    }
+    const userRoles = await getRolesByUserId(session.user.id);
+    if (userRoles.length > 0) {
+      redirect("/home");
+    }
+    redirect("/anmeldung");
+  }
+
   return (
     <div className="min-h-screen flex justify-center pt-[10vh]">
       <main className="w-full max-w-screen-xl px-4 pb-5">

@@ -6,16 +6,20 @@ import { revalidatePath } from "next/cache";
 import { tournamentWeek } from "@/db/schema/tournamentWeek";
 import { z } from "zod";
 import { createTournamentFormSchema } from "@/schema/tournament";
-import { auth } from "@/auth/utils";
+import { authWithRedirect } from "@/auth/utils";
 import invariant from "tiny-invariant";
+import { auth } from "@/auth";
 
 export async function createTournament(
   formData: z.infer<typeof createTournamentFormSchema>,
 ) {
-  const session = await auth();
+  const session = await authWithRedirect();
   invariant(session?.user.role === "admin", "Unauthorized");
 
   const data = createTournamentFormSchema.parse(formData);
+
+  const context = await auth.$context;
+  const hashedPassword = await context.password.hash(data.pgnViewerPassword);
 
   const newTournament: typeof tournament.$inferInsert = {
     name: "TODO: HSK Klubturnier",
@@ -32,6 +36,7 @@ export async function createTournament(
     tieBreakMethod: data.tieBreakMethod,
     type: data.tournamentType,
     organizerProfileId: parseInt(data.organizerProfileId),
+    pgnViewerPassword: hashedPassword,
   };
   const inserted = await db
     .insert(tournament)

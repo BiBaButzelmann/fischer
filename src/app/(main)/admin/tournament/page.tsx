@@ -1,4 +1,4 @@
-import { auth } from "@/auth/utils";
+import { authWithRedirect } from "@/auth/utils";
 import { EditGroups } from "@/components/admin/tournament/edit-groups";
 import { PairingsOverview } from "@/components/admin/tournament/pairings-overview";
 import EditTournamentDetails from "@/components/admin/tournament/edit-tournament-details";
@@ -14,7 +14,7 @@ import { getProfilesByUserRole } from "@/db/repositories/profile";
 import { getActiveTournamentWithGroups } from "@/db/repositories/tournament";
 
 export default async function Page() {
-  await auth();
+  await authWithRedirect();
 
   return (
     <div>

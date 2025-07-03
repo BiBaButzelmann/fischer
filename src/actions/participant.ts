@@ -5,7 +5,7 @@ import { db } from "@/db/client";
 import invariant from "tiny-invariant";
 import { participant } from "@/db/schema/participant";
 import { participantFormSchema } from "@/schema/participant";
-import { auth } from "@/auth/utils";
+import { authWithRedirect } from "@/auth/utils";
 import { getTournamentById } from "@/db/repositories/tournament";
 import { getProfileByUserId } from "@/db/repositories/profile";
 import { and, eq } from "drizzle-orm";
@@ -14,7 +14,7 @@ export async function createParticipant(
   tournamentId: number,
   data: z.infer<typeof participantFormSchema>,
 ) {
-  const session = await auth();
+  const session = await authWithRedirect();
 
   const tournament = await getTournamentById(tournamentId);
   invariant(tournament, "Tournament not found");
@@ -48,7 +48,7 @@ export async function createParticipant(
 }
 
 export async function deleteParticipant(participantId: number) {
-  const session = await auth();
+  const session = await authWithRedirect();
 
   const currentProfile = await getProfileByUserId(session.user.id);
   invariant(currentProfile, "Profile not found");

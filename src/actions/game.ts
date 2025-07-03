@@ -1,5 +1,7 @@
 "use server";
 
+import { auth as betterAuth } from "@/auth";
+import { auth } from "@/auth/utils";
 import { db } from "@/db/client";
 import { getGroupsByTournamentId } from "@/db/repositories/group";
 import { getTournamentById } from "@/db/repositories/tournament";
@@ -122,4 +124,23 @@ export async function rescheduleGames(tournamentId: number) {
   await removeScheduledGames(tournamentId);
   await scheduleGames(tournamentId);
   revalidatePath("/admin/tournament");
+}
+
+export async function verifyPgnPassword(gameId: number, password: string) {
+  const session = await auth();
+  if (!session) return false;
+
+  const game = await db.query.game.findFirst({
+    where: (game, { eq }) => eq(game.id, gameId),
+    with: {
+      tournament: true,
+    },
+  });
+  if (!game || !game.tournament) return false;
+
+  const context = await betterAuth.$context;
+  return await context.password.verify({
+    password,
+    hash: game.tournament.pgnViewerPassword,
+  });
 }

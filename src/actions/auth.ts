@@ -7,13 +7,28 @@ import { redirect } from "next/navigation";
 import { signupFormSchema } from "@/components/auth/signup-form";
 import { profile } from "@/db/schema/profile";
 import { auth } from "@/auth";
-import { getActiveTournament } from "@/db/repositories/tournament";
-import { getRolesByProfileId } from "@/db/repositories/role";
-import { getProfileByUserId } from "@/db/repositories/profile";
-import invariant from "tiny-invariant";
+import {
+  getActiveTournament,
+  getLatestTournament,
+} from "@/db/repositories/tournament";
+import { getRolesByUserId } from "@/db/repositories/role";
+
+export async function loginRedirect(userId: string) {
+  const tournament = await getLatestTournament();
+  if (!tournament) {
+    redirect("/home");
+  }
+  if (tournament.stage === "registration") {
+    const roles = await getRolesByUserId(userId);
+    if (roles.length > 0) {
+      redirect("/home");
+    } else {
+      redirect("/anmeldung");
+    }
+  }
+}
 
 export type LoginResponse = { error: string };
-
 export async function login(data: z.infer<typeof loginFormSchema>) {
   const result = await auth.api.signInEmail({
     body: {
@@ -27,18 +42,19 @@ export async function login(data: z.infer<typeof loginFormSchema>) {
       error: "Ungültige E-Mail-Adresse oder Passwort",
     };
   }
-  const tournament = await getActiveTournament();
-  if (tournament?.stage === "registration") {
-    const profile = await getProfileByUserId(result.user.id);
-    invariant(profile, "Profile not found for user");
-    const roles = await getRolesByProfileId(profile.id);
+  await loginRedirect(result.user.id);
+}
 
-    if (roles.length > 0) {
-      redirect("/home");
-    }
-    redirect("/anmeldung");
+export async function signupRedirect() {
+  const tournament = await getActiveTournament();
+  if (!tournament) {
+    redirect("/home");
   }
-  redirect("/home");
+  if (tournament.stage === "registration") {
+    redirect("/anmeldung");
+  } else {
+    redirect("/home");
+  }
 }
 
 export type SignupResponse = { error: string };
@@ -64,12 +80,5 @@ export async function signup(data: z.infer<typeof signupFormSchema>) {
     email: data.email,
   });
 
-  const tournament = await getActiveTournament();
-  if (!tournament) {
-    redirect("/home");
-  }
-  if (tournament.stage === "registration") {
-    redirect("/anmeldung");
-  }
-  redirect("/home");
+  await signupRedirect();
 }
