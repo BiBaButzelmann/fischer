@@ -19,17 +19,12 @@ export const navItems = {
   roles: {
     href: "/anmeldung",
     icon: <UsersIcon />,
-    label: "Rollen bearbeiten",
+    label: "Turnierbeteiligung verwalten",
   },
   rules: {
     href: "/turnierordnung",
     icon: <BookTextIcon />,
     label: "Turnierordnung",
-  },
-  profile: {
-    href: "/profile",
-    icon: <UserIcon />,
-    label: "Profileinstellungen",
   },
 } as const;
 
@@ -49,7 +44,6 @@ export function buildNavKeys({ authed, stage }: BuildArgs): NavKey[] {
 
   if (authed && stage === "registration") keys.push("roles");
   if (isActive) keys.push("rules");
-  if (authed) keys.push("profile");
 
   return keys;
 }

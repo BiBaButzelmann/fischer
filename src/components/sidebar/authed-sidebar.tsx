@@ -14,6 +14,7 @@ import {
 import { buildNavKeys, navItems } from "./sidebar-nav";
 import NavAdmin from "./nav-admin";
 import { TournamentStage } from "@/db/types/tournament";
+import { NavUser } from "./nav-user";
 
 type Props = {
   stage: TournamentStage | undefined;
@@ -54,7 +55,7 @@ export default function AuthedSidebar({ stage }: Props) {
           </SidebarGroupContent>
         </SidebarGroup>
       </SidebarContent>
-
+      <NavUser />
       <SidebarFooter></SidebarFooter>
     </Sidebar>
   );
