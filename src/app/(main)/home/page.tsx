@@ -1,4 +1,5 @@
 import { auth } from "@/auth/utils";
+import { RegistrationCountdownClient } from "@/components/home/RegistrationCountdownClient";
 import { getProfileByUserId } from "@/db/repositories/profile";
 import { getLatestTournament } from "@/db/repositories/tournament";
 import React from "react";
@@ -9,7 +10,6 @@ async function home() {
     getLatestTournament(),
   ]);
 
-  const formattedStartDate = tournament?.startDate.toLocaleDateString("de-DE");
   const formattedEndDate = tournament?.endDate?.toLocaleDateString("de-DE");
 
   return (
@@ -21,13 +21,12 @@ async function home() {
 
         {tournament?.stage === "registration" ? (
           <>
-            <p className="mt-2 text-lg text-muted-foreground">
-              Vielen Dank für deine Anmeldung! Das Turnier beginnt am{" "}
-              <span className="font-semibold text-foreground">
-                {formattedStartDate}
-              </span>
-              .
-            </p>
+            <div className="max-w-xl mx-auto p-4">
+              <RegistrationCountdownClient
+                deadline={new Date(tournament.startDate)}
+              />
+            </div>
+
             <p className="mt-1 text-sm text-muted-foreground">
               Wir freuen uns auf spannende Partien und wünschen dir viel Erfolg!
             </p>
