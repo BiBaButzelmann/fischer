@@ -92,7 +92,7 @@ export default async function Page() {
             </CardContent>
             <CardFooter className="mt-auto">
               <Button className="w-full text-lg py-6" asChild variant="default">
-                <Link href="/zuschauen">
+                <Link href="/home">
                   Zuschauen
                   <ChevronRight className="ml-2 h-5 w-5" />
                 </Link>
