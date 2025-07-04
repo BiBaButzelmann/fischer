@@ -1,27 +1,30 @@
-# Fischer Project Guidelines
+# AGENTS.md
 
-## Commands
+## Build, Lint, and Test Commands
 
-- `bun run dev` - Start development server (with Turbopack)
-- `bun run build` - Build for production
-- `bun run lint` - Run linting
-- `bun run start` - Start production server
+- **Start dev server:** `bun run dev`
+- **Build:** `bun run build`
+- **Lint:** `bun run lint`
+- **Start production:** `bun run start`
+- **Run a single test:** (No test script found; add if needed)
 
-## Code Style
+## Code Style Guidelines
 
-- **Formatting**: Use 2 spaces for indentation, 100 character line width
-- **TypeScript**: Strict mode enabled, use type annotations for all variables
-- **Imports**: Use path aliases with `@/` prefix (e.g., `import { db } from "@/db/client"`)
-- **Components**: Follow React functional component pattern with explicit type props
-- **Error Handling**: Use zod for validation, return explicit error objects (see `actions.ts` files)
-- **Naming**:
-  - camelCase for variables, functions
-  - PascalCase for components, types, interfaces
+- **Formatting:** 2 spaces, 100 character line width
+- **TypeScript:** Strict mode, type annotations for all variables
+- **Imports:** Use `@/` path alias (e.g., `import { db } from "@/db/client"`)
+- **Components:** React functional components, explicit type props
+- **Error Handling:** Use zod for validation, return explicit error objects (see `actions.ts`)
+- **Naming:**
+  - camelCase for variables/functions
+  - PascalCase for components/types/interfaces
   - kebab-case for filenames
-- **Server Components**: Use "use server" directive at top of server action files
+- **Server Actions:** Use `"use server"` at top of server action files
 
 ## Architecture
 
-- Next.js app router with TypeScript
-- Drizzle ORM with NeonDB
-- Radix UI components with Tailwind CSS
+- Next.js app router (TypeScript)
+- Drizzle ORM (NeonDB)
+- Radix UI, Tailwind CSS
+
+_No Cursor or Copilot rules found._
