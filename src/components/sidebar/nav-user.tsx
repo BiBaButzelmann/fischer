@@ -1,3 +1,5 @@
+"use client";
+
 import { UserView } from "@daveyplate/better-auth-ui";
 import { ChevronsUpDown, LogOutIcon, UserIcon } from "lucide-react";
 import Link from "next/link";
@@ -16,9 +18,9 @@ export function NavUser({ session }: { session: typeof auth.$Infer.Session }) {
     <div className="flex flex-col gap-2">
       <DropdownMenu>
         <DropdownMenuTrigger asChild>
-          <Button className="!p-2 h-fit bg-gray-200 hover:bg-secondary hover:text-sidebar-foreground">
+          <Button className="!p-2 h-fit bg-gray-100 hover:bg-secondary hover:text-sidebar-foreground">
             <UserView
-              classNames={{ base: "text-gray-500" }}
+              classNames={{ base: "text-gray-700" }}
               user={session.user}
             />
 

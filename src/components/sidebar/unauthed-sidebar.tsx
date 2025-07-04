@@ -2,7 +2,6 @@ import Link from "next/link";
 import {
   Sidebar,
   SidebarContent,
-  SidebarFooter,
   SidebarGroup,
   SidebarGroupContent,
   SidebarGroupLabel,
@@ -51,8 +50,6 @@ export default function UnauthedSidebar({ stage }: Props) {
           </SidebarGroupContent>
         </SidebarGroup>
       </SidebarContent>
-
-      <SidebarFooter />
     </Sidebar>
   );
 }
