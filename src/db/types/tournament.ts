@@ -3,4 +3,4 @@ import { tournament, tournamentStage } from "../schema/tournament";
 
 export type Tournament = InferSelectModel<typeof tournament>;
 
-export type TournamentStage = (typeof tournamentStage.enumValues)[number];
+export type TournamentStage = Tournament["stage"];

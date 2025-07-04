@@ -1,4 +1,3 @@
-import { Suspense } from "react";
 import { TournamentStage } from "@/db/types/tournament";
 import { getActiveTournament } from "@/db/repositories/tournament";
 import AuthedSidebar from "./authed-sidebar";
@@ -8,15 +7,11 @@ import { auth } from "@/auth/utils";
 export async function AppSidebar() {
   const session = await auth();
   const tournament = await getActiveTournament();
-  const stage: TournamentStage | undefined = tournament?.stage;
+  const stage = tournament?.stage;
 
   if (session) {
-    return (
-      <Suspense fallback={null}>
-        <AuthedSidebar stage={stage} />
-      </Suspense>
-    );
+    return <AuthedSidebar stage={stage} />;
   }
 
-  return <UnauthedSidebar stage={stage} />;
+  return <UnauthedSidebar stage={tournament?.stage} />;
 }
