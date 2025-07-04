@@ -9,7 +9,7 @@ export async function AppSidebar() {
   const stage = tournament?.stage;
 
   if (session) {
-    return <AuthedSidebar stage={stage} />;
+    return <AuthedSidebar session={session} stage={stage} />;
   }
 
   return <UnauthedSidebar stage={stage} />;
