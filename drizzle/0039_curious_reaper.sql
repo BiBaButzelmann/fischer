@@ -1,0 +1,1 @@
+ALTER TABLE "tournament" ALTER COLUMN "end_registration_date" SET NOT NULL;

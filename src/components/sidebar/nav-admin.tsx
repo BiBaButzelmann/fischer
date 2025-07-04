@@ -1,8 +1,8 @@
 import { auth } from "@/auth";
 import { headers } from "next/headers";
 import Link from "next/link";
-import { SidebarMenuButton, SidebarMenuItem } from "../ui/sidebar";
 import { BinocularsIcon } from "lucide-react";
+import { SidebarMenuButton, SidebarMenuItem } from "../ui/sidebar";
 
 export default async function NavAdmin() {
   const session = await auth.api.getSession({

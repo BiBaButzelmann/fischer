@@ -1,6 +1,6 @@
 {
-  "id": "d295b4de-d3a5-4a16-ac15-f6979b0e1f2c",
-  "prevId": "51ccec3d-9c37-47f2-83ad-98552708d4dd",
+  "id": "608c71f7-0432-4626-9c57-ec84c203be08",
+  "prevId": "61920f1d-eee9-4f58-ab10-920df90bb195",
   "version": "7",
   "dialect": "postgresql",
   "tables": {
@@ -1125,7 +1125,7 @@
           "name": "end_registration_date",
           "type": "date",
           "primaryKey": false,
-          "notNull": true
+          "notNull": false
         },
         "start_date": {
           "name": "start_date",

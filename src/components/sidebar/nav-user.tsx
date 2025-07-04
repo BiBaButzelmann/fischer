@@ -16,7 +16,7 @@ export function NavUser({ session }: { session: typeof auth.$Infer.Session }) {
     <div className="flex flex-col gap-2">
       <DropdownMenu>
         <DropdownMenuTrigger asChild>
-          <Button className="!p-2 h-fit bg-gray-100 hover:bg-gray-200">
+          <Button className="!p-2 h-fit bg-gray-200 hover:bg-secondary hover:text-sidebar-foreground">
             <UserView
               classNames={{ base: "text-gray-500" }}
               user={session.user}

@@ -1,60 +1,16 @@
-import Link from "next/link";
-import {
-  Sidebar,
-  SidebarContent,
-  SidebarFooter,
-  SidebarGroup,
-  SidebarGroupContent,
-  SidebarGroupLabel,
-  SidebarHeader,
-  SidebarMenu,
-  SidebarMenuButton,
-  SidebarMenuItem,
-} from "../ui/sidebar";
-import { NavUser } from "./nav-user";
-import { NotepadTextIcon, SwordsIcon } from "lucide-react";
-import { Suspense } from "react";
-import NavAdmin from "./nav-admin";
+import { getActiveTournament } from "@/db/repositories/tournament";
+import AuthedSidebar from "./authed-sidebar";
+import UnauthedSidebar from "./unauthed-sidebar";
+import { auth } from "@/auth/utils";
 
-export function AppSidebar() {
-  return (
-    <Sidebar>
-      <SidebarHeader>
-        <Link href="/home">
-          <p className="text-xl font-semibold px-2 py-2">fischer</p>
-        </Link>
-      </SidebarHeader>
-      <SidebarContent>
-        <SidebarGroup>
-          <SidebarGroupLabel>Übersicht</SidebarGroupLabel>
-          <SidebarGroupContent>
-            <SidebarMenu>
-              <Suspense fallback={null}>
-                <NavAdmin />
-              </Suspense>
-              <SidebarMenuItem>
-                <SidebarMenuButton asChild>
-                  <Link href="/tournament">
-                    <NotepadTextIcon />
-                    <span>Turnierplan</span>
-                  </Link>
-                </SidebarMenuButton>
-              </SidebarMenuItem>
-              <SidebarMenuItem>
-                <SidebarMenuButton asChild>
-                  <Link href="/my-games">
-                    <SwordsIcon />
-                    <span>Meine Partien</span>
-                  </Link>
-                </SidebarMenuButton>
-              </SidebarMenuItem>
-            </SidebarMenu>
-          </SidebarGroupContent>
-        </SidebarGroup>
-      </SidebarContent>
-      <SidebarFooter>
-        <NavUser />
-      </SidebarFooter>
-    </Sidebar>
-  );
+export async function AppSidebar() {
+  const session = await auth();
+  const tournament = await getActiveTournament();
+  const stage = tournament?.stage;
+
+  if (session) {
+    return <AuthedSidebar stage={stage} />;
+  }
+
+  return <UnauthedSidebar stage={stage} />;
 }
