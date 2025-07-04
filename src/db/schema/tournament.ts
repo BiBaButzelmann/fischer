@@ -27,7 +27,7 @@ export const tournament = pgTable("tournament", {
   numberOfRounds: smallint("number_of_rounds").notNull(),
   endRegistrationDate: date("end_registration_date", {
     mode: "date",
-  }),
+  }).notNull(),
 
   startDate: date("start_date", { mode: "date" }).notNull(),
   endDate: date("end_date", { mode: "date" }).notNull(),
