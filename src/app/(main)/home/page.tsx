@@ -10,9 +10,7 @@ async function home() {
     getLatestTournament(),
   ]);
 
-  const formattedEndDate =
-    tournament?.endRegistrationDate?.toLocaleDateString("de-DE");
-
+  const formattedEndDate = tournament?.endDate?.toLocaleDateString("de-DE");
   return (
     <div className="space-y-8">
       <section className="bg-card border rounded-lg p-6 md:p-8 shadow-sm">
@@ -24,7 +22,7 @@ async function home() {
           <>
             <div className="max-w-xl mx-auto p-4">
               <RegistrationCountdownClient
-                deadline={new Date(tournament.startDate)}
+                deadline={new Date(tournament.endRegistrationDate)}
               />
             </div>
 

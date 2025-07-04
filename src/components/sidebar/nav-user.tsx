@@ -1,4 +1,3 @@
-import { createAuthClient } from "better-auth/react";
 import { UserButton } from "@daveyplate/better-auth-ui";
 
 export function NavUser() {

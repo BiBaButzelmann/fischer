@@ -9,6 +9,7 @@ type Props = {
 };
 
 export const RegistrationCountdownClient = ({ deadline }: Props) => {
+  console.log("RegistrationCountdownClient rendered with deadline:", deadline);
   const calculateTimeLeft = () => {
     const difference = +deadline - +new Date();
     if (difference <= 0) return null;
