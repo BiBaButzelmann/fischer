@@ -10,7 +10,8 @@ async function home() {
     getLatestTournament(),
   ]);
 
-  const formattedEndDate = tournament?.endDate?.toLocaleDateString("de-DE");
+  const formattedEndDate =
+    tournament?.endRegistrationDate?.toLocaleDateString("de-DE");
 
   return (
     <div className="space-y-8">

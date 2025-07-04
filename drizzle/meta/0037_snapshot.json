@@ -1,6 +1,6 @@
 {
-  "id": "51ccec3d-9c37-47f2-83ad-98552708d4dd",
-  "prevId": "0570ed28-4ba2-4c75-9bc0-5a1deadad50d",
+  "id": "61920f1d-eee9-4f58-ab10-920df90bb195",
+  "prevId": "51ccec3d-9c37-47f2-83ad-98552708d4dd",
   "version": "7",
   "dialect": "postgresql",
   "tables": {
@@ -1120,6 +1120,12 @@
           "type": "smallint",
           "primaryKey": false,
           "notNull": true
+        },
+        "end_registration_date": {
+          "name": "end_registration_date",
+          "type": "date",
+          "primaryKey": false,
+          "notNull": false
         },
         "start_date": {
           "name": "start_date",

@@ -1,4 +1,3 @@
-import { TournamentStage } from "@/db/types/tournament";
 import { getActiveTournament } from "@/db/repositories/tournament";
 import AuthedSidebar from "./authed-sidebar";
 import UnauthedSidebar from "./unauthed-sidebar";
@@ -13,5 +12,5 @@ export async function AppSidebar() {
     return <AuthedSidebar stage={stage} />;
   }
 
-  return <UnauthedSidebar stage={tournament?.stage} />;
+  return <UnauthedSidebar stage={stage} />;
 }

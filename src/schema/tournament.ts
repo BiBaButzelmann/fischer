@@ -5,6 +5,9 @@ export const createTournamentFormSchema = z.object({
   clubName: z.string().min(1, "Vereinsname ist erforderlich"),
   tournamentType: z.string().min(1, "Turnierart ist erforderlich"),
   numberOfRounds: z.coerce.number().min(1, "Mindestens 1 Runde erforderlich"),
+  endRegistrationDate: z
+    .string()
+    .min(1, "Enddatum der Anmeldung ist erforderlich"),
   startDate: z.string().min(1, "Startdatum ist erforderlich"),
   endDate: z.string().min(1, "Enddatum ist erforderlich"),
   timeLimit: z.string().min(1, "Bedenkzeit ist erforderlich"),
