@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useState, useCallback } from "react";
 import { Card, CardHeader, CardTitle, CardContent } from "@/components/ui/card";
 import { Clock } from "lucide-react";
 
@@ -9,8 +9,7 @@ type Props = {
 };
 
 export const RegistrationCountdownClient = ({ deadline }: Props) => {
-  console.log("RegistrationCountdownClient rendered with deadline:", deadline);
-  const calculateTimeLeft = () => {
+  const calculateTimeLeft = useCallback(() => {
     const difference = +deadline - +new Date();
     if (difference <= 0) return null;
 
@@ -20,7 +19,7 @@ export const RegistrationCountdownClient = ({ deadline }: Props) => {
       Minuten: Math.floor((difference / 1000 / 60) % 60),
       Sekunden: Math.floor((difference / 1000) % 60),
     };
-  };
+  }, [deadline]);
 
   const [timeLeft, setTimeLeft] = useState(calculateTimeLeft());
 
@@ -31,7 +30,7 @@ export const RegistrationCountdownClient = ({ deadline }: Props) => {
     }, 1000);
 
     return () => clearInterval(timer);
-  }, [deadline]);
+  }, [calculateTimeLeft]);
 
   return (
     <Card>
