@@ -7,8 +7,10 @@ import { GamesList } from "@/components/partien/games-list";
 export default async function Page({
   searchParams,
 }: {
-  searchParams: { year?: string; group?: string };
+  searchParams: Promise<{ year?: string; group?: string }>;
 }) {
+  const { year, group } = await searchParams;
+
   const latestTournament = await getLatestTournament();
   if (!latestTournament) {
     return <div>Kein Turnier gefunden</div>;
@@ -20,17 +22,17 @@ export default async function Page({
   );
   const groups = await getGroupsByTournamentId(latestTournament.id);
 
-  const year = searchParams.year ?? years[0];
-  const groupNumber = searchParams.group ?? groups[0]?.groupNumber.toString();
+  const selectedYear = year ?? years[0];
+  const selectedGroup = group ?? groups[0]?.groupNumber.toString();
 
-  const games = await getGamesByYearAndGroup(year, groupNumber);
+  const games = await getGamesByYearAndGroup(selectedYear, selectedGroup);
 
   return (
     <div className="space-y-6">
       <PartienSelector
-        selectedYear={year}
+        selectedYear={selectedYear}
         years={years}
-        selectedGroup={groupNumber}
+        selectedGroup={selectedGroup}
         groups={groups}
       />
       {games.length > 0 ? (
