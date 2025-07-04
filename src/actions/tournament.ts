@@ -27,6 +27,7 @@ export async function createTournament(
     club: data.clubName,
     startDate: new Date(data.startDate),
     endDate: new Date(data.endDate),
+    endRegistrationDate: new Date(data.endRegistrationDate),
     email: data.email,
     location: data.location,
     numberOfRounds: data.numberOfRounds,
