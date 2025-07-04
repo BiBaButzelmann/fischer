@@ -1,9 +1,5 @@
 import { createAuthClient } from "better-auth/react";
-import { Skeleton } from "../ui/skeleton";
 import { UserButton } from "@daveyplate/better-auth-ui";
-import { UserIcon } from "lucide-react";
-
-const { useSession } = createAuthClient();
 
 export function NavUser() {
   return (

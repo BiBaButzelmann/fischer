@@ -3,7 +3,6 @@ import {
   CalendarIcon,
   SwordsIcon,
   UsersIcon,
-  UserIcon,
   BookTextIcon,
   TrophyIcon,
 } from "lucide-react";

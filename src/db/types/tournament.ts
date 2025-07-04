@@ -1,5 +1,5 @@
 import { InferSelectModel } from "drizzle-orm";
-import { tournament, tournamentStage } from "../schema/tournament";
+import { tournament } from "../schema/tournament";
 
 export type Tournament = InferSelectModel<typeof tournament>;
 
