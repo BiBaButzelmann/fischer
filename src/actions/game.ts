@@ -1,11 +1,13 @@
 "use server";
 
 import { auth as betterAuth } from "@/auth";
-import { auth } from "@/auth/utils";
+import { auth, authWithRedirect } from "@/auth/utils";
 import { db } from "@/db/client";
+import { isUserParticipantInGame } from "@/db/repositories/game";
 import { getGroupsByTournamentId } from "@/db/repositories/group";
 import { getTournamentById } from "@/db/repositories/tournament";
 import { game } from "@/db/schema/game";
+import { GameResult } from "@/db/types/game";
 import { eq, InferInsertModel } from "drizzle-orm";
 import { revalidatePath } from "next/cache";
 import invariant from "tiny-invariant";
@@ -143,4 +145,23 @@ export async function verifyPgnPassword(gameId: number, password: string) {
     password,
     hash: game.tournament.pgnViewerPassword,
   });
+}
+
+export async function updateGameResult(gameId: number, result: GameResult) {
+  const session = await authWithRedirect();
+  // TODO: check match entering helper as well
+  const isUserParticipating = await isUserParticipantInGame(
+    gameId,
+    session.user.id,
+  );
+  invariant(isUserParticipating, "User is not participating in this game");
+
+  await db
+    .update(game)
+    .set({
+      result,
+    })
+    .where(eq(game.id, gameId));
+  revalidatePath("/partien");
+  revalidatePath(`/partien/${gameId}`);
 }

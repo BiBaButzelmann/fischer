@@ -138,6 +138,7 @@ export async function getGamesByYearAndGroup(
         with: {
           profile: {
             columns: {
+              userId: true,
               firstName: true,
               lastName: true,
             },
@@ -151,6 +152,7 @@ export async function getGamesByYearAndGroup(
         with: {
           profile: {
             columns: {
+              userId: true,
               firstName: true,
               lastName: true,
             },

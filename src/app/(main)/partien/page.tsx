@@ -3,12 +3,15 @@ import { getGroupsByTournamentId } from "@/db/repositories/group";
 import { getGamesByYearAndGroup } from "@/db/repositories/game";
 import { PartienSelector } from "@/components/partien/partien-selector";
 import { GamesList } from "@/components/partien/games-list";
+import { updateGameResult } from "@/actions/game";
+import { auth } from "@/auth/utils";
 
 export default async function Page({
   searchParams,
 }: {
   searchParams: Promise<{ year?: string; group?: string }>;
 }) {
+  const session = await auth();
   const { year, group } = await searchParams;
 
   const latestTournament = await getLatestTournament();
@@ -36,7 +39,11 @@ export default async function Page({
         groups={groups}
       />
       {games.length > 0 ? (
-        <GamesList games={games} />
+        <GamesList
+          userId={session?.user.id}
+          games={games}
+          onResultChange={updateGameResult}
+        />
       ) : (
         <div>Keine Partien gefunden</div>
       )}

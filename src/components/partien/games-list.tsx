@@ -9,42 +9,68 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
-import { resultEnum } from "@/db/schema/game";
 import { Button } from "../ui/button";
 import { Handshake, NotebookPen } from "lucide-react";
 import { Tooltip, TooltipContent, TooltipTrigger } from "../ui/tooltip";
 import Link from "next/link";
+import {
+  GameResult,
+  GameWithParticipantNamesAndRatings,
+} from "@/db/types/game";
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTrigger,
+  DialogTitle,
+  DialogDescription,
+  DialogFooter,
+  DialogClose,
+} from "../ui/dialog";
+import { Label } from "../ui/label";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "../ui/select";
+import { useMemo, useTransition } from "react";
 
 type GameListProps = {
-  games: {
-    id: number;
-    boardNumber: number;
-    round: number;
-    result: (typeof resultEnum.enumValues)[number] | null;
-    whiteParticipant: {
-      fideRating: number | null;
-      profile: {
-        firstName: string;
-        lastName: string;
-      };
-    };
-    blackParticipant: {
-      fideRating: number | null;
-      profile: {
-        firstName: string;
-        lastName: string;
-      };
-    };
-  }[];
+  userId: string | undefined;
+  games: GameWithParticipantNamesAndRatings[];
+  onResultChange: (gameId: number, result: GameResult) => Promise<void>;
 };
 
-const resultDisplay = {
-  draw: "½-½",
-  white_wins: "1-0",
-  black_wins: "0-1",
-};
+export function GamesList({ userId, games, onResultChange }: GameListProps) {
+  const [isPending, startTransition] = useTransition();
 
-export function GamesList({ games }: GameListProps) {
+  const gameParticipantsMap = useMemo(
+    () =>
+      Object.fromEntries(
+        games.map((game) => [
+          game.id,
+          [
+            game.whiteParticipant.profile.userId,
+            game.blackParticipant.profile.userId,
+          ],
+        ]),
+      ),
+    [games],
+  );
+
+  const handleResultFormSubmit = (gameId: number) => {
+    return async (event: React.FormEvent<HTMLFormElement>) => {
+      event.preventDefault();
+      const formData = new FormData(event.currentTarget);
+      const result = formData.get("result") as GameResult;
+      startTransition(async () => {
+        await onResultChange(gameId, result);
+      });
+    };
+  };
+
   return (
     <Table>
       <TableHeader>
@@ -54,6 +80,7 @@ export function GamesList({ games }: GameListProps) {
           <TableHead>Weiß</TableHead>
           <TableHead>Schwarz</TableHead>
           <TableHead>Ergebnis</TableHead>
+          <TableHead></TableHead>
         </TableRow>
       </TableHeader>
       <TableBody>
@@ -98,23 +125,78 @@ export function GamesList({ games }: GameListProps) {
                   </Link>
                 </TooltipTrigger>
                 <TooltipContent>
-                  <p>Partie bearbeiten</p>
+                  <p>Partie anschauen</p>
                 </TooltipContent>
               </Tooltip>
-              <Tooltip>
-                <TooltipTrigger asChild>
-                  <Button
-                    aria-label="Ergebnis melden"
-                    variant="outline"
-                    size="icon"
-                  >
-                    <Handshake className="h-4 w-4" />
-                  </Button>
-                </TooltipTrigger>
-                <TooltipContent>
-                  <p>Ergebnis melden</p>
-                </TooltipContent>
-              </Tooltip>
+              {userId != null &&
+              gameParticipantsMap[game.id].includes(userId) ? (
+                <Dialog>
+                  <Tooltip>
+                    <TooltipTrigger asChild>
+                      <DialogTrigger asChild>
+                        <Button
+                          aria-label="Ergebnis melden"
+                          variant="outline"
+                          size="icon"
+                        >
+                          <Handshake className="h-4 w-4" />
+                        </Button>
+                      </DialogTrigger>
+                    </TooltipTrigger>
+                    <TooltipContent>
+                      <p>Ergebnis melden</p>
+                    </TooltipContent>
+                  </Tooltip>
+                  <DialogContent>
+                    <form onSubmit={handleResultFormSubmit(game.id)}>
+                      <DialogHeader>
+                        <DialogTitle>Ergebnis melden</DialogTitle>
+                        <DialogDescription>
+                          Melde hier das Ergebnis der Partie. Klicke speichern
+                          wenn du fertig bist.
+                        </DialogDescription>
+                      </DialogHeader>
+                      <div className="flex flex-col gap-2 py-4">
+                        <Label
+                          htmlFor={`result-select-${game.id}`}
+                          className="font-medium"
+                        >
+                          Ergebnis
+                        </Label>
+                        <Select
+                          name="result"
+                          defaultValue={game.result ?? ""}
+                          required
+                        >
+                          <SelectTrigger
+                            id={`result-select-${game.id}`}
+                            className="w-full"
+                          >
+                            <SelectValue placeholder="Ergebnis wählen" />
+                          </SelectTrigger>
+                          <SelectContent>
+                            <SelectItem value="white_wins">
+                              1-0 (Weiß gewinnt)
+                            </SelectItem>
+                            <SelectItem value="black_wins">
+                              0-1 (Schwarz gewinnt)
+                            </SelectItem>
+                            <SelectItem value="draw">½-½ (Remis)</SelectItem>
+                          </SelectContent>
+                        </Select>
+                      </div>
+                      <DialogFooter>
+                        <DialogClose asChild>
+                          <Button variant="outline">Schließen</Button>
+                        </DialogClose>
+                        <Button disabled={isPending} type="submit">
+                          Speichern
+                        </Button>
+                      </DialogFooter>
+                    </form>
+                  </DialogContent>
+                </Dialog>
+              ) : null}
             </TableCell>
           </TableRow>
         ))}
@@ -122,3 +204,9 @@ export function GamesList({ games }: GameListProps) {
     </Table>
   );
 }
+
+const resultDisplay: Record<GameResult, string> = {
+  draw: "½-½",
+  white_wins: "1-0",
+  black_wins: "0-1",
+};
