@@ -1,5 +1,5 @@
 import { db } from "../client";
-import { and, eq, sql } from "drizzle-orm";
+import { sql } from "drizzle-orm";
 import { tournament } from "../schema/tournament";
 import { group } from "../schema/group";
 

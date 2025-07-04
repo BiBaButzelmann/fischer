@@ -1,7 +1,7 @@
 "use client";
 
 import { GroupWithParticipants } from "@/db/types/group";
-import { useRouter, useSearchParams } from "next/navigation";
+import { useRouter } from "next/navigation";
 import {
   Select,
   SelectContent,
@@ -23,7 +23,6 @@ export function PartienSelector({
   groups: GroupWithParticipants[];
 }) {
   const router = useRouter();
-  const searchParams = useSearchParams();
 
   const handleYearChange = (year: string) => {
     router.push(`?year=${year}&group=${selectedGroup}`);

@@ -1,5 +1,5 @@
 import { relations } from "drizzle-orm";
-import { integer, pgEnum, pgTable, timestamp } from "drizzle-orm/pg-core";
+import { integer, pgTable, timestamp } from "drizzle-orm/pg-core";
 import { participant } from "./participant";
 import { tournament } from "./tournament";
 import { group } from "./group";

@@ -1,7 +1,6 @@
 import { InferEnum, InferSelectModel } from "drizzle-orm";
 import { game } from "../schema/game";
 import { ParticipantWithName } from "./participant";
-import { gameResult } from "../schema/columns.helpers";
 
 export type Game = InferSelectModel<typeof game>;
 export type GameWithParticipants = Game & {
