@@ -58,7 +58,7 @@ export default async function AuthedSidebar({ stage }: Props) {
         </SidebarGroup>
       </SidebarContent>
       {session != null ? (
-        <SidebarFooter>
+        <SidebarFooter className="px-2">
           <NavUser session={session} />
         </SidebarFooter>
       ) : null}
