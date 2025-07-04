@@ -12,25 +12,26 @@ import {
 import { Label } from "../ui/label";
 
 export function PartienSelector({
+  selectedYear,
   years,
+  selectedGroup,
   groups,
 }: {
+  selectedYear: string;
   years: string[];
+  selectedGroup: string;
   groups: GroupWithParticipants[];
 }) {
   const router = useRouter();
   const searchParams = useSearchParams();
 
   const handleYearChange = (year: string) => {
-    router.push(`?year=${year}&group=${group}`);
+    router.push(`?year=${year}&group=${selectedGroup}`);
   };
 
   const handleGroupChange = (group: string) => {
-    router.push(`?year=${year}&group=${group}`);
+    router.push(`?year=${selectedYear}&group=${group}`);
   };
-
-  const year = searchParams.get("year") ?? years[0].toString();
-  const group = searchParams.get("group") ?? groups[0]?.groupNumber.toString();
 
   return (
     <div className="flex gap-4 mb-4">
@@ -38,7 +39,7 @@ export function PartienSelector({
         <Label htmlFor="year-select" className="text-sm font-medium">
           Jahr
         </Label>
-        <Select value={year} onValueChange={handleYearChange}>
+        <Select value={selectedYear} onValueChange={handleYearChange}>
           <SelectTrigger id="year-select" className="w-32">
             <SelectValue />
           </SelectTrigger>
@@ -55,7 +56,7 @@ export function PartienSelector({
         <Label htmlFor="group-select" className="text-sm font-medium">
           Gruppe
         </Label>
-        <Select value={group} onValueChange={handleGroupChange}>
+        <Select value={selectedGroup} onValueChange={handleGroupChange}>
           <SelectTrigger id="group-select" className="w-48">
             <SelectValue />
           </SelectTrigger>
