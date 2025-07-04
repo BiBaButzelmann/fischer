@@ -1,47 +1,58 @@
-"use client";
+import { UserView } from "@daveyplate/better-auth-ui";
+import { ChevronsUpDown, LogOutIcon, UserIcon } from "lucide-react";
+import Link from "next/link";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuSeparator,
+  DropdownMenuTrigger,
+} from "../ui/dropdown-menu";
+import { Button } from "../ui/button";
+import { auth } from "@/auth";
 
-import { createAuthClient } from "better-auth/react";
-import { Skeleton } from "../ui/skeleton";
-import { UserButton } from "@daveyplate/better-auth-ui";
-import { UserIcon } from "lucide-react";
-
-const { useSession } = createAuthClient();
-
-export function NavUser() {
-  const session = useSession();
-
-  if (session.data == null) {
-    return (
-      <div className="flex flex-col gap-2">
-        <div className="flex items-center space-x-4 w-full">
-          <Skeleton className="h-12 w-12 rounded-full" />
-          <div className="space-y-2 flex-grow">
-            <Skeleton className="h-4" />
-            <Skeleton className="h-4" />
-          </div>
-        </div>
-      </div>
-    );
-  }
-
+export function NavUser({ session }: { session: typeof auth.$Infer.Session }) {
   return (
     <div className="flex flex-col gap-2">
-      <UserButton
-        size="full"
-        localization={{
-          settings: "Einstellungen",
-          signOut: "Ausloggen",
-        }}
-        className="hover:bg-secondary hover:text-sidebar-foreground"
-        additionalLinks={[
-          {
-            href: "/anmeldung",
-            label: "Turnierbeteiligung verwalten",
-            icon: <UserIcon />,
-            signedIn: true,
-          },
-        ]}
-      />
+      <DropdownMenu>
+        <DropdownMenuTrigger asChild>
+          <Button className="!p-2 h-fit bg-gray-100 hover:bg-gray-200">
+            <UserView
+              classNames={{ base: "text-gray-500" }}
+              user={session.user}
+            />
+
+            <ChevronsUpDown className="ml-auto text-gray-500" />
+          </Button>
+        </DropdownMenuTrigger>
+
+        <DropdownMenuContent
+          className="w-[--radix-dropdown-menu-trigger-width] min-w-56 max-w-64"
+          onCloseAutoFocus={(e) => e.preventDefault()}
+        >
+          <div className="p-2">
+            <UserView user={session.user} />
+          </div>
+
+          <DropdownMenuSeparator />
+
+          <Link href="/anmeldung">
+            <DropdownMenuItem>
+              <>
+                <UserIcon />
+                Turnierbeteiligung verwalten
+              </>
+            </DropdownMenuItem>
+          </Link>
+
+          <Link href="/ausloggen">
+            <DropdownMenuItem>
+              <LogOutIcon />
+              Ausloggen
+            </DropdownMenuItem>
+          </Link>
+        </DropdownMenuContent>
+      </DropdownMenu>
     </div>
   );
 }
