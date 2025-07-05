@@ -15,12 +15,14 @@ import { buildNavKeys, navItems } from "./sidebar-nav";
 import NavAdmin from "./nav-admin";
 import { TournamentStage } from "@/db/types/tournament";
 import { NavUser } from "./nav-user";
+import { auth } from "@/auth";
 
 type Props = {
+  session: typeof auth.$Infer.Session;
   stage: TournamentStage | undefined;
 };
 
-export default function AuthedSidebar({ stage }: Props) {
+export default async function AuthedSidebar({ session, stage }: Props) {
   const menuKeys = buildNavKeys({ authed: true, stage });
 
   return (
@@ -55,8 +57,9 @@ export default function AuthedSidebar({ stage }: Props) {
           </SidebarGroupContent>
         </SidebarGroup>
       </SidebarContent>
-      <NavUser />
-      <SidebarFooter></SidebarFooter>
+      <SidebarFooter className="px-2">
+        <NavUser session={session} />
+      </SidebarFooter>
     </Sidebar>
   );
 }

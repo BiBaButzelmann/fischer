@@ -1,16 +1,60 @@
-import { UserButton } from "@daveyplate/better-auth-ui";
+"use client";
 
-export function NavUser() {
+import { UserView } from "@daveyplate/better-auth-ui";
+import { ChevronsUpDown, LogOutIcon, UserIcon } from "lucide-react";
+import Link from "next/link";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuSeparator,
+  DropdownMenuTrigger,
+} from "../ui/dropdown-menu";
+import { Button } from "../ui/button";
+import { auth } from "@/auth";
+
+export function NavUser({ session }: { session: typeof auth.$Infer.Session }) {
   return (
     <div className="flex flex-col gap-2">
-      <UserButton
-        size="full"
-        localization={{
-          settings: "Einstellungen",
-          signOut: "Ausloggen",
-        }}
-        className="hover:bg-secondary hover:text-sidebar-foreground"
-      />
+      <DropdownMenu>
+        <DropdownMenuTrigger asChild>
+          <Button className="!p-2 h-fit bg-gray-100 hover:bg-secondary hover:text-sidebar-foreground">
+            <UserView
+              classNames={{ base: "text-gray-700" }}
+              user={session.user}
+            />
+
+            <ChevronsUpDown className="ml-auto text-gray-500" />
+          </Button>
+        </DropdownMenuTrigger>
+
+        <DropdownMenuContent
+          className="w-[--radix-dropdown-menu-trigger-width] min-w-56 max-w-64"
+          onCloseAutoFocus={(e) => e.preventDefault()}
+        >
+          <div className="p-2">
+            <UserView user={session.user} />
+          </div>
+
+          <DropdownMenuSeparator />
+
+          <Link href="/anmeldung">
+            <DropdownMenuItem>
+              <>
+                <UserIcon />
+                Turnierbeteiligung verwalten
+              </>
+            </DropdownMenuItem>
+          </Link>
+
+          <Link href="/ausloggen">
+            <DropdownMenuItem>
+              <LogOutIcon />
+              Ausloggen
+            </DropdownMenuItem>
+          </Link>
+        </DropdownMenuContent>
+      </DropdownMenu>
     </div>
   );
 }
