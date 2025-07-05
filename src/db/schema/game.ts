@@ -1,17 +1,10 @@
 import { relations } from "drizzle-orm";
-import { integer, pgEnum, pgTable, timestamp } from "drizzle-orm/pg-core";
+import { integer, pgTable, timestamp } from "drizzle-orm/pg-core";
 import { participant } from "./participant";
 import { tournament } from "./tournament";
 import { group } from "./group";
-import { timestamps } from "./columns.helpers";
+import { gameResult, timestamps } from "./columns.helpers";
 import { pgn } from "./pgn";
-
-export const resultEnum = pgEnum("result", [
-  "draw", // 0
-  "white_wins", // 1
-  "black_wins", // 2
-  // TODO: nicht angetreten etc.
-]);
 
 export const game = pgTable("game", {
   id: integer("id").generatedAlwaysAsIdentity().primaryKey(),
@@ -27,7 +20,7 @@ export const game = pgTable("game", {
     withTimezone: true,
   }).notNull(),
 
-  result: resultEnum(),
+  result: gameResult(),
 
   ...timestamps,
 });

@@ -12,15 +12,15 @@ import { Suspense } from "react";
 const INITIAL_PGN = `[\nEvent "?"\nSite "?"\nDate "????.??.??"\nRound "?"\nWhite "?"\nBlack "?"\nResult "*"\n]\n\n*`;
 
 type PageProps = {
-  params: Promise<{ gameId: string }>;
+  params: Promise<{ partieId: string }>;
 };
 
 export default async function GamePage({ params }: PageProps) {
-  const { gameId: gameIdParam } = await params;
+  const { partieId: gameIdParam } = await params;
 
   const session = await auth();
   if (session == null) {
-    redirect("/games");
+    redirect("/partien");
   }
 
   const parsedGameIdResult = z.coerce.number().safeParse(gameIdParam);
