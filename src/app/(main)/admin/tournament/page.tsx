@@ -2,7 +2,6 @@ import { authWithRedirect } from "@/auth/utils";
 import { EditGroups } from "@/components/admin/tournament/edit-groups";
 import { PairingsOverview } from "@/components/admin/tournament/pairings-overview";
 import EditTournamentDetails from "@/components/admin/tournament/edit-tournament-details";
-import { ParticipantsList } from "@/components/admin/tournament/participants-list";
 import {
   Collapsible,
   CollapsibleContent,
@@ -12,9 +11,13 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { ChevronDownIcon } from "lucide-react";
 import { getProfilesByUserRole } from "@/db/repositories/profile";
 import { getActiveTournamentWithGroups } from "@/db/repositories/tournament";
+import { Participants } from "@/components/participants/participants";
+import { TournamentWithGroups } from "@/db/types/tournament";
+import { getParticipantsByTournamentId } from "@/db/repositories/participant";
 
 export default async function Page() {
   await authWithRedirect();
+  const tournament = await getActiveTournamentWithGroups();
 
   return (
     <div>
@@ -27,22 +30,29 @@ export default async function Page() {
       <Tabs defaultValue="tournament">
         <TabsList>
           <TabsTrigger value="tournament">Turnier</TabsTrigger>
-          <TabsTrigger value="players">Teilnehmer</TabsTrigger>
+          <TabsTrigger disabled={tournament == null} value="players">
+            Teilnehmer
+          </TabsTrigger>
         </TabsList>
         <TabsContent value="tournament">
-          <ManageTournament />
+          <ManageTournament activeTournament={tournament} />
         </TabsContent>
-        <TabsContent value="players">
-          <ParticipantsList />
-        </TabsContent>
+        {tournament ? (
+          <TabsContent value="players">
+            <ParticipantsList tournamentId={tournament.id} />
+          </TabsContent>
+        ) : null}
       </Tabs>
     </div>
   );
 }
 
-async function ManageTournament() {
+async function ManageTournament({
+  activeTournament,
+}: {
+  activeTournament?: TournamentWithGroups;
+}) {
   const adminProfiles = await getProfilesByUserRole("admin");
-  const activeTournament = await getActiveTournamentWithGroups();
 
   const openCollapsible =
     activeTournament == null
@@ -103,4 +113,9 @@ async function ManageTournament() {
       </Collapsible>
     </div>
   );
+}
+
+async function ParticipantsList({ tournamentId }: { tournamentId: number }) {
+  const participants = await getParticipantsByTournamentId(tournamentId);
+  return <Participants participants={participants} />;
 }
