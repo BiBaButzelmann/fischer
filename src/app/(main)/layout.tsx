@@ -19,7 +19,7 @@ export default function RootLayout({
           <Separator />
           <div className="text-center p-6 text-xs text-muted-foreground">
             <p>© 2025 HSK Klubturnier</p>
-            <p>Kontakt: klubturnier@hsk1830.de | Tel: +49 123 456789</p>
+            <p>Kontakt: klubturnier@hsk1830.de</p>
           </div>
         </footer>
       </main>
