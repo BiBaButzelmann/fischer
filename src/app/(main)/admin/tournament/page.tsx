@@ -10,20 +10,14 @@ import {
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { ChevronDownIcon } from "lucide-react";
 import { getProfilesByUserRole } from "@/db/repositories/profile";
-import {
-  getActiveTournament,
-  getActiveTournamentWithGroups,
-} from "@/db/repositories/tournament";
+import { getActiveTournamentWithGroups } from "@/db/repositories/tournament";
 import { Participants } from "@/components/participants/participants";
-import { Tournament, TournamentWithGroups } from "@/db/types/tournament";
-import { Participant, ParticipantWithName } from "@/db/types/participant";
+import { TournamentWithGroups } from "@/db/types/tournament";
 import { getParticipantsByTournamentId } from "@/db/repositories/participant";
 
 export default async function Page() {
-  const [_, tournament] = await Promise.all([
-    authWithRedirect(),
-    getActiveTournamentWithGroups(),
-  ]);
+  await authWithRedirect();
+  const tournament = await getActiveTournamentWithGroups();
 
   return (
     <div>

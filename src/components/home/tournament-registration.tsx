@@ -14,7 +14,6 @@ import { Participants } from "../participants/participants";
 import { getParticipantsByTournamentId } from "@/db/repositories/participant";
 import { ScrollArea } from "../ui/scroll-area";
 import { getTournamentWeeksByTournamentId } from "@/db/repositories/tournamentWeek";
-import { DateTime } from "luxon";
 import { TournamentWeeks } from "./tournament-weeks";
 
 type Props = {
