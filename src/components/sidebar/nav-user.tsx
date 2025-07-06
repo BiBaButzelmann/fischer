@@ -1,12 +1,7 @@
 "use client";
 
 import { UserView } from "@daveyplate/better-auth-ui";
-import {
-  ChevronsUpDown,
-  LogOutIcon,
-  SettingsIcon,
-  UserIcon,
-} from "lucide-react";
+import { ChevronsUpDown, LogOutIcon, SettingsIcon } from "lucide-react";
 import Link from "next/link";
 import {
   DropdownMenu,
