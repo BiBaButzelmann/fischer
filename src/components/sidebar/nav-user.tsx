@@ -1,7 +1,12 @@
 "use client";
 
 import { UserView } from "@daveyplate/better-auth-ui";
-import { ChevronsUpDown, LogOutIcon, UserIcon } from "lucide-react";
+import {
+  ChevronsUpDown,
+  LogOutIcon,
+  SettingsIcon,
+  UserIcon,
+} from "lucide-react";
 import Link from "next/link";
 import {
   DropdownMenu,
@@ -38,11 +43,11 @@ export function NavUser({ session }: { session: typeof auth.$Infer.Session }) {
 
           <DropdownMenuSeparator />
 
-          <Link href="/anmeldung">
+          <Link href="/einstellungen">
             <DropdownMenuItem>
               <>
-                <UserIcon />
-                Turnierbeteiligung verwalten
+                <SettingsIcon />
+                Einstellungen
               </>
             </DropdownMenuItem>
           </Link>

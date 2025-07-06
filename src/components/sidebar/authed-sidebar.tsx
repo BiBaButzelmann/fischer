@@ -5,7 +5,6 @@ import {
   SidebarFooter,
   SidebarGroup,
   SidebarGroupContent,
-  SidebarGroupLabel,
   SidebarHeader,
   SidebarMenu,
   SidebarMenuButton,
@@ -14,8 +13,8 @@ import {
 import { buildNavKeys, navItems } from "./sidebar-nav";
 import NavAdmin from "./nav-admin";
 import { TournamentStage } from "@/db/types/tournament";
-import { NavUser } from "./nav-user";
 import { auth } from "@/auth";
+import { NavUser } from "./nav-user";
 
 type Props = {
   session: typeof auth.$Infer.Session;
@@ -28,14 +27,13 @@ export default async function AuthedSidebar({ session, stage }: Props) {
   return (
     <Sidebar>
       <SidebarHeader>
-        <Link href="/home">
-          <p className="text-xl font-semibold px-2 py-2">fischer</p>
+        <Link href="/uebersicht">
+          <p className="text-xl font-semibold px-2 py-2">Klubturnier</p>
         </Link>
       </SidebarHeader>
 
       <SidebarContent>
         <SidebarGroup>
-          <SidebarGroupLabel>Übersicht</SidebarGroupLabel>
           <SidebarGroupContent>
             <SidebarMenu>
               <NavAdmin />

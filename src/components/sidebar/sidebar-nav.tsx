@@ -8,8 +8,8 @@ import {
 } from "lucide-react";
 
 export const navItems = {
-  games: { href: "/my-games", icon: <SwordsIcon />, label: "Partien" },
-  calendar: { href: "/calendar", icon: <CalendarIcon />, label: "Kalender" },
+  games: { href: "/partien", icon: <SwordsIcon />, label: "Partien" },
+  calendar: { href: "/kalendar", icon: <CalendarIcon />, label: "Kalender" },
   ranking: {
     href: "/bestenliste",
     icon: <TrophyIcon />,
@@ -18,7 +18,7 @@ export const navItems = {
   roles: {
     href: "/anmeldung",
     icon: <UsersIcon />,
-    label: "Turnierbeteiligung verwalten",
+    label: "Anmeldung anpassen",
   },
   rules: {
     href: "/turnierordnung",
