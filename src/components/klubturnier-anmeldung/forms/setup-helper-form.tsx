@@ -28,7 +28,7 @@ import {
   CollapsibleContent,
   CollapsibleTrigger,
 } from "@/components/ui/collapsible";
-import { ChevronDown, ClipboardEdit, Info, Users } from "lucide-react";
+import { ChevronDown, Info, Users, Wrench } from "lucide-react";
 
 type Props = {
   initialValues?: z.infer<typeof setupHelperFormSchema>;
@@ -86,7 +86,7 @@ export function SetupHelperForm({ initialValues, onSubmit, onDelete }: Props) {
                   </p>
                 </div>
                 <div className="flex items-start gap-3">
-                  <ClipboardEdit className="h-4 w-4 mt-0.5 flex-shrink-0" />
+                  <Wrench className="h-4 w-4 mt-0.5 flex-shrink-0" />
                   <p>
                     <strong>Aufgabe:</strong> Jeder Aufbauhelfer ist in der
                     Regel für den Aufbau der Schachbretter und das Stellen der

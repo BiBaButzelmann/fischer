@@ -28,7 +28,7 @@ import {
   CollapsibleContent,
   CollapsibleTrigger,
 } from "@/components/ui/collapsible";
-import { ChevronDown, ClipboardEdit, Info, Users } from "lucide-react";
+import { ChevronDown, Info, Shield, Users } from "lucide-react";
 
 type Props = {
   initialValues?: z.infer<typeof refereeFormSchema>;
@@ -89,7 +89,7 @@ export function RefereeForm({ initialValues, onSubmit, onDelete }: Props) {
                   </p>
                 </div>
                 <div className="flex items-start gap-3">
-                  <ClipboardEdit className="h-4 w-4 mt-0.5 flex-shrink-0" />
+                  <Shield className="h-4 w-4 mt-0.5 flex-shrink-0" />
                   <p>
                     <strong>Aufgabe:</strong> Jeder Schiedsrichter ist für einen
                     Wochentag eingeteilt, an dem er den Spieltag betreut und die

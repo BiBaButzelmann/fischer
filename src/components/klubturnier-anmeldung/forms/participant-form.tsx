@@ -31,7 +31,7 @@ import {
 import { participantFormSchema } from "@/schema/participant";
 import { MatchDaysCheckboxes } from "./matchday-selection";
 import { DEFAULT_CLUB } from "@/constants/constants";
-import { ChevronDown, ClipboardEdit, Info, Users } from "lucide-react";
+import { ChevronDown, Info, User, Users } from "lucide-react";
 import {
   Collapsible,
   CollapsibleContent,
@@ -101,7 +101,7 @@ export function ParticipateForm({ initialValues, onSubmit, onDelete }: Props) {
                     </p>
                   </div>
                   <div className="flex items-start gap-3">
-                    <ClipboardEdit className="h-4 w-4 mt-0.5 flex-shrink-0" />
+                    <User className="h-4 w-4 mt-0.5 flex-shrink-0" />
                     <p>
                       <strong>Aufgabe:</strong> Der Spieler misst sich einmal
                       pro Woche mit einem möglichst gleichstarken Gegner aus

@@ -15,7 +15,7 @@ import { jurorFormSchema } from "@/schema/juror";
 import { zodResolver } from "@hookform/resolvers/zod";
 import z from "zod";
 import { Switch } from "@/components/ui/switch";
-import { Info, Users, Gavel, ClipboardEdit, ChevronDown } from "lucide-react";
+import { Info, Users, ChevronDown, Gavel } from "lucide-react";
 import { Collapsible, CollapsibleTrigger } from "@/components/ui/collapsible";
 import { CollapsibleContent } from "@radix-ui/react-collapsible";
 
@@ -85,7 +85,7 @@ export function JurorForm({
                   </p>
                 </div>
                 <div className="flex items-start gap-3">
-                  <ClipboardEdit className="h-4 w-4 mt-0.5 flex-shrink-0" />
+                  <Gavel className="h-4 w-4 mt-0.5 flex-shrink-0" />
                   <p>
                     <strong>Aufgabe:</strong> Das Turniergericht entscheidet
                     nach Anhörung aller Parteien innerhalb von drei Tagen
