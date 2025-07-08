@@ -46,7 +46,7 @@ export default async function Page() {
             <p className="text-muted-foreground">
               Noch kein Konto?{" "}
               <Link
-                href="/signup"
+                href="/registrieren"
                 className="text-primary hover:underline font-medium"
               >
                 Jetzt registrieren
