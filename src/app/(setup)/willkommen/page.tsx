@@ -28,7 +28,7 @@ export default async function Page() {
     if (userRoles.length > 0) {
       redirect("/uebersicht");
     }
-    redirect("/anmeldung");
+    redirect("/klubturnier-anmeldung");
   }
 
   return (
