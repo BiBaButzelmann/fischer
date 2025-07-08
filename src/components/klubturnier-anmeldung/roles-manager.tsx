@@ -217,14 +217,6 @@ export function RolesManager({ tournamentId, userId, rolesData }: Props) {
   );
 }
 
-const ROLES = [
-  "participant",
-  "referee",
-  "juror",
-  "matchEnteringHelper",
-  "setupHelper",
-] as const;
-
 function hasSelectedMoreThanOneRole(roles: RolesData): boolean {
   return Object.values(roles).filter((role) => role !== undefined).length > 0;
 }
