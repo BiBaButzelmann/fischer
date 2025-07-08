@@ -7,5 +7,5 @@ export default async function Page() {
   if (signOutResult.success) {
     redirect("/willkommen");
   }
-  redirect("/home");
+  redirect("/uebersicht");
 }

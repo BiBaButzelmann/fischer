@@ -23,8 +23,8 @@ export default function UnauthedSidebar({ stage }: Props) {
   return (
     <Sidebar>
       <SidebarHeader>
-        <Link href="/home">
-          <p className="text-xl font-semibold px-2 py-2">fischer</p>
+        <Link href="/uebersicht">
+          <p className="text-xl font-semibold px-2 py-2">Klubturnier</p>
         </Link>
       </SidebarHeader>
 

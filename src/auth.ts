@@ -22,8 +22,15 @@ export const auth = betterAuth({
     enabled: true,
     autoSignIn: true,
     requireEmailVerification: false,
+    revokeSessionsOnPasswordReset: true,
+
     sendResetPassword: async ({ user, url }) => {
       await sendPasswordResetEmail(user.email, user.name, url);
+    },
+  },
+  user: {
+    changeEmail: {
+      enabled: true,
     },
   },
   plugins: [
