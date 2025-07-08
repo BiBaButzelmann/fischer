@@ -50,6 +50,7 @@ export function ParticipateForm({ initialValues, onSubmit, onDelete }: Props) {
       dwzRating: initialValues?.dwzRating,
       fideRating: initialValues?.fideRating,
       fideId: initialValues?.fideId,
+      nationality: initialValues?.nationality,
       preferredMatchDay: initialValues?.preferredMatchDay,
       secondaryMatchDays: initialValues?.secondaryMatchDays ?? [],
     },
@@ -234,7 +235,7 @@ export function ParticipateForm({ initialValues, onSubmit, onDelete }: Props) {
                   </FormItem>
                 )}
               />
-              {/* Nationalität */}
+              {/* Nationalität */}{" "}
               <FormField
                 control={form.control}
                 name="nationality"
@@ -242,9 +243,13 @@ export function ParticipateForm({ initialValues, onSubmit, onDelete }: Props) {
                   <FormItem className="w-44">
                     <FormLabel required>Nationalität</FormLabel>
                     <FormControl>
+                      {/*TODO: fix alignment*/}
                       <CountryDropdown
-                        onChange={(c) => field.onChange(c.ioc)} // ⇒ "GER"
+                        defaultValue={field.value || undefined}
+                        onChange={(c) => field.onChange(c.ioc)}
                         placeholder="Land wählen"
+                        useIocCode={true}
+                        showCodeOnSelection={true}
                       />
                     </FormControl>
                     <FormMessage />

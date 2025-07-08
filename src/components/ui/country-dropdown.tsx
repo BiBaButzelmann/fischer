@@ -47,6 +47,9 @@ interface CountryDropdownProps {
   disabled?: boolean;
   placeholder?: string;
   slim?: boolean;
+  useIocCode?: boolean; // When true, uses IOC codes instead of alpha3
+  showCodeOnSelection?: boolean; // When true, shows the code (IOC or alpha3) after selection
+  className?: string; // Allow custom className
 }
 
 const CountryDropdownComponent = (
@@ -60,6 +63,9 @@ const CountryDropdownComponent = (
     disabled = false,
     placeholder = "Select a country",
     slim = false,
+    useIocCode = false,
+    showCodeOnSelection = false,
+    className,
     ...props
   }: CountryDropdownProps,
   ref: React.ForwardedRef<HTMLButtonElement>,
@@ -71,8 +77,10 @@ const CountryDropdownComponent = (
 
   useEffect(() => {
     if (defaultValue) {
-      const initialCountry = options.find(
-        (country) => country.alpha3 === defaultValue,
+      const initialCountry = options.find((country) =>
+        useIocCode
+          ? country.ioc === defaultValue
+          : country.alpha3 === defaultValue,
       );
       if (initialCountry) {
         setSelectedCountry(initialCountry);
@@ -84,7 +92,7 @@ const CountryDropdownComponent = (
       // Reset selected country if defaultValue is undefined or null
       setSelectedCountry(undefined);
     }
-  }, [defaultValue, options]);
+  }, [defaultValue, options, useIocCode]);
 
   const handleSelect = useCallback(
     (country: Country) => {
@@ -97,8 +105,9 @@ const CountryDropdownComponent = (
   );
 
   const triggerClasses = cn(
-    "flex h-9 w-full items-center justify-between whitespace-nowrap rounded-md border border-input bg-transparent px-3 py-2 text-sm shadow-sm ring-offset-background placeholder:text-muted-foreground focus:outline-none focus:ring-1 focus:ring-ring disabled:cursor-not-allowed disabled:opacity-50 [&>span]:line-clamp-1",
+    "flex h-9 w-full items-center justify-between whitespace-nowrap rounded-md border border-input bg-transparent px-3 py-2 text-sm shadow-sm ring-offset-background data-[placeholder]:text-muted-foreground focus:outline-none focus:ring-1 focus:ring-ring disabled:cursor-not-allowed disabled:opacity-50 [&>span]:line-clamp-1",
     slim === true && "w-20",
+    className,
   );
 
   return (
@@ -120,11 +129,17 @@ const CountryDropdownComponent = (
             {slim === false && (
               <span className="overflow-hidden text-ellipsis whitespace-nowrap">
                 {selectedCountry.name}
+                {showCodeOnSelection && (
+                  <span className="ml-2 text-muted-foreground">
+                    ({useIocCode ? selectedCountry.ioc : selectedCountry.alpha3}
+                    )
+                  </span>
+                )}
               </span>
             )}
           </div>
         ) : (
-          <span>
+          <span className="text-muted-foreground">
             {slim === false ? (
               placeholder || setSelectedCountry.name
             ) : (
