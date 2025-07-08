@@ -44,7 +44,7 @@ export async function AppSidebar() {
             <SidebarMenuButton asChild>
               <Link href="/klubturnier-anmeldung">
                 <UsersIcon />
-                {/*TODO: Farblich hervorheben*/}
+                {/*TODO: Farblich hervorheben, dont show to gast account*/}
                 <span>Anmeldung anpassen</span>
               </Link>
             </SidebarMenuButton>
