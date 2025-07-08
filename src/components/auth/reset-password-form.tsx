@@ -68,7 +68,7 @@ export function ResetPasswordForm() {
           Dein Passwort wurde erfolgreich geändert.
         </p>
         <Button asChild className="mt-4 w-full">
-          <Link href="/login">Zur Anmeldung</Link>
+          <Link href="/anmelden">Zur Anmeldung</Link>
         </Button>
       </div>
     );
@@ -143,7 +143,7 @@ export function ResetPasswordForm() {
         {/* Link zurück zum Login */}
         <div className="mt-4 text-center">
           <Link
-            href="/login"
+            href="/anmelden"
             className="text-sm text-muted-foreground hover:underline"
           >
             Zurück zur Anmeldung

@@ -22,9 +22,16 @@ import {
   SelectValue,
 } from "../../ui/select";
 import { Button } from "../../ui/button";
+import {
+  Tooltip,
+  TooltipContent,
+  TooltipProvider,
+  TooltipTrigger,
+} from "../../ui/tooltip";
 import { participantFormSchema } from "@/schema/participant";
 import { MatchDaysCheckboxes } from "./matchday-selection";
 import { DEFAULT_CLUB } from "@/constants/constants";
+import { Info } from "lucide-react";
 
 type Props = {
   initialValues?: z.infer<typeof participantFormSchema>;
@@ -60,8 +67,9 @@ export function ParticipateForm({ initialValues, onSubmit, onDelete }: Props) {
 
   const fideRating = form.watch("fideRating");
   return (
-    <Form {...form}>
-      <form onSubmit={form.handleSubmit(handleSubmit)} className="space-y-8">
+    <TooltipProvider>
+      <Form {...form}>
+        <form onSubmit={form.handleSubmit(handleSubmit)} className="space-y-8">
         <FormField
           control={form.control}
           name="chessClub"
@@ -83,7 +91,12 @@ export function ParticipateForm({ initialValues, onSubmit, onDelete }: Props) {
               <FormItem className="flex-1">
                 <FormLabel>DWZ</FormLabel>
                 <FormControl>
-                  <Input type="number" id="dwzRating" {...field} />
+                  <Input
+                    type="number"
+                    id="dwzRating"
+                    placeholder="leer lassen, wenn keine vorhanden"
+                    {...field}
+                  />
                 </FormControl>
                 <FormMessage />
               </FormItem>
@@ -96,7 +109,12 @@ export function ParticipateForm({ initialValues, onSubmit, onDelete }: Props) {
               <FormItem className="flex-1">
                 <FormLabel required={fideRating ? true : false}>Elo</FormLabel>
                 <FormControl>
-                  <Input type="number" id="fideRating" {...field} />
+                  <Input
+                    type="number"
+                    id="fideRating"
+                    placeholder="leer lassen, wenn keine vorhanden"
+                    {...field}
+                  />
                 </FormControl>
                 <FormMessage />
               </FormItem>
@@ -109,7 +127,24 @@ export function ParticipateForm({ initialValues, onSubmit, onDelete }: Props) {
             name="fideId"
             render={({ field }) => (
               <FormItem>
-                <FormLabel required>FIDE ID</FormLabel>
+                <div className="flex items-center gap-2">
+                  <Tooltip>
+                    <TooltipTrigger asChild>
+                      <a
+                        href="https://www.schachbund.de/fide-identifikationsnummer.html"
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="hover:text-blue-600 transition-colors"
+                      >
+                        <Info className="h-4 w-4" />
+                      </a>
+                    </TooltipTrigger>
+                    <TooltipContent>
+                      <p>Was ist eine FIDE ID?</p>
+                    </TooltipContent>
+                  </Tooltip>
+                  <FormLabel required>FIDE ID</FormLabel>
+                </div>
                 <FormControl>
                   <Input
                     id="fideId"
@@ -189,5 +224,6 @@ export function ParticipateForm({ initialValues, onSubmit, onDelete }: Props) {
         </div>
       </form>
     </Form>
+    </TooltipProvider>
   );
 }

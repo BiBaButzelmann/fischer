@@ -4,7 +4,7 @@ import { Accordion } from "@/components/ui/accordion";
 import { Button } from "@/components/ui/button";
 import { User, Shield, Wrench, ClipboardEdit, Gavel } from "lucide-react";
 import { RoleCard } from "./role-card";
-import { ParticipateForm } from "./forms/participate-form";
+import { ParticipateForm } from "./forms/participant-form";
 import { RefereeForm } from "./forms/referee-form";
 import { MatchEnteringForm } from "./forms/match-entering-form";
 import { SetupHelperForm } from "./forms/setup-helper-form";

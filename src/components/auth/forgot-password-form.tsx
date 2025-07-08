@@ -128,7 +128,7 @@ export function ForgotPasswordForm() {
         {/* Link zurück zum Login */}
         <div className="mt-4 text-center">
           <Link
-            href="/login"
+            href="/anmelden"
             className="text-sm text-muted-foreground hover:underline"
           >
             Zurück zur Anmeldung
