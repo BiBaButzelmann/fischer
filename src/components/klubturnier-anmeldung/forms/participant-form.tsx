@@ -45,6 +45,7 @@ export function ParticipateForm({ initialValues, onSubmit, onDelete }: Props) {
     resolver: zodResolver(participantFormSchema),
     defaultValues: {
       chessClub: initialValues?.chessClub ?? DEFAULT_CLUB,
+      title: initialValues?.title,
       dwzRating: initialValues?.dwzRating,
       fideRating: initialValues?.fideRating,
       fideId: initialValues?.fideId,
@@ -70,160 +71,202 @@ export function ParticipateForm({ initialValues, onSubmit, onDelete }: Props) {
     <TooltipProvider>
       <Form {...form}>
         <form onSubmit={form.handleSubmit(handleSubmit)} className="space-y-8">
-        <FormField
-          control={form.control}
-          name="chessClub"
-          render={({ field }) => (
-            <FormItem>
-              <FormLabel required>Schachverein</FormLabel>
-              <FormControl>
-                <Input id="chessClub" required {...field} />
-              </FormControl>
-              <FormMessage />
-            </FormItem>
-          )}
-        />
-        <div className="flex gap-4">
+          <div className="flex gap-4">
+            <FormField
+              control={form.control}
+              name="title"
+              render={({ field }) => (
+                <FormItem className="w-32">
+                  <FormLabel>Titel</FormLabel>
+                  <FormControl>
+                    <Select
+                      defaultValue="noTitle"
+                      value={field.value}
+                      onValueChange={field.onChange}
+                    >
+                      <SelectTrigger>
+                        <SelectValue placeholder="Titel" />
+                      </SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value="noTitle">Kein Titel</SelectItem>
+                        <SelectItem value="GM">GM </SelectItem>
+                        <SelectItem value="IM">IM </SelectItem>
+                        <SelectItem value="FM">FM </SelectItem>
+                        <SelectItem value="CM">CM </SelectItem>
+                        <SelectItem value="WGM">WGM </SelectItem>
+                        <SelectItem value="WIM">WIM </SelectItem>
+                        <SelectItem value="WFM">WFM </SelectItem>
+                        <SelectItem value="WCM">WCM </SelectItem>
+                      </SelectContent>
+                    </Select>
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+            <FormField
+              control={form.control}
+              name="chessClub"
+              render={({ field }) => (
+                <FormItem className="flex-1">
+                  <FormLabel required>Schachverein</FormLabel>
+                  <FormControl>
+                    <Input id="chessClub" required {...field} />
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+          </div>
+          <div className="flex gap-4">
+            <FormField
+              control={form.control}
+              name="dwzRating"
+              render={({ field }) => (
+                <FormItem className="flex-1">
+                  <FormLabel>DWZ</FormLabel>
+                  <FormControl>
+                    <Input
+                      type="number"
+                      id="dwzRating"
+                      placeholder="leer lassen, wenn keine vorhanden"
+                      min="500"
+                      max="2800"
+                      step="1"
+                      {...field}
+                    />
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+            <FormField
+              control={form.control}
+              name="fideRating"
+              render={({ field }) => (
+                <FormItem className="flex-1">
+                  <FormLabel required={fideRating ? true : false}>
+                    Elo
+                  </FormLabel>
+                  <FormControl>
+                    <Input
+                      type="number"
+                      id="fideRating"
+                      placeholder="leer lassen, wenn keine vorhanden"
+                      min="500"
+                      max="2800"
+                      step="1"
+                      {...field}
+                    />
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+          </div>
+          {fideRating ? (
+            <FormField
+              control={form.control}
+              name="fideId"
+              render={({ field }) => (
+                <FormItem>
+                  <div className="flex items-center gap-2">
+                    <Tooltip>
+                      <TooltipTrigger asChild>
+                        <a
+                          href="https://www.schachbund.de/fide-identifikationsnummer.html"
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          className="hover:text-blue-600 transition-colors"
+                        >
+                          <Info className="h-4 w-4 pb-0.5" />
+                        </a>
+                      </TooltipTrigger>
+                      <TooltipContent>
+                        <p>Was ist eine FIDE ID?</p>
+                      </TooltipContent>
+                    </Tooltip>
+                    <FormLabel required>FIDE ID</FormLabel>
+                  </div>
+                  <FormControl>
+                    <Input
+                      id="fideId"
+                      required
+                      placeholder="10245154"
+                      {...field}
+                    />
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+          ) : null}
           <FormField
             control={form.control}
-            name="dwzRating"
-            render={({ field }) => (
-              <FormItem className="flex-1">
-                <FormLabel>DWZ</FormLabel>
-                <FormControl>
-                  <Input
-                    type="number"
-                    id="dwzRating"
-                    placeholder="leer lassen, wenn keine vorhanden"
-                    {...field}
-                  />
-                </FormControl>
-                <FormMessage />
-              </FormItem>
-            )}
-          />
-          <FormField
-            control={form.control}
-            name="fideRating"
-            render={({ field }) => (
-              <FormItem className="flex-1">
-                <FormLabel required={fideRating ? true : false}>Elo</FormLabel>
-                <FormControl>
-                  <Input
-                    type="number"
-                    id="fideRating"
-                    placeholder="leer lassen, wenn keine vorhanden"
-                    {...field}
-                  />
-                </FormControl>
-                <FormMessage />
-              </FormItem>
-            )}
-          />
-        </div>
-        {fideRating ? (
-          <FormField
-            control={form.control}
-            name="fideId"
+            name="preferredMatchDay"
             render={({ field }) => (
               <FormItem>
-                <div className="flex items-center gap-2">
-                  <Tooltip>
-                    <TooltipTrigger asChild>
-                      <a
-                        href="https://www.schachbund.de/fide-identifikationsnummer.html"
-                        target="_blank"
-                        rel="noopener noreferrer"
-                        className="hover:text-blue-600 transition-colors"
-                      >
-                        <Info className="h-4 w-4" />
-                      </a>
-                    </TooltipTrigger>
-                    <TooltipContent>
-                      <p>Was ist eine FIDE ID?</p>
-                    </TooltipContent>
-                  </Tooltip>
-                  <FormLabel required>FIDE ID</FormLabel>
-                </div>
+                <FormLabel required>Bevorzugter Spieltag</FormLabel>
                 <FormControl>
-                  <Input
-                    id="fideId"
-                    required
-                    placeholder="10245154"
-                    {...field}
-                  />
+                  <Select value={field.value} onValueChange={field.onChange}>
+                    <SelectTrigger>
+                      <SelectValue placeholder="Wähle einen Spieltag" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="tuesday">Dienstag</SelectItem>
+                      <SelectItem value="thursday">Donnerstag</SelectItem>
+                      <SelectItem value="friday">Freitag</SelectItem>
+                    </SelectContent>
+                  </Select>
                 </FormControl>
+                <FormDescription>
+                  Die A-Klasse spielt nur an Freitagen
+                </FormDescription>
                 <FormMessage />
               </FormItem>
             )}
           />
-        ) : null}
-        <FormField
-          control={form.control}
-          name="preferredMatchDay"
-          render={({ field }) => (
-            <FormItem>
-              <FormLabel required>Bevorzugter Spieltag</FormLabel>
-              <FormControl>
-                <Select value={field.value} onValueChange={field.onChange}>
-                  <SelectTrigger>
-                    <SelectValue placeholder="Wähle einen Spieltag" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="tuesday">Dienstag</SelectItem>
-                    <SelectItem value="thursday">Donnerstag</SelectItem>
-                    <SelectItem value="friday">Freitag</SelectItem>
-                  </SelectContent>
-                </Select>
-              </FormControl>
-              <FormDescription>
-                Die A-Klasse spielt nur an Freitagen
-              </FormDescription>
-              <FormMessage />
-            </FormItem>
-          )}
-        />
-        <FormField
-          control={form.control}
-          name="secondaryMatchDays"
-          render={({ field }) => (
-            <FormItem>
-              <FormLabel>Ich könnte aber auch spielen am</FormLabel>
-              <FormControl>
-                <MatchDaysCheckboxes
-                  value={field.value}
-                  onChange={field.onChange}
-                />
-              </FormControl>
-              <FormMessage />
-              <FormDescription>
-                Wer nicht flexibel ist, könnte unter Umständen bei dem Turnier
-                nicht berücksichtigt werden.
-              </FormDescription>
-            </FormItem>
-          )}
-        />
-        <div className="flex items-center gap-2">
-          <Button
-            disabled={isPending}
-            type="submit"
-            className="w-full sm:w-auto"
-          >
-            Änderungen speichern
-          </Button>
-          {initialValues !== undefined ? (
+          <FormField
+            control={form.control}
+            name="secondaryMatchDays"
+            render={({ field }) => (
+              <FormItem>
+                <FormLabel>Ich könnte aber auch spielen am</FormLabel>
+                <FormControl>
+                  <MatchDaysCheckboxes
+                    value={field.value}
+                    onChange={field.onChange}
+                  />
+                </FormControl>
+                <FormMessage />
+                <FormDescription>
+                  Wer nicht flexibel ist, könnte unter Umständen bei dem Turnier
+                  nicht berücksichtigt werden.
+                </FormDescription>
+              </FormItem>
+            )}
+          />
+          <div className="flex items-center gap-2">
             <Button
               disabled={isPending}
-              className="w-full sm:w-auto "
-              variant={"outline"}
-              onClick={handleDelete}
+              type="submit"
+              className="w-full sm:w-auto"
             >
-              Änderungen verwerfen
+              Änderungen speichern
             </Button>
-          ) : null}
-        </div>
-      </form>
-    </Form>
+            {initialValues !== undefined ? (
+              <Button
+                disabled={isPending}
+                className="w-full sm:w-auto "
+                variant={"outline"}
+                onClick={handleDelete}
+              >
+                Änderungen verwerfen
+              </Button>
+            ) : null}
+          </div>
+        </form>
+      </Form>
     </TooltipProvider>
   );
 }

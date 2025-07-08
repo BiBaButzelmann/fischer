@@ -302,6 +302,13 @@
       "when": 1751638344026,
       "tag": "0039_curious_reaper",
       "breakpoints": true
+    },
+    {
+      "idx": 40,
+      "version": "7",
+      "when": 1751995099855,
+      "tag": "0040_rich_lizard",
+      "breakpoints": true
     }
   ]
 }

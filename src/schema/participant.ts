@@ -3,6 +3,7 @@ import z from "zod";
 
 export const participantFormSchema = z.object({
   chessClub: z.string().min(1, "Schachverein ist erforderlich"),
+  title: z.string().optional(),
   dwzRating: z.coerce
     .number()
     .min(0, "DWZ-Punktzahl muss mindestens 0 sein")

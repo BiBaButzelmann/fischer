@@ -28,6 +28,7 @@ export async function createParticipant(
       profileId: currentProfile.id,
       tournamentId: tournament.id,
       chessClub: data.chessClub,
+      title: data.title === "noTitle" ? null : data.title,
       dwzRating: data.dwzRating,
       fideRating: data.fideRating,
       fideId: data.fideId,
