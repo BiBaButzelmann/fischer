@@ -151,16 +151,16 @@ export function RolesManager({ tournamentId, userId, rolesData }: Props) {
           />
         </RoleCard>
         <RoleCard
-          accordionId="referee"
-          name="Schiedsrichter"
-          description="Als Schiedsrichter anmelden"
-          completed={rolesData.referee != null}
-          icon={Shield}
+          accordionId="setupHelper"
+          name="Aufbauhelfer"
+          description="Als Aufbauhelfer anmelden"
+          completed={rolesData.setupHelper != null}
+          icon={Wrench}
         >
-          <RefereeForm
-            initialValues={rolesData.referee ?? undefined}
-            onSubmit={handleRefereeFormSubmit}
-            onDelete={handleDeleteReferee}
+          <SetupHelperForm
+            initialValues={rolesData.setupHelper ?? undefined}
+            onSubmit={handleSetupHelperFormSubmit}
+            onDelete={handleDeleteSetupHelper}
           />
         </RoleCard>
         <RoleCard
@@ -177,18 +177,19 @@ export function RolesManager({ tournamentId, userId, rolesData }: Props) {
           />
         </RoleCard>
         <RoleCard
-          accordionId="setupHelper"
-          name="Aufbauhelfer"
-          description="Als Aufbauhelfer anmelden"
-          completed={rolesData.setupHelper != null}
-          icon={Wrench}
+          accordionId="referee"
+          name="Schiedsrichter"
+          description="Als Schiedsrichter anmelden"
+          completed={rolesData.referee != null}
+          icon={Shield}
         >
-          <SetupHelperForm
-            initialValues={rolesData.setupHelper ?? undefined}
-            onSubmit={handleSetupHelperFormSubmit}
-            onDelete={handleDeleteSetupHelper}
+          <RefereeForm
+            initialValues={rolesData.referee ?? undefined}
+            onSubmit={handleRefereeFormSubmit}
+            onDelete={handleDeleteReferee}
           />
         </RoleCard>
+
         <RoleCard
           accordionId="juror"
           name="Turniergericht"

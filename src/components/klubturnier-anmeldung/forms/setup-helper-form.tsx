@@ -23,6 +23,12 @@ import z from "zod";
 import { useTransition } from "react";
 import { MatchDaysCheckboxes } from "./matchday-selection";
 import { setupHelperFormSchema } from "@/schema/setupHelper";
+import {
+  Collapsible,
+  CollapsibleContent,
+  CollapsibleTrigger,
+} from "@/components/ui/collapsible";
+import { ChevronDown, ClipboardEdit, Info, Users } from "lucide-react";
 
 type Props = {
   initialValues?: z.infer<typeof setupHelperFormSchema>;
@@ -56,6 +62,43 @@ export function SetupHelperForm({ initialValues, onSubmit, onDelete }: Props) {
         onSubmit={form.handleSubmit(handleFormSubmit)}
         className="space-y-6 pt-4"
       >
+        <Collapsible>
+          <div className="border rounded-lg">
+            <div className="p-6">
+              <div className="flex items-center justify-between">
+                <div className="flex items-center gap-2">
+                  <Info className="h-5 w-5 pb-1" />
+                  <h3 className="font-semibold">Über den Aufbauhelfer</h3>
+                </div>
+                <CollapsibleTrigger className="p-1 hover:bg-gray-100 dark:hover:bg-gray-800 rounded transition-colors">
+                  <ChevronDown className="h-4 w-4 " />
+                </CollapsibleTrigger>
+              </div>
+            </div>
+            <CollapsibleContent>
+              <div className="px-6 pb-6 space-y-3 text-sm">
+                <div className="flex items-start gap-3">
+                  <Users className="h-4 w-4 mt-0.5 flex-shrink-0" />
+                  <p>
+                    <strong>Zusammensetzung:</strong> Die Aufbauhelfer sind in
+                    der Regel eine Gruppe von mindestens 6 Personen, die sich
+                    auf die Spieltage aufteilen
+                  </p>
+                </div>
+                <div className="flex items-start gap-3">
+                  <ClipboardEdit className="h-4 w-4 mt-0.5 flex-shrink-0" />
+                  <p>
+                    <strong>Aufgabe:</strong> Jeder Aufbauhelfer ist in der
+                    Regel für den Aufbau der Schachbretter und das Stellen der
+                    Uhren eines Wochentages verantwortlich. Die Aufbauhelfer
+                    werden nach Möglichkeit gleichmäßig auf die Tage aufgeteilt,
+                    sodass sie sich abwechseln können.
+                  </p>
+                </div>
+              </div>
+            </CollapsibleContent>
+          </div>
+        </Collapsible>
         <FormField
           control={form.control}
           name="preferredMatchDay"
