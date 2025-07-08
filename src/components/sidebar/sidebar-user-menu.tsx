@@ -13,7 +13,11 @@ import {
 import { Button } from "../ui/button";
 import { auth } from "@/auth";
 
-export function NavUser({ session }: { session: typeof auth.$Infer.Session }) {
+export function SidebarUserMenu({
+  session,
+}: {
+  session: typeof auth.$Infer.Session;
+}) {
   return (
     <div className="flex flex-col gap-2">
       <DropdownMenu>
