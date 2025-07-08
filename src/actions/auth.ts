@@ -16,12 +16,12 @@ import { getRolesByUserId } from "@/db/repositories/role";
 export async function loginRedirect(userId: string) {
   const tournament = await getLatestTournament();
   if (!tournament) {
-    redirect("/home");
+    redirect("/uebersicht");
   }
   if (tournament.stage === "registration") {
     const roles = await getRolesByUserId(userId);
     if (roles.length > 0) {
-      redirect("/home");
+      redirect("/uebersicht");
     } else {
       redirect("/anmeldung");
     }
@@ -48,12 +48,12 @@ export async function login(data: z.infer<typeof loginFormSchema>) {
 export async function signupRedirect() {
   const tournament = await getActiveTournament();
   if (!tournament) {
-    redirect("/home");
+    redirect("/uebersicht");
   }
   if (tournament.stage === "registration") {
     redirect("/anmeldung");
   } else {
-    redirect("/home");
+    redirect("/uebersicht");
   }
 }
 

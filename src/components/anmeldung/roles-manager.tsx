@@ -212,7 +212,7 @@ export function RolesManager({ tournamentId, userId, rolesData }: Props) {
             className="w-full sm:w-auto"
             asChild
           >
-            <Link href="/home">Anmeldung abschließen</Link>
+            <Link href="/uebersicht">Anmeldung abschließen</Link>
           </Button>
         </div>
       ) : null}

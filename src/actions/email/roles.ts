@@ -15,5 +15,5 @@ export async function sendRolesSelectionSummaryEmail(
 
   await sendRolesSelectionSummaryMail(profile.email, profile.firstName, roles);
 
-  redirect("/home");
+  redirect("/uebersicht");
 }

@@ -28,20 +28,21 @@ export function Providers({ children }: { children: ReactNode }) {
         }}
         Link={Link}
         localization={{
-          signIn: "Einloggen",
-          signInDescription: "Email und Passwort eingeben",
-          signUp: "Account erstellen",
-          forgotPassword: "Passwort zurücksetzen",
-          emailPlaceholder: "max.mustermann@web.de",
-          passwordPlaceholder: "Passwort",
-          dontHaveAnAccount: "Noch keinen Account?",
-          forgotPasswordLink: "Passwort vergessen?",
-          goBack: "Zurück",
-          signUpDescription: "Informationen eingeben",
-          namePlaceholder: "Max Mustermann",
-          password: "Passwort",
-          signUpAction: "Registrieren",
-          alreadyHaveAnAccount: "Bereits einen Account?",
+          SIGN_IN: "Einloggen",
+          SIGN_IN_DESCRIPTION: "Email und Passwort eingeben",
+          SIGN_UP: "Account erstellen",
+          FORGOT_PASSWORD: "Passwort zurücksetzen",
+          EMAIL_PLACEHOLDER: "max.mustermann@web.de",
+          PASSWORD_PLACEHOLDER: "Passwort",
+          DONT_HAVE_AN_ACCOUNT: "Noch keinen Account?",
+          FORGOT_PASSWORD_LINK: "Passwort vergessen?",
+          GO_BACK: "Zurück",
+          SIGN_UP_DESCRIPTION: "Informationen eingeben",
+          NAME_PLACEHOLDER: "Max Mustermann",
+          PASSWORD: "Passwort",
+          SIGN_UP_ACTION: "Registrieren",
+          ALREADY_HAVE_AN_ACCOUNT: "Bereits einen Account?",
+          INVALID_PASSWORD: "Das Passwort ist ungültig.",
         }}
       >
         <SidebarProvider>{children}</SidebarProvider>

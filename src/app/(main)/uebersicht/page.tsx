@@ -1,6 +1,6 @@
-import { TournamentDone } from "@/components/home/tournament-done";
-import { TournamentRegistration } from "@/components/home/tournament-registration";
-import { TournamentRunning } from "@/components/home/tournament-running";
+import { TournamentDone } from "@/components/uebersicht/tournament-done";
+import { TournamentRegistration } from "@/components/uebersicht/tournament-registration";
+import { TournamentRunning } from "@/components/uebersicht/tournament-running";
 import { getLatestTournament } from "@/db/repositories/tournament";
 import React from "react";
 

@@ -1,21 +1,21 @@
-redirect behavior:
+# redirect behavior
 
 - welcome
 
   - unauthed -> no redirect
   - authed ->
     - tournament is in registration phase ->
-      - user is registered (one or more roles) -> home
+      - user is registered (one or more roles) -> uebersicht
       - user is not registered -> anmeldung
-    - tournament is not in registration phase -> home
+    - tournament is not in registration phase -> uebersicht
 
 - anmeldung
 
   - unauthed -> welcome
   - authed -> no redirect
-  - done -> home
+  - done -> uebersicht
 
-- home
+- uebersicht
 
   - unauthed -> no redirect
   - authed -> no redirect
@@ -41,17 +41,17 @@ redirect behavior:
   - unauthed -> no redirect
   - authed / done ->
     - tournament is in registration phase ->
-      - user is registered (one or more roles) -> home
+      - user is registered (one or more roles) -> uebersicht
       - user is not registered -> anmeldung
-    - tournament is not in registration phase -> home
+    - tournament is not in registration phase -> uebersicht
 - register
 
   - unauthed -> no redirect
   - authed / done ->
     - tournament is in registration phase ->
-      - user is registered (one or more roles) -> home
+      - user is registered (one or more roles) -> uebersicht
       - user is not registered -> anmeldung
-    - tournament is not in registration phase -> home
+    - tournament is not in registration phase -> uebersicht
 
 - admin
   - unauthed -> login maybe redirect url?

@@ -22,11 +22,11 @@ export default async function Page() {
 
   if (session != null) {
     if (tournament?.stage !== "registration") {
-      redirect("/home");
+      redirect("/uebersicht");
     }
     const userRoles = await getRolesByUserId(session.user.id);
     if (userRoles.length > 0) {
-      redirect("/home");
+      redirect("/uebersicht");
     }
     redirect("/anmeldung");
   }
@@ -112,7 +112,7 @@ export default async function Page() {
             </CardContent>
             <CardFooter className="mt-auto">
               <Button className="w-full text-lg py-6" asChild variant="default">
-                <Link href="/home">
+                <Link href="/uebersicht">
                   Zuschauen
                   <ChevronRight className="ml-2 h-5 w-5" />
                 </Link>
