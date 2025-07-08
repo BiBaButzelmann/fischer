@@ -31,12 +31,7 @@ import {
 import { participantFormSchema } from "@/schema/participant";
 import { MatchDaysCheckboxes } from "./matchday-selection";
 import { DEFAULT_CLUB } from "@/constants/constants";
-import { ChevronDown, Info, User, Users } from "lucide-react";
-import {
-  Collapsible,
-  CollapsibleContent,
-  CollapsibleTrigger,
-} from "@/components/ui/collapsible";
+import { Info, User, Users } from "lucide-react";
 
 type Props = {
   initialValues?: z.infer<typeof participantFormSchema>;
@@ -76,44 +71,37 @@ export function ParticipateForm({ initialValues, onSubmit, onDelete }: Props) {
     <TooltipProvider>
       <Form {...form}>
         <form onSubmit={form.handleSubmit(handleSubmit)} className="space-y-8">
-          <Collapsible className="pt-4">
-            <div className="border rounded-lg">
-              <div className="p-6">
-                <div className="flex items-center justify-between">
-                  <div className="flex items-center gap-2">
-                    <Info className="h-5 w-5 pb-1" />
-                    <h3 className="font-semibold">Über den Spieler</h3>
-                  </div>
-                  <CollapsibleTrigger className="p-1 hover:bg-gray-100 dark:hover:bg-gray-800 rounded transition-colors">
-                    <ChevronDown className="h-4 w-4 " />
-                  </CollapsibleTrigger>
+          <div className="border rounded-lg">
+            <div className="p-6">
+              <div className="flex items-center justify-between">
+                <div className="flex items-center gap-2">
+                  <Info className="h-5 w-5 pb-1" />
+                  <h3 className="font-semibold">Info</h3>
                 </div>
               </div>
-              <CollapsibleContent>
-                <div className="px-6 pb-6 space-y-3 text-sm">
-                  <div className="flex items-start gap-3">
-                    <Users className="h-4 w-4 mt-0.5 flex-shrink-0" />
-                    <p>
-                      <strong>Zusammensetzung:</strong> Historisch gesehen haben
-                      in den letzten Jahren um die 100 Spieler am Klubturnier
-                      teilgenommen. Wir hoffen, diese Zahl in diesem Jahr zu
-                      übertreffen.
-                    </p>
-                  </div>
-                  <div className="flex items-start gap-3">
-                    <User className="h-4 w-4 mt-0.5 flex-shrink-0" />
-                    <p>
-                      <strong>Aufgabe:</strong> Der Spieler misst sich einmal
-                      pro Woche mit einem möglichst gleichstarken Gegner aus
-                      seiner Gruppe und versucht, bis zum Ende des Turniers den
-                      Gruppensieg zu erzielen. In drei Wochen hat der Spieler
-                      die Möglichkeit, verschobene Partien nachzuholen.
-                    </p>
-                  </div>
-                </div>
-              </CollapsibleContent>
             </div>
-          </Collapsible>
+            <div className="px-6 pb-6 space-y-3 text-sm">
+              <div className="flex items-start gap-3">
+                <Users className="h-4 w-4 mt-0.5 flex-shrink-0" />
+                <p>
+                  <strong>Zusammensetzung:</strong> Historisch gesehen haben in
+                  den letzten Jahren um die 100 Spieler am Klubturnier
+                  teilgenommen. Wir hoffen, diese Zahl in diesem Jahr zu
+                  übertreffen.
+                </p>
+              </div>
+              <div className="flex items-start gap-3">
+                <User className="h-4 w-4 mt-0.5 flex-shrink-0" />
+                <p>
+                  <strong>Aufgabe:</strong> Der Spieler misst sich einmal pro
+                  Woche mit einem möglichst gleichstarken Gegner aus seiner
+                  Gruppe und versucht, bis zum Ende des Turniers den Gruppensieg
+                  zu erzielen. In drei Wochen hat der Spieler die Möglichkeit,
+                  verschobene Partien nachzuholen.
+                </p>
+              </div>
+            </div>
+          </div>
           <div className="flex gap-4">
             <FormField
               control={form.control}

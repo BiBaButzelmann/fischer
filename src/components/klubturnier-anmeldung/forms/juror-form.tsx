@@ -15,9 +15,7 @@ import { jurorFormSchema } from "@/schema/juror";
 import { zodResolver } from "@hookform/resolvers/zod";
 import z from "zod";
 import { Switch } from "@/components/ui/switch";
-import { Info, Users, ChevronDown, Gavel } from "lucide-react";
-import { Collapsible, CollapsibleTrigger } from "@/components/ui/collapsible";
-import { CollapsibleContent } from "@radix-ui/react-collapsible";
+import { Info, Users, Gavel } from "lucide-react";
 
 type Props = {
   initiallyParticipating?: boolean;
@@ -60,42 +58,35 @@ export function JurorForm({
         onSubmit={form.handleSubmit(handleFormSubmit)}
         className="space-y-6 pt-4"
       >
-        <Collapsible>
-          <div className="border rounded-lg">
-            <div className="p-6">
-              <div className="flex items-center justify-between">
-                <div className="flex items-center gap-2">
-                  <Info className="h-5 w-5 pb-1" />
-                  <h3 className="font-semibold">Über das Turniergericht</h3>
-                </div>
-                <CollapsibleTrigger className="p-1 hover:bg-gray-100 dark:hover:bg-gray-800 rounded transition-colors">
-                  <ChevronDown className="h-4 w-4 " />
-                </CollapsibleTrigger>
+        <div className="border rounded-lg">
+          <div className="p-6">
+            <div className="flex items-center justify-between">
+              <div className="flex items-center gap-2">
+                <Info className="h-5 w-5 pb-1" />
+                <h3 className="font-semibold">Info</h3>
               </div>
             </div>
-            <CollapsibleContent>
-              <div className="px-6 pb-6 space-y-3 text-sm">
-                <div className="flex items-start gap-3">
-                  <Users className="h-4 w-4 mt-0.5 flex-shrink-0" />
-                  <p>
-                    <strong>Zusammensetzung:</strong> Das Turniergericht setzt
-                    sich aus drei Spielern des Klubturniers und zwei Nachrückern
-                    zusammen, die nicht als Schiedsrichter im Klubturnier tätig
-                    sind.
-                  </p>
-                </div>
-                <div className="flex items-start gap-3">
-                  <Gavel className="h-4 w-4 mt-0.5 flex-shrink-0" />
-                  <p>
-                    <strong>Aufgabe:</strong> Das Turniergericht entscheidet
-                    nach Anhörung aller Parteien innerhalb von drei Tagen
-                    endgültig über den Protest einer Schiedsrichterentscheidung.
-                  </p>
-                </div>
-              </div>
-            </CollapsibleContent>
           </div>
-        </Collapsible>
+          <div className="px-6 pb-6 space-y-3 text-sm">
+            <div className="flex items-start gap-3">
+              <Users className="h-4 w-4 mt-0.5 flex-shrink-0" />
+              <p>
+                <strong>Zusammensetzung:</strong> Das Turniergericht setzt sich
+                aus drei Spielern des Klubturniers und zwei Nachrückern
+                zusammen, die nicht als Schiedsrichter im Klubturnier tätig
+                sind.
+              </p>
+            </div>
+            <div className="flex items-start gap-3">
+              <Gavel className="h-4 w-4 mt-0.5 flex-shrink-0" />
+              <p>
+                <strong>Aufgabe:</strong> Das Turniergericht entscheidet nach
+                Anhörung aller Parteien innerhalb von drei Tagen endgültig über
+                den Protest einer Schiedsrichterentscheidung.
+              </p>
+            </div>
+          </div>
+        </div>
         <FormField
           control={form.control}
           name="participating"
