@@ -1,20 +1,20 @@
 import { authWithRedirect } from "@/auth/utils";
+import { ChangeNameCard } from "@/components/settings/change-name-card";
+import { ChangePhoneNumberCard } from "@/components/settings/change-phonenumber-card";
 import { Button } from "@/components/ui/button";
 import { getProfileByUserId } from "@/db/repositories/profile";
 import {
   ChangeEmailCard,
   ChangePasswordCard,
-  UpdateNameCard,
 } from "@daveyplate/better-auth-ui";
 import { ArrowLeft } from "lucide-react";
-import { redirect } from "next/navigation";
+import invariant from "tiny-invariant";
 
 export default async function Page() {
   const session = await authWithRedirect();
   const profile = await getProfileByUserId(session.user.id);
-  if (!profile) {
-    redirect("/willkommen");
-  }
+  invariant(profile, "Profile not found");
+
   return (
     <div className="flex flex-col gap-6">
       <Button variant="ghost" asChild className="self-start">
@@ -22,19 +22,9 @@ export default async function Page() {
           <ArrowLeft className="h-4 w-4" /> Zurück zur Übersicht
         </a>
       </Button>
-      <UpdateNameCard
-        classNames={{
-          skeleton: "bg-secondary",
-        }}
-        localization={{
-          NAME: "Dein Name",
-          NAME_DESCRIPTION:
-            "Aktualisiere deinen Namen für dein Profil. Dieser Name wird für die DWZ-Auswertung verwendet. Wenn der Name nicht stimmt, kannst du ggf. nicht für das Turnier berücksichtigt werden.",
-          NAME_INSTRUCTIONS:
-            "Mit Speichern bestätigst du die Änderung deines Namens.",
-          NAME_PLACEHOLDER: "Max Mustermann",
-          SAVE: "Speichern",
-        }}
+      <ChangeNameCard
+        firstName={profile.firstName}
+        lastName={profile.lastName}
       />
       <ChangeEmailCard
         localization={{
@@ -52,6 +42,7 @@ export default async function Page() {
           skeleton: "bg-secondary",
         }}
       />
+      <ChangePhoneNumberCard phoneNumber={profile.phoneNumber ?? ""} />
       <ChangePasswordCard
         localization={{
           CHANGE_PASSWORD: "Passwort ändern",

@@ -15,13 +15,14 @@ import { Button } from "../ui/button";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { signup } from "@/actions/auth";
-import { Mail, User, Lock } from "lucide-react";
+import { Mail, User, Lock, Phone } from "lucide-react";
 
 export const signupFormSchema = z
   .object({
     firstName: z.string().min(1, "Vorname ist erforderlich"),
     lastName: z.string().min(1, "Nachname ist erforderlich"),
     email: z.string().email("Ungültige E-Mail-Adresse"),
+    phoneNumber: z.string().min(1, "Telefonnummer ist erforderlich"),
     password: z.string().min(6, "Passwort muss mindestens 6 Zeichen lang sein"),
     confirmPassword: z.string(),
   })
@@ -40,6 +41,7 @@ export function SignupForm() {
       firstName: "",
       lastName: "",
       email: "",
+      phoneNumber: "",
       password: "",
       confirmPassword: "",
     },
@@ -48,11 +50,7 @@ export function SignupForm() {
   const handleSubmit = (data: z.infer<typeof signupFormSchema>) => {
     startTransition(async () => {
       const result = await signup(data);
-      if (result?.error) {
-        setError(result.error);
-      } else {
-        setError("");
-      }
+      setError(result?.error ?? "");
     });
   };
 
@@ -112,6 +110,26 @@ export function SignupForm() {
                   placeholder="max.mustermann@beispiel.de"
                   required
                   icon={Mail}
+                  {...field}
+                />
+              </FormControl>
+              <FormMessage />
+            </FormItem>
+          )}
+        />
+
+        <FormField
+          control={form.control}
+          name="phoneNumber"
+          render={({ field }) => (
+            <FormItem>
+              <FormLabel>Telefonnummer</FormLabel>
+              <FormControl>
+                <Input
+                  type="tel"
+                  placeholder="+49 123 4567890"
+                  required
+                  icon={Phone}
                   {...field}
                 />
               </FormControl>
