@@ -10,7 +10,6 @@ import {
   SidebarHeader,
   SidebarMenu,
   SidebarMenuButton,
-  SidebarMenuItem,
 } from "../ui/sidebar";
 import Link from "next/link";
 import { SidebarUserMenu } from "./sidebar-user-menu";
