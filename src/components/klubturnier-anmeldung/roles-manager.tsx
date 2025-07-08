@@ -37,9 +37,7 @@ type Props = {
 export function RolesManager({ tournamentId, userId, rolesData }: Props) {
   const [isPending, startTransition] = useTransition();
   const router = useRouter();
-  const [accordionValue, setAccordionValue] = useState(
-    getAccordionValue(rolesData),
-  );
+  const [accordionValue, setAccordionValue] = useState<string>();
 
   const handleParticipateFormSubmit = async (
     data: z.infer<typeof participantFormSchema>,
@@ -120,9 +118,7 @@ export function RolesManager({ tournamentId, userId, rolesData }: Props) {
         type="single"
         collapsible
         value={accordionValue}
-        onValueChange={(value) =>
-          setAccordionValue(value as RolesWithoutAdmin | undefined)
-        }
+        onValueChange={(value) => setAccordionValue(value)}
         className="w-full"
       >
         <RoleCard
@@ -228,16 +224,6 @@ const ROLES = [
   "matchEnteringHelper",
   "setupHelper",
 ] as const;
-
-type RolesWithoutAdmin = Exclude<Role, "admin">;
-
-function getAccordionValue(roles: RolesData): RolesWithoutAdmin | undefined {
-  for (const role of ROLES) {
-    if (roles[role] === undefined) {
-      return role;
-    }
-  }
-}
 
 function hasSelectedMoreThanOneRole(roles: RolesData): boolean {
   return Object.values(roles).filter((role) => role !== undefined).length > 0;
