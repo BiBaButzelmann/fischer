@@ -32,6 +32,7 @@ import { participantFormSchema } from "@/schema/participant";
 import { MatchDaysCheckboxes } from "./matchday-selection";
 import { DEFAULT_CLUB } from "@/constants/constants";
 import { Info, User, Users } from "lucide-react";
+import { CountryDropdown } from "@/components/ui/country-dropdown";
 
 type Props = {
   initialValues?: z.infer<typeof participantFormSchema>;
@@ -196,41 +197,61 @@ export function ParticipateForm({ initialValues, onSubmit, onDelete }: Props) {
             />
           </div>
           {fideRating ? (
-            <FormField
-              control={form.control}
-              name="fideId"
-              render={({ field }) => (
-                <FormItem>
-                  <div className="flex items-center gap-2">
-                    <Tooltip>
-                      <TooltipTrigger asChild>
-                        <a
-                          href="https://www.schachbund.de/fide-identifikationsnummer.html"
-                          target="_blank"
-                          rel="noopener noreferrer"
-                          className="hover:text-blue-600 transition-colors"
-                        >
-                          <Info className="h-4 w-4 pb-0.5" />
-                        </a>
-                      </TooltipTrigger>
-                      <TooltipContent>
-                        <p>Was ist eine FIDE ID?</p>
-                      </TooltipContent>
-                    </Tooltip>
-                    <FormLabel required>FIDE ID</FormLabel>
-                  </div>
-                  <FormControl>
-                    <Input
-                      id="fideId"
-                      required
-                      placeholder="10245154"
-                      {...field}
-                    />
-                  </FormControl>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
+            <div className="flex gap-4">
+              {/* FIDE-ID */}
+              <FormField
+                control={form.control}
+                name="fideId"
+                render={({ field }) => (
+                  <FormItem>
+                    <div className="flex items-center gap-2">
+                      <Tooltip>
+                        <TooltipTrigger asChild>
+                          <a
+                            href="https://www.schachbund.de/fide-identifikationsnummer.html"
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            className="hover:text-blue-600 transition-colors"
+                          >
+                            <Info className="h-4 w-4 pb-0.5" />
+                          </a>
+                        </TooltipTrigger>
+                        <TooltipContent>
+                          <p>Was ist eine FIDE ID?</p>
+                        </TooltipContent>
+                      </Tooltip>
+                      <FormLabel required>FIDE ID</FormLabel>
+                    </div>
+                    <FormControl>
+                      <Input
+                        id="fideId"
+                        required
+                        placeholder="10245154"
+                        {...field}
+                      />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+              {/* Nationalität */}
+              <FormField
+                control={form.control}
+                name="nationality"
+                render={({ field }) => (
+                  <FormItem className="w-44">
+                    <FormLabel required>Nationalität</FormLabel>
+                    <FormControl>
+                      <CountryDropdown
+                        onChange={(c) => field.onChange(c.ioc)} // ⇒ "GER"
+                        placeholder="Land wählen"
+                      />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+            </div>
           ) : null}
           <FormField
             control={form.control}

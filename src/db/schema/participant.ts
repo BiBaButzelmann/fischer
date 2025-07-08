@@ -17,6 +17,7 @@ export const participant = pgTable(
 
     chessClub: text("chess_club").notNull(),
     title: text("title"),
+    nationality: text("nationality"),
     dwzRating: integer("dwz_rating"),
     fideRating: integer("fide_rating"),
     fideId: text("fide_id"),

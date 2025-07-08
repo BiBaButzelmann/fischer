@@ -13,6 +13,11 @@ export const participantFormSchema = z.object({
     .min(0, "FIDE-Punktzahl muss mindestens 0 sein")
     .optional(),
   fideId: z.string().optional(),
+  nationality: z
+    .string()
+    .length(3, "3-Buchstaben-Ländercode benötigt")
+    .toUpperCase()
+    .optional(), // nur vorhanden, wenn Elo eingegeben
 
   preferredMatchDay: z.enum(availableMatchDays, {
     errorMap: () => ({ message: "Bevorzugter Spieltag ist erforderlich" }),
