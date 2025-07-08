@@ -41,7 +41,11 @@ export async function TournamentRegistration({ tournament }: Props) {
             <CardTitle className="text-4xl font-bold">
               Hallo, {playerName}!
             </CardTitle>
-            <CardDescription>Vielen Dank für deine Anmeldung!</CardDescription>
+            {playerName !== "Gast" ? (
+              <CardDescription>
+                Vielen Dank für deine Anmeldung!
+              </CardDescription>
+            ) : null}
           </CardHeader>
           <CardContent>
             <div className="mb-4 flex items-center gap-2 text-sm text-muted-foreground">
