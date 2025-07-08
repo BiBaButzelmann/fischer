@@ -9,7 +9,7 @@ import { RefereeForm } from "./forms/referee-form";
 import { MatchEnteringForm } from "./forms/match-entering-form";
 import { SetupHelperForm } from "./forms/setup-helper-form";
 import { JurorForm } from "./forms/juror-form";
-import { Role, RolesData } from "@/db/types/role";
+import { RolesData } from "@/db/types/role";
 import { useState, useTransition } from "react";
 import { z } from "zod";
 import { participantFormSchema } from "@/schema/participant";
