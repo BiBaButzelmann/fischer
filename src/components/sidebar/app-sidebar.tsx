@@ -96,14 +96,12 @@ export async function AppSidebar() {
           <SidebarGroup>
             <SidebarGroupLabel>Admin</SidebarGroupLabel>
             <SidebarGroupContent>
-              <SidebarMenuItem>
-                <SidebarMenuButton asChild>
-                  <Link href="/admin/tournament">
-                    <BinocularsIcon />
-                    <span>Turnier verwalten</span>
-                  </Link>
-                </SidebarMenuButton>
-              </SidebarMenuItem>
+              <SidebarMenuButton asChild>
+                <Link href="/admin/tournament">
+                  <BinocularsIcon />
+                  <span>Turnier verwalten</span>
+                </Link>
+              </SidebarMenuButton>
             </SidebarGroupContent>
           </SidebarGroup>
         ) : null}
