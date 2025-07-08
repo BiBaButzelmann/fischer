@@ -5,7 +5,6 @@ import {
   ChangeEmailCard,
   ChangePasswordCard,
   UpdateNameCard,
-  UpdateUsernameCard,
 } from "@daveyplate/better-auth-ui";
 import { ArrowLeft } from "lucide-react";
 import { redirect } from "next/navigation";
