@@ -20,6 +20,25 @@ export default function RootLayout({
           <div className="text-center p-6 text-xs text-muted-foreground">
             <p>© 2025 HSK Klubturnier</p>
             <p>Kontakt: klubturnier@hsk1830.de</p>
+            <p>
+              <a
+                href="https://hsk1830.de/Datenschutz"
+                target="_blank"
+                rel="noopener noreferrer"
+                className="text-muted-foreground hover:text-foreground"
+              >
+                Datenschutz
+              </a>
+              <span className="mx-2">|</span>
+              <a
+                href="https://hsk1830.de/impressum"
+                target="_blank"
+                rel="noopener noreferrer"
+                className="text-muted-foreground hover:text-foreground"
+              >
+                Impressum
+              </a>
+            </p>
           </div>
         </footer>
       </main>
