@@ -4,6 +4,7 @@ import { getProfileByUserId } from "@/db/repositories/profile";
 import {
   ChangeEmailCard,
   ChangePasswordCard,
+  PasswordInput,
   UpdateNameCard,
 } from "@daveyplate/better-auth-ui";
 import { ArrowLeft } from "lucide-react";
@@ -23,43 +24,55 @@ export default async function Page() {
         </a>
       </Button>
       <UpdateNameCard
+        classNames={{
+          skeleton: "bg-secondary",
+        }}
         localization={{
-          name: "Dein Name",
-          nameDescription:
+          NAME: "Dein Name",
+          NAME_DESCRIPTION:
             "Aktualisiere deinen Namen für dein Profil. Dieser Name wird für die DWZ-Auswertung verwendet. Wenn der Name nicht stimmt, kannst du ggf. nicht für das Turnier berücksichtigt werden.",
-          nameInstructions:
+          NAME_INSTRUCTIONS:
             "Mit Speichern bestätigst du die Änderung deines Namens.",
-          namePlaceholder: "Max Mustermann",
-          save: "Speichern",
+          NAME_PLACEHOLDER: "Max Mustermann",
+          SAVE: "Speichern",
         }}
       />
       <ChangeEmailCard
         localization={{
-          email: "Deine E-Mail",
-          emailDescription:
+          EMAIL: "Deine E-Mail",
+          EMAIL_DESCRIPTION:
             "Du kannst hier deine E-Mail-Adresse aktualisieren.",
-          emailInstructions:
+          EMAIL_INSTRUCTIONS:
             "Mit Speichern bestätigst du die Änderung deiner E-Mail-Adresse.",
-          emailPlaceholder: "du@beispiel.de",
-          emailVerification:
+          EMAIL_PLACEHOLDER: "du@beispiel.de",
+          EMAIL_VERIFICATION:
             "Überprüfe dein Postfach für den Bestätigungslink!",
-          save: "Speichern",
+          SAVE: "Speichern",
         }}
       />
       <ChangePasswordCard
         localization={{
-          changePassword: "Passwort ändern",
-          changePasswordDescription:
+          CHANGE_PASSWORD: "Passwort ändern",
+          CHANGE_PASSWORD_DESCRIPTION:
             "Setze ein neues Passwort für deinen Account",
-          newPassword: "",
-          changePasswordSuccess: "Passwort erfolgreich aktualisiert!",
-          setPassword: "Passwort festlegen",
-          changePasswordInstructions:
+          NEW_PASSWORD: "",
+          CHANGE_PASSWORD_SUCCESS: "Passwort erfolgreich aktualisiert!",
+          SET_PASSWORD: "Passwort festlegen",
+          CHANGE_PASSWORD_INSTRUCTIONS:
             "Mit Speichern bestätigst du die Änderung deines Passworts.",
-          newPasswordPlaceholder: "Neues Passwort",
-          currentPassword: "",
-          currentPasswordPlaceholder: "Aktuelles Passwort",
-          save: "Speichern",
+          NEW_PASSWORD_PLACEHOLDER: "Neues Passwort",
+          CURRENT_PASSWORD: "",
+          CURRENT_PASSWORD_PLACEHOLDER: "Aktuelles Passwort",
+          SAVE: "Speichern",
+          PASSWORD_TOO_LONG:
+            "Das Passwort muss mindestens 6 Zeichen lang sein.",
+          CONFIRM_PASSWORD: "Passwort bestätigen",
+          CONFIRM_PASSWORD_PLACEHOLDER: "Passwort bestätigen",
+          PASSWORDS_DO_NOT_MATCH: "Die Passwörter stimmen nicht überein.",
+          PASSWORD_REQUIRED: "yee haw",
+        }}
+        passwordValidation={{
+          minLength: 6,
         }}
       />
     </div>
