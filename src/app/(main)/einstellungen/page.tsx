@@ -4,7 +4,6 @@ import { getProfileByUserId } from "@/db/repositories/profile";
 import {
   ChangeEmailCard,
   ChangePasswordCard,
-  PasswordInput,
   UpdateNameCard,
 } from "@daveyplate/better-auth-ui";
 import { ArrowLeft } from "lucide-react";
@@ -20,7 +19,7 @@ export default async function Page() {
     <div className="flex flex-col gap-6">
       <Button variant="ghost" asChild className="self-start">
         <a href="/uebersicht" className="flex items-center gap-2">
-          <ArrowLeft className="h-4 w-4" /> Zurück zum Dashboard
+          <ArrowLeft className="h-4 w-4" /> Zurück zur Übersicht
         </a>
       </Button>
       <UpdateNameCard
@@ -49,6 +48,9 @@ export default async function Page() {
             "Überprüfe dein Postfach für den Bestätigungslink!",
           SAVE: "Speichern",
         }}
+        classNames={{
+          skeleton: "bg-secondary",
+        }}
       />
       <ChangePasswordCard
         localization={{
@@ -66,13 +68,12 @@ export default async function Page() {
           SAVE: "Speichern",
           PASSWORD_TOO_LONG:
             "Das Passwort muss mindestens 6 Zeichen lang sein.",
-          CONFIRM_PASSWORD: "Passwort bestätigen",
-          CONFIRM_PASSWORD_PLACEHOLDER: "Passwort bestätigen",
-          PASSWORDS_DO_NOT_MATCH: "Die Passwörter stimmen nicht überein.",
-          PASSWORD_REQUIRED: "yee haw",
         }}
         passwordValidation={{
           minLength: 6,
+        }}
+        classNames={{
+          skeleton: "bg-secondary",
         }}
       />
     </div>
