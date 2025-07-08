@@ -1,4 +1,7 @@
 import { authWithRedirect } from "@/auth/utils";
+import { ChangePhoneNumber } from "@/components/settings/change-phonenumber";
+import { ChangePhoneNumberCard } from "@/components/settings/change-phonenumber-card";
+import { ChangePhoneNumberSkeleton } from "@/components/settings/change-phonenumber-skeleton";
 import { Button } from "@/components/ui/button";
 import { getProfileByUserId } from "@/db/repositories/profile";
 import {
@@ -7,14 +10,10 @@ import {
   UpdateNameCard,
 } from "@daveyplate/better-auth-ui";
 import { ArrowLeft } from "lucide-react";
-import { redirect } from "next/navigation";
+import { Suspense } from "react";
 
 export default async function Page() {
   const session = await authWithRedirect();
-  const profile = await getProfileByUserId(session.user.id);
-  if (!profile) {
-    redirect("/willkommen");
-  }
   return (
     <div className="flex flex-col gap-6">
       <Button variant="ghost" asChild className="self-start">
@@ -52,6 +51,9 @@ export default async function Page() {
           skeleton: "bg-secondary",
         }}
       />
+      <Suspense fallback={<ChangePhoneNumberSkeleton />}>
+        <ChangePhoneNumber session={session} />
+      </Suspense>
       <ChangePasswordCard
         localization={{
           CHANGE_PASSWORD: "Passwort ändern",
