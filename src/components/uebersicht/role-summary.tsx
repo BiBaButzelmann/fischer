@@ -1,11 +1,10 @@
 import {
-  CheckCircle,
-  XCircle,
   Users,
+  User,
+  Wrench,
+  ClipboardEdit,
+  Shield,
   Gavel,
-  Settings,
-  PenTool,
-  UserCheck,
 } from "lucide-react";
 import {
   Card,
@@ -110,7 +109,7 @@ export function RoleSummary({
           {participant && (
             <div className="rounded-lg border p-4 space-y-3">
               <div className="flex items-center gap-2">
-                <CheckCircle className="h-4 w-4 text-green-600" />
+                <User className="h-4 w-4 text-green-600" />
                 <h3 className="font-semibold">Spieler</h3>
               </div>
               <div className="space-y-3 text-sm">
@@ -204,7 +203,7 @@ export function RoleSummary({
           {setupHelper && (
             <div className="rounded-lg border p-4 space-y-3">
               <div className="flex items-center gap-2">
-                <CheckCircle className="h-4 w-4 text-green-600" />
+                <Wrench className="h-4 w-4 text-green-600" />
                 <h3 className="font-semibold">Aufbauhelfer</h3>
               </div>
               <div className="space-y-3 text-sm">
@@ -240,12 +239,12 @@ export function RoleSummary({
           {matchEnteringHelper && (
             <div className="rounded-lg border p-4 space-y-3">
               <div className="flex items-center gap-2">
-                <CheckCircle className="h-4 w-4 text-green-600" />
+                <ClipboardEdit className="h-4 w-4 text-green-600" />
                 <h3 className="font-semibold">Eingabehelfer</h3>
               </div>
               <div className="text-sm">
                 <div className="border rounded p-2 flex items-center gap-2">
-                  <PenTool className="h-4 w-4 text-muted-foreground" />
+                  <ClipboardEdit className="h-4 w-4 text-muted-foreground" />
                   <span className="text-muted-foreground">Anzahl Gruppen:</span>
                   <span className="font-medium">
                     {matchEnteringHelper.numberOfGroupsToEnter}
@@ -259,7 +258,7 @@ export function RoleSummary({
           {referee && (
             <div className="rounded-lg border p-4 space-y-3">
               <div className="flex items-center gap-2">
-                <CheckCircle className="h-4 w-4 text-green-600" />
+                <Shield className="h-4 w-4 text-green-600" />
                 <h3 className="font-semibold">Schiedsrichter</h3>
               </div>
               <div className="space-y-3 text-sm">
@@ -295,12 +294,12 @@ export function RoleSummary({
           {juror && (
             <div className="rounded-lg border p-4 space-y-3">
               <div className="flex items-center gap-2">
-                <CheckCircle className="h-4 w-4 text-green-600" />
+                <Gavel className="h-4 w-4 text-green-600" />
                 <h3 className="font-semibold">Turniergericht</h3>
               </div>
               <div className="text-sm">
                 <div className="border rounded p-2 flex items-center gap-2">
-                  <UserCheck className="h-4 w-4 text-muted-foreground" />
+                  <Gavel className="h-4 w-4 text-muted-foreground" />
                   <span className="text-muted-foreground">Status:</span>
                   <span className="font-medium">Angemeldet</span>
                 </div>

@@ -25,7 +25,6 @@ export async function AppSidebar() {
   const tournament = await getActiveTournament();
 
   const stage = tournament?.stage;
-  const isRegistration = stage === "registration";
   const isActive = stage === "registration" || stage === "running";
   const isAdmin = session?.user.role === "admin";
 
