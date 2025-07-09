@@ -30,6 +30,11 @@ export interface Country {
   status: string;
 }
 
+const COUNTRY_OPTIONS = countries.all.filter(
+  (country: Country) =>
+    country.emoji && country.status !== "deleted" && country.ioc !== "PRK",
+);
+
 interface CountryDropdownProps {
   onChange: (country: Country) => void;
   defaultValue?: string;
@@ -52,14 +57,9 @@ const CountryDropdownComponent = (
     undefined,
   );
 
-  const options = countries.all.filter(
-    (country: Country) =>
-      country.emoji && country.status !== "deleted" && country.ioc !== "PRK",
-  );
-
   useEffect(() => {
     if (defaultValue) {
-      const initialCountry = options.find(
+      const initialCountry = COUNTRY_OPTIONS.find(
         (country: Country) => country.ioc === defaultValue,
       );
       if (initialCountry) {
@@ -121,9 +121,8 @@ const CountryDropdownComponent = (
             </div>
             <CommandEmpty>No country found.</CommandEmpty>
             <CommandGroup>
-              {options
-                .filter((country: Country) => country.name)
-                .map((option: Country, key: number) => (
+              {COUNTRY_OPTIONS.filter((country: Country) => country.name).map(
+                (option: Country, key: number) => (
                   <CommandItem
                     className="flex items-center w-full gap-2"
                     key={key}
@@ -149,7 +148,8 @@ const CountryDropdownComponent = (
                       )}
                     />
                   </CommandItem>
-                ))}
+                ),
+              )}
             </CommandGroup>
           </CommandList>
         </Command>
