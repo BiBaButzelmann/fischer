@@ -17,45 +17,65 @@ export function SelectedWeeks({
   selectedWeeks: Week[];
   onWeekChange: (index: number, newCalendarWeek: number) => void;
 }) {
+  // Count the week number based on status
+  const getWeekNumber = (currentIndex: number, allWeeks: Week[]) => {
+    const currentWeek = allWeeks[currentIndex];
+    const weeksOfSameType = allWeeks
+      .slice(0, currentIndex + 1)
+      .filter((w) => w.status === currentWeek.status);
+    return weeksOfSameType.length;
+  };
+
   return (
     <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-      {selectedWeeks.map((week, index) => (
-        <div key={index}>
-          <Label htmlFor={`week-date-${index}`} className="text-sm font-medium">
-            Woche {index + 1}
-          </Label>
-          <Popover>
-            <PopoverTrigger asChild>
-              <Button
-                variant="outline"
-                className="w-full justify-start text-left font-normal mt-1 px-2 py-1 h-auto hover:bg-secondary hover:text-black"
-              >
-                <CalendarIcon className="mr-2 h-4 w-4" />
-                <span className="flex flex-col">
-                  <span className="font-medium">
-                    {getCalendarWeek(week.weekNumber)}
+      {selectedWeeks.map((week, index) => {
+        const weekNumber = getWeekNumber(index, selectedWeeks);
+        const weekTitle =
+          week.status === "regular"
+            ? `Woche ${weekNumber}`
+            : `Nachholwoche ${weekNumber}`;
+
+        return (
+          <div key={index}>
+            <Label
+              htmlFor={`week-date-${index}`}
+              className="text-sm font-medium"
+            >
+              {weekTitle}
+            </Label>
+            <Popover>
+              <PopoverTrigger asChild>
+                <Button
+                  variant="outline"
+                  className="w-full justify-start text-left font-normal mt-1 px-2 py-1 h-auto hover:bg-secondary hover:text-black"
+                >
+                  <CalendarIcon className="mr-2 h-4 w-4" />
+                  <span className="flex flex-col">
+                    <span className="font-medium">
+                      {getCalendarWeek(week.weekNumber)}
+                    </span>
+                    <span className="text-xs text-muted-foreground">
+                      {getWeekRange(week.weekNumber)}
+                    </span>
                   </span>
-                  <span className="text-xs text-muted-foreground">
-                    {getWeekRange(week.weekNumber)}
-                  </span>
-                </span>
-              </Button>
-            </PopoverTrigger>
-            <PopoverContent className="w-auto p-0 rounded-md">
-              <WeekCalendar
-                weekNumber={week.weekNumber}
-                onSelect={(weekNumber) => {
-                  console.log("Selected week number:", weekNumber);
-                  if (weekNumber === undefined) {
-                    return;
-                  }
-                  onWeekChange(index, weekNumber);
-                }}
-              />
-            </PopoverContent>
-          </Popover>
-        </div>
-      ))}
+                </Button>
+              </PopoverTrigger>
+              <PopoverContent className="w-auto p-0 rounded-md">
+                <WeekCalendar
+                  weekNumber={week.weekNumber}
+                  onSelect={(weekNumber) => {
+                    console.log("Selected week number:", weekNumber);
+                    if (weekNumber === undefined) {
+                      return;
+                    }
+                    onWeekChange(index, weekNumber);
+                  }}
+                />
+              </PopoverContent>
+            </Popover>
+          </div>
+        );
+      })}
     </div>
   );
 }

@@ -30,8 +30,7 @@ export async function TournamentRegistration({ tournament }: Props) {
     getTournamentWeeksByTournamentId(tournament.id),
   ]);
 
-  const playerName =
-    profile != null ? `${profile.firstName} ${profile.lastName}` : "Gast";
+  const playerFirstName = profile != null ? `${profile.firstName}` : "Gast";
 
   return (
     <div className="grid grid-cols-1 items-start gap-8 lg:grid-cols-3">
@@ -39,7 +38,7 @@ export async function TournamentRegistration({ tournament }: Props) {
         <Card>
           <CardHeader>
             <CardTitle className="text-4xl font-bold">
-              Hallo, {playerName}!
+              Hallo, {playerFirstName}!
             </CardTitle>
             {session ? (
               <CardDescription>
