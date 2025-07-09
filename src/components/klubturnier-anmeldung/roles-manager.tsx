@@ -48,7 +48,7 @@ export function RolesManager({ tournamentId, userId, rolesData }: Props) {
 
   const handleDeleteParticipant = async () => {
     if (rolesData.participant) {
-      await deleteParticipant(rolesData.participant.id);
+      await deleteParticipant(tournamentId, rolesData.participant.id);
       router.refresh();
     }
   };
@@ -62,7 +62,7 @@ export function RolesManager({ tournamentId, userId, rolesData }: Props) {
 
   const handleDeleteReferee = async () => {
     if (rolesData.referee) {
-      await deleteReferee(rolesData.referee.id);
+      await deleteReferee(tournamentId, rolesData.referee.id);
       router.refresh();
     }
   };
@@ -75,7 +75,10 @@ export function RolesManager({ tournamentId, userId, rolesData }: Props) {
 
   const handleDeleteMatchEnteringHelper = async () => {
     if (rolesData.matchEnteringHelper) {
-      await deleteMatchEnteringHelper(rolesData.matchEnteringHelper.id);
+      await deleteMatchEnteringHelper(
+        tournamentId,
+        rolesData.matchEnteringHelper.id,
+      );
       router.refresh();
     }
   };
@@ -89,7 +92,7 @@ export function RolesManager({ tournamentId, userId, rolesData }: Props) {
 
   const handleDeleteSetupHelper = async () => {
     if (rolesData.setupHelper) {
-      await deleteSetupHelper(rolesData.setupHelper.id);
+      await deleteSetupHelper(tournamentId, rolesData.setupHelper.id);
       router.refresh();
     }
   };
@@ -101,7 +104,7 @@ export function RolesManager({ tournamentId, userId, rolesData }: Props) {
 
   const handleDeleteJuror = async () => {
     if (rolesData.juror) {
-      await deleteJuror(rolesData.juror.id);
+      await deleteJuror(tournamentId, rolesData.juror.id);
       router.refresh();
     }
   };

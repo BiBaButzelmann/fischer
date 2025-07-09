@@ -17,7 +17,10 @@ export async function createMatchEnteringHelper(
   const session = await authWithRedirect();
 
   const tournament = await getTournamentById(tournamentId);
-  invariant(tournament, "Tournament not found");
+  invariant(
+    tournament != null && tournament.stage === "registration",
+    "Tournament not found or not in registration stage",
+  );
 
   const currentProfile = await getProfileByUserId(session.user.id);
   invariant(currentProfile, "Profile not found");
@@ -36,8 +39,17 @@ export async function createMatchEnteringHelper(
       },
     });
 }
-export async function deleteMatchEnteringHelper(matchEnteringHelperId: number) {
+export async function deleteMatchEnteringHelper(
+  tournamentId: number,
+  matchEnteringHelperId: number,
+) {
   const session = await authWithRedirect();
+
+  const tournament = await getTournamentById(tournamentId);
+  invariant(
+    tournament != null && tournament.stage === "registration",
+    "Tournament not found or not in registration stage",
+  );
 
   const currentProfile = await getProfileByUserId(session.user.id);
   invariant(currentProfile, "Match Entering Helper not found");
@@ -48,6 +60,7 @@ export async function deleteMatchEnteringHelper(matchEnteringHelperId: number) {
       and(
         eq(matchEnteringHelper.id, matchEnteringHelperId),
         eq(matchEnteringHelper.profileId, currentProfile.id),
+        eq(matchEnteringHelper.tournamentId, tournament.id),
       ),
     );
 }

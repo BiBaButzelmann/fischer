@@ -17,7 +17,10 @@ export async function createReferee(
   const session = await authWithRedirect();
 
   const tournament = await getTournamentById(tournamentId);
-  invariant(tournament, "Tournament not found");
+  invariant(
+    tournament != null && tournament.stage === "registration",
+    "Tournament not found or not in registration stage",
+  );
 
   const currentProfile = await getProfileByUserId(session.user.id);
   invariant(currentProfile, "Profile not found");
@@ -39,8 +42,14 @@ export async function createReferee(
     });
 }
 
-export async function deleteReferee(refereeId: number) {
+export async function deleteReferee(tournamentId: number, refereeId: number) {
   const session = await authWithRedirect();
+
+  const tournament = await getTournamentById(tournamentId);
+  invariant(
+    tournament != null && tournament.stage === "registration",
+    "Tournament not found or not in registration stage",
+  );
 
   const currentProfile = await getProfileByUserId(session.user.id);
   invariant(currentProfile, "Profile not found");
@@ -48,6 +57,10 @@ export async function deleteReferee(refereeId: number) {
   await db
     .delete(referee)
     .where(
-      and(eq(referee.id, refereeId), eq(referee.profileId, currentProfile.id)),
+      and(
+        eq(referee.id, refereeId),
+        eq(referee.profileId, currentProfile.id),
+        eq(referee.tournamentId, tournament.id),
+      ),
     );
 }
