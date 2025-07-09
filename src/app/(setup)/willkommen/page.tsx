@@ -28,7 +28,7 @@ export default async function Page() {
     if (userRoles.length > 0) {
       redirect("/uebersicht");
     }
-    redirect("/anmeldung");
+    redirect("/klubturnier-anmeldung");
   }
 
   return (
@@ -59,7 +59,7 @@ export default async function Page() {
             </CardContent>
             <CardFooter className="mt-auto">
               <Button className="w-full text-lg py-6" asChild variant="default">
-                <Link href="/signup">
+                <Link href="/registrieren">
                   Registrieren <ChevronRight className="ml-2 h-5 w-5" />
                 </Link>
               </Button>
@@ -85,7 +85,7 @@ export default async function Page() {
             </CardContent>
             <CardFooter className="mt-auto">
               <Button className="w-full text-lg py-6" asChild variant="default">
-                <Link href="/login">
+                <Link href="/anmelden">
                   Anmelden <ChevronRight className="ml-2 h-5 w-5" />
                 </Link>
               </Button>

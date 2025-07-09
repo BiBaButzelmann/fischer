@@ -24,7 +24,7 @@ export async function loginRedirect(userId: string) {
     if (roles.length > 0) {
       redirect("/uebersicht");
     } else {
-      redirect("/anmeldung");
+      redirect("/klubturnier-anmeldung");
     }
   }
 }
@@ -55,7 +55,7 @@ export async function signupRedirect() {
     redirect("/uebersicht");
   }
   if (tournament.stage === "registration") {
-    redirect("/anmeldung");
+    redirect("/klubturnier-anmeldung");
   } else {
     redirect("/uebersicht");
   }

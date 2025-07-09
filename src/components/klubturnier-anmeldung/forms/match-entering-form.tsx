@@ -22,6 +22,7 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import z from "zod";
 import { useTransition } from "react";
 import { matchEnteringHelperFormSchema } from "@/schema/matchEnteringHelper";
+import { ClipboardEdit, Info, Users } from "lucide-react";
 
 type Props = {
   initialValues?: z.infer<typeof matchEnteringHelperFormSchema>;
@@ -64,6 +65,37 @@ export function MatchEnteringForm({
         onSubmit={form.handleSubmit(handleFormSubmit)}
         className="space-y-6 pt-4"
       >
+        <div className="border rounded-lg">
+          <div className="p-6">
+            <div className="flex items-center justify-between">
+              <div className="flex items-center gap-2">
+                <Info className="h-5 w-5 pb-1" />
+                <h3 className="font-semibold">Info</h3>
+              </div>
+            </div>
+          </div>
+          <div className="px-6 pb-6 space-y-3 text-sm">
+            <div className="flex items-start gap-3">
+              <Users className="h-4 w-4 mt-0.5 flex-shrink-0" />
+              <p>
+                <strong>Zusammensetzung:</strong> Die Eingabehelfer sind im
+                Durchschnitt ein Team aus bis zu 10 Personen, die sich die
+                Eingabe der Schachpartien teilen. Die Zuweisung der Gruppen
+                erfolgt durch die Turnierleitung. Wenn es genug Eingabehelfer
+                gibt, können Gruppen auch aufgeteilt werden.
+              </p>
+            </div>
+            <div className="flex items-start gap-3">
+              <ClipboardEdit className="h-4 w-4 mt-0.5 flex-shrink-0" />
+              <p>
+                <strong>Aufgabe:</strong> Der Eingabehelfer gibt die ihm
+                zugeteilten Partien direkt auf der Webseite in einem
+                integrierten Schachbrett ein. Eine Anleitung erhält er zum
+                Turnierstart zusätzlich per E-Mail.
+              </p>
+            </div>
+          </div>
+        </div>
         <FormField
           control={form.control}
           name="numberOfGroupsToEnter"

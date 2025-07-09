@@ -1,5 +1,5 @@
 import { authWithRedirect } from "@/auth/utils";
-import { RolesManager } from "@/components/anmeldung/roles-manager";
+import { RolesManager } from "@/components/klubturnier-anmeldung/roles-manager";
 import { getJurorByProfileIdAndTournamentId } from "@/db/repositories/juror";
 import { getMatchEnteringHelperByProfileIdAndTournamentId } from "@/db/repositories/match-entering-helper";
 import { getParticipantByProfileIdAndTournamentId } from "@/db/repositories/participant";

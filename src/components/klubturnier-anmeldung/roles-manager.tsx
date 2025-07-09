@@ -4,12 +4,12 @@ import { Accordion } from "@/components/ui/accordion";
 import { Button } from "@/components/ui/button";
 import { User, Shield, Wrench, ClipboardEdit, Gavel } from "lucide-react";
 import { RoleCard } from "./role-card";
-import { ParticipateForm } from "./forms/participate-form";
+import { ParticipateForm } from "./forms/participant-form";
 import { RefereeForm } from "./forms/referee-form";
 import { MatchEnteringForm } from "./forms/match-entering-form";
 import { SetupHelperForm } from "./forms/setup-helper-form";
 import { JurorForm } from "./forms/juror-form";
-import { Role, RolesData } from "@/db/types/role";
+import { RolesData } from "@/db/types/role";
 import { useState, useTransition } from "react";
 import { z } from "zod";
 import { participantFormSchema } from "@/schema/participant";
@@ -37,9 +37,7 @@ type Props = {
 export function RolesManager({ tournamentId, userId, rolesData }: Props) {
   const [isPending, startTransition] = useTransition();
   const router = useRouter();
-  const [accordionValue, setAccordionValue] = useState(
-    getAccordionValue(rolesData),
-  );
+  const [accordionValue, setAccordionValue] = useState<string>();
 
   const handleParticipateFormSubmit = async (
     data: z.infer<typeof participantFormSchema>,
@@ -120,9 +118,7 @@ export function RolesManager({ tournamentId, userId, rolesData }: Props) {
         type="single"
         collapsible
         value={accordionValue}
-        onValueChange={(value) =>
-          setAccordionValue(value as RolesWithoutAdmin | undefined)
-        }
+        onValueChange={(value) => setAccordionValue(value)}
         className="w-full"
       >
         <RoleCard
@@ -151,16 +147,16 @@ export function RolesManager({ tournamentId, userId, rolesData }: Props) {
           />
         </RoleCard>
         <RoleCard
-          accordionId="referee"
-          name="Schiedsrichter"
-          description="Als Schiedsrichter anmelden"
-          completed={rolesData.referee != null}
-          icon={Shield}
+          accordionId="setupHelper"
+          name="Aufbauhelfer"
+          description="Als Aufbauhelfer anmelden"
+          completed={rolesData.setupHelper != null}
+          icon={Wrench}
         >
-          <RefereeForm
-            initialValues={rolesData.referee ?? undefined}
-            onSubmit={handleRefereeFormSubmit}
-            onDelete={handleDeleteReferee}
+          <SetupHelperForm
+            initialValues={rolesData.setupHelper ?? undefined}
+            onSubmit={handleSetupHelperFormSubmit}
+            onDelete={handleDeleteSetupHelper}
           />
         </RoleCard>
         <RoleCard
@@ -177,18 +173,19 @@ export function RolesManager({ tournamentId, userId, rolesData }: Props) {
           />
         </RoleCard>
         <RoleCard
-          accordionId="setupHelper"
-          name="Aufbauhelfer"
-          description="Als Aufbauhelfer anmelden"
-          completed={rolesData.setupHelper != null}
-          icon={Wrench}
+          accordionId="referee"
+          name="Schiedsrichter"
+          description="Als Schiedsrichter anmelden"
+          completed={rolesData.referee != null}
+          icon={Shield}
         >
-          <SetupHelperForm
-            initialValues={rolesData.setupHelper ?? undefined}
-            onSubmit={handleSetupHelperFormSubmit}
-            onDelete={handleDeleteSetupHelper}
+          <RefereeForm
+            initialValues={rolesData.referee ?? undefined}
+            onSubmit={handleRefereeFormSubmit}
+            onDelete={handleDeleteReferee}
           />
         </RoleCard>
+
         <RoleCard
           accordionId="juror"
           name="Turniergericht"
@@ -218,24 +215,6 @@ export function RolesManager({ tournamentId, userId, rolesData }: Props) {
       ) : null}
     </div>
   );
-}
-
-const ROLES = [
-  "participant",
-  "referee",
-  "juror",
-  "matchEnteringHelper",
-  "setupHelper",
-] as const;
-
-type RolesWithoutAdmin = Exclude<Role, "admin">;
-
-function getAccordionValue(roles: RolesData): RolesWithoutAdmin | undefined {
-  for (const role of ROLES) {
-    if (roles[role] === undefined) {
-      return role;
-    }
-  }
 }
 
 function hasSelectedMoreThanOneRole(roles: RolesData): boolean {

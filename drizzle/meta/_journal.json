@@ -302,6 +302,20 @@
       "when": 1751638344026,
       "tag": "0039_curious_reaper",
       "breakpoints": true
+    },
+    {
+      "idx": 40,
+      "version": "7",
+      "when": 1751995099855,
+      "tag": "0040_rich_lizard",
+      "breakpoints": true
+    },
+    {
+      "idx": 41,
+      "version": "7",
+      "when": 1752009795850,
+      "tag": "0041_curious_ma_gnuci",
+      "breakpoints": true
     }
   ]
 }

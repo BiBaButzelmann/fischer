@@ -38,11 +38,11 @@ export async function AppSidebar() {
         </Link>
       </SidebarHeader>
       <SidebarContent>
-        {isRegistration ? (
+        {isRegistration && session ? (
           <SidebarGroup>
             <SidebarGroupLabel>Registrierung</SidebarGroupLabel>
             <SidebarMenuButton asChild>
-              <Link href="/anmeldung">
+              <Link href="/klubturnier-anmeldung">
                 <UsersIcon />
                 {/*TODO: Farblich hervorheben*/}
                 <span>Anmeldung anpassen</span>

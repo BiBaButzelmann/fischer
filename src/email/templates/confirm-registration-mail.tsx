@@ -33,7 +33,7 @@ export function ConfirmRegistrationMail({ name, email }: Props) {
       </p>
       <p>
         <a
-          href="https://klubturnier.hsk1830.de/anmeldung"
+          href="https://klubturnier.hsk1830.de/klubturnier-anmeldung"
           style={{ color: "#2980b9", fontWeight: "bold" }}
         >
           klubturnier.hsk1830.de/anmeldung
