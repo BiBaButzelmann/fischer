@@ -15,7 +15,6 @@ import { getParticipantsByTournamentId } from "@/db/repositories/participant";
 import { ScrollArea } from "../ui/scroll-area";
 import { getTournamentWeeksByTournamentId } from "@/db/repositories/tournamentWeek";
 import { TournamentWeeks } from "./tournament-weeks";
-import { getRolesDataByProfileIdAndTournamentId } from "@/db/repositories/role";
 import { RoleSummary } from "./role-summary";
 
 type Props = {
@@ -31,16 +30,6 @@ export async function TournamentRegistration({ tournament }: Props) {
       : Promise.resolve(null),
     getTournamentWeeksByTournamentId(tournament.id),
   ]);
-
-  const rolesData = profile
-    ? await getRolesDataByProfileIdAndTournamentId(profile.id, tournament.id)
-    : {
-        participant: undefined,
-        juror: undefined,
-        referee: undefined,
-        matchEnteringHelper: undefined,
-        setupHelper: undefined,
-      };
 
   const playerFirstName = profile != null ? `${profile.firstName}` : "Gast";
 
@@ -67,15 +56,12 @@ export async function TournamentRegistration({ tournament }: Props) {
         </Card>
       </div>
 
-      {/* Role Summary - only show if user is logged in */}
-      {session && (
+      {/* Role Summary */}
+      {profile && (
         <div className="lg:col-span-5">
           <RoleSummary
-            participant={rolesData.participant}
-            juror={rolesData.juror}
-            referee={rolesData.referee}
-            matchEnteringHelper={rolesData.matchEnteringHelper}
-            setupHelper={rolesData.setupHelper}
+            profileId={profile.id}
+            tournamentId={tournament.id}
             showEditButton={tournament.stage === "registration"}
           />
         </div>

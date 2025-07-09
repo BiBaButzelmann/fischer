@@ -16,21 +16,23 @@ import {
 import { Badge } from "../ui/badge";
 import { Button } from "../ui/button";
 import Link from "next/link";
-import { RolesData } from "../../db/types/role";
 import { matchDays } from "../../constants/constants";
+import { getRolesDataByProfileIdAndTournamentId } from "@/db/repositories/role";
 
-type RoleSummaryProps = RolesData & {
+type RoleSummaryProps = {
+  profileId: number;
+  tournamentId: number;
   showEditButton?: boolean;
 };
 
-export function RoleSummary({
-  participant,
-  juror,
-  referee,
-  matchEnteringHelper,
-  setupHelper,
+export async function RoleSummary({
+  profileId,
+  tournamentId,
   showEditButton = false,
 }: RoleSummaryProps) {
+  const { participant, juror, referee, matchEnteringHelper, setupHelper } =
+    await getRolesDataByProfileIdAndTournamentId(profileId, tournamentId);
+
   return (
     <Card>
       <CardHeader>
