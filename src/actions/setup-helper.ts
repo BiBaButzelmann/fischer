@@ -17,7 +17,10 @@ export async function createSetupHelper(
   const session = await authWithRedirect();
 
   const tournament = await getTournamentById(tournamentId);
-  invariant(tournament, "Tournament not found");
+  invariant(
+    tournament != null && tournament.stage === "registration",
+    "Tournament not found or not in registration stage",
+  );
 
   const currentProfile = await getProfileByUserId(session.user.id);
   invariant(currentProfile, "Profile not found");
@@ -38,8 +41,17 @@ export async function createSetupHelper(
       },
     });
 }
-export async function deleteSetupHelper(setupHelperId: number) {
+export async function deleteSetupHelper(
+  tournamentId: number,
+  setupHelperId: number,
+) {
   const session = await authWithRedirect();
+
+  const tournament = await getTournamentById(tournamentId);
+  invariant(
+    tournament != null && tournament.stage === "registration",
+    "Tournament not found or not in registration stage",
+  );
 
   const currentProfile = await getProfileByUserId(session.user.id);
   invariant(currentProfile, "Profile not found");
@@ -50,6 +62,7 @@ export async function deleteSetupHelper(setupHelperId: number) {
       and(
         eq(setupHelper.id, setupHelperId),
         eq(setupHelper.profileId, currentProfile.id),
+        eq(setupHelper.tournamentId, tournament.id),
       ),
     );
 }

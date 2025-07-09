@@ -12,7 +12,7 @@ import { auth } from "@/auth/utils";
 import { getProfileByUserId } from "@/db/repositories/profile";
 import { Participants } from "../participants/participants";
 import { getParticipantsByTournamentId } from "@/db/repositories/participant";
-import { ScrollArea } from "../ui/scroll-area";
+import { ScrollArea, ScrollBar } from "../ui/scroll-area";
 import { getTournamentWeeksByTournamentId } from "@/db/repositories/tournamentWeek";
 import { TournamentWeeks } from "./tournament-weeks";
 import { RoleSummary } from "./role-summary";
@@ -80,8 +80,11 @@ export async function TournamentRegistration({ tournament }: Props) {
             </CardDescription>
           </CardHeader>
           <CardContent className="flex-1">
-            <ScrollArea className="h-[500px] w-full pr-2">
-              <Participants participants={participants} />
+            <ScrollArea className="h-[510px] w-full pr-3">
+              <Participants
+                profileId={profile?.id}
+                participants={participants}
+              />
             </ScrollArea>
           </CardContent>
         </Card>
@@ -93,8 +96,11 @@ export async function TournamentRegistration({ tournament }: Props) {
             <CardTitle>Zeitplan</CardTitle>
             <CardDescription>Gesamtübersicht der Spieltermine.</CardDescription>
           </CardHeader>
-          <CardContent className="flex-1 overflow-x-auto">
-            <TournamentWeeks tournamentWeeks={tournamentWeeks} />
+          <CardContent className="flex-1">
+            <ScrollArea className="w-full pb-3">
+              <TournamentWeeks tournamentWeeks={tournamentWeeks} />
+              <ScrollBar orientation="horizontal" />
+            </ScrollArea>
           </CardContent>
         </Card>
       </div>

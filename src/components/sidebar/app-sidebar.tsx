@@ -19,6 +19,7 @@ import {
   CalendarIcon,
   SwordsIcon,
 } from "lucide-react";
+import { Button } from "../ui/button";
 
 export async function AppSidebar() {
   const session = await auth();
@@ -26,6 +27,7 @@ export async function AppSidebar() {
 
   const stage = tournament?.stage;
 
+  const isRegistrationOpen = stage === "registration";
   const isActive = stage === "registration" || stage === "running";
   const isAdmin = session?.user.role === "admin";
 
@@ -91,11 +93,19 @@ export async function AppSidebar() {
           </SidebarGroup>
         ) : null}
       </SidebarContent>
-      {session ? (
-        <SidebarFooter>
-          <SidebarUserMenu session={session} />
-        </SidebarFooter>
-      ) : null}
+      <SidebarFooter>
+        {isRegistrationOpen && session ? (
+          <Button asChild>
+            <Link href="/klubturnier-anmeldung">Anmeldung anpassen</Link>
+          </Button>
+        ) : null}
+        {isRegistrationOpen && !session ? (
+          <Button asChild>
+            <Link href="/registrieren">Registrieren</Link>
+          </Button>
+        ) : null}
+        {session ? <SidebarUserMenu session={session} /> : null}
+      </SidebarFooter>
     </Sidebar>
   );
 }

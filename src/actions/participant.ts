@@ -17,7 +17,10 @@ export async function createParticipant(
   const session = await authWithRedirect();
 
   const tournament = await getTournamentById(tournamentId);
-  invariant(tournament, "Tournament not found");
+  invariant(
+    tournament != null && tournament.stage === "registration",
+    "Tournament not found or not in registration stage",
+  );
 
   const currentProfile = await getProfileByUserId(session.user.id);
   invariant(currentProfile, "Profile not found");
@@ -51,8 +54,17 @@ export async function createParticipant(
     });
 }
 
-export async function deleteParticipant(participantId: number) {
+export async function deleteParticipant(
+  tournamentId: number,
+  participantId: number,
+) {
   const session = await authWithRedirect();
+
+  const tournament = await getTournamentById(tournamentId);
+  invariant(
+    tournament != null && tournament.stage === "registration",
+    "Tournament not found or not in registration stage",
+  );
 
   const currentProfile = await getProfileByUserId(session.user.id);
   invariant(currentProfile, "Profile not found");
@@ -63,6 +75,7 @@ export async function deleteParticipant(participantId: number) {
       and(
         eq(participant.id, participantId),
         eq(participant.profileId, currentProfile.id),
+        eq(participant.tournamentId, tournament.id),
       ),
     );
 }
