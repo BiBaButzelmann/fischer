@@ -56,7 +56,7 @@ export default async function RolesPage() {
       {/* Document Links */}
       <div className="flex flex-col sm:flex-row gap-4 justify-center">
         <Link
-          href="/setup-ausschreibung"
+          href="/ausschreibung"
           target="_blank"
           rel="noopener noreferrer"
           className="group flex items-center gap-3 px-4 py-3 border border-border rounded-lg hover:border-primary hover:bg-primary/5 transition-all duration-200"
@@ -67,7 +67,7 @@ export default async function RolesPage() {
         </Link>
 
         <Link
-          href="/setup-turnierordnung"
+          href="/turnierordnung"
           target="_blank"
           rel="noopener noreferrer"
           className="group flex items-center gap-3 px-4 py-3 border border-border rounded-lg hover:border-primary hover:bg-primary/5 transition-all duration-200"
