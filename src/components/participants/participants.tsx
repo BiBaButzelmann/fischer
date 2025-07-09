@@ -7,10 +7,14 @@ import {
   TableHeader,
   TableRow,
 } from "../ui/table";
+import { cn } from "@/lib/utils";
 
-type Props = { participants: ParticipantWithName[] };
+type Props = {
+  profileId?: number;
+  participants: ParticipantWithName[];
+};
 
-export async function Participants({ participants }: Props) {
+export function Participants({ profileId, participants }: Props) {
   return (
     <Table>
       <TableHeader>
@@ -24,7 +28,13 @@ export async function Participants({ participants }: Props) {
       </TableHeader>
       <TableBody>
         {participants.map((p, index) => (
-          <TableRow key={p.id} className="hover:bg-muted">
+          <TableRow
+            key={p.id}
+            className={cn(
+              "hover:bg-muted",
+              profileId === p.profileId ? "bg-secondary" : "",
+            )}
+          >
             <TableCell>{index + 1}</TableCell>
             <TableCell className="font-medium truncate">
               {p.profile.firstName} {p.profile.lastName}

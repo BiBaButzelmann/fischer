@@ -81,7 +81,10 @@ export async function TournamentRegistration({ tournament }: Props) {
           </CardHeader>
           <CardContent className="flex-1">
             <ScrollArea className="h-[510px] w-full pr-3">
-              <Participants participants={participants} />
+              <Participants
+                profileId={profile?.id}
+                participants={participants}
+              />
             </ScrollArea>
           </CardContent>
         </Card>
