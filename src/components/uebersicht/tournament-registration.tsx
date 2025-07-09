@@ -33,8 +33,8 @@ export async function TournamentRegistration({ tournament }: Props) {
   const playerFirstName = profile != null ? `${profile.firstName}` : "Gast";
 
   return (
-    <div className="grid grid-cols-1 items-start gap-8 lg:grid-cols-3">
-      <div className="lg:col-span-3">
+    <div className="grid grid-cols-1 items-stretch gap-8 lg:grid-cols-5">
+      <div className="lg:col-span-5">
         <Card>
           <CardHeader>
             <CardTitle className="text-4xl font-bold">
@@ -55,8 +55,8 @@ export async function TournamentRegistration({ tournament }: Props) {
         </Card>
       </div>
 
-      <div className="lg:col-span-2">
-        <Card>
+      <div className="lg:col-span-3">
+        <Card className="flex h-full flex-col">
           <CardHeader>
             <CardTitle>Teilnehmerliste</CardTitle>
             <CardDescription>
@@ -67,21 +67,21 @@ export async function TournamentRegistration({ tournament }: Props) {
               angemeldeten Spieler.
             </CardDescription>
           </CardHeader>
-          <CardContent className="h-[400px]">
-            <ScrollArea className="h-full w-full pr-2">
+          <CardContent className="flex-1">
+            <ScrollArea className="h-[500px] w-full pr-2">
               <Participants participants={participants} />
             </ScrollArea>
           </CardContent>
         </Card>
       </div>
 
-      <div className="lg:col-span-1">
-        <Card>
+      <div className="lg:col-span-2">
+        <Card className="flex h-full flex-col">
           <CardHeader>
             <CardTitle>Zeitplan</CardTitle>
             <CardDescription>Gesamtübersicht der Spieltermine.</CardDescription>
           </CardHeader>
-          <CardContent>
+          <CardContent className="flex-1 overflow-x-auto">
             <TournamentWeeks tournamentWeeks={tournamentWeeks} />
           </CardContent>
         </Card>

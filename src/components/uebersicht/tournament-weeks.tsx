@@ -27,7 +27,6 @@ export function TournamentWeeks({ tournamentWeeks }: Props) {
     };
   });
 
-  // Count regular weeks and catch-up weeks separately for numbering
   let regularWeekCount = 0;
   let catchUpWeekCount = 0;
 
@@ -35,7 +34,7 @@ export function TournamentWeeks({ tournamentWeeks }: Props) {
     <Table className="w-full">
       <TableHeader>
         <TableRow>
-          <TableHead className="w-[100px]">Woche</TableHead>
+          <TableHead className="w-[140px] min-w-[140px]">Woche</TableHead>
           <TableHead className="text-center">Dienstag</TableHead>
           <TableHead className="text-center">Donnerstag</TableHead>
           <TableHead className="text-center">Freitag</TableHead>
