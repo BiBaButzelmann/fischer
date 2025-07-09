@@ -1,5 +1,5 @@
 import { db } from "../client";
-import { sql } from "drizzle-orm";
+import { eq } from "drizzle-orm";
 import { tournament } from "../schema/tournament";
 import { group } from "../schema/group";
 
@@ -100,36 +100,39 @@ export async function isUserParticipantInGame(
   );
 }
 
-export async function getGamesByYearAndGroup(
-  year: string,
-  groupNumber: string,
+export async function getGamesByGroup(
+  groupId: number,
+  round?: number,
+  participantId?: number,
 ) {
+  console.log(
+    "Fetching games for groupId:",
+    groupId,
+    "round:",
+    round,
+    "participantId:",
+    participantId,
+  );
   return await db.query.game.findMany({
-    where: (game, { and, eq }) =>
-      and(
-        eq(
-          game.groupId,
-          db
-            .select({ id: group.id })
-            .from(group)
-            .where(
-              and(
-                eq(group.groupNumber, parseInt(groupNumber)),
-                eq(
-                  group.tournamentId,
-                  db
-                    .select({ id: tournament.id })
-                    .from(tournament)
-                    .where(
-                      sql`EXTRACT(YEAR FROM ${tournament.startDate}) = ${parseInt(year)}`,
-                    )
-                    .limit(1),
-                ),
-              ),
-            )
-            .limit(1),
-        ),
-      ),
+    where: (game, { and, eq, or }) => {
+      const conditions = [eq(game.groupId, groupId)];
+
+      if (round !== undefined) {
+        conditions.push(eq(game.round, round));
+      }
+
+      if (participantId !== undefined) {
+        const participantCondition = or(
+          eq(game.whiteParticipantId, participantId),
+          eq(game.blackParticipantId, participantId),
+        );
+        if (participantCondition) {
+          conditions.push(participantCondition);
+        }
+      }
+
+      return conditions.length > 1 ? and(...conditions) : conditions[0];
+    },
     with: {
       whiteParticipant: {
         columns: {
@@ -162,4 +165,15 @@ export async function getGamesByYearAndGroup(
     },
     orderBy: (game, { asc }) => [asc(game.round), asc(game.boardNumber)],
   });
+}
+
+export async function getAllGroupNamesByTournamentId(tournamentId: number) {
+  return await db
+    .select({
+      id: group.id,
+      groupName: group.groupName,
+    })
+    .from(group)
+    .where(eq(group.tournamentId, tournamentId))
+    .orderBy(group.groupNumber);
 }

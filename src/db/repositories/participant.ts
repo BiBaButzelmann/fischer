@@ -62,3 +62,21 @@ export async function getParticipantsByTournamentId(tournamentId: number) {
     ],
   });
 }
+
+export async function getParticipantsByGroupId(groupId: number) {
+  return await db.query.participant.findMany({
+    where: (participant, { eq }) => eq(participant.groupId, groupId),
+    columns: {
+      id: true,
+      title: true,
+    },
+    with: {
+      profile: {
+        columns: {
+          firstName: true,
+          lastName: true,
+        },
+      },
+    },
+  });
+}

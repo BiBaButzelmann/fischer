@@ -29,3 +29,14 @@ export async function getLatestTournament() {
     orderBy: (tournament, { desc }) => [desc(tournament.createdAt)],
   });
 }
+
+export async function getAllTournamentNames() {
+  return await db.query.tournament.findMany({
+    columns: {
+      id: true,
+      name: true,
+      numberOfRounds: true,
+    },
+    orderBy: (tournament, { desc }) => [desc(tournament.startDate)],
+  });
+}

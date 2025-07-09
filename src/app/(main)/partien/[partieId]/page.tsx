@@ -61,7 +61,7 @@ async function PgnContainer({
 
   const whiteDisplay = formatDisplayName(game.whiteParticipant);
   const blackDisplay = formatDisplayName(game.blackParticipant);
-  const pgn = game.pgn.value ?? INITIAL_PGN;
+  const pgn = game.pgn != null ? game.pgn.value : INITIAL_PGN;
 
   return (
     <div className="p-4">
