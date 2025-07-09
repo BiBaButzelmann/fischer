@@ -101,7 +101,7 @@ export async function AppSidebar() {
         ) : null}
         {isRegistrationOpen && !session ? (
           <Button asChild>
-            <Link href="/willkommen">Anmelden</Link>
+            <Link href="/registrieren">Registrieren</Link>
           </Button>
         ) : null}
         {session ? <SidebarUserMenu session={session} /> : null}
