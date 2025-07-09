@@ -62,13 +62,13 @@ export async function AppSidebar() {
             <SidebarGroupContent>
               <SidebarMenu>
                 <SidebarMenuButton asChild>
-                  <Link href="/ausschreibung">
+                  <Link href="/ausschreibung" target="_blank">
                     <BookTextIcon />
                     <span>Ausschreibung</span>
                   </Link>
                 </SidebarMenuButton>
                 <SidebarMenuButton asChild>
-                  <Link href="/turnierordnung">
+                  <Link href="/turnierordnung" target="_blank">
                     <BookTextIcon />
                     <span>Turnierordnung</span>
                   </Link>

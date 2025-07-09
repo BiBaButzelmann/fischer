@@ -30,15 +30,7 @@ export function WeekContainer({
     return week.status === "regular" ? `Reguläre Woche` : `Nachholwoche`;
   };
 
-  // Count the week number based on status
-  const getWeekNumber = (currentWeek: Week, allWeeks: Week[]) => {
-    const weeksOfSameType = allWeeks
-      .slice(0, allWeeks.findIndex((w) => w.index === currentWeek.index) + 1)
-      .filter((w) => w.status === currentWeek.status);
-    return weeksOfSameType.length;
-  };
-
-  const weekNumber = getWeekNumber(week, weeks);
+  const weekNumber = getWeekNumberforType(week, weeks);
   const weekTitle =
     week.status === "regular"
       ? `Woche ${weekNumber}`
@@ -109,3 +101,9 @@ export function WeekContainer({
     </div>
   );
 }
+const getWeekNumberforType = (currentWeek: Week, allWeeks: Week[]) => {
+  const weeksOfSameType = allWeeks
+    .slice(0, allWeeks.findIndex((w) => w.index === currentWeek.index) + 1)
+    .filter((w) => w.status === currentWeek.status);
+  return weeksOfSameType.length;
+};

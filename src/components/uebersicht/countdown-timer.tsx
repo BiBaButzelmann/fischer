@@ -7,45 +7,21 @@ type Props = {
 };
 
 export function CountdownTimer({ date }: Props) {
-  const [timeLeft, setTimeLeft] = useState<TimeLeft | null>(null);
-  const [isClient, setIsClient] = useState(false);
+  const [timeLeft, setTimeLeft] = useState(calculateTimeLeft(date));
 
   useEffect(() => {
-    setIsClient(true);
-    const calculated = calculateTimeLeft(date);
-    setTimeLeft(calculated || null);
-  }, [date]);
-
-  useEffect(() => {
-    if (!isClient) return;
-
-    const timer = setInterval(() => {
-      const calculated = calculateTimeLeft(date);
-      setTimeLeft(calculated || null);
+    const timer = setTimeout(() => {
+      setTimeLeft(calculateTimeLeft(date));
     }, 1000);
 
-    return () => clearInterval(timer);
-  }, [date, isClient]);
+    return () => clearTimeout(timer);
+  });
 
-  if (!isClient || timeLeft === null) {
-    return (
-      <div className="grid grid-cols-4 gap-4">
-        {["days", "hours", "minutes", "seconds"].map((key) => (
-          <div
-            key={key}
-            className="flex flex-col items-center justify-center bg-muted p-4 rounded-lg"
-          >
-            <span className="text-4xl font-bold text-red-500">--</span>
-            <span className="text-xs text-muted-foreground uppercase">
-              {intervalLabels[key as keyof TimeLeft]}
-            </span>
-          </div>
-        ))}
-      </div>
-    );
+  if (timeLeft != null) {
+    return <Timers timeLeft={timeLeft} />;
   }
 
-  return <Timers timeLeft={timeLeft} />;
+  return null;
 }
 
 type TimeLeft = {
