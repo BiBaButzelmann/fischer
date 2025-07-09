@@ -248,8 +248,6 @@ export function ParticipateForm({ initialValues, onSubmit, onDelete }: Props) {
                         defaultValue={field.value || undefined}
                         onChange={(c) => field.onChange(c.ioc)}
                         placeholder="Land wählen"
-                        useIocCode={true}
-                        showCodeOnSelection={true}
                       />
                     </FormControl>
                     <FormMessage />
