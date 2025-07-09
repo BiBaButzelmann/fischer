@@ -1,6 +1,5 @@
 import { authWithRedirect } from "@/auth/utils";
 import { MyGamesCalendar } from "@/components/my-games/my-games-calendar";
-import { MyGamesList } from "@/components/my-games/my-games-list";
 import { getGamesOfParticipant } from "@/db/repositories/game";
 import { getParticipantByUserId } from "@/db/repositories/participant";
 
