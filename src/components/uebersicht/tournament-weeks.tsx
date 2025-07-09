@@ -14,21 +14,31 @@ type Props = {
 };
 
 export function TournamentWeeks({ tournamentWeeks }: Props) {
-  const schedule = tournamentWeeks.map((week) => {
-    const weekStart = DateTime.now()
-      .set({ weekNumber: week.weekNumber })
-      .startOf("week");
-    return {
-      id: week.id,
-      status: week.status,
-      tuesday: weekStart.plus({ days: 1 }).toFormat("dd.MM"),
-      thursday: weekStart.plus({ days: 3 }).toFormat("dd.MM"),
-      friday: weekStart.plus({ days: 4 }).toFormat("dd.MM"),
-    };
-  });
+  const getSchedule = () => {
+    let regularWeekCount = 0;
+    let catchUpWeekCount = 0;
 
-  let regularWeekCount = 0;
-  let catchUpWeekCount = 0;
+    return tournamentWeeks.map((week) => {
+      const weekStart = DateTime.now()
+        .set({ weekNumber: week.weekNumber })
+        .startOf("week");
+
+      const weekLabel =
+        week.status === "regular"
+          ? `Woche ${++regularWeekCount}`
+          : `Nachholwoche ${++catchUpWeekCount}`;
+
+      return {
+        id: week.id,
+        weekLabel,
+        tuesday: weekStart.plus({ days: 1 }).toFormat("dd.MM"),
+        thursday: weekStart.plus({ days: 3 }).toFormat("dd.MM"),
+        friday: weekStart.plus({ days: 4 }).toFormat("dd.MM"),
+      };
+    });
+  };
+
+  const schedule = getSchedule();
 
   return (
     <Table className="w-full">
@@ -41,23 +51,16 @@ export function TournamentWeeks({ tournamentWeeks }: Props) {
         </TableRow>
       </TableHeader>
       <TableBody>
-        {schedule.map((week, i) => {
-          const weekLabel =
-            tournamentWeeks[i].status === "regular"
-              ? `Woche ${++regularWeekCount}`
-              : `Nachholwoche ${++catchUpWeekCount}`;
-
-          return (
-            <TableRow key={week.id}>
-              <TableCell className="font-semibold text-nowrap">
-                {weekLabel}
-              </TableCell>
-              <TableCell className="text-center">{week.tuesday}</TableCell>
-              <TableCell className="text-center">{week.thursday}</TableCell>
-              <TableCell className="text-center">{week.friday}</TableCell>
-            </TableRow>
-          );
-        })}
+        {schedule.map((week) => (
+          <TableRow key={week.id}>
+            <TableCell className="font-semibold text-nowrap">
+              {week.weekLabel}
+            </TableCell>
+            <TableCell className="text-center">{week.tuesday}</TableCell>
+            <TableCell className="text-center">{week.thursday}</TableCell>
+            <TableCell className="text-center">{week.friday}</TableCell>
+          </TableRow>
+        ))}
       </TableBody>
     </Table>
   );

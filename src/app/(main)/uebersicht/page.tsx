@@ -2,13 +2,11 @@ import { auth } from "@/auth/utils";
 import { TournamentDone } from "@/components/uebersicht/tournament-done";
 import { TournamentRegistration } from "@/components/uebersicht/tournament-registration";
 import { TournamentRunning } from "@/components/uebersicht/tournament-running";
-import { getRolesDataByProfileIdAndTournamentId } from "@/db/repositories/role";
+import { getRolesByUserId } from "@/db/repositories/role";
 import { getLatestTournament } from "@/db/repositories/tournament";
-import { getProfileByUserId } from "@/db/repositories/profile";
 import React from "react";
-import invariant from "tiny-invariant";
+
 import { redirect } from "next/navigation";
-import { hasSelectedAtLeastOneRole } from "@/db/types/role";
 
 export default async function Page() {
   const tournament = await getLatestTournament();
@@ -23,16 +21,8 @@ export default async function Page() {
   }
 
   if (session) {
-    const profile = await getProfileByUserId(session.user.id);
-    if (!profile) {
-      invariant(profile, "Profile not found");
-    }
-    const rolesData = await getRolesDataByProfileIdAndTournamentId(
-      profile.id,
-      tournament.id,
-    );
-    // the user cannot acces the overview page without selecting at least one role
-    if (!hasSelectedAtLeastOneRole(rolesData)) {
+    const rolesData = await getRolesByUserId(session.user.id);
+    if (rolesData.length === 0) {
       redirect("/klubturnier-anmeldung");
     }
   }

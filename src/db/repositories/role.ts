@@ -18,7 +18,6 @@ import { getParticipantByProfileIdAndTournamentId } from "./participant";
 import { getRefereeByProfileIdAndTournamentId } from "./referee";
 import { getSetupHelperByProfileIdAndTournamentId } from "./setup-helper";
 
-// TODO: should we add admin here?
 export async function getRolesByProfileId(profileId: number): Promise<Role[]> {
   const participantQuery = db
     .select({ tableName: sql<Role>`'participant'::text`.as("tableName") })
