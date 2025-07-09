@@ -1,5 +1,4 @@
 import { auth } from "@/auth/utils";
-import { hasSelectedAtLeastOneRole } from "@/components/klubturnier-anmeldung/roles-manager";
 import { TournamentDone } from "@/components/uebersicht/tournament-done";
 import { TournamentRegistration } from "@/components/uebersicht/tournament-registration";
 import { TournamentRunning } from "@/components/uebersicht/tournament-running";
@@ -9,6 +8,7 @@ import { getProfileByUserId } from "@/db/repositories/profile";
 import React from "react";
 import invariant from "tiny-invariant";
 import { redirect } from "next/navigation";
+import { hasSelectedAtLeastOneRole } from "@/db/types/role";
 
 export default async function Page() {
   const tournament = await getLatestTournament();

@@ -9,7 +9,7 @@ import { RefereeForm } from "./forms/referee-form";
 import { MatchEnteringForm } from "./forms/match-entering-form";
 import { SetupHelperForm } from "./forms/setup-helper-form";
 import { JurorForm } from "./forms/juror-form";
-import { RolesData } from "@/db/types/role";
+import { hasSelectedAtLeastOneRole, RolesData } from "@/db/types/role";
 import { useState, useTransition } from "react";
 import { z } from "zod";
 import { participantFormSchema } from "@/schema/participant";
@@ -217,8 +217,4 @@ export function RolesManager({ tournamentId, userId, rolesData }: Props) {
       ) : null}
     </div>
   );
-}
-
-export function hasSelectedAtLeastOneRole(roles: RolesData): boolean {
-  return Object.values(roles).filter((role) => role !== undefined).length > 0;
 }

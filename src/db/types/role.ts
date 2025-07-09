@@ -19,3 +19,7 @@ export type RolesData = {
   setupHelper: SetupHelper | undefined;
   juror: Juror | undefined;
 };
+
+export function hasSelectedAtLeastOneRole(roles: RolesData): boolean {
+  return Object.values(roles).filter((role) => role !== undefined).length > 0;
+}
