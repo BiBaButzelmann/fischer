@@ -32,6 +32,7 @@ export async function createParticipant(
       dwzRating: data.dwzRating,
       fideRating: data.fideRating,
       fideId: data.fideId,
+      nationality: data.nationality,
       preferredMatchDay: data.preferredMatchDay,
       secondaryMatchDays: data.secondaryMatchDays,
     })
@@ -42,6 +43,8 @@ export async function createParticipant(
         dwzRating: data.dwzRating,
         fideRating: data.fideRating,
         fideId: data.fideId,
+        nationality: data.nationality,
+        title: data.title === "noTitle" ? null : data.title,
         preferredMatchDay: data.preferredMatchDay,
         secondaryMatchDays: data.secondaryMatchDays,
       },

@@ -18,7 +18,6 @@ import {
   BookTextIcon,
   CalendarIcon,
   SwordsIcon,
-  UsersIcon,
 } from "lucide-react";
 
 export async function AppSidebar() {
@@ -38,19 +37,6 @@ export async function AppSidebar() {
         </Link>
       </SidebarHeader>
       <SidebarContent>
-        {isRegistration && session ? (
-          <SidebarGroup>
-            <SidebarGroupLabel>Registrierung</SidebarGroupLabel>
-            <SidebarMenuButton asChild>
-              <Link href="/klubturnier-anmeldung">
-                <UsersIcon />
-                {/*TODO: Farblich hervorheben*/}
-                <span>Anmeldung anpassen</span>
-              </Link>
-            </SidebarMenuButton>
-          </SidebarGroup>
-        ) : null}
-
         <SidebarGroup>
           <SidebarGroupLabel>Turnier</SidebarGroupLabel>
           <SidebarGroupContent>

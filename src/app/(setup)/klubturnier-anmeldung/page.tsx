@@ -39,7 +39,6 @@ export default async function RolesPage() {
     setupHelper,
     juror,
   };
-
   return (
     <div className="space-y-8">
       <header className="text-center">

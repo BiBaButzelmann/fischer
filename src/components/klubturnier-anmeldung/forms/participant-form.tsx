@@ -2,7 +2,7 @@
 
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useTransition } from "react";
-import { useForm } from "react-hook-form";
+import { Controller, useForm } from "react-hook-form";
 import z from "zod";
 import {
   Form,
@@ -61,7 +61,6 @@ export function ParticipateForm({ initialValues, onSubmit, onDelete }: Props) {
       await onDelete();
     });
   };
-
   const fideRating = form.watch("fideRating");
   return (
     <Form {...form}>
@@ -212,7 +211,7 @@ export function ParticipateForm({ initialValues, onSubmit, onDelete }: Props) {
                       rel="noopener noreferrer"
                       className="hover:text-blue-600 transition-colors text-blue-400 text-xs"
                     >
-                      <p>Was ist die FIDE ID?</p>
+                      Was ist die FIDE ID?
                     </a>{" "}
                   </FormDescription>
                   <FormMessage />

@@ -64,7 +64,6 @@ export function SelectedWeeks({
                 <WeekCalendar
                   weekNumber={week.weekNumber}
                   onSelect={(weekNumber) => {
-                    console.log("Selected week number:", weekNumber);
                     if (weekNumber === undefined) {
                       return;
                     }

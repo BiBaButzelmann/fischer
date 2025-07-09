@@ -136,6 +136,8 @@ export function RolesManager({ tournamentId, userId, rolesData }: Props) {
                     preferredMatchDay: rolesData.participant.preferredMatchDay,
                     secondaryMatchDays:
                       rolesData.participant.secondaryMatchDays,
+                    title: rolesData.participant.title ?? "noTitle",
+                    nationality: rolesData.participant.nationality ?? undefined,
                     dwzRating: rolesData.participant.dwzRating ?? undefined,
                     fideRating: rolesData.participant.fideRating ?? undefined,
                     fideId: rolesData.participant.fideId ?? undefined,

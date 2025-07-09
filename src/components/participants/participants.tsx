@@ -16,6 +16,7 @@ export async function Participants({ participants }: Props) {
       <TableHeader className="sticky top-0">
         <TableRow>
           <TableHead className="w-[50px]">#</TableHead>
+          {/*TODO: Titel einfügen*/}
           <TableHead>Name</TableHead>
           <TableHead className="text-right">ELO</TableHead>
           <TableHead className="text-right">DWZ</TableHead>

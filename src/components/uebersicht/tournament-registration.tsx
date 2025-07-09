@@ -11,10 +11,18 @@ import { CountdownTimer } from "./countdown-timer";
 import { auth } from "@/auth/utils";
 import { getProfileByUserId } from "@/db/repositories/profile";
 import { Participants } from "../participants/participants";
-import { getParticipantsByTournamentId } from "@/db/repositories/participant";
+import {
+  getParticipantsByTournamentId,
+  getParticipantByProfileIdAndTournamentId,
+} from "@/db/repositories/participant";
 import { ScrollArea } from "../ui/scroll-area";
 import { getTournamentWeeksByTournamentId } from "@/db/repositories/tournamentWeek";
 import { TournamentWeeks } from "./tournament-weeks";
+import { getJurorByProfileIdAndTournamentId } from "@/db/repositories/juror";
+import { getRefereeByProfileIdAndTournamentId } from "@/db/repositories/referee";
+import { getMatchEnteringHelperByProfileIdAndTournamentId } from "@/db/repositories/match-entering-helper";
+import { getSetupHelperByProfileIdAndTournamentId } from "@/db/repositories/setup-helper";
+import { RoleSummary } from "./role-summary";
 
 type Props = {
   tournament: Tournament;
@@ -29,6 +37,28 @@ export async function TournamentRegistration({ tournament }: Props) {
       : Promise.resolve(null),
     getTournamentWeeksByTournamentId(tournament.id),
   ]);
+
+  // Fetch user's role data if logged in
+  const userRoles = profile
+    ? await Promise.all([
+        getParticipantByProfileIdAndTournamentId(profile.id, tournament.id),
+        getJurorByProfileIdAndTournamentId(profile.id, tournament.id),
+        getRefereeByProfileIdAndTournamentId(profile.id, tournament.id),
+        getMatchEnteringHelperByProfileIdAndTournamentId(
+          profile.id,
+          tournament.id,
+        ),
+        getSetupHelperByProfileIdAndTournamentId(profile.id, tournament.id),
+      ])
+    : [null, null, null, null, null];
+
+  const [
+    userParticipant,
+    userJuror,
+    userReferee,
+    userMatchEnteringHelper,
+    userSetupHelper,
+  ] = userRoles;
 
   const playerFirstName = profile != null ? `${profile.firstName}` : "Gast";
 
@@ -54,6 +84,20 @@ export async function TournamentRegistration({ tournament }: Props) {
           </CardContent>
         </Card>
       </div>
+
+      {/* Role Summary - only show if user is logged in */}
+      {session && (
+        <div className="lg:col-span-5">
+          <RoleSummary
+            participant={userParticipant}
+            juror={userJuror}
+            referee={userReferee}
+            matchEnteringHelper={userMatchEnteringHelper}
+            setupHelper={userSetupHelper}
+            showEditButton={tournament.stage === "registration"}
+          />
+        </div>
+      )}
 
       <div className="lg:col-span-3">
         <Card className="flex h-full flex-col">
