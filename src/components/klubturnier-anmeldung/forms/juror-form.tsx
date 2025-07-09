@@ -28,7 +28,6 @@ export function JurorForm({
   onSubmit,
   onDelete,
 }: Props) {
-  console.log("initiallyParticipating", initiallyParticipating);
   const [isPending, startTransition] = useTransition();
   const form = useForm<z.infer<typeof jurorFormSchema>>({
     resolver: zodResolver(jurorFormSchema),

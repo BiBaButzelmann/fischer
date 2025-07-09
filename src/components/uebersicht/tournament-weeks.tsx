@@ -14,33 +14,47 @@ type Props = {
 };
 
 export function TournamentWeeks({ tournamentWeeks }: Props) {
-  const schedule = tournamentWeeks.map((week) => {
-    const weekStart = DateTime.now()
-      .set({ weekNumber: week.weekNumber })
-      .startOf("week");
-    return {
-      id: week.id,
-      tuesday: weekStart.plus({ days: 1 }).toFormat("dd.MM"),
-      thursday: weekStart.plus({ days: 3 }).toFormat("dd.MM"),
-      friday: weekStart.plus({ days: 4 }).toFormat("dd.MM"),
-    };
-  });
+  const getSchedule = () => {
+    let regularWeekCount = 0;
+    let catchUpWeekCount = 0;
+
+    return tournamentWeeks.map((week) => {
+      const weekStart = DateTime.now()
+        .set({ weekNumber: week.weekNumber })
+        .startOf("week");
+
+      const weekLabel =
+        week.status === "regular"
+          ? `Woche ${++regularWeekCount}`
+          : `Nachholwoche ${++catchUpWeekCount}`;
+
+      return {
+        id: week.id,
+        weekLabel,
+        tuesday: weekStart.plus({ days: 1 }).toFormat("dd.MM"),
+        thursday: weekStart.plus({ days: 3 }).toFormat("dd.MM"),
+        friday: weekStart.plus({ days: 4 }).toFormat("dd.MM"),
+      };
+    });
+  };
+
+  const schedule = getSchedule();
 
   return (
     <Table className="w-full">
       <TableHeader>
         <TableRow>
-          <TableHead className="w-[100px]">Woche</TableHead>
+          <TableHead className="w-[140px] min-w-[140px]">Woche</TableHead>
           <TableHead className="text-center">Dienstag</TableHead>
           <TableHead className="text-center">Donnerstag</TableHead>
           <TableHead className="text-center">Freitag</TableHead>
         </TableRow>
       </TableHeader>
       <TableBody>
-        {schedule.map((week, i) => (
+        {schedule.map((week) => (
           <TableRow key={week.id}>
             <TableCell className="font-semibold text-nowrap">
-              Woche {i + 1}
+              {week.weekLabel}
             </TableCell>
             <TableCell className="text-center">{week.tuesday}</TableCell>
             <TableCell className="text-center">{week.thursday}</TableCell>

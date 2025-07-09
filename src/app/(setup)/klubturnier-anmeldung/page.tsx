@@ -1,13 +1,11 @@
 import { authWithRedirect } from "@/auth/utils";
 import { RolesManager } from "@/components/klubturnier-anmeldung/roles-manager";
-import { getJurorByProfileIdAndTournamentId } from "@/db/repositories/juror";
-import { getMatchEnteringHelperByProfileIdAndTournamentId } from "@/db/repositories/match-entering-helper";
-import { getParticipantByProfileIdAndTournamentId } from "@/db/repositories/participant";
 import { getProfileByUserId } from "@/db/repositories/profile";
-import { getRefereeByProfileIdAndTournamentId } from "@/db/repositories/referee";
-import { getSetupHelperByProfileIdAndTournamentId } from "@/db/repositories/setup-helper";
+import { getRolesDataByProfileIdAndTournamentId } from "@/db/repositories/role";
 import { getLatestTournament } from "@/db/repositories/tournament";
 import { redirect } from "next/navigation";
+import Link from "next/link";
+import { BookTextIcon, ExternalLinkIcon } from "lucide-react";
 
 export default async function RolesPage() {
   const session = await authWithRedirect();
@@ -20,26 +18,10 @@ export default async function RolesPage() {
     redirect("/willkommen");
   }
 
-  const [participant, referee, matchEnteringHelper, setupHelper, juror] =
-    await Promise.all([
-      getParticipantByProfileIdAndTournamentId(profile.id, tournament.id),
-      getRefereeByProfileIdAndTournamentId(profile.id, tournament.id),
-      getMatchEnteringHelperByProfileIdAndTournamentId(
-        profile.id,
-        tournament.id,
-      ),
-      getSetupHelperByProfileIdAndTournamentId(profile.id, tournament.id),
-      getJurorByProfileIdAndTournamentId(profile.id, tournament.id),
-    ]);
-
-  const initialValues = {
-    participant,
-    referee,
-    matchEnteringHelper,
-    setupHelper,
-    juror,
-  };
-
+  const initialValues = await getRolesDataByProfileIdAndTournamentId(
+    profile.id,
+    tournament.id,
+  );
   return (
     <div className="space-y-8">
       <header className="text-center">
@@ -51,6 +33,32 @@ export default async function RolesPage() {
           dazu an.
         </p>
       </header>
+
+      {/* Document Links */}
+      <div className="flex flex-col sm:flex-row gap-4 justify-center">
+        <Link
+          href="/ausschreibung"
+          target="_blank"
+          rel="noopener noreferrer"
+          className="group flex items-center gap-3 px-4 py-3 border border-border rounded-lg hover:border-primary hover:bg-primary/5 transition-all duration-200"
+        >
+          <BookTextIcon className="h-5 w-5" />
+          <span className="font-medium">Ausschreibung</span>
+          <ExternalLinkIcon className="h-4 w-4 text-muted-foreground group-hover:text-primary transition-colors" />
+        </Link>
+
+        <Link
+          href="/turnierordnung"
+          target="_blank"
+          rel="noopener noreferrer"
+          className="group flex items-center gap-3 px-4 py-3 border border-border rounded-lg hover:border-primary hover:bg-primary/5 transition-all duration-200"
+        >
+          <BookTextIcon className="h-5 w-5" />
+          <span className="font-medium">Turnierordnung</span>
+          <ExternalLinkIcon className="h-4 w-4 text-muted-foreground group-hover:text-primary transition-colors" />
+        </Link>
+      </div>
+
       <RolesManager
         key={JSON.stringify(initialValues)}
         tournamentId={tournament.id}

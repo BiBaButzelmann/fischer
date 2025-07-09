@@ -9,7 +9,7 @@ import { RefereeForm } from "./forms/referee-form";
 import { MatchEnteringForm } from "./forms/match-entering-form";
 import { SetupHelperForm } from "./forms/setup-helper-form";
 import { JurorForm } from "./forms/juror-form";
-import { RolesData } from "@/db/types/role";
+import { hasSelectedAtLeastOneRole, RolesData } from "@/db/types/role";
 import { useState, useTransition } from "react";
 import { z } from "zod";
 import { participantFormSchema } from "@/schema/participant";
@@ -136,6 +136,8 @@ export function RolesManager({ tournamentId, userId, rolesData }: Props) {
                     preferredMatchDay: rolesData.participant.preferredMatchDay,
                     secondaryMatchDays:
                       rolesData.participant.secondaryMatchDays,
+                    title: rolesData.participant.title ?? "noTitle",
+                    nationality: rolesData.participant.nationality ?? undefined,
                     dwzRating: rolesData.participant.dwzRating ?? undefined,
                     fideRating: rolesData.participant.fideRating ?? undefined,
                     fideId: rolesData.participant.fideId ?? undefined,
@@ -200,7 +202,7 @@ export function RolesManager({ tournamentId, userId, rolesData }: Props) {
           />
         </RoleCard>
       </Accordion>
-      {hasSelectedMoreThanOneRole(rolesData) ? (
+      {hasSelectedAtLeastOneRole(rolesData) ? (
         <div className="flex justify-center pt-6">
           <Button
             disabled={isPending}
@@ -215,8 +217,4 @@ export function RolesManager({ tournamentId, userId, rolesData }: Props) {
       ) : null}
     </div>
   );
-}
-
-function hasSelectedMoreThanOneRole(roles: RolesData): boolean {
-  return Object.values(roles).filter((role) => role !== undefined).length > 0;
 }

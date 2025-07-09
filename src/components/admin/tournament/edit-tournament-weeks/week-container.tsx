@@ -15,11 +15,13 @@ import { Button } from "@/components/ui/button";
 
 export function WeekContainer({
   week,
+  weeks,
   onDeleteWeek,
   onUpdateWeekStatus,
   onUpdateRefereeNeeded,
 }: {
   week: Week;
+  weeks: Week[];
   onDeleteWeek: (index: number) => void;
   onUpdateWeekStatus: (index: number, status: WeekStatus) => void;
   onUpdateRefereeNeeded: (index: number, day: WeekDay, value: boolean) => void;
@@ -28,11 +30,17 @@ export function WeekContainer({
     return week.status === "regular" ? `Reguläre Woche` : `Nachholwoche`;
   };
 
+  const weekNumber = getWeekNumberforType(week, weeks);
+  const weekTitle =
+    week.status === "regular"
+      ? `Woche ${weekNumber}`
+      : `Nachholwoche ${weekNumber}`;
+
   return (
     <div className="space-y-4">
       <div className="flex items-center justify-between">
         <div className="flex items-center gap-3">
-          <h4 className="font-medium text-base">Woche {week.index + 1}</h4>
+          <h4 className="font-medium text-base">{weekTitle}</h4>
           <Badge
             className={cn(
               week.status === "regular"
@@ -93,3 +101,9 @@ export function WeekContainer({
     </div>
   );
 }
+const getWeekNumberforType = (currentWeek: Week, allWeeks: Week[]) => {
+  const weeksOfSameType = allWeeks
+    .slice(0, allWeeks.findIndex((w) => w.index === currentWeek.index) + 1)
+    .filter((w) => w.status === currentWeek.status);
+  return weeksOfSameType.length;
+};

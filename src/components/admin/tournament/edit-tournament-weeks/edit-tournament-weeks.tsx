@@ -84,6 +84,7 @@ export function EditTournamentWeeks({
                 <WeekContainer
                   key={`${week.index}-${week.weekNumber}`}
                   week={week}
+                  weeks={weeks}
                   onDeleteWeek={handleDeleteWeek}
                   onUpdateWeekStatus={handleUpdateWeekStatus}
                   onUpdateRefereeNeeded={handleUpdateRefereeNeeded}

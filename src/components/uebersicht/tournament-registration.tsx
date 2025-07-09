@@ -15,6 +15,7 @@ import { getParticipantsByTournamentId } from "@/db/repositories/participant";
 import { ScrollArea } from "../ui/scroll-area";
 import { getTournamentWeeksByTournamentId } from "@/db/repositories/tournamentWeek";
 import { TournamentWeeks } from "./tournament-weeks";
+import { RoleSummary } from "./role-summary";
 
 type Props = {
   tournament: Tournament;
@@ -30,16 +31,15 @@ export async function TournamentRegistration({ tournament }: Props) {
     getTournamentWeeksByTournamentId(tournament.id),
   ]);
 
-  const playerName =
-    profile != null ? `${profile.firstName} ${profile.lastName}` : "Gast";
+  const playerFirstName = profile != null ? `${profile.firstName}` : "Gast";
 
   return (
-    <div className="grid grid-cols-1 items-start gap-8 lg:grid-cols-3">
-      <div className="lg:col-span-3">
+    <div className="grid grid-cols-1 items-stretch gap-8 lg:grid-cols-5">
+      <div className="lg:col-span-5">
         <Card>
           <CardHeader>
             <CardTitle className="text-4xl font-bold">
-              Hallo, {playerName}!
+              Hallo, {playerFirstName}!
             </CardTitle>
             {session ? (
               <CardDescription>
@@ -56,8 +56,19 @@ export async function TournamentRegistration({ tournament }: Props) {
         </Card>
       </div>
 
-      <div className="lg:col-span-2">
-        <Card>
+      {/* Role Summary */}
+      {profile && (
+        <div className="lg:col-span-5">
+          <RoleSummary
+            profileId={profile.id}
+            tournamentId={tournament.id}
+            showEditButton={tournament.stage === "registration"}
+          />
+        </div>
+      )}
+
+      <div className="lg:col-span-3">
+        <Card className="flex h-full flex-col">
           <CardHeader>
             <CardTitle>Teilnehmerliste</CardTitle>
             <CardDescription>
@@ -68,21 +79,21 @@ export async function TournamentRegistration({ tournament }: Props) {
               angemeldeten Spieler.
             </CardDescription>
           </CardHeader>
-          <CardContent className="h-[400px]">
-            <ScrollArea className="h-full w-full pr-2">
+          <CardContent className="flex-1">
+            <ScrollArea className="h-[500px] w-full pr-2">
               <Participants participants={participants} />
             </ScrollArea>
           </CardContent>
         </Card>
       </div>
 
-      <div className="lg:col-span-1">
-        <Card>
+      <div className="lg:col-span-2">
+        <Card className="flex h-full flex-col">
           <CardHeader>
             <CardTitle>Zeitplan</CardTitle>
             <CardDescription>Gesamtübersicht der Spieltermine.</CardDescription>
           </CardHeader>
-          <CardContent>
+          <CardContent className="flex-1 overflow-x-auto">
             <TournamentWeeks tournamentWeeks={tournamentWeeks} />
           </CardContent>
         </Card>

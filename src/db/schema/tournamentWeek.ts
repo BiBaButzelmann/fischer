@@ -20,7 +20,7 @@ export const tournamentWeek = pgTable("tournament_week", {
   weekNumber: smallint("week_number").notNull(),
   refereeNeededTuesday: boolean("referee_needed_tuesday").notNull(),
   refereeNeededThursday: boolean("referee_needed_thursday").notNull(),
-  refereeNeededFriday: boolean("referee_needed_saturday").notNull(),
+  refereeNeededFriday: boolean("referee_needed_friday").notNull(),
 });
 
 export const tournamentWeekRelations = relations(tournamentWeek, ({ one }) => ({
