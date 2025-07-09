@@ -11,17 +11,11 @@ import { CountdownTimer } from "./countdown-timer";
 import { auth } from "@/auth/utils";
 import { getProfileByUserId } from "@/db/repositories/profile";
 import { Participants } from "../participants/participants";
-import {
-  getParticipantsByTournamentId,
-  getParticipantByProfileIdAndTournamentId,
-} from "@/db/repositories/participant";
+import { getParticipantsByTournamentId } from "@/db/repositories/participant";
 import { ScrollArea } from "../ui/scroll-area";
 import { getTournamentWeeksByTournamentId } from "@/db/repositories/tournamentWeek";
 import { TournamentWeeks } from "./tournament-weeks";
-import { getJurorByProfileIdAndTournamentId } from "@/db/repositories/juror";
-import { getRefereeByProfileIdAndTournamentId } from "@/db/repositories/referee";
-import { getMatchEnteringHelperByProfileIdAndTournamentId } from "@/db/repositories/match-entering-helper";
-import { getSetupHelperByProfileIdAndTournamentId } from "@/db/repositories/setup-helper";
+import { getRolesDataByProfileIdAndTournamentId } from "@/db/repositories/role";
 import { RoleSummary } from "./role-summary";
 
 type Props = {
@@ -38,27 +32,15 @@ export async function TournamentRegistration({ tournament }: Props) {
     getTournamentWeeksByTournamentId(tournament.id),
   ]);
 
-  // Fetch user's role data if logged in
-  const userRoles = profile
-    ? await Promise.all([
-        getParticipantByProfileIdAndTournamentId(profile.id, tournament.id),
-        getJurorByProfileIdAndTournamentId(profile.id, tournament.id),
-        getRefereeByProfileIdAndTournamentId(profile.id, tournament.id),
-        getMatchEnteringHelperByProfileIdAndTournamentId(
-          profile.id,
-          tournament.id,
-        ),
-        getSetupHelperByProfileIdAndTournamentId(profile.id, tournament.id),
-      ])
-    : [null, null, null, null, null];
-
-  const [
-    userParticipant,
-    userJuror,
-    userReferee,
-    userMatchEnteringHelper,
-    userSetupHelper,
-  ] = userRoles;
+  const rolesData = profile
+    ? await getRolesDataByProfileIdAndTournamentId(profile.id, tournament.id)
+    : {
+        participant: undefined,
+        juror: undefined,
+        referee: undefined,
+        matchEnteringHelper: undefined,
+        setupHelper: undefined,
+      };
 
   const playerFirstName = profile != null ? `${profile.firstName}` : "Gast";
 
@@ -89,11 +71,11 @@ export async function TournamentRegistration({ tournament }: Props) {
       {session && (
         <div className="lg:col-span-5">
           <RoleSummary
-            participant={userParticipant}
-            juror={userJuror}
-            referee={userReferee}
-            matchEnteringHelper={userMatchEnteringHelper}
-            setupHelper={userSetupHelper}
+            participant={rolesData.participant}
+            juror={rolesData.juror}
+            referee={rolesData.referee}
+            matchEnteringHelper={rolesData.matchEnteringHelper}
+            setupHelper={rolesData.setupHelper}
             showEditButton={tournament.stage === "registration"}
           />
         </div>

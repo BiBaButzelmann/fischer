@@ -10,8 +10,13 @@ import { matchEnteringHelper } from "../schema/matchEnteringHelper";
 import { setupHelper } from "../schema/setupHelper";
 import { auth } from "@/auth";
 import { headers } from "next/headers";
-import { Role } from "../types/role";
+import { Role, RolesData } from "../types/role";
 import { getProfileByUserId } from "./profile";
+import { getJurorByProfileIdAndTournamentId } from "./juror";
+import { getMatchEnteringHelperByProfileIdAndTournamentId } from "./match-entering-helper";
+import { getParticipantByProfileIdAndTournamentId } from "./participant";
+import { getRefereeByProfileIdAndTournamentId } from "./referee";
+import { getSetupHelperByProfileIdAndTournamentId } from "./setup-helper";
 
 // TODO: should we add admin here?
 export async function getRolesByProfileId(profileId: number): Promise<Role[]> {
@@ -63,4 +68,26 @@ export async function getRolesByUserId(userId: string): Promise<Role[]> {
     return [];
   }
   return getRolesByProfileId(profile.id);
+}
+
+export async function getRolesDataByProfileIdAndTournamentId(
+  profileId: number,
+  tournamentId: number,
+): Promise<RolesData> {
+  const [participant, referee, matchEnteringHelper, setupHelper, juror] =
+    await Promise.all([
+      getParticipantByProfileIdAndTournamentId(profileId, tournamentId),
+      getRefereeByProfileIdAndTournamentId(profileId, tournamentId),
+      getMatchEnteringHelperByProfileIdAndTournamentId(profileId, tournamentId),
+      getSetupHelperByProfileIdAndTournamentId(profileId, tournamentId),
+      getJurorByProfileIdAndTournamentId(profileId, tournamentId),
+    ]);
+
+  return {
+    participant: participant ?? undefined,
+    referee: referee ?? undefined,
+    matchEnteringHelper: matchEnteringHelper ?? undefined,
+    setupHelper: setupHelper ?? undefined,
+    juror: juror ?? undefined,
+  };
 }

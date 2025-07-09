@@ -16,39 +16,11 @@ import {
 import { Badge } from "../ui/badge";
 import { Button } from "../ui/button";
 import Link from "next/link";
+import { RolesData } from "../../db/types/role";
+import { matchDays } from "../../constants/constants";
 
-type RoleSummaryProps = {
-  participant?: {
-    chessClub: string;
-    title?: string | null;
-    dwzRating?: number | null;
-    fideRating?: number | null;
-    fideId?: string | null;
-    nationality?: string | null;
-    preferredMatchDay: string;
-    secondaryMatchDays: string[];
-  } | null;
-  juror?: {
-    id: number;
-  } | null;
-  referee?: {
-    preferredMatchDay: string;
-    secondaryMatchDays: string[];
-  } | null;
-  matchEnteringHelper?: {
-    numberOfGroupsToEnter: number;
-  } | null;
-  setupHelper?: {
-    preferredMatchDay: string;
-    secondaryMatchDays: string[];
-  } | null;
+type RoleSummaryProps = RolesData & {
   showEditButton?: boolean;
-};
-
-const matchDayLabels: Record<string, string> = {
-  tuesday: "Dienstag",
-  thursday: "Donnerstag",
-  friday: "Freitag",
 };
 
 export function RoleSummary({
@@ -59,32 +31,6 @@ export function RoleSummary({
   setupHelper,
   showEditButton = false,
 }: RoleSummaryProps) {
-  const hasAnyRole =
-    participant || juror || referee || matchEnteringHelper || setupHelper;
-
-  if (!hasAnyRole) {
-    return (
-      <Card>
-        <CardHeader>
-          <div className="flex items-center justify-between">
-            <div className="flex items-center gap-2">
-              <Users className="h-5 w-5" />
-              <CardTitle>Meine Anmeldungen</CardTitle>
-            </div>
-            {showEditButton && (
-              <Button asChild size="sm">
-                <Link href="/klubturnier-anmeldung">Anmeldung anpassen</Link>
-              </Button>
-            )}
-          </div>
-          <CardDescription>
-            Du hast dich noch für keine Rolle angemeldet.
-          </CardDescription>
-        </CardHeader>
-      </Card>
-    );
-  }
-
   return (
     <Card>
       <CardHeader>
@@ -174,7 +120,7 @@ export function RoleSummary({
                   </span>
                   <div className="mt-1">
                     <Badge variant="secondary">
-                      {matchDayLabels[participant.preferredMatchDay]}
+                      {matchDays[participant.preferredMatchDay]}
                     </Badge>
                   </div>
                 </div>
@@ -187,7 +133,7 @@ export function RoleSummary({
                     <div className="mt-1">
                       {participant.secondaryMatchDays.map((day, index) => (
                         <span key={day} className="text-sm">
-                          {matchDayLabels[day]}
+                          {matchDays[day]}
                           {index < participant.secondaryMatchDays.length - 1 &&
                             ", "}
                         </span>
@@ -212,7 +158,7 @@ export function RoleSummary({
                     Bevorzugter Tag:
                   </span>
                   <Badge variant="secondary" className="text-xs">
-                    {matchDayLabels[setupHelper.preferredMatchDay]}
+                    {matchDays[setupHelper.preferredMatchDay]}
                   </Badge>
                 </div>
                 {setupHelper.secondaryMatchDays.length > 0 && (
@@ -223,7 +169,7 @@ export function RoleSummary({
                     <div className="mt-1">
                       {setupHelper.secondaryMatchDays.map((day, index) => (
                         <span key={day} className="text-sm">
-                          {matchDayLabels[day]}
+                          {matchDays[day]}
                           {index < setupHelper.secondaryMatchDays.length - 1 &&
                             ", "}
                         </span>
@@ -267,7 +213,7 @@ export function RoleSummary({
                     Bevorzugter Tag:
                   </span>
                   <Badge variant="secondary" className="text-xs">
-                    {matchDayLabels[referee.preferredMatchDay]}
+                    {matchDays[referee.preferredMatchDay]}
                   </Badge>
                 </div>
                 {referee.secondaryMatchDays.length > 0 && (
@@ -278,7 +224,7 @@ export function RoleSummary({
                     <div className="mt-1">
                       {referee.secondaryMatchDays.map((day, index) => (
                         <span key={day} className="text-sm">
-                          {matchDayLabels[day]}
+                          {matchDays[day]}
                           {index < referee.secondaryMatchDays.length - 1 &&
                             ", "}
                         </span>

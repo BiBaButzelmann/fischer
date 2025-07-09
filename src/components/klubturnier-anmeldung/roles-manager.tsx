@@ -202,7 +202,7 @@ export function RolesManager({ tournamentId, userId, rolesData }: Props) {
           />
         </RoleCard>
       </Accordion>
-      {hasSelectedMoreThanOneRole(rolesData) ? (
+      {hasSelectedAtLeastOneRole(rolesData) ? (
         <div className="flex justify-center pt-6">
           <Button
             disabled={isPending}
@@ -219,6 +219,6 @@ export function RolesManager({ tournamentId, userId, rolesData }: Props) {
   );
 }
 
-function hasSelectedMoreThanOneRole(roles: RolesData): boolean {
+export function hasSelectedAtLeastOneRole(roles: RolesData): boolean {
   return Object.values(roles).filter((role) => role !== undefined).length > 0;
 }

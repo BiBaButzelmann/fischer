@@ -1,11 +1,7 @@
 import { authWithRedirect } from "@/auth/utils";
 import { RolesManager } from "@/components/klubturnier-anmeldung/roles-manager";
-import { getJurorByProfileIdAndTournamentId } from "@/db/repositories/juror";
-import { getMatchEnteringHelperByProfileIdAndTournamentId } from "@/db/repositories/match-entering-helper";
-import { getParticipantByProfileIdAndTournamentId } from "@/db/repositories/participant";
 import { getProfileByUserId } from "@/db/repositories/profile";
-import { getRefereeByProfileIdAndTournamentId } from "@/db/repositories/referee";
-import { getSetupHelperByProfileIdAndTournamentId } from "@/db/repositories/setup-helper";
+import { getRolesDataByProfileIdAndTournamentId } from "@/db/repositories/role";
 import { getLatestTournament } from "@/db/repositories/tournament";
 import { redirect } from "next/navigation";
 import Link from "next/link";
@@ -22,25 +18,10 @@ export default async function RolesPage() {
     redirect("/willkommen");
   }
 
-  const [participant, referee, matchEnteringHelper, setupHelper, juror] =
-    await Promise.all([
-      getParticipantByProfileIdAndTournamentId(profile.id, tournament.id),
-      getRefereeByProfileIdAndTournamentId(profile.id, tournament.id),
-      getMatchEnteringHelperByProfileIdAndTournamentId(
-        profile.id,
-        tournament.id,
-      ),
-      getSetupHelperByProfileIdAndTournamentId(profile.id, tournament.id),
-      getJurorByProfileIdAndTournamentId(profile.id, tournament.id),
-    ]);
-
-  const initialValues = {
-    participant,
-    referee,
-    matchEnteringHelper,
-    setupHelper,
-    juror,
-  };
+  const initialValues = await getRolesDataByProfileIdAndTournamentId(
+    profile.id,
+    tournament.id,
+  );
   return (
     <div className="space-y-8">
       <header className="text-center">
