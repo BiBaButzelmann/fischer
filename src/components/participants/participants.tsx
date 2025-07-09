@@ -13,13 +13,13 @@ type Props = { participants: ParticipantWithName[] };
 export async function Participants({ participants }: Props) {
   return (
     <Table>
-      <TableHeader className="sticky top-0">
+      <TableHeader>
         <TableRow>
-          <TableHead className="w-[50px]">#</TableHead>
+          <TableHead className="w-[50px] sticky top-0 bg-card">#</TableHead>
           {/*TODO: Titel einfügen*/}
-          <TableHead>Name</TableHead>
-          <TableHead className="text-right">ELO</TableHead>
-          <TableHead className="text-right">DWZ</TableHead>
+          <TableHead className="sticky top-0 bg-card">Name</TableHead>
+          <TableHead className="text-right sticky top-0 bg-card">ELO</TableHead>
+          <TableHead className="text-right sticky top-0 bg-card">DWZ</TableHead>
         </TableRow>
       </TableHeader>
       <TableBody>
