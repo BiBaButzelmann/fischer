@@ -14,7 +14,7 @@ import {
   PopoverTrigger,
 } from "@/components/ui/popover";
 import { cn } from "@/lib/utils";
-import { ChevronDown, CheckIcon, Globe } from "lucide-react";
+import { ChevronDown, CheckIcon } from "lucide-react";
 import { CircleFlag } from "react-circle-flags";
 import { countries } from "country-data-list";
 
