@@ -8,6 +8,11 @@ import {
   TableHeader,
   TableRow,
 } from "../ui/table";
+import Holidays from "date-holidays";
+
+const holidays = new Holidays("DE", "HH", {
+  types: ["public"],
+});
 
 type Props = {
   tournamentWeeks: TournamentWeek[];
@@ -31,9 +36,9 @@ export function TournamentWeeks({ tournamentWeeks }: Props) {
       return {
         id: week.id,
         weekLabel,
-        tuesday: weekStart.plus({ days: 1 }).toFormat("dd.MM"),
-        thursday: weekStart.plus({ days: 3 }).toFormat("dd.MM"),
-        friday: weekStart.plus({ days: 4 }).toFormat("dd.MM"),
+        tuesday: weekStart.plus({ days: 1 }),
+        thursday: weekStart.plus({ days: 3 }),
+        friday: weekStart.plus({ days: 4 }),
       };
     });
   };
@@ -56,12 +61,25 @@ export function TournamentWeeks({ tournamentWeeks }: Props) {
             <TableCell className="font-semibold text-nowrap">
               {week.weekLabel}
             </TableCell>
-            <TableCell className="text-center">{week.tuesday}</TableCell>
-            <TableCell className="text-center">{week.thursday}</TableCell>
-            <TableCell className="text-center">{week.friday}</TableCell>
+            <TableCell className="text-center">
+              {displayDate(week.tuesday)}
+            </TableCell>
+            <TableCell className="text-center">
+              {displayDate(week.thursday)}
+            </TableCell>
+            <TableCell className="text-center">
+              {displayDate(week.friday)}
+            </TableCell>
           </TableRow>
         ))}
       </TableBody>
     </Table>
   );
+}
+
+function displayDate(date: DateTime) {
+  if (holidays.isHoliday(date.toJSDate())) {
+    return "Feiertag";
+  }
+  return date.toFormat("dd.MM");
 }
