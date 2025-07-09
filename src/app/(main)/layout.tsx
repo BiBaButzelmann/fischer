@@ -1,5 +1,6 @@
 import { AppSidebar } from "@/components/sidebar";
 import { Separator } from "@/components/ui/separator";
+import Image from "next/image";
 // import { SidebarTrigger } from "@/components/ui/sidebar";
 
 export default function RootLayout({
@@ -12,6 +13,15 @@ export default function RootLayout({
       <AppSidebar />
       <main className="w-full relative ">
         {/* <SidebarTrigger className="absolute top-2 left-2 text-foreground" /> */}
+        <div className="absolute top-4 right-4 z-10">
+          <Image
+            src="/Logo_HSK.webp"
+            alt="HSK 1830 Logo"
+            width={80}
+            height={80}
+            className="object-contain"
+          />
+        </div>
         <div className="min-h-screen px-4 py-4 max-w-6xl mx-auto">
           {children}
         </div>
