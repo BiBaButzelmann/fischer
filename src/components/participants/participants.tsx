@@ -7,24 +7,34 @@ import {
   TableHeader,
   TableRow,
 } from "../ui/table";
+import { cn } from "@/lib/utils";
 
-type Props = { participants: ParticipantWithName[] };
+type Props = {
+  profileId?: number;
+  participants: ParticipantWithName[];
+};
 
-export async function Participants({ participants }: Props) {
+export function Participants({ profileId, participants }: Props) {
   return (
     <Table>
-      <TableHeader className="sticky top-0">
+      <TableHeader>
         <TableRow>
-          <TableHead className="w-[50px]">#</TableHead>
+          <TableHead className="w-[50px] sticky top-0 bg-card">#</TableHead>
           {/*TODO: Titel einfügen*/}
-          <TableHead>Name</TableHead>
-          <TableHead className="text-right">ELO</TableHead>
-          <TableHead className="text-right">DWZ</TableHead>
+          <TableHead className="sticky top-0 bg-card">Name</TableHead>
+          <TableHead className="text-right sticky top-0 bg-card">ELO</TableHead>
+          <TableHead className="text-right sticky top-0 bg-card">DWZ</TableHead>
         </TableRow>
       </TableHeader>
       <TableBody>
         {participants.map((p, index) => (
-          <TableRow key={p.id} className="hover:bg-muted">
+          <TableRow
+            key={p.id}
+            className={cn(
+              "hover:bg-muted",
+              profileId === p.profileId ? "bg-secondary" : "",
+            )}
+          >
             <TableCell>{index + 1}</TableCell>
             <TableCell className="font-medium truncate">
               {p.profile.firstName} {p.profile.lastName}

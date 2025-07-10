@@ -12,7 +12,10 @@ export async function createJuror(tournamentId: number) {
   const session = await authWithRedirect();
 
   const tournament = await getTournamentById(tournamentId);
-  invariant(tournament, "Tournament not found");
+  invariant(
+    tournament != null && tournament.stage === "registration",
+    "Tournament not found or not in registration stage",
+  );
 
   const currentProfile = await getProfileByUserId(session.user.id);
   invariant(currentProfile, "Profile not found");
@@ -26,13 +29,25 @@ export async function createJuror(tournamentId: number) {
     .onConflictDoNothing();
 }
 
-export async function deleteJuror(jurorId: number) {
+export async function deleteJuror(tournamentId: number, jurorId: number) {
   const session = await authWithRedirect();
+
+  const tournament = await getTournamentById(tournamentId);
+  invariant(
+    tournament != null && tournament.stage === "registration",
+    "Tournament not found or not in registration stage",
+  );
 
   const currentProfile = await getProfileByUserId(session.user.id);
   invariant(currentProfile, "Juror not found");
 
   await db
     .delete(juror)
-    .where(and(eq(juror.id, jurorId), eq(juror.profileId, currentProfile.id)));
+    .where(
+      and(
+        eq(juror.id, jurorId),
+        eq(juror.profileId, currentProfile.id),
+        eq(juror.tournamentId, tournament.id),
+      ),
+    );
 }

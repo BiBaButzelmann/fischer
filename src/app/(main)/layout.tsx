@@ -1,7 +1,7 @@
 import { AppSidebar } from "@/components/sidebar";
 import { Separator } from "@/components/ui/separator";
+import { SidebarTrigger } from "@/components/ui/sidebar";
 import Image from "next/image";
-// import { SidebarTrigger } from "@/components/ui/sidebar";
 
 export default function RootLayout({
   children,
@@ -11,8 +11,8 @@ export default function RootLayout({
   return (
     <>
       <AppSidebar />
-      <main className="w-full relative ">
-        {/* <SidebarTrigger className="absolute top-2 left-2 text-foreground" /> */}
+      <main className="w-full">
+        <SidebarTrigger className="mt-4 ml-2 hover:bg-secondary hover:text-current" />
         <div className="absolute top-4 right-4 z-10">
           <Image
             src="/Logo_HSK.webp"
@@ -22,7 +22,7 @@ export default function RootLayout({
             className="object-contain"
           />
         </div>
-        <div className="min-h-screen px-4 py-4 max-w-6xl mx-auto">
+        <div className="min-h-screen px-10 py-4 max-w-6xl mx-auto">
           {children}
         </div>
         <footer>
