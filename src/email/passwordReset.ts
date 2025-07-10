@@ -13,7 +13,7 @@ export async function sendPasswordResetEmail(
   await resend.emails.send({
     from: "noreply@hsk1830.de",
     to: recipientAddress,
-    subject: "Password bla bla",
+    subject: "Password zurücksetzen",
     react: PasswordResetMail({
       firstName: firstName,
       url: url,

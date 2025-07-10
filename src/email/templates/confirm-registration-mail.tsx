@@ -36,11 +36,14 @@ export function ConfirmRegistrationMail({ name, email }: Props) {
           href="https://klubturnier.hsk1830.de/klubturnier-anmeldung"
           style={{ color: "#2980b9", fontWeight: "bold" }}
         >
-          klubturnier.hsk1830.de/anmeldung
+          klubturnier.hsk1830.de/klubturnier-anmeldung
         </a>
       </p>
       <p>Ohne diese Anmeldung wirst du nicht im Turnier berücksichtigt.</p>
-      <p>Bei Fragen stehen wir dir jederzeit gerne zur Verfügung.</p>
+      <p>
+        Bei Fragen stehen wir dir jederzeit gerne unter klubturnier@hsk1830.de
+        zur Verfügung.
+      </p>
       <p>
         Viele Grüße,
         <br />
