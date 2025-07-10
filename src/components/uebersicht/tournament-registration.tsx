@@ -34,7 +34,7 @@ export async function TournamentRegistration({ tournament }: Props) {
   const playerFirstName = profile != null ? `${profile.firstName}` : "Gast";
 
   return (
-    <div className="grid grid-cols-1 items-stretch gap-8 lg:grid-cols-5">
+    <div className="grid grid-cols-1 items-stretch gap-4 md:gap-8 lg:grid-cols-5">
       <div className="lg:col-span-5">
         <Card>
           <CardHeader>
@@ -56,7 +56,6 @@ export async function TournamentRegistration({ tournament }: Props) {
         </Card>
       </div>
 
-      {/* Role Summary */}
       {profile && (
         <div className="lg:col-span-5">
           <RoleSummary

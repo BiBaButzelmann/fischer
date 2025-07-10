@@ -22,7 +22,7 @@ export default function RootLayout({
             className="object-contain"
           />
         </div>
-        <div className="min-h-screen px-10 py-4 max-w-6xl mx-auto">
+        <div className="min-h-screen px-2 md:px-10 py-4 max-w-6xl mx-auto">
           {children}
         </div>
         <footer>
