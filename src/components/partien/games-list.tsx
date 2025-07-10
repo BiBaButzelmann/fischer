@@ -36,6 +36,8 @@ import {
   SelectValue,
 } from "../ui/select";
 import { useMemo, useTransition } from "react";
+import { useIsMobile } from "@/hooks/use-mobile";
+import { useRouter } from "next/navigation";
 
 type GameListProps = {
   userId: string | undefined;
@@ -44,6 +46,8 @@ type GameListProps = {
 };
 
 export function GamesList({ userId, games, onResultChange }: GameListProps) {
+  const isMobile = useIsMobile();
+  const router = useRouter();
   const [isPending, startTransition] = useTransition();
 
   const gameParticipantsMap = useMemo(
@@ -71,25 +75,37 @@ export function GamesList({ userId, games, onResultChange }: GameListProps) {
     };
   };
 
+  const handleNavigate = (gameId: number) => {
+    router.push(`/partien/${gameId}`);
+  };
+
   return (
     <Table>
       <TableHeader>
         <TableRow>
-          <TableHead>Brett</TableHead>
-          <TableHead>Runde</TableHead>
-          <TableHead>Weiß</TableHead>
-          <TableHead>Schwarz</TableHead>
-          <TableHead>Ergebnis</TableHead>
-          <TableHead></TableHead>
+          <TableHead className="hidden md:table-cell sticky top-0 bg-card">
+            Brett
+          </TableHead>
+          <TableHead className="hidden md:table-cell sticky top-0 bg-card">
+            Runde
+          </TableHead>
+          <TableHead className="sticky top-0 bg-card">Weiß</TableHead>
+          <TableHead className="sticky top-0 bg-card">Schwarz</TableHead>
+          <TableHead className="sticky top-0 bg-card">Ergebnis</TableHead>
+          <TableHead className="hidden md:table-cell sticky top-0 bg-card"></TableHead>
         </TableRow>
       </TableHeader>
       <TableBody>
         {games.map((game) => (
-          <TableRow key={game.id}>
-            <TableCell>
+          <TableRow
+            key={game.id}
+            onClick={isMobile ? () => handleNavigate(game.id) : undefined}
+            className="cursor-default"
+          >
+            <TableCell className="hidden md:table-cell">
               <Badge variant="outline">{game.boardNumber}</Badge>
             </TableCell>
-            <TableCell>{game.round}</TableCell>
+            <TableCell className="hidden md:table-cell">{game.round}</TableCell>
             <TableCell>
               {game.whiteParticipant.profile.firstName}{" "}
               {game.whiteParticipant.profile.lastName}
@@ -111,7 +127,7 @@ export function GamesList({ userId, games, onResultChange }: GameListProps) {
             <TableCell>
               {game.result ? resultDisplay[game.result] : "-"}
             </TableCell>
-            <TableCell className="flex items-center gap-2">
+            <TableCell className="hidden md:flex items-center gap-2">
               <Tooltip>
                 <TooltipTrigger asChild>
                   <Link href={`/partien/${game.id}`}>

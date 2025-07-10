@@ -33,7 +33,7 @@ export function PartienSelector({
   };
 
   return (
-    <div className="flex gap-4 mb-4">
+    <div className="flex flex-wrap gap-2 md:gap-4 mb-4">
       <div className="flex flex-col gap-1">
         <Label htmlFor="year-select" className="text-sm font-medium">
           Jahr

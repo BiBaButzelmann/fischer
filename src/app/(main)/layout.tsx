@@ -13,7 +13,7 @@ export default function RootLayout({
       <AppSidebar />
       <main className="w-full">
         <SidebarTrigger className="mt-4 ml-2 hover:bg-secondary hover:text-current" />
-        <div className="absolute top-4 right-4 z-10">
+        <div className="hidden md:block absolute top-4 right-4 z-10">
           <Image
             src="/Logo_HSK.webp"
             alt="HSK 1830 Logo"
@@ -22,7 +22,7 @@ export default function RootLayout({
             className="object-contain"
           />
         </div>
-        <div className="min-h-screen px-2 md:px-10 py-4 max-w-6xl mx-auto">
+        <div className="min-h-[calc(100vh-46px)] px-4 md:px-10 py-4 max-w-6xl mx-auto">
           {children}
         </div>
         <footer>

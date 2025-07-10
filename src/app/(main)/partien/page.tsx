@@ -5,6 +5,7 @@ import { PartienSelector } from "@/components/partien/partien-selector";
 import { GamesList } from "@/components/partien/games-list";
 import { updateGameResult } from "@/actions/game";
 import { auth } from "@/auth/utils";
+import { ScrollArea } from "@/components/ui/scroll-area";
 
 export default async function Page({
   searchParams,
@@ -31,22 +32,27 @@ export default async function Page({
   const games = await getGamesByYearAndGroup(selectedYear, selectedGroup);
 
   return (
-    <div className="space-y-6">
-      <PartienSelector
-        selectedYear={selectedYear}
-        years={years}
-        selectedGroup={selectedGroup}
-        groups={groups}
-      />
-      {games.length > 0 ? (
-        <GamesList
-          userId={session?.user.id}
-          games={games}
-          onResultChange={updateGameResult}
+    <div>
+      <h1 className="text-3xl font-bold text-gray-900 mb-4">Partien</h1>
+      <div className="flex flex-col gap-1 md:gap-2">
+        <PartienSelector
+          selectedYear={selectedYear}
+          years={years}
+          selectedGroup={selectedGroup}
+          groups={groups}
         />
-      ) : (
-        <div>Keine Partien gefunden</div>
-      )}
+        {games.length > 0 ? (
+          <ScrollArea className="h-[calc(100vh-200px)]">
+            <GamesList
+              userId={session?.user.id}
+              games={games}
+              onResultChange={updateGameResult}
+            />
+          </ScrollArea>
+        ) : (
+          <div>Keine Partien gefunden</div>
+        )}
+      </div>
     </div>
   );
 }
