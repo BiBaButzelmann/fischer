@@ -5,7 +5,9 @@ export default function RootLayout({
 }>) {
   return (
     <div className="flex flex-grow justify-center items-center">
-      <div className="w-2/3 max-w-4xl">{children}</div>
+      <main className="w-full xl:w-2/3 xl:max-w-5xl px-4 py-12">
+        {children}
+      </main>
     </div>
   );
 }
