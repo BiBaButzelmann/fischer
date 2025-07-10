@@ -105,14 +105,6 @@ export async function getGamesByGroup(
   round?: number,
   participantId?: number,
 ) {
-  console.log(
-    "Fetching games for groupId:",
-    groupId,
-    "round:",
-    round,
-    "participantId:",
-    participantId,
-  );
   return await db.query.game.findMany({
     where: (game, { and, eq, or }) => {
       const conditions = [eq(game.groupId, groupId)];
