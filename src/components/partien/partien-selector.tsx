@@ -1,6 +1,5 @@
 "use client";
 
-import { GroupWithParticipants } from "@/db/types/group";
 import { useRouter } from "next/navigation";
 import {
   Select,

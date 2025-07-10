@@ -36,8 +36,6 @@ export default async function Page({
   );
   const selectedGroup = groupId ?? groups[0]?.id.toString();
 
-  console.log("Selected Group:", selectedGroup);
-
   const rounds = Array.from(
     { length: tournamentNames[0].numberOfRounds },
     (_, i) => i + 1,
