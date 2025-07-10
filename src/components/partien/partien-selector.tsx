@@ -114,7 +114,7 @@ export function PartienSelector({
     <div className="flex gap-4 mb-4">
       <div className="flex flex-col gap-1">
         <Label htmlFor="tournament-select" className="text-sm font-medium">
-          Jahr
+          Ausgabe
         </Label>
         <Select
           value={selectedTournamentId}

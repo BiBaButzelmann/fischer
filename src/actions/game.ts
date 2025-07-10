@@ -87,7 +87,6 @@ export async function scheduleGames(tournamentId: number) {
       );
       continue;
     }
-    if (!group.matchDay) continue;
 
     // players that actually have a position inside this group
     const players = group.participants
