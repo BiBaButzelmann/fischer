@@ -27,6 +27,11 @@ export async function getGameById(gameId: number) {
         },
       },
       pgn: true,
+      tournament: {
+        columns: {
+          name: true,
+        },
+      },
     },
   });
 }

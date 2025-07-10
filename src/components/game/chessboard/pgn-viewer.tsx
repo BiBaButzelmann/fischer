@@ -79,14 +79,7 @@ export default function PgnViewer({
 
 function movesFromPGN(pgn: string): Move[] {
   const game = new Chess();
-  if (pgn.trim()) {
-    try {
-      game.loadPgn(pgn);
-    } catch {
-      // return empty array when there are no moves yet
-      return [];
-    }
-  }
+  game.loadPgn(pgn);
   return game.history({ verbose: true });
 }
 
