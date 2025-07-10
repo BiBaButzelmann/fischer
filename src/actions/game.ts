@@ -36,30 +36,67 @@ function firstMatchDate(start: Date, weekday: keyof typeof weekdayToIndex) {
   return d;
 }
 
-/** Berger "circle" algorithm – works for 3 … 16 players (and beyond)  */
-function roundRobinPairs(n: number): Array<Array<[number, number]>> {
-  const odd = n % 2 === 1;
-  const players: number[] = Array.from(
-    { length: odd ? n + 1 : n },
-    (_, i) => i + 1,
-  ); // +1 dummy for bye
-  const rounds = odd ? n : n - 1;
-  const result: Array<Array<[number, number]>> = [];
+export function bergerFide(n: number): Array<Array<[number, number]>> {
+  if (n % 2) {
+    throw new Error("n must be even (add a bye for odd n)");
+  }
 
-  for (let r = 0; r < rounds; r++) {
-    const pairs: [number, number][] = [];
-    for (let i = 0; i < players.length / 2; i++) {
-      const white = players[i];
-      const black = players[players.length - 1 - i];
-      if (white <= n && black <= n) pairs.push([white, black]); // skip dummy
+  const half = Math.floor(n / 2); // boards per round
+  const circle = n - 1; // players 1 … n-1 live on the circle
+  const rounds: Array<Array<[number, number]>> = [];
+
+  for (let r = 1; r < n; r++) {
+    // 1-based round counter
+    // ---------- board 1 (always contains player n) ----------
+    let board: Array<[number, number]>;
+    let startWhite: number;
+
+    if (r & 1) {
+      // odd round
+      const opp = Math.floor((r + 1) / 2); // 1,2,3,4,…
+      board = [[opp, n]]; // n is Black
+      startWhite = (opp % circle) + 1; // first White on the circle
+    } else {
+      // even round
+      const opp = half + Math.floor(r / 2); // n/2+1, n/2+2,…
+      board = [[n, opp]]; // n is White
+      startWhite = ((half + Math.floor(r / 2)) % circle) + 1;
+      if (startWhite === n) {
+        // can never be player n
+        startWhite = 1;
+      }
     }
 
-    result.push(pairs);
+    // ---------- remaining boards ----------
+    let wIdx = startWhite - 1; // 0-based index on circle
+    let bIdx = (wIdx - 2 + circle) % circle; // "two steps behind" (with proper modulo)
 
-    // rotate (keeping first element fixed)
-    players.splice(1, 0, players.pop() as number);
+    for (let i = 0; i < half - 1; i++) {
+      const white = wIdx + 1;
+      const black = bIdx + 1;
+      board.push([white, black]);
+      wIdx = (wIdx + 1) % circle; // walk clockwise
+      bIdx = (bIdx - 1 + circle) % circle; // walk anti-clockwise (with proper modulo)
+    }
+
+    rounds.push(board);
   }
-  return result;
+
+  return rounds;
+}
+
+/** Berger algorithm for round-robin tournaments */
+function roundRobinPairs(n: number): Array<Array<[number, number]>> {
+  const isOdd = n % 2 === 1;
+
+  if (isOdd) {
+    const extended = bergerFide(n + 1);
+    return extended.map((round) =>
+      round.filter(([white, black]) => white <= n && black <= n),
+    );
+  } else {
+    return bergerFide(n);
+  }
 }
 
 export async function removeScheduledGames(tournamentId: number) {
