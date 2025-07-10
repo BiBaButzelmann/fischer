@@ -44,7 +44,6 @@ export const gameRelations = relations(game, ({ one }) => ({
     fields: [game.groupId],
     references: [group.id],
   }),
-  //relation to pgn table
   pgn: one(pgn, {
     fields: [game.id],
     references: [pgn.gameId],

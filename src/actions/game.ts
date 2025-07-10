@@ -11,56 +11,7 @@ import { GameResult } from "@/db/types/game";
 import { eq, InferInsertModel } from "drizzle-orm";
 import { revalidatePath } from "next/cache";
 import invariant from "tiny-invariant";
-
-const weekdayToIndex = {
-  monday: 1,
-  tuesday: 2,
-  wednesday: 3,
-  thursday: 4,
-  friday: 5,
-  saturday: 6,
-  sunday: 0,
-} as const;
-
-function addDays(d: Date, days: number) {
-  const out = new Date(d);
-  out.setDate(out.getDate() + days);
-  return out;
-}
-
-/** first date ≥ `start` that falls on the wanted `weekday`              */
-function firstMatchDate(start: Date, weekday: keyof typeof weekdayToIndex) {
-  const wanted = weekdayToIndex[weekday];
-  const d = new Date(start);
-  while (d.getDay() !== wanted) d.setDate(d.getDate() + 1);
-  return d;
-}
-
-/** Berger "circle" algorithm – works for 3 … 16 players (and beyond)  */
-function roundRobinPairs(n: number): Array<Array<[number, number]>> {
-  const odd = n % 2 === 1;
-  const players: number[] = Array.from(
-    { length: odd ? n + 1 : n },
-    (_, i) => i + 1,
-  ); // +1 dummy for bye
-  const rounds = odd ? n : n - 1;
-  const result: Array<Array<[number, number]>> = [];
-
-  for (let r = 0; r < rounds; r++) {
-    const pairs: [number, number][] = [];
-    for (let i = 0; i < players.length / 2; i++) {
-      const white = players[i];
-      const black = players[players.length - 1 - i];
-      if (white <= n && black <= n) pairs.push([white, black]); // skip dummy
-    }
-
-    result.push(pairs);
-
-    // rotate (keeping first element fixed)
-    players.splice(1, 0, players.pop() as number);
-  }
-  return result;
-}
+import { addDays, firstMatchDate, roundRobinPairs } from "@/lib/pairing-utils";
 
 export async function removeScheduledGames(tournamentId: number) {
   await db.delete(game).where(eq(game.tournamentId, tournamentId));
@@ -87,7 +38,6 @@ export async function scheduleGames(tournamentId: number) {
       );
       continue;
     }
-    if (!group.matchDay) continue;
 
     // players that actually have a position inside this group
     const players = group.participants

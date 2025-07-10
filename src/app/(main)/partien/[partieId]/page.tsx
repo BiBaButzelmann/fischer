@@ -8,8 +8,7 @@ import { PasswordProtection } from "@/components/game/password-protection";
 import { verifyPgnPassword } from "@/actions/game";
 import PgnViewer from "@/components/game/chessboard/pgn-viewer";
 import { Suspense } from "react";
-
-const INITIAL_PGN = `[\nEvent "?"\nSite "?"\nDate "????.??.??"\nRound "?"\nWhite "?"\nBlack "?"\nResult "*"\n]\n\n*`;
+import { DateTime } from "luxon";
 
 type PageProps = {
   params: Promise<{ partieId: string }>;
@@ -61,7 +60,16 @@ async function PgnContainer({
 
   const whiteDisplay = formatDisplayName(game.whiteParticipant);
   const blackDisplay = formatDisplayName(game.blackParticipant);
-  const pgn = game.pgn.value ?? INITIAL_PGN;
+  const pgn =
+    game.pgn != null
+      ? game.pgn.value
+      : getInitialPGN(
+          game.tournament.name,
+          game.scheduled,
+          game.round,
+          whiteDisplay,
+          blackDisplay,
+        );
 
   return (
     <div className="p-4">
@@ -83,7 +91,17 @@ async function gameBelongsToMatchEnteringHelper() {
   return false;
 }
 
-const formatDisplayName = (p: ParticipantWithName) => {
+function formatDisplayName(p: ParticipantWithName) {
   const rating = p.fideRating ?? p.dwzRating;
   return `${getParticipantFullName(p)}${rating ? ` (${rating})` : ""}`;
-};
+}
+
+function getInitialPGN(
+  tournamentName: string,
+  date: Date,
+  round: number,
+  whiteParticipant: string,
+  blackParticipant: string,
+) {
+  return `[Event "${tournamentName}"]\n[Site "https://klubturnier.hsk1830.de"]\n[Date "${DateTime.fromJSDate(date).toFormat("dd.MM.yyyy")}"]\n[Round "${round}"]\n[White "${whiteParticipant}"]\n[Black "${blackParticipant}"]\n[Result "*"]\n\n*`;
+}

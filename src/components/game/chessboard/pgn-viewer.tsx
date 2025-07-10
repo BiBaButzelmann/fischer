@@ -31,10 +31,7 @@ export default function PgnViewer({
     [moves, currentIndex],
   );
 
-  const fullPGN = useMemo(
-    () => computeFenForIndex(moves, moves.length - 1),
-    [moves],
-  );
+  const fullPGN = useMemo(() => computePGNFromMoves(moves), [moves]);
 
   const handleDrop = useCallback(
     (sourceSquare: string, targetSquare: string): boolean => {
@@ -82,9 +79,7 @@ export default function PgnViewer({
 
 function movesFromPGN(pgn: string): Move[] {
   const game = new Chess();
-  if (pgn.trim()) {
-    game.loadPgn(pgn);
-  }
+  game.loadPgn(pgn);
   return game.history({ verbose: true });
 }
 
@@ -99,6 +94,14 @@ function currentBoardState(moves: Move[], index: number): Chess {
 function computeFenForIndex(moves: Move[], index: number): string {
   const currentState = currentBoardState(moves, index);
   return currentState.fen();
+}
+
+function computePGNFromMoves(moves: Move[]): string {
+  const chess = new Chess();
+  for (const move of moves) {
+    chess.move(move);
+  }
+  return chess.pgn();
 }
 
 const useChessboardControls = ({
