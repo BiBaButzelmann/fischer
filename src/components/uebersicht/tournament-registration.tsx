@@ -66,6 +66,21 @@ export async function TournamentRegistration({ tournament }: Props) {
         </div>
       )}
 
+      <div className="lg:col-span-2">
+        <Card className="flex h-full flex-col">
+          <CardHeader>
+            <CardTitle>Zeitplan</CardTitle>
+            <CardDescription>Gesamtübersicht der Spieltermine.</CardDescription>
+          </CardHeader>
+          <CardContent className="flex-1">
+            <ScrollArea className="w-full pb-3">
+              <TournamentWeeks tournamentWeeks={tournamentWeeks} />
+              <ScrollBar orientation="horizontal" />
+            </ScrollArea>
+          </CardContent>
+        </Card>
+      </div>
+
       <div className="lg:col-span-3">
         <Card className="flex h-full flex-col">
           <CardHeader>
@@ -84,21 +99,6 @@ export async function TournamentRegistration({ tournament }: Props) {
                 profileId={profile?.id}
                 participants={participants}
               />
-            </ScrollArea>
-          </CardContent>
-        </Card>
-      </div>
-
-      <div className="lg:col-span-2">
-        <Card className="flex h-full flex-col">
-          <CardHeader>
-            <CardTitle>Zeitplan</CardTitle>
-            <CardDescription>Gesamtübersicht der Spieltermine.</CardDescription>
-          </CardHeader>
-          <CardContent className="flex-1">
-            <ScrollArea className="w-full pb-3">
-              <TournamentWeeks tournamentWeeks={tournamentWeeks} />
-              <ScrollBar orientation="horizontal" />
             </ScrollArea>
           </CardContent>
         </Card>

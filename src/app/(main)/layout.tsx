@@ -15,7 +15,7 @@ export default function RootLayout({
         <SidebarTrigger className="mt-4 ml-2 hover:bg-secondary hover:text-current" />
         <div className="hidden md:block absolute top-4 right-4 z-10">
           <Image
-            src="/Logo_HSK.webp"
+            src="/logo.webp"
             alt="HSK 1830 Logo"
             width={80}
             height={80}
