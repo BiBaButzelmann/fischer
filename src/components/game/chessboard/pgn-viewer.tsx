@@ -82,7 +82,7 @@ function movesFromPGN(pgn: string): Move[] {
   if (pgn.trim()) {
     try {
       game.loadPgn(pgn);
-    } catch (error) {
+    } catch (_error) {
       // return empty array when there are no moves yet
       return [];
     }

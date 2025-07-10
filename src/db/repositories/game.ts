@@ -1,6 +1,5 @@
 import { db } from "../client";
 import { eq } from "drizzle-orm";
-import { tournament } from "../schema/tournament";
 import { group } from "../schema/group";
 
 export async function getGameById(gameId: number) {
