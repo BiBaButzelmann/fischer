@@ -14,7 +14,7 @@ export default async function Page() {
   const games = await getGamesOfParticipant(currentParticipant.id);
   return (
     <div>
-      <div className="mb-8">
+      <div className="mb-4">
         <h1 className="text-3xl font-bold text-gray-900 mb-2">Kalender</h1>
         <div className="bg-blue-50 border border-blue-200 rounded-lg p-4 mb-4">
           <p className="text-blue-800 text-sm">
@@ -23,9 +23,7 @@ export default async function Page() {
           </p>
         </div>
       </div>
-      <div className="flex flex-col gap-4 mt-4">
-        <MyGamesCalendar games={games} />
-      </div>
+      <MyGamesCalendar games={games} />
     </div>
   );
 }

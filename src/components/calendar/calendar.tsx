@@ -20,6 +20,7 @@ export function Calendar({ events }: { events: EventInput[] }) {
       eventStartEditable
       selectable
       eventDrop={console.log}
+      height="auto"
     />
   );
 }
