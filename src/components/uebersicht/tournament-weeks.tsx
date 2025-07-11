@@ -8,11 +8,7 @@ import {
   TableHeader,
   TableRow,
 } from "../ui/table";
-import Holidays from "date-holidays";
-
-const holidays = new Holidays("DE", "HH", {
-  types: ["public"],
-});
+import { isHoliday } from "@/lib/holidays";
 
 type Props = {
   tournamentWeeks: TournamentWeek[];
@@ -78,7 +74,7 @@ export function TournamentWeeks({ tournamentWeeks }: Props) {
 }
 
 function displayDate(date: DateTime) {
-  if (holidays.isHoliday(date.toJSDate())) {
+  if (isHoliday(date.toJSDate())) {
     return "Feiertag";
   }
   return date.toFormat("dd.MM");

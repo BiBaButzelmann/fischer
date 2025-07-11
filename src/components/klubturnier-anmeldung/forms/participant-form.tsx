@@ -3,6 +3,8 @@
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useTransition } from "react";
 import { useForm } from "react-hook-form";
+import { format } from "date-fns";
+import { CalendarIcon } from "lucide-react";
 import z from "zod";
 import {
   Form,
@@ -22,19 +24,31 @@ import {
   SelectValue,
 } from "../../ui/select";
 import { Button } from "../../ui/button";
+import { Calendar } from "../../ui/calendar";
+import { Popover, PopoverContent, PopoverTrigger } from "../../ui/popover";
 import { participantFormSchema } from "@/schema/participant";
 import { MatchDaysCheckboxes } from "./matchday-selection";
 import { DEFAULT_CLUB } from "@/constants/constants";
 import { Info, User, Users } from "lucide-react";
 import { CountryDropdown } from "@/components/ui/country-dropdown";
+import { cn } from "@/lib/utils";
+import { isHoliday } from "@/lib/holidays";
+
+import { Tournament } from "@/db/types/tournament";
 
 type Props = {
   initialValues?: z.infer<typeof participantFormSchema>;
   onSubmit: (data: z.infer<typeof participantFormSchema>) => Promise<void>;
   onDelete: () => Promise<void>;
+  tournament?: Tournament;
 };
 
-export function ParticipateForm({ initialValues, onSubmit, onDelete }: Props) {
+export function ParticipateForm({
+  initialValues,
+  onSubmit,
+  onDelete,
+  tournament,
+}: Props) {
   const [isPending, startTransition] = useTransition();
   const form = useForm<z.infer<typeof participantFormSchema>>({
     resolver: zodResolver(participantFormSchema),
@@ -47,6 +61,7 @@ export function ParticipateForm({ initialValues, onSubmit, onDelete }: Props) {
       nationality: initialValues?.nationality,
       preferredMatchDay: initialValues?.preferredMatchDay,
       secondaryMatchDays: initialValues?.secondaryMatchDays ?? [],
+      notAvailableDays: initialValues?.notAvailableDays ?? [],
     },
   });
 
@@ -61,7 +76,56 @@ export function ParticipateForm({ initialValues, onSubmit, onDelete }: Props) {
       await onDelete();
     });
   };
+
   const fideRating = form.watch("fideRating");
+
+  const isDateDisabled = (date: Date): boolean => {
+    if (tournament) {
+      const dateOnly = new Date(
+        date.getFullYear(),
+        date.getMonth(),
+        date.getDate(),
+      );
+      const startDateOnly = new Date(
+        tournament.startDate.getFullYear(),
+        tournament.startDate.getMonth(),
+        tournament.startDate.getDate(),
+      );
+      const endDateOnly = new Date(
+        tournament.endDate.getFullYear(),
+        tournament.endDate.getMonth(),
+        tournament.endDate.getDate(),
+      );
+
+      if (dateOnly < startDateOnly || dateOnly > endDateOnly) {
+        return true;
+      }
+    } else {
+      const today = new Date();
+      const todayOnly = new Date(
+        today.getFullYear(),
+        today.getMonth(),
+        today.getDate(),
+      );
+      const dateOnly = new Date(
+        date.getFullYear(),
+        date.getMonth(),
+        date.getDate(),
+      );
+
+      if (dateOnly < todayOnly) {
+        return true;
+      }
+    }
+
+    if (isHoliday(date)) {
+      return true;
+    }
+
+    const dayOfWeek = date.getDay();
+    return dayOfWeek !== 2 && dayOfWeek !== 4 && dayOfWeek !== 5;
+  };
+
   return (
     <Form {...form}>
       <form onSubmit={form.handleSubmit(handleSubmit)} className="space-y-8">
@@ -283,6 +347,76 @@ export function ParticipateForm({ initialValues, onSubmit, onDelete }: Props) {
             </FormItem>
           )}
         />
+        <FormField
+          control={form.control}
+          name="notAvailableDays"
+          render={({ field }) => (
+            <FormItem>
+              <FormLabel>Nicht verfügbare Tage</FormLabel>
+              <Popover>
+                <PopoverTrigger asChild>
+                  <Button
+                    variant={"outline"}
+                    className={cn(
+                      "w-full justify-start text-left font-normal",
+                      (!field.value || field.value.length === 0) &&
+                        "text-muted-foreground",
+                    )}
+                  >
+                    <CalendarIcon className="mr-2 h-4 w-4 opacity-50" />
+                    {field.value && field.value.length > 0 ? (
+                      `${field.value.length} Tag${field.value.length === 1 ? "" : "e"} ausgewählt`
+                    ) : (
+                      <span>
+                        Einzelne Tage wählen, an denen du nicht verfügbar bist.
+                      </span>
+                    )}
+                  </Button>
+                </PopoverTrigger>
+                <PopoverContent className="w-auto p-0" align="start">
+                  <Calendar
+                    mode="multiple"
+                    selected={field.value || []}
+                    onSelect={(selectedDates) => {
+                      if (selectedDates && selectedDates.length <= 14) {
+                        field.onChange(selectedDates);
+                      }
+                    }}
+                    numberOfMonths={1}
+                    disabled={isDateDisabled}
+                  />
+                </PopoverContent>
+              </Popover>
+              <FormDescription>
+                Optional: Wähle Tage aus, an denen du nicht für Spiele verfügbar
+                bist, obwohl du sie als bevorzugter Spieltag angegeben hast.
+                Verwende dies nur für lang geplante Urlaubsreisen oder andere
+                unverschiebbare Termine. Wir versuchen dann, dich mit anderen
+                Spielern zu paaren, die an dem Tag ebenfalls nicht spielen
+                können, um die Anzahl der Verschiebungen zu minimieren.
+              </FormDescription>
+              <FormMessage />
+              {field.value && field.value.length > 0 && (
+                <div className="text-sm text-muted-foreground">
+                  <p className="font-medium mb-2">
+                    Ausgewählte Tage ({field.value.length}):
+                  </p>
+                  <div className="flex flex-wrap gap-1">
+                    {field.value.map((date, index) => (
+                      <span
+                        key={index}
+                        className="inline-flex items-center px-2 py-1 rounded-md bg-secondary text-secondary-foreground text-xs"
+                      >
+                        {format(date, "dd.MM.yyyy")}
+                      </span>
+                    ))}
+                  </div>
+                </div>
+              )}
+            </FormItem>
+          )}
+        />
+
         <div className="flex items-center gap-2">
           <Button
             disabled={isPending}
