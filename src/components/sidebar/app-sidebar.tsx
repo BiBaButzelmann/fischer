@@ -20,6 +20,7 @@ import {
   SwordsIcon,
 } from "lucide-react";
 import { Button } from "../ui/button";
+import Image from "next/image";
 
 export async function AppSidebar() {
   const session = await auth();
@@ -34,7 +35,14 @@ export async function AppSidebar() {
   return (
     <Sidebar>
       <SidebarHeader>
-        <Link href="/uebersicht">
+        <Link className="inline-flex items-center gap-2" href="/uebersicht">
+          <Image
+            src="/logo.webp"
+            alt="HSK 1830 Logo"
+            width={40}
+            height={80}
+            className="object-contain"
+          />
           <p className="text-xl font-semibold px-2 py-2">Klubturnier</p>
         </Link>
       </SidebarHeader>

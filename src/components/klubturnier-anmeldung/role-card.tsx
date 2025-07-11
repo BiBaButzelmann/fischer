@@ -49,7 +49,7 @@ export function RoleCard({
           </span>
         )}
       </AccordionTrigger>
-      <AccordionContent className="p-4 pt-0">{children}</AccordionContent>
+      <AccordionContent className="md:p-4 md:pt-0">{children}</AccordionContent>
     </AccordionItem>
   );
 }

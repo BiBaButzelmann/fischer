@@ -40,16 +40,16 @@ const intervalLabels: Record<keyof TimeLeft, string> = {
 
 function Timers({ timeLeft }: { timeLeft: TimeLeft }) {
   return (
-    <div className="grid grid-cols-4 gap-4">
+    <div className="grid grid-cols-4 gap-2 md:gap-4">
       {Object.entries(timeLeft).map(([key, value]) => (
         <div
           key={key}
           className="flex flex-col items-center justify-center bg-muted p-4 rounded-lg"
         >
-          <span className="text-4xl font-bold text-red-500">
+          <span className="text-2xl md:text-4xl font-bold text-red-500">
             {value.toString().padStart(2, "0")}
           </span>
-          <span className="text-xs text-muted-foreground uppercase">
+          <span className="text-[0.7rem] md:text-xs text-muted-foreground uppercase">
             {intervalLabels[key as keyof TimeLeft]}
           </span>
         </div>

@@ -15,7 +15,7 @@ import { getParticipantsByTournamentId } from "@/db/repositories/participant";
 import { ScrollArea, ScrollBar } from "../ui/scroll-area";
 import { getTournamentWeeksByTournamentId } from "@/db/repositories/tournamentWeek";
 import { TournamentWeeks } from "./tournament-weeks";
-import { RoleSummary } from "./role-summary";
+import { RolesSummary } from "./roles-summary";
 
 type Props = {
   tournament: Tournament;
@@ -34,8 +34,8 @@ export async function TournamentRegistration({ tournament }: Props) {
   const playerFirstName = profile != null ? `${profile.firstName}` : "Gast";
 
   return (
-    <div className="grid grid-cols-1 items-stretch gap-8 lg:grid-cols-5">
-      <div className="lg:col-span-5">
+    <div className="grid grid-cols-1 items-stretch gap-4 md:gap-8 lg:grid-cols-6">
+      <div className="lg:col-span-6">
         <Card>
           <CardHeader>
             <CardTitle className="text-4xl font-bold">
@@ -56,16 +56,30 @@ export async function TournamentRegistration({ tournament }: Props) {
         </Card>
       </div>
 
-      {/* Role Summary */}
       {profile && (
-        <div className="lg:col-span-5">
-          <RoleSummary
+        <div className="lg:col-span-6">
+          <RolesSummary
             profileId={profile.id}
             tournamentId={tournament.id}
             showEditButton={tournament.stage === "registration"}
           />
         </div>
       )}
+
+      <div className="lg:col-span-3">
+        <Card className="flex h-full flex-col">
+          <CardHeader>
+            <CardTitle>Zeitplan</CardTitle>
+            <CardDescription>Gesamtübersicht der Spieltermine.</CardDescription>
+          </CardHeader>
+          <CardContent className="flex-1">
+            <ScrollArea className="w-full pb-3">
+              <TournamentWeeks tournamentWeeks={tournamentWeeks} />
+              <ScrollBar orientation="horizontal" />
+            </ScrollArea>
+          </CardContent>
+        </Card>
+      </div>
 
       <div className="lg:col-span-3">
         <Card className="flex h-full flex-col">
@@ -85,21 +99,6 @@ export async function TournamentRegistration({ tournament }: Props) {
                 profileId={profile?.id}
                 participants={participants}
               />
-            </ScrollArea>
-          </CardContent>
-        </Card>
-      </div>
-
-      <div className="lg:col-span-2">
-        <Card className="flex h-full flex-col">
-          <CardHeader>
-            <CardTitle>Zeitplan</CardTitle>
-            <CardDescription>Gesamtübersicht der Spieltermine.</CardDescription>
-          </CardHeader>
-          <CardContent className="flex-1">
-            <ScrollArea className="w-full pb-3">
-              <TournamentWeeks tournamentWeeks={tournamentWeeks} />
-              <ScrollBar orientation="horizontal" />
             </ScrollArea>
           </CardContent>
         </Card>

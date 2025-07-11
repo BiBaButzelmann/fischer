@@ -206,17 +206,15 @@ export function RolesManager({ tournamentId, userId, rolesData }: Props) {
         </RoleCard>
       </Accordion>
       {hasSelectedAtLeastOneRole(rolesData) ? (
-        <div className="flex justify-center pt-6">
-          <Button
-            disabled={isPending}
-            onClick={handleSubmitRoleSelection}
-            size="lg"
-            className="w-full sm:w-auto"
-            asChild
-          >
-            <Link href="/uebersicht">Anmeldung abschließen</Link>
-          </Button>
-        </div>
+        <Button
+          disabled={isPending}
+          onClick={handleSubmitRoleSelection}
+          size="lg"
+          className="w-full sm:w-auto"
+          asChild
+        >
+          <Link href="/uebersicht">Anmeldung abschließen</Link>
+        </Button>
       ) : null}
     </div>
   );

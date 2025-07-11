@@ -15,7 +15,7 @@ const geistMono = Geist_Mono({
 });
 
 export const metadata: Metadata = {
-  title: "fischer",
+  title: "HSK Klubturnier",
   description: "HSK Klubturnier",
 };
 
