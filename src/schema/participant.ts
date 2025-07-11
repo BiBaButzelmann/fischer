@@ -23,5 +23,5 @@ export const participantFormSchema = z.object({
     errorMap: () => ({ message: "Bevorzugter Spieltag ist erforderlich" }),
   }),
   secondaryMatchDays: z.array(z.enum(availableMatchDays)),
-  notAvailableDays: z.array(z.date()).max(14, "Maximal 14 Tage").optional(),
+  notAvailableDays: z.array(z.date()).max(5, "Maximal 5 Tage").optional(),
 });
