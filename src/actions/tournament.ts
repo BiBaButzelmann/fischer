@@ -9,6 +9,8 @@ import { createTournamentFormSchema } from "@/schema/tournament";
 import { authWithRedirect } from "@/auth/utils";
 import invariant from "tiny-invariant";
 import { auth } from "@/auth";
+import { eq } from "drizzle-orm";
+import { TournamentStage } from "@/db/types/tournament";
 
 export async function createTournament(
   formData: z.infer<typeof createTournamentFormSchema>,
@@ -59,4 +61,20 @@ export async function createTournament(
   await db.insert(tournamentWeek).values(newWeeks);
 
   revalidatePath("/admin/tournament");
+}
+
+export async function updateTournamentStage(
+  tournamentId: number,
+  stage: TournamentStage,
+) {
+  const session = await authWithRedirect();
+  invariant(session?.user.role === "admin", "Unauthorized");
+
+  await db
+    .update(tournament)
+    .set({ stage })
+    .where(eq(tournament.id, tournamentId));
+
+  revalidatePath("/admin/tournament");
+  revalidatePath("/uebersicht");
 }
