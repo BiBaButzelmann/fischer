@@ -88,7 +88,7 @@ export function PartienSelector({
     );
   };
 
-  const handleRoundChange = (round: string) => {
+  const handleRoundChange = (round: string | undefined) => {
     router.push(
       buildUrl({
         tournamentId: selectedTournamentId,
@@ -99,7 +99,7 @@ export function PartienSelector({
     );
   };
 
-  const handleParticipantChange = (participantId: string) => {
+  const handleParticipantChange = (participantId: string | undefined) => {
     router.push(
       buildUrl({
         tournamentId: selectedTournamentId,
@@ -153,8 +153,17 @@ export function PartienSelector({
         <Label htmlFor="round-select" className="text-sm font-medium">
           Runde
         </Label>
-        <Select value={selectedRound} onValueChange={handleRoundChange}>
-          <SelectTrigger id="round-select" className="w-48">
+        <Select
+          key={selectedRound}
+          value={selectedRound}
+          onValueChange={handleRoundChange}
+        >
+          <SelectTrigger
+            id="round-select"
+            className="w-48"
+            clearable={selectedRound != null}
+            onClear={() => handleRoundChange(undefined)}
+          >
             <SelectValue />
           </SelectTrigger>
           <SelectContent>
@@ -171,10 +180,16 @@ export function PartienSelector({
           Spieler
         </Label>
         <Select
+          key={selectedParticipantId}
           value={selectedParticipantId}
           onValueChange={handleParticipantChange}
         >
-          <SelectTrigger id="participant-select" className="w-48">
+          <SelectTrigger
+            id="participant-select"
+            className="w-48"
+            clearable={selectedParticipantId != null}
+            onClear={() => handleParticipantChange(undefined)}
+          >
             <SelectValue />
           </SelectTrigger>
           <SelectContent>
