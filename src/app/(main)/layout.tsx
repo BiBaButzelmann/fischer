@@ -13,15 +13,6 @@ export default function RootLayout({
       <AppSidebar />
       <main className="w-full">
         <SidebarTrigger className="mt-4 ml-2 hover:bg-secondary hover:text-current" />
-        <div className="hidden md:block absolute top-4 right-4 z-10">
-          <Image
-            src="/logo.webp"
-            alt="HSK 1830 Logo"
-            width={80}
-            height={80}
-            className="object-contain"
-          />
-        </div>
         <div className="min-h-[calc(100vh-46px)] px-4 md:px-10 py-4 max-w-6xl mx-auto">
           {children}
         </div>
