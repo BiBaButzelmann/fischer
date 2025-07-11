@@ -29,10 +29,14 @@ const stages: { key: TournamentStage; label: string; description: string }[] = [
   },
 ];
 
-export function TournamentStageManager({ tournament }: TournamentStageManagerProps) {
+export function TournamentStageManager({
+  tournament,
+}: TournamentStageManagerProps) {
   const [isPending, startTransition] = useTransition();
 
-  const currentStageIndex = stages.findIndex(stage => stage.key === tournament.stage);
+  const currentStageIndex = stages.findIndex(
+    (stage) => stage.key === tournament.stage,
+  );
   const nextStage = stages[currentStageIndex + 1];
 
   const handleStageChange = (stage: TournamentStage) => {
@@ -48,7 +52,8 @@ export function TournamentStageManager({ tournament }: TournamentStageManagerPro
           Aktuelle Turnierphase: {stages[currentStageIndex].label}
         </h3>
         <p className="text-sm text-gray-600 mb-4">
-          Verwalten Sie hier den Fortschritt des Turniers durch die verschiedenen Phasen.
+          Verwalten Sie hier den Fortschritt des Turniers durch die
+          verschiedenen Phasen.
         </p>
       </div>
 
@@ -63,17 +68,18 @@ export function TournamentStageManager({ tournament }: TournamentStageManagerPro
               <div
                 className={cn(
                   "flex items-center justify-center w-8 h-8 rounded-full border-2 text-sm font-medium transition-all",
-                  isActive && "bg-blue-500 border-blue-500 text-white shadow-sm",
+                  isActive &&
+                    "bg-blue-500 border-blue-500 text-white shadow-sm",
                   isCompleted && "bg-green-500 border-green-500 text-white",
-                  isNext && "border-orange-500 bg-orange-100 text-orange-700 shadow-md ring-2 ring-orange-200",
-                  !isActive && !isCompleted && !isNext && "border-gray-300 bg-gray-50 text-gray-400"
+                  isNext &&
+                    "border-orange-500 bg-orange-100 text-orange-700 shadow-md ring-2 ring-orange-200",
+                  !isActive &&
+                    !isCompleted &&
+                    !isNext &&
+                    "border-gray-300 bg-gray-50 text-gray-400",
                 )}
               >
-                {isCompleted ? (
-                  <CheckIcon className="w-4 h-4" />
-                ) : (
-                  index + 1
-                )}
+                {isCompleted ? <CheckIcon className="w-4 h-4" /> : index + 1}
               </div>
               <div className="ml-2 min-w-0">
                 <p
@@ -82,7 +88,7 @@ export function TournamentStageManager({ tournament }: TournamentStageManagerPro
                     isActive && "text-blue-600",
                     isCompleted && "text-green-600",
                     isNext && "text-orange-700 font-semibold",
-                    !isActive && !isCompleted && !isNext && "text-gray-400"
+                    !isActive && !isCompleted && !isNext && "text-gray-400",
                   )}
                 >
                   {stage.label}
@@ -93,7 +99,7 @@ export function TournamentStageManager({ tournament }: TournamentStageManagerPro
                     isActive && "text-blue-500",
                     isCompleted && "text-green-500",
                     isNext && "text-orange-600 font-medium",
-                    !isActive && !isCompleted && !isNext && "text-gray-400"
+                    !isActive && !isCompleted && !isNext && "text-gray-400",
                   )}
                 >
                   {stage.description}
@@ -113,22 +119,24 @@ export function TournamentStageManager({ tournament }: TournamentStageManagerPro
             <p className="font-semibold text-orange-800">
               🎯 Nächste empfohlene Phase: {nextStage.label}
             </p>
-            <p className="text-sm text-orange-600">
-              {nextStage.description}
-            </p>
+            <p className="text-sm text-orange-600">{nextStage.description}</p>
           </div>
           <Button
             onClick={() => handleStageChange(nextStage.key)}
             disabled={isPending}
             className="bg-orange-500 hover:bg-orange-600 text-white font-medium shadow-sm"
           >
-            {isPending ? "Wird geändert..." : `Zu "${nextStage.label}" wechseln`}
+            {isPending
+              ? "Wird geändert..."
+              : `Zu "${nextStage.label}" wechseln`}
           </Button>
         </div>
       )}
 
       <div className="space-y-2">
-        <p className="text-sm font-medium text-gray-700">Oder direkt zu einer Phase wechseln:</p>
+        <p className="text-sm font-medium text-gray-700">
+          Oder direkt zu einer Phase wechseln:
+        </p>
         <div className="flex flex-wrap gap-2">
           {stages.map((stage) => (
             <Button

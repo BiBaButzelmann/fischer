@@ -49,20 +49,12 @@ export default async function Page() {
   );
 }
 
-async function ManageTournament({
-  tournament,
-}: {
-  tournament?: Tournament;
-}) {
+async function ManageTournament({ tournament }: { tournament?: Tournament }) {
   const adminProfiles = await getProfilesByUserRole("admin");
   const groups = tournament ? await getGroupsByTournamentId(tournament.id) : [];
 
   const openCollapsible =
-    tournament == null
-      ? "details"
-      : groups.length > 0
-        ? "pairings"
-        : "groups";
+    tournament == null ? "details" : groups.length > 0 ? "pairings" : "groups";
 
   return (
     <div className="space-y-4">
@@ -93,9 +85,7 @@ async function ManageTournament({
           </div>
         </CollapsibleTrigger>
         <CollapsibleContent className="mt-4">
-          {tournament ? (
-            <EditGroups tournament={tournament} />
-          ) : null}
+          {tournament ? <EditGroups tournament={tournament} /> : null}
         </CollapsibleContent>
       </Collapsible>
       <Collapsible
@@ -109,9 +99,7 @@ async function ManageTournament({
           </div>
         </CollapsibleTrigger>
         <CollapsibleContent className="mt-4">
-          {tournament ? (
-            <PairingsOverview tournament={tournament} />
-          ) : null}
+          {tournament ? <PairingsOverview tournament={tournament} /> : null}
         </CollapsibleContent>
       </Collapsible>
       <Collapsible
@@ -127,7 +115,14 @@ async function ManageTournament({
         <CollapsibleContent className="mt-4">
           {tournament ? (
             <TournamentStageManager tournament={tournament} />
-          ) : null}
+          ) : (
+            <div>
+              <p className="text-sm text-gray-600">
+                Kein aktives Turnier gefunden. Bitte erstellen Sie ein neues
+                Turnier.
+              </p>
+            </div>
+          )}
         </CollapsibleContent>
       </Collapsible>
     </div>

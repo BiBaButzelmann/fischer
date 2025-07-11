@@ -27,7 +27,9 @@ export default async function Page({
   if (tournamentNames.length === 0) {
     return (
       <div className="text-center p-6 bg-gray-50 rounded-lg">
-        <div className="mb-4">Es gibt noch keine laufenden Turniere.</div>
+        <div className="mb-4">
+          Das Turnier befindet sich noch in der Anmeldephase
+        </div>
         <div className="text-sm text-gray-600">
           <p className="mb-2">
             Du findest die Turniere der vorherigen Jahre unter:{" "}
