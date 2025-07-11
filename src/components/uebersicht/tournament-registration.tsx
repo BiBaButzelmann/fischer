@@ -15,7 +15,7 @@ import { getParticipantsByTournamentId } from "@/db/repositories/participant";
 import { ScrollArea, ScrollBar } from "../ui/scroll-area";
 import { getTournamentWeeksByTournamentId } from "@/db/repositories/tournamentWeek";
 import { TournamentWeeks } from "./tournament-weeks";
-import { RoleSummary } from "./role-summary";
+import { RolesSummary } from "./roles-summary";
 
 type Props = {
   tournament: Tournament;
@@ -58,7 +58,7 @@ export async function TournamentRegistration({ tournament }: Props) {
 
       {profile && (
         <div className="lg:col-span-6">
-          <RoleSummary
+          <RolesSummary
             profileId={profile.id}
             tournamentId={tournament.id}
             showEditButton={tournament.stage === "registration"}
