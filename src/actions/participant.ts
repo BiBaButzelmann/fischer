@@ -38,6 +38,7 @@ export async function createParticipant(
       nationality: data.nationality,
       preferredMatchDay: data.preferredMatchDay,
       secondaryMatchDays: data.secondaryMatchDays,
+      notAvailableDays: data.notAvailableDays,
     })
     .onConflictDoUpdate({
       target: [participant.tournamentId, participant.profileId],
@@ -50,6 +51,7 @@ export async function createParticipant(
         title: data.title === "noTitle" ? null : data.title,
         preferredMatchDay: data.preferredMatchDay,
         secondaryMatchDays: data.secondaryMatchDays,
+        notAvailableDays: data.notAvailableDays,
       },
     });
 }

@@ -10,6 +10,7 @@ import { MatchEnteringForm } from "./forms/match-entering-form";
 import { SetupHelperForm } from "./forms/setup-helper-form";
 import { JurorForm } from "./forms/juror-form";
 import { hasSelectedAtLeastOneRole, RolesData } from "@/db/types/role";
+import { Tournament } from "@/db/types/tournament";
 import { useState, useTransition } from "react";
 import { z } from "zod";
 import { participantFormSchema } from "@/schema/participant";
@@ -29,12 +30,12 @@ import Link from "next/link";
 import { sendRolesSelectionSummaryEmail } from "@/actions/email/roles";
 
 type Props = {
-  tournamentId: number;
   userId: string;
   rolesData: RolesData;
+  tournament: Tournament;
 };
 
-export function RolesManager({ tournamentId, userId, rolesData }: Props) {
+export function RolesManager({ userId, rolesData, tournament }: Props) {
   const [isPending, startTransition] = useTransition();
   const router = useRouter();
   const [accordionValue, setAccordionValue] = useState<string>();
@@ -42,13 +43,13 @@ export function RolesManager({ tournamentId, userId, rolesData }: Props) {
   const handleParticipateFormSubmit = async (
     data: z.infer<typeof participantFormSchema>,
   ) => {
-    await createParticipant(tournamentId, data);
+    await createParticipant(tournament.id, data);
     router.refresh();
   };
 
   const handleDeleteParticipant = async () => {
     if (rolesData.participant) {
-      await deleteParticipant(tournamentId, rolesData.participant.id);
+      await deleteParticipant(tournament.id, rolesData.participant.id);
       router.refresh();
     }
   };
@@ -56,27 +57,27 @@ export function RolesManager({ tournamentId, userId, rolesData }: Props) {
   const handleRefereeFormSubmit = async (
     data: z.infer<typeof refereeFormSchema>,
   ) => {
-    await createReferee(tournamentId, data);
+    await createReferee(tournament.id, data);
     router.refresh();
   };
 
   const handleDeleteReferee = async () => {
     if (rolesData.referee) {
-      await deleteReferee(tournamentId, rolesData.referee.id);
+      await deleteReferee(tournament.id, rolesData.referee.id);
       router.refresh();
     }
   };
   const handleMatchEnteringHelperFormSubmit = async (
     data: z.infer<typeof matchEnteringHelperFormSchema>,
   ) => {
-    await createMatchEnteringHelper(tournamentId, data);
+    await createMatchEnteringHelper(tournament.id, data);
     router.refresh();
   };
 
   const handleDeleteMatchEnteringHelper = async () => {
     if (rolesData.matchEnteringHelper) {
       await deleteMatchEnteringHelper(
-        tournamentId,
+        tournament.id,
         rolesData.matchEnteringHelper.id,
       );
       router.refresh();
@@ -86,25 +87,25 @@ export function RolesManager({ tournamentId, userId, rolesData }: Props) {
   const handleSetupHelperFormSubmit = async (
     data: z.infer<typeof setupHelperFormSchema>,
   ) => {
-    await createSetupHelper(tournamentId, data);
+    await createSetupHelper(tournament.id, data);
     router.refresh();
   };
 
   const handleDeleteSetupHelper = async () => {
     if (rolesData.setupHelper) {
-      await deleteSetupHelper(tournamentId, rolesData.setupHelper.id);
+      await deleteSetupHelper(tournament.id, rolesData.setupHelper.id);
       router.refresh();
     }
   };
 
   const handleJurorFormSubmit = async () => {
-    await createJuror(tournamentId);
+    await createJuror(tournament.id);
     router.refresh();
   };
 
   const handleDeleteJuror = async () => {
     if (rolesData.juror) {
-      await deleteJuror(tournamentId, rolesData.juror.id);
+      await deleteJuror(tournament.id, rolesData.juror.id);
       router.refresh();
     }
   };
@@ -144,11 +145,14 @@ export function RolesManager({ tournamentId, userId, rolesData }: Props) {
                     dwzRating: rolesData.participant.dwzRating ?? undefined,
                     fideRating: rolesData.participant.fideRating ?? undefined,
                     fideId: rolesData.participant.fideId ?? undefined,
+                    notAvailableDays:
+                      rolesData.participant.notAvailableDays ?? [],
                   }
                 : undefined
             }
             onSubmit={handleParticipateFormSubmit}
             onDelete={handleDeleteParticipant}
+            tournament={tournament}
           />
         </RoleCard>
         <RoleCard
@@ -206,15 +210,17 @@ export function RolesManager({ tournamentId, userId, rolesData }: Props) {
         </RoleCard>
       </Accordion>
       {hasSelectedAtLeastOneRole(rolesData) ? (
-        <Button
-          disabled={isPending}
-          onClick={handleSubmitRoleSelection}
-          size="lg"
-          className="w-full sm:w-auto"
-          asChild
-        >
-          <Link href="/uebersicht">Anmeldung abschließen</Link>
-        </Button>
+        <div className="flex">
+          <Button
+            disabled={isPending}
+            onClick={handleSubmitRoleSelection}
+            size="lg"
+            className="w-full sm:w-auto sm:mx-auto"
+            asChild
+          >
+            <Link href="/uebersicht">Anmeldung abschließen</Link>
+          </Button>
+        </div>
       ) : null}
     </div>
   );

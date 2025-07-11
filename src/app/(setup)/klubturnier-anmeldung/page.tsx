@@ -65,9 +65,9 @@ export default async function RolesPage() {
 
       <RolesManager
         key={JSON.stringify(initialValues)}
-        tournamentId={tournament.id}
         userId={session.user.id}
         rolesData={initialValues}
+        tournament={tournament}
       />
     </div>
   );

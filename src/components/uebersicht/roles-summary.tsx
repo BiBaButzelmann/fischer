@@ -54,7 +54,9 @@ export async function RolesSummary({
             </div>
           </div>
           {showEditButton ? (
-            <Button className="font-medium px-6">Anmeldung anpassen</Button>
+            <Button asChild className="font-medium px-6">
+              <a href="/klubturnier-anmeldung">Anmeldung anpassen</a>
+            </Button>
           ) : null}
         </div>
       </CardHeader>
@@ -273,11 +275,11 @@ function JurorSection() {
   return (
     <RoleSection
       icon={<Gavel className="h-4 w-4 text-gray-600" />}
-      title="Jury"
+      title="Turniergericht"
     >
       <div className="flex items-center gap-2 text-sm text-gray-700">
         <CheckCircle2 className="h-4 w-4 text-green-600" />
-        <span>Als Jurymitglied angemeldet</span>
+        <span>Als Mitglied im Turniergericht angemeldet</span>
       </div>
     </RoleSection>
   );
