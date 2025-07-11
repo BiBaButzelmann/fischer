@@ -1,4 +1,4 @@
-import { getAllTournamentNames } from "@/db/repositories/tournament";
+import { getAllActiveTournamentNames } from "@/db/repositories/tournament";
 import {
   getAllGroupNamesByTournamentId,
   getGamesByGroup as getGamesByGroup,
@@ -23,9 +23,29 @@ export default async function Page({
   const session = await auth();
   const { tournamentId, groupId, round, participantId } = await searchParams;
 
-  const tournamentNames = await getAllTournamentNames();
+  const tournamentNames = await getAllActiveTournamentNames();
   if (tournamentNames.length === 0) {
-    return <div>Keine Turniere gefunden</div>;
+    return (
+      <div className="text-center p-6 bg-gray-50 rounded-lg">
+        <div className="mb-4">Es gibt noch keine laufenden Turniere.</div>
+        <div className="text-sm text-gray-600">
+          <p className="mb-2">
+            Du findest die Turniere der vorherigen Jahre unter:{" "}
+            <a
+              href="https://hsk1830.de/spielbetrieb/turniere/klubturnier"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="text-blue-600 hover:text-blue-800 underline"
+            >
+              hsk1830.de/spielbetrieb/turniere/klubturnier
+            </a>
+          </p>
+          <p>
+            Die neue Seite wird ihre Paarungen ab dem 02.09.2025 hier anzeigen.
+          </p>
+        </div>
+      </div>
+    );
   }
 
   const selectedTournamentId = tournamentId

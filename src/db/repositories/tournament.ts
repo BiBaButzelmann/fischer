@@ -30,13 +30,15 @@ export async function getLatestTournament() {
   });
 }
 
-export async function getAllTournamentNames() {
+export async function getAllActiveTournamentNames() {
   return await db.query.tournament.findMany({
     columns: {
       id: true,
       name: true,
       numberOfRounds: true,
     },
+    where: (tournament, { or, eq }) =>
+      or(eq(tournament.stage, "running"), eq(tournament.stage, "done")),
     orderBy: (tournament, { desc }) => [desc(tournament.startDate)],
   });
 }
