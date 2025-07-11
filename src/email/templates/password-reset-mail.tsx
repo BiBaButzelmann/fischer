@@ -26,7 +26,10 @@ export function PasswordResetMail({ firstName, url }: Props) {
         Falls du diese Anfrage nicht gestellt hast, kannst du diese E-Mail
         ignorieren – es wurden keine Änderungen vorgenommen.
       </p>
-      <p>Bei Fragen stehen wir dir jederzeit gerne zur Verfügung.</p>
+      <p>
+        Bei Fragen stehen wir dir jederzeit gerne unter klubturnier@hsk1830.de
+        zur Verfügung.
+      </p>
       <p>
         Viele Grüße,
         <br />

@@ -13,7 +13,7 @@ export async function sendConfirmRegistrationEmail(
   await resend.emails.send({
     from: "noreply@hsk1830.de",
     to: recipientAddress,
-    subject: "Bla bla bla",
+    subject: "Registrierung für das Klubturnier erfolgreich",
     react: ConfirmRegistrationMail({
       name: firstName,
       email: recipientAddress,

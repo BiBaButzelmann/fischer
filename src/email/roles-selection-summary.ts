@@ -14,7 +14,7 @@ export async function sendRolesSelectionSummaryMail(
   await resend.emails.send({
     from: "klubturnier@hsk1830.de",
     to: recipientAddress,
-    subject: "Rollenübersicht für das Klubturnier",
+    subject: "Anmeldebestätigung für das Klubturnier",
     react: RoleSelectionSummaryMail({
       name: firstName,
       roles: roles,
