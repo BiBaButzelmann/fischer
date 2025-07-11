@@ -31,6 +31,7 @@ export async function loginRedirect(userId: string) {
 
 export type LoginResponse = { error: string };
 export async function login(data: z.infer<typeof loginFormSchema>) {
+  let userId: string;
   try {
     const result = await auth.api.signInEmail({
       body: {
@@ -39,7 +40,7 @@ export async function login(data: z.infer<typeof loginFormSchema>) {
         rememberMe: true,
       },
     });
-    await loginRedirect(result.user.id);
+    userId = result.user.id;
   } catch (error) {
     console.error("Login error:", error);
     return {
@@ -47,6 +48,8 @@ export async function login(data: z.infer<typeof loginFormSchema>) {
         "Fehler bei der Anmeldung. Bitte überprüfe deine E-Mail und Passwort.",
     };
   }
+
+  await loginRedirect(userId);
 }
 
 export async function signupRedirect() {

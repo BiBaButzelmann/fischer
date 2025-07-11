@@ -1,6 +1,5 @@
 "use client";
 
-import { GroupWithParticipants } from "@/db/types/group";
 import { useRouter } from "next/navigation";
 import {
   Select,
@@ -12,40 +11,122 @@ import {
 import { Label } from "../ui/label";
 
 export function PartienSelector({
-  selectedYear,
-  years,
-  selectedGroup,
+  selectedTournamentId,
+  tournamentNames,
+  selectedGroupId,
   groups,
+  selectedRound,
+  rounds,
+  selectedParticipantId,
+  participants,
 }: {
-  selectedYear: string;
-  years: string[];
-  selectedGroup: string;
-  groups: GroupWithParticipants[];
+  selectedTournamentId: string;
+  tournamentNames: {
+    id: number;
+    name: string;
+    numberOfRounds: number;
+  }[];
+  selectedGroupId: string;
+  groups: {
+    id: number;
+    groupName: string;
+  }[];
+  selectedRound?: string;
+  rounds: number[];
+  selectedParticipantId?: string;
+  participants: {
+    title: string | null;
+    id: number;
+    profile: {
+      firstName: string;
+      lastName: string;
+    };
+  }[];
 }) {
   const router = useRouter();
 
-  const handleYearChange = (year: string) => {
-    router.push(`?year=${year}&group=${selectedGroup}`);
+  const buildUrl = (params: {
+    tournamentId: string;
+    groupId: string;
+    round?: string;
+    participantId?: string;
+  }) => {
+    const searchParams = new URLSearchParams();
+    searchParams.set("tournamentId", params.tournamentId);
+    searchParams.set("groupId", params.groupId);
+
+    if (params.round != null && params.round !== "") {
+      searchParams.set("round", params.round);
+    }
+
+    if (params.participantId != null && params.participantId !== "") {
+      searchParams.set("participantId", params.participantId);
+    }
+
+    return `?${searchParams.toString()}`;
+  };
+
+  const handleTournamentChange = (tournamentId: string) => {
+    router.push(
+      buildUrl({
+        tournamentId,
+        groupId: selectedGroupId,
+        round: selectedRound,
+        participantId: selectedParticipantId,
+      }),
+    );
   };
 
   const handleGroupChange = (group: string) => {
-    router.push(`?year=${selectedYear}&group=${group}`);
+    router.push(
+      buildUrl({
+        tournamentId: selectedTournamentId,
+        groupId: group,
+        round: selectedRound,
+        participantId: selectedParticipantId,
+      }),
+    );
+  };
+
+  const handleRoundChange = (round: string) => {
+    router.push(
+      buildUrl({
+        tournamentId: selectedTournamentId,
+        groupId: selectedGroupId,
+        round,
+        participantId: selectedParticipantId,
+      }),
+    );
+  };
+
+  const handleParticipantChange = (participantId: string) => {
+    router.push(
+      buildUrl({
+        tournamentId: selectedTournamentId,
+        groupId: selectedGroupId,
+        round: selectedRound,
+        participantId,
+      }),
+    );
   };
 
   return (
     <div className="flex flex-wrap gap-2 md:gap-4 mb-4">
       <div className="flex flex-col gap-1">
-        <Label htmlFor="year-select" className="text-sm font-medium">
-          Jahr
+        <Label htmlFor="tournament-select" className="text-sm font-medium">
+          Ausgabe
         </Label>
-        <Select value={selectedYear} onValueChange={handleYearChange}>
-          <SelectTrigger id="year-select" className="w-32">
+        <Select
+          value={selectedTournamentId}
+          onValueChange={handleTournamentChange}
+        >
+          <SelectTrigger id="tournament-select" className="w-32">
             <SelectValue />
           </SelectTrigger>
           <SelectContent>
-            {years.map((y) => (
-              <SelectItem key={y} value={y}>
-                {y}
+            {tournamentNames.map((t) => (
+              <SelectItem key={t.id} value={t.id.toString()}>
+                {t.name}
               </SelectItem>
             ))}
           </SelectContent>
@@ -55,14 +136,51 @@ export function PartienSelector({
         <Label htmlFor="group-select" className="text-sm font-medium">
           Gruppe
         </Label>
-        <Select value={selectedGroup} onValueChange={handleGroupChange}>
+        <Select value={selectedGroupId} onValueChange={handleGroupChange}>
           <SelectTrigger id="group-select" className="w-48">
             <SelectValue />
           </SelectTrigger>
           <SelectContent>
             {groups.map((g) => (
-              <SelectItem key={g.id} value={g.groupNumber.toString()}>
+              <SelectItem key={g.id} value={g.id.toString()}>
                 {g.groupName}
+              </SelectItem>
+            ))}
+          </SelectContent>
+        </Select>
+      </div>
+      <div className="flex flex-col gap-1">
+        <Label htmlFor="round-select" className="text-sm font-medium">
+          Runde
+        </Label>
+        <Select value={selectedRound} onValueChange={handleRoundChange}>
+          <SelectTrigger id="round-select" className="w-48">
+            <SelectValue />
+          </SelectTrigger>
+          <SelectContent>
+            {rounds.map((r) => (
+              <SelectItem key={r} value={r.toString()}>
+                Runde {r}
+              </SelectItem>
+            ))}
+          </SelectContent>
+        </Select>
+      </div>
+      <div className="flex flex-col gap-1">
+        <Label htmlFor="participant-select" className="text-sm font-medium">
+          Spieler
+        </Label>
+        <Select
+          value={selectedParticipantId}
+          onValueChange={handleParticipantChange}
+        >
+          <SelectTrigger id="participant-select" className="w-48">
+            <SelectValue />
+          </SelectTrigger>
+          <SelectContent>
+            {participants.map((p) => (
+              <SelectItem key={p.id} value={p.id.toString()}>
+                {p.title} {p.profile.firstName} {p.profile.lastName}
               </SelectItem>
             ))}
           </SelectContent>
