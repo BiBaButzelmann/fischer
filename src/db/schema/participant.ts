@@ -1,5 +1,12 @@
 import { relations } from "drizzle-orm";
-import { boolean, integer, pgTable, text, unique } from "drizzle-orm/pg-core";
+import {
+  boolean,
+  integer,
+  pgTable,
+  text,
+  unique,
+  date,
+} from "drizzle-orm/pg-core";
 import { profile } from "./profile";
 import { group } from "./group";
 import { matchDay, timestamps } from "./columns.helpers";
@@ -24,6 +31,7 @@ export const participant = pgTable(
 
     preferredMatchDay: matchDay("preferred_match_day").notNull(),
     secondaryMatchDays: matchDay("secondary_match_days").array().notNull(),
+    notAvailableDays: date("not_available_days", { mode: "date" }).array(),
 
     entryFeePayed: boolean("entry_fee_payed"),
 
