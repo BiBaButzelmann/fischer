@@ -75,6 +75,7 @@ export function ParticipateForm({
 
   const fideRating = form.watch("fideRating");
   const chessClubType = form.watch("chessClubType");
+  const preferredMatchDay = form.watch("preferredMatchDay");
 
   useEffect(() => {
     form.watch((value, { name }) => {
@@ -428,6 +429,7 @@ export function ParticipateForm({
                 <MatchDaysCheckboxes
                   value={field.value}
                   onChange={field.onChange}
+                  preferredMatchDay={preferredMatchDay}
                 />
               </FormControl>
               <FormMessage />
