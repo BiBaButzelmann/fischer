@@ -9,12 +9,23 @@ import { authWithRedirect } from "@/auth/utils";
 import { getTournamentById } from "@/db/repositories/tournament";
 import { getProfileByUserId } from "@/db/repositories/profile";
 import { and, eq } from "drizzle-orm";
+import { DEFAULT_CLUB_LABEL } from "@/constants/constants";
 
 export async function createParticipant(
   tournamentId: number,
   data: z.infer<typeof participantFormSchema>,
 ) {
   const session = await authWithRedirect();
+
+  let chessClub: string;
+  if (data.chessClubType === "other") {
+    if (!data.chessClub || data.chessClub.trim().length === 0) {
+      throw new Error("Schachverein ist erforderlich");
+    }
+    chessClub = data.chessClub;
+  } else {
+    chessClub = DEFAULT_CLUB_LABEL;
+  }
 
   const tournament = await getTournamentById(tournamentId);
   invariant(
@@ -30,12 +41,13 @@ export async function createParticipant(
     .values({
       profileId: currentProfile.id,
       tournamentId: tournament.id,
-      chessClub: data.chessClub,
+      chessClub,
       title: data.title === "noTitle" ? null : data.title,
       dwzRating: data.dwzRating,
       fideRating: data.fideRating,
       fideId: data.fideId,
       nationality: data.nationality,
+      birthYear: data.birthYear,
       preferredMatchDay: data.preferredMatchDay,
       secondaryMatchDays: data.secondaryMatchDays,
       notAvailableDays: data.notAvailableDays,
@@ -43,12 +55,13 @@ export async function createParticipant(
     .onConflictDoUpdate({
       target: [participant.tournamentId, participant.profileId],
       set: {
-        chessClub: data.chessClub,
+        chessClub,
         dwzRating: data.dwzRating,
         fideRating: data.fideRating,
         fideId: data.fideId,
         nationality: data.nationality,
         title: data.title === "noTitle" ? null : data.title,
+        birthYear: data.birthYear,
         preferredMatchDay: data.preferredMatchDay,
         secondaryMatchDays: data.secondaryMatchDays,
         notAvailableDays: data.notAvailableDays,

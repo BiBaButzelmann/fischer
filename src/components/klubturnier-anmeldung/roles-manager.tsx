@@ -28,6 +28,7 @@ import { createSetupHelper, deleteSetupHelper } from "@/actions/setup-helper";
 import { createJuror, deleteJuror } from "@/actions/juror";
 import Link from "next/link";
 import { sendRolesSelectionSummaryEmail } from "@/actions/email/roles";
+import { DEFAULT_CLUB_KEY, DEFAULT_CLUB_LABEL } from "@/constants/constants";
 
 type Props = {
   userId: string;
@@ -136,6 +137,10 @@ export function RolesManager({ userId, rolesData, tournament }: Props) {
             initialValues={
               rolesData.participant
                 ? {
+                    chessClubType:
+                      rolesData.participant.chessClub === DEFAULT_CLUB_LABEL
+                        ? DEFAULT_CLUB_KEY
+                        : "other",
                     chessClub: rolesData.participant.chessClub,
                     preferredMatchDay: rolesData.participant.preferredMatchDay,
                     secondaryMatchDays:
