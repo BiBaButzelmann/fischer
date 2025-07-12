@@ -44,6 +44,8 @@ export function RefereeForm({ initialValues, onSubmit, onDelete }: Props) {
     },
   });
 
+  const preferredMatchDay = form.watch("preferredMatchDay");
+
   const handleFormSubmit = (data: z.infer<typeof refereeFormSchema>) => {
     startTransition(async () => {
       await onSubmit(data);
@@ -156,6 +158,7 @@ export function RefereeForm({ initialValues, onSubmit, onDelete }: Props) {
                 <MatchDaysCheckboxes
                   value={field.value}
                   onChange={field.onChange}
+                  preferredMatchDay={preferredMatchDay}
                 />
               </FormControl>
               <FormMessage />
