@@ -78,7 +78,7 @@ export async function softDeleteUser(userId: string) {
   });
 }
 
-export async function hardDeleteProfile(userId: string) {
+export async function hardDeleteUser(userId: string) {
   const session = await authWithRedirect();
   if (session.user.role !== "admin") {
     return {
@@ -95,6 +95,7 @@ export async function hardDeleteProfile(userId: string) {
     };
   }
   const { id: profileId } = profileData;
+
   const [gamePostponementCount] = await db
     .select({ count: count() })
     .from(gamePostponement)
@@ -149,5 +150,68 @@ export async function hardDeleteProfile(userId: string) {
     await tx.delete(profile).where(eq(profile.id, profileId));
     await tx.delete(user).where(eq(user.id, userId));
     return { success: true, deletedAt: new Date() };
+  });
+}
+
+export async function restoreUser(userId: string) {
+  const session = await authWithRedirect();
+  if (session.user.role !== "admin") {
+    return {
+      success: false,
+      reason: "Nur Admins können Profile wiederherstellen",
+    };
+  }
+
+  const profileData = await getProfileByUserId(userId);
+  if (!profileData) {
+    return {
+      success: false,
+      reason: "Profil nicht gefunden",
+    };
+  }
+  const { id: profileId } = profileData;
+
+  return await db.transaction(async (tx) => {
+    await tx
+      .update(profile)
+      .set({ deletedAt: null })
+      .where(eq(profile.id, profileId));
+
+    await tx
+      .update(participant)
+      .set({ deletedAt: null })
+      .where(eq(participant.profileId, profileId));
+
+    await tx
+      .update(juror)
+      .set({ deletedAt: null })
+      .where(eq(juror.profileId, profileId));
+
+    await tx
+      .update(referee)
+      .set({ deletedAt: null })
+      .where(eq(referee.profileId, profileId));
+
+    await tx
+      .update(setupHelper)
+      .set({ deletedAt: null })
+      .where(eq(setupHelper.profileId, profileId));
+
+    await tx
+      .update(matchEnteringHelper)
+      .set({ deletedAt: null })
+      .where(eq(matchEnteringHelper.profileId, profileId));
+
+    await tx
+      .update(gamePostponement)
+      .set({ deletedAt: null })
+      .where(eq(gamePostponement.postponedByProfileId, profileId));
+
+    await tx
+      .update(tournament)
+      .set({ deletedAt: null })
+      .where(eq(tournament.organizerProfileId, profileId));
+
+    return { success: true, restoredAt: new Date() };
   });
 }
