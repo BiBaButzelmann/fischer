@@ -55,7 +55,7 @@ export function UserRow({ user, showDeleteActions = false }: Props) {
               : "Fehler beim Deaktivieren des Benutzers.",
           );
         }
-      } catch (error) {
+      } catch {
         toast.error("Ein unerwarteter Fehler ist aufgetreten.");
       }
     });
@@ -75,7 +75,7 @@ export function UserRow({ user, showDeleteActions = false }: Props) {
               : "Fehler beim Löschen des Benutzers.",
           );
         }
-      } catch (error) {
+      } catch {
         toast.error("Ein unerwarteter Fehler ist aufgetreten.");
       }
     });
@@ -94,7 +94,7 @@ export function UserRow({ user, showDeleteActions = false }: Props) {
               : "Fehler beim Wiederherstellen des Benutzers.",
           );
         }
-      } catch (error) {
+      } catch {
         toast.error("Ein unerwarteter Fehler ist aufgetreten.");
       }
     });
@@ -171,7 +171,7 @@ export function UserRow({ user, showDeleteActions = false }: Props) {
                     Benutzer deaktivieren
                   </DialogTitle>
                   <DialogDescription>
-                    Möchten Sie den Benutzer "{getDisplayName(user)}"
+                    Möchten Sie den Benutzer &quot;{getDisplayName(user)}&quot;
                     deaktivieren? Der Benutzer wird ausgeblendet, aber alle
                     Daten bleiben erhalten und können später wiederhergestellt
                     werden.
@@ -218,8 +218,9 @@ export function UserRow({ user, showDeleteActions = false }: Props) {
                       Diese Aktion kann nicht rückgängig gemacht werden!
                     </strong>
                     <br />
-                    Der Benutzer "{getDisplayName(user)}" und alle zugehörigen
-                    Daten werden permanent aus der Datenbank gelöscht.
+                    Der Benutzer &quot;{getDisplayName(user)}&quot; und alle
+                    zugehörigen Daten werden permanent aus der Datenbank
+                    gelöscht.
                     <br />
                     <br />
                     Diese Aktion ist nur möglich, wenn der Benutzer keine Spiele

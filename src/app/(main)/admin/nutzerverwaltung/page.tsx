@@ -25,6 +25,7 @@ import {
   ClipboardEdit,
   Wrench,
   UserX,
+  LucideIcon,
 } from "lucide-react";
 import { UserRow } from "@/components/admin/user-row";
 
@@ -207,7 +208,7 @@ function UserList({
   users: ProfileWithName[];
   title: string;
   description: string;
-  icon: any;
+  icon: LucideIcon;
   emptyMessage: string;
   isDisabledUsers?: boolean;
 }) {
