@@ -157,6 +157,7 @@ export function RolesManager({
                     dwzRating: rolesData.participant.dwzRating ?? undefined,
                     fideRating: rolesData.participant.fideRating ?? undefined,
                     fideId: rolesData.participant.fideId ?? undefined,
+                    birthYear: rolesData.participant.birthYear ?? undefined,
                     notAvailableDays:
                       rolesData.participant.notAvailableDays ?? [],
                   }
@@ -202,7 +203,15 @@ export function RolesManager({
           icon={Shield}
         >
           <RefereeForm
-            initialValues={rolesData.referee ?? undefined}
+            initialValues={
+              rolesData.referee
+                ? {
+                    fideId: rolesData.referee.fideId,
+                    preferredMatchDay: rolesData.referee.preferredMatchDay,
+                    secondaryMatchDays: rolesData.referee.secondaryMatchDays,
+                  }
+                : undefined
+            }
             onSubmit={handleRefereeFormSubmit}
             onDelete={handleDeleteReferee}
           />
