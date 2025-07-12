@@ -134,7 +134,7 @@ function PlayerSection({ participant }: { participant: Participant }) {
           </div>
         </div>
         <div className="bg-gray-50 rounded-lg p-3 text-center border border-gray-200 md:col-span-1 col-span-2">
-          <div className="text-sm font-bold text-gray-900">
+          <div className="text-xl font-semibold text-gray-900">
             {participant.fideId ?? "-"}
           </div>
           <div className="text-xs font-medium text-gray-500 uppercase tracking-wide">
