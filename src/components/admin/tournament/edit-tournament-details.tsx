@@ -22,12 +22,12 @@ import {
 } from "@/components/ui/select";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useTransition } from "react";
-import { createTournament } from "@/actions/tournament";
 import { Button } from "@/components/ui/button";
 import { EditTournamentWeeks } from "./edit-tournament-weeks/edit-tournament-weeks";
 import { createTournamentFormSchema } from "@/schema/tournament";
 import { z } from "zod";
 import { DEFAULT_CLUB_LABEL } from "@/constants/constants";
+import { createTournament } from "@/actions/tournament";
 
 type Props = {
   profiles: Profile[];
@@ -75,7 +75,7 @@ export default function EditTournamentDetails({ profiles }: Props) {
               name="clubName"
               render={({ field }) => (
                 <FormItem>
-                  <FormLabel>Vereinsname</FormLabel>
+                  <FormLabel required>Vereinsname</FormLabel>
                   <FormControl>
                     <Input {...field} placeholder="Vereinsname" />
                   </FormControl>
@@ -89,7 +89,7 @@ export default function EditTournamentDetails({ profiles }: Props) {
               name="tournamentType"
               render={({ field }) => (
                 <FormItem>
-                  <FormLabel>Turnierart *</FormLabel>
+                  <FormLabel required>Turnierart</FormLabel>
                   <FormControl>
                     <Input
                       placeholder="z.B. Schweizer System, Rundenturnier"
@@ -106,7 +106,7 @@ export default function EditTournamentDetails({ profiles }: Props) {
               name="numberOfRounds"
               render={({ field }) => (
                 <FormItem>
-                  <FormLabel>Anzahl Runden *</FormLabel>
+                  <FormLabel required>Anzahl Runden</FormLabel>
                   <FormControl>
                     <Input
                       type="number"
@@ -125,7 +125,7 @@ export default function EditTournamentDetails({ profiles }: Props) {
               name="timeLimit"
               render={({ field }) => (
                 <FormItem>
-                  <FormLabel>Bedenkzeit *</FormLabel>
+                  <FormLabel required>Bedenkzeit</FormLabel>
                   <FormControl>
                     <Input
                       placeholder="z.B. 90 Minuten + 30 Sekunden Zuschlag"
@@ -142,7 +142,21 @@ export default function EditTournamentDetails({ profiles }: Props) {
               name="startDate"
               render={({ field }) => (
                 <FormItem>
-                  <FormLabel>Startdatum *</FormLabel>
+                  <FormLabel required>Startdatum</FormLabel>
+                  <FormControl>
+                    <Input type="date" {...field} />
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+
+            <Controller
+              control={form.control}
+              name="endRegistrationDate"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel required>Ende der Registrierungsphase</FormLabel>
                   <FormControl>
                     <Input type="date" {...field} />
                   </FormControl>
@@ -156,7 +170,7 @@ export default function EditTournamentDetails({ profiles }: Props) {
               name="endDate"
               render={({ field }) => (
                 <FormItem>
-                  <FormLabel>Enddatum *</FormLabel>
+                  <FormLabel required>Enddatum</FormLabel>
                   <FormControl>
                     <Input type="date" {...field} />
                   </FormControl>
@@ -171,7 +185,7 @@ export default function EditTournamentDetails({ profiles }: Props) {
             name="location"
             render={({ field }) => (
               <FormItem>
-                <FormLabel>Austragungsort *</FormLabel>
+                <FormLabel required>Austragungsort</FormLabel>
                 <FormControl>
                   <Input
                     placeholder="Adresse des Turnierortes eingeben"
@@ -189,7 +203,7 @@ export default function EditTournamentDetails({ profiles }: Props) {
               name="tieBreakMethod"
               render={({ field }) => (
                 <FormItem>
-                  <FormLabel>Feinwertung *</FormLabel>
+                  <FormLabel required>Feinwertung</FormLabel>
                   <FormControl>
                     <Input
                       placeholder="z.B. Buchholz, Sonneborn-Berger"
@@ -206,7 +220,7 @@ export default function EditTournamentDetails({ profiles }: Props) {
               name="softwareUsed"
               render={({ field }) => (
                 <FormItem>
-                  <FormLabel>Verwendete Software *</FormLabel>
+                  <FormLabel required>Verwendete Software</FormLabel>
                   <FormControl>
                     <Input
                       placeholder="z.B. Swiss Manager, ChessManager"
@@ -230,7 +244,7 @@ export default function EditTournamentDetails({ profiles }: Props) {
                     onCheckedChange={field.onChange}
                   />
                 </FormControl>
-                <FormLabel className="text-sm font-medium">
+                <FormLabel required className="text-sm font-medium">
                   Alle Uhren digital
                 </FormLabel>
               </FormItem>
@@ -243,7 +257,7 @@ export default function EditTournamentDetails({ profiles }: Props) {
               name="phone"
               render={({ field }) => (
                 <FormItem>
-                  <FormLabel>Telefon *</FormLabel>
+                  <FormLabel required>Telefon</FormLabel>
                   <FormControl>
                     <Input
                       type="tel"
@@ -261,7 +275,7 @@ export default function EditTournamentDetails({ profiles }: Props) {
               name="email"
               render={({ field }) => (
                 <FormItem>
-                  <FormLabel>E-Mail *</FormLabel>
+                  <FormLabel required>E-Mail</FormLabel>
                   <FormControl>
                     <Input
                       type="email"
@@ -285,7 +299,7 @@ export default function EditTournamentDetails({ profiles }: Props) {
               name="organizerProfileId"
               render={({ field }) => (
                 <FormItem>
-                  <FormLabel>Organisator auswählen</FormLabel>
+                  <FormLabel required>Organisator auswählen</FormLabel>
                   <Select value={field.value} onValueChange={field.onChange}>
                     <FormControl>
                       <SelectTrigger>
@@ -340,7 +354,7 @@ export default function EditTournamentDetails({ profiles }: Props) {
               name="pgnViewerPassword"
               render={({ field }) => (
                 <FormItem>
-                  <FormLabel>PGN Viewer Passwort *</FormLabel>
+                  <FormLabel required>PGN Viewer Passwort</FormLabel>
                   <FormControl>
                     <Input
                       type="password"
