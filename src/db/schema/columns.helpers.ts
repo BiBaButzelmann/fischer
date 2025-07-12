@@ -7,6 +7,7 @@ export const timestamps = {
   updatedAt: timestamp("updated_at")
     .$defaultFn(() => /* @__PURE__ */ new Date())
     .notNull(),
+  deletedAt: timestamp("deleted_at"),
 };
 
 export const availableMatchDays = ["tuesday", "thursday", "friday"] as const;

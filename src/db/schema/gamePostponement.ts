@@ -9,7 +9,7 @@ export const gamePostponement = pgTable("game_postponement", {
   id: integer("id").generatedAlwaysAsIdentity().primaryKey(),
   gameId: integer("game_id").notNull(),
   postponingParticipantId: integer("postponing_participant_id").notNull(),
-  postponedByProfileId: integer("postponed_by_user_id").notNull(),
+  postponedByProfileId: integer("postponed_by_profile_id").notNull(),
   from: timestamp("from", {
     mode: "date",
     withTimezone: true,
