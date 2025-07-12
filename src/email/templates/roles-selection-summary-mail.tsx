@@ -1,4 +1,8 @@
-import { DEFAULT_CLUB, matchDays } from "@/constants/constants";
+import {
+  DEFAULT_CLUB_KEY,
+  DEFAULT_CLUB_LABEL,
+  matchDays,
+} from "@/constants/constants";
 import { MatchDay } from "@/db/types/group";
 import { RolesData } from "@/db/types/role";
 
@@ -29,7 +33,7 @@ export default function RoleSelectionSummaryMail({ name, roles }: Props) {
             Sekundäre Spieltage:{" "}
             {p.secondaryMatchDays.map(translateMatchDay).join(", ")}
           </li>
-          {p.chessClub !== DEFAULT_CLUB && p.entryFeePayed === false && (
+          {p.chessClub !== DEFAULT_CLUB_KEY && p.entryFeePayed === false && (
             <li>
               Bitte überweise die Startgebühr auf folgendes Konto:
               <br />
@@ -97,7 +101,7 @@ export default function RoleSelectionSummaryMail({ name, roles }: Props) {
       <h1 style={{ fontSize: 24, marginBottom: 16 }}>Hallo {name},</h1>
       <p style={{ marginBottom: 16 }}>
         Herzlichen Glückwunsch zur erfolgreichen Anmeldung zum Klubturnier des{" "}
-        {DEFAULT_CLUB}!<br />
+        {DEFAULT_CLUB_LABEL}!<br />
         Hier ist eine Übersicht deiner ausgewählten Rollen:
       </p>
       <ul style={{ paddingLeft: 20, listStyleType: "disc" }}>{listItems}</ul>
