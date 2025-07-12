@@ -11,7 +11,7 @@ export async function sendPasswordResetEmail(
     recipientAddress = "delivered@resend.dev";
   }
   await resend.emails.send({
-    from: "noreply@hsk1830.de",
+    from: "klubturnier@hsk1830.de",
     to: recipientAddress,
     subject: "Password zurücksetzen",
     react: PasswordResetMail({
