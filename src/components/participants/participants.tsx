@@ -15,23 +15,18 @@ type Props = {
 };
 
 export function Participants({ profileId, participants }: Props) {
-  const sortedParticipants = [...participants].sort(
-    (a, b) => (b.dwzRating || 0) - (a.dwzRating || 0),
-  );
-
   return (
     <Table>
       <TableHeader>
         <TableRow>
           <TableHead className="w-[50px] sticky top-0 bg-card">#</TableHead>
-          {/*TODO: Titel einfügen*/}
           <TableHead className="sticky top-0 bg-card">Name</TableHead>
           <TableHead className="text-right sticky top-0 bg-card">ELO</TableHead>
           <TableHead className="text-right sticky top-0 bg-card">DWZ</TableHead>
         </TableRow>
       </TableHeader>
       <TableBody>
-        {sortedParticipants.map((p, index) => (
+        {participants.map((p, index) => (
           <TableRow
             key={p.id}
             className={cn(
@@ -41,6 +36,7 @@ export function Participants({ profileId, participants }: Props) {
           >
             <TableCell>{index + 1}</TableCell>
             <TableCell className="font-medium truncate">
+              {p.title ? `${p.title} ` : ""}
               {p.profile.firstName} {p.profile.lastName}
             </TableCell>
             <TableCell className="text-right">{p.fideRating}</TableCell>
