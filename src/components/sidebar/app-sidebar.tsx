@@ -40,7 +40,7 @@ export async function AppSidebar() {
             src="/logo.webp"
             alt="HSK 1830 Logo"
             width={40}
-            height={80}
+            height={48}
             className="object-contain"
           />
           <p className="text-xl font-semibold px-2 py-2">Klubturnier</p>

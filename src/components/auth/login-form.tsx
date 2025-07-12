@@ -13,17 +13,23 @@ import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { Input } from "../ui/input";
 import { Button } from "../ui/button";
-import { useState, useTransition } from "react";
+import { useState } from "react";
 import { Mail, Lock } from "lucide-react";
-import { login } from "@/actions/auth";
+import { authClient } from "@/auth-client";
+import { Tournament } from "@/db/types/tournament";
+import { Role } from "@/db/types/role";
 
 export const loginFormSchema = z.object({
   email: z.string().email("Ungültige E-Mail-Adresse"),
   password: z.string().min(6, "Passwort muss mindestens 6 Zeichen lang sein"),
 });
 
-export function LoginForm() {
-  const [isPending, startTransition] = useTransition();
+type Props = {
+  tournament?: Tournament;
+  roles?: Role[];
+};
+
+export function LoginForm({ tournament, roles }: Props) {
   const form = useForm<z.infer<typeof loginFormSchema>>({
     resolver: zodResolver(loginFormSchema),
     defaultValues: {
@@ -31,12 +37,32 @@ export function LoginForm() {
       password: "",
     },
   });
+  const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState("");
-  const handleSubmit = (data: z.infer<typeof loginFormSchema>) => {
-    startTransition(async () => {
-      const result = await login(data);
-      setError(result?.error ?? "");
+
+  const buildCallbackURL = () => {
+    if (!tournament) {
+      return "/uebersicht";
+    }
+    if (tournament.stage === "registration") {
+      return roles && roles.length > 0
+        ? "/uebersicht"
+        : "/klubturnier-anmeldung";
+    }
+  };
+
+  const handleSubmit = async (data: z.infer<typeof loginFormSchema>) => {
+    setIsLoading(true);
+    const result = await authClient.signIn.email({
+      email: data.email,
+      password: data.password,
+      callbackURL: buildCallbackURL(),
+      rememberMe: true,
     });
+    if (result.error) {
+      setError(result.error.message ?? "Fehler bei der Anmeldung");
+    }
+    setIsLoading(false);
   };
 
   return (
@@ -95,9 +121,9 @@ export function LoginForm() {
         <Button
           type="submit"
           className="w-full text-lg py-6"
-          disabled={isPending}
+          disabled={isLoading}
         >
-          {isPending ? "Anmelden..." : "Anmelden"}
+          {isLoading ? "Anmelden..." : "Anmelden"}
         </Button>
       </form>
     </Form>
