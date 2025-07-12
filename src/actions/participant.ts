@@ -94,3 +94,77 @@ export async function deleteParticipant(
       ),
     );
 }
+
+export async function getParticipantEloData(
+  firstName: string,
+  lastName: string,
+): Promise<{
+  title: string | null;
+  nationality: string;
+  fideRating: number | null;
+  dwzRating: number | null;
+  fideId: string | null;
+  zpsClub: string;
+  zpsPlayer: string;
+} | null> {
+  const session = await authWithRedirect();
+
+  const clubData = await fetch(
+    "https://www.schachbund.de/php/dewis/verein.php?zps=40023&format=csv",
+  );
+  const clubCsv = await clubData.text();
+
+  const clubCsvLines = clubCsv.split("\n");
+  const matchingClubLine = clubCsvLines.find((line) => {
+    const fields = line.split("|");
+    const rowLastName = fields[1]?.trim() || "";
+    const rowFirstName = fields[2]?.trim() || "";
+
+    return (
+      rowFirstName.toLowerCase() === firstName.toLowerCase() &&
+      rowLastName.toLowerCase() === lastName.toLowerCase()
+    );
+  });
+
+  if (!matchingClubLine) {
+    return null;
+  }
+
+  const clubFields = matchingClubLine.split("|");
+  if (clubFields.length !== 14) {
+    return null;
+  }
+
+  const playerId = clubFields[0];
+  if (playerId.trim() === "") {
+    return null;
+  }
+
+  const playerData = await fetch(
+    `https://www.schachbund.de/php/dewis/spieler.php?pkz=${playerId}&format=csv`,
+  );
+  const playerCsv = await playerData.text();
+
+  const playerCsvLines = playerCsv.split("\n");
+  const matchingPlayerLine = playerCsvLines[1].replace(/[\n\r\t]/gm, "");
+
+  const playerFields = matchingPlayerLine.split("|");
+
+  if (playerFields.length !== 10) {
+    return null;
+  }
+
+  const ratingSchema = z.coerce.number();
+  const fideRating = ratingSchema.safeParse(playerFields[7]);
+  const dwzRating = ratingSchema.safeParse(playerFields[4]);
+
+  return {
+    title: playerFields[8] || null,
+    nationality: playerFields[9],
+    fideRating: fideRating.success ? fideRating.data : null,
+    dwzRating: dwzRating.success ? dwzRating.data : null,
+    fideId: playerFields[6] || null,
+    zpsClub: clubFields[4],
+    zpsPlayer: clubFields[5],
+  };
+}

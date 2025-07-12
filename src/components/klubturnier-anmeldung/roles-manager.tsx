@@ -29,14 +29,21 @@ import { createJuror, deleteJuror } from "@/actions/juror";
 import Link from "next/link";
 import { sendRolesSelectionSummaryEmail } from "@/actions/email/roles";
 import { DEFAULT_CLUB_KEY, DEFAULT_CLUB_LABEL } from "@/constants/constants";
+import { Profile } from "@/db/types/profile";
 
 type Props = {
   userId: string;
   rolesData: RolesData;
   tournament: Tournament;
+  profile: Profile;
 };
 
-export function RolesManager({ userId, rolesData, tournament }: Props) {
+export function RolesManager({
+  userId,
+  rolesData,
+  tournament,
+  profile,
+}: Props) {
   const [isPending, startTransition] = useTransition();
   const router = useRouter();
   const [accordionValue, setAccordionValue] = useState<string>();
@@ -158,6 +165,7 @@ export function RolesManager({ userId, rolesData, tournament }: Props) {
             onSubmit={handleParticipateFormSubmit}
             onDelete={handleDeleteParticipant}
             tournament={tournament}
+            profile={profile}
           />
         </RoleCard>
         <RoleCard

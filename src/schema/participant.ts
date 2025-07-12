@@ -5,7 +5,7 @@ import z from "zod";
 export const participantFormSchema = z
   .object({
     chessClubType: z.enum([DEFAULT_CLUB_KEY, "other"], {
-      errorMap: () => ({ message: "Schachverein-Typ ist erforderlich" }),
+      errorMap: () => ({ message: "Schachverein ist erforderlich" }),
     }),
     chessClub: z.string().optional(),
     title: z.string().optional(),
@@ -32,6 +32,10 @@ export const participantFormSchema = z
       )
       .optional(),
 
+    // Will not be used in the form, but can be used in the backend
+    zpsClub: z.string().optional(),
+    zpsPlayer: z.string().optional(),
+
     preferredMatchDay: z.enum(availableMatchDays, {
       errorMap: () => ({ message: "Bevorzugter Spieltag ist erforderlich" }),
     }),
@@ -40,13 +44,54 @@ export const participantFormSchema = z
   })
   .refine(
     (data) => {
-      if (data.chessClubType === DEFAULT_CLUB_KEY) {
-        return !!data.chessClub && data.chessClub.trim().length > 0;
+      if (data.chessClubType === "other") {
+        const chessClub = data.chessClub?.trim();
+        return !!chessClub && chessClub.length > 0;
       }
       return true;
     },
     {
       message: "Schachverein ist erforderlich",
       path: ["chessClub"],
+    },
+  )
+  .refine(
+    (data) => {
+      if (data.fideRating != null && data.fideRating > 0) {
+        return !!data.fideId && data.fideId.trim().length > 0;
+      }
+      return true;
+    },
+    {
+      message: "FIDE-ID ist erforderlich, wenn Elo angegeben ist",
+      path: ["fideId"],
+    },
+  )
+  .refine(
+    (data) => {
+      if (data.fideRating != null && data.fideRating > 0) {
+        return !!data.nationality && data.nationality.trim().length === 3;
+      }
+      return true;
+    },
+    {
+      message: "Nationalität ist erforderlich, wenn Elo angegeben ist",
+      path: ["nationality"],
+    },
+  )
+  .refine(
+    (data) => {
+      if (data.fideRating != null && data.fideRating > 0) {
+        return (
+          !!data.birthYear &&
+          data.birthYear >= 1900 &&
+          data.birthYear <= new Date().getFullYear()
+        );
+      }
+      return true;
+    },
+    {
+      message: "Geburtsjahr ist erforderlich, wenn Elo angegeben ist",
+      path: ["birthYear"],
     },
   );
