@@ -15,6 +15,10 @@ type Props = {
 };
 
 export function Participants({ profileId, participants }: Props) {
+  const sortedParticipants = [...participants].sort(
+    (a, b) => (b.dwzRating || 0) - (a.dwzRating || 0),
+  );
+
   return (
     <Table>
       <TableHeader>
@@ -27,7 +31,7 @@ export function Participants({ profileId, participants }: Props) {
         </TableRow>
       </TableHeader>
       <TableBody>
-        {participants.map((p, index) => (
+        {sortedParticipants.map((p, index) => (
           <TableRow
             key={p.id}
             className={cn(
