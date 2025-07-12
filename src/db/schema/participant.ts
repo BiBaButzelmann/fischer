@@ -27,7 +27,10 @@ export const participant = pgTable(
     nationality: text("nationality"),
     dwzRating: integer("dwz_rating"),
     fideRating: integer("fide_rating"),
+    birthYear: integer("birth_year"),
     fideId: text("fide_id"),
+    zpsClubId: text("zps_club_id"),
+    zpsPlayerId: text("zps_player_id"),
 
     preferredMatchDay: matchDay("preferred_match_day").notNull(),
     secondaryMatchDays: matchDay("secondary_match_days").array().notNull(),

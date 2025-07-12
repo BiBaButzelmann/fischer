@@ -34,7 +34,7 @@ export async function scheduleGames(tournamentId: number) {
     // ignore groups with no declared match-day
     if (!group.matchDay) {
       console.warn(
-        `Skipping group ${group.groupNumber} (id=${group.id}) – no matchDay set`,
+        `Skipping group ${group.groupNumber} (id=${group.id}) - no matchDay set`,
       );
       continue;
     }
@@ -66,6 +66,7 @@ export async function scheduleGames(tournamentId: number) {
       });
     });
   }
+
   if (scheduledGames.length) {
     await db.insert(game).values(scheduledGames);
     revalidatePath("/admin/tournament");
