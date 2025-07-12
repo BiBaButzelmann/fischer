@@ -1,5 +1,5 @@
 import { relations } from "drizzle-orm";
-import { integer, pgTable, unique } from "drizzle-orm/pg-core";
+import { integer, pgTable, text, unique } from "drizzle-orm/pg-core";
 import { profile } from "./profile";
 import { tournament } from "./tournament";
 import { matchDay, timestamps } from "./columns.helpers";
@@ -14,6 +14,8 @@ export const referee = pgTable(
 
     preferredMatchDay: matchDay("preferred_match_day").notNull(),
     secondaryMatchDays: matchDay("secondary_match_day").array().notNull(),
+
+    fideId: text("fide_id"),
 
     ...timestamps,
   },
