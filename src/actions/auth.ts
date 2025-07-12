@@ -13,6 +13,7 @@ import {
 } from "@/db/repositories/tournament";
 import { getRolesByUserId } from "@/db/repositories/role";
 import invariant from "tiny-invariant";
+import { APIError } from "better-auth/api";
 
 export async function loginRedirect(userId: string): Promise<never> {
   const tournament = await getLatestTournament();
@@ -88,6 +89,15 @@ export async function signup(data: z.infer<typeof signupFormSchema>) {
     });
   } catch (error) {
     console.error("Signup error:", error);
+
+    if (error instanceof APIError) {
+      if (error.message === auth.$ERROR_CODES.USER_ALREADY_EXISTS) {
+        return {
+          error: "Ein Benutzer mit dieser E-Mail-Adresse existiert bereits.",
+        };
+      }
+    }
+
     return {
       error: "Fehler bei der Registrierung. Bitte versuche es später erneut.",
     };
