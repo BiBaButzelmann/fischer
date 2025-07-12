@@ -84,6 +84,7 @@ export function ParticipateForm({
       }
 
       if (value.chessClubType === "other") {
+        form.setValue("chessClub", "");
         return;
       }
 
