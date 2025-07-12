@@ -124,13 +124,9 @@ export function RefereeForm({ initialValues, onSubmit, onDelete }: Props) {
               <FormItem className="flex-1">
                 <FormLabel required>FIDE ID</FormLabel>
                 <FormControl>
-                  <Input
-                    id="fideId"
-                    required
-                    placeholder="10245154"
-                    {...field}
-                  />
+                  <Input id="fideId" placeholder="10245154" {...field} />
                 </FormControl>
+                <FormMessage />
                 <FormDescription>
                   <a
                     href="https://ratings.fide.com/profile/"
@@ -141,7 +137,6 @@ export function RefereeForm({ initialValues, onSubmit, onDelete }: Props) {
                     Was ist die FIDE ID?
                   </a>{" "}
                 </FormDescription>
-                <FormMessage />
               </FormItem>
             )}
           />
