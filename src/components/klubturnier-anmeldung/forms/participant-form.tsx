@@ -287,6 +287,10 @@ export function ParticipateForm({
                     />
                   </FormControl>
                   <FormMessage />
+                  <FormDescription>
+                    Wer in den A- und B-Gruppen spielen möchte, muss seine Elo
+                    angeben.
+                  </FormDescription>
                 </FormItem>
               )}
             />
