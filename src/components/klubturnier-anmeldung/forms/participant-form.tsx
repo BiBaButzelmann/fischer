@@ -28,19 +28,22 @@ import { Calendar } from "../../ui/calendar";
 import { Popover, PopoverContent, PopoverTrigger } from "../../ui/popover";
 import { participantFormSchema } from "@/schema/participant";
 import { MatchDaysCheckboxes } from "./matchday-selection";
-import { DEFAULT_CLUB } from "@/constants/constants";
 import { Info, User, Users } from "lucide-react";
 import { CountryDropdown } from "@/components/ui/country-dropdown";
 import { cn } from "@/lib/utils";
 import { isHoliday } from "@/lib/holidays";
 
 import { Tournament } from "@/db/types/tournament";
+import { getParticipantEloData } from "@/actions/participant";
+import { Profile } from "@/db/types/profile";
+import { DEFAULT_CLUB_KEY, DEFAULT_CLUB_LABEL } from "@/constants/constants";
 
 type Props = {
   initialValues?: z.infer<typeof participantFormSchema>;
   onSubmit: (data: z.infer<typeof participantFormSchema>) => Promise<void>;
   onDelete: () => Promise<void>;
-  tournament?: Tournament;
+  tournament: Tournament;
+  profile: Profile;
 };
 
 export function ParticipateForm({
@@ -48,24 +51,68 @@ export function ParticipateForm({
   onSubmit,
   onDelete,
   tournament,
+  profile,
 }: Props) {
   const [isPending, startTransition] = useTransition();
   const form = useForm<z.infer<typeof participantFormSchema>>({
     resolver: zodResolver(participantFormSchema),
     defaultValues: {
-      chessClub: initialValues?.chessClub ?? DEFAULT_CLUB,
+      chessClubType: initialValues?.chessClubType,
+      chessClub: initialValues?.chessClub,
       title: initialValues?.title,
       dwzRating: initialValues?.dwzRating,
       fideRating: initialValues?.fideRating,
       fideId: initialValues?.fideId,
       nationality: initialValues?.nationality,
+      birthYear: initialValues?.birthYear,
+      zpsClub: initialValues?.zpsClub,
+      zpsPlayer: initialValues?.zpsPlayer,
       preferredMatchDay: initialValues?.preferredMatchDay,
       secondaryMatchDays: initialValues?.secondaryMatchDays ?? [],
       notAvailableDays: initialValues?.notAvailableDays ?? [],
     },
   });
 
+  const fideRating = form.watch("fideRating");
+  const chessClubType = form.watch("chessClubType");
+  const preferredMatchDay = form.watch("preferredMatchDay");
+
+  const handleDateDisabled = (date: Date) => {
+    return isDateDisabled(date, tournament.startDate, tournament.endDate);
+  };
+
+  const handleChessClubTypeChange = (value: "hsk" | "other") => {
+    form.setValue("chessClubType", value);
+
+    if (value === "other") {
+      form.setValue("chessClub", "");
+      return;
+    }
+
+    startTransition(async () => {
+      const eloData = await getParticipantEloData(
+        profile.firstName,
+        profile.lastName,
+      );
+      if (!eloData) {
+        console.warn(
+          `No Elo data found for ${profile.firstName} ${profile.lastName}`,
+        );
+        return;
+      }
+
+      form.setValue("title", eloData.title ?? "noTitle");
+      form.setValue("nationality", eloData.nationality ?? undefined);
+      form.setValue("fideRating", eloData.fideRating ?? undefined);
+      form.setValue("dwzRating", eloData.dwzRating ?? undefined);
+      form.setValue("fideId", eloData.fideId ?? undefined);
+      form.setValue("zpsClub", eloData.zpsClub ?? undefined);
+      form.setValue("zpsPlayer", eloData.zpsPlayer ?? undefined);
+    });
+  };
+
   const handleSubmit = (data: z.infer<typeof participantFormSchema>) => {
+    console.log("Submitting form with data:", data);
     startTransition(async () => {
       await onSubmit(data);
     });
@@ -77,58 +124,12 @@ export function ParticipateForm({
     });
   };
 
-  const fideRating = form.watch("fideRating");
-
-  const isDateDisabled = (date: Date): boolean => {
-    if (tournament) {
-      const dateOnly = new Date(
-        date.getFullYear(),
-        date.getMonth(),
-        date.getDate(),
-      );
-      const startDateOnly = new Date(
-        tournament.startDate.getFullYear(),
-        tournament.startDate.getMonth(),
-        tournament.startDate.getDate(),
-      );
-      const endDateOnly = new Date(
-        tournament.endDate.getFullYear(),
-        tournament.endDate.getMonth(),
-        tournament.endDate.getDate(),
-      );
-
-      if (dateOnly < startDateOnly || dateOnly > endDateOnly) {
-        return true;
-      }
-    } else {
-      const today = new Date();
-      const todayOnly = new Date(
-        today.getFullYear(),
-        today.getMonth(),
-        today.getDate(),
-      );
-      const dateOnly = new Date(
-        date.getFullYear(),
-        date.getMonth(),
-        date.getDate(),
-      );
-
-      if (dateOnly < todayOnly) {
-        return true;
-      }
-    }
-
-    if (isHoliday(date)) {
-      return true;
-    }
-
-    const dayOfWeek = date.getDay();
-    return dayOfWeek !== 2 && dayOfWeek !== 4 && dayOfWeek !== 5;
-  };
-
   return (
     <Form {...form}>
-      <form onSubmit={form.handleSubmit(handleSubmit)} className="space-y-8">
+      <form
+        onSubmit={form.handleSubmit(handleSubmit)}
+        className="space-y-6 pt-4"
+      >
         <div className="border rounded-lg">
           <div className="p-6">
             <div className="flex items-center justify-between">
@@ -163,29 +164,23 @@ export function ParticipateForm({
         <div className="flex gap-4">
           <FormField
             control={form.control}
-            name="title"
+            name="chessClubType"
             render={({ field }) => (
-              <FormItem className="w-32">
-                <FormLabel>Titel</FormLabel>
+              <FormItem className="flex-1">
+                <FormLabel required>Schachverein</FormLabel>
                 <FormControl>
                   <Select
-                    defaultValue="noTitle"
                     value={field.value}
-                    onValueChange={field.onChange}
+                    onValueChange={handleChessClubTypeChange}
                   >
                     <SelectTrigger>
-                      <SelectValue placeholder="Titel" />
+                      <SelectValue placeholder="Schachverein wählen" />
                     </SelectTrigger>
                     <SelectContent>
-                      <SelectItem value="noTitle">Kein Titel</SelectItem>
-                      <SelectItem value="GM">GM </SelectItem>
-                      <SelectItem value="IM">IM </SelectItem>
-                      <SelectItem value="FM">FM </SelectItem>
-                      <SelectItem value="CM">CM </SelectItem>
-                      <SelectItem value="WGM">WGM </SelectItem>
-                      <SelectItem value="WIM">WIM </SelectItem>
-                      <SelectItem value="WFM">WFM </SelectItem>
-                      <SelectItem value="WCM">WCM </SelectItem>
+                      <SelectItem value={DEFAULT_CLUB_KEY}>
+                        {DEFAULT_CLUB_LABEL}
+                      </SelectItem>
+                      <SelectItem value="other">Anderer Verein</SelectItem>
                     </SelectContent>
                   </Select>
                 </FormControl>
@@ -193,64 +188,119 @@ export function ParticipateForm({
               </FormItem>
             )}
           />
+        </div>
+
+        {chessClubType === "other" && (
           <FormField
             control={form.control}
             name="chessClub"
             render={({ field }) => (
-              <FormItem className="flex-1">
-                <FormLabel required>Schachverein</FormLabel>
-                <FormControl>
-                  <Input id="chessClub" required {...field} />
-                </FormControl>
-                <FormMessage />
-              </FormItem>
-            )}
-          />
-        </div>
-        <div className="flex gap-4">
-          <FormField
-            control={form.control}
-            name="dwzRating"
-            render={({ field }) => (
-              <FormItem className="flex-1">
-                <FormLabel>DWZ</FormLabel>
+              <FormItem>
+                <FormLabel required>Name des Schachvereins</FormLabel>
                 <FormControl>
                   <Input
-                    type="number"
-                    id="dwzRating"
-                    placeholder="leer lassen, wenn keine vorhanden"
-                    min="500"
-                    max="2800"
-                    step="1"
+                    id="chessClub"
+                    placeholder="Bitte geben Sie den Namen Ihres Schachvereins ein"
                     {...field}
+                    value={field.value || ""}
                   />
                 </FormControl>
                 <FormMessage />
+                <FormDescription>
+                  Als Mitglied in einem anderen Schachverein wird eine
+                  Startgebühr von 60€ fällig. Weitere Informationen folgen nach
+                  Anmeldung per E-Mail.
+                </FormDescription>
               </FormItem>
             )}
           />
-          <FormField
-            control={form.control}
-            name="fideRating"
-            render={({ field }) => (
-              <FormItem className="flex-1">
-                <FormLabel required={fideRating ? true : false}>Elo</FormLabel>
-                <FormControl>
-                  <Input
-                    type="number"
-                    id="fideRating"
-                    placeholder="leer lassen, wenn keine vorhanden"
-                    min="500"
-                    max="2800"
-                    step="1"
-                    {...field}
-                  />
-                </FormControl>
-                <FormMessage />
-              </FormItem>
-            )}
-          />
-        </div>
+        )}
+
+        {chessClubType != null ? (
+          <div className="flex gap-4">
+            <FormField
+              control={form.control}
+              name="title"
+              render={({ field }) => (
+                <FormItem className="w-32">
+                  <FormLabel>Titel</FormLabel>
+                  <FormControl>
+                    <Select
+                      defaultValue="noTitle"
+                      value={field.value}
+                      onValueChange={field.onChange}
+                    >
+                      <SelectTrigger>
+                        <SelectValue placeholder="Titel" />
+                      </SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value="noTitle">Kein Titel</SelectItem>
+                        <SelectItem value="GM">GM </SelectItem>
+                        <SelectItem value="IM">IM </SelectItem>
+                        <SelectItem value="FM">FM </SelectItem>
+                        <SelectItem value="CM">CM </SelectItem>
+                        <SelectItem value="WGM">WGM </SelectItem>
+                        <SelectItem value="WIM">WIM </SelectItem>
+                        <SelectItem value="WFM">WFM </SelectItem>
+                        <SelectItem value="WCM">WCM </SelectItem>
+                      </SelectContent>
+                    </Select>
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+            <FormField
+              control={form.control}
+              name="dwzRating"
+              render={({ field }) => (
+                <FormItem className="flex-1">
+                  <FormLabel>DWZ</FormLabel>
+                  <FormControl>
+                    <Input
+                      type="number"
+                      id="dwzRating"
+                      placeholder="leer lassen, wenn keine vorhanden"
+                      min="500"
+                      max="2800"
+                      step="1"
+                      {...field}
+                    />
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+            <FormField
+              control={form.control}
+              name="fideRating"
+              render={({ field }) => (
+                <FormItem className="flex-1">
+                  <FormLabel required={fideRating ? true : false}>
+                    Elo
+                  </FormLabel>
+                  <FormControl>
+                    <Input
+                      type="number"
+                      id="fideRating"
+                      placeholder="leer lassen, wenn keine vorhanden"
+                      min="500"
+                      max="2800"
+                      step="1"
+                      {...field}
+                    />
+                  </FormControl>
+                  <FormMessage />
+                  <FormDescription>
+                    Wer in den A- und B-Gruppen spielen möchte, muss seine Elo
+                    angeben.
+                  </FormDescription>
+                </FormItem>
+              )}
+            />
+          </div>
+        ) : null}
+
         {fideRating ? (
           <div className="flex gap-4">
             {/* FIDE-ID */}
@@ -261,12 +311,7 @@ export function ParticipateForm({
                 <FormItem>
                   <FormLabel required>FIDE ID</FormLabel>
                   <FormControl>
-                    <Input
-                      id="fideId"
-                      required
-                      placeholder="10245154"
-                      {...field}
-                    />
+                    <Input id="fideId" placeholder="10245154" {...field} />
                   </FormControl>
                   <FormDescription>
                     <a
@@ -294,6 +339,27 @@ export function ParticipateForm({
                       defaultValue={field.value || undefined}
                       onChange={(c) => field.onChange(c.ioc)}
                       placeholder="Land wählen"
+                    />
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+            <FormField
+              control={form.control}
+              name="birthYear"
+              render={({ field }) => (
+                <FormItem className="w-32">
+                  <FormLabel required>Geburtsjahr</FormLabel>
+                  <FormControl>
+                    <Input
+                      type="number"
+                      id="birthYear"
+                      placeholder="z.B. 1990"
+                      min="1900"
+                      max={new Date().getFullYear()}
+                      step="1"
+                      {...field}
                     />
                   </FormControl>
                   <FormMessage />
@@ -337,6 +403,7 @@ export function ParticipateForm({
                 <MatchDaysCheckboxes
                   value={field.value}
                   onChange={field.onChange}
+                  preferredMatchDay={preferredMatchDay}
                 />
               </FormControl>
               <FormMessage />
@@ -383,7 +450,7 @@ export function ParticipateForm({
                       }
                     }}
                     numberOfMonths={1}
-                    disabled={isDateDisabled}
+                    disabled={handleDateDisabled}
                   />
                 </PopoverContent>
               </Popover>
@@ -439,4 +506,33 @@ export function ParticipateForm({
       </form>
     </Form>
   );
+}
+
+function isDateDisabled(date: Date, min: Date, max: Date) {
+  const dateOnly = new Date(
+    date.getFullYear(),
+    date.getMonth(),
+    date.getDate(),
+  );
+  const startDateOnly = new Date(
+    min.getFullYear(),
+    min.getMonth(),
+    min.getDate(),
+  );
+  const endDateOnly = new Date(
+    max.getFullYear(),
+    max.getMonth(),
+    max.getDate(),
+  );
+
+  if (dateOnly < startDateOnly || dateOnly > endDateOnly) {
+    return true;
+  }
+
+  if (isHoliday(date)) {
+    return true;
+  }
+
+  const dayOfWeek = date.getDay();
+  return dayOfWeek !== 2 && dayOfWeek !== 4 && dayOfWeek !== 5;
 }

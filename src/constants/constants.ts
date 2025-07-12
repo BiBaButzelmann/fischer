@@ -6,4 +6,5 @@ export const matchDays: Record<MatchDay, string> = {
   friday: "Freitag",
 };
 
-export const DEFAULT_CLUB = "Hamburger Schachklub von 1830 e.V.";
+export const DEFAULT_CLUB_KEY = "hsk";
+export const DEFAULT_CLUB_LABEL = "Hamburger Schachklub von 1830 e.V.";

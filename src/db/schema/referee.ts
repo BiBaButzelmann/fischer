@@ -15,7 +15,7 @@ export const referee = pgTable(
     preferredMatchDay: matchDay("preferred_match_day").notNull(),
     secondaryMatchDays: matchDay("secondary_match_day").array().notNull(),
 
-    fideId: text("fide_id"),
+    fideId: text("fide_id").notNull(),
 
     ...timestamps,
   },

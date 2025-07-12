@@ -1,0 +1,1 @@
+ALTER TABLE "referee" ALTER COLUMN "fide_id" SET NOT NULL;

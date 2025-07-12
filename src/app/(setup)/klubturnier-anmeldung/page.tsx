@@ -68,6 +68,7 @@ export default async function RolesPage() {
         userId={session.user.id}
         rolesData={initialValues}
         tournament={tournament}
+        profile={profile}
       />
     </div>
   );

@@ -28,14 +28,22 @@ import { createSetupHelper, deleteSetupHelper } from "@/actions/setup-helper";
 import { createJuror, deleteJuror } from "@/actions/juror";
 import Link from "next/link";
 import { sendRolesSelectionSummaryEmail } from "@/actions/email/roles";
+import { Profile } from "@/db/types/profile";
+import { DEFAULT_CLUB_KEY, DEFAULT_CLUB_LABEL } from "@/constants/constants";
 
 type Props = {
   userId: string;
   rolesData: RolesData;
   tournament: Tournament;
+  profile: Profile;
 };
 
-export function RolesManager({ userId, rolesData, tournament }: Props) {
+export function RolesManager({
+  userId,
+  rolesData,
+  tournament,
+  profile,
+}: Props) {
   const [isPending, startTransition] = useTransition();
   const router = useRouter();
   const [accordionValue, setAccordionValue] = useState<string>();
@@ -136,6 +144,10 @@ export function RolesManager({ userId, rolesData, tournament }: Props) {
             initialValues={
               rolesData.participant
                 ? {
+                    chessClubType:
+                      rolesData.participant.chessClub === DEFAULT_CLUB_LABEL
+                        ? DEFAULT_CLUB_KEY
+                        : "other",
                     chessClub: rolesData.participant.chessClub,
                     preferredMatchDay: rolesData.participant.preferredMatchDay,
                     secondaryMatchDays:
@@ -145,6 +157,7 @@ export function RolesManager({ userId, rolesData, tournament }: Props) {
                     dwzRating: rolesData.participant.dwzRating ?? undefined,
                     fideRating: rolesData.participant.fideRating ?? undefined,
                     fideId: rolesData.participant.fideId ?? undefined,
+                    birthYear: rolesData.participant.birthYear ?? undefined,
                     notAvailableDays:
                       rolesData.participant.notAvailableDays ?? [],
                   }
@@ -153,6 +166,7 @@ export function RolesManager({ userId, rolesData, tournament }: Props) {
             onSubmit={handleParticipateFormSubmit}
             onDelete={handleDeleteParticipant}
             tournament={tournament}
+            profile={profile}
           />
         </RoleCard>
         <RoleCard
@@ -189,7 +203,15 @@ export function RolesManager({ userId, rolesData, tournament }: Props) {
           icon={Shield}
         >
           <RefereeForm
-            initialValues={rolesData.referee ?? undefined}
+            initialValues={
+              rolesData.referee
+                ? {
+                    fideId: rolesData.referee.fideId,
+                    preferredMatchDay: rolesData.referee.preferredMatchDay,
+                    secondaryMatchDays: rolesData.referee.secondaryMatchDays,
+                  }
+                : undefined
+            }
             onSubmit={handleRefereeFormSubmit}
             onDelete={handleDeleteReferee}
           />
