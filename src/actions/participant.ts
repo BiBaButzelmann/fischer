@@ -107,7 +107,7 @@ export async function getParticipantEloData(
   zpsClub: string;
   zpsPlayer: string;
 } | null> {
-  const session = await authWithRedirect();
+  await authWithRedirect();
 
   const clubData = await fetch(
     "https://www.schachbund.de/php/dewis/verein.php?zps=40023&format=csv",

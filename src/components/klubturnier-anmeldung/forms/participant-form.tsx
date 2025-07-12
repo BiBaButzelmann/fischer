@@ -1,8 +1,8 @@
 "use client";
 
 import { zodResolver } from "@hookform/resolvers/zod";
-import { useEffect, useTransition } from "react";
-import { SubmitErrorHandler, useForm } from "react-hook-form";
+import { useTransition } from "react";
+import { useForm } from "react-hook-form";
 import { format } from "date-fns";
 import { CalendarIcon } from "lucide-react";
 import z from "zod";
@@ -77,34 +77,39 @@ export function ParticipateForm({
   const chessClubType = form.watch("chessClubType");
   const preferredMatchDay = form.watch("preferredMatchDay");
 
-  useEffect(() => {
-    form.watch((value, { name }) => {
-      if (name !== "chessClubType") {
-        return;
-      }
+  const handleDateDisabled = (date: Date) => {
+    return isDateDisabled(date, tournament.startDate, tournament.endDate);
+  };
 
-      if (value.chessClubType === "other") {
-        form.setValue("chessClub", "");
-        return;
-      }
+  const handleChessClubTypeChange = (value: "hsk" | "other") => {
+    form.setValue("chessClubType", value);
 
-      getParticipantEloData(profile.firstName, profile.lastName).then(
-        (data) => {
-          if (data == null) {
-            return;
-          }
+    if (value === "other") {
+      form.setValue("chessClub", "");
+      return;
+    }
 
-          form.setValue("title", data.title ?? "noTitle");
-          form.setValue("nationality", data.nationality ?? undefined);
-          form.setValue("fideRating", data.fideRating ?? undefined);
-          form.setValue("dwzRating", data.dwzRating ?? undefined);
-          form.setValue("fideId", data.fideId ?? undefined);
-          form.setValue("zpsClub", data.zpsClub ?? undefined);
-          form.setValue("zpsPlayer", data.zpsPlayer ?? undefined);
-        },
+    startTransition(async () => {
+      const eloData = await getParticipantEloData(
+        profile.firstName,
+        profile.lastName,
       );
+      if (!eloData) {
+        console.warn(
+          `No Elo data found for ${profile.firstName} ${profile.lastName}`,
+        );
+        return;
+      }
+
+      form.setValue("title", eloData.title ?? "noTitle");
+      form.setValue("nationality", eloData.nationality ?? undefined);
+      form.setValue("fideRating", eloData.fideRating ?? undefined);
+      form.setValue("dwzRating", eloData.dwzRating ?? undefined);
+      form.setValue("fideId", eloData.fideId ?? undefined);
+      form.setValue("zpsClub", eloData.zpsClub ?? undefined);
+      form.setValue("zpsPlayer", eloData.zpsPlayer ?? undefined);
     });
-  }, [form.watch]);
+  };
 
   const handleSubmit = (data: z.infer<typeof participantFormSchema>) => {
     console.log("Submitting form with data:", data);
@@ -117,53 +122,6 @@ export function ParticipateForm({
     startTransition(async () => {
       await onDelete();
     });
-  };
-
-  const isDateDisabled = (date: Date): boolean => {
-    if (tournament) {
-      const dateOnly = new Date(
-        date.getFullYear(),
-        date.getMonth(),
-        date.getDate(),
-      );
-      const startDateOnly = new Date(
-        tournament.startDate.getFullYear(),
-        tournament.startDate.getMonth(),
-        tournament.startDate.getDate(),
-      );
-      const endDateOnly = new Date(
-        tournament.endDate.getFullYear(),
-        tournament.endDate.getMonth(),
-        tournament.endDate.getDate(),
-      );
-
-      if (dateOnly < startDateOnly || dateOnly > endDateOnly) {
-        return true;
-      }
-    } else {
-      const today = new Date();
-      const todayOnly = new Date(
-        today.getFullYear(),
-        today.getMonth(),
-        today.getDate(),
-      );
-      const dateOnly = new Date(
-        date.getFullYear(),
-        date.getMonth(),
-        date.getDate(),
-      );
-
-      if (dateOnly < todayOnly) {
-        return true;
-      }
-    }
-
-    if (isHoliday(date)) {
-      return true;
-    }
-
-    const dayOfWeek = date.getDay();
-    return dayOfWeek !== 2 && dayOfWeek !== 4 && dayOfWeek !== 5;
   };
 
   return (
@@ -208,7 +166,10 @@ export function ParticipateForm({
               <FormItem className="flex-1">
                 <FormLabel required>Schachverein</FormLabel>
                 <FormControl>
-                  <Select value={field.value} onValueChange={field.onChange}>
+                  <Select
+                    value={field.value}
+                    onValueChange={handleChessClubTypeChange}
+                  >
                     <SelectTrigger>
                       <SelectValue placeholder="Schachverein wählen" />
                     </SelectTrigger>
@@ -478,7 +439,7 @@ export function ParticipateForm({
                       }
                     }}
                     numberOfMonths={1}
-                    disabled={isDateDisabled}
+                    disabled={handleDateDisabled}
                   />
                 </PopoverContent>
               </Popover>
@@ -534,4 +495,33 @@ export function ParticipateForm({
       </form>
     </Form>
   );
+}
+
+function isDateDisabled(date: Date, min: Date, max: Date) {
+  const dateOnly = new Date(
+    date.getFullYear(),
+    date.getMonth(),
+    date.getDate(),
+  );
+  const startDateOnly = new Date(
+    min.getFullYear(),
+    min.getMonth(),
+    min.getDate(),
+  );
+  const endDateOnly = new Date(
+    max.getFullYear(),
+    max.getMonth(),
+    max.getDate(),
+  );
+
+  if (dateOnly < startDateOnly || dateOnly > endDateOnly) {
+    return true;
+  }
+
+  if (isHoliday(date)) {
+    return true;
+  }
+
+  const dayOfWeek = date.getDay();
+  return dayOfWeek !== 2 && dayOfWeek !== 4 && dayOfWeek !== 5;
 }
