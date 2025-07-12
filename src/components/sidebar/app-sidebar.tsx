@@ -17,6 +17,7 @@ import {
   BinocularsIcon,
   BookTextIcon,
   CalendarIcon,
+  LayoutDashboard,
   SwordsIcon,
   UserRoundCogIcon,
 } from "lucide-react";
@@ -52,6 +53,12 @@ export async function AppSidebar() {
           <SidebarGroupLabel>Turnier</SidebarGroupLabel>
           <SidebarGroupContent>
             <SidebarMenu>
+              <SidebarMenuButton asChild>
+                <Link href="/uebersicht">
+                  <LayoutDashboard />
+                  <p className="mt-1">Übersicht</p>
+                </Link>
+              </SidebarMenuButton>
               <SidebarMenuButton asChild>
                 <Link href="/partien">
                   <SwordsIcon />
