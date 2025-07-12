@@ -52,8 +52,8 @@ export function TournamentStageManager({
           Aktuelle Turnierphase: {stages[currentStageIndex].label}
         </h3>
         <p className="text-sm text-gray-600 mb-4">
-          Verwalten Sie hier den Fortschritt des Turniers durch die
-          verschiedenen Phasen.
+          Verwalte hier den Fortschritt des Turniers durch die verschiedenen
+          Phasen.
         </p>
       </div>
 

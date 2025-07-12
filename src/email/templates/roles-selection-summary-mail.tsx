@@ -27,15 +27,15 @@ export default function RoleSelectionSummaryMail({ name, roles }: Props) {
           {p.fideRating && <li>Elo: {p.fideRating}</li>}
           {p.fideId && <li>FIDE‑ID: {p.fideId}</li>}
           <li>
-            Bevorzugter Spieltag: {translateMatchDay(p.preferredMatchDay)}
+            Bevorzugter Wochentag: {translateMatchDay(p.preferredMatchDay)}
           </li>
           <li>
-            Sekundäre Spieltage:{" "}
+            Alternative Wochentage:{" "}
             {p.secondaryMatchDays.map(translateMatchDay).join(", ")}
           </li>
           {p.chessClub !== DEFAULT_CLUB_KEY && p.entryFeePayed === false && (
             <li>
-              Bitte überweise die Startgebühr auf folgendes Konto:
+              Bitte überweise die Startgebühr von 60€ auf folgendes Konto:
               <br />
               IBAN: <strong>DE86 2005 0550 1216 1326 86</strong>
               Verwendungszweck: <strong>Klubturnier 2025 [Vorname Name]</strong>
@@ -50,8 +50,8 @@ export default function RoleSelectionSummaryMail({ name, roles }: Props) {
     const r = roles.referee;
     listItems.push(
       <li key="referee" style={{ paddingBottom: 8 }}>
-        <strong>Schiedsrichter</strong> – Bevorzugter Spieltag:{" "}
-        {translateMatchDay(r.preferredMatchDay)}; Sekundäre:{" "}
+        <strong>Schiedsrichter</strong> – Bevorzugter Wochentag:{" "}
+        {translateMatchDay(r.preferredMatchDay)}; Alternative Wochentage:{" "}
         {r.secondaryMatchDays.map(translateMatchDay).join(", ")}
       </li>,
     );
@@ -61,8 +61,8 @@ export default function RoleSelectionSummaryMail({ name, roles }: Props) {
     const s = roles.setupHelper;
     listItems.push(
       <li key="setupHelper" style={{ paddingBottom: 8 }}>
-        <strong>Aufbauhelfer</strong> – Bevorzugter Spieltag:{" "}
-        {translateMatchDay(s.preferredMatchDay)}; Sekundäre:{" "}
+        <strong>Aufbauhelfer</strong> – Bevorzugter Wochentag:{" "}
+        {translateMatchDay(s.preferredMatchDay)}; Alternative Wochentage:{" "}
         {s.secondaryMatchDays.map(translateMatchDay).join(", ")}
       </li>,
     );
@@ -72,7 +72,7 @@ export default function RoleSelectionSummaryMail({ name, roles }: Props) {
     const m = roles.matchEnteringHelper;
     listItems.push(
       <li key="matchEnteringHelper" style={{ paddingBottom: 8 }}>
-        <strong>Ergebniserfasser</strong> – Anzahl Gruppen:{" "}
+        <strong>Eingabehelfer</strong> – Anzahl Gruppen:{" "}
         {m.numberOfGroupsToEnter}
       </li>,
     );
@@ -81,7 +81,7 @@ export default function RoleSelectionSummaryMail({ name, roles }: Props) {
   if (roles.juror) {
     listItems.push(
       <li key="juror" style={{ paddingBottom: 8 }}>
-        <strong>Juror</strong>
+        <strong>Mitglied des Schiedsgerichtes</strong>
       </li>,
     );
   }

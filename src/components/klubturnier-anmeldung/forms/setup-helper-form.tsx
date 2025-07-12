@@ -75,7 +75,7 @@ export function SetupHelperForm({ initialValues, onSubmit, onDelete }: Props) {
               <p>
                 <strong>Zusammensetzung:</strong> Die Aufbauhelfer sind in der
                 Regel eine Gruppe von mindestens 6 Personen, die sich auf die
-                Spieltage aufteilen
+                Wochentage aufteilen
               </p>
             </div>
             <div className="flex items-start gap-3">
@@ -95,11 +95,11 @@ export function SetupHelperForm({ initialValues, onSubmit, onDelete }: Props) {
           name="preferredMatchDay"
           render={({ field }) => (
             <FormItem>
-              <FormLabel required>Bevorzugter Spieltag</FormLabel>
+              <FormLabel required>Bevorzugter Wochentag</FormLabel>
               <FormControl>
                 <Select value={field.value} onValueChange={field.onChange}>
                   <SelectTrigger>
-                    <SelectValue placeholder="Wähle einen Spieltag" />
+                    <SelectValue placeholder="Wähle einen Wochentag" />
                   </SelectTrigger>
                   <SelectContent>
                     <SelectItem value="tuesday">Dienstag</SelectItem>
@@ -109,7 +109,7 @@ export function SetupHelperForm({ initialValues, onSubmit, onDelete }: Props) {
                 </Select>
               </FormControl>
               <FormDescription>
-                Bitte wähle deinen bevorzugten Spieltag als Aufbauhelfer aus.
+                Bitte wähle deinen bevorzugten Wochentag als Aufbauhelfer aus.
               </FormDescription>
               <FormMessage />
             </FormItem>

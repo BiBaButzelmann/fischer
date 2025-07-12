@@ -118,8 +118,7 @@ async function ManageTournament({ tournament }: { tournament?: Tournament }) {
           ) : (
             <div>
               <p className="text-sm text-gray-600">
-                Kein aktives Turnier gefunden. Bitte erstellen Sie ein neues
-                Turnier.
+                Kein aktives Turnier gefunden. Bitte erstelle ein neues Turnier.
               </p>
             </div>
           )}

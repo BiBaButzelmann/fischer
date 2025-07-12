@@ -86,7 +86,7 @@ export function RefereeForm({ initialValues, onSubmit, onDelete }: Props) {
               <Shield className="h-4 w-4 mt-0.5 flex-shrink-0" />
               <p>
                 <strong>Aufgabe:</strong> Jeder Schiedsrichter ist für einen
-                Wochentag eingeteilt, an dem er den Spieltag betreut und die
+                Wochentag eingeteilt, an dem er die Spieler betreut und die
                 Ergebnisse auf der Webseite einträgt. Dazu wird eine Anleitung
                 zum Turnierstart per E-Mail verschickt.
               </p>
@@ -99,11 +99,11 @@ export function RefereeForm({ initialValues, onSubmit, onDelete }: Props) {
             name="preferredMatchDay"
             render={({ field }) => (
               <FormItem className="flex-1">
-                <FormLabel required>Bevorzugter Spieltag</FormLabel>
+                <FormLabel required>Bevorzugter Wochentag</FormLabel>
                 <FormControl>
                   <Select value={field.value} onValueChange={field.onChange}>
                     <SelectTrigger>
-                      <SelectValue placeholder="Wähle einen Spieltag" />
+                      <SelectValue placeholder="Wähle einen Wochentag" />
                     </SelectTrigger>
                     <SelectContent>
                       <SelectItem value="tuesday">Dienstag</SelectItem>

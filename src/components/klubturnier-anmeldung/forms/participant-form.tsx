@@ -200,7 +200,7 @@ export function ParticipateForm({
                 <FormControl>
                   <Input
                     id="chessClub"
-                    placeholder="Bitte geben Sie den Namen Ihres Schachvereins ein"
+                    placeholder="Bitte gib den Namen deines Schachvereins ein"
                     {...field}
                     value={field.value || ""}
                   />
@@ -373,11 +373,11 @@ export function ParticipateForm({
           name="preferredMatchDay"
           render={({ field }) => (
             <FormItem>
-              <FormLabel required>Bevorzugter Spieltag</FormLabel>
+              <FormLabel required>Bevorzugter Wochentag</FormLabel>
               <FormControl>
                 <Select value={field.value} onValueChange={field.onChange}>
                   <SelectTrigger>
-                    <SelectValue placeholder="Wähle einen Spieltag" />
+                    <SelectValue placeholder="Wähle einen Wochentag" />
                   </SelectTrigger>
                   <SelectContent>
                     <SelectItem value="tuesday">Dienstag</SelectItem>
@@ -455,12 +455,13 @@ export function ParticipateForm({
                 </PopoverContent>
               </Popover>
               <FormDescription>
-                Optional: Wähle Tage aus, an denen du nicht für Spiele verfügbar
-                bist, obwohl du sie als bevorzugter Spieltag angegeben hast.
-                Verwende dies nur für lang geplante Urlaubsreisen oder andere
-                unverschiebbare Termine. Wir versuchen dann, dich mit anderen
-                Spielern zu paaren, die an dem Tag ebenfalls nicht spielen
-                können, um die Anzahl der Verschiebungen zu minimieren.
+                Optional: Wähle einzelne Tage aus, an denen du nicht für Spiele
+                verfügbar bist, obwohl du sie als bevorzugter Wochentag
+                angegeben hast. Verwende dies nur für lang geplante
+                Urlaubsreisen oder andere unverschiebbare Termine. Wir versuchen
+                dann, dich mit anderen Spielern zu paaren, die an dem Tag
+                ebenfalls nicht spielen können, um die Anzahl der Verschiebungen
+                zu minimieren.
               </FormDescription>
               <FormMessage />
               {field.value && field.value.length > 0 && (

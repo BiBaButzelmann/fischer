@@ -134,7 +134,7 @@ function PlayerSection({ participant }: { participant: Participant }) {
           </div>
         </div>
         <div className="bg-gray-50 rounded-lg p-3 text-center border border-gray-200 md:col-span-1 col-span-2">
-          <div className="text-sm font-bold text-gray-900">
+          <div className="text-xl font-semibold text-gray-900">
             {participant.fideId ?? "-"}
           </div>
           <div className="text-xs font-medium text-gray-500 uppercase tracking-wide">
@@ -165,7 +165,7 @@ function PlayerSection({ participant }: { participant: Participant }) {
           <div className="flex items-center gap-2 mb-2">
             <Calendar className="h-4 w-4 text-gray-500" />
             <span className="text-sm font-medium text-gray-700">
-              Bevorzugter Spieltag
+              Bevorzugter Wochentag
             </span>
           </div>
           <div className="ml-6">
@@ -178,7 +178,7 @@ function PlayerSection({ participant }: { participant: Participant }) {
           <div className="flex items-center gap-2 mb-2">
             <Calendar className="h-4 w-4 text-gray-400" />
             <span className="text-sm font-medium text-gray-700">
-              Alternative Spieltage
+              Alternative Wochentage
             </span>
           </div>
           <div className="ml-6 flex gap-2 flex-wrap">
