@@ -12,11 +12,13 @@ import {
 import {
   Form,
   FormControl,
+  FormDescription,
   FormField,
   FormItem,
   FormLabel,
   FormMessage,
 } from "@/components/ui/form";
+import { Input } from "@/components/ui/input";
 import { refereeFormSchema } from "@/schema/referee";
 import { zodResolver } from "@hookform/resolvers/zod";
 import z from "zod";
@@ -38,6 +40,7 @@ export function RefereeForm({ initialValues, onSubmit, onDelete }: Props) {
     defaultValues: {
       preferredMatchDay: initialValues?.preferredMatchDay ?? undefined,
       secondaryMatchDays: initialValues?.secondaryMatchDays ?? [],
+      fideId: initialValues?.fideId ?? "",
     },
   });
 
@@ -88,28 +91,59 @@ export function RefereeForm({ initialValues, onSubmit, onDelete }: Props) {
             </div>
           </div>
         </div>
-        <FormField
-          control={form.control}
-          name="preferredMatchDay"
-          render={({ field }) => (
-            <FormItem>
-              <FormLabel required>Bevorzugter Spieltag</FormLabel>
-              <FormControl>
-                <Select value={field.value} onValueChange={field.onChange}>
-                  <SelectTrigger>
-                    <SelectValue placeholder="Wähle einen Spieltag" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="tuesday">Dienstag</SelectItem>
-                    <SelectItem value="thursday">Donnerstag</SelectItem>
-                    <SelectItem value="friday">Freitag</SelectItem>
-                  </SelectContent>
-                </Select>
-              </FormControl>
-              <FormMessage />
-            </FormItem>
-          )}
-        />
+        <div className="flex gap-4">
+          <FormField
+            control={form.control}
+            name="preferredMatchDay"
+            render={({ field }) => (
+              <FormItem className="flex-1">
+                <FormLabel required>Bevorzugter Spieltag</FormLabel>
+                <FormControl>
+                  <Select value={field.value} onValueChange={field.onChange}>
+                    <SelectTrigger>
+                      <SelectValue placeholder="Wähle einen Spieltag" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="tuesday">Dienstag</SelectItem>
+                      <SelectItem value="thursday">Donnerstag</SelectItem>
+                      <SelectItem value="friday">Freitag</SelectItem>
+                    </SelectContent>
+                  </Select>
+                </FormControl>
+                <FormMessage />
+              </FormItem>
+            )}
+          />
+          {/* FIDE-ID */}
+          <FormField
+            control={form.control}
+            name="fideId"
+            render={({ field }) => (
+              <FormItem className="flex-1">
+                <FormLabel required>FIDE ID</FormLabel>
+                <FormControl>
+                  <Input
+                    id="fideId"
+                    required
+                    placeholder="10245154"
+                    {...field}
+                  />
+                </FormControl>
+                <FormDescription>
+                  <a
+                    href="https://ratings.fide.com/profile/"
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="hover:text-blue-600 transition-colors text-blue-400 text-xs"
+                  >
+                    Was ist die FIDE ID?
+                  </a>{" "}
+                </FormDescription>
+                <FormMessage />
+              </FormItem>
+            )}
+          />
+        </div>
         <FormField
           control={form.control}
           name="secondaryMatchDays"
