@@ -11,6 +11,7 @@ import {
   FormControl,
 } from "../ui/form";
 import { Input } from "../ui/input";
+import { PasswordInput } from "@daveyplate/better-auth-ui";
 import { Button } from "../ui/button";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
@@ -145,15 +146,20 @@ export function SignupForm() {
             <FormItem>
               <FormLabel>Passwort</FormLabel>
               <FormControl>
-                <Input
-                  id="password"
-                  type="password"
-                  placeholder="Passwort muss mindestens 6 Zeichen lang sein"
-                  className="pl-10"
-                  required
-                  icon={Lock}
-                  {...field}
-                />
+                <div className="relative">
+                  <Lock
+                    size={16}
+                    className="absolute left-3 top-1/2 transform -translate-y-1/2 text-muted-foreground z-10"
+                  />
+                  <PasswordInput
+                    id="password"
+                    placeholder="Passwort muss mindestens 6 Zeichen lang sein"
+                    className="pl-10"
+                    required
+                    enableToggle={true}
+                    {...field}
+                  />
+                </div>
               </FormControl>
               <FormMessage />
             </FormItem>
@@ -167,14 +173,20 @@ export function SignupForm() {
             <FormItem>
               <FormLabel>Passwort bestätigen</FormLabel>
               <FormControl>
-                <Input
-                  id="confirmPassword"
-                  type="password"
-                  placeholder="Passwort wiederholen"
-                  required
-                  icon={Lock}
-                  {...field}
-                />
+                <div className="relative">
+                  <Lock
+                    size={16}
+                    className="absolute left-3 top-1/2 transform -translate-y-1/2 text-muted-foreground z-10"
+                  />
+                  <PasswordInput
+                    id="confirmPassword"
+                    placeholder="Passwort wiederholen"
+                    className="pl-10"
+                    required
+                    enableToggle={true}
+                    {...field}
+                  />
+                </div>
               </FormControl>
               <FormMessage />
             </FormItem>
