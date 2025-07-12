@@ -1,33 +1,21 @@
-import { getTableColumns, eq, or, count } from "drizzle-orm";
+"use server";
+
+import { authWithRedirect } from "@/auth/utils";
+import { count, eq, or } from "drizzle-orm";
 import { db } from "../client";
-import { profile } from "../schema/profile";
-import { user } from "../schema/auth";
-import { participant } from "../schema/participant";
+import { game } from "../schema/game";
+import { gamePostponement } from "../schema/gamePostponement";
 import { juror } from "../schema/juror";
+import { matchEnteringHelper } from "../schema/matchEnteringHelper";
+import { participant } from "../schema/participant";
 import { referee } from "../schema/referee";
 import { setupHelper } from "../schema/setupHelper";
-import { matchEnteringHelper } from "../schema/matchEnteringHelper";
-import { gamePostponement } from "../schema/gamePostponement";
 import { tournament } from "../schema/tournament";
-import { game } from "../schema/game";
-import { authWithRedirect } from "@/auth/utils";
-import { se } from "date-fns/locale";
+import { profile } from "../schema/profile";
+import { getProfileByUserId } from "./profile";
+import { user } from "../schema/auth";
 
-export async function getProfileByUserId(userId: string) {
-  return await db.query.profile.findFirst({
-    where: (profile, { eq }) => eq(profile.userId, userId),
-  });
-}
-
-export async function getProfilesByUserRole(role: "admin" | "user") {
-  return await db
-    .select(getTableColumns(profile))
-    .from(profile)
-    .leftJoin(user, eq(profile.userId, user.id))
-    .where(eq(user.role, role));
-}
-
-export async function softDeleteProfile(profileId: number) {
+export async function softDeleteUser(userId: string) {
   const session = await authWithRedirect();
   if (session.user.role !== "admin") {
     return {
@@ -35,7 +23,14 @@ export async function softDeleteProfile(profileId: number) {
       reason: "Nur Admins können Profile löschen",
     };
   }
-
+  const profileData = await getProfileByUserId(userId);
+  if (!profileData) {
+    return {
+      success: false,
+      reason: "Profil nicht gefunden",
+    };
+  }
+  const { id: profileId } = profileData;
   const deletedAt = new Date();
 
   return await db.transaction(async (tx) => {
@@ -83,7 +78,7 @@ export async function softDeleteProfile(profileId: number) {
   });
 }
 
-export async function hardDeleteProfile(profileId: number) {
+export async function hardDeleteProfile(userId: string) {
   const session = await authWithRedirect();
   if (session.user.role !== "admin") {
     return {
@@ -92,6 +87,14 @@ export async function hardDeleteProfile(profileId: number) {
     };
   }
 
+  const profileData = await getProfileByUserId(userId);
+  if (!profileData) {
+    return {
+      success: false,
+      reason: "Profil nicht gefunden",
+    };
+  }
+  const { id: profileId } = profileData;
   const [gamePostponementCount] = await db
     .select({ count: count() })
     .from(gamePostponement)
@@ -144,7 +147,7 @@ export async function hardDeleteProfile(profileId: number) {
       .where(eq(matchEnteringHelper.profileId, profileId));
     await tx.delete(participant).where(eq(participant.profileId, profileId));
     await tx.delete(profile).where(eq(profile.id, profileId));
-
+    await tx.delete(user).where(eq(user.id, userId));
     return { success: true, deletedAt: new Date() };
   });
 }
