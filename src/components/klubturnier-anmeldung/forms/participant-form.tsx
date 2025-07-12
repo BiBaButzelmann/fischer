@@ -200,13 +200,17 @@ export function ParticipateForm({
                 <FormControl>
                   <Input
                     id="chessClub"
-                    required
                     placeholder="Bitte geben Sie den Namen Ihres Schachvereins ein"
                     {...field}
                     value={field.value || ""}
                   />
                 </FormControl>
                 <FormMessage />
+                <FormDescription>
+                  Als Mitglied in einem anderen Schachverein wird eine
+                  Startgebühr von 60€ fällig. Weitere Informationen folgen nach
+                  Anmeldung per E-Mail.
+                </FormDescription>
               </FormItem>
             )}
           />
