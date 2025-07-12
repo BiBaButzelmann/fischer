@@ -3,9 +3,21 @@ import { RolesManager } from "@/components/klubturnier-anmeldung/roles-manager";
 import { getProfileByUserId } from "@/db/repositories/profile";
 import { getRolesDataByProfileIdAndTournamentId } from "@/db/repositories/role";
 import { getLatestTournament } from "@/db/repositories/tournament";
+import { getTournamentWeeksByTournamentId } from "@/db/repositories/tournamentWeek";
+import { TournamentWeeks } from "@/components/uebersicht/tournament-weeks";
 import { redirect } from "next/navigation";
 import Link from "next/link";
-import { BookTextIcon, ExternalLinkIcon } from "lucide-react";
+import { BookTextIcon, ExternalLinkIcon, CalendarIcon } from "lucide-react";
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogHeader,
+  DialogTitle,
+  DialogTrigger,
+} from "@/components/ui/dialog";
+import { Button } from "@/components/ui/button";
+import { ScrollArea, ScrollBar } from "@/components/ui/scroll-area";
 
 export default async function RolesPage() {
   const session = await authWithRedirect();
@@ -22,10 +34,10 @@ export default async function RolesPage() {
     redirect("/uebersicht");
   }
 
-  const initialValues = await getRolesDataByProfileIdAndTournamentId(
-    profile.id,
-    tournament.id,
-  );
+  const [initialValues, tournamentWeeks] = await Promise.all([
+    getRolesDataByProfileIdAndTournamentId(profile.id, tournament.id),
+    getTournamentWeeksByTournamentId(tournament.id),
+  ]);
   return (
     <div className="space-y-8">
       <header className="text-center">
@@ -61,6 +73,28 @@ export default async function RolesPage() {
           <span className="font-medium">Turnierordnung</span>
           <ExternalLinkIcon className="h-4 w-4 text-muted-foreground group-hover:text-primary transition-colors" />
         </Link>
+
+        <Dialog>
+          <DialogTrigger asChild>
+            <div className="group flex items-center gap-3 px-4 py-3 border border-border rounded-lg hover:border-primary hover:bg-primary/5 transition-all duration-200 cursor-pointer">
+              <BookTextIcon className="h-5 w-5" />
+              <span className="font-medium">Zeitplan</span>
+              <ExternalLinkIcon className="h-4 w-4 text-muted-foreground group-hover:text-primary transition-colors" />
+            </div>
+          </DialogTrigger>
+          <DialogContent className="max-w-4xl max-h-[80vh]">
+            <DialogHeader>
+              <DialogTitle>Zeitplan</DialogTitle>
+              <DialogDescription>
+                Gesamtübersicht der Spieltermine.
+              </DialogDescription>
+            </DialogHeader>
+            <ScrollArea className="w-full pb-3">
+              <TournamentWeeks tournamentWeeks={tournamentWeeks} />
+              <ScrollBar orientation="horizontal" />
+            </ScrollArea>
+          </DialogContent>
+        </Dialog>
       </div>
 
       <RolesManager
