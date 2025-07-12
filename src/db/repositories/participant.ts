@@ -57,8 +57,8 @@ export async function getParticipantsByTournamentId(tournamentId: number) {
       },
     },
     orderBy: (participant, { desc, sql }) => [
-      sql`${participant.fideRating} IS NULL`,
-      desc(participant.fideRating),
+      sql`${participant.dwzRating} IS NULL`,
+      desc(participant.dwzRating),
     ],
   });
 }
