@@ -17,7 +17,6 @@ export async function removeScheduledGames(tournamentId: number) {
   await db.delete(game).where(eq(game.tournamentId, tournamentId));
 }
 
-// TODO: find out how to do transactions with drizzle and neon
 export async function scheduleGames(tournamentId: number) {
   const tournament = await getTournamentById(tournamentId);
   invariant(tournament, `Tournament #${tournamentId} not found`);
