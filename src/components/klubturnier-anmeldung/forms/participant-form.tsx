@@ -126,7 +126,10 @@ export function ParticipateForm({
 
   return (
     <Form {...form}>
-      <form onSubmit={form.handleSubmit(handleSubmit)} className="space-y-8">
+      <form
+        onSubmit={form.handleSubmit(handleSubmit)}
+        className="space-y-6 pt-4"
+      >
         <div className="border rounded-lg">
           <div className="p-6">
             <div className="flex items-center justify-between">
