@@ -32,12 +32,14 @@ export async function createReferee(
       tournamentId: tournament.id,
       preferredMatchDay: data.preferredMatchDay,
       secondaryMatchDays: data.secondaryMatchDays,
+      fideId: data.fideId,
     })
     .onConflictDoUpdate({
       target: [referee.tournamentId, referee.profileId],
       set: {
         preferredMatchDay: data.preferredMatchDay,
         secondaryMatchDays: data.secondaryMatchDays,
+        fideId: data.fideId,
       },
     });
 }

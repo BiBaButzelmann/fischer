@@ -34,9 +34,9 @@ import { cn } from "@/lib/utils";
 import { isHoliday } from "@/lib/holidays";
 
 import { Tournament } from "@/db/types/tournament";
-import { DEFAULT_CLUB_KEY, DEFAULT_CLUB_LABEL } from "@/constants/constants";
 import { getParticipantEloData } from "@/actions/participant";
 import { Profile } from "@/db/types/profile";
+import { DEFAULT_CLUB_KEY, DEFAULT_CLUB_LABEL } from "@/constants/constants";
 
 type Props = {
   initialValues?: z.infer<typeof participantFormSchema>;
@@ -199,6 +199,54 @@ export function ParticipateForm({
             </div>
           </div>
         </div>
+        <div className="flex gap-4">
+          <FormField
+            control={form.control}
+            name="chessClubType"
+            render={({ field }) => (
+              <FormItem className="flex-1">
+                <FormLabel required>Schachverein</FormLabel>
+                <FormControl>
+                  <Select value={field.value} onValueChange={field.onChange}>
+                    <SelectTrigger>
+                      <SelectValue placeholder="Schachverein wählen" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value={DEFAULT_CLUB_KEY}>
+                        {DEFAULT_CLUB_LABEL}
+                      </SelectItem>
+                      <SelectItem value="other">Anderer Verein</SelectItem>
+                    </SelectContent>
+                  </Select>
+                </FormControl>
+                <FormMessage />
+              </FormItem>
+            )}
+          />
+        </div>
+
+        {chessClubType === "other" && (
+          <FormField
+            control={form.control}
+            name="chessClub"
+            render={({ field }) => (
+              <FormItem>
+                <FormLabel required>Name des Schachvereins</FormLabel>
+                <FormControl>
+                  <Input
+                    id="chessClub"
+                    required
+                    placeholder="Bitte geben Sie den Namen Ihres Schachvereins ein"
+                    {...field}
+                    value={field.value || ""}
+                  />
+                </FormControl>
+                <FormMessage />
+              </FormItem>
+            )}
+          />
+        )}
+
         <div className="flex gap-4">
           <FormField
             control={form.control}

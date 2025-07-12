@@ -28,8 +28,8 @@ import { createSetupHelper, deleteSetupHelper } from "@/actions/setup-helper";
 import { createJuror, deleteJuror } from "@/actions/juror";
 import Link from "next/link";
 import { sendRolesSelectionSummaryEmail } from "@/actions/email/roles";
-import { DEFAULT_CLUB_KEY, DEFAULT_CLUB_LABEL } from "@/constants/constants";
 import { Profile } from "@/db/types/profile";
+import { DEFAULT_CLUB_KEY, DEFAULT_CLUB_LABEL } from "@/constants/constants";
 
 type Props = {
   userId: string;
