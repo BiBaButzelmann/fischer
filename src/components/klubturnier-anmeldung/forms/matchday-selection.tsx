@@ -28,6 +28,7 @@ export function MatchDaysCheckboxes({
       <div className="flex items-center flex-nowrap">
         <Checkbox
           id="thursday"
+          checked={value.includes("thursday")}
           onCheckedChange={(checked) => {
             return checked
               ? onChange([...value, "thursday"])
@@ -41,6 +42,7 @@ export function MatchDaysCheckboxes({
       <div className="flex items-center flex-nowrap">
         <Checkbox
           id="friday"
+          checked={value.includes("friday")}
           onCheckedChange={(checked) => {
             return checked
               ? onChange([...value, "friday"])
