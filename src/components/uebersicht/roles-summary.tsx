@@ -165,7 +165,7 @@ function PlayerSection({ participant }: { participant: Participant }) {
           <div className="flex items-center gap-2 mb-2">
             <Calendar className="h-4 w-4 text-gray-500" />
             <span className="text-sm font-medium text-gray-700">
-              Bevorzugter Spieltag
+              Bevorzugter Wochentag
             </span>
           </div>
           <div className="ml-6">
@@ -178,7 +178,7 @@ function PlayerSection({ participant }: { participant: Participant }) {
           <div className="flex items-center gap-2 mb-2">
             <Calendar className="h-4 w-4 text-gray-400" />
             <span className="text-sm font-medium text-gray-700">
-              Alternative Spieltage
+              Alternative Wochentage
             </span>
           </div>
           <div className="ml-6 flex gap-2 flex-wrap">

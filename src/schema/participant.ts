@@ -37,7 +37,7 @@ export const participantFormSchema = z
     zpsPlayer: z.string().optional(),
 
     preferredMatchDay: z.enum(availableMatchDays, {
-      errorMap: () => ({ message: "Bevorzugter Spieltag ist erforderlich" }),
+      errorMap: () => ({ message: "Bevorzugter Wochentag ist erforderlich" }),
     }),
     secondaryMatchDays: z.array(z.enum(availableMatchDays)),
     notAvailableDays: z.array(z.date()).max(5, "Maximal 5 Tage").optional(),
