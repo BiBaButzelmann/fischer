@@ -14,7 +14,7 @@ import {
 import { getRolesByUserId } from "@/db/repositories/role";
 import invariant from "tiny-invariant";
 
-export async function loginRedirect(userId: string) {
+export async function loginRedirect(userId: string): Promise<never> {
   const tournament = await getLatestTournament();
   if (!tournament) {
     redirect("/uebersicht");
@@ -27,6 +27,7 @@ export async function loginRedirect(userId: string) {
       redirect("/klubturnier-anmeldung");
     }
   }
+  throw new Error("Error during login redirect");
 }
 
 export type LoginResponse = { error: string };
@@ -40,6 +41,7 @@ export async function login(data: z.infer<typeof loginFormSchema>) {
         rememberMe: true,
       },
     });
+    console.log("Login result:", result);
     userId = result.user.id;
   } catch (error) {
     console.error("Login error:", error);
