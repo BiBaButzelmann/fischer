@@ -7,7 +7,7 @@ import { getTournamentWeeksByTournamentId } from "@/db/repositories/tournamentWe
 import { TournamentWeeks } from "@/components/uebersicht/tournament-weeks";
 import { redirect } from "next/navigation";
 import Link from "next/link";
-import { BookTextIcon, ExternalLinkIcon, CalendarIcon } from "lucide-react";
+import { BookTextIcon, ExternalLinkIcon } from "lucide-react";
 import {
   Dialog,
   DialogContent,
@@ -16,7 +16,6 @@ import {
   DialogTitle,
   DialogTrigger,
 } from "@/components/ui/dialog";
-import { Button } from "@/components/ui/button";
 import { ScrollArea, ScrollBar } from "@/components/ui/scroll-area";
 
 export default async function RolesPage() {
