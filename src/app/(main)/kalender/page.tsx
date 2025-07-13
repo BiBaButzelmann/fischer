@@ -18,7 +18,7 @@ export default async function Page() {
         <h1 className="text-3xl font-bold text-gray-900 mb-2">Kalender</h1>
         <div className="bg-blue-50 border border-blue-200 rounded-lg p-4 mb-4">
           <p className="text-blue-800 text-sm">
-            Deine persönlichen Termine werden in diesem Kalendar am{" "}
+            Deine persönlichen Termine werden in diesem Kalender am{" "}
             <strong>02.09.2025</strong> angezeigt werden
           </p>
         </div>
