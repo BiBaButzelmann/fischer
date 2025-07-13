@@ -24,7 +24,7 @@ export async function createTournament(
   const hashedPassword = await context.password.hash(data.pgnViewerPassword);
 
   const newTournament: typeof tournament.$inferInsert = {
-    name: "TODO: HSK Klubturnier",
+    name: "Klubturnier 2025",
     allClocksDigital: true,
     club: data.clubName,
     startDate: new Date(data.startDate),
