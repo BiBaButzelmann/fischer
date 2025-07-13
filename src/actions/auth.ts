@@ -14,6 +14,8 @@ import {
 import { getRolesByUserId } from "@/db/repositories/role";
 import invariant from "tiny-invariant";
 import { APIError } from "better-auth/api";
+import { headers } from "next/headers";
+import { revalidatePath } from "next/cache";
 
 export async function loginRedirect(userId: string): Promise<never> {
   const tournament = await getLatestTournament();
@@ -104,4 +106,13 @@ export async function signup(data: z.infer<typeof signupFormSchema>) {
   }
 
   await signupRedirect();
+}
+
+export async function signout() {
+  const result = await auth.api.signOut({
+    headers: await headers(),
+  });
+
+  revalidatePath("/", "layout");
+  return result;
 }

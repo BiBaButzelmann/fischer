@@ -25,6 +25,7 @@ import { Button } from "../ui/button";
 import Image from "next/image";
 
 export async function AppSidebar() {
+  console.log("Rendering AppSidebar");
   const session = await auth();
   const tournament = await getActiveTournament();
 
