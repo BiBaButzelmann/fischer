@@ -28,7 +28,6 @@ import { Calendar } from "../../ui/calendar";
 import { Popover, PopoverContent, PopoverTrigger } from "../../ui/popover";
 import { participantFormSchema } from "@/schema/participant";
 import { MatchDaysCheckboxes } from "./matchday-selection";
-import { Info, User, Users } from "lucide-react";
 import { CountryDropdown } from "@/components/ui/country-dropdown";
 import { cn } from "@/lib/utils";
 import { isHoliday } from "@/lib/holidays";
@@ -129,37 +128,6 @@ export function ParticipateForm({
         onSubmit={form.handleSubmit(handleSubmit)}
         className="space-y-6 pt-4"
       >
-        <div className="border rounded-lg">
-          <div className="p-6">
-            <div className="flex items-center justify-between">
-              <div className="flex items-center gap-2">
-                <Info className="h-5 w-5 pb-1" />
-                <h3 className="font-semibold">Info</h3>
-              </div>
-            </div>
-          </div>
-          <div className="px-6 pb-6 space-y-3 text-sm">
-            <div className="flex items-start gap-3">
-              <Users className="h-4 w-4 mt-0.5 flex-shrink-0" />
-              <p>
-                <strong>Zusammensetzung:</strong> Historisch gesehen haben in
-                den letzten Jahren um die 100 Spieler am Klubturnier
-                teilgenommen. Wir hoffen, diese Zahl in diesem Jahr zu
-                übertreffen.
-              </p>
-            </div>
-            <div className="flex items-start gap-3">
-              <User className="h-4 w-4 mt-0.5 flex-shrink-0" />
-              <p>
-                <strong>Aufgabe:</strong> Der Spieler misst sich einmal pro
-                Woche mit einem möglichst gleichstarken Gegner aus seiner Gruppe
-                und versucht, bis zum Ende des Turniers den Gruppensieg zu
-                erzielen. In drei Wochen hat der Spieler die Möglichkeit,
-                verschobene Partien nachzuholen.
-              </p>
-            </div>
-          </div>
-        </div>
         <div className="flex gap-4">
           <FormField
             control={form.control}
