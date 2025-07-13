@@ -1,11 +1,21 @@
-import { auth } from "@/auth";
-import { headers } from "next/headers";
-import { redirect } from "next/navigation";
+"use client";
 
-export default async function Page() {
-  const signOutResult = await auth.api.signOut({ headers: await headers() });
-  if (signOutResult.success) {
-    redirect("/willkommen");
-  }
-  redirect("/uebersicht");
+import { signout } from "@/actions/auth";
+import { useRouter } from "next/navigation";
+import { useEffect } from "react";
+
+export default function Page() {
+  const router = useRouter();
+
+  useEffect(() => {
+    signout().then((result) => {
+      if (result.success) {
+        router.push("/willkommen");
+      } else {
+        router.push("/uebersicht");
+      }
+    });
+  }, [router]);
+
+  return null;
 }

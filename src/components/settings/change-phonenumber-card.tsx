@@ -14,7 +14,6 @@ import { Button } from "../ui/button";
 import { updateProfile } from "@/actions/profile";
 
 export function ChangePhoneNumberCard({
-  // TODO: remove this after db was dumped and we can make the phoneNumber field required
   phoneNumber: initialPhoneNumber = "",
 }: {
   phoneNumber: string | null;

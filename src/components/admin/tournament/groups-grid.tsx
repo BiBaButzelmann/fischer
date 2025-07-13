@@ -33,9 +33,11 @@ import { GroupMatchDay } from "./group-match-day";
 export const UNASSIGNED_CONTAINER_ID = "unassigned-droppable";
 
 export function GroupsGrid({
+  tournamentId,
   groups: initialGroups,
   unassignedParticipants: initialUnassignedParticipants,
 }: {
+  tournamentId: number;
   groups: GridGroup[];
   unassignedParticipants: ParticipantWithName[];
 }) {
@@ -67,15 +69,13 @@ export function GroupsGrid({
 
   const handleSave = () => {
     startTransition(async () => {
-      // TODO: tournament ID should be dynamic
-      await updateGroups(1, groups, unassignedParticipants);
+      await updateGroups(tournamentId, groups, unassignedParticipants);
     });
   };
 
   const handleGenerateGroups = () => {
     startTransition(async () => {
-      // TODO: tournament ID should be dynamic
-      await generateGroups(1);
+      await generateGroups(tournamentId);
     });
   };
 
