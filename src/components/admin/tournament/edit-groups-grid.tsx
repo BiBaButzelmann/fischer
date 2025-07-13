@@ -3,16 +3,16 @@ import { GroupsGrid } from "./groups-grid";
 import { GroupWithParticipants } from "@/db/types/group";
 import { GridGroup } from "./types";
 
-// TODO: remove this component, put logic into EditGroups
 export async function EditGroupsGrid({
+  tournamentId,
   groups: initialGroups,
   unassignedParticipants: initialUnassignedParticipants,
 }: {
+  tournamentId: number;
   groups: GroupWithParticipants[];
   unassignedParticipants: ParticipantWithName[];
 }) {
   const gridGroups: GridGroup[] = initialGroups.map((group) => ({
-    // TODO: we probably don't need the id here
     id: group.id,
     groupNumber: group.groupNumber,
     groupName: group.groupName,
@@ -22,6 +22,7 @@ export async function EditGroupsGrid({
 
   return (
     <GroupsGrid
+      tournamentId={tournamentId}
       groups={gridGroups}
       unassignedParticipants={initialUnassignedParticipants}
     />

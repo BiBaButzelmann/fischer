@@ -11,6 +11,7 @@ export async function EditGroups({ tournament }: { tournament: Tournament }) {
 
   return (
     <EditGroupsGrid
+      tournamentId={tournament.id}
       groups={groups}
       unassignedParticipants={unassignedParticipants}
     />
