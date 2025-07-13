@@ -44,7 +44,6 @@ export async function login(data: z.infer<typeof loginFormSchema>) {
         rememberMe: true,
       },
     });
-    console.log("Login result:", result);
     userId = result.user.id;
   } catch (error) {
     console.error("Login error:", error);

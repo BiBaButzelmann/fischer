@@ -112,7 +112,6 @@ export function ParticipateForm({
   };
 
   const handleSubmit = (data: z.infer<typeof participantFormSchema>) => {
-    console.log("Submitting form with data:", data);
     startTransition(async () => {
       await onSubmit(data);
     });
