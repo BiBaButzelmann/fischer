@@ -314,7 +314,7 @@ export function ParticipateForm({
                   </FormControl>
                   <FormDescription>
                     <a
-                      href="https://ratings.fide.com/profile/"
+                      href="https://www.schachbund.de/fide-identifikationsnummer.html"
                       target="_blank"
                       rel="noopener noreferrer"
                       className="hover:text-blue-600 transition-colors text-blue-400 text-xs"
