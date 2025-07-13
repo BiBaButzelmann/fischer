@@ -27,7 +27,7 @@ export function TournamentWeeks({ tournamentWeeks }: Props) {
       const weekLabel =
         week.status === "regular"
           ? `Woche ${++regularWeekCount}`
-          : `Nachholwoche ${++catchUpWeekCount}`;
+          : `Verlegungswoche ${++catchUpWeekCount}`;
 
       return {
         id: week.id,

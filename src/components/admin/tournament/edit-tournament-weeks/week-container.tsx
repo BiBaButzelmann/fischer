@@ -27,14 +27,14 @@ export function WeekContainer({
   onUpdateRefereeNeeded: (index: number, day: WeekDay, value: boolean) => void;
 }) {
   const getWeekLabel = (week: Week) => {
-    return week.status === "regular" ? `Reguläre Woche` : `Nachholwoche`;
+    return week.status === "regular" ? `Reguläre Woche` : `Verlegungswoche`;
   };
 
   const weekNumber = getWeekNumberforType(week, weeks);
   const weekTitle =
     week.status === "regular"
       ? `Woche ${weekNumber}`
-      : `Nachholwoche ${weekNumber}`;
+      : `Verlegungswoche ${weekNumber}`;
 
   return (
     <div className="space-y-4">
@@ -65,7 +65,7 @@ export function WeekContainer({
               </SelectTrigger>
               <SelectContent>
                 <SelectItem value="regular">Reguläre Woche</SelectItem>
-                <SelectItem value="catch-up">Nachholwoche</SelectItem>
+                <SelectItem value="catch-up">Verlegungswoche</SelectItem>
               </SelectContent>
             </Select>
           </div>

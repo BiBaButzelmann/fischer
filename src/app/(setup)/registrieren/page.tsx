@@ -33,7 +33,8 @@ export default async function Page() {
         <CardHeader className="text-center">
           <CardTitle className="text-2xl font-bold">Registrieren</CardTitle>
           <CardDescription>
-            Erstelle ein Konto für das HSK Klubturnier
+            Erstelle ein Konto für das HSK Klubturnier mit den Daten der
+            teilnehmenden Person.
           </CardDescription>
         </CardHeader>
         <CardContent>

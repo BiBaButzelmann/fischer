@@ -70,7 +70,10 @@ export async function TournamentRegistration({ tournament }: Props) {
         <Card className="flex h-full flex-col">
           <CardHeader>
             <CardTitle>Zeitplan</CardTitle>
-            <CardDescription>Gesamtübersicht der Spieltermine.</CardDescription>
+            <CardDescription>
+              Gesamtübersicht der Spieltermine. An Feiertagen kann nicht
+              gespielt werden.
+            </CardDescription>
           </CardHeader>
           <CardContent className="flex-1">
             <ScrollArea className="w-full pb-3">

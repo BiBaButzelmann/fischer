@@ -33,7 +33,7 @@ export function SelectedWeeks({
         const weekTitle =
           week.status === "regular"
             ? `Woche ${weekNumber}`
-            : `Nachholwoche ${weekNumber}`;
+            : `Verlegungswoche ${weekNumber}`;
 
         return (
           <div key={index}>
