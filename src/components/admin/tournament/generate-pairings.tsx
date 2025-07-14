@@ -9,6 +9,7 @@ export function GeneratePairings({ tournamentId }: { tournamentId: number }) {
   const [isPending, startTransition] = useTransition();
 
   const handleGeneratePairings = () => {
+    console.log("Generating pairings for tournament:", tournamentId);
     startTransition(async () => {
       await rescheduleGames(tournamentId);
     });

@@ -20,6 +20,7 @@ import {
   LayoutDashboard,
   SwordsIcon,
   UserRoundCogIcon,
+  Users,
 } from "lucide-react";
 import { Button } from "../ui/button";
 import Image from "next/image";
@@ -102,15 +103,21 @@ export async function AppSidebar() {
             <SidebarGroupLabel>Admin</SidebarGroupLabel>
             <SidebarGroupContent>
               <SidebarMenuButton asChild>
+                <Link href="/admin/nutzerverwaltung">
+                  <UserRoundCogIcon />
+                  <span>Nutzer verwalten</span>
+                </Link>
+              </SidebarMenuButton>
+              <SidebarMenuButton asChild>
                 <Link href="/admin/tournament">
                   <BinocularsIcon />
                   <span>Turnier verwalten</span>
                 </Link>
               </SidebarMenuButton>
               <SidebarMenuButton asChild>
-                <Link href="/admin/nutzerverwaltung">
-                  <UserRoundCogIcon />
-                  <span>Nutzer verwalten</span>
+                <Link href="/admin/gruppen">
+                  <Users />
+                  <span>Gruppen verwalten</span>
                 </Link>
               </SidebarMenuButton>
             </SidebarGroupContent>
