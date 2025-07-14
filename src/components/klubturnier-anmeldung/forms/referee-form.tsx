@@ -78,7 +78,7 @@ export function RefereeForm({ initialValues, onSubmit, onDelete }: Props) {
               <Users className="h-4 w-4 mt-0.5 flex-shrink-0" />
               <p>
                 <strong>Zusammensetzung:</strong> Die Schiedsrichter sind in der
-                diesjährigen Ausgabe für alle Wochentage geplant und machen es
+                diesjährigen Ausgabe für alle Spieltage geplant und machen es
                 möglich, dass spielende Gruppen Elo ausgewertet werden können.
               </p>
             </div>
@@ -86,7 +86,7 @@ export function RefereeForm({ initialValues, onSubmit, onDelete }: Props) {
               <Shield className="h-4 w-4 mt-0.5 flex-shrink-0" />
               <p>
                 <strong>Aufgabe:</strong> Jeder Schiedsrichter ist für einen
-                Wochentag eingeteilt, an dem er die Spieler betreut und die
+                Spieltag eingeteilt, an dem er die Spieler betreut und die
                 Ergebnisse auf der Webseite einträgt. Dazu wird eine Anleitung
                 zum Turnierstart per E-Mail verschickt.
               </p>
@@ -99,11 +99,11 @@ export function RefereeForm({ initialValues, onSubmit, onDelete }: Props) {
             name="preferredMatchDay"
             render={({ field }) => (
               <FormItem className="flex-1">
-                <FormLabel required>Bevorzugter Wochentag</FormLabel>
+                <FormLabel required>Bevorzugter Spieltag</FormLabel>
                 <FormControl>
                   <Select value={field.value} onValueChange={field.onChange}>
                     <SelectTrigger>
-                      <SelectValue placeholder="Wähle einen Wochentag" />
+                      <SelectValue placeholder="Wähle einen Spieltag" />
                     </SelectTrigger>
                     <SelectContent>
                       <SelectItem value="tuesday">Dienstag</SelectItem>
@@ -147,7 +147,7 @@ export function RefereeForm({ initialValues, onSubmit, onDelete }: Props) {
           render={({ field }) => (
             <FormItem>
               <FormLabel>
-                Ich könnte zusätzlich an folgenden Wochentagen:
+                Ich könnte zusätzlich an folgenden Spieltagen:
               </FormLabel>
               <FormControl>
                 <MatchDaysCheckboxes

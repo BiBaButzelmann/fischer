@@ -27,10 +27,10 @@ export default function RoleSelectionSummaryMail({ name, roles }: Props) {
           {p.fideRating && <li>Elo: {p.fideRating}</li>}
           {p.fideId && <li>FIDE‑ID: {p.fideId}</li>}
           <li>
-            Bevorzugter Wochentag: {translateMatchDay(p.preferredMatchDay)}
+            Bevorzugter Spieltag: {translateMatchDay(p.preferredMatchDay)}
           </li>
           <li>
-            Alternative Wochentage:{" "}
+            Alternative Spieltage:{" "}
             {p.secondaryMatchDays.map(translateMatchDay).join(", ")}
           </li>
           {p.chessClub !== DEFAULT_CLUB_KEY && p.entryFeePayed === false && (
@@ -50,8 +50,8 @@ export default function RoleSelectionSummaryMail({ name, roles }: Props) {
     const r = roles.referee;
     listItems.push(
       <li key="referee" style={{ paddingBottom: 8 }}>
-        <strong>Schiedsrichter</strong> – Bevorzugter Wochentag:{" "}
-        {translateMatchDay(r.preferredMatchDay)}; Alternative Wochentage:{" "}
+        <strong>Schiedsrichter</strong> – Bevorzugter Spieltag:{" "}
+        {translateMatchDay(r.preferredMatchDay)}; Alternative Spieltage:{" "}
         {r.secondaryMatchDays.map(translateMatchDay).join(", ")}
       </li>,
     );
@@ -61,8 +61,8 @@ export default function RoleSelectionSummaryMail({ name, roles }: Props) {
     const s = roles.setupHelper;
     listItems.push(
       <li key="setupHelper" style={{ paddingBottom: 8 }}>
-        <strong>Aufbauhelfer</strong> – Bevorzugter Wochentag:{" "}
-        {translateMatchDay(s.preferredMatchDay)}; Alternative Wochentage:{" "}
+        <strong>Aufbauhelfer</strong> – Bevorzugter Spieltag:{" "}
+        {translateMatchDay(s.preferredMatchDay)}; Alternative Spieltage:{" "}
         {s.secondaryMatchDays.map(translateMatchDay).join(", ")}
       </li>,
     );

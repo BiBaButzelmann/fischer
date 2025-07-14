@@ -34,7 +34,7 @@ export function GroupMatchDay({ group }: { group: GridGroup }) {
       onValueChange={handleMatchdayChange}
     >
       <SelectTrigger className="w-full">
-        <SelectValue placeholder="Wochentag" />
+        <SelectValue placeholder="Spieltag" />
       </SelectTrigger>
       <SelectContent>
         {Object.entries(matchDays).map(([value, label]) => (
