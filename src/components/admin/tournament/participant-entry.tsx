@@ -33,7 +33,7 @@ export function ParticipantEntry({
           {participant.secondaryMatchDays.length > 0 ? (
             <div className="flex flex-col">
               <span className="text-sm text-muted-foreground">
-                Alternative Wochentage:
+                Alternative Spieltage:
               </span>
               <div className="flex gap-1">
                 {participant.secondaryMatchDays.map((day) => (
@@ -48,7 +48,7 @@ export function ParticipantEntry({
             </div>
           ) : (
             <span className="text-sm text-muted-foreground">
-              Keine alternativen Wochentage
+              Keine alternativen Spieltage
             </span>
           )}
         </HoverCardContent>

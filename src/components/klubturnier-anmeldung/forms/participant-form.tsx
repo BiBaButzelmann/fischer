@@ -340,11 +340,11 @@ export function ParticipateForm({
           name="preferredMatchDay"
           render={({ field }) => (
             <FormItem>
-              <FormLabel required>Bevorzugter Wochentag</FormLabel>
+              <FormLabel required>Bevorzugter Spieltag</FormLabel>
               <FormControl>
                 <Select value={field.value} onValueChange={field.onChange}>
                   <SelectTrigger>
-                    <SelectValue placeholder="Wähle einen Wochentag" />
+                    <SelectValue placeholder="Wähle einen Spieltag" />
                   </SelectTrigger>
                   <SelectContent>
                     <SelectItem value="tuesday">Dienstag</SelectItem>
@@ -423,7 +423,7 @@ export function ParticipateForm({
               </Popover>
               <FormDescription>
                 Optional: Wähle einzelne Tage aus, an denen du nicht für Spiele
-                verfügbar bist, obwohl du sie als bevorzugter Wochentag
+                verfügbar bist, obwohl du sie als bevorzugter Spieltag
                 angegeben hast. Verwende dies nur für lang geplante
                 Urlaubsreisen oder andere unverschiebbare Termine. Wir versuchen
                 dann, dich mit anderen Spielern zu paaren, die an dem Tag
