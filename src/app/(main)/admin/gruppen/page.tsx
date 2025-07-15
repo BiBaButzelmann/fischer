@@ -18,7 +18,13 @@ export default async function Page() {
           Gruppenverwaltung
         </h1>
       </div>
-      <div>{tournament ? <EditGroups tournament={tournament} /> : null}</div>
+      <div>
+        {tournament ? (
+          <EditGroups tournament={tournament} />
+        ) : (
+          <p>Kein Turnier gefunden</p>
+        )}
+      </div>
     </div>
   );
 }
