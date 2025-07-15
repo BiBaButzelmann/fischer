@@ -35,7 +35,13 @@ export function PairingContainer({
 
       {/* Right side: Pairings for selected group */}
       <div className="flex-1 min-w-0">
-        <Pairing group={selectedGroup} />
+        {selectedGroup ? (
+          <Pairing group={selectedGroup} />
+        ) : (
+          <div className="flex flex-col items-center justify-center gap-4 p-8 text-gray-500">
+            <span>Keine Gruppe ausgewählt</span>
+          </div>
+        )}
       </div>
     </div>
   );

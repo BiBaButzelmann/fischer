@@ -5,15 +5,7 @@ import { Game } from "@/db/types/game";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { ParticipantEntry } from "../groups/participant-entry";
 
-export function Pairing({ group }: { group?: GroupWithParticipantsAndGames }) {
-  if (!group) {
-    return (
-      <div className="flex flex-col items-center justify-center gap-4 p-8 text-gray-500">
-        <span>Keine Gruppe ausgewählt</span>
-      </div>
-    );
-  }
-
+export function Pairing({ group }: { group: GroupWithParticipantsAndGames }) {
   if (!group.games || group.games.length === 0) {
     return (
       <div className="flex flex-col items-center justify-center gap-4 p-8 text-gray-500">

@@ -54,7 +54,9 @@ export async function getGroupsWithGamesByTournamentId(tournamentId: number) {
   });
 }
 
-export async function getGroupsWithParticipantsAndGamesByTournamentId(tournamentId: number) {
+export async function getGroupsWithParticipantsAndGamesByTournamentId(
+  tournamentId: number,
+) {
   return await db.query.group.findMany({
     where: (group, { eq }) => eq(group.tournamentId, tournamentId),
     with: {
