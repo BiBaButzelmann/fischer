@@ -32,8 +32,6 @@ export async function generateGroups(tournamentId: number) {
     participants,
   );
 
-  console.log("Participant groups generated:", participantGroups);
-
   for (const [index, participantsInGroup] of participantGroups.entries()) {
     const groupNumber = index + 1;
     const groupName = `Gruppe ${groupNumber}`;
@@ -149,7 +147,7 @@ function getParticipantsGroupDistribution(
   unassignedParticipants: ParticipantWithName[];
 } {
   // assume participants are already sorted by fide rating
-  const totalGroups = Math.floor(participants.length / groupSize);
+  const totalGroups = Math.ceil(participants.length / groupSize);
   const totalAssignable = totalGroups * groupSize;
 
   const participantGroups: ParticipantWithName[][] = [];
