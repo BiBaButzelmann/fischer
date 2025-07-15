@@ -32,6 +32,8 @@ export async function generateGroups(tournamentId: number) {
     participants,
   );
 
+  console.log("Participant groups generated:", participantGroups);
+
   for (const [index, participantsInGroup] of participantGroups.entries()) {
     const groupNumber = index + 1;
     const groupName = `Gruppe ${groupNumber}`;
