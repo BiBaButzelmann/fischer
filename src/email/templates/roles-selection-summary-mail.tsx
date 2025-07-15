@@ -1,8 +1,4 @@
-import {
-  DEFAULT_CLUB_KEY,
-  DEFAULT_CLUB_LABEL,
-  matchDays,
-} from "@/constants/constants";
+import { DEFAULT_CLUB_LABEL, matchDays } from "@/constants/constants";
 import { MatchDay } from "@/db/types/group";
 import { RolesData } from "@/db/types/role";
 
@@ -33,7 +29,7 @@ export default function RoleSelectionSummaryMail({ name, roles }: Props) {
             Alternative Spieltage:{" "}
             {p.secondaryMatchDays.map(translateMatchDay).join(", ")}
           </li>
-          {p.entryFeePayed === false && (
+          {p.chessClub !== DEFAULT_CLUB_LABEL && p.entryFeePayed === false && (
             <li>
               Bitte überweise die Startgebühr von 60€ auf folgendes Konto:
               <br />
