@@ -33,7 +33,7 @@ export default function RoleSelectionSummaryMail({ name, roles }: Props) {
             Alternative Spieltage:{" "}
             {p.secondaryMatchDays.map(translateMatchDay).join(", ")}
           </li>
-          {p.chessClub !== DEFAULT_CLUB_KEY && p.entryFeePayed === false && (
+          {p.entryFeePayed === false && (
             <li>
               Bitte überweise die Startgebühr von 60€ auf folgendes Konto:
               <br />
