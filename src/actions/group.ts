@@ -93,7 +93,6 @@ export async function updateGroups(
         tournamentId,
         insertGroup.id,
         insertGroup.participants,
-        true,
       );
     }
   }
@@ -105,13 +104,7 @@ export async function updateGroupPositions(
   tournamentId: number,
   groupId: number,
   participants: ParticipantWithName[],
-  skipAuth: boolean = false,
 ) {
-  if (!skipAuth) {
-    const session = await authWithRedirect();
-    invariant(session?.user.role === "admin", "Unauthorized");
-  }
-
   for (const [index, p] of participants.entries()) {
     await db
       .update(participant)
@@ -127,10 +120,8 @@ export async function updateGroupPositions(
       );
   }
 
-  if (!skipAuth) {
-    revalidatePath("/admin/tournament");
-    revalidatePath("/admin/paarungen");
-  }
+  revalidatePath("/admin/tournament");
+  revalidatePath("/admin/paarungen");
 }
 
 export async function updateGroupMatchDay(

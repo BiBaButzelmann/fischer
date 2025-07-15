@@ -21,10 +21,10 @@ export default async function RolesPage() {
     redirect("/uebersicht");
   }
 
-  const [initialValues, tournamentWeeks] = await Promise.all([
-    getRolesDataByProfileIdAndTournamentId(profile.id, tournament.id),
-    getTournamentWeeksByTournamentId(tournament.id),
-  ]);
+  const initialValues = await getRolesDataByProfileIdAndTournamentId(
+    profile.id,
+    tournament.id,
+  );
   return (
     <div className="space-y-8">
       <header className="text-center">
