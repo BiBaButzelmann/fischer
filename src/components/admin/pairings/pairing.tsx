@@ -14,8 +14,7 @@ export function Pairing({ group }: { group: GroupWithParticipantsAndGames }) {
           {group.groupName || `Gruppe ${group.groupNumber}`}
         </span>
         <p className="text-sm">
-          Verwenden Sie &quot;Gruppeneinteilung speichern &amp; Paarungen
-          generieren&quot; um Partien zu erstellen.
+          Verwende Paarungen generieren, um Partien zu erstellen.
         </p>
       </div>
     );
@@ -40,8 +39,7 @@ export function Pairing({ group }: { group: GroupWithParticipantsAndGames }) {
       <div className="flex flex-col items-center justify-center gap-4 p-8 text-gray-500">
         <span>Keine Partien angesetzt</span>
         <p className="text-sm">
-          Verwenden Sie &quot;Gruppeneinteilung speichern &amp; Paarungen
-          generieren&quot; um Partien zu erstellen.
+          Verwende Paarungen generieren, um Partien zu erstellen.
         </p>
       </div>
     );

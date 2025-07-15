@@ -201,7 +201,7 @@ export function GroupPositionManager({
 
       {/* Save Button */}
       <Button onClick={handleSave} disabled={isPending} className="w-full">
-        Gruppeneinteilung speichern & Paarungen generieren
+        Paarungen generieren
       </Button>
     </div>
   );
