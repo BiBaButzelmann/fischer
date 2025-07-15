@@ -1,0 +1,86 @@
+import {
+  integer,
+  pgTable,
+  primaryKey,
+  date,
+  boolean,
+} from "drizzle-orm/pg-core";
+import { relations } from "drizzle-orm";
+import { tournament } from "./tournament";
+import { tournamentWeek } from "./tournamentWeek";
+import { referee } from "./referee";
+import { setupHelper } from "./setupHelper";
+import { game } from "./game";
+import { timestamps, matchDay } from "./columns.helpers";
+
+export const matchday = pgTable("matchday", {
+  id: integer("id").generatedAlwaysAsIdentity().primaryKey(),
+  tournamentId: integer("tournament_id").notNull(),
+  tournamentWeekId: integer("tournament_week_id").notNull(),
+  date: date("date", { mode: "date" }).notNull(),
+  matchDay: matchDay("match_day").notNull(), // tuesday, thursday, friday
+  refereeId: integer("referee_id"),
+  refereeNeeded: boolean("referee_needed").notNull().default(true),
+
+  ...timestamps,
+});
+
+export const matchdaySetupHelper = pgTable(
+  "matchday_setup_helper",
+  {
+    matchdayId: integer("matchday_id").notNull(),
+    setupHelperId: integer("setup_helper_id").notNull(),
+  },
+  (table) => [primaryKey({ columns: [table.matchdayId, table.setupHelperId] })],
+);
+
+export const matchdayGame = pgTable(
+  "matchday_game",
+  {
+    matchdayId: integer("matchday_id").notNull(),
+    gameId: integer("game_id").notNull(),
+  },
+  (table) => [primaryKey({ columns: [table.matchdayId, table.gameId] })],
+);
+
+export const matchdayRelations = relations(matchday, ({ one, many }) => ({
+  tournament: one(tournament, {
+    fields: [matchday.tournamentId],
+    references: [tournament.id],
+  }),
+  tournamentWeek: one(tournamentWeek, {
+    fields: [matchday.tournamentWeekId],
+    references: [tournamentWeek.id],
+  }),
+  referee: one(referee, {
+    fields: [matchday.refereeId],
+    references: [referee.id],
+  }),
+  setupHelpers: many(matchdaySetupHelper),
+  games: many(matchdayGame),
+}));
+
+export const matchdaySetupHelperRelations = relations(
+  matchdaySetupHelper,
+  ({ one }) => ({
+    matchday: one(matchday, {
+      fields: [matchdaySetupHelper.matchdayId],
+      references: [matchday.id],
+    }),
+    setupHelper: one(setupHelper, {
+      fields: [matchdaySetupHelper.setupHelperId],
+      references: [setupHelper.id],
+    }),
+  }),
+);
+
+export const matchdayGameRelations = relations(matchdayGame, ({ one }) => ({
+  matchday: one(matchday, {
+    fields: [matchdayGame.matchdayId],
+    references: [matchday.id],
+  }),
+  game: one(game, {
+    fields: [matchdayGame.gameId],
+    references: [game.id],
+  }),
+}));

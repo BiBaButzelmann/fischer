@@ -7,12 +7,12 @@ import { Button } from "@/components/ui/button";
 import { Plus } from "lucide-react";
 import { Profile } from "@/db/types/profile";
 import { Tournament } from "@/db/types/tournament";
-import { TournamentWeek } from "@/db/types/tournamentWeek";
+import { TournamentWeekWithMatchdays } from "@/db/types/tournamentWeek";
 
 type Props = {
   adminProfiles: Profile[];
   tournament?: Tournament;
-  tournamentWeeks: TournamentWeek[];
+  tournamentWeeks: TournamentWeekWithMatchdays[];
 };
 
 export default function TournamentDetailsManager({
