@@ -1,20 +1,18 @@
 "use client";
 
 import { useState } from "react";
-import { GroupWithParticipants, GroupWithGames } from "@/db/types/group";
+import { GroupWithParticipantsAndGames } from "@/db/types/group";
 import { GroupPositionManager } from "./group-position-manager";
 import { Pairing } from "./pairing";
 
 type GroupPairingsContainerProps = {
   tournamentId: number;
-  groups: GroupWithParticipants[];
-  groupsWithGames: GroupWithGames[];
+  groups: GroupWithParticipantsAndGames[];
 };
 
 export function PairingContainer({
   tournamentId,
   groups,
-  groupsWithGames,
 }: GroupPairingsContainerProps) {
   const [selectedGroupId, setSelectedGroupId] = useState<number>(groups[0].id);
 
@@ -22,9 +20,7 @@ export function PairingContainer({
     setSelectedGroupId(groupId);
   };
 
-  const selectedGroupWithGames = groupsWithGames.find(
-    (group) => group.id === selectedGroupId,
-  );
+  const selectedGroup = groups.find((group) => group.id === selectedGroupId);
 
   return (
     <div className="flex gap-6">
@@ -39,7 +35,7 @@ export function PairingContainer({
 
       {/* Right side: Pairings for selected group */}
       <div className="flex-1 min-w-0">
-        <Pairing group={selectedGroupWithGames} />
+        <Pairing group={selectedGroup} />
       </div>
     </div>
   );

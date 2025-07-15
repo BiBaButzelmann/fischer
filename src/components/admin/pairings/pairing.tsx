@@ -1,11 +1,11 @@
 "use client";
 
-import { GroupWithGames } from "@/db/types/group";
-import { GameWithParticipants } from "@/db/types/game";
+import { GroupWithParticipantsAndGames } from "@/db/types/group";
+import { Game } from "@/db/types/game";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { ParticipantEntry } from "../groups/participant-entry";
 
-export function Pairing({ group }: { group?: GroupWithGames }) {
+export function Pairing({ group }: { group?: GroupWithParticipantsAndGames }) {
   if (!group) {
     return (
       <div className="flex flex-col items-center justify-center gap-4 p-8 text-gray-500">
@@ -29,13 +29,17 @@ export function Pairing({ group }: { group?: GroupWithGames }) {
     );
   }
 
+  const findParticipant = (participantId: number) => {
+    return group.participants.find((p) => p.id === participantId);
+  };
+
   const gamesByRound = group.games.reduce((acc, game) => {
     if (!acc.has(game.round)) {
       acc.set(game.round, []);
     }
     acc.get(game.round)!.push(game);
     return acc;
-  }, new Map<number, GameWithParticipants[]>());
+  }, new Map<number, Game[]>());
 
   const rounds = Array.from(gamesByRound.keys()).sort((a, b) => a - b);
 
@@ -106,7 +110,9 @@ export function Pairing({ group }: { group?: GroupWithGames }) {
                         </div>
                         <div>
                           <ParticipantEntry
-                            participant={game.whiteParticipant}
+                            participant={
+                              findParticipant(game.whiteParticipantId)!
+                            }
                             showMatchDays={false}
                             showFideRating={false}
                             showDwzRating={false}
@@ -114,7 +120,9 @@ export function Pairing({ group }: { group?: GroupWithGames }) {
                         </div>
                         <div>
                           <ParticipantEntry
-                            participant={game.blackParticipant}
+                            participant={
+                              findParticipant(game.blackParticipantId)!
+                            }
                             showMatchDays={false}
                             showFideRating={false}
                             showDwzRating={false}

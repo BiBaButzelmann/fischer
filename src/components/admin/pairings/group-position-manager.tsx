@@ -83,7 +83,6 @@ export function GroupPositionManager({
 
   const handleGroupChange = (value: string) => {
     setSelectedGroupId(value);
-
     onGroupChange(parseInt(value));
   };
 
