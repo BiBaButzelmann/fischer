@@ -1,9 +1,15 @@
 import { authWithRedirect } from "@/auth/utils";
 import { EditGroups } from "@/components/admin/groups/edit-groups";
 import { getLatestTournament } from "@/db/repositories/tournament";
+import { redirect } from "next/navigation";
 
 export default async function Page() {
-  await authWithRedirect();
+  const session = await authWithRedirect();
+
+  if (session.user.role !== "admin") {
+    redirect("/uebersicht");
+  }
+
   const tournament = await getLatestTournament();
   return (
     <div>

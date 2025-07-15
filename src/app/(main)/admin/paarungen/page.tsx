@@ -1,11 +1,18 @@
+import { authWithRedirect } from "@/auth/utils";
 import { PairingContainer } from "@/components/admin/pairings/pairing-container";
 import {
   getGroupsByTournamentId,
   getGroupsWithGamesByTournamentId,
 } from "@/db/repositories/group";
 import { getLatestTournament } from "@/db/repositories/tournament";
+import { redirect } from "next/navigation";
 
 export default async function Page() {
+  const session = await authWithRedirect();
+
+  if (session.user.role !== "admin") {
+    redirect("/uebersicht");
+  }
   const tournament = await getLatestTournament();
 
   if (!tournament) {

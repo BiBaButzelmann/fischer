@@ -28,9 +28,14 @@ import {
   LucideIcon,
 } from "lucide-react";
 import { UserRow } from "@/components/admin/user-row";
+import { redirect } from "next/navigation";
 
 export default async function Page() {
-  await authWithRedirect();
+  const session = await authWithRedirect();
+
+  if (session.user.role !== "admin") {
+    redirect("/uebersicht");
+  }
 
   const [tournament, allProfiles, disabledProfiles] = await Promise.all([
     getActiveTournament(),
