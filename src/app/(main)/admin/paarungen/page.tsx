@@ -21,8 +21,19 @@ export default async function Page() {
     getGroupsWithGamesByTournamentId(tournament.id),
   ]);
 
+  if (groups.length === 0) {
+    return (
+      <div className="p-8">
+        <h1 className="text-3xl font-bold text-gray-900 mb-2">Paarungen</h1>
+        <div className="text-center py-8 text-gray-500">
+          Keine Gruppen gefunden. Erstellen Sie zuerst Gruppen.
+        </div>
+      </div>
+    );
+  }
+
   return (
-    <div>
+    <div className="p-8">
       <div className="mb-8">
         <h1 className="text-3xl font-bold text-gray-900 mb-2">Paarungen</h1>
       </div>

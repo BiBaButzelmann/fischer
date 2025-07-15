@@ -16,25 +16,15 @@ export function PairingContainer({
   groups,
   groupsWithGames,
 }: GroupPairingsContainerProps) {
-  const [selectedGroupId, setSelectedGroupId] = useState<number | null>(
-    groups.length > 0 ? groups[0].id : null,
-  );
+  const [selectedGroupId, setSelectedGroupId] = useState<number>(groups[0].id);
 
-  const handleGroupChange = (groupId: number | null) => {
+  const handleGroupChange = (groupId: number) => {
     setSelectedGroupId(groupId);
   };
 
-  const selectedGroupWithGames = selectedGroupId
-    ? groupsWithGames.find((group) => group.id === selectedGroupId)
-    : undefined;
-
-  if (groups.length === 0) {
-    return (
-      <div className="text-center py-8 text-gray-500">
-        Keine Gruppen gefunden. Erstellen Sie zuerst Gruppen.
-      </div>
-    );
-  }
+  const selectedGroupWithGames = groupsWithGames.find(
+    (group) => group.id === selectedGroupId,
+  );
 
   return (
     <div className="flex gap-6">

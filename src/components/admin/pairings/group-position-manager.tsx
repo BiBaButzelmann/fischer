@@ -32,7 +32,7 @@ import { useSortable } from "@dnd-kit/sortable";
 type GroupPositionManagerProps = {
   tournamentId: number;
   groups: GroupWithParticipants[];
-  onGroupChange: (groupId: number | null) => void;
+  onGroupChange: (groupId: number) => void;
 };
 
 export function GroupPositionManager({
@@ -83,7 +83,9 @@ export function GroupPositionManager({
 
   const handleGroupChange = (value: string) => {
     setSelectedGroupId(value);
-    onGroupChange(value ? parseInt(value) : null);
+    if (value) {
+      onGroupChange(parseInt(value));
+    }
   };
 
   const handleDragStart = (event: DragStartEvent) => {
