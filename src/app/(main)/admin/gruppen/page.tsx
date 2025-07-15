@@ -1,5 +1,5 @@
 import { authWithRedirect } from "@/auth/utils";
-import { EditGroups } from "@/components/admin/tournament/edit-groups";
+import { EditGroups } from "@/components/admin/groups/edit-groups";
 import { getLatestTournament } from "@/db/repositories/tournament";
 
 export default async function Page() {

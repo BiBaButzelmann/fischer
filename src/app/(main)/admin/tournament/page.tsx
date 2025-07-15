@@ -1,5 +1,4 @@
 import { authWithRedirect } from "@/auth/utils";
-import { EditGroups } from "@/components/admin/tournament/edit-groups";
 import { PairingsOverview } from "@/components/admin/tournament/pairings-overview";
 import EditTournamentDetails from "@/components/admin/tournament/edit-tournament-details";
 import { TournamentStageManager } from "@/components/admin/tournament/tournament-stage-manager";

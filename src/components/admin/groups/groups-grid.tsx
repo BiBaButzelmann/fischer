@@ -23,12 +23,12 @@ import {
   useTransition,
 } from "react";
 import invariant from "tiny-invariant";
-import { ParticipantEntry } from "./participant-entry";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { generateGroups, updateGroups } from "@/actions/group";
 import { Button } from "@/components/ui/button";
 import { GridGroup } from "./types";
 import { GroupMatchDay } from "./group-match-day";
+import { ParticipantEntry } from "./participant-entry";
 
 export const UNASSIGNED_CONTAINER_ID = "unassigned-droppable";
 

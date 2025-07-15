@@ -6,7 +6,7 @@ import { MatchDay } from "@/db/types/group";
 import { ParticipantWithName } from "@/db/types/participant";
 import { and, eq } from "drizzle-orm";
 import { revalidatePath } from "next/cache";
-import { GridGroup } from "@/components/admin/tournament/types";
+import { GridGroup } from "@/components/admin/groups/types";
 import { group } from "@/db/schema/group";
 import { authWithRedirect } from "@/auth/utils";
 import { getTournamentById } from "@/db/repositories/tournament";
