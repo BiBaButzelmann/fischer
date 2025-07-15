@@ -2,7 +2,7 @@ export default function Turnierordnung() {
   return (
     <div className="w-full h-screen">
       <iframe
-        src="/pdfs/turnierordnung.pdf"
+        src="http://docs.google.com/gview?url=https://your-domain.com/pdfs/turnierordnung.pdf&embedded=true"
         className="w-full h-full self-center"
         style={{ border: "none" }}
       />
