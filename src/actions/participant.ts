@@ -51,6 +51,8 @@ export async function createParticipant(
       preferredMatchDay: data.preferredMatchDay,
       secondaryMatchDays: data.secondaryMatchDays,
       notAvailableDays: data.notAvailableDays,
+      zpsClubId: data.zpsClub,
+      zpsPlayerId: data.zpsPlayer,
     })
     .onConflictDoUpdate({
       target: [participant.tournamentId, participant.profileId],
@@ -65,6 +67,8 @@ export async function createParticipant(
         preferredMatchDay: data.preferredMatchDay,
         secondaryMatchDays: data.secondaryMatchDays,
         notAvailableDays: data.notAvailableDays,
+        zpsClubId: data.zpsClub,
+        zpsPlayerId: data.zpsPlayer,
       },
     });
 }
