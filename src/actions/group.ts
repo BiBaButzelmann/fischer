@@ -105,6 +105,9 @@ export async function updateGroupPositions(
   groupId: number,
   participants: ParticipantWithName[],
 ) {
+  const session = await authWithRedirect();
+  invariant(session?.user.role === "admin", "Unauthorized");
+
   for (const [index, p] of participants.entries()) {
     await db
       .update(participant)

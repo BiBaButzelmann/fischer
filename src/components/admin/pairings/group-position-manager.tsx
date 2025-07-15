@@ -83,9 +83,8 @@ export function GroupPositionManager({
 
   const handleGroupChange = (value: string) => {
     setSelectedGroupId(value);
-    if (value) {
-      onGroupChange(parseInt(value));
-    }
+
+    onGroupChange(parseInt(value));
   };
 
   const handleDragStart = (event: DragStartEvent) => {
@@ -135,7 +134,7 @@ export function GroupPositionManager({
   if (sortedGroups.length === 0) {
     return (
       <div className="text-center py-8 text-gray-500">
-        Keine Gruppen gefunden. Erstellen Sie zuerst Gruppen.
+        Keine Gruppen gefunden. Erstelle zuerst Gruppen.
       </div>
     );
   }

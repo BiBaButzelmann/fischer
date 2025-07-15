@@ -58,7 +58,7 @@ export default async function Page() {
         <Card>
           <CardContent className="pt-6">
             <p className="text-center text-gray-500">
-              Kein aktives Turnier gefunden. Erstellen Sie zuerst ein Turnier.
+              Kein aktives Turnier gefunden. Erstelle zuerst ein Turnier.
             </p>
           </CardContent>
         </Card>
