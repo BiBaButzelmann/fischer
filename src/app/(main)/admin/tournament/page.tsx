@@ -72,18 +72,7 @@ async function ManageTournament({ tournament }: { tournament?: Tournament }) {
           <EditTournamentDetails profiles={adminProfiles} />
         </CollapsibleContent>
       </Collapsible>
-      <Collapsible
-        defaultOpen={openCollapsible === "groups"}
-        className="border border-primary rounded-md p-4"
-      >
-        <CollapsibleTrigger className="w-full">
-          <div className="flex">
-            <span className="flex-grow text-left">Paarungen generieren</span>
-            <ChevronDownIcon />
-          </div>
-        </CollapsibleTrigger>
-        <CollapsibleContent className="mt-4"></CollapsibleContent>
-      </Collapsible>
+
       <Collapsible
         defaultOpen={false}
         className="border border-primary rounded-md p-4"
