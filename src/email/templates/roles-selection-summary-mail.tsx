@@ -37,7 +37,7 @@ export default function RoleSelectionSummaryMail({ name, roles }: Props) {
             <li>
               Bitte überweise die Startgebühr von 60€ auf folgendes Konto:
               <br />
-              IBAN: <strong>DE86 2005 0550 1216 1326 86</strong>
+              IBAN: <strong>DE86 2005 0550 1216 1326 86 </strong>
               Verwendungszweck: <strong>Klubturnier 2025 [Vorname Name]</strong>
             </li>
           )}
