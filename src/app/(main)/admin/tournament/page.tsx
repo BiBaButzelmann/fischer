@@ -1,6 +1,4 @@
 import { authWithRedirect } from "@/auth/utils";
-import { EditGroups } from "@/components/admin/tournament/edit-groups";
-import { PairingsOverview } from "@/components/admin/tournament/pairings-overview";
 import EditTournamentDetails from "@/components/admin/tournament/edit-tournament-details";
 import { TournamentStageManager } from "@/components/admin/tournament/tournament-stage-manager";
 import {
@@ -74,34 +72,7 @@ async function ManageTournament({ tournament }: { tournament?: Tournament }) {
           <EditTournamentDetails profiles={adminProfiles} />
         </CollapsibleContent>
       </Collapsible>
-      <Collapsible
-        defaultOpen={openCollapsible === "groups"}
-        className="border border-primary rounded-md p-4"
-      >
-        <CollapsibleTrigger className="w-full">
-          <div className="flex">
-            <span className="flex-grow text-left">Gruppen verwalten</span>
-            <ChevronDownIcon />
-          </div>
-        </CollapsibleTrigger>
-        <CollapsibleContent className="mt-4">
-          {tournament ? <EditGroups tournament={tournament} /> : null}
-        </CollapsibleContent>
-      </Collapsible>
-      <Collapsible
-        defaultOpen={openCollapsible === "pairings"}
-        className="border border-primary rounded-md p-4"
-      >
-        <CollapsibleTrigger className="w-full">
-          <div className="flex">
-            <span className="flex-grow text-left">Paarungen generieren</span>
-            <ChevronDownIcon />
-          </div>
-        </CollapsibleTrigger>
-        <CollapsibleContent className="mt-4">
-          {tournament ? <PairingsOverview tournament={tournament} /> : null}
-        </CollapsibleContent>
-      </Collapsible>
+
       <Collapsible
         defaultOpen={false}
         className="border border-primary rounded-md p-4"

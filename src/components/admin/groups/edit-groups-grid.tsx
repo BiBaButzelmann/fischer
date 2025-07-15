@@ -1,7 +1,7 @@
 import { ParticipantWithName } from "@/db/types/participant";
-import { GroupsGrid } from "./groups-grid";
 import { GroupWithParticipants } from "@/db/types/group";
 import { GridGroup } from "./types";
+import { GroupsGrid } from "./groups-grid";
 
 export async function EditGroupsGrid({
   tournamentId,

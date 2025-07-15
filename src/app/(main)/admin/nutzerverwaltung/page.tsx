@@ -28,9 +28,14 @@ import {
   LucideIcon,
 } from "lucide-react";
 import { UserRow } from "@/components/admin/user-row";
+import { redirect } from "next/navigation";
 
 export default async function Page() {
-  await authWithRedirect();
+  const session = await authWithRedirect();
+
+  if (session.user.role !== "admin") {
+    redirect("/uebersicht");
+  }
 
   const [tournament, allProfiles, disabledProfiles] = await Promise.all([
     getActiveTournament(),
@@ -53,7 +58,7 @@ export default async function Page() {
         <Card>
           <CardContent className="pt-6">
             <p className="text-center text-gray-500">
-              Kein aktives Turnier gefunden. Erstellen Sie zuerst ein Turnier.
+              Kein aktives Turnier gefunden. Erstelle zuerst ein Turnier.
             </p>
           </CardContent>
         </Card>

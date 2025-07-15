@@ -1,7 +1,7 @@
 import { InferEnum, InferSelectModel } from "drizzle-orm";
 import { group } from "../schema/group";
 import { ParticipantWithName } from "./participant";
-import { GameWithParticipants } from "./game";
+import { GameWithParticipants, Game } from "./game";
 
 export type MatchDay = InferEnum<typeof group.matchDay>;
 
@@ -13,4 +13,9 @@ export type GroupWithParticipants = Group & {
 
 export type GroupWithGames = Group & {
   games: GameWithParticipants[];
+};
+
+export type GroupWithParticipantsAndGames = Group & {
+  participants: ParticipantWithName[];
+  games: Game[];
 };

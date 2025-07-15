@@ -1,4 +1,4 @@
-import { EditGroupsGrid } from "./edit-groups-grid";
+import { EditGroupsGrid } from "../groups/edit-groups-grid";
 import { Tournament } from "@/db/types/tournament";
 import { getGroupsByTournamentId } from "@/db/repositories/group";
 import { getUnassignedParticipantsByTournamentId } from "@/db/repositories/participant";

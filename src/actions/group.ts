@@ -6,7 +6,7 @@ import { MatchDay } from "@/db/types/group";
 import { ParticipantWithName } from "@/db/types/participant";
 import { and, eq } from "drizzle-orm";
 import { revalidatePath } from "next/cache";
-import { GridGroup } from "@/components/admin/tournament/types";
+import { GridGroup } from "@/components/admin/groups/types";
 import { group } from "@/db/schema/group";
 import { authWithRedirect } from "@/auth/utils";
 import { getTournamentById } from "@/db/repositories/tournament";
@@ -64,7 +64,6 @@ export async function generateGroups(tournamentId: number) {
   revalidatePath("/admin/tournament");
 }
 
-// TODO: maybe add flag to only update participant if participant was moved to a different group/position
 export async function updateGroups(
   tournamentId: number,
   groups: GridGroup[],
@@ -89,23 +88,43 @@ export async function updateGroups(
   }
 
   for (const insertGroup of groups) {
-    for (const [index, p] of insertGroup.participants.entries()) {
-      await db
-        .update(participant)
-        .set({
-          groupId: insertGroup.id,
-          groupPosition: index + 1,
-        })
-        .where(
-          and(
-            eq(participant.tournamentId, tournamentId),
-            eq(participant.profileId, p.profileId),
-          ),
-        );
+    if (insertGroup.participants.length > 0) {
+      await updateGroupPositions(
+        tournamentId,
+        insertGroup.id,
+        insertGroup.participants,
+      );
     }
   }
 
   revalidatePath("/admin/tournament");
+}
+
+export async function updateGroupPositions(
+  tournamentId: number,
+  groupId: number,
+  participants: ParticipantWithName[],
+) {
+  const session = await authWithRedirect();
+  invariant(session?.user.role === "admin", "Unauthorized");
+
+  for (const [index, p] of participants.entries()) {
+    await db
+      .update(participant)
+      .set({
+        groupId: groupId,
+        groupPosition: index + 1,
+      })
+      .where(
+        and(
+          eq(participant.tournamentId, tournamentId),
+          eq(participant.profileId, p.profileId),
+        ),
+      );
+  }
+
+  revalidatePath("/admin/tournament");
+  revalidatePath("/admin/paarungen");
 }
 
 export async function updateGroupMatchDay(
