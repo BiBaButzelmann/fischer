@@ -41,6 +41,14 @@ export function TournamentWeeks({ tournamentWeeks }: Props) {
 
   const schedule = getSchedule();
 
+  if (tournamentWeeks.length === 0) {
+    return (
+      <div className="text-center py-8 text-muted-foreground">
+        Keine Turnierwochen verfügbar
+      </div>
+    );
+  }
+
   return (
     <Table className="w-full">
       <TableHeader>
