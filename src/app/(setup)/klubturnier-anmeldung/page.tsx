@@ -3,7 +3,6 @@ import { RolesManager } from "@/components/klubturnier-anmeldung/roles-manager";
 import { getProfileByUserId } from "@/db/repositories/profile";
 import { getRolesDataByProfileIdAndTournamentId } from "@/db/repositories/role";
 import { getLatestTournament } from "@/db/repositories/tournament";
-import { getTournamentWeeksByTournamentId } from "@/db/repositories/tournamentWeek";
 import { redirect } from "next/navigation";
 
 export default async function RolesPage() {
