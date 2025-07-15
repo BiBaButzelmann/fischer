@@ -53,6 +53,7 @@ export async function createParticipant(
       notAvailableDays: data.notAvailableDays,
       zpsClubId: data.zpsClub,
       zpsPlayerId: data.zpsPlayer,
+      entryFeePayed: data.chessClubType === "other" ? false : null,
     })
     .onConflictDoUpdate({
       target: [participant.tournamentId, participant.profileId],
@@ -69,6 +70,7 @@ export async function createParticipant(
         notAvailableDays: data.notAvailableDays,
         zpsClubId: data.zpsClub,
         zpsPlayerId: data.zpsPlayer,
+        entryFeePayed: data.chessClubType === "other" ? false : null,
       },
     });
 }

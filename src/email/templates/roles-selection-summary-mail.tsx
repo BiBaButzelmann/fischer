@@ -1,8 +1,4 @@
-import {
-  DEFAULT_CLUB_KEY,
-  DEFAULT_CLUB_LABEL,
-  matchDays,
-} from "@/constants/constants";
+import { DEFAULT_CLUB_LABEL, matchDays } from "@/constants/constants";
 import { MatchDay } from "@/db/types/group";
 import { RolesData } from "@/db/types/role";
 
@@ -33,11 +29,11 @@ export default function RoleSelectionSummaryMail({ name, roles }: Props) {
             Alternative Spieltage:{" "}
             {p.secondaryMatchDays.map(translateMatchDay).join(", ")}
           </li>
-          {p.chessClub !== DEFAULT_CLUB_KEY && p.entryFeePayed === false && (
+          {p.chessClub !== DEFAULT_CLUB_LABEL && p.entryFeePayed === false && (
             <li>
               Bitte überweise die Startgebühr von 60€ auf folgendes Konto:
               <br />
-              IBAN: <strong>DE86 2005 0550 1216 1326 86</strong>
+              IBAN: <strong>DE86 2005 0550 1216 1326 86 </strong>
               Verwendungszweck: <strong>Klubturnier 2025 [Vorname Name]</strong>
             </li>
           )}
