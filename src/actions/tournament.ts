@@ -16,6 +16,7 @@ import { eq } from "drizzle-orm";
 import { TournamentStage } from "@/db/types/tournament";
 import { DateTime } from "luxon";
 import { matchday } from "@/db/schema/matchday";
+import { isHoliday } from "@/lib/holidays";
 
 export async function createTournament(
   formData: z.infer<typeof createTournamentFormSchema>,
@@ -176,8 +177,28 @@ function getMatchDays(
   >["selectedCalendarWeeks"],
 ) {
   return insertedTournamentWeeks.flatMap((week, index) => {
-    return [
-      {
+    const tuesday = DateTime.now()
+      .set({
+        weekNumber: week.weekNumber,
+        weekday: 2,
+      })
+      .toJSDate();
+    const thursday = DateTime.now()
+      .set({
+        weekNumber: week.weekNumber,
+        weekday: 4,
+      })
+      .toJSDate();
+    const friday = DateTime.now()
+      .set({
+        weekNumber: week.weekNumber,
+        weekday: 5,
+      })
+      .toJSDate();
+
+    const matchDays: (typeof matchday.$inferInsert)[] = [];
+    if (!isHoliday(tuesday)) {
+      matchDays.push({
         tournamentId,
         tournamentWeekId: week.id,
         matchDay: "tuesday",
@@ -188,8 +209,10 @@ function getMatchDays(
           })
           .toJSDate(),
         refereeNeeded: selectedCalendarWeeks[index].tuesday.refereeNeeded,
-      },
-      {
+      });
+    }
+    if (!isHoliday(thursday)) {
+      matchDays.push({
         tournamentId,
         tournamentWeekId: week.id,
         matchDay: "thursday",
@@ -200,8 +223,10 @@ function getMatchDays(
           })
           .toJSDate(),
         refereeNeeded: selectedCalendarWeeks[index].thursday.refereeNeeded,
-      },
-      {
+      });
+    }
+    if (!isHoliday(friday)) {
+      matchDays.push({
         tournamentId,
         tournamentWeekId: week.id,
         matchDay: "friday",
@@ -212,7 +237,8 @@ function getMatchDays(
           })
           .toJSDate(),
         refereeNeeded: selectedCalendarWeeks[index].friday.refereeNeeded,
-      },
-    ] as (typeof matchday.$inferInsert)[];
+      });
+    }
+    return matchDays;
   });
 }
