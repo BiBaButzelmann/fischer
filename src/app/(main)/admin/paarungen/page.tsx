@@ -1,4 +1,4 @@
-import { GroupPairings } from "@/components/admin/pairings/group-pairings";
+import { PairingContainer } from "@/components/admin/pairings/pairing-container";
 import {
   getGroupsByTournamentId,
   getGroupsWithGamesByTournamentId,
@@ -26,7 +26,7 @@ export default async function Page() {
       <div className="mb-8">
         <h1 className="text-3xl font-bold text-gray-900 mb-2">Paarungen</h1>
       </div>
-      <GroupPairings
+      <PairingContainer
         tournamentId={tournament.id}
         groups={groups}
         groupsWithGames={groupsWithGames}

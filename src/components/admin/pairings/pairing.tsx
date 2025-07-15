@@ -5,7 +5,7 @@ import { GameWithParticipants } from "@/db/types/game";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { ParticipantEntry } from "../groups/participant-entry";
 
-export function SingleGroupPairings({ group }: { group?: GroupWithGames }) {
+export function Pairing({ group }: { group?: GroupWithGames }) {
   if (!group) {
     return (
       <div className="flex flex-col items-center justify-center gap-4 p-8 text-gray-500">
@@ -29,7 +29,6 @@ export function SingleGroupPairings({ group }: { group?: GroupWithGames }) {
     );
   }
 
-  // Group games by round
   const gamesByRound = group.games.reduce((acc, game) => {
     if (!acc.has(game.round)) {
       acc.set(game.round, []);
@@ -87,10 +86,10 @@ export function SingleGroupPairings({ group }: { group?: GroupWithGames }) {
                 {/* Table Content */}
                 <div className="overflow-hidden">
                   {/* Table Header */}
-                  <div className="grid grid-cols-3 gap-6 px-6 py-3 bg-gray-50 border-b border-gray-200 font-semibold text-sm text-gray-700">
-                    <div>Bo.</div>
-                    <div>White</div>
-                    <div>Black</div>
+                  <div className="grid grid-cols-[80px_1fr_1fr] gap-6 px-6 py-3 bg-gray-50 border-b border-gray-200 font-semibold text-sm text-gray-700">
+                    <div>Brett</div>
+                    <div>Weiß</div>
+                    <div>Schwarz</div>
                   </div>
 
                   {/* Table Rows */}
@@ -98,7 +97,7 @@ export function SingleGroupPairings({ group }: { group?: GroupWithGames }) {
                     {games.map((game, index) => (
                       <div
                         key={game.id}
-                        className={`grid grid-cols-3 gap-6 px-6 py-4 hover:bg-gray-50 transition-colors ${
+                        className={`grid grid-cols-[80px_1fr_1fr] gap-6 px-6 py-4 hover:bg-gray-50 transition-colors ${
                           index % 2 === 0 ? "bg-white" : "bg-gray-50/50"
                         }`}
                       >

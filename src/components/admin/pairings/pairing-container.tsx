@@ -3,7 +3,7 @@
 import { useState } from "react";
 import { GroupWithParticipants, GroupWithGames } from "@/db/types/group";
 import { GroupPositionManager } from "./group-position-manager";
-import { SingleGroupPairings } from "./single-group-pairings";
+import { Pairing } from "./pairing";
 
 type GroupPairingsContainerProps = {
   tournamentId: number;
@@ -11,7 +11,7 @@ type GroupPairingsContainerProps = {
   groupsWithGames: GroupWithGames[];
 };
 
-export function GroupPairings({
+export function PairingContainer({
   tournamentId,
   groups,
   groupsWithGames,
@@ -49,7 +49,7 @@ export function GroupPairings({
 
       {/* Right side: Pairings for selected group */}
       <div className="flex-1 min-w-0">
-        <SingleGroupPairings group={selectedGroupWithGames} />
+        <Pairing group={selectedGroupWithGames} />
       </div>
     </div>
   );
