@@ -1,12 +1,7 @@
 import { relations } from "drizzle-orm";
-import {
-  boolean,
-  integer,
-  pgEnum,
-  pgTable,
-  smallint,
-} from "drizzle-orm/pg-core";
+import { integer, pgEnum, pgTable, smallint } from "drizzle-orm/pg-core";
 import { tournament } from "./tournament";
+import { matchday } from "./matchday";
 
 export const tournamentWeekStatus = pgEnum("tournament_week_status", [
   "regular",
@@ -18,14 +13,15 @@ export const tournamentWeek = pgTable("tournament_week", {
   tournamentId: integer("tournament_id").notNull(),
   status: tournamentWeekStatus("status").default("regular").notNull(),
   weekNumber: smallint("week_number").notNull(),
-  refereeNeededTuesday: boolean("referee_needed_tuesday").notNull(),
-  refereeNeededThursday: boolean("referee_needed_thursday").notNull(),
-  refereeNeededFriday: boolean("referee_needed_friday").notNull(),
 });
 
-export const tournamentWeekRelations = relations(tournamentWeek, ({ one }) => ({
-  tournament: one(tournament, {
-    fields: [tournamentWeek.tournamentId],
-    references: [tournament.id],
+export const tournamentWeekRelations = relations(
+  tournamentWeek,
+  ({ one, many }) => ({
+    tournament: one(tournament, {
+      fields: [tournamentWeek.tournamentId],
+      references: [tournament.id],
+    }),
+    matchdays: many(matchday),
   }),
-}));
+);

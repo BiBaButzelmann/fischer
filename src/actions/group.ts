@@ -147,7 +147,7 @@ function getParticipantsGroupDistribution(
   unassignedParticipants: ParticipantWithName[];
 } {
   // assume participants are already sorted by fide rating
-  const totalGroups = Math.floor(participants.length / groupSize);
+  const totalGroups = Math.ceil(participants.length / groupSize);
   const totalAssignable = totalGroups * groupSize;
 
   const participantGroups: ParticipantWithName[][] = [];

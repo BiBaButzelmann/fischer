@@ -1,2 +1,0 @@
-CREATE TYPE "public"."tournament_stage" AS ENUM('registration', 'running', 'done');--> statement-breakpoint
-ALTER TABLE "tournament" ADD COLUMN "stage" "tournament_stage" DEFAULT 'registration' NOT NULL;

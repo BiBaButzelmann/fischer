@@ -1,1 +1,0 @@
-ALTER TABLE "profile" ALTER COLUMN "fide_id" DROP NOT NULL;

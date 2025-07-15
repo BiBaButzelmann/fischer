@@ -12,6 +12,7 @@ import * as setupHelperSchema from "./schema/setupHelper";
 import * as refereeSchema from "./schema/referee";
 import * as jurorSchema from "./schema/juror";
 import * as matchEnteringHelperSchema from "./schema/matchEnteringHelper";
+import * as matchdaySchema from "./schema/matchday";
 
 const pool = new Pool({ connectionString: process.env.DATABASE_URL! });
 
@@ -29,5 +30,6 @@ export const db = drizzle(pool, {
     ...refereeSchema,
     ...jurorSchema,
     ...matchEnteringHelperSchema,
+    ...matchdaySchema,
   },
 });

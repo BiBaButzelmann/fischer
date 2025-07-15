@@ -1,1 +1,0 @@
-ALTER TABLE "tournament" ADD COLUMN "started" boolean DEFAULT false NOT NULL;

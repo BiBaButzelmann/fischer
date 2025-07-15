@@ -1,1 +1,0 @@
-ALTER TABLE "participant" ADD COLUMN "title" text;

@@ -14,7 +14,7 @@ import {
 } from "@/components/ui/form";
 import { Profile } from "@/db/types/profile";
 import { Tournament } from "@/db/types/tournament";
-import { TournamentWeek } from "@/db/types/tournamentWeek";
+import { TournamentWeekWithMatchdays } from "@/db/types/tournamentWeek";
 import {
   Select,
   SelectContent,
@@ -34,7 +34,7 @@ import { updateTournament } from "@/actions/tournament";
 type Props = {
   profiles: Profile[];
   tournament?: Tournament;
-  tournamentWeeks: TournamentWeek[];
+  tournamentWeeks: TournamentWeekWithMatchdays[];
 };
 export default function EditTournamentDetails({
   profiles,
@@ -43,19 +43,18 @@ export default function EditTournamentDetails({
 }: Props) {
   const [loading, startTransition] = useTransition();
 
-  // Convert tournament weeks to the format expected by the form
   const selectedCalendarWeeks = tournamentWeeks.map((week, index) => ({
     index,
     status: week.status as "regular" | "catch-up",
     weekNumber: week.weekNumber,
     tuesday: {
-      refereeNeeded: week.refereeNeededTuesday,
+      refereeNeeded: week.matchdays[0]?.refereeNeeded ?? false,
     },
     thursday: {
-      refereeNeeded: week.refereeNeededThursday,
+      refereeNeeded: week.matchdays[1]?.refereeNeeded ?? false,
     },
     friday: {
-      refereeNeeded: week.refereeNeededFriday,
+      refereeNeeded: week.matchdays[2]?.refereeNeeded ?? false,
     },
   }));
 
