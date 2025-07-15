@@ -1,13 +1,23 @@
-DO $$
-BEGIN
+DO $$ BEGIN
     CREATE TYPE "public"."result" AS ENUM('draw', 'white_wins', 'black_wins');
-	CREATE TYPE "public"."match_day" AS ENUM('tuesday', 'thursday', 'friday');
-	CREATE TYPE "public"."tournament_stage" AS ENUM('registration', 'running', 'done');
-	CREATE TYPE "public"."tournament_week_status" AS ENUM('regular', 'catch-up');
 EXCEPTION
     WHEN duplicate_object THEN null;
-END $$;
-
+END $$;--> statement-breakpoint
+DO $$ BEGIN
+    CREATE TYPE "public"."match_day" AS ENUM('tuesday', 'thursday', 'friday');
+EXCEPTION
+    WHEN duplicate_object THEN null;
+END $$;--> statement-breakpoint
+DO $$ BEGIN
+    CREATE TYPE "public"."tournament_stage" AS ENUM('registration', 'running', 'done');
+EXCEPTION
+    WHEN duplicate_object THEN null;
+END $$;--> statement-breakpoint
+DO $$ BEGIN
+    CREATE TYPE "public"."tournament_week_status" AS ENUM('regular', 'catch-up');
+EXCEPTION
+    WHEN duplicate_object THEN null;
+END $$;--> statement-breakpoint
 CREATE TABLE IF NOT EXISTS "account" (
 	"id" text PRIMARY KEY NOT NULL,
 	"account_id" text NOT NULL,
@@ -248,41 +258,25 @@ CREATE TABLE IF NOT EXISTS "tournament_week" (
 	"id" integer PRIMARY KEY GENERATED ALWAYS AS IDENTITY (sequence name "tournament_week_id_seq" INCREMENT BY 1 MINVALUE 1 MAXVALUE 2147483647 START WITH 1 CACHE 1),
 	"tournament_id" integer NOT NULL,
 	"status" "tournament_week_status" DEFAULT 'regular' NOT NULL,
-	"week_number" smallint NOT NULL
+	"week_number" smallint NOT NULL,
+	"referee_needed_tuesday" boolean NOT NULL,
+	"referee_needed_thursday" boolean NOT NULL,
+	"referee_needed_friday" boolean NOT NULL
 );
 --> statement-breakpoint
-DO $$
-BEGIN
-    IF NOT EXISTS (SELECT 1 FROM pg_constraint WHERE conname = 'account_user_id_user_id_fk') THEN
-        ALTER TABLE "account" ADD CONSTRAINT "account_user_id_user_id_fk" FOREIGN KEY ("user_id") REFERENCES "public"."user"("id") ON DELETE cascade ON UPDATE no action;
-    END IF;
+DO $$ BEGIN
+    ALTER TABLE "account" ADD CONSTRAINT "account_user_id_user_id_fk" FOREIGN KEY ("user_id") REFERENCES "public"."user"("id") ON DELETE cascade ON UPDATE no action;
 EXCEPTION
     WHEN duplicate_object THEN null;
-END $$;
---> statement-breakpoint
-DO $$
-BEGIN
-    IF NOT EXISTS (SELECT 1 FROM pg_constraint WHERE conname = 'session_user_id_user_id_fk') THEN
-        ALTER TABLE "session" ADD CONSTRAINT "session_user_id_user_id_fk" FOREIGN KEY ("user_id") REFERENCES "public"."user"("id") ON DELETE cascade ON UPDATE no action;
-    END IF;
+END $$;--> statement-breakpoint
+DO $$ BEGIN
+    ALTER TABLE "session" ADD CONSTRAINT "session_user_id_user_id_fk" FOREIGN KEY ("user_id") REFERENCES "public"."user"("id") ON DELETE cascade ON UPDATE no action;
 EXCEPTION
     WHEN duplicate_object THEN null;
-END $$;
---> statement-breakpoint
-DO $$
-BEGIN
-    IF NOT EXISTS (SELECT 1 FROM pg_constraint WHERE conname = 'pgn_game_id_game_id_fk') THEN
-        ALTER TABLE "pgn" ADD CONSTRAINT "pgn_game_id_game_id_fk" FOREIGN KEY ("game_id") REFERENCES "public"."game"("id") ON DELETE cascade ON UPDATE no action;
-    END IF;
+END $$;--> statement-breakpoint
+DO $$ BEGIN
+    ALTER TABLE "pgn" ADD CONSTRAINT "pgn_game_id_game_id_fk" FOREIGN KEY ("game_id") REFERENCES "public"."game"("id") ON DELETE cascade ON UPDATE no action;
 EXCEPTION
     WHEN duplicate_object THEN null;
-END $$;
---> statement-breakpoint
-DO $$
-BEGIN
-    IF NOT EXISTS (SELECT 1 FROM pg_indexes WHERE indexname = 'pgn_game_id_unique') THEN
-        CREATE UNIQUE INDEX "pgn_game_id_unique" ON "pgn" USING btree ("game_id");
-    END IF;
-EXCEPTION
-    WHEN duplicate_object THEN null;
-END $$;
+END $$;--> statement-breakpoint
+CREATE UNIQUE INDEX IF NOT EXISTS "pgn_game_id_unique" ON "pgn" USING btree ("game_id");

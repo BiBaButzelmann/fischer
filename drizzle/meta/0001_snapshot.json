@@ -1,6 +1,6 @@
 {
-  "id": "c5b920f0-3636-46ec-8fbd-db6d213e8137",
-  "prevId": "00000000-0000-0000-0000-000000000000",
+  "id": "f39ec664-6dec-411d-8c51-ab0d137e7cd4",
+  "prevId": "c5b920f0-3636-46ec-8fbd-db6d213e8137",
   "version": "7",
   "dialect": "postgresql",
   "tables": {
@@ -1586,24 +1586,6 @@
         "week_number": {
           "name": "week_number",
           "type": "smallint",
-          "primaryKey": false,
-          "notNull": true
-        },
-        "referee_needed_tuesday": {
-          "name": "referee_needed_tuesday",
-          "type": "boolean",
-          "primaryKey": false,
-          "notNull": true
-        },
-        "referee_needed_thursday": {
-          "name": "referee_needed_thursday",
-          "type": "boolean",
-          "primaryKey": false,
-          "notNull": true
-        },
-        "referee_needed_friday": {
-          "name": "referee_needed_friday",
-          "type": "boolean",
           "primaryKey": false,
           "notNull": true
         }
