@@ -1,5 +1,4 @@
 import { authWithRedirect } from "@/auth/utils";
-import { PairingsOverview } from "@/components/admin/tournament/pairings-overview";
 import EditTournamentDetails from "@/components/admin/tournament/edit-tournament-details";
 import { TournamentStageManager } from "@/components/admin/tournament/tournament-stage-manager";
 import {
@@ -83,9 +82,7 @@ async function ManageTournament({ tournament }: { tournament?: Tournament }) {
             <ChevronDownIcon />
           </div>
         </CollapsibleTrigger>
-        <CollapsibleContent className="mt-4">
-          {tournament ? <PairingsOverview tournament={tournament} /> : null}
-        </CollapsibleContent>
+        <CollapsibleContent className="mt-4"></CollapsibleContent>
       </Collapsible>
       <Collapsible
         defaultOpen={false}

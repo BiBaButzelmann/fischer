@@ -120,6 +120,12 @@ export async function AppSidebar() {
                   <span>Gruppen verwalten</span>
                 </Link>
               </SidebarMenuButton>
+              <SidebarMenuButton asChild>
+                <Link href="/admin/paarungen">
+                  <Users />
+                  <span>Paarungen verwalten</span>
+                </Link>
+              </SidebarMenuButton>
             </SidebarGroupContent>
           </SidebarGroup>
         ) : null}
