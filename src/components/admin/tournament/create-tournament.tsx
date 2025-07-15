@@ -13,8 +13,6 @@ import {
   FormMessage,
 } from "@/components/ui/form";
 import { Profile } from "@/db/types/profile";
-import { Tournament } from "@/db/types/tournament";
-import { TournamentWeek } from "@/db/types/tournamentWeek";
 import {
   Select,
   SelectContent,
@@ -26,84 +24,62 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import { useTransition } from "react";
 import { Button } from "@/components/ui/button";
 import { EditTournamentWeeks } from "./edit-tournament-weeks/edit-tournament-weeks";
-import { updateTournamentFormSchema } from "@/schema/tournament";
+import { createTournamentFormSchema } from "@/schema/tournament";
 import { z } from "zod";
 import { DEFAULT_CLUB_LABEL } from "@/constants/constants";
-import { updateTournament } from "@/actions/tournament";
+import { createTournament } from "@/actions/tournament";
 
 type Props = {
   profiles: Profile[];
-  tournament?: Tournament;
-  tournamentWeeks: TournamentWeek[];
+  onCancel: () => void;
 };
-export default function EditTournamentDetails({
-  profiles,
-  tournament,
-  tournamentWeeks,
-}: Props) {
+
+export default function CreateTournament({ profiles, onCancel }: Props) {
   const [loading, startTransition] = useTransition();
 
-  // Convert tournament weeks to the format expected by the form
-  const selectedCalendarWeeks = tournamentWeeks.map((week, index) => ({
-    index,
-    status: week.status as "regular" | "catch-up",
-    weekNumber: week.weekNumber,
-    tuesday: {
-      refereeNeeded: week.refereeNeededTuesday,
-    },
-    thursday: {
-      refereeNeeded: week.refereeNeededThursday,
-    },
-    friday: {
-      refereeNeeded: week.refereeNeededFriday,
-    },
-  }));
-
   const form = useForm({
-    resolver: zodResolver(updateTournamentFormSchema),
+    resolver: zodResolver(createTournamentFormSchema),
     defaultValues: {
-      clubName: tournament?.club ?? DEFAULT_CLUB_LABEL,
-      tournamentType: tournament?.type ?? "Rundenturnier",
-      numberOfRounds: tournament?.numberOfRounds ?? 9,
+      clubName: DEFAULT_CLUB_LABEL,
+      tournamentType: "Rundenturnier",
+      numberOfRounds: 9,
       timeLimit:
-        tournament?.timeLimit ??
         "40 Züge in 90 Minuten, danach 0 Züge in 0 Minuten, 30 Minuten für die letzte Phase, Zugabe pro Zug in Sekunden: 30",
-      location: tournament?.location ?? "Hamburg",
-      tieBreakMethod: tournament?.tieBreakMethod ?? "Sonneborn-Berger",
-      softwareUsed: tournament?.softwareUsed ?? "Swiss Manager",
-      allClocksDigital: tournament?.allClocksDigital ?? true,
-      phone: tournament?.phone ?? "040 20981411",
-      email: tournament?.email ?? "klubturnier@hsk1830.de",
-      startDate: tournament?.startDate
-        ? tournament.startDate.toISOString().split("T")[0]
-        : "",
-      endDate: tournament?.endDate
-        ? tournament.endDate.toISOString().split("T")[0]
-        : "",
-      endRegistrationDate: tournament?.endRegistrationDate
-        ? tournament.endRegistrationDate.toISOString().split("T")[0]
-        : "",
-      organizerProfileId: tournament?.organizerProfileId?.toString() ?? "",
-      selectedCalendarWeeks,
+      location: "Hamburg",
+      tieBreakMethod: "Sonneborn-Berger",
+      softwareUsed: "Swiss Manager",
+      allClocksDigital: true,
+      phone: "040 20981411",
+      email: "klubturnier@hsk1830.de",
+      startDate: "",
+      endDate: "",
+      endRegistrationDate: "",
+      organizerProfileId: "",
+      selectedCalendarWeeks: [],
       pgnViewerPassword: "",
     },
   });
 
   const handleSubmit = async (
-    data: z.infer<typeof updateTournamentFormSchema>,
+    data: z.infer<typeof createTournamentFormSchema>,
   ) => {
-    if (!tournament?.id) {
-      console.error("No tournament ID available for update");
-      return;
-    }
-
     startTransition(async () => {
-      await updateTournament(tournament.id, data);
+      await createTournament(data);
+      onCancel(); // Close the create form after successful creation
     });
   };
 
   return (
-    <div>
+    <div className="space-y-4">
+      <div className="flex items-center justify-between">
+        <h2 className="text-2xl font-semibold text-gray-800">
+          Neues Turnier erstellen
+        </h2>
+        <Button variant="outline" onClick={onCancel}>
+          Abbrechen
+        </Button>
+      </div>
+
       <Form {...form}>
         <form onSubmit={form.handleSubmit(handleSubmit)} className="space-y-4">
           {/* Teil 1: Turnierinformationen */}
@@ -395,17 +371,11 @@ export default function EditTournamentDetails({
               name="pgnViewerPassword"
               render={({ field }) => (
                 <FormItem>
-                  <FormLabel required={!tournament}>
-                    PGN Viewer Passwort {tournament ? "(optional)" : ""}
-                  </FormLabel>
+                  <FormLabel required>PGN Viewer Passwort</FormLabel>
                   <FormControl>
                     <Input
                       type="password"
-                      placeholder={
-                        tournament
-                          ? "Leer lassen, um das bestehende Passwort zu behalten"
-                          : "Mindestens 6 Zeichen lang"
-                      }
+                      placeholder="Mindestens 6 Zeichen lang"
                       {...field}
                     />
                   </FormControl>
@@ -419,9 +389,14 @@ export default function EditTournamentDetails({
             />
           </div>
 
-          <Button type="submit" disabled={loading}>
-            {loading ? "Speichere..." : "Turnier aktualisieren"}
-          </Button>
+          <div className="flex gap-2">
+            <Button type="submit" disabled={loading}>
+              {loading ? "Erstelle..." : "Turnier erstellen"}
+            </Button>
+            <Button type="button" variant="outline" onClick={onCancel}>
+              Abbrechen
+            </Button>
+          </div>
         </form>
       </Form>
     </div>
