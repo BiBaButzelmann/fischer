@@ -1,1 +1,0 @@
-ALTER TABLE "group" ADD COLUMN "group_name2" text NOT NULL;

@@ -1,1 +1,0 @@
-ALTER TABLE "game" ALTER COLUMN "scheduled" SET DATA TYPE timestamp with time zone;

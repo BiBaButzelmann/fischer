@@ -1,1 +1,0 @@
-ALTER TABLE "tournament_week" RENAME COLUMN "referee_needed_saturday" TO "referee_needed_friday";

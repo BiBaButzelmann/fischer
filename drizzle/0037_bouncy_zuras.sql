@@ -1,1 +1,0 @@
-ALTER TABLE "tournament" ALTER COLUMN "pgn_viewer_password" SET NOT NULL;
