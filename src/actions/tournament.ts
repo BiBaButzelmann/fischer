@@ -201,7 +201,7 @@ function getMatchDays(
       matchDays.push({
         tournamentId,
         tournamentWeekId: week.id,
-        matchDay: "tuesday",
+        dayOfWeek: "tuesday",
         date: DateTime.now()
           .set({
             weekNumber: week.weekNumber,
@@ -215,7 +215,7 @@ function getMatchDays(
       matchDays.push({
         tournamentId,
         tournamentWeekId: week.id,
-        matchDay: "thursday",
+        dayOfWeek: "thursday",
         date: DateTime.now()
           .set({
             weekNumber: week.weekNumber,
@@ -229,7 +229,7 @@ function getMatchDays(
       matchDays.push({
         tournamentId,
         tournamentWeekId: week.id,
-        matchDay: "friday",
+        dayOfWeek: "friday",
         date: DateTime.now()
           .set({
             weekNumber: week.weekNumber,
