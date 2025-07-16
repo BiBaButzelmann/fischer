@@ -3,7 +3,6 @@ import { getLatestTournament } from "@/db/repositories/tournament";
 import { getRefereesByTournamentId } from "@/db/repositories/referee";
 import { getRefereeAssignmentsByTournamentId } from "@/db/repositories/match-day";
 import { RefereeAssignmentForm } from "@/components/admin/referee/referee-assignment-form";
-import type { MatchDay } from "@/db/types/group";
 
 export default async function Page() {
   await authWithRedirect();

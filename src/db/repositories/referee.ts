@@ -1,6 +1,5 @@
 import { db } from "../client";
 import { referee } from "../schema/referee";
-import { profile } from "../schema/profile";
 import { and, eq } from "drizzle-orm";
 import type { RefereeWithName } from "../types/referee";
 
