@@ -126,6 +126,12 @@ export async function AppSidebar() {
                   <span>Paarungen verwalten</span>
                 </Link>
               </SidebarMenuButton>
+              <SidebarMenuButton asChild>
+                <Link href="/admin/schiedsrichter">
+                  <Users />
+                  <span>Schiedsrichter verwalten</span>
+                </Link>
+              </SidebarMenuButton>
             </SidebarGroupContent>
           </SidebarGroup>
         ) : null}
