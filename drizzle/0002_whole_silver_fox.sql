@@ -1,0 +1,1 @@
+ALTER TABLE "matchday" RENAME COLUMN "match_day" TO "day_of_week";
