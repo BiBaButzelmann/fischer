@@ -5,7 +5,6 @@ import { profile } from "../schema/profile";
 import { and, eq, isNotNull, getTableColumns } from "drizzle-orm";
 import type { MatchDay } from "../types/group";
 import type { RefereeWithName } from "../types/referee";
-import { availableMatchDays } from "../schema/columns.helpers";
 
 export async function getRefereeIdByTournamentIdAndDayOfWeek(
   tournamentId: number,
@@ -32,40 +31,31 @@ export async function getRefereeAssignmentsByTournamentId(
     .select({
       dayOfWeek: matchday.dayOfWeek,
       referee: getTableColumns(referee),
-      firstName: profile.firstName,
-      lastName: profile.lastName,
+      profile: {
+        firstName: profile.firstName,
+        lastName: profile.lastName,
+      },
     })
     .from(matchday)
-    .leftJoin(referee, eq(matchday.refereeId, referee.id))
-    .leftJoin(profile, eq(referee.profileId, profile.id))
+    .innerJoin(referee, eq(matchday.refereeId, referee.id))
+    .innerJoin(profile, eq(referee.profileId, profile.id))
     .where(eq(matchday.tournamentId, tournamentId))
     .orderBy(matchday.date);
 
   return results.reduce(
     (acc, entry) => {
-      const { dayOfWeek, ...refereeWithName } = entry;
-      if (dayOfWeek != null) {
-        acc[dayOfWeek] =
-          refereeWithName.referee?.id &&
-          refereeWithName.firstName &&
-          refereeWithName.lastName
-            ? {
-                ...refereeWithName.referee,
-                profile: {
-                  firstName: refereeWithName.firstName,
-                  lastName: refereeWithName.lastName,
-                },
-              }
-            : null;
+      if (entry.referee != null) {
+        acc[entry.dayOfWeek] = {
+          ...entry.referee,
+          profile: entry.profile,
+        };
       }
       return acc;
     },
-    availableMatchDays.reduce(
-      (init, day) => {
-        init[day] = null;
-        return init;
-      },
-      {} as Record<MatchDay, RefereeWithName | null>,
-    ),
+    {
+      tuesday: null,
+      thursday: null,
+      friday: null,
+    } as Record<MatchDay, RefereeWithName | null>,
   );
 }
