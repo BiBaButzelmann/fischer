@@ -48,5 +48,8 @@ export const auth = betterAuth({
       },
     }),
   ],
-  trustedOrigins: [process.env.VERCEL_URL!],
+  trustedOrigins: [
+    process.env.VERCEL_URL!,
+    "https://fischer-git-feat-edit-group-names-bibabutzelmanns-projects.vercel.app/",
+  ],
 });
