@@ -3,8 +3,7 @@ import { referee } from "../schema/referee";
 
 export type Referee = InferSelectModel<typeof referee>;
 
-export type RefereeWithName = {
-  id: number;
+export type RefereeWithName = Referee & {
   profile: {
     firstName: string;
     lastName: string;
