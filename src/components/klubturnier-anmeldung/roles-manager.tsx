@@ -19,7 +19,6 @@ import { matchEnteringHelperFormSchema } from "@/schema/matchEnteringHelper";
 import { setupHelperFormSchema } from "@/schema/setupHelper";
 import { useRouter } from "next/navigation";
 import { createParticipant, deleteParticipant } from "@/actions/participant";
-import { createReferee, deleteReferee } from "@/actions/referee";
 import {
   createMatchEnteringHelper,
   deleteMatchEnteringHelper,
@@ -30,6 +29,7 @@ import Link from "next/link";
 import { sendRolesSelectionSummaryEmail } from "@/actions/email/roles";
 import { Profile } from "@/db/types/profile";
 import { DEFAULT_CLUB_KEY, DEFAULT_CLUB_LABEL } from "@/constants/constants";
+import { createReferee, deleteReferee } from "@/actions/referee";
 
 type Props = {
   userId: string;
