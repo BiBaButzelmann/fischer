@@ -87,12 +87,6 @@ export function RefereeAssignmentForm({
                   ))}
                 </SelectContent>
               </Select>
-              {currentReferee && (
-                <p className="text-xs text-gray-500">
-                  Aktuell: {currentReferee.profile.firstName}{" "}
-                  {currentReferee.profile.lastName}
-                </p>
-              )}
             </div>
           );
         })}
