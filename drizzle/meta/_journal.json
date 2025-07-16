@@ -15,6 +15,13 @@
       "when": 1752604449281,
       "tag": "0001_mysterious_madrox",
       "breakpoints": true
+    },
+    {
+      "idx": 2,
+      "version": "7",
+      "when": 1752658136714,
+      "tag": "0002_whole_silver_fox",
+      "breakpoints": true
     }
   ]
 }
