@@ -1,5 +1,5 @@
 import { DEFAULT_CLUB_LABEL, matchDays } from "@/constants/constants";
-import { MatchDay } from "@/db/types/group";
+import { DayOfWeek } from "@/db/types/group";
 import { RolesData } from "@/db/types/role";
 
 type Props = {
@@ -7,7 +7,7 @@ type Props = {
   roles: RolesData;
 };
 
-const translateMatchDay = (day: MatchDay) => matchDays[day];
+const translateMatchDay = (day: DayOfWeek) => matchDays[day];
 
 export default function RoleSelectionSummaryMail({ name, roles }: Props) {
   const listItems: React.ReactNode[] = [];

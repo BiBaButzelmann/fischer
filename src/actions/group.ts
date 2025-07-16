@@ -2,7 +2,7 @@
 
 import { db } from "@/db/client";
 import { participant } from "@/db/schema/participant";
-import { MatchDay } from "@/db/types/group";
+import { DayOfWeek } from "@/db/types/group";
 import { ParticipantWithName } from "@/db/types/participant";
 import { and, eq } from "drizzle-orm";
 import { revalidatePath } from "next/cache";
@@ -129,7 +129,7 @@ export async function updateGroupPositions(
 
 export async function updateGroupMatchDay(
   groupId: number,
-  matchDay: MatchDay | null,
+  matchDay: DayOfWeek | null,
 ) {
   const session = await authWithRedirect();
   invariant(session?.user.role === "admin", "Unauthorized");

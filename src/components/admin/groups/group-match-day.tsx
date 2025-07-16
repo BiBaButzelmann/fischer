@@ -8,7 +8,7 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { GridGroup } from "./types";
-import { MatchDay } from "@/db/types/group";
+import { DayOfWeek } from "@/db/types/group";
 import { useMemo, useTransition } from "react";
 import { updateGroupMatchDay } from "@/actions/group";
 import { matchDays } from "@/constants/constants";
@@ -16,7 +16,7 @@ import { matchDays } from "@/constants/constants";
 export function GroupMatchDay({ group }: { group: GridGroup }) {
   const [isPending, startTransition] = useTransition();
 
-  const handleMatchdayChange = (value: MatchDay | "none") => {
+  const handleMatchdayChange = (value: DayOfWeek | "none") => {
     startTransition(async () => {
       await updateGroupMatchDay(group.id, value === "none" ? null : value);
     });

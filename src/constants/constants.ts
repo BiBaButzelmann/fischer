@@ -1,6 +1,6 @@
-import { MatchDay } from "@/db/types/group";
+import { DayOfWeek } from "@/db/types/group";
 
-export const matchDays: Record<MatchDay, string> = {
+export const matchDays: Record<DayOfWeek, string> = {
   tuesday: "Dienstag",
   thursday: "Donnerstag",
   friday: "Freitag",

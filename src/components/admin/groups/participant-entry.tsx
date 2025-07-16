@@ -4,10 +4,10 @@ import {
   HoverCardContent,
   HoverCardTrigger,
 } from "@/components/ui/hover-card";
-import { MatchDay } from "@/db/types/group";
+import { DayOfWeek } from "@/db/types/group";
 import { ParticipantWithName } from "@/db/types/participant";
 
-const daysMap: Record<MatchDay, string> = {
+const daysMap: Record<DayOfWeek, string> = {
   tuesday: "Di",
   thursday: "Do",
   friday: "Fr",
