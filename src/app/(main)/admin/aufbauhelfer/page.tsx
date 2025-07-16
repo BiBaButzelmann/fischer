@@ -19,7 +19,7 @@ export default async function Page() {
     return (
       <div>
         <h1 className="text-3xl font-bold text-gray-900 mb-2">
-          Schiedsrichterverwaltung
+          Aufbauhelferverwaltung
         </h1>
         <p>Kein aktives Turnier gefunden.</p>
       </div>
@@ -32,10 +32,21 @@ export default async function Page() {
   ]);
 
   return (
-    <SetupHelperAssignmentForm
-      tournamentId={tournament.id}
-      setupHelpers={setupHelpers}
-      currentAssignments={assignedSetupHelpers}
-    />
+    <div>
+      <div className="mb-8">
+        <h1 className="text-3xl font-bold text-gray-900 mb-2">
+          Aufbauhelferverwaltung
+        </h1>
+        <p className="text-gray-600">
+          Aufbauhelfer für {tournament.name} zuweisen
+        </p>
+      </div>
+
+      <SetupHelperAssignmentForm
+        tournamentId={tournament.id}
+        setupHelpers={setupHelpers}
+        currentAssignments={assignedSetupHelpers}
+      />
+    </div>
   );
 }

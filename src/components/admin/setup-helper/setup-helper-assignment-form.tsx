@@ -80,7 +80,6 @@ export function SetupHelperAssignmentForm({
                   <SelectValue placeholder="Aufbauhelfer hinzufügen..." />
                 </SelectTrigger>
                 <SelectContent>
-                  <SelectItem value="none">Aufbauhelfer hinzufügen</SelectItem>
                   {setupHelpers.map((setupHelper) => (
                     <SelectItem
                       key={setupHelper.id}
@@ -93,10 +92,13 @@ export function SetupHelperAssignmentForm({
                 </SelectContent>
               </Select>
             </div>
-            <div className="mt-2 ml-2 space-y-1">
+            <div className="mt-2">
               {assignments[day] != null
                 ? assignments[day].map((sh) => (
-                    <div key={sh.id}>
+                    <div
+                      key={sh.id}
+                      className="px-2 py-2 bg-gray-100 rounded mb-1"
+                    >
                       <span>
                         {sh.profile.firstName} {sh.profile.lastName}
                       </span>

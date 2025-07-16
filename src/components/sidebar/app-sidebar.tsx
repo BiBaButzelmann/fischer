@@ -132,6 +132,12 @@ export async function AppSidebar() {
                   <span>Schiedsrichter verwalten</span>
                 </Link>
               </SidebarMenuButton>
+              <SidebarMenuButton asChild>
+                <Link href="/admin/aufbauhelfer">
+                  <Users />
+                  <span>Aufbauhelfer verwalten</span>
+                </Link>
+              </SidebarMenuButton>
             </SidebarGroupContent>
           </SidebarGroup>
         ) : null}
