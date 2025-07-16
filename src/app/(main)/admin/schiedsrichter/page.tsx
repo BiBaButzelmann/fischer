@@ -4,6 +4,7 @@ import { getRefereesByTournamentId } from "@/db/repositories/referee";
 import { getRefereeIdByTournamentIdAndDayOfWeek } from "@/db/repositories/match-day";
 import { availableMatchDays } from "@/db/schema/columns.helpers";
 import { RefereeAssignmentForm } from "@/components/admin/referee/referee-assignment-form";
+import type { MatchDay } from "@/db/types/group";
 
 export default async function Page() {
   await authWithRedirect();
@@ -23,7 +24,7 @@ export default async function Page() {
 
   const referees = await getRefereesByTournamentId(tournament.id);
 
-  const currentAssignments: Record<string, number | null> = {};
+  const currentAssignments: Partial<Record<MatchDay, number | null>> = {};
   for (const day of availableMatchDays) {
     const result = await getRefereeIdByTournamentIdAndDayOfWeek(
       tournament.id,

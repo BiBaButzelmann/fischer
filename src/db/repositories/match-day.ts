@@ -1,11 +1,11 @@
 import { db } from "../client";
 import { matchday } from "../schema/matchday";
 import { and, eq, isNotNull } from "drizzle-orm";
-import type { availableMatchDays } from "../schema/columns.helpers";
+import type { MatchDay } from "../types/group";
 
 export async function getRefereeIdByTournamentIdAndDayOfWeek(
   tournamentId: number,
-  dayOfWeek: (typeof availableMatchDays)[number],
+  dayOfWeek: MatchDay,
 ): Promise<number | null> {
   const result = await db.query.matchday.findFirst({
     where: and(
