@@ -1,17 +1,6 @@
 import { Badge } from "@/components/ui/badge";
-import {
-  HoverCard,
-  HoverCardContent,
-  HoverCardTrigger,
-} from "@/components/ui/hover-card";
-import { DayOfWeek } from "@/db/types/group";
 import { ParticipantWithName } from "@/db/types/participant";
-
-const daysMap: Record<DayOfWeek, string> = {
-  tuesday: "Di",
-  thursday: "Do",
-  friday: "Fr",
-};
+import { UserWeekdayDisplay } from "../user-weekday-display";
 
 export function ParticipantEntry({
   participant,
@@ -30,36 +19,10 @@ export function ParticipantEntry({
         {participant.profile.firstName} {participant.profile.lastName}
       </p>
       {showMatchDays && (
-        <HoverCard>
-          <HoverCardTrigger asChild>
-            <Badge className="bg-green-600 hover:bg-green-600 cursor-default w-9">
-              {daysMap[participant.preferredMatchDay]}
-            </Badge>
-          </HoverCardTrigger>
-          <HoverCardContent>
-            {participant.secondaryMatchDays.length > 0 ? (
-              <div className="flex flex-col">
-                <span className="text-sm text-muted-foreground">
-                  Alternative Spieltage:
-                </span>
-                <div className="flex gap-1">
-                  {participant.secondaryMatchDays.map((day) => (
-                    <Badge
-                      key={day}
-                      className="bg-green-400 hover:bg-green-600 cursor-default"
-                    >
-                      {daysMap[day]}
-                    </Badge>
-                  ))}
-                </div>
-              </div>
-            ) : (
-              <span className="text-sm text-muted-foreground">
-                Keine alternativen Spieltage
-              </span>
-            )}
-          </HoverCardContent>
-        </HoverCard>
+        <UserWeekdayDisplay
+          preferredMatchDay={participant.preferredMatchDay}
+          secondaryMatchDays={participant.secondaryMatchDays}
+        />
       )}
       {showFideRating && (
         <Badge className="whitespace-nowrap w-[75px]">

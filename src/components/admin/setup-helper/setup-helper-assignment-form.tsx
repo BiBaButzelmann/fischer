@@ -15,6 +15,7 @@ import { DayOfWeek } from "@/db/types/group";
 import { SetupHelperWithName } from "@/db/types/setup-helper";
 import { useState, useTransition } from "react";
 import invariant from "tiny-invariant";
+import { UserWeekdayDisplay } from "../user-weekday-display";
 
 type Props = {
   tournamentId: number;
@@ -99,9 +100,7 @@ export function SetupHelperAssignmentForm({
                       key={sh.id}
                       className="px-2 py-2 bg-gray-100 rounded mb-1"
                     >
-                      <span>
-                        {sh.profile.firstName} {sh.profile.lastName}
-                      </span>
+                      <SetupHelperEntry setupHelper={sh} />
                     </div>
                   ))
                 : null}
@@ -115,6 +114,24 @@ export function SetupHelperAssignmentForm({
           {isPending ? "Speichern..." : "Speichern"}
         </Button>
       </div>
+    </div>
+  );
+}
+
+function SetupHelperEntry({
+  setupHelper,
+}: {
+  setupHelper: SetupHelperWithName;
+}) {
+  return (
+    <div className="flex items-center">
+      <span className="inline-flex flex-1">
+        {setupHelper.profile.firstName} {setupHelper.profile.lastName}
+      </span>
+      <UserWeekdayDisplay
+        preferredMatchDay={setupHelper.preferredMatchDay}
+        secondaryMatchDays={setupHelper.secondaryMatchDays}
+      />
     </div>
   );
 }
