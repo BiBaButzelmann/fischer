@@ -48,4 +48,5 @@ export const auth = betterAuth({
       },
     }),
   ],
+  trustedOrigins: [process.env.VERCEL_URL!],
 });
