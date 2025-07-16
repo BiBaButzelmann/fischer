@@ -13,3 +13,17 @@ export async function getRefereeByProfileIdAndTournamentId(
     ),
   });
 }
+
+export async function getRefereesByTournamentId(tournamentId: number) {
+  return await db.query.referee.findMany({
+    where: eq(referee.tournamentId, tournamentId),
+    with: {
+      profile: {
+        columns: {
+          firstName: true,
+          lastName: true,
+        },
+      },
+    },
+  });
+}

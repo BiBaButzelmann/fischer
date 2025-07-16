@@ -11,7 +11,7 @@ import type { availableMatchDays } from "@/db/schema/columns.helpers";
 export async function updateRefereeIdByTournamentIdAndDayofWeek(
   dayofWeek: (typeof availableMatchDays)[number],
   tournamentId: number,
-  refereeId: number,
+  refereeId: number | null,
 ) {
   const session = await authWithRedirect();
   invariant(session?.user.role === "admin", "Unauthorized");
