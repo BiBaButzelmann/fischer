@@ -13,17 +13,12 @@ import { availableMatchDays } from "@/db/schema/columns.helpers";
 import { updateRefereeIdByTournamentIdAndDayofWeek } from "@/actions/match-day";
 import { RefereeWithName } from "@/db/types/referee";
 import type { MatchDay } from "@/db/types/group";
+import { matchDays } from "@/constants/constants";
 
 type Props = {
   tournamentId: number;
   referees: RefereeWithName[];
   currentAssignments: Record<MatchDay, RefereeWithName | null>;
-};
-
-const dayLabels: Record<MatchDay, string> = {
-  tuesday: "Dienstag",
-  thursday: "Donnerstag",
-  friday: "Freitag",
 };
 
 export function RefereeAssignmentForm({
@@ -69,7 +64,7 @@ export function RefereeAssignmentForm({
           return (
             <div key={day} className="space-y-2">
               <label className="text-sm font-medium text-gray-700">
-                {dayLabels[day]}
+                {matchDays[day]}
               </label>
               <Select
                 value={currentReferee ? currentReferee.id.toString() : "none"}
