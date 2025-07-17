@@ -29,6 +29,7 @@ import {
 } from "lucide-react";
 import { UserRow } from "@/components/admin/user-row";
 import { redirect } from "next/navigation";
+import { DayOfWeek } from "@/db/types/group";
 
 export default async function Page() {
   const session = await authWithRedirect();
@@ -141,7 +142,14 @@ export default async function Page() {
 
         <TabsContent value="referees" className="space-y-4">
           <UserList
-            users={referees.map((r) => r.profile)}
+            users={referees.map((r) => ({
+              ...r.profile,
+              phoneNumber: r.profile.phoneNumber
+            }))}
+            refereeData={referees.map((r) => ({
+              profileId: r.profile.id,
+              preferredMatchDay: r.preferredMatchDay
+            }))}
             title="Schiedsrichter"
             description={`${referees.length} Schiedsrichter sind für das Turnier verfügbar`}
             icon={Shield}
@@ -209,6 +217,7 @@ function UserList({
   icon: Icon,
   emptyMessage,
   isDisabledUsers = false,
+  refereeData,
 }: {
   users: ProfileWithName[];
   title: string;
@@ -216,6 +225,10 @@ function UserList({
   icon: LucideIcon;
   emptyMessage: string;
   isDisabledUsers?: boolean;
+  refereeData?: Array<{
+    profileId: number;
+    preferredMatchDay: DayOfWeek;
+  }>;
 }) {
   return (
     <Card>
@@ -235,13 +248,19 @@ function UserList({
           <p className="text-gray-500 text-sm italic">{emptyMessage}</p>
         ) : (
           <div className="space-y-1">
-            {users.map((user) => (
-              <UserRow
-                key={user.id}
-                user={user}
-                showDeleteActions={!isDisabledUsers}
-              />
-            ))}
+            {users.map((user) => {
+              const refereeInfo = refereeData?.find(r => r.profileId === user.id);
+              return (
+                <UserRow
+                  key={user.id}
+                  user={user}
+                  showDeleteActions={!isDisabledUsers}
+                  refereeData={refereeInfo ? {
+                    preferredMatchDay: refereeInfo.preferredMatchDay
+                  } : undefined}
+                />
+              );
+            })}
           </div>
         )}
       </CardContent>

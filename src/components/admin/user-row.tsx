@@ -10,7 +10,14 @@ import {
   DialogTitle,
   DialogTrigger,
 } from "@/components/ui/dialog";
-import { User, Trash2, AlertTriangle, RotateCcw } from "lucide-react";
+import {
+  User,
+  Trash2,
+  AlertTriangle,
+  RotateCcw,
+  Shield,
+  Phone,
+} from "lucide-react";
 import { useState, useTransition } from "react";
 import {
   softDeleteUserProfile,
@@ -18,6 +25,9 @@ import {
   restoreUserProfile,
 } from "@/actions/admin";
 import { toast } from "sonner";
+import { Badge } from "@/components/ui/badge";
+import { matchDaysShort } from "@/constants/constants";
+import { DayOfWeek } from "@/db/types/group";
 
 interface ProfileWithName {
   id: number;
@@ -25,14 +35,22 @@ interface ProfileWithName {
   firstName: string;
   lastName: string;
   deletedAt: Date | null;
+  phoneNumber?: string | null;
 }
 
 type Props = {
   user: ProfileWithName;
   showDeleteActions?: boolean;
+  refereeData?: {
+    preferredMatchDay: DayOfWeek;
+  };
 };
 
-export function UserRow({ user, showDeleteActions = false }: Props) {
+export function UserRow({
+  user,
+  showDeleteActions = false,
+  refereeData,
+}: Props) {
   const [softDeleteOpen, setSoftDeleteOpen] = useState(false);
   const [hardDeleteOpen, setHardDeleteOpen] = useState(false);
   const [isPending, startTransition] = useTransition();
@@ -102,7 +120,7 @@ export function UserRow({ user, showDeleteActions = false }: Props) {
 
   return (
     <div
-      className={`flex items-center justify-between px-3 py-2 rounded-md border ${
+      className={`flex items-center justify-between px-3 py-3 rounded-md border ${
         user.deletedAt != null
           ? "bg-red-50 border-red-200"
           : "bg-gray-50 border-gray-200"
@@ -111,23 +129,54 @@ export function UserRow({ user, showDeleteActions = false }: Props) {
       <div className="flex items-center gap-2">
         <div
           className={`w-6 h-6 rounded-full flex items-center justify-center ${
-            user.deletedAt != null ? "bg-red-200" : "bg-gray-200"
+            user.deletedAt != null
+              ? "bg-red-200"
+              : refereeData
+                ? "bg-blue-200"
+                : "bg-gray-200"
           }`}
         >
-          <User
-            className={`h-3 w-3 ${
-              user.deletedAt != null ? "text-red-600" : "text-gray-600"
-            }`}
-          />
+          {refereeData ? (
+            <Shield
+              className={`h-3 w-3 ${
+                user.deletedAt != null ? "text-red-600" : "text-blue-600"
+              }`}
+            />
+          ) : (
+            <User
+              className={`h-3 w-3 ${
+                user.deletedAt != null ? "text-red-600" : "text-gray-600"
+              }`}
+            />
+          )}
         </div>
-        <div className="flex flex-col">
-          <span
-            className={`font-medium text-sm ${
-              user.deletedAt != null ? "text-red-900" : "text-gray-900"
-            }`}
-          >
-            {getDisplayName(user)}
-          </span>
+        <div className="flex flex-col gap-1 flex-1">
+          <div className="flex items-center gap-2">
+            <span
+              className={`font-medium text-sm ${
+                user.deletedAt != null ? "text-red-900" : "text-gray-900"
+              }`}
+            >
+              {getDisplayName(user)}
+            </span>
+            {refereeData && (
+              <Badge
+                variant="secondary"
+                className="bg-blue-100 text-blue-800 text-xs px-2 py-0.5"
+              >
+                {matchDaysShort[refereeData.preferredMatchDay]}
+              </Badge>
+            )}
+          </div>
+          <div className="flex items-center gap-3 text-xs text-gray-600">
+            {user.phoneNumber && (
+              <div className="flex items-center gap-1">
+                <Phone className="h-3 w-3" />
+                <span>{user.phoneNumber}</span>
+              </div>
+            )}
+            <span>ID: {user.id}</span>
+          </div>
           {user.deletedAt && (
             <span className="text-xs text-red-600">
               Deaktiviert:{" "}

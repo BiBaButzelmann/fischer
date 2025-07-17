@@ -54,6 +54,7 @@ export async function getAllRefereesByTournamentId(tournamentId: number) {
           userId: true,
           firstName: true,
           lastName: true,
+          phoneNumber: true,
           deletedAt: true,
         },
       },
