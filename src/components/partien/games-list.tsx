@@ -124,9 +124,7 @@ export function GamesList({ userId, games, onResultChange }: GameListProps) {
                 </span>
               )}
             </TableCell>
-            <TableCell>
-              {game.result ? resultDisplay[game.result] : "-"}
-            </TableCell>
+            <TableCell>{game.result ?? "-"}</TableCell>
             <TableCell className="hidden md:flex items-center gap-2">
               <Tooltip>
                 <TooltipTrigger asChild>
@@ -191,13 +189,14 @@ export function GamesList({ userId, games, onResultChange }: GameListProps) {
                             <SelectValue placeholder="Ergebnis wählen" />
                           </SelectTrigger>
                           <SelectContent>
-                            <SelectItem value="white_wins">
-                              1-0 (Weiß gewinnt)
-                            </SelectItem>
-                            <SelectItem value="black_wins">
-                              0-1 (Schwarz gewinnt)
-                            </SelectItem>
-                            <SelectItem value="draw">½-½ (Remis)</SelectItem>
+                            <SelectItem value="1:0">1-0</SelectItem>
+                            <SelectItem value="0:1">0-1</SelectItem>
+                            <SelectItem value="½-½">½-½</SelectItem>
+                            <SelectItem value="+:-">1-0</SelectItem>
+                            <SelectItem value="-:+">0-1</SelectItem>
+                            <SelectItem value="0-½">0-½</SelectItem>
+                            <SelectItem value="½-0">½-0</SelectItem>
+                            <SelectItem value="-:-">0-0</SelectItem>
                           </SelectContent>
                         </Select>
                       </div>
@@ -220,9 +219,3 @@ export function GamesList({ userId, games, onResultChange }: GameListProps) {
     </Table>
   );
 }
-
-const resultDisplay: Record<GameResult, string> = {
-  draw: "½-½",
-  white_wins: "1-0",
-  black_wins: "0-1",
-};
