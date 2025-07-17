@@ -20,27 +20,43 @@ export function GroupTitle({ groupId, groupName: initialGroupName }: Props) {
     setGroupName(e.target.value);
   };
 
+  const handleUpdate = () => {
+    startTransition(async () => {
+      await updateGroupName(groupId, groupName);
+    });
+    setIsEditing(false);
+  };
+
+  const handleSubmit = (e: React.FormEvent) => {
+    e.preventDefault();
+    handleUpdate();
+  };
+
+  const handleBlur = () => {
+    handleUpdate();
+  };
+
   const handleEditClick = () => {
     if (!isEditing) {
       setIsEditing(true);
       return;
     }
 
-    startTransition(async () => {
-      await updateGroupName(groupId, groupName);
-      setIsEditing(false);
-    });
+    handleUpdate();
   };
 
   return (
     <div className="flex items-center gap-2">
       {isEditing ? (
-        <Input
-          autoFocus
-          className="flex-1"
-          value={groupName}
-          onChange={handleChange}
-        />
+        <form onSubmit={handleSubmit} className="flex-1">
+          <Input
+            autoFocus
+            className="flex-1"
+            value={groupName}
+            onChange={handleChange}
+            onBlur={handleBlur}
+          />
+        </form>
       ) : (
         <span className="flex-1">{groupName}</span>
       )}
