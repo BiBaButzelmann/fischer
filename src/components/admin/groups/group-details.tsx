@@ -8,23 +8,29 @@ type Props = {
 
 export function GroupDetails({ group }: Props) {
   const averageElo = useMemo(() => {
-    if (group.participants.length === 0) return 0;
+    const participantsWithElo = group.participants.filter(
+      (participant) => participant.fideRating !== null,
+    );
+    if (participantsWithElo.length === 0) return 0;
 
-    const eloSum = group.participants.reduce(
+    const eloSum = participantsWithElo.reduce(
       (sum, participant) => sum + (participant.fideRating ?? 0),
       0,
     );
-    return eloSum / group.participants.length;
+    return eloSum / participantsWithElo.length;
   }, [group.participants]);
 
   const averageDwz = useMemo(() => {
-    if (group.participants.length === 0) return 0;
+    const participantsWithDwz = group.participants.filter(
+      (participant) => participant.dwzRating !== null,
+    );
+    if (participantsWithDwz.length === 0) return 0;
 
-    const dwzSum = group.participants.reduce(
+    const dwzSum = participantsWithDwz.reduce(
       (sum, participant) => sum + (participant.dwzRating ?? 0),
       0,
     );
-    return dwzSum / group.participants.length;
+    return dwzSum / participantsWithDwz.length;
   }, [group.participants]);
 
   return (
@@ -32,8 +38,8 @@ export function GroupDetails({ group }: Props) {
       <GroupTitle groupId={group.id} groupName={group.groupName} />
       <div className="flex flex-col gap-1 text-muted-foreground text-sm font-normal">
         <span>Teilnehmer: {group.participants.length}</span>
-        <span>Elo-Durchschnitt: {averageElo.toFixed(2)}</span>
-        <span>DWZ-Durchschnitt: {averageDwz.toFixed(2)}</span>
+        <span>Elo-Durchschnitt: {Math.round(averageElo)}</span>
+        <span>DWZ-Durchschnitt: {Math.round(averageDwz)}</span>
       </div>
     </div>
   );
