@@ -101,12 +101,25 @@ export function ParticipateForm({
       }
 
       form.setValue("title", eloData.title ?? "noTitle");
-      form.setValue("nationality", eloData.nationality ?? undefined);
-      form.setValue("fideRating", eloData.fideRating ?? undefined);
-      form.setValue("dwzRating", eloData.dwzRating ?? undefined);
-      form.setValue("fideId", eloData.fideId ?? undefined);
-      form.setValue("zpsClub", eloData.zpsClub ?? undefined);
-      form.setValue("zpsPlayer", eloData.zpsPlayer ?? undefined);
+
+      if (eloData.dwzRating) {
+        form.setValue("dwzRating", eloData.dwzRating);
+      }
+      if (eloData.zpsClub) {
+        form.setValue("zpsClub", eloData.zpsClub);
+      }
+      if (eloData.zpsPlayer) {
+        form.setValue("zpsPlayer", eloData.zpsPlayer);
+      }
+
+      if (eloData.fideRating && eloData.fideId) {
+        form.setValue("fideRating", eloData.fideRating);
+        form.setValue("fideId", eloData.fideId);
+        form.setValue(
+          "nationality",
+          eloData.nationality !== "?" ? eloData.nationality : undefined,
+        );
+      }
     });
   };
 
@@ -423,12 +436,11 @@ export function ParticipateForm({
               </Popover>
               <FormDescription>
                 Optional: Wähle einzelne Tage aus, an denen du nicht für Spiele
-                verfügbar bist, obwohl du sie als bevorzugter Spieltag
-                angegeben hast. Verwende dies nur für lang geplante
-                Urlaubsreisen oder andere unverschiebbare Termine. Wir versuchen
-                dann, dich mit anderen Spielern zu paaren, die an dem Tag
-                ebenfalls nicht spielen können, um die Anzahl der Verschiebungen
-                zu minimieren.
+                verfügbar bist, obwohl du sie als bevorzugter Spieltag angegeben
+                hast. Verwende dies nur für lang geplante Urlaubsreisen oder
+                andere unverschiebbare Termine. Wir versuchen dann, dich mit
+                anderen Spielern zu paaren, die an dem Tag ebenfalls nicht
+                spielen können, um die Anzahl der Verschiebungen zu minimieren.
               </FormDescription>
               <FormMessage />
               {field.value && field.value.length > 0 && (

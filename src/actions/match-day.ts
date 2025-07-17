@@ -10,7 +10,7 @@ import type { availableMatchDays } from "@/db/schema/columns.helpers";
 import { DayOfWeek } from "@/db/types/group";
 
 export async function updateRefereeIdByTournamentIdAndDayofWeek(
-  dayofWeek: (typeof availableMatchDays)[number],
+  dayofWeek: MatchDay,
   tournamentId: number,
   refereeId: number | null,
 ) {

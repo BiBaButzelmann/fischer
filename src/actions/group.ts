@@ -61,7 +61,7 @@ export async function generateGroups(tournamentId: number) {
     }
   }
 
-  revalidatePath("/admin/tournament");
+  revalidatePath("/admin/gruppen");
 }
 
 export async function updateGroups(
@@ -97,7 +97,7 @@ export async function updateGroups(
     }
   }
 
-  revalidatePath("/admin/tournament");
+  revalidatePath("/admin/gruppen");
 }
 
 export async function updateGroupPositions(
@@ -123,7 +123,7 @@ export async function updateGroupPositions(
       );
   }
 
-  revalidatePath("/admin/tournament");
+  revalidatePath("/admin/gruppen");
   revalidatePath("/admin/paarungen");
 }
 
@@ -136,7 +136,16 @@ export async function updateGroupMatchDay(
 
   await db.update(group).set({ matchDay }).where(eq(group.id, groupId));
 
-  revalidatePath("/admin/tournament");
+  revalidatePath("/admin/gruppen");
+}
+
+export async function updateGroupName(groupId: number, groupName: string) {
+  const session = await authWithRedirect();
+  invariant(session?.user.role === "admin", "Unauthorized");
+
+  await db.update(group).set({ groupName }).where(eq(group.id, groupId));
+
+  revalidatePath("/admin/gruppen");
 }
 
 function getParticipantsGroupDistribution(

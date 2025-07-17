@@ -1,8 +1,7 @@
 import { authWithRedirect } from "@/auth/utils";
 import { getLatestTournament } from "@/db/repositories/tournament";
 import { getRefereesByTournamentId } from "@/db/repositories/referee";
-import { getRefereeIdByTournamentIdAndDayOfWeek } from "@/db/repositories/match-day";
-import { availableMatchDays } from "@/db/schema/columns.helpers";
+import { getRefereeAssignmentsByTournamentId } from "@/db/repositories/match-day";
 import { RefereeAssignmentForm } from "@/components/admin/referee/referee-assignment-form";
 
 export default async function Page() {
@@ -23,14 +22,9 @@ export default async function Page() {
 
   const referees = await getRefereesByTournamentId(tournament.id);
 
-  const currentAssignments: Record<string, number | null> = {};
-  for (const day of availableMatchDays) {
-    const result = await getRefereeIdByTournamentIdAndDayOfWeek(
-      tournament.id,
-      day,
-    );
-    currentAssignments[day] = result;
-  }
+  const currentAssignments = await getRefereeAssignmentsByTournamentId(
+    tournament.id,
+  );
 
   return (
     <div>
