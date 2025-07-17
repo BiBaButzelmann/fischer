@@ -3,12 +3,12 @@ import { matchday } from "../schema/matchday";
 import { referee } from "../schema/referee";
 import { profile } from "../schema/profile";
 import { and, eq, isNotNull, getTableColumns } from "drizzle-orm";
-import type { MatchDay } from "../types/group";
 import type { RefereeWithName } from "../types/referee";
+import { DayOfWeek } from "../types/group";
 
 export async function getRefereeIdByTournamentIdAndDayOfWeek(
   tournamentId: number,
-  dayOfWeek: MatchDay,
+  dayOfWeek: DayOfWeek,
 ): Promise<number | null> {
   const result = await db.query.matchday.findFirst({
     where: and(
@@ -26,7 +26,7 @@ export async function getRefereeIdByTournamentIdAndDayOfWeek(
 
 export async function getRefereeAssignmentsByTournamentId(
   tournamentId: number,
-): Promise<Record<MatchDay, RefereeWithName | null>> {
+): Promise<Record<DayOfWeek, RefereeWithName | null>> {
   const results = await db
     .select({
       dayOfWeek: matchday.dayOfWeek,
@@ -56,6 +56,6 @@ export async function getRefereeAssignmentsByTournamentId(
       tuesday: null,
       thursday: null,
       friday: null,
-    } as Record<MatchDay, RefereeWithName | null>,
+    } as Record<DayOfWeek, RefereeWithName | null>,
   );
 }
