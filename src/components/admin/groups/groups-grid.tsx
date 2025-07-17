@@ -29,6 +29,7 @@ import { Button } from "@/components/ui/button";
 import { GridGroup } from "./types";
 import { GroupMatchDay } from "./group-match-day";
 import { ParticipantEntry } from "./participant-entry";
+import { GroupDetails } from "./group-details";
 
 export const UNASSIGNED_CONTAINER_ID = "unassigned-droppable";
 
@@ -138,10 +139,13 @@ export function GroupContainer({ group }: { group: GridGroup }) {
     <Card>
       <CardHeader>
         <CardTitle>
-          Gruppe {group.groupNumber} -- {group.participants.length} Teilnehmer
+          <GroupDetails group={group} />
         </CardTitle>
       </CardHeader>
-      <CardContent ref={setNodeRef}>
+      <CardContent
+        ref={setNodeRef}
+        className="p-0 pl-4 pb-4 pr-4 md:p-0 md:pl-6 md:pb-6 md:pr-6"
+      >
         <div className="px-2 mb-2">
           <GroupMatchDay group={group} />
         </div>
