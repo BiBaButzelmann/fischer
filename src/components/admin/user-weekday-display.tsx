@@ -19,7 +19,7 @@ export function UserWeekdayDisplay({
   return (
     <HoverCard>
       <HoverCardTrigger asChild>
-        <Badge className="bg-green-600 hover:bg-green-600 cursor-default w-9">
+        <Badge className="cursor-default w-9">
           {matchDaysShort[preferredMatchDay]}
         </Badge>
       </HoverCardTrigger>
@@ -31,10 +31,7 @@ export function UserWeekdayDisplay({
             </span>
             <div className="flex gap-1">
               {secondaryMatchDays.map((day) => (
-                <Badge
-                  key={day}
-                  className="bg-green-400 hover:bg-green-600 cursor-default"
-                >
+                <Badge key={day} variant="secondary" className="cursor-default">
                   {matchDaysShort[day]}
                 </Badge>
               ))}

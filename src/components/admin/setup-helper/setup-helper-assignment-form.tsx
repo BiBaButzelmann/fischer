@@ -9,13 +9,14 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { matchDays } from "@/constants/constants";
+import { matchDays, matchDaysShort } from "@/constants/constants";
 import { availableMatchDays } from "@/db/schema/columns.helpers";
 import { DayOfWeek } from "@/db/types/group";
 import { SetupHelperWithName } from "@/db/types/setup-helper";
 import { useState, useTransition } from "react";
 import invariant from "tiny-invariant";
-import { UserWeekdayDisplay } from "../user-weekday-display";
+import { Badge } from "@/components/ui/badge";
+import { Trash } from "lucide-react";
 
 type Props = {
   tournamentId: number;
@@ -48,6 +49,17 @@ export function SetupHelperAssignmentForm({
       return {
         ...prev,
         [day]: Array.from(currentlyAssigned),
+      };
+    });
+  };
+
+  const handleDelete = (day: DayOfWeek, setupHelperId: number) => {
+    setAssignments((prev) => {
+      const currentlyAssigned =
+        prev[day]?.filter((sh) => sh.id !== setupHelperId) ?? [];
+      return {
+        ...prev,
+        [day]: currentlyAssigned,
       };
     });
   };
@@ -85,9 +97,21 @@ export function SetupHelperAssignmentForm({
                     <SelectItem
                       key={setupHelper.id}
                       value={setupHelper.id.toString()}
+                      className="flex items-center justify-between"
                     >
                       {setupHelper.profile.firstName}{" "}
-                      {setupHelper.profile.lastName}
+                      {setupHelper.profile.lastName}{" "}
+                      <div className="flex gap-1">
+                        <Badge>
+                          {matchDaysShort[setupHelper.preferredMatchDay]}
+                        </Badge>
+                        {setupHelper.secondaryMatchDays.length > 0 &&
+                          setupHelper.secondaryMatchDays.map((day) => (
+                            <Badge key={day} variant="secondary">
+                              {matchDaysShort[day]}
+                            </Badge>
+                          ))}
+                      </div>
                     </SelectItem>
                   ))}
                 </SelectContent>
@@ -100,7 +124,10 @@ export function SetupHelperAssignmentForm({
                       key={sh.id}
                       className="px-2 py-2 bg-gray-100 rounded mb-1"
                     >
-                      <SetupHelperEntry setupHelper={sh} />
+                      <SetupHelperEntry
+                        setupHelper={sh}
+                        onDelete={() => handleDelete(day, sh.id)}
+                      />
                     </div>
                   ))
                 : null}
@@ -118,20 +145,45 @@ export function SetupHelperAssignmentForm({
   );
 }
 
+function UserWeekday({
+  preferredMatchDay,
+  secondaryMatchDays,
+}: {
+  preferredMatchDay: DayOfWeek;
+  secondaryMatchDays: DayOfWeek[];
+}) {
+  return (
+    <div className="flex gap-1">
+      <Badge>{matchDaysShort[preferredMatchDay]}</Badge>
+      {secondaryMatchDays.length > 0 &&
+        secondaryMatchDays.map((day) => (
+          <Badge key={day} variant="secondary">
+            {matchDaysShort[day]}
+          </Badge>
+        ))}
+    </div>
+  );
+}
+
 function SetupHelperEntry({
   setupHelper,
+  onDelete,
 }: {
   setupHelper: SetupHelperWithName;
+  onDelete: () => void;
 }) {
   return (
     <div className="flex items-center">
       <span className="inline-flex flex-1">
         {setupHelper.profile.firstName} {setupHelper.profile.lastName}
       </span>
-      <UserWeekdayDisplay
+      <UserWeekday
         preferredMatchDay={setupHelper.preferredMatchDay}
         secondaryMatchDays={setupHelper.secondaryMatchDays}
       />
+      <Button variant="outline" size="icon" className="ml-2" onClick={onDelete}>
+        <Trash />
+      </Button>
     </div>
   );
 }
