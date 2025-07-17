@@ -1,15 +1,15 @@
 import { Checkbox } from "@/components/ui/checkbox";
 import { Label } from "@/components/ui/label";
-import { MatchDay } from "@/db/types/group";
+import { DayOfWeek } from "@/db/types/group";
 
 export function MatchDaysCheckboxes({
   value,
   onChange,
   preferredMatchDay,
 }: {
-  value: MatchDay[];
-  onChange: (days: MatchDay[]) => void;
-  preferredMatchDay?: MatchDay;
+  value: DayOfWeek[];
+  onChange: (days: DayOfWeek[]) => void;
+  preferredMatchDay?: DayOfWeek;
 }) {
   return (
     <div className="flex gap-4">
