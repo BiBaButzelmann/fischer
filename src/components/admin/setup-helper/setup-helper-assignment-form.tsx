@@ -43,8 +43,14 @@ export function SetupHelperAssignmentForm({
       if (prev[day] == null) {
         prev[day] = [];
       }
-      const currentlyAssigned = new Set(prev[day]);
-      currentlyAssigned.add(setupHelper);
+      const currentlyAssigned = prev[day];
+      const currentlyAssignedIds = new Set(
+        currentlyAssigned.map((sh) => sh.id),
+      );
+
+      if (!currentlyAssignedIds.has(setupHelper.id)) {
+        currentlyAssigned.push(setupHelper);
+      }
 
       return {
         ...prev,
