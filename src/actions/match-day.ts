@@ -6,11 +6,10 @@ import { and, eq, inArray } from "drizzle-orm";
 import { authWithRedirect } from "@/auth/utils";
 import invariant from "tiny-invariant";
 import { revalidatePath } from "next/cache";
-import type { availableMatchDays } from "@/db/schema/columns.helpers";
 import { DayOfWeek } from "@/db/types/group";
 
 export async function updateRefereeIdByTournamentIdAndDayofWeek(
-  dayofWeek: MatchDay,
+  dayofWeek: DayOfWeek,
   tournamentId: number,
   refereeId: number | null,
 ) {
