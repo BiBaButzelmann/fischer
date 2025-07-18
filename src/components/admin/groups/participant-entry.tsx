@@ -8,11 +8,21 @@ export function ParticipantEntry({
   showFideRating = true,
   showDwzRating = true,
 }: {
-  participant: ParticipantWithName;
+  participant: ParticipantWithName | undefined;
   showMatchDays?: boolean;
   showFideRating?: boolean;
   showDwzRating?: boolean;
 }) {
+  if (!participant) {
+    return (
+      <div className="flex items-center gap-2 py-1">
+        <p className="font-semibold flex-grow truncate text-red-500">
+          Teilnehmer-Daten nicht verfügbar, bitte Paarungen neu generieren.
+        </p>
+      </div>
+    );
+  }
+
   return (
     <div className="flex items-center gap-2 py-1">
       <p className="font-semibold flex-grow truncate">
