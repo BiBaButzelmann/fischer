@@ -38,12 +38,17 @@ export async function scheduleGamesForGroup(
   }
 
   const tournament = await getTournamentById(tournamentId);
-  invariant(tournament, `Tournament #${tournamentId} not found`);
-  const startDate = tournament.startDate;
+  if (tournament == null) {
+    return { error: `Kein Turnier ${tournamentId} gefunden` };
+  }
 
   const group = await getGroupById(groupId);
-  invariant(group, `Group #${groupId} not found`);
-  invariant(group.matchDay, `Group #${groupId} has no match day set`);
+  if (group == null) {
+    return { error: `Keine Gruppe ${groupId} gefunden` };
+  }
+  if (group.matchDay == null) {
+    return { error: `${group.groupName} hat keinen Spieltag gesetzt` };
+  }
 
   const scheduledGames: InferInsertModel<typeof game>[] = [];
   const players = group.participants
@@ -51,15 +56,14 @@ export async function scheduleGamesForGroup(
     .sort((a, b) => (a.groupPosition ?? 0) - (b.groupPosition ?? 0));
 
   const n = players.length;
-  invariant(
-    n >= 2,
-    `Group #${groupId} has not enough players to schedule games`,
-  );
+  if (n < 2) {
+    return {
+      error: `${group.groupName} hat nicht genug Spieler für Paarungen`,
+    };
+  }
 
   const pairings = roundRobinPairs(n); // array[round][pair] -> [white#, black#]
-  console.log("pairings", pairings);
-  const firstDate = firstMatchDate(startDate, group.matchDay);
-  console.log("firstDate", firstDate);
+  const firstDate = firstMatchDate(tournament.startDate, group.matchDay);
 
   pairings.forEach((pairsInRound, roundIdx) => {
     // TODO: set the time from the tournament settings
@@ -77,10 +81,8 @@ export async function scheduleGamesForGroup(
     });
   });
 
-  console.log("scheduledGames", scheduledGames.length);
-
   await db.insert(game).values(scheduledGames);
-  revalidatePath("/admin/tournament");
+  revalidatePath("/admin/paarungen");
 }
 
 export async function rescheduleGamesForGroup(
@@ -88,8 +90,7 @@ export async function rescheduleGamesForGroup(
   groupId: number,
 ) {
   await removeScheduledGamesForGroup(tournamentId, groupId);
-  await scheduleGamesForGroup(tournamentId, groupId);
-  revalidatePath("/admin/tournament");
+  return await scheduleGamesForGroup(tournamentId, groupId);
 }
 
 export async function verifyPgnPassword(gameId: number, password: string) {
