@@ -132,7 +132,10 @@ export default async function Page() {
 
         <TabsContent value="participants" className="space-y-4">
           <UserList
-            users={participants.map((p) => p.profile)}
+            users={participants.map((p) => ({
+              ...p.profile,
+              preferredMatchDay: p.preferredMatchDay,
+            }))}
             title="Teilnehmer"
             description={`${participants.length} Spieler sind für das Turnier angemeldet`}
             icon={User}
@@ -144,11 +147,7 @@ export default async function Page() {
           <UserList
             users={referees.map((r) => ({
               ...r.profile,
-              phoneNumber: r.profile.phoneNumber
-            }))}
-            refereeData={referees.map((r) => ({
-              profileId: r.profile.id,
-              preferredMatchDay: r.preferredMatchDay
+              preferredMatchDay: r.preferredMatchDay,
             }))}
             title="Schiedsrichter"
             description={`${referees.length} Schiedsrichter sind für das Turnier verfügbar`}
@@ -202,13 +201,15 @@ export default async function Page() {
   );
 }
 
-interface ProfileWithName {
+type ProfileWithName = {
   id: number;
   userId: string;
   firstName: string;
   lastName: string;
+  phoneNumber?: string | null;
+  preferredMatchDay?: DayOfWeek | null;
   deletedAt: Date | null;
-}
+};
 
 function UserList({
   users,
@@ -217,7 +218,6 @@ function UserList({
   icon: Icon,
   emptyMessage,
   isDisabledUsers = false,
-  refereeData,
 }: {
   users: ProfileWithName[];
   title: string;
@@ -225,10 +225,6 @@ function UserList({
   icon: LucideIcon;
   emptyMessage: string;
   isDisabledUsers?: boolean;
-  refereeData?: Array<{
-    profileId: number;
-    preferredMatchDay: DayOfWeek;
-  }>;
 }) {
   return (
     <Card>
@@ -248,19 +244,13 @@ function UserList({
           <p className="text-gray-500 text-sm italic">{emptyMessage}</p>
         ) : (
           <div className="space-y-1">
-            {users.map((user) => {
-              const refereeInfo = refereeData?.find(r => r.profileId === user.id);
-              return (
-                <UserRow
-                  key={user.id}
-                  user={user}
-                  showDeleteActions={!isDisabledUsers}
-                  refereeData={refereeInfo ? {
-                    preferredMatchDay: refereeInfo.preferredMatchDay
-                  } : undefined}
-                />
-              );
-            })}
+            {users.map((user) => (
+              <UserRow
+                key={user.id}
+                user={user}
+                showDeleteActions={!isDisabledUsers}
+              />
+            ))}
           </div>
         )}
       </CardContent>

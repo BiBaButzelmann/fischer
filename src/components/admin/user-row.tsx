@@ -36,21 +36,15 @@ interface ProfileWithName {
   lastName: string;
   deletedAt: Date | null;
   phoneNumber?: string | null;
+  preferredMatchDay?: DayOfWeek | null;
 }
 
 type Props = {
   user: ProfileWithName;
   showDeleteActions?: boolean;
-  refereeData?: {
-    preferredMatchDay: DayOfWeek;
-  };
 };
 
-export function UserRow({
-  user,
-  showDeleteActions = false,
-  refereeData,
-}: Props) {
+export function UserRow({ user, showDeleteActions = false }: Props) {
   const [softDeleteOpen, setSoftDeleteOpen] = useState(false);
   const [hardDeleteOpen, setHardDeleteOpen] = useState(false);
   const [isPending, startTransition] = useTransition();
@@ -129,26 +123,14 @@ export function UserRow({
       <div className="flex items-center gap-2">
         <div
           className={`w-6 h-6 rounded-full flex items-center justify-center ${
-            user.deletedAt != null
-              ? "bg-red-200"
-              : refereeData
-                ? "bg-blue-200"
-                : "bg-gray-200"
+            user.deletedAt != null ? "bg-red-200" : "bg-gray-200"
           }`}
         >
-          {refereeData ? (
-            <Shield
-              className={`h-3 w-3 ${
-                user.deletedAt != null ? "text-red-600" : "text-blue-600"
-              }`}
-            />
-          ) : (
-            <User
-              className={`h-3 w-3 ${
-                user.deletedAt != null ? "text-red-600" : "text-gray-600"
-              }`}
-            />
-          )}
+          <User
+            className={`h-3 w-3 ${
+              user.deletedAt != null ? "text-red-600" : "text-gray-600"
+            }`}
+          />
         </div>
         <div className="flex flex-col gap-1 flex-1">
           <div className="flex items-center gap-2">
@@ -159,12 +141,12 @@ export function UserRow({
             >
               {getDisplayName(user)}
             </span>
-            {refereeData && (
+            {user.preferredMatchDay && (
               <Badge
                 variant="secondary"
                 className="bg-blue-100 text-blue-800 text-xs px-2 py-0.5"
               >
-                {matchDaysShort[refereeData.preferredMatchDay]}
+                {matchDaysShort[user.preferredMatchDay]}
               </Badge>
             )}
           </div>
@@ -175,7 +157,6 @@ export function UserRow({
                 <span>{user.phoneNumber}</span>
               </div>
             )}
-            <span>ID: {user.id}</span>
           </div>
           {user.deletedAt && (
             <span className="text-xs text-red-600">
