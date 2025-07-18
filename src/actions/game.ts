@@ -57,7 +57,9 @@ export async function scheduleGamesForGroup(
   );
 
   const pairings = roundRobinPairs(n); // array[round][pair] -> [white#, black#]
+  console.log("pairings", pairings);
   const firstDate = firstMatchDate(startDate, group.matchDay);
+  console.log("firstDate", firstDate);
 
   pairings.forEach((pairsInRound, roundIdx) => {
     // TODO: set the time from the tournament settings
@@ -74,6 +76,8 @@ export async function scheduleGamesForGroup(
       });
     });
   });
+
+  console.log("scheduledGames", scheduledGames.length);
 
   await db.insert(game).values(scheduledGames);
   revalidatePath("/admin/tournament");
