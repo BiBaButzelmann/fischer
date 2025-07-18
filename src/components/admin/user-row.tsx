@@ -10,14 +10,7 @@ import {
   DialogTitle,
   DialogTrigger,
 } from "@/components/ui/dialog";
-import {
-  User,
-  Trash2,
-  AlertTriangle,
-  RotateCcw,
-  Shield,
-  Phone,
-} from "lucide-react";
+import { User, Trash2, AlertTriangle, RotateCcw, Phone } from "lucide-react";
 import { useState, useTransition } from "react";
 import {
   softDeleteUserProfile,
