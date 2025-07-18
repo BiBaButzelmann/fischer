@@ -4,6 +4,7 @@ import { participant } from "./participant";
 import { game } from "./game";
 import { matchDay, timestamps } from "./columns.helpers";
 import { tournament } from "./tournament";
+import { groupMatchEnteringHelper } from "./matchEnteringHelper";
 
 export const group = pgTable(
   "group",
@@ -26,5 +27,6 @@ export const groupRelations = relations(group, ({ one, many }) => ({
     references: [tournament.id],
   }),
   participants: many(participant),
+  matchEnteringHelpers: many(groupMatchEnteringHelper),
   games: many(game),
 }));

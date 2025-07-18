@@ -9,7 +9,7 @@ import {
 import { ChevronDownIcon } from "lucide-react";
 import { getProfilesByUserRole } from "@/db/repositories/profile";
 import { getLatestTournament } from "@/db/repositories/tournament";
-import { getGroupsByTournamentId } from "@/db/repositories/group";
+import { getGroupsWithParticipantsByTournamentId } from "@/db/repositories/group";
 import { Tournament } from "@/db/types/tournament";
 import { getTournamentWeeksByTournamentId } from "@/db/repositories/tournamentWeek";
 
@@ -32,7 +32,9 @@ export default async function Page() {
 
 async function ManageTournament({ tournament }: { tournament?: Tournament }) {
   const adminProfiles = await getProfilesByUserRole("admin");
-  const groups = tournament ? await getGroupsByTournamentId(tournament.id) : [];
+  const groups = tournament
+    ? await getGroupsWithParticipantsByTournamentId(tournament.id)
+    : [];
   const tournamentWeeks = tournament
     ? await getTournamentWeeksByTournamentId(tournament.id)
     : [];

@@ -138,6 +138,12 @@ export async function AppSidebar() {
                   <span>Aufbauhelfer verwalten</span>
                 </Link>
               </SidebarMenuButton>
+              <SidebarMenuButton asChild>
+                <Link href="/admin/eingabehelfer">
+                  <Users />
+                  <span>Eingabehelfer verwalten</span>
+                </Link>
+              </SidebarMenuButton>
             </SidebarGroupContent>
           </SidebarGroup>
         ) : null}
