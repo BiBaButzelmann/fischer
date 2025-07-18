@@ -41,11 +41,17 @@ import { useRouter } from "next/navigation";
 
 type GameListProps = {
   userId: string | undefined;
+  userRole?: string;
   games: GameWithParticipantNamesAndRatings[];
   onResultChange: (gameId: number, result: GameResult) => Promise<void>;
 };
 
-export function GamesList({ userId, games, onResultChange }: GameListProps) {
+export function GamesList({
+  userId,
+  userRole,
+  games,
+  onResultChange,
+}: GameListProps) {
   const isMobile = useIsMobile();
   const router = useRouter();
   const [isPending, startTransition] = useTransition();
@@ -193,22 +199,27 @@ export function GamesList({ userId, games, onResultChange }: GameListProps) {
                             <SelectItem value="0:1">Schwarz gewinnt</SelectItem>
                             <SelectItem value="½-½">Remis</SelectItem>
                             <SelectItem value="+:-">
-                              Weiß gewinnt (Schwarz ist nicht angetreten)
+                              Schwarz nicht angetreten
                             </SelectItem>
                             <SelectItem value="-:+">
-                              Schwarz gewinnt (Weiß ist nicht angetreten)
-                            </SelectItem>
-                            <SelectItem value="0-½">
-                              Weiß verliert durch Regelverstoß, aber Schwarz hat
-                              unzureichendes Material zum Matt setzen.{" "}
-                            </SelectItem>
-                            <SelectItem value="½-0">
-                              Schwarz verliert durch Regelverstoß, aber Weiß hat
-                              unzureichendes Material zum Matt setzen.
+                              Weiß nicht angetreten
                             </SelectItem>
                             <SelectItem value="-:-">
-                              Beide Spieler sind nicht angetreten.
+                              Beide Spieler nicht angetreten.
                             </SelectItem>
+                            {userRole === "admin" && (
+                              <>
+                                <SelectItem value="0-½">
+                                  Weiß verliert durch Regelverstoß, aber Schwarz
+                                  hat unzureichendes Material zum Matt
+                                  setzen.{" "}
+                                </SelectItem>
+                                <SelectItem value="½-0">
+                                  Schwarz verliert durch Regelverstoß, aber Weiß
+                                  hat unzureichendes Material zum Matt setzen.
+                                </SelectItem>
+                              </>
+                            )}
                           </SelectContent>
                         </Select>
                       </div>
