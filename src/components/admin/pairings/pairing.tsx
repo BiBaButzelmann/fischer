@@ -98,6 +98,7 @@ export function Pairing({ group }: { group: GroupWithParticipantsAndGames }) {
                         <div className="font-semibold text-gray-900">
                           {game.boardNumber}
                         </div>
+                        {/* TODO: add color coding for players that dont have time on that date */}
                         <div>
                           <ParticipantEntry
                             participant={

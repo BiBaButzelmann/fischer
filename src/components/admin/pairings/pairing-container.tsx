@@ -32,7 +32,7 @@ export function PairingContainer({
           onGroupChange={handleGroupChange}
         />
       </div>
-
+      {/* TODO: there is a bug that for 9 players only 4 pairings are shown, see todo in game.ts */}
       {/* Right side: Pairings for selected group */}
       <div className="flex-1 min-w-0">
         {selectedGroup ? (
