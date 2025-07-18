@@ -76,6 +76,7 @@ export async function updateSetupHelpers(
         }));
       },
     );
+    // TODO: bug when all setup helpers are removed, it will not delete the old ones
     await tx.insert(matchdaySetupHelper).values(insertValues);
   });
 

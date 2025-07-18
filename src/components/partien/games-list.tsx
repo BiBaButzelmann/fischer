@@ -148,6 +148,7 @@ export function GamesList({
                   <p>Partie anschauen</p>
                 </TooltipContent>
               </Tooltip>
+              {/* TODO: Schiedsrichter darf Ergebnisse melden (global) */}
               {userId != null &&
               gameParticipantsMap[game.id].includes(userId) ? (
                 <Dialog>

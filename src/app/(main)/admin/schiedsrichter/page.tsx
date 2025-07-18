@@ -36,7 +36,7 @@ export default async function Page() {
           Schiedsrichter für {tournament.name} zuweisen
         </p>
       </div>
-
+      {/* TODO: es muss eine Möglichkeit geben, granularer Schiedsrichtern Spieltage zuzuweisen. Gerade für Nachholwochen müuss es möglich sein, anderen Schiedsrichtern die Termine einzustellen */}
       <RefereeAssignmentForm
         tournamentId={tournament.id}
         referees={referees}
