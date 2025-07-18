@@ -14,7 +14,6 @@ import { Card, CardContent, CardHeader } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { ParticipantEntry } from "../groups/participant-entry";
 import { updateGroupPositions } from "@/actions/group";
-import { rescheduleGames } from "@/actions/game";
 import {
   DndContext,
   closestCorners,
@@ -28,6 +27,7 @@ import {
 import { SortableContext, arrayMove } from "@dnd-kit/sortable";
 import { CSS } from "@dnd-kit/utilities";
 import { useSortable } from "@dnd-kit/sortable";
+import { rescheduleGamesForGroup } from "@/actions/game";
 
 type GroupPositionManagerProps = {
   tournamentId: number;
@@ -126,7 +126,7 @@ export function GroupPositionManager({
         selectedGroup.id,
         currentParticipants,
       );
-      await rescheduleGames(tournamentId);
+      await rescheduleGamesForGroup(tournamentId, selectedGroup.id);
     });
   };
 

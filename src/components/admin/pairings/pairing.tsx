@@ -55,7 +55,7 @@ export function Pairing({ group }: { group: GroupWithParticipantsAndGames }) {
               value={`round-${round}`}
               className="text-sm"
             >
-              Round {round}
+              Runde {round}
             </TabsTrigger>
           ))}
         </TabsList>
@@ -68,7 +68,7 @@ export function Pairing({ group }: { group: GroupWithParticipantsAndGames }) {
                 {/* Header Section */}
                 <div className="bg-gray-50 border-b border-gray-200 px-6 py-4 rounded-t-lg">
                   <h3 className="text-lg font-semibold text-gray-900">
-                    Round {round} on{" "}
+                    Runde {round} am{" "}
                     {games[0]?.scheduled.toLocaleDateString("de-DE", {
                       year: "numeric",
                       month: "2-digit",

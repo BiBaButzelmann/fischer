@@ -1,5 +1,24 @@
 import { db } from "../client";
 
+export async function getGroupById(groupId: number) {
+  return await db.query.group.findFirst({
+    where: (group, { eq }) => eq(group.id, groupId),
+    with: {
+      participants: {
+        orderBy: (participant, { asc }) => [asc(participant.groupPosition)],
+        with: {
+          profile: {
+            columns: {
+              firstName: true,
+              lastName: true,
+            },
+          },
+        },
+      },
+    },
+  });
+}
+
 export async function getGroupsByTournamentId(tournamentId: number) {
   return await db.query.group.findMany({
     where: (group, { eq }) => eq(group.tournamentId, tournamentId),
