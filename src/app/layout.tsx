@@ -30,6 +30,11 @@ export default function RootLayout({
       <body
         className={`${geistSans.variable} ${geistMono.variable} antialiased min-h-screen bg-background text-foreground font-sans`}
       >
+        {process.env.VERCEL_ENV !== "production" ? (
+          <div className="fixed top-2 right-2 bg-red-500 px-8 py-2 text-white z-10">
+            {process.env.VERCEL_ENV ?? "Development"}
+          </div>
+        ) : null}
         <Analytics />
         <Toaster position="top-right" />
         <Providers>{children}</Providers>
