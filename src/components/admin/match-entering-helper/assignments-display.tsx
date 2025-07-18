@@ -11,7 +11,7 @@ export function AssignmentsDisplay({
 }: AssignmentsDisplayProps) {
   return (
     <Badge>
-      {numberOfGroupsToEnter} ({assignedCount})
+      {assignedCount}/{numberOfGroupsToEnter}
     </Badge>
   );
 }
