@@ -15,10 +15,14 @@ export const availableMatchDays = ["tuesday", "thursday", "friday"] as const;
 export const matchDay = pgEnum("match_day", availableMatchDays);
 
 export const gameResults = [
-  "draw",
-  "white_wins",
-  "black_wins",
-  // TODO: nicht angetreten etc.
+  "1:0",
+  "0:1",
+  "½-½",
+  "+:-",
+  "-:+",
+  "-:-",
+  "0-½",
+  "½-0",
 ] as const;
 
 export const gameResult = pgEnum("result", gameResults);

@@ -41,11 +41,17 @@ import { useRouter } from "next/navigation";
 
 type GameListProps = {
   userId: string | undefined;
+  userRole?: string;
   games: GameWithParticipantNamesAndRatings[];
   onResultChange: (gameId: number, result: GameResult) => Promise<void>;
 };
 
-export function GamesList({ userId, games, onResultChange }: GameListProps) {
+export function GamesList({
+  userId,
+  userRole,
+  games,
+  onResultChange,
+}: GameListProps) {
   const isMobile = useIsMobile();
   const router = useRouter();
   const [isPending, startTransition] = useTransition();
@@ -124,9 +130,7 @@ export function GamesList({ userId, games, onResultChange }: GameListProps) {
                 </span>
               )}
             </TableCell>
-            <TableCell>
-              {game.result ? resultDisplay[game.result] : "-"}
-            </TableCell>
+            <TableCell>{game.result ?? "-"}</TableCell>
             <TableCell className="hidden md:flex items-center gap-2">
               <Tooltip>
                 <TooltipTrigger asChild>
@@ -191,13 +195,31 @@ export function GamesList({ userId, games, onResultChange }: GameListProps) {
                             <SelectValue placeholder="Ergebnis wählen" />
                           </SelectTrigger>
                           <SelectContent>
-                            <SelectItem value="white_wins">
-                              1-0 (Weiß gewinnt)
+                            <SelectItem value="1:0">Weiß gewinnt</SelectItem>
+                            <SelectItem value="0:1">Schwarz gewinnt</SelectItem>
+                            <SelectItem value="½-½">Remis</SelectItem>
+                            <SelectItem value="+:-">
+                              Schwarz nicht angetreten
                             </SelectItem>
-                            <SelectItem value="black_wins">
-                              0-1 (Schwarz gewinnt)
+                            <SelectItem value="-:+">
+                              Weiß nicht angetreten
                             </SelectItem>
-                            <SelectItem value="draw">½-½ (Remis)</SelectItem>
+                            <SelectItem value="-:-">
+                              Beide Spieler nicht angetreten.
+                            </SelectItem>
+                            {userRole === "admin" && (
+                              <>
+                                <SelectItem value="0-½">
+                                  Weiß verliert durch Regelverstoß, aber Schwarz
+                                  hat unzureichendes Material zum Matt
+                                  setzen.{" "}
+                                </SelectItem>
+                                <SelectItem value="½-0">
+                                  Schwarz verliert durch Regelverstoß, aber Weiß
+                                  hat unzureichendes Material zum Matt setzen.
+                                </SelectItem>
+                              </>
+                            )}
                           </SelectContent>
                         </Select>
                       </div>
@@ -220,9 +242,3 @@ export function GamesList({ userId, games, onResultChange }: GameListProps) {
     </Table>
   );
 }
-
-const resultDisplay: Record<GameResult, string> = {
-  draw: "½-½",
-  white_wins: "1-0",
-  black_wins: "0-1",
-};

@@ -29,6 +29,7 @@ import {
 } from "lucide-react";
 import { UserRow } from "@/components/admin/user-row";
 import { redirect } from "next/navigation";
+import { DayOfWeek } from "@/db/types/group";
 
 export default async function Page() {
   const session = await authWithRedirect();
@@ -131,7 +132,10 @@ export default async function Page() {
 
         <TabsContent value="participants" className="space-y-4">
           <UserList
-            users={participants.map((p) => p.profile)}
+            users={participants.map((p) => ({
+              ...p.profile,
+              preferredMatchDay: p.preferredMatchDay,
+            }))}
             title="Teilnehmer"
             description={`${participants.length} Spieler sind für das Turnier angemeldet`}
             icon={User}
@@ -141,7 +145,10 @@ export default async function Page() {
 
         <TabsContent value="referees" className="space-y-4">
           <UserList
-            users={referees.map((r) => r.profile)}
+            users={referees.map((r) => ({
+              ...r.profile,
+              preferredMatchDay: r.preferredMatchDay,
+            }))}
             title="Schiedsrichter"
             description={`${referees.length} Schiedsrichter sind für das Turnier verfügbar`}
             icon={Shield}
@@ -194,13 +201,15 @@ export default async function Page() {
   );
 }
 
-interface ProfileWithName {
+type ProfileWithName = {
   id: number;
   userId: string;
   firstName: string;
   lastName: string;
+  phoneNumber?: string | null;
+  preferredMatchDay?: DayOfWeek | null;
   deletedAt: Date | null;
-}
+};
 
 function UserList({
   users,
