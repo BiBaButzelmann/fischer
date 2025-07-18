@@ -1,10 +1,10 @@
 import { EditGroupsGrid } from "../groups/edit-groups-grid";
 import { Tournament } from "@/db/types/tournament";
-import { getGroupsByTournamentId } from "@/db/repositories/group";
+import { getGroupsWithParticipantsByTournamentId } from "@/db/repositories/group";
 import { getUnassignedParticipantsByTournamentId } from "@/db/repositories/participant";
 
 export async function EditGroups({ tournament }: { tournament: Tournament }) {
-  const groups = await getGroupsByTournamentId(tournament.id);
+  const groups = await getGroupsWithParticipantsByTournamentId(tournament.id);
   const unassignedParticipants = await getUnassignedParticipantsByTournamentId(
     tournament.id,
   );

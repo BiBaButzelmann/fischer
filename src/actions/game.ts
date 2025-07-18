@@ -4,7 +4,7 @@ import { auth as betterAuth } from "@/auth";
 import { auth, authWithRedirect } from "@/auth/utils";
 import { db } from "@/db/client";
 import { isUserParticipantInGame } from "@/db/repositories/game";
-import { getGroupsByTournamentId } from "@/db/repositories/group";
+import { getGroupsWithParticipantsByTournamentId } from "@/db/repositories/group";
 import { getTournamentById } from "@/db/repositories/tournament";
 import { game } from "@/db/schema/game";
 import { GameResult } from "@/db/types/game";
@@ -22,7 +22,7 @@ export async function scheduleGames(tournamentId: number) {
   invariant(tournament, `Tournament #${tournamentId} not found`);
   const startDate = tournament.startDate;
 
-  const groups = await getGroupsByTournamentId(tournamentId);
+  const groups = await getGroupsWithParticipantsByTournamentId(tournamentId);
 
   const scheduledGames: InferInsertModel<typeof game>[] = [];
 
