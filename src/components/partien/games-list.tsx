@@ -189,14 +189,26 @@ export function GamesList({ userId, games, onResultChange }: GameListProps) {
                             <SelectValue placeholder="Ergebnis wählen" />
                           </SelectTrigger>
                           <SelectContent>
-                            <SelectItem value="1:0">1-0</SelectItem>
-                            <SelectItem value="0:1">0-1</SelectItem>
-                            <SelectItem value="½-½">½-½</SelectItem>
-                            <SelectItem value="+:-">1-0</SelectItem>
-                            <SelectItem value="-:+">0-1</SelectItem>
-                            <SelectItem value="0-½">0-½</SelectItem>
-                            <SelectItem value="½-0">½-0</SelectItem>
-                            <SelectItem value="-:-">0-0</SelectItem>
+                            <SelectItem value="1:0">Weiß gewinnt</SelectItem>
+                            <SelectItem value="0:1">Schwarz gewinnt</SelectItem>
+                            <SelectItem value="½-½">Remis</SelectItem>
+                            <SelectItem value="+:-">
+                              Weiß gewinnt (Schwarz ist nicht angetreten)
+                            </SelectItem>
+                            <SelectItem value="-:+">
+                              Schwarz gewinnt (Weiß ist nicht angetreten)
+                            </SelectItem>
+                            <SelectItem value="0-½">
+                              Weiß verliert durch Regelverstoß, aber Schwarz hat
+                              unzureichendes Material zum Matt setzen.{" "}
+                            </SelectItem>
+                            <SelectItem value="½-0">
+                              Schwarz verliert durch Regelverstoß, aber Weiß hat
+                              unzureichendes Material zum Matt setzen.
+                            </SelectItem>
+                            <SelectItem value="-:-">
+                              Beide Spieler sind nicht angetreten.
+                            </SelectItem>
                           </SelectContent>
                         </Select>
                       </div>
