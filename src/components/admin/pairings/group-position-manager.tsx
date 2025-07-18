@@ -14,7 +14,6 @@ import { Card, CardContent, CardHeader } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { ParticipantEntry } from "../groups/participant-entry";
 import { updateGroupPositions } from "@/actions/group";
-import { rescheduleGames } from "@/actions/game";
 import {
   DndContext,
   closestCorners,
@@ -28,6 +27,7 @@ import {
 import { SortableContext, arrayMove } from "@dnd-kit/sortable";
 import { CSS } from "@dnd-kit/utilities";
 import { useSortable } from "@dnd-kit/sortable";
+import { rescheduleGamesForGroup } from "@/actions/game";
 
 type GroupPositionManagerProps = {
   tournamentId: number;
@@ -40,6 +40,7 @@ export function GroupPositionManager({
   groups: initialGroups,
   onGroupChange,
 }: GroupPositionManagerProps) {
+  const [error, setError] = useState<string>();
   const [isPending, startTransition] = useTransition();
   const sortedGroups = [...initialGroups].sort(
     (a, b) => a.groupNumber - b.groupNumber,
@@ -126,7 +127,14 @@ export function GroupPositionManager({
         selectedGroup.id,
         currentParticipants,
       );
-      await rescheduleGames(tournamentId);
+      const response = await rescheduleGamesForGroup(
+        tournamentId,
+        selectedGroup.id,
+      );
+      setError(undefined);
+      if (response?.error != null) {
+        setError(response.error);
+      }
     });
   };
 
@@ -198,6 +206,10 @@ export function GroupPositionManager({
           ) : null}
         </DragOverlay>
       </DndContext>
+
+      {error ? (
+        <p className="text-sm text-red-500 text-center">{error}</p>
+      ) : null}
 
       {/* Save Button */}
       <Button onClick={handleSave} disabled={isPending} className="w-full">
