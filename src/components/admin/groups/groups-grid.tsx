@@ -22,6 +22,8 @@ import { GridGroup } from "./types";
 import { GroupMatchDay } from "./group-match-day";
 import { ParticipantEntry } from "./participant-entry";
 import { GroupDetails } from "./group-details";
+import { Button } from "@/components/ui/button";
+import { Trash } from "lucide-react";
 
 export const UNASSIGNED_CONTAINER_ID = "unassigned-droppable";
 const UNASSIGNED_CONTAINER_TYPE = "unassigned";
@@ -33,12 +35,14 @@ export function GroupsGrid({
   unassignedParticipants,
   onChangeGroups,
   onChangeUnassignedParticipants,
+  onDeleteGroup,
 }: {
   tournamentId: number;
   groups: GridGroup[];
   unassignedParticipants: ParticipantWithName[];
   onChangeGroups: (groups: GridGroup[]) => void;
   onChangeUnassignedParticipants: (participants: ParticipantWithName[]) => void;
+  onDeleteGroup: (groupId: number) => void;
 }) {
   const [activeItem, setActiveItem] = useState<ParticipantWithName | null>(
     null,
@@ -72,7 +76,11 @@ export function GroupsGrid({
         <div className="flex flex-col gap-4">
           <div className="grid grid-cols-1 sm:grid-cols-1 lg:grid-cols-2 gap-4">
             {groups.map((group) => (
-              <GroupContainer key={group.id} group={group} />
+              <GroupContainer
+                key={group.id}
+                group={group}
+                onDeleteGroup={onDeleteGroup}
+              />
             ))}
             <UnassignedContainer participants={unassignedParticipants} />
           </div>
@@ -87,7 +95,13 @@ export function GroupsGrid({
   );
 }
 
-export function GroupContainer({ group }: { group: GridGroup }) {
+export function GroupContainer({
+  group,
+  onDeleteGroup,
+}: {
+  group: GridGroup;
+  onDeleteGroup: (groupId: number) => void;
+}) {
   const { setNodeRef } = useDroppable({
     id: group.id,
     data: {
@@ -105,7 +119,19 @@ export function GroupContainer({ group }: { group: GridGroup }) {
     <Card>
       <CardHeader>
         <CardTitle>
-          <GroupDetails group={group} />
+          <div className="flex gap-2">
+            <div className="flex-1">
+              <GroupDetails group={group} />
+            </div>
+            <Button
+              size="icon"
+              variant="outline"
+              className="text-destructive border-destructive"
+              onClick={() => onDeleteGroup(group.id)}
+            >
+              <Trash className="h-4 w-4" />
+            </Button>
+          </div>
         </CardTitle>
       </CardHeader>
       <CardContent

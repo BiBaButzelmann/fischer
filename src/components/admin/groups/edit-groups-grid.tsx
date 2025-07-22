@@ -27,7 +27,6 @@ export function EditGroupsGrid({
       (group) =>
         ({
           id: group.id,
-          isNew: false,
           groupNumber: group.groupNumber,
           groupName: group.groupName,
           matchDay: group.matchDay,
@@ -41,12 +40,24 @@ export function EditGroupsGrid({
       ...prev,
       {
         id: Date.now(),
-        isNew: true,
         groupNumber: prev.length + 1,
         groupName: `Gruppe ${prev.length + 1}`,
         matchDay: null,
         participants: [],
       } as GridGroup,
+    ]);
+  };
+
+  const handleDeleteGroup = (groupId: number) => {
+    const newGroups = [...gridGroups];
+    const groupIndex = newGroups.findIndex((g) => g.id === groupId);
+    if (groupIndex === -1) return;
+
+    const deletedGroup = newGroups.splice(groupIndex, 1);
+    setGridGroups(newGroups);
+    setUnassignedParticipants([
+      ...unassignedParticipants,
+      ...deletedGroup[0].participants,
     ]);
   };
 
@@ -73,6 +84,7 @@ export function EditGroupsGrid({
         unassignedParticipants={unassignedParticipants}
         onChangeGroups={setGridGroups}
         onChangeUnassignedParticipants={setUnassignedParticipants}
+        onDeleteGroup={handleDeleteGroup}
       />
       <Button onClick={handleSave} disabled={isPending}>
         Gruppenaufteilung Speichern
