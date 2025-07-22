@@ -15,17 +15,9 @@ import {
   useSensors,
 } from "@dnd-kit/core";
 import { CSS } from "@dnd-kit/utilities";
-import {
-  Dispatch,
-  SetStateAction,
-  useMemo,
-  useState,
-  useTransition,
-} from "react";
+import { useMemo, useState } from "react";
 import invariant from "tiny-invariant";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { generateGroups, updateGroups } from "@/actions/group";
-import { Button } from "@/components/ui/button";
 import { GridGroup } from "./types";
 import { GroupMatchDay } from "./group-match-day";
 import { ParticipantEntry } from "./participant-entry";
@@ -37,20 +29,17 @@ const GROUP_CONTAINER_TYPE = "group";
 const PARTICIPANT_CONTAINER_TYPE = "participant";
 
 export function GroupsGrid({
-  tournamentId,
-  groups: initialGroups,
-  unassignedParticipants: initialUnassignedParticipants,
+  groups,
+  unassignedParticipants,
+  onChangeGroups,
+  onChangeUnassignedParticipants,
 }: {
   tournamentId: number;
   groups: GridGroup[];
   unassignedParticipants: ParticipantWithName[];
+  onChangeGroups: (groups: GridGroup[]) => void;
+  onChangeUnassignedParticipants: (participants: ParticipantWithName[]) => void;
 }) {
-  const [isPending, startTransition] = useTransition();
-
-  const [groups, setGroups] = useState(initialGroups);
-  const [unassignedParticipants, setUnassignedParticipants] = useState(
-    initialUnassignedParticipants,
-  );
   const [activeItem, setActiveItem] = useState<ParticipantWithName | null>(
     null,
   );
@@ -66,33 +55,10 @@ export function GroupsGrid({
   const { handleDragStart, handleDragOver, handleDragEnd } = useDragAndDrop({
     groups,
     unassignedParticipants,
-    setGroups,
-    setUnassignedParticipants,
-    setActiveItem,
+    onChangeGroups,
+    onChangeUnassignedParticipants,
+    onChangeActiveItem: setActiveItem,
   });
-
-  const handleSave = () => {
-    startTransition(async () => {
-      await updateGroups(tournamentId, groups, unassignedParticipants);
-    });
-  };
-
-  const handleGenerateGroups = () => {
-    startTransition(async () => {
-      await generateGroups(tournamentId);
-    });
-  };
-
-  if (groups.length === 0) {
-    return (
-      <div className="flex flex-col items-center justify-center gap-4 p-4">
-        <span>Keine Gruppen vorhanden</span>
-        <Button onClick={handleGenerateGroups} disabled={isPending}>
-          Gruppen generieren
-        </Button>
-      </div>
-    );
-  }
 
   return (
     <div className="flex flex-col gap-4">
@@ -117,9 +83,6 @@ export function GroupsGrid({
           ) : null}
         </DragOverlay>
       </DndContext>
-      <Button onClick={handleSave} disabled={isPending}>
-        Gruppenaufteilung Speichern
-      </Button>
     </div>
   );
 }
@@ -236,15 +199,15 @@ export function ParticipantItem({
 function useDragAndDrop({
   groups,
   unassignedParticipants,
-  setGroups,
-  setUnassignedParticipants,
-  setActiveItem,
+  onChangeGroups,
+  onChangeUnassignedParticipants,
+  onChangeActiveItem,
 }: {
   groups: GridGroup[];
   unassignedParticipants: ParticipantWithName[];
-  setGroups: Dispatch<SetStateAction<GridGroup[]>>;
-  setUnassignedParticipants: Dispatch<SetStateAction<ParticipantWithName[]>>;
-  setActiveItem: Dispatch<SetStateAction<ParticipantWithName | null>>;
+  onChangeGroups: (groups: GridGroup[]) => void;
+  onChangeUnassignedParticipants: (participants: ParticipantWithName[]) => void;
+  onChangeActiveItem: (participant: ParticipantWithName | null) => void;
 }) {
   const findContainerId = (id: number) => {
     if (unassignedParticipants.some((p) => p.id === id)) {
@@ -261,7 +224,7 @@ function useDragAndDrop({
   const handleDragStart = (event: DragStartEvent) => {
     const { active } = event;
     invariant(active.data.current, "Active data must be set");
-    setActiveItem(active.data.current?.participant as ParticipantWithName);
+    onChangeActiveItem(active.data.current?.participant as ParticipantWithName);
   };
 
   const handleDragOver = (event: DragOverEvent) => {
@@ -285,49 +248,47 @@ function useDragAndDrop({
     }
 
     // Handle moving an item to a new container
-    setGroups((prevGroups) => {
-      const newGroups = [...prevGroups];
-      let newUnassigned = [...unassignedParticipants];
-      const participant = active.data.current?.participant;
+    const newGroups = [...groups];
+    let newUnassigned = [...unassignedParticipants];
+    const participant = active.data.current?.participant;
 
-      // Remove from original container
-      if (originalContainerId === UNASSIGNED_CONTAINER_ID) {
-        newUnassigned = newUnassigned.filter((p) => p.id !== active.id);
-      } else {
-        const groupIndex = newGroups.findIndex(
-          (g) => g.id === originalContainerId,
-        );
-        if (groupIndex > -1) {
-          newGroups[groupIndex] = {
-            ...newGroups[groupIndex],
-            participants: newGroups[groupIndex].participants.filter(
-              (p) => p.id !== active.id,
-            ),
-          };
-        }
+    // Remove from original container
+    if (originalContainerId === UNASSIGNED_CONTAINER_ID) {
+      newUnassigned = newUnassigned.filter((p) => p.id !== active.id);
+    } else {
+      const groupIndex = newGroups.findIndex(
+        (g) => g.id === originalContainerId,
+      );
+      if (groupIndex > -1) {
+        newGroups[groupIndex] = {
+          ...newGroups[groupIndex],
+          participants: newGroups[groupIndex].participants.filter(
+            (p) => p.id !== active.id,
+          ),
+        };
       }
+    }
 
-      // Add to new container
-      if (overContainerId === UNASSIGNED_CONTAINER_ID) {
-        newUnassigned.push(participant);
-      } else {
-        const groupIndex = newGroups.findIndex((g) => g.id === overContainerId);
-        if (groupIndex > -1) {
-          newGroups[groupIndex] = {
-            ...newGroups[groupIndex],
-            participants: [...newGroups[groupIndex].participants, participant],
-          };
-        }
+    // Add to new container
+    if (overContainerId === UNASSIGNED_CONTAINER_ID) {
+      newUnassigned.push(participant);
+    } else {
+      const groupIndex = newGroups.findIndex((g) => g.id === overContainerId);
+      if (groupIndex > -1) {
+        newGroups[groupIndex] = {
+          ...newGroups[groupIndex],
+          participants: [...newGroups[groupIndex].participants, participant],
+        };
       }
+    }
 
-      setUnassignedParticipants(newUnassigned);
-      return newGroups;
-    });
+    onChangeUnassignedParticipants(newUnassigned);
+    onChangeGroups(newGroups);
   };
 
   const handleDragEnd = (event: DragEndEvent) => {
     const { active, over } = event;
-    setActiveItem(null);
+    onChangeActiveItem(null);
 
     if (!over) return;
 
@@ -346,34 +307,34 @@ function useDragAndDrop({
     ) {
       // This handles re-ordering within the same list
       if (originalContainerId === UNASSIGNED_CONTAINER_ID) {
-        setUnassignedParticipants((prev) => {
-          const oldIndex = prev.findIndex((p) => p.id === active.id);
-          const newIndex = prev.findIndex((p) => p.id === over.id);
-          return arrayMove(prev, oldIndex, newIndex);
-        });
+        const newUnassignedParticipants = [...unassignedParticipants];
+        const oldIndex = unassignedParticipants.findIndex(
+          (p) => p.id === active.id,
+        );
+        const newIndex = unassignedParticipants.findIndex(
+          (p) => p.id === over.id,
+        );
+        return arrayMove(newUnassignedParticipants, oldIndex, newIndex);
+        onChangeUnassignedParticipants(newUnassignedParticipants);
+        return;
       } else {
-        setGroups((prev) => {
-          const groupIndex = prev.findIndex(
-            (g) => g.id === originalContainerId,
-          );
-          const group = prev[groupIndex];
-          const oldIndex = group.participants.findIndex(
-            (p) => p.id === active.id,
-          );
-          const newIndex = group.participants.findIndex(
-            (p) => p.id === over.id,
-          );
-          const newParticipants = arrayMove(
-            group.participants,
-            oldIndex,
-            newIndex,
-          );
-          const newGroups = [...prev];
-          newGroups[groupIndex] = { ...group, participants: newParticipants };
-          return newGroups;
-        });
+        const groupIndex = groups.findIndex(
+          (g) => g.id === originalContainerId,
+        );
+        const group = groups[groupIndex];
+        const oldIndex = group.participants.findIndex(
+          (p) => p.id === active.id,
+        );
+        const newIndex = group.participants.findIndex((p) => p.id === over.id);
+        const newParticipants = arrayMove(
+          group.participants,
+          oldIndex,
+          newIndex,
+        );
+        const newGroups = [...groups];
+        newGroups[groupIndex] = { ...group, participants: newParticipants };
+        onChangeGroups(newGroups);
       }
-      return;
     }
   };
 
