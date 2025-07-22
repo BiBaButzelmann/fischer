@@ -32,6 +32,9 @@ import { ParticipantEntry } from "./participant-entry";
 import { GroupDetails } from "./group-details";
 
 export const UNASSIGNED_CONTAINER_ID = "unassigned-droppable";
+const UNASSIGNED_CONTAINER_TYPE = "unassigned";
+const GROUP_CONTAINER_TYPE = "group";
+const PARTICIPANT_CONTAINER_TYPE = "participant";
 
 export function GroupsGrid({
   tournamentId,
@@ -105,9 +108,9 @@ export function GroupsGrid({
             {groups.map((group) => (
               <GroupContainer key={group.id} group={group} />
             ))}
+            <UnassignedContainer participants={unassignedParticipants} />
           </div>
         </div>
-        <UnassignedContainer participants={unassignedParticipants} />
         <DragOverlay>
           {activeItem ? (
             <ParticipantItem participant={activeItem} isOverlay />
@@ -125,7 +128,7 @@ export function GroupContainer({ group }: { group: GridGroup }) {
   const { setNodeRef } = useDroppable({
     id: group.id,
     data: {
-      type: "group",
+      type: GROUP_CONTAINER_TYPE,
       group,
     },
   });
@@ -167,7 +170,7 @@ export function UnassignedContainer({
   const { setNodeRef } = useDroppable({
     id: UNASSIGNED_CONTAINER_ID,
     data: {
-      type: "unassigned",
+      type: UNASSIGNED_CONTAINER_TYPE,
     },
   });
 
@@ -204,7 +207,7 @@ export function ParticipantItem({
   } = useSortable({
     id: participant.id,
     data: {
-      type: "Participant",
+      type: PARTICIPANT_CONTAINER_TYPE,
       participant,
     },
   });
@@ -267,9 +270,9 @@ function useDragAndDrop({
 
     const originalContainerId = findContainerId(active.id as number);
     const overContainerId =
-      over.data.current?.type === "Group"
+      over.data.current?.type === GROUP_CONTAINER_TYPE
         ? over.id
-        : over.data.current?.type === "UnassignedGroup"
+        : over.data.current?.type === UNASSIGNED_CONTAINER_TYPE
           ? UNASSIGNED_CONTAINER_ID
           : findContainerId(over.id as number);
 
@@ -330,9 +333,9 @@ function useDragAndDrop({
 
     const originalContainerId = findContainerId(active.id as number);
     const overContainerId =
-      over.data.current?.type === "Group"
+      over.data.current?.type === GROUP_CONTAINER_TYPE
         ? over.id
-        : over.data.current?.type === "UnassignedGroup"
+        : over.data.current?.type === UNASSIGNED_CONTAINER_TYPE
           ? UNASSIGNED_CONTAINER_ID
           : findContainerId(over.id as number);
 
