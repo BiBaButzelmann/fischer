@@ -122,11 +122,7 @@ export function GroupPositionManager({
     if (!selectedGroup) return;
 
     startTransition(async () => {
-      await updateGroupPositions(
-        tournamentId,
-        selectedGroup.id,
-        currentParticipants,
-      );
+      await updateGroupPositions(selectedGroup.id, currentParticipants);
       const response = await rescheduleGamesForGroup(
         tournamentId,
         selectedGroup.id,
