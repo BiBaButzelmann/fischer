@@ -17,6 +17,8 @@ import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { signup } from "@/actions/auth";
 import { Mail, User, Lock, Phone } from "lucide-react";
+import { Checkbox } from "../ui/checkbox";
+import Link from "next/link";
 
 export const signupFormSchema = z
   .object({
@@ -26,6 +28,11 @@ export const signupFormSchema = z
     phoneNumber: z.string().min(1, "Telefonnummer ist erforderlich"),
     password: z.string().min(6, "Passwort muss mindestens 6 Zeichen lang sein"),
     confirmPassword: z.string(),
+    acceptedTerms: z.literal<boolean>(true, {
+      errorMap: () => ({
+        message: "Sie müssen den Datenschutzbestimmungen zustimmen",
+      }),
+    }),
   })
   .refine((data) => data.password === data.confirmPassword, {
     message: "Passwörter stimmen nicht überein",
@@ -64,12 +71,11 @@ export function SignupForm() {
             name="firstName"
             render={({ field }) => (
               <FormItem>
-                <FormLabel>Vorname</FormLabel>
+                <FormLabel required>Vorname</FormLabel>
                 <FormControl>
                   <Input
                     id="firstName"
                     placeholder="Max"
-                    required
                     icon={User}
                     {...field}
                   />
@@ -83,14 +89,9 @@ export function SignupForm() {
             name="lastName"
             render={({ field }) => (
               <FormItem>
-                <FormLabel>Nachname</FormLabel>
+                <FormLabel required>Nachname</FormLabel>
                 <FormControl>
-                  <Input
-                    id="lastName"
-                    placeholder="Mustermann"
-                    required
-                    {...field}
-                  />
+                  <Input id="lastName" placeholder="Mustermann" {...field} />
                 </FormControl>
                 <FormMessage />
               </FormItem>
@@ -103,13 +104,12 @@ export function SignupForm() {
           name="email"
           render={({ field }) => (
             <FormItem>
-              <FormLabel>E-Mail-Adresse</FormLabel>
+              <FormLabel required>E-Mail-Adresse</FormLabel>
               <FormControl>
                 <Input
                   id="email"
                   type="email"
                   placeholder="max.mustermann@beispiel.de"
-                  required
                   icon={Mail}
                   {...field}
                 />
@@ -124,12 +124,11 @@ export function SignupForm() {
           name="phoneNumber"
           render={({ field }) => (
             <FormItem>
-              <FormLabel>Telefonnummer</FormLabel>
+              <FormLabel required>Telefonnummer</FormLabel>
               <FormControl>
                 <Input
                   type="tel"
                   placeholder="+49 123 4567890"
-                  required
                   icon={Phone}
                   {...field}
                 />
@@ -144,7 +143,7 @@ export function SignupForm() {
           name="password"
           render={({ field }) => (
             <FormItem>
-              <FormLabel>Passwort</FormLabel>
+              <FormLabel required>Passwort</FormLabel>
               <FormControl>
                 <div className="relative">
                   <Lock
@@ -155,7 +154,6 @@ export function SignupForm() {
                     id="password"
                     placeholder="Passwort muss mindestens 6 Zeichen lang sein"
                     className="pl-10"
-                    required
                     enableToggle={true}
                     {...field}
                   />
@@ -171,7 +169,7 @@ export function SignupForm() {
           name="confirmPassword"
           render={({ field }) => (
             <FormItem>
-              <FormLabel>Passwort bestätigen</FormLabel>
+              <FormLabel required>Passwort bestätigen</FormLabel>
               <FormControl>
                 <div className="relative">
                   <Lock
@@ -182,10 +180,57 @@ export function SignupForm() {
                     id="confirmPassword"
                     placeholder="Passwort wiederholen"
                     className="pl-10"
-                    required
                     enableToggle={true}
                     {...field}
                   />
+                </div>
+              </FormControl>
+              <FormMessage />
+            </FormItem>
+          )}
+        />
+
+        <FormField
+          control={form.control}
+          name="acceptedTerms"
+          render={({ field }) => (
+            <FormItem>
+              <FormLabel required>Datenschutzbestätigung</FormLabel>
+              <FormControl>
+                <div className="flex items-start gap-1.5 text-muted-foreground">
+                  <Checkbox
+                    checked={field.value}
+                    onCheckedChange={field.onChange}
+                    className="mt-1"
+                  />
+                  <p>
+                    Ich stimme zu, dass meine Angaben und Daten elektronisch
+                    erhoben und für die Dauer des Turniers gespeichert werden.
+                    Ich bin desweiteren damit einverstanden, dass ich dauerhaft
+                    als Teilnehmer des Turniers auf der HSK-Website genannt
+                    werden kann.
+                    <br></br>
+                    Ich bestätigte die{" "}
+                    <Link
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      href="https://hsk1830.de/Datenschutz"
+                      className="text-primary"
+                    >
+                      Datenschutzerklärung
+                    </Link>{" "}
+                    zur Kenntnis genommen zu haben.
+                    <br></br>
+                    Hinweis: Sie können Ihre Einwilligung jederzeit für die
+                    Zukunft per E-Mail and{" "}
+                    <Link
+                      href="mailto:datenschutz@hsk1830.de"
+                      className="text-primary"
+                    >
+                      datenschutz@hsk1830.de
+                    </Link>{" "}
+                    widerrufen.
+                  </p>
                 </div>
               </FormControl>
               <FormMessage />
