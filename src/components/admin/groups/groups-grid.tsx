@@ -24,6 +24,7 @@ import { ParticipantEntry } from "./participant-entry";
 import { GroupDetails } from "./group-details";
 import { Button } from "@/components/ui/button";
 import { Trash } from "lucide-react";
+import { DayOfWeek } from "@/db/types/group";
 
 export const UNASSIGNED_CONTAINER_ID = "unassigned-droppable";
 const UNASSIGNED_CONTAINER_TYPE = "unassigned";
@@ -64,6 +65,23 @@ export function GroupsGrid({
     onChangeActiveItem: setActiveItem,
   });
 
+  const handleChangeGroupName = (groupId: number, newName: string) => {
+    const updatedGroups = groups.map((g) =>
+      g.id === groupId ? { ...g, groupName: newName } : g,
+    );
+    onChangeGroups(updatedGroups);
+  };
+
+  const handleChangeGroupMatchDay = (
+    groupId: number,
+    matchDay: DayOfWeek | null,
+  ) => {
+    const updatedGroups = groups.map((g) =>
+      g.id === groupId ? { ...g, matchDay } : g,
+    );
+    onChangeGroups(updatedGroups);
+  };
+
   return (
     <div className="flex flex-col gap-4">
       <DndContext
@@ -79,6 +97,8 @@ export function GroupsGrid({
               <GroupContainer
                 key={group.id}
                 group={group}
+                onChangeGroupName={handleChangeGroupName}
+                onChangeGroupMatchDay={handleChangeGroupMatchDay}
                 onDeleteGroup={onDeleteGroup}
               />
             ))}
@@ -97,9 +117,13 @@ export function GroupsGrid({
 
 export function GroupContainer({
   group,
+  onChangeGroupName,
+  onChangeGroupMatchDay,
   onDeleteGroup,
 }: {
   group: GridGroup;
+  onChangeGroupName: (groupId: number, newName: string) => void;
+  onChangeGroupMatchDay: (groupId: number, matchDay: DayOfWeek | null) => void;
   onDeleteGroup: (groupId: number) => void;
 }) {
   const { setNodeRef } = useDroppable({
@@ -121,7 +145,10 @@ export function GroupContainer({
         <CardTitle>
           <div className="flex gap-2">
             <div className="flex-1">
-              <GroupDetails group={group} />
+              <GroupDetails
+                group={group}
+                onChangeGroupName={onChangeGroupName}
+              />
             </div>
             <Button
               size="icon"
@@ -139,7 +166,10 @@ export function GroupContainer({
         className="p-0 pl-4 pb-4 pr-4 md:p-0 md:pl-6 md:pb-6 md:pr-6"
       >
         <div className="px-2 mb-2">
-          <GroupMatchDay group={group} />
+          <GroupMatchDay
+            group={group}
+            onChangeGroupMatchDay={onChangeGroupMatchDay}
+          />
         </div>
         <SortableContext items={participantIds}>
           {group.participants.map((p) => (

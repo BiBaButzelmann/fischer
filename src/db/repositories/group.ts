@@ -7,10 +7,14 @@ export async function getGroupById(groupId: number) {
       participants: {
         orderBy: (participant, { asc }) => [asc(participant.groupPosition)],
         with: {
-          profile: {
-            columns: {
-              firstName: true,
-              lastName: true,
+          participant: {
+            with: {
+              profile: {
+                columns: {
+                  firstName: true,
+                  lastName: true,
+                },
+              },
             },
           },
         },
@@ -60,10 +64,14 @@ export async function getGroupsWithParticipantsByTournamentId(
       participants: {
         orderBy: (participant, { asc }) => [asc(participant.groupPosition)],
         with: {
-          profile: {
-            columns: {
-              firstName: true,
-              lastName: true,
+          participant: {
+            with: {
+              profile: {
+                columns: {
+                  firstName: true,
+                  lastName: true,
+                },
+              },
             },
           },
         },
@@ -116,10 +124,14 @@ export async function getGroupsWithParticipantsAndGamesByTournamentId(
       participants: {
         orderBy: (participant, { asc }) => [asc(participant.groupPosition)],
         with: {
-          profile: {
-            columns: {
-              firstName: true,
-              lastName: true,
+          participant: {
+            with: {
+              profile: {
+                columns: {
+                  firstName: true,
+                  lastName: true,
+                },
+              },
             },
           },
         },

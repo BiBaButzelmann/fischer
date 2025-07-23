@@ -1,7 +1,6 @@
 "use client";
 
 import { ParticipantWithName } from "@/db/types/participant";
-import { GroupWithParticipants } from "@/db/types/group";
 import { GroupsGrid } from "./groups-grid";
 import { useState, useTransition } from "react";
 import { GridGroup } from "./types";
@@ -14,7 +13,7 @@ export function EditGroupsGrid({
   unassignedParticipants: initialUnassignedParticipants,
 }: {
   tournamentId: number;
-  groups: GroupWithParticipants[];
+  groups: GridGroup[];
   unassignedParticipants: ParticipantWithName[];
 }) {
   const [isPending, startTransition] = useTransition();
@@ -22,24 +21,14 @@ export function EditGroupsGrid({
   const [unassignedParticipants, setUnassignedParticipants] = useState(
     initialUnassignedParticipants,
   );
-  const [gridGroups, setGridGroups] = useState(() =>
-    initialGroups.map(
-      (group) =>
-        ({
-          id: group.id,
-          groupNumber: group.groupNumber,
-          groupName: group.groupName,
-          matchDay: group.matchDay,
-          participants: group.participants,
-        }) as GridGroup,
-    ),
-  );
+  const [gridGroups, setGridGroups] = useState(initialGroups);
 
   const handleAddNewGroup = () => {
     setGridGroups((prev) => [
       ...prev,
       {
         id: Date.now(),
+        isNew: true,
         groupNumber: prev.length + 1,
         groupName: `Gruppe ${prev.length + 1}`,
         matchDay: null,
@@ -63,11 +52,7 @@ export function EditGroupsGrid({
 
   const handleSave = () => {
     startTransition(async () => {
-      await updateGroups(
-        tournamentId,
-        gridGroups,
-        initialUnassignedParticipants,
-      );
+      await updateGroups(tournamentId, gridGroups);
     });
   };
 

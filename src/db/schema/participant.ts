@@ -6,10 +6,11 @@ import {
   text,
   unique,
   date,
+  primaryKey,
 } from "drizzle-orm/pg-core";
 import { profile } from "./profile";
-import { group } from "./group";
 import { matchDay, timestamps } from "./columns.helpers";
+import { group } from "./group";
 
 export const participant = pgTable(
   "participant",
@@ -18,9 +19,6 @@ export const participant = pgTable(
 
     profileId: integer("profile_id").notNull(),
     tournamentId: integer("tournament_id").notNull(),
-
-    groupId: integer("group_id"),
-    groupPosition: integer("group_position"),
 
     chessClub: text("chess_club").notNull(),
     title: text("title"),
@@ -48,8 +46,36 @@ export const participantRelations = relations(participant, ({ one }) => ({
     fields: [participant.profileId],
     references: [profile.id],
   }),
-  group: one(group, {
-    fields: [participant.groupId],
-    references: [group.id],
+  group: one(participantGroup, {
+    fields: [participant.id],
+    references: [participantGroup.participantId],
   }),
 }));
+
+export const participantGroup = pgTable(
+  "participant_group",
+  {
+    groupId: integer("group_id").notNull(),
+    participantId: integer("participant_id").notNull(),
+    groupPosition: integer("group_position").notNull(),
+  },
+  (table) => [
+    primaryKey({
+      columns: [table.groupId, table.participantId, table.groupPosition],
+    }),
+  ],
+);
+
+export const participantGroupRelations = relations(
+  participantGroup,
+  ({ one }) => ({
+    participant: one(participant, {
+      fields: [participantGroup.participantId],
+      references: [participant.id],
+    }),
+    group: one(group, {
+      fields: [participantGroup.groupId],
+      references: [group.id],
+    }),
+  }),
+);

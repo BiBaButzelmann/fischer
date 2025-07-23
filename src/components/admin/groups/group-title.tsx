@@ -1,18 +1,21 @@
 "use client";
 
-import { updateGroupName } from "@/actions/group";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Pen } from "lucide-react";
-import { ChangeEventHandler, useState, useTransition } from "react";
+import { ChangeEventHandler, useState } from "react";
 
 type Props = {
   groupId: number;
   groupName: string;
+  onChangeGroupName: (groupId: number, groupName: string) => void;
 };
 
-export function GroupTitle({ groupId, groupName: initialGroupName }: Props) {
-  const [isPending, startTransition] = useTransition();
+export function GroupTitle({
+  groupId,
+  groupName: initialGroupName,
+  onChangeGroupName,
+}: Props) {
   const [isEditing, setIsEditing] = useState(false);
   const [groupName, setGroupName] = useState(initialGroupName);
 
@@ -21,9 +24,7 @@ export function GroupTitle({ groupId, groupName: initialGroupName }: Props) {
   };
 
   const handleUpdate = () => {
-    startTransition(async () => {
-      await updateGroupName(groupId, groupName);
-    });
+    onChangeGroupName(groupId, groupName);
     setIsEditing(false);
   };
 
@@ -60,12 +61,7 @@ export function GroupTitle({ groupId, groupName: initialGroupName }: Props) {
       ) : (
         <span className="flex-1">{groupName}</span>
       )}
-      <Button
-        disabled={isPending}
-        size="icon"
-        variant="ghost"
-        onClick={handleEditClick}
-      >
+      <Button size="icon" variant="ghost" onClick={handleEditClick}>
         <Pen className="h-4 w-4" />
       </Button>
     </div>
