@@ -195,7 +195,7 @@ export function SignupForm() {
           name="acceptedTerms"
           render={({ field }) => (
             <FormItem>
-              <FormLabel required>Datenschutzbestätigung</FormLabel>
+              <FormLabel required>Datenschutz</FormLabel>
               <FormControl>
                 <div className="flex items-start gap-1.5 text-muted-foreground">
                   <Checkbox
@@ -204,13 +204,13 @@ export function SignupForm() {
                     className="mt-1"
                   />
                   <p>
-                    Ich stimme zu, dass meine Angaben und Daten elektronisch
-                    erhoben und für die Dauer des Turniers gespeichert werden.
-                    Ich bin desweiteren damit einverstanden, dass ich dauerhaft
-                    als Teilnehmer des Turniers auf der HSK-Website genannt
-                    werden kann.
+                    Ich stimme zu, dass meine Daten elektronisch erhoben und für
+                    die Dauer des Turniers gespeichert werden. Ich bin
+                    desweiteren damit einverstanden, dass ich dauerhaft als
+                    Teilnehmer des Turniers auf der HSK-Website genannt werden
+                    kann.
                     <br></br>
-                    Ich bestätigte die{" "}
+                    Ich bestätigte, die{" "}
                     <Link
                       target="_blank"
                       rel="noopener noreferrer"
@@ -221,8 +221,8 @@ export function SignupForm() {
                     </Link>{" "}
                     zur Kenntnis genommen zu haben.
                     <br></br>
-                    Hinweis: Sie können Ihre Einwilligung jederzeit für die
-                    Zukunft per E-Mail and{" "}
+                    Hinweis: Du kannst deine Einwilligung jederzeit per E-Mail
+                    an{" "}
                     <Link
                       href="mailto:datenschutz@hsk1830.de"
                       className="text-primary"
