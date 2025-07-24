@@ -1,0 +1,2 @@
+ALTER TABLE "participant_group" DROP CONSTRAINT "participant_group_group_id_participant_id_pk";--> statement-breakpoint
+ALTER TABLE "participant_group" ADD CONSTRAINT "participant_group_group_id_participant_id_group_position_pk" PRIMARY KEY("group_id","participant_id","group_position");

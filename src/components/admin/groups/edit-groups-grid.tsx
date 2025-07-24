@@ -1,30 +1,79 @@
-import { ParticipantWithName } from "@/db/types/participant";
-import { GroupWithParticipants } from "@/db/types/group";
-import { GridGroup } from "./types";
-import { GroupsGrid } from "./groups-grid";
+"use client";
 
-export async function EditGroupsGrid({
+import { ParticipantWithName } from "@/db/types/participant";
+import { GroupsGrid } from "./groups-grid";
+import { useState, useTransition } from "react";
+import { GridGroup } from "./types";
+import { Button } from "@/components/ui/button";
+import { updateGroups } from "@/actions/group";
+
+export function EditGroupsGrid({
   tournamentId,
   groups: initialGroups,
   unassignedParticipants: initialUnassignedParticipants,
 }: {
   tournamentId: number;
-  groups: GroupWithParticipants[];
+  groups: GridGroup[];
   unassignedParticipants: ParticipantWithName[];
 }) {
-  const gridGroups: GridGroup[] = initialGroups.map((group) => ({
-    id: group.id,
-    groupNumber: group.groupNumber,
-    groupName: group.groupName,
-    matchDay: group.matchDay,
-    participants: group.participants,
-  }));
+  const [isPending, startTransition] = useTransition();
+
+  const [unassignedParticipants, setUnassignedParticipants] = useState(
+    initialUnassignedParticipants,
+  );
+  const [gridGroups, setGridGroups] = useState(initialGroups);
+
+  const handleAddNewGroup = () => {
+    setGridGroups((prev) => [
+      ...prev,
+      {
+        id: Date.now(),
+        isNew: true,
+        groupNumber: prev.length + 1,
+        groupName: `Gruppe ${prev.length + 1}`,
+        matchDay: null,
+        participants: [],
+      } as GridGroup,
+    ]);
+  };
+
+  const handleDeleteGroup = (groupId: number) => {
+    const newGroups = [...gridGroups];
+    const groupIndex = newGroups.findIndex((g) => g.id === groupId);
+    if (groupIndex === -1) return;
+
+    const deletedGroup = newGroups.splice(groupIndex, 1);
+    setGridGroups(newGroups);
+    setUnassignedParticipants([
+      ...unassignedParticipants,
+      ...deletedGroup[0].participants,
+    ]);
+  };
+
+  const handleSave = () => {
+    startTransition(async () => {
+      await updateGroups(tournamentId, gridGroups);
+    });
+  };
 
   return (
-    <GroupsGrid
-      tournamentId={tournamentId}
-      groups={gridGroups}
-      unassignedParticipants={initialUnassignedParticipants}
-    />
+    <div className="flex flex-col gap-4">
+      <div className="flex justify-end">
+        <Button variant="outline" onClick={handleAddNewGroup}>
+          Gruppe hinzufügen
+        </Button>
+      </div>
+      <GroupsGrid
+        tournamentId={tournamentId}
+        groups={gridGroups}
+        unassignedParticipants={unassignedParticipants}
+        onChangeGroups={setGridGroups}
+        onChangeUnassignedParticipants={setUnassignedParticipants}
+        onDeleteGroup={handleDeleteGroup}
+      />
+      <Button onClick={handleSave} disabled={isPending}>
+        Gruppenaufteilung Speichern
+      </Button>
+    </div>
   );
 }

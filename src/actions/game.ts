@@ -70,8 +70,8 @@ export async function scheduleGamesForGroup(
     const roundDate = addDays(firstDate, roundIdx * 7); // weekly cadence
     pairsInRound.forEach(([whiteNo, blackNo], boardIdx) => {
       scheduledGames.push({
-        whiteParticipantId: players[whiteNo - 1].id,
-        blackParticipantId: players[blackNo - 1].id,
+        whiteParticipantId: players[whiteNo - 1].participant.id,
+        blackParticipantId: players[blackNo - 1].participant.id,
         tournamentId,
         groupId: group.id,
         round: roundIdx + 1,

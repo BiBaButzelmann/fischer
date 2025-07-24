@@ -4,9 +4,10 @@ import { GridGroup } from "./types";
 
 type Props = {
   group: GridGroup;
+  onChangeGroupName: (groupId: number, newName: string) => void;
 };
 
-export function GroupDetails({ group }: Props) {
+export function GroupDetails({ group, onChangeGroupName }: Props) {
   const averageElo = useMemo(() => {
     const participantsWithElo = group.participants.filter(
       (participant) => participant.fideRating !== null,
@@ -35,7 +36,11 @@ export function GroupDetails({ group }: Props) {
 
   return (
     <div className="flex flex-col gap-1">
-      <GroupTitle groupId={group.id} groupName={group.groupName} />
+      <GroupTitle
+        onChangeGroupName={onChangeGroupName}
+        groupId={group.id}
+        groupName={group.groupName}
+      />
       <div className="flex flex-col gap-1 text-muted-foreground text-sm font-normal">
         <span>Teilnehmer: {group.participants.length}</span>
         <span>Elo-Durchschnitt: {Math.round(averageElo)}</span>

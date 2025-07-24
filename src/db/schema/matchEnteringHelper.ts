@@ -53,7 +53,7 @@ export const groupMatchEnteringHelper = pgTable(
   ],
 );
 
-export const groupMatchEnteringHelperRelations = relations(
+export const matchEnteringHelperGroupRelations = relations(
   groupMatchEnteringHelper,
   ({ one }) => ({
     group: one(group, {
