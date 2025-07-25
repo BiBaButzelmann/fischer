@@ -1,7 +1,8 @@
 import { db } from "../client";
-import { participant } from "../schema/participant";
+import { group } from "../schema/group";
+import { participant, participantGroup } from "../schema/participant";
 import { profile } from "../schema/profile";
-import { eq, getTableColumns } from "drizzle-orm";
+import { and, eq, getTableColumns, isNull } from "drizzle-orm";
 
 export async function getParticipantByProfileIdAndTournamentId(
   profileId: number,
@@ -28,21 +29,26 @@ export async function getParticipantByUserId(userId: string) {
 export async function getUnassignedParticipantsByTournamentId(
   tournamentId: number,
 ) {
-  return await db.query.participant.findMany({
-    where: (participant, { eq, and, isNull }) =>
+  return await db
+    .select({
+      ...getTableColumns(participant),
+      profile: {
+        firstName: profile.firstName,
+        lastName: profile.lastName,
+      },
+    })
+    .from(participant)
+    .leftJoin(
+      participantGroup,
+      eq(participant.id, participantGroup.participantId),
+    )
+    .innerJoin(profile, eq(participant.profileId, profile.id))
+    .where(
       and(
         eq(participant.tournamentId, tournamentId),
-        isNull(participant.groupId),
+        isNull(participantGroup.participantId),
       ),
-    with: {
-      profile: {
-        columns: {
-          firstName: true,
-          lastName: true,
-        },
-      },
-    },
-  });
+    );
 }
 
 export async function getParticipantsByTournamentId(tournamentId: number) {
@@ -64,19 +70,17 @@ export async function getParticipantsByTournamentId(tournamentId: number) {
 }
 
 export async function getParticipantsByGroupId(groupId: number) {
-  return await db.query.participant.findMany({
-    where: (participant, { eq }) => eq(participant.groupId, groupId),
-    columns: {
-      id: true,
-      title: true,
-    },
-    with: {
+  return await db
+    .select({
+      ...getTableColumns(participant),
       profile: {
-        columns: {
-          firstName: true,
-          lastName: true,
-        },
+        firstName: profile.firstName,
+        lastName: profile.lastName,
       },
-    },
-  });
+    })
+    .from(participantGroup)
+    .innerJoin(group, eq(participantGroup.groupId, group.id))
+    .innerJoin(participant, eq(participantGroup.participantId, participant.id))
+    .innerJoin(profile, eq(participant.profileId, profile.id))
+    .where(eq(group.id, groupId));
 }

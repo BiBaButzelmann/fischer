@@ -22,6 +22,34 @@
       "when": 1752658136714,
       "tag": "0002_whole_silver_fox",
       "breakpoints": true
+    },
+    {
+      "idx": 3,
+      "version": "7",
+      "when": 1752826485357,
+      "tag": "0003_lethal_namor",
+      "breakpoints": true
+    },
+    {
+      "idx": 4,
+      "version": "7",
+      "when": 1752858199766,
+      "tag": "0004_free_sway",
+      "breakpoints": true
+    },
+    {
+      "idx": 5,
+      "version": "7",
+      "when": 1753211993248,
+      "tag": "0005_perpetual_flatman",
+      "breakpoints": true
+    },
+    {
+      "idx": 6,
+      "version": "7",
+      "when": 1753213819397,
+      "tag": "0006_oval_piledriver",
+      "breakpoints": true
     }
   ]
 }

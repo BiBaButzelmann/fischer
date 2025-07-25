@@ -1,5 +1,6 @@
 "use client";
 
+import { match } from "ts-pattern";
 import { useEffect, useState } from "react";
 
 type Props = {
@@ -31,13 +32,6 @@ type TimeLeft = {
   seconds: number;
 };
 
-const intervalLabels: Record<keyof TimeLeft, string> = {
-  days: "Tage",
-  hours: "Stunden",
-  minutes: "Minuten",
-  seconds: "Sekunden",
-};
-
 function Timers({ timeLeft }: { timeLeft: TimeLeft }) {
   return (
     <div className="grid grid-cols-4 gap-2 md:gap-4">
@@ -50,7 +44,12 @@ function Timers({ timeLeft }: { timeLeft: TimeLeft }) {
             {value.toString().padStart(2, "0")}
           </span>
           <span className="text-[0.7rem] md:text-xs text-muted-foreground uppercase">
-            {intervalLabels[key as keyof TimeLeft]}
+            {match(key as keyof TimeLeft)
+              .with("days", () => (value === 1 ? "Tag" : "Tagen"))
+              .with("hours", () => (value === 1 ? "Stunde" : "Stunden"))
+              .with("minutes", () => (value === 1 ? "Minute" : "Minuten"))
+              .with("seconds", () => (value === 1 ? "Sekunde" : "Sekunden"))
+              .exhaustive()}
           </span>
         </div>
       ))}

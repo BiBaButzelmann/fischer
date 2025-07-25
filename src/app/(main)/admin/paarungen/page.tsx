@@ -20,11 +20,11 @@ export default async function Page() {
       </div>
     );
   }
-  const groups = await getGroupsWithParticipantsAndGamesByTournamentId(
+  const groupsData = await getGroupsWithParticipantsAndGamesByTournamentId(
     tournament.id,
   );
 
-  if (groups.length === 0) {
+  if (groupsData.length === 0) {
     return (
       <div className="p-8">
         <h1 className="text-3xl font-bold text-gray-900 mb-2">Paarungen</h1>
@@ -34,6 +34,11 @@ export default async function Page() {
       </div>
     );
   }
+
+  const groups = groupsData.map((g) => ({
+    ...g,
+    participants: g.participants.map((p) => p.participant),
+  }));
 
   return (
     <div className="p-8">

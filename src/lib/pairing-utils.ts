@@ -76,7 +76,7 @@ export function bergerFide(n: number): Array<Array<[number, number]>> {
 /** Berger algorithm for round-robin tournaments */
 export function roundRobinPairs(n: number): Array<Array<[number, number]>> {
   const isOdd = n % 2 === 1;
-
+  // TODO: for odd player counts, there must be a player called "spielfrei", that triggers results, has certain logic for the fide .txt and notifies other players
   if (isOdd) {
     const extended = bergerFide(n + 1); // add a "bye" for odd n
     return extended.map((round) =>

@@ -91,6 +91,7 @@ export default async function Page({
           <ScrollArea className="h-[calc(100vh-200px)]">
             <GamesList
               userId={session?.user.id}
+              userRole={session?.user.role || undefined}
               games={games}
               onResultChange={updateGameResult}
             />

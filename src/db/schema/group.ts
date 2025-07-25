@@ -1,9 +1,10 @@
 import { relations } from "drizzle-orm";
 import { integer, pgTable, primaryKey, text } from "drizzle-orm/pg-core";
-import { participant } from "./participant";
+import { participantGroup } from "./participant";
 import { game } from "./game";
 import { matchDay, timestamps } from "./columns.helpers";
 import { tournament } from "./tournament";
+import { groupMatchEnteringHelper as matchEnteringHelperGroup } from "./matchEnteringHelper";
 
 export const group = pgTable(
   "group",
@@ -25,6 +26,7 @@ export const groupRelations = relations(group, ({ one, many }) => ({
     fields: [group.tournamentId],
     references: [tournament.id],
   }),
-  participants: many(participant),
+  participants: many(participantGroup),
+  matchEnteringHelpers: many(matchEnteringHelperGroup),
   games: many(game),
 }));

@@ -8,18 +8,19 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { GridGroup } from "./types";
-import { MatchDay } from "@/db/types/group";
-import { useMemo, useTransition } from "react";
-import { updateGroupMatchDay } from "@/actions/group";
+import { DayOfWeek } from "@/db/types/group";
+import { useMemo } from "react";
 import { matchDays } from "@/constants/constants";
 
-export function GroupMatchDay({ group }: { group: GridGroup }) {
-  const [isPending, startTransition] = useTransition();
+type Props = {
+  group: GridGroup;
+  onChangeGroupMatchDay: (groupId: number, matchDay: DayOfWeek | null) => void;
+};
 
-  const handleMatchdayChange = (value: MatchDay | "none") => {
-    startTransition(async () => {
-      await updateGroupMatchDay(group.id, value === "none" ? null : value);
-    });
+export function GroupMatchDay({ group, onChangeGroupMatchDay }: Props) {
+  const handleMatchdayChange = (value: DayOfWeek | "none") => {
+    const matchDay = value === "none" ? null : (value as DayOfWeek);
+    onChangeGroupMatchDay(group.id, matchDay);
   };
 
   const defaultValue = useMemo(
@@ -28,11 +29,7 @@ export function GroupMatchDay({ group }: { group: GridGroup }) {
   );
 
   return (
-    <Select
-      disabled={isPending}
-      defaultValue={defaultValue}
-      onValueChange={handleMatchdayChange}
-    >
+    <Select defaultValue={defaultValue} onValueChange={handleMatchdayChange}>
       <SelectTrigger className="w-full">
         <SelectValue placeholder="Spieltag" />
       </SelectTrigger>

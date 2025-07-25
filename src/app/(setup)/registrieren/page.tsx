@@ -19,7 +19,7 @@ export default async function Page() {
   }
 
   return (
-    <div className="w-full max-w-md px-4 py-8 mx-auto">
+    <div className="w-full max-w-lg md:px-4 md:py-8 mx-auto">
       <div className="mb-6">
         <Button variant="ghost" asChild>
           <Link href="/willkommen" className="flex items-center gap-2">

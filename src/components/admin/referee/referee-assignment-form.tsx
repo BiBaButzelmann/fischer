@@ -12,13 +12,13 @@ import {
 import { availableMatchDays } from "@/db/schema/columns.helpers";
 import { updateRefereeIdByTournamentIdAndDayofWeek } from "@/actions/match-day";
 import { RefereeWithName } from "@/db/types/referee";
-import type { MatchDay } from "@/db/types/group";
 import { matchDays } from "@/constants/constants";
+import { DayOfWeek } from "@/db/types/group";
 
 type Props = {
   tournamentId: number;
   referees: RefereeWithName[];
-  currentAssignments: Record<MatchDay, RefereeWithName | null>;
+  currentAssignments: Record<DayOfWeek, RefereeWithName | null>;
 };
 
 export function RefereeAssignmentForm({
@@ -27,10 +27,10 @@ export function RefereeAssignmentForm({
   currentAssignments,
 }: Props) {
   const [assignments, setAssignments] =
-    useState<Record<MatchDay, RefereeWithName | null>>(currentAssignments);
+    useState<Record<DayOfWeek, RefereeWithName | null>>(currentAssignments);
   const [isPending, startTransition] = useTransition();
 
-  const handleAssignmentChange = (day: MatchDay, refereeId: string | null) => {
+  const handleAssignmentChange = (day: DayOfWeek, refereeId: string | null) => {
     setAssignments((prev) => ({
       ...prev,
       [day]:
