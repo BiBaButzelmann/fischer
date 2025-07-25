@@ -13,10 +13,14 @@ export async function generateFideReport(groupId: number, month: number) {
     with: {
       participants: {
         with: {
-          profile: {
-            columns: {
-              firstName: true,
-              lastName: true,
+          participant: {
+            with: {
+              profile: {
+                columns: {
+                  firstName: true,
+                  lastName: true,
+                },
+              },
             },
           },
         },
@@ -90,29 +94,4 @@ const columnIdentifiers: Record<
   birthYear: "BBBB/BB/BB",
   currentPoints: "PPPP",
   currentGroupPosition: "RRRR",
-};
-
-type TableEntry = {
-  // ?
-  index: number;
-  startingGroupPosition: number;
-  gender: "m" | "f";
-  title: string;
-  // firstName, lastName
-  name: string;
-  fideRating: number;
-  fideNation: string;
-  fideId: string;
-  // yyyy/00/00
-  birthYear: string;
-  // X.0
-  currentPoints: number;
-  currentGroupPosition: number;
-  results: Result[];
-};
-
-type Result = {
-  opponentGroupPosition: number;
-  pieceColor: "w" | "b";
-  result: "1" | "0" | "+" | "-";
 };
