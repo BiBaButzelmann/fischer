@@ -19,6 +19,7 @@ import {
   CalendarIcon,
   LayoutDashboard,
   SwordsIcon,
+  Trophy,
   UserRoundCogIcon,
   Users,
 } from "lucide-react";
@@ -64,6 +65,12 @@ export async function AppSidebar() {
                 <Link href="/partien">
                   <SwordsIcon />
                   <span>Partien</span>
+                </Link>
+              </SidebarMenuButton>
+              <SidebarMenuButton asChild>
+                <Link href="/ergebnisse">
+                  <Trophy />
+                  <span>Ergebnisse</span>
                 </Link>
               </SidebarMenuButton>
               {session != null ? (
