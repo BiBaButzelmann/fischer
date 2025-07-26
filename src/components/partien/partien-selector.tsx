@@ -111,7 +111,7 @@ export function PartienSelector({
           value={selectedTournamentId}
           onValueChange={handleTournamentChange}
         >
-          <SelectTrigger id="tournament-select" className="w-32">
+          <SelectTrigger id="tournament-select" className="w-48">
             <SelectValue />
           </SelectTrigger>
           <SelectContent>
