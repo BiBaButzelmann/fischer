@@ -1,7 +1,6 @@
 import { db } from "../client";
-import { eq, lte, isNotNull } from "drizzle-orm";
+import { eq } from "drizzle-orm";
 import { group } from "../schema/group";
-import { participantGroup } from "../schema/participant";
 
 export async function getGameById(gameId: number) {
   return await db.query.game.findFirst({
