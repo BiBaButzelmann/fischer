@@ -69,23 +69,12 @@ export function Results({
 
   const fetchStandings = async (groupId: string, round?: string) => {
     setLoading({ standings: true });
-    try {
-      const result = await getStandingsAction(
-        Number(groupId),
-        round ? Number(round) : undefined,
-      );
-      if (result.success) {
-        setStandings(result.standings);
-      } else {
-        console.error("Failed to fetch standings:", result.error);
-        setStandings([]);
-      }
-    } catch (error) {
-      console.error("Error fetching standings:", error);
-      setStandings([]);
-    } finally {
-      setLoading({ standings: false });
-    }
+    const standings = await getStandingsAction(
+      Number(groupId),
+      round ? Number(round) : undefined,
+    );
+    setStandings(standings);
+    setLoading({ standings: false });
   };
 
   useEffect(() => {
