@@ -1,5 +1,11 @@
-import { generateFideReport } from "@/lib/fide-report";
+import { generatePlayerSection } from "@/lib/fide-report/player-section";
+import { generateTournamentSection } from "@/lib/fide-report/tournament-section";
+import {
+  PlayerSectionData,
+  TournamentSectionData,
+} from "@/lib/fide-report/types";
 import { TableGenerator } from "@/lib/table-generator";
+import { DateTime } from "luxon";
 import { describe, expect, it } from "vitest";
 
 describe("TableGenerator", () => {
@@ -51,39 +57,97 @@ describe("TableGenerator", () => {
 });
 
 describe("generateFideReport", () => {
-  it("should generate the correct table", () => {
-    const table = generateFideReport([
-      {
-        index: 1,
-        startingGroupPosition: 1,
-        gender: "m",
-        title: "",
-        name: "Mueller,Kai",
-        fideRating: 1960,
-        fideNation: "GER",
-        fideId: "12939455",
-        birthYear: new Date(1996, 1, 1), // Month/day are 00 in example, using 01 here.
-        currentPoints: 2.0,
-        currentGroupPosition: 1,
-        results: [
-          {
-            scheduled: new Date(2017, 9, 16),
-            opponentGroupPosition: 10,
-            pieceColor: "w",
-            result: "1",
-          },
-          {
-            scheduled: new Date(2017, 9, 23),
-            opponentGroupPosition: 2,
-            pieceColor: "w",
-            result: "1",
-          },
-        ],
-      },
-    ]);
+  const playerSectionData = [
+    {
+      index: 1,
+      startingGroupPosition: 1,
+      gender: "m",
+      title: "",
+      name: "Mueller,Kai",
+      fideRating: 1960,
+      fideNation: "GER",
+      fideId: "12939455",
+      birthYear: DateTime.local(1996, 1, 1),
+      currentPoints: 2.0,
+      currentGroupPosition: 1,
+      results: [
+        {
+          scheduled: DateTime.local(2024, 9, 17),
+          opponentGroupPosition: 10,
+          pieceColor: "w",
+          result: "1",
+        },
+        {
+          scheduled: DateTime.local(2024, 9, 24),
+          opponentGroupPosition: 2,
+          pieceColor: "w",
+          result: "1",
+        },
+      ],
+    },
+    {
+      index: 1,
+      startingGroupPosition: 3,
+      gender: "m",
+      title: "",
+      name: "Stejskal,Manfred",
+      fideRating: 1917,
+      fideNation: "GER",
+      fideId: "12926620",
+      birthYear: DateTime.local(1952, 1, 1),
+      currentPoints: 0.0,
+      currentGroupPosition: 8,
+      results: [
+        {
+          scheduled: DateTime.local(2024, 9, 24),
+          opponentGroupPosition: 9,
+          pieceColor: "b",
+          result: "0",
+        },
+      ],
+    },
+  ] as PlayerSectionData;
+
+  const tournamentSectionData = {
+    tournamentName: "HSK Klubturnier 2024 - B1-Gruppe",
+    location: "Hamburg",
+    federation: "GER",
+    dateOfStart: DateTime.local(2024, 9, 17),
+    dateOfEnd: DateTime.local(2024, 12, 10),
+    numberOfPlayers: 10,
+    numberOfRatedPlayers: 10,
+    typeOfTournament: "Individual round robin",
+    organizer: "Paul Jeken",
+    timeControl: "2 Stunden 40 / Zuege, 30 min. Rest",
+  } as TournamentSectionData;
+
+  it("should generate the correct player section", () => {
+    const table = generatePlayerSection(playerSectionData);
     expect(table).toBe(
-      `DDD SSSS sTTT NNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNN RRRR FFF IIIIIIIIIII BBBB/BB/BB PPPP RRRR  1111 1 1  2222 2 2 
-001    1 m    Mueller,Kai                       1960 GER    12939455 1996/00/00  2.0    1    10 w 1     2 w 1 `,
+      `         1         2         3         4         5         6         7         8         9        10        11
+12345678901234567890123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890
+DDD SSSS sTTT NNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNN RRRR FFF IIIIIIIIIII BBBB/BB/BB PPPP RRRR  1111 1 1  2222 2 2 
+001    1 m    Mueller,Kai                       1960 GER    12939455 1996/00/00  2.0    1    10 w 1     2 w 1 
+001    3 m    Stejskal,Manfred                  1917 GER    12926620 1952/00/00  0.0    8               9 b 0 `,
     );
+  });
+
+  it("should generate the correct tournament section", () => {
+    const section = generateTournamentSection(
+      tournamentSectionData,
+      playerSectionData,
+    );
+
+    expect(section).toBe(`012 HSK Klubturnier 2024 - B1-Gruppe 
+022 Hamburg
+032 GER
+042 2024/09/17
+052 2024/12/10
+062 10
+072 10
+092 Individual round robin
+102 Paul Jeken
+122 2 Stunden 40 / Zuege, 30 min. Rest
+132                                                                                        24/09/17  24/09/24 `);
   });
 });

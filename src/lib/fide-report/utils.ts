@@ -1,5 +1,6 @@
 import { match } from "ts-pattern";
-import { Result, TableEntryKeyValue } from "./types";
+import { Result, TableEntryKeyValue, PlayerSectionData } from "./types";
+import { DateTime } from "luxon";
 
 export function getStringRepresentationForValue(value: TableEntryKeyValue) {
   return match(value)
@@ -28,8 +29,7 @@ export function getStringRepresentationForValue(value: TableEntryKeyValue) {
       return data;
     })
     .with({ id: "birthYear" }, ({ data }) => {
-      const year = data.getUTCFullYear();
-      return `${year}/00/00`;
+      return `${data.year}/00/00`;
     })
     .with({ id: "currentPoints" }, ({ data }) => {
       return data.toFixed(1);
@@ -47,6 +47,25 @@ export function getStringRepresentationForResult(game: Result) {
   return `${game.opponentGroupPosition.toString().padStart(4, " ")} ${game.pieceColor} ${game.result}`;
 }
 
-export function getStringRepresentationForScheduled(scheduled: Date) {
-  return scheduled.toISOString().split("T")[0];
+export function getStringRepresentationForScheduled(scheduled: DateTime) {
+  console.log("rep", scheduled);
+  return scheduled.toFormat("yyyy-MM-dd");
+}
+
+export function getGamesGroupedByScheduledDate(
+  playerSectionData: PlayerSectionData,
+) {
+  const gamesByDate: Map<string, PlayerSectionData> = new Map();
+
+  playerSectionData.forEach((record) => {
+    record.results.forEach((result) => {
+      const dateKey = getStringRepresentationForScheduled(result.scheduled);
+      if (!gamesByDate.has(dateKey)) {
+        gamesByDate.set(dateKey, []);
+      }
+      gamesByDate.get(dateKey)!.push(record);
+    });
+  });
+
+  return gamesByDate;
 }

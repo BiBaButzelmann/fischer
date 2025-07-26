@@ -1,4 +1,21 @@
-export type TableEntry = {
+import { DateTime } from "luxon";
+
+export type TournamentSectionData = {
+  tournamentName: string;
+  location: string;
+  federation: string;
+  dateOfStart: DateTime;
+  dateOfEnd: DateTime;
+  numberOfPlayers: number;
+  numberOfRatedPlayers: number;
+  typeOfTournament: string;
+  organizer: string;
+  timeControl: string;
+};
+
+export type PlayerSectionData = PlayerEntry[];
+
+export type PlayerEntry = {
   // ?
   index: number;
   startingGroupPosition: number;
@@ -10,7 +27,7 @@ export type TableEntry = {
   fideNation: string;
   fideId: string;
   // yyyy/00/00
-  birthYear: Date;
+  birthYear: DateTime;
   // X.0
   currentPoints: number;
   currentGroupPosition: number;
@@ -18,12 +35,12 @@ export type TableEntry = {
 };
 
 export type Result = {
-  scheduled: Date;
+  scheduled: DateTime;
   opponentGroupPosition: number;
   pieceColor: "w" | "b";
   result: "1" | "0" | "+" | "-";
 };
 
 export type TableEntryKeyValue = {
-  [K in keyof TableEntry]: { id: K; data: TableEntry[K] };
-}[keyof TableEntry];
+  [K in keyof PlayerEntry]: { id: K; data: PlayerEntry[K] };
+}[keyof PlayerEntry];
