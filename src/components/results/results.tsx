@@ -134,7 +134,7 @@ export function Results({
             value={selectedTournamentId}
             onValueChange={handleTournamentChange}
           >
-            <SelectTrigger id="tournament-select" className="w-32">
+            <SelectTrigger id="tournament-select" className="w-48">
               <SelectValue />
             </SelectTrigger>
             <SelectContent>
@@ -204,7 +204,7 @@ export function Results({
               <TableHead className="text-right">ELO</TableHead>
               <TableHead className="text-right">Punkte</TableHead>
               <TableHead className="text-right">Feinwertung</TableHead>
-              <TableHead className="text-right">Spielquote</TableHead>
+              <TableHead className="text-right">Anzahl Partien</TableHead>
             </TableRow>
           </TableHeader>
           <TableBody>
@@ -265,14 +265,7 @@ export function Results({
                       {player.sonnebornBerger.toFixed(2)}
                     </TableCell>
                     <TableCell className="text-right">
-                      {(() => {
-                        const maxRound = selectedRound
-                          ? Number(selectedRound)
-                          : rounds.length;
-
-                        const expectedGames = maxRound;
-                        return `${player.gamesPlayed} aus ${expectedGames}`;
-                      })()}
+                      {player.gamesPlayed}
                     </TableCell>
                   </TableRow>
                 ))}

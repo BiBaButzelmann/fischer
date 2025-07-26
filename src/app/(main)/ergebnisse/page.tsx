@@ -25,9 +25,25 @@ export default async function ResultsPage({
 
   if (tournamentNames.length === 0) {
     return (
-      <div className="bg-background text-foreground min-h-screen p-4 sm:p-6 md:p-8 flex items-center justify-center">
-        <div className="text-center text-lg text-muted-foreground">
-          Kein Turnier gefunden.
+      <div className="text-center p-6 bg-gray-50 rounded-lg">
+        <div className="mb-4">
+          Das Turnier befindet sich noch in der Anmeldephase.
+        </div>
+        <div className="text-sm text-gray-600">
+          <p className="mb-2">
+            Du findest die Turniere der vorherigen Jahre unter:{" "}
+            <a
+              href="https://hsk1830.de/spielbetrieb/turniere/klubturnier"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="text-blue-600 hover:text-blue-800 underline"
+            >
+              hsk1830.de/spielbetrieb/turniere/klubturnier
+            </a>
+          </p>
+          <p>
+            Die neue Seite wird alle Ergebnisse ab dem 02.09.2025 hier anzeigen.
+          </p>
         </div>
       </div>
     );
@@ -74,8 +90,9 @@ export default async function ResultsPage({
               Ergebnisse
             </CardTitle>
             <CardDescription>
-              Wählen Sie ein Turnier, eine Gruppe und eine Runde aus, um die
-              Ergebnisse anzuzeigen.
+              Wenn du keine Runde auswählst, werden die Ergebnisse aller Runden
+              angezeigt. Als Feinwertungssystem wird das Sonneborn-Berger-System
+              verwendet.
             </CardDescription>
           </CardHeader>
           <Results
