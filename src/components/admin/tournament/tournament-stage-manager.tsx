@@ -70,7 +70,7 @@ export function TournamentStageManager({ tournament }: Props) {
       {selectedStage && selectedStage !== tournament.stage && (
         <div className="flex items-center gap-2 p-3 bg-blue-50 border border-blue-200 rounded-lg">
           <p className="text-sm text-blue-700 flex-1">
-            Phase zu "{stages.find((s) => s.key === selectedStage)?.label}"
+            Phase zu &ldquo;{stages.find((s) => s.key === selectedStage)?.label}&rdquo;
             ändern?
           </p>
           <Button
