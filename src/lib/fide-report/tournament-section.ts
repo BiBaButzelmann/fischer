@@ -18,8 +18,8 @@ export function generateTournamentSection(
   return `012 ${tournamentSectionData.tournamentName}\r
 022 ${tournamentSectionData.location}\r
 032 ${tournamentSectionData.federation}\r
-042 ${tournamentSectionData.dateOfStart.toFormat("yyyy/MM/dd")}\r
-052 ${tournamentSectionData.dateOfEnd.toFormat("yyyy/MM/dd")}\r
+042 ${tournamentSectionData.startDate.toFormat("yyyy/MM/dd")}\r
+052 ${tournamentSectionData.endDate.toFormat("yyyy/MM/dd")}\r
 062 ${tournamentSectionData.numberOfPlayers}\r
 072 ${tournamentSectionData.numberOfRatedPlayers}\r
 092 ${tournamentSectionData.typeOfTournament}\r

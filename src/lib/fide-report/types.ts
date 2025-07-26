@@ -4,8 +4,8 @@ export type TournamentSectionData = {
   tournamentName: string;
   location: string;
   federation: string;
-  dateOfStart: DateTime;
-  dateOfEnd: DateTime;
+  startDate: DateTime;
+  endDate: DateTime;
   numberOfPlayers: number;
   numberOfRatedPlayers: number;
   typeOfTournament: string;
