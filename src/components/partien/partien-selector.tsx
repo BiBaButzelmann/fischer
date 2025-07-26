@@ -9,6 +9,20 @@ import {
   SelectValue,
 } from "../ui/select";
 import { Label } from "../ui/label";
+import type { TournamentSummary } from "@/db/types/tournament";
+import type { GroupSummary } from "@/db/types/group";
+import type { ParticipantSummary } from "@/db/types/participant";
+
+export type Props = {
+  selectedTournamentId: string;
+  tournamentNames: TournamentSummary[];
+  selectedGroupId: string;
+  groups: GroupSummary[];
+  selectedRound?: string;
+  rounds: number[];
+  selectedParticipantId?: string;
+  participants: ParticipantSummary[];
+};
 
 export function PartienSelector({
   selectedTournamentId,
@@ -19,30 +33,7 @@ export function PartienSelector({
   rounds,
   selectedParticipantId,
   participants,
-}: {
-  selectedTournamentId: string;
-  tournamentNames: {
-    id: number;
-    name: string;
-    numberOfRounds: number;
-  }[];
-  selectedGroupId: string;
-  groups: {
-    id: number;
-    groupName: string;
-  }[];
-  selectedRound?: string;
-  rounds: number[];
-  selectedParticipantId?: string;
-  participants: {
-    title: string | null;
-    id: number;
-    profile: {
-      firstName: string;
-      lastName: string;
-    };
-  }[];
-}) {
+}: Props) {
   const router = useRouter();
 
   const buildUrl = (params: {

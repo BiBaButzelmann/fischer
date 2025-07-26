@@ -2,7 +2,6 @@
 
 import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
-import type { Tournament } from "@/db/types/tournament";
 import {
   Table,
   TableBody,
@@ -24,6 +23,17 @@ import { Label } from "../ui/label";
 import { cn } from "@/lib/utils";
 import { getStandingsAction } from "@/actions/standings";
 import type { PlayerStanding } from "@/lib/standings";
+import type { TournamentSummary } from "@/db/types/tournament";
+import type { GroupSummary } from "@/db/types/group";
+
+export type Props = {
+  selectedTournamentId: string;
+  tournamentNames: TournamentSummary[];
+  selectedGroupId?: string;
+  groups: GroupSummary[];
+  selectedRound?: string;
+  rounds: number[];
+};
 
 export function Results({
   tournamentNames,
@@ -32,25 +42,9 @@ export function Results({
   selectedTournamentId,
   selectedGroupId,
   selectedRound,
-}: {
-  initialTournament: Tournament;
-  tournamentNames: {
-    id: number;
-    name: string;
-    numberOfRounds: number;
-  }[];
-  groups: {
-    id: number;
-    groupName: string;
-  }[];
-  rounds: number[];
-  selectedTournamentId: string;
-  selectedGroupId?: string;
-  selectedRound?: string;
-}) {
+}: Props) {
   const router = useRouter();
 
-  // Build URL function similar to partien-selector
   const buildUrl = (params: {
     tournamentId: string;
     groupId?: string;
@@ -59,27 +53,21 @@ export function Results({
     const searchParams = new URLSearchParams();
     searchParams.set("tournamentId", params.tournamentId);
 
-    if (params.groupId != null && params.groupId !== "") {
+    if (params.groupId) {
       searchParams.set("groupId", params.groupId);
     }
 
-    if (params.round != null && params.round !== "") {
+    if (params.round) {
       searchParams.set("round", params.round);
     }
 
     return `/ergebnisse?${searchParams.toString()}`;
   };
 
-  // State for standings data
   const [standings, setStandings] = useState<PlayerStanding[]>([]);
   const [loading, setLoading] = useState({ standings: false });
 
-  // Function to fetch standings
   const fetchStandings = async (groupId: string, round?: string) => {
-    if (!groupId || groupId === "") {
-      return;
-    }
-
     setLoading({ standings: true });
     try {
       const result = await getStandingsAction(
@@ -100,14 +88,12 @@ export function Results({
     }
   };
 
-  // Effect to fetch standings when selections change
   useEffect(() => {
-    if (selectedGroupId && selectedGroupId !== "") {
+    if (selectedGroupId) {
       fetchStandings(selectedGroupId, selectedRound);
     }
   }, [selectedGroupId, selectedRound]);
 
-  // Handler functions similar to partien-selector
   const handleTournamentChange = (tournamentId: string) => {
     router.push(
       buildUrl({
@@ -164,8 +150,8 @@ export function Results({
           <Label htmlFor="group-select" className="text-sm font-medium">
             Gruppe
           </Label>
-          <Select 
-            value={selectedGroupId || ""} 
+          <Select
+            value={selectedGroupId || ""}
             onValueChange={handleGroupChange}
           >
             <SelectTrigger id="group-select" className="w-48">
@@ -192,7 +178,7 @@ export function Results({
             <SelectTrigger
               id="round-select"
               className="w-48"
-              clearable={selectedRound != null}
+              clearable={!!selectedRound}
               onClear={() => handleRoundChange(undefined)}
             >
               <SelectValue />
@@ -248,56 +234,52 @@ export function Results({
                     </TableCell>
                   </TableRow>
                 ))
-              : standings.length > 0
-                ? standings.map((player, index) => (
-                    <TableRow key={player.participantId}>
-                      <TableCell className="py-2">
-                        <div
-                          className={cn(
-                            "w-7 h-7 flex items-center justify-center rounded-md mx-auto font-bold",
-                            index + 1 === 1 && "bg-yellow-400 text-yellow-900",
-                            index + 1 === 2 && "bg-slate-300 text-slate-800",
-                            index + 1 === 3 && "bg-orange-400 text-orange-900",
-                          )}
-                        >
-                          {index + 1}
-                        </div>
-                      </TableCell>
-                      <TableCell>
-                        {player.title ? `${player.title} ` : ""}
-                        {player.name}
-                      </TableCell>
-                      <TableCell className="text-right">
-                        {player.dwz || "-"}
-                      </TableCell>
-                      <TableCell className="text-right">
-                        {player.elo || "-"}
-                      </TableCell>
-                      <TableCell className="text-right">
-                        {player.points.toFixed(1)}
-                      </TableCell>
-                      <TableCell className="text-right">
-                        {player.sonnebornBerger.toFixed(2)}
-                      </TableCell>
-                      <TableCell className="text-right">
-                        {(() => {
-                          // Calculate expected games up to selected round
-                          const maxRound = selectedRound
-                            ? Number(selectedRound)
-                            : rounds.length;
-                          // For round-robin, expected games = number of rounds played so far
-                          // This assumes each player plays one game per round
-                          const expectedGames = maxRound;
-                          return `${player.gamesPlayed} aus ${expectedGames}`;
-                        })()}
-                      </TableCell>
-                    </TableRow>
-                  ))
-                : null}
-            {!loading.standings && (!standings || standings.length === 0) && (
+              : standings.map((player, index) => (
+                  <TableRow key={player.participantId}>
+                    <TableCell className="py-2">
+                      <div
+                        className={cn(
+                          "w-7 h-7 flex items-center justify-center rounded-md mx-auto font-bold",
+                          index + 1 === 1 && "bg-yellow-400 text-yellow-900",
+                          index + 1 === 2 && "bg-slate-300 text-slate-800",
+                          index + 1 === 3 && "bg-orange-400 text-orange-900",
+                        )}
+                      >
+                        {index + 1}
+                      </div>
+                    </TableCell>
+                    <TableCell>
+                      {player.title ? `${player.title} ` : ""}
+                      {player.name}
+                    </TableCell>
+                    <TableCell className="text-right">
+                      {player.dwz || "-"}
+                    </TableCell>
+                    <TableCell className="text-right">
+                      {player.elo || "-"}
+                    </TableCell>
+                    <TableCell className="text-right">
+                      {player.points.toFixed(1)}
+                    </TableCell>
+                    <TableCell className="text-right">
+                      {player.sonnebornBerger.toFixed(2)}
+                    </TableCell>
+                    <TableCell className="text-right">
+                      {(() => {
+                        const maxRound = selectedRound
+                          ? Number(selectedRound)
+                          : rounds.length;
+
+                        const expectedGames = maxRound;
+                        return `${player.gamesPlayed} aus ${expectedGames}`;
+                      })()}
+                    </TableCell>
+                  </TableRow>
+                ))}
+            {!loading.standings && standings.length === 0 && (
               <TableRow>
                 <TableCell colSpan={7} className="text-center h-24">
-                  {selectedGroupId && selectedRound ? (
+                  {selectedGroupId ? (
                     <>
                       Keine Ergebnisse für Gruppe{" "}
                       {groups.find((g) => g.id.toString() === selectedGroupId)
@@ -310,7 +292,7 @@ export function Results({
                       </span>
                     </>
                   ) : (
-                    "Bitte wählen Sie eine Gruppe und Runde, um die Ergebnisse anzuzeigen."
+                    "Bitte wähle eine Gruppe, um die Ergebnisse anzuzeigen."
                   )}
                 </TableCell>
               </TableRow>

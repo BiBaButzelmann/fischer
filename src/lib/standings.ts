@@ -59,7 +59,7 @@ function calculatePointsFromResult(
     case "½-0":
       return isWhite ? 0.5 : 0;
     case "-:-":
-      return 0; // Both forfeit
+      return 0;
     default:
       return 0;
   }
@@ -84,7 +84,6 @@ export function calculateStandings(
 ): PlayerStanding[] {
   const playerStats = new Map<number, PlayerStanding>();
 
-  // First, initialize all participants from the participants list if provided
   if (participants) {
     participants.forEach((participantGroup) => {
       const participant = participantGroup.participant;
@@ -101,7 +100,6 @@ export function calculateStandings(
     });
   }
 
-  // Then initialize any additional players from games (in case some aren't in participantGroup table)
   games.forEach((game) => {
     if (!playerStats.has(game.whiteParticipantId)) {
       playerStats.set(game.whiteParticipantId, {
@@ -130,7 +128,6 @@ export function calculateStandings(
     }
   });
 
-  // Calculate points from games
   games.forEach((game) => {
     if (!game.result) return;
 
@@ -146,9 +143,6 @@ export function calculateStandings(
     blackPlayer.gamesPlayed += 1;
   });
 
-  // Calculate Sonneborn-Berger scores
-  // "Die Sonneborn-Berger-Zahl eines Spielers ist die Summe der vollen Punktzahl der Gegner,
-  // gegen die er gewonnen hat, und der halben Punktzahl der Gegner, gegen die er unentschieden gespielt hat."
   games.forEach((game) => {
     if (!game.result) return;
 
@@ -158,28 +152,19 @@ export function calculateStandings(
     const whitePoints = calculatePointsFromResult(game.result, true);
     const blackPoints = calculatePointsFromResult(game.result, false);
 
-    // For white player: add opponent's total points based on result
     if (whitePoints === 1) {
-      // White won: add full points of black opponent
       whitePlayer.sonnebornBerger += blackPlayer.points;
     } else if (whitePoints === 0.5) {
-      // Draw: add half points of black opponent
       whitePlayer.sonnebornBerger += blackPlayer.points * 0.5;
     }
-    // If white lost (0 points), add nothing
 
-    // For black player: add opponent's total points based on result
     if (blackPoints === 1) {
-      // Black won: add full points of white opponent
       blackPlayer.sonnebornBerger += whitePlayer.points;
     } else if (blackPoints === 0.5) {
-      // Draw: add half points of white opponent
       blackPlayer.sonnebornBerger += whitePlayer.points * 0.5;
     }
-    // If black lost (0 points), add nothing
   });
 
-  // Convert to array and sort by points (descending), then by Sonneborn-Berger (descending), then by name
   return Array.from(playerStats.values()).sort((a, b) => {
     if (b.points !== a.points) {
       return b.points - a.points;
