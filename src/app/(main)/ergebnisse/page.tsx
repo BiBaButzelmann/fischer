@@ -79,7 +79,6 @@ export default async function ResultsPage({
             </CardDescription>
           </CardHeader>
           <Results
-            initialTournament={tournament}
             tournamentNames={tournamentNames}
             groups={groups}
             rounds={rounds}
