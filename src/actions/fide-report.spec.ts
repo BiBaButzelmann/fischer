@@ -33,7 +33,7 @@ describe("TableGenerator", () => {
     generator.addColumn("id", "ID", 5, "left");
     generator.addColumn("name", "Name", 20, "left");
     const header = generator.generateHeader();
-    expect(header).toBe("ID    Name                ");
+    expect(header).toBe("ID    Name                \r");
   });
 
   it("should handle border collapse correctly", () => {
@@ -41,7 +41,7 @@ describe("TableGenerator", () => {
     generator.addColumn("gender", "s", 1, "left", true);
     generator.addColumn("title", "TTT", 3, "right");
     const header = generator.generateHeader();
-    expect(header).toBe("sTTT");
+    expect(header).toBe("sTTT\r");
   });
 
   it("should generate padded rows correctly", () => {
@@ -53,7 +53,7 @@ describe("TableGenerator", () => {
       { id: "name", data: "Test User" },
     ]);
     const rows = generator.generateRows();
-    expect(rows).toBe("1     Test User           ");
+    expect(rows).toBe("1     Test User           \r");
   });
 });
 
@@ -143,23 +143,23 @@ const tournamentSectionData = {
   timeControl: "2 Stunden 40 / Zuege, 30 min. Rest",
 } as TournamentSectionData;
 
-const expectedPlayerSection = `         1         2         3         4         5         6         7         8         9        10        11
-12345678901234567890123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890
-DDD SSSS sTTT NNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNN RRRR FFF IIIIIIIIIII BBBB/BB/BB PPPP RRRR  1111 1 1  2222 2 2 
-001    1 m    Mueller,Kai                       1960 GER    12939455 1996/00/00  2.0    1    10 w 1     2 w 1 
-001    3 m    Stejskal,Manfred                  1917 GER    12926620 1952/00/00  0.0    8               9 b 0 `;
+const expectedPlayerSection = `         1         2         3         4         5         6         7         8         9        10        11\r
+12345678901234567890123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890\r
+DDD SSSS sTTT NNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNN RRRR FFF IIIIIIIIIII BBBB/BB/BB PPPP RRRR  1111 1 1  2222 2 2 \r
+001    1 m    Mueller,Kai                       1960 GER    12939455 1996/00/00  2.0    1    10 w 1     2 w 1 \r
+001    3 m    Stejskal,Manfred                  1917 GER    12926620 1952/00/00  0.0    8               9 b 0 \r`;
 
-const expectedTournamentSection = `012 HSK Klubturnier 2024 - B1-Gruppe 
-022 Hamburg
-032 GER
-042 2024/09/17
-052 2024/12/10
-062 10
-072 10
-092 Individual round robin
-102 Paul Jeken
-122 2 Stunden 40 / Zuege, 30 min. Rest
-132                                                                                        24/09/17  24/09/24 `;
+const expectedTournamentSection = `012 HSK Klubturnier 2024 - B1-Gruppe\r
+022 Hamburg\r
+032 GER\r
+042 2024/09/17\r
+052 2024/12/10\r
+062 10\r
+072 10\r
+092 Individual round robin\r
+102 Paul Jeken\r
+122 2 Stunden 40 / Zuege, 30 min. Rest\r
+132                                                                                        24/09/17  24/09/24 \r`;
 
 const expectedFideReport = `${expectedTournamentSection}
 

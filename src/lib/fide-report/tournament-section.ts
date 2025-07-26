@@ -15,15 +15,15 @@ export function generateTournamentSection(
     }),
   ).join("");
 
-  return `012 ${tournamentSectionData.tournamentName} 
-022 ${tournamentSectionData.location}
-032 ${tournamentSectionData.federation}
-042 ${tournamentSectionData.dateOfStart.toFormat("yyyy/MM/dd")}
-052 ${tournamentSectionData.dateOfEnd.toFormat("yyyy/MM/dd")}
-062 ${tournamentSectionData.numberOfPlayers}
-072 ${tournamentSectionData.numberOfRatedPlayers}
-092 ${tournamentSectionData.typeOfTournament}
-102 ${tournamentSectionData.organizer}
-122 ${tournamentSectionData.timeControl}
-132                                                                                       ${gameDates}`;
+  return `012 ${tournamentSectionData.tournamentName}\r
+022 ${tournamentSectionData.location}\r
+032 ${tournamentSectionData.federation}\r
+042 ${tournamentSectionData.dateOfStart.toFormat("yyyy/MM/dd")}\r
+052 ${tournamentSectionData.dateOfEnd.toFormat("yyyy/MM/dd")}\r
+062 ${tournamentSectionData.numberOfPlayers}\r
+072 ${tournamentSectionData.numberOfRatedPlayers}\r
+092 ${tournamentSectionData.typeOfTournament}\r
+102 ${tournamentSectionData.organizer}\r
+122 ${tournamentSectionData.timeControl}\r
+132                                                                                       ${gameDates}\r`;
 }

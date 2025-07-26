@@ -59,7 +59,7 @@ export class TableGenerator {
         header += " ";
       }
     }
-    return header;
+    return header + "\r";
   }
 
   generateRow(values: Record<ColumnIdentifier, string>) {
@@ -77,7 +77,7 @@ export class TableGenerator {
   }
 
   generateRows() {
-    return this.rows.map((row) => this.generateRow(row)).join("\n");
+    return this.rows.map((row) => this.generateRow(row)).join("\r\n") + "\r";
   }
 
   generateTable() {
