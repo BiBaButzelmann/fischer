@@ -20,8 +20,7 @@ export default async function ResultsPage({
     round?: string;
   }>;
 }) {
-  const { tournamentId } = await searchParams;
-
+  const { tournamentId, groupId, round } = await searchParams;
   const tournamentNames = await getAllActiveTournamentNames();
 
   if (tournamentNames.length === 0) {
@@ -41,6 +40,9 @@ export default async function ResultsPage({
   const groups = await getAllGroupNamesByTournamentId(
     Number(selectedTournamentId),
   );
+
+  const selectedGroupId =
+    groupId || (groups.length > 0 ? groups[0].id.toString() : undefined);
 
   const selectedTournamentName =
     tournamentNames.find((t) => t.id.toString() === selectedTournamentId) ||
@@ -81,6 +83,9 @@ export default async function ResultsPage({
             tournamentNames={tournamentNames}
             groups={groups}
             rounds={rounds}
+            selectedTournamentId={selectedTournamentId}
+            selectedGroupId={selectedGroupId}
+            selectedRound={round}
           />
         </Card>
       </div>
