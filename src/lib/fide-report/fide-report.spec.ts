@@ -89,7 +89,7 @@ const tournamentSectionData = {
   endDate: DateTime.local(2024, 12, 10),
   numberOfPlayers: 10,
   numberOfRatedPlayers: 10,
-  typeOfTournament: "Individual round robin",
+  tournamentType: "Individual round robin",
   organizer: "Paul Jeken",
   timeControl: "2 Stunden 40 / Zuege, 30 min. Rest",
 } as TournamentSectionData;

@@ -22,7 +22,7 @@ export function generateTournamentSection(
 052 ${tournamentSectionData.endDate.toFormat("yyyy/MM/dd")}\r
 062 ${tournamentSectionData.numberOfPlayers}\r
 072 ${tournamentSectionData.numberOfRatedPlayers}\r
-092 ${tournamentSectionData.typeOfTournament}\r
+092 ${tournamentSectionData.tournamentType}\r
 102 ${tournamentSectionData.organizer}\r
 122 ${tournamentSectionData.timeControl}\r
 132                                                                                       ${gameDates}\r`;

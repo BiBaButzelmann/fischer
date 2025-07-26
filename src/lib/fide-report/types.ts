@@ -8,7 +8,7 @@ export type TournamentSectionData = {
   endDate: DateTime;
   numberOfPlayers: number;
   numberOfRatedPlayers: number;
-  typeOfTournament: string;
+  tournamentType: string;
   organizer: string;
   timeControl: string;
 };
