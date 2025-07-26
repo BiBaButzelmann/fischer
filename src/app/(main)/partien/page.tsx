@@ -28,7 +28,7 @@ export default async function Page({
     return (
       <div className="text-center p-6 bg-gray-50 rounded-lg">
         <div className="mb-4">
-          Das Turnier befindet sich noch in der Anmeldephase
+          Das Turnier befindet sich noch in der Anmeldephase.
         </div>
         <div className="text-sm text-gray-600">
           <p className="mb-2">
@@ -43,7 +43,7 @@ export default async function Page({
             </a>
           </p>
           <p>
-            Die neue Seite wird ihre Paarungen ab dem 02.09.2025 hier anzeigen.
+            Die neue Seite wird deine Paarungen ab dem 02.09.2025 hier anzeigen.
           </p>
         </div>
       </div>
