@@ -172,6 +172,12 @@ export function calculateStandings(
     if (b.sonnebornBerger !== a.sonnebornBerger) {
       return b.sonnebornBerger - a.sonnebornBerger;
     }
+    if ((b.dwz || 0) !== (a.dwz || 0)) {
+      return (b.dwz || 0) - (a.dwz || 0);
+    }
+    if ((b.elo || 0) !== (a.elo || 0)) {
+      return (b.elo || 0) - (a.elo || 0);
+    }
     return a.name.localeCompare(b.name);
   });
 }
