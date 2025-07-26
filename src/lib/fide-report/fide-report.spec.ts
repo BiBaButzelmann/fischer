@@ -91,7 +91,7 @@ const tournamentSectionData = {
   numberOfRatedPlayers: 10,
   tournamentType: "Individual round robin",
   organizer: "Paul Jeken",
-  timeControl: "2 Stunden 40 / Zuege, 30 min. Rest",
+  timeLimit: "2 Stunden 40 / Zuege, 30 min. Rest",
 } as TournamentSectionData;
 
 const expectedPlayerSection = `         1         2         3         4         5         6         7         8         9        10        11\r

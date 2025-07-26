@@ -10,7 +10,7 @@ export type TournamentSectionData = {
   numberOfRatedPlayers: number;
   tournamentType: string;
   organizer: string;
-  timeControl: string;
+  timeLimit: string;
 };
 
 export type PlayerSectionData = PlayerEntry[];
