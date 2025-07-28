@@ -1,6 +1,5 @@
 "use client";
 
-import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import {
   Table,
@@ -11,7 +10,6 @@ import {
   TableRow,
 } from "../ui/table";
 import { CardContent } from "../ui/card";
-import { Skeleton } from "../ui/skeleton";
 import {
   Select,
   SelectContent,
@@ -21,18 +19,18 @@ import {
 } from "../ui/select";
 import { Label } from "../ui/label";
 import { cn } from "@/lib/utils";
-import { getStandingsAction } from "@/actions/standings";
 import type { PlayerStanding } from "@/lib/standings";
-import type { TournamentSummary } from "@/db/types/tournament";
+import type { TournamentNames } from "@/db/types/tournament";
 import type { GroupSummary } from "@/db/types/group";
 
 export type Props = {
   selectedTournamentId: string;
-  tournamentNames: TournamentSummary[];
+  tournamentNames: TournamentNames[];
   selectedGroupId?: string;
   groups: GroupSummary[];
   selectedRound?: string;
   rounds: number[];
+  standings: PlayerStanding[];
 };
 
 export function Results({
@@ -42,6 +40,7 @@ export function Results({
   selectedTournamentId,
   selectedGroupId,
   selectedRound,
+  standings,
 }: Props) {
   const router = useRouter();
 
@@ -63,25 +62,6 @@ export function Results({
 
     return `/ergebnisse?${searchParams.toString()}`;
   };
-
-  const [standings, setStandings] = useState<PlayerStanding[]>([]);
-  const [loading, setLoading] = useState({ standings: false });
-
-  const fetchStandings = async (groupId: string, round?: string) => {
-    setLoading({ standings: true });
-    const standings = await getStandingsAction(
-      Number(groupId),
-      round ? Number(round) : undefined,
-    );
-    setStandings(standings);
-    setLoading({ standings: false });
-  };
-
-  useEffect(() => {
-    if (selectedGroupId) {
-      fetchStandings(selectedGroupId, selectedRound);
-    }
-  }, [selectedGroupId, selectedRound]);
 
   const handleTournamentChange = (tournamentId: string) => {
     router.push(
@@ -197,68 +177,7 @@ export function Results({
             </TableRow>
           </TableHeader>
           <TableBody>
-            {loading.standings
-              ? Array.from({ length: 8 }).map((_, i) => (
-                  <TableRow key={i}>
-                    <TableCell className="text-center">
-                      <Skeleton className="h-5 w-5 mx-auto" />
-                    </TableCell>
-                    <TableCell>
-                      <Skeleton className="h-5 w-3/4" />
-                    </TableCell>
-                    <TableCell className="text-right">
-                      <Skeleton className="h-5 w-10 ml-auto" />
-                    </TableCell>
-                    <TableCell className="text-right">
-                      <Skeleton className="h-5 w-10 ml-auto" />
-                    </TableCell>
-                    <TableCell className="text-right">
-                      <Skeleton className="h-5 w-12 ml-auto" />
-                    </TableCell>
-                    <TableCell className="text-right">
-                      <Skeleton className="h-5 w-12 ml-auto" />
-                    </TableCell>
-                    <TableCell className="text-right">
-                      <Skeleton className="h-5 w-16 ml-auto" />
-                    </TableCell>
-                  </TableRow>
-                ))
-              : standings.map((player, index) => (
-                  <TableRow key={player.participantId}>
-                    <TableCell className="py-2">
-                      <div
-                        className={cn(
-                          "w-7 h-7 flex items-center justify-center rounded-md mx-auto font-bold",
-                          index + 1 === 1 && "bg-yellow-400 text-yellow-900",
-                          index + 1 === 2 && "bg-slate-300 text-slate-800",
-                          index + 1 === 3 && "bg-orange-400 text-orange-900",
-                        )}
-                      >
-                        {index + 1}
-                      </div>
-                    </TableCell>
-                    <TableCell>
-                      {player.title ? `${player.title} ` : ""}
-                      {player.name}
-                    </TableCell>
-                    <TableCell className="text-right">
-                      {player.dwz || "-"}
-                    </TableCell>
-                    <TableCell className="text-right">
-                      {player.elo || "-"}
-                    </TableCell>
-                    <TableCell className="text-right">
-                      {player.points.toFixed(1)}
-                    </TableCell>
-                    <TableCell className="text-right">
-                      {player.sonnebornBerger.toFixed(2)}
-                    </TableCell>
-                    <TableCell className="text-right">
-                      {player.gamesPlayed}
-                    </TableCell>
-                  </TableRow>
-                ))}
-            {!loading.standings && standings.length === 0 && (
+            {standings.length === 0 ? (
               <TableRow>
                 <TableCell colSpan={7} className="text-center h-24">
                   {selectedGroupId ? (
@@ -278,6 +197,42 @@ export function Results({
                   )}
                 </TableCell>
               </TableRow>
+            ) : (
+              standings.map((player, index) => (
+                <TableRow key={player.participantId}>
+                  <TableCell className="py-2">
+                    <div
+                      className={cn(
+                        "w-7 h-7 flex items-center justify-center rounded-md mx-auto font-bold",
+                        index + 1 === 1 && "bg-yellow-400 text-yellow-900",
+                        index + 1 === 2 && "bg-slate-300 text-slate-800",
+                        index + 1 === 3 && "bg-orange-400 text-orange-900",
+                      )}
+                    >
+                      {index + 1}
+                    </div>
+                  </TableCell>
+                  <TableCell>
+                    {player.title ? `${player.title} ` : ""}
+                    {player.name}
+                  </TableCell>
+                  <TableCell className="text-right">
+                    {player.dwz || "-"}
+                  </TableCell>
+                  <TableCell className="text-right">
+                    {player.elo || "-"}
+                  </TableCell>
+                  <TableCell className="text-right">
+                    {player.points.toFixed(1)}
+                  </TableCell>
+                  <TableCell className="text-right">
+                    {player.sonnebornBerger.toFixed(2)}
+                  </TableCell>
+                  <TableCell className="text-right">
+                    {player.gamesPlayed}
+                  </TableCell>
+                </TableRow>
+              ))
             )}
           </TableBody>
         </Table>
