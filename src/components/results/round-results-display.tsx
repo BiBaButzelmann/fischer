@@ -14,17 +14,13 @@ import {
 import { cn } from "@/lib/utils";
 import type { GroupSummary } from "@/db/types/group";
 
-interface RoundResultsDisplayProps {
+type Props = {
   groupId: string;
   round?: string;
   groups: GroupSummary[];
-}
+};
 
-export async function RoundResultsDisplay({
-  groupId,
-  round,
-  groups,
-}: RoundResultsDisplayProps) {
+export async function RoundResultsDisplay({ groupId, round, groups }: Props) {
   const participants = await getParticipantsInGroup(Number(groupId));
   const games = await getCompletedGames(
     Number(groupId),
