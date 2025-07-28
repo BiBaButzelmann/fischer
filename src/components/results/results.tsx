@@ -12,7 +12,6 @@ import {
 import { Label } from "../ui/label";
 import type { TournamentNames } from "@/db/types/tournament";
 import type { GroupSummary } from "@/db/types/group";
-import { RoundResultsDisplay } from "./round-results-display";
 
 export type Props = {
   selectedTournamentId: string;
@@ -151,20 +150,6 @@ export function Results({
           </Select>
         </div>
       </div>
-
-      {selectedGroupId ? (
-        <RoundResultsDisplay
-          groupId={selectedGroupId}
-          round={selectedRound}
-          groups={groups}
-        />
-      ) : (
-        <div className="border rounded-lg overflow-hidden">
-          <div className="text-center h-24 flex items-center justify-center">
-            Bitte wähle eine Gruppe, um die Ergebnisse anzuzeigen.
-          </div>
-        </div>
-      )}
     </CardContent>
   );
 }

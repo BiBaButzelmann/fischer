@@ -1,4 +1,3 @@
-import { Results } from "@/components/results/results";
 import {
   Card,
   CardDescription,
@@ -10,6 +9,7 @@ import {
   getTournamentById,
 } from "@/db/repositories/tournament";
 import { getAllGroupNamesByTournamentId } from "@/db/repositories/game";
+import { RoundResultsDisplay } from "@/components/results/round-results-display";
 
 export default async function Page({
   searchParams,
@@ -95,7 +95,7 @@ export default async function Page({
               verwendet.
             </CardDescription>
           </CardHeader>
-          <Results
+          <RoundResultsDisplay
             tournamentNames={tournamentNames}
             groups={groups}
             rounds={rounds}
