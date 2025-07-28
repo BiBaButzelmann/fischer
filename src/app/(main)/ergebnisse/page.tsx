@@ -9,12 +9,7 @@ import {
   getAllActiveTournamentNames,
   getTournamentById,
 } from "@/db/repositories/tournament";
-import {
-  getAllGroupNamesByTournamentId,
-  getGamesForStandings,
-  getParticipantsInGroup,
-} from "@/db/repositories/game";
-import { calculateStandings } from "@/lib/standings";
+import { getAllGroupNamesByTournamentId } from "@/db/repositories/game";
 
 export default async function ResultsPage({
   searchParams,
@@ -86,19 +81,6 @@ export default async function ResultsPage({
     (_, i) => i + 1,
   );
 
-  const standings = selectedGroupId
-    ? await (async () => {
-        const participants = await getParticipantsInGroup(
-          Number(selectedGroupId),
-        );
-        const games = await getGamesForStandings(
-          Number(selectedGroupId),
-          round ? Number(round) : undefined,
-        );
-        return calculateStandings(games, participants);
-      })()
-    : [];
-
   return (
     <div className="bg-background text-foreground h-full p-4 sm:p-6 md:p-8">
       <div className="max-w-5xl mx-auto">
@@ -120,7 +102,6 @@ export default async function ResultsPage({
             selectedTournamentId={selectedTournamentId}
             selectedGroupId={selectedGroupId}
             selectedRound={round}
-            standings={standings}
           />
         </Card>
       </div>
