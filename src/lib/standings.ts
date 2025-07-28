@@ -1,9 +1,7 @@
 import type { gameResults } from "@/db/schema/columns.helpers";
-import type {
-  PlayerStanding,
-  ParticipantWithRating,
-  GameWithParticipants,
-} from "@/db/types/standings";
+import type { PlayerStanding } from "@/db/types/standings";
+import type { ParticipantWithRating } from "@/db/types/participant";
+import type { GameWithParticipantRatings } from "@/db/types/game";
 
 function calculatePointsFromResult(
   result: (typeof gameResults)[number],
@@ -32,7 +30,7 @@ function calculatePointsFromResult(
 }
 
 export function calculateStandings(
-  games: GameWithParticipants[],
+  games: GameWithParticipantRatings[],
   participants?: ParticipantWithRating[],
 ): PlayerStanding[] {
   const playerStats = new Map<number, PlayerStanding>();
