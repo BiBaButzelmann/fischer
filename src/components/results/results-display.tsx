@@ -1,4 +1,4 @@
-import { Results } from "./results";
+import { ResultsSelector } from "./results-selector";
 import {
   getParticipantsInGroup,
   getCompletedGames,
@@ -21,11 +21,11 @@ type Props = {
   groups: GroupSummary[];
   rounds: number[];
   selectedTournamentId: string;
-  selectedGroupId?: string;
-  selectedRound?: string;
+  selectedGroupId: string;
+  selectedRound: string;
 };
 
-export async function RoundResultsDisplay({
+export async function ResultsDisplay({
   tournamentNames,
   groups,
   rounds,
@@ -33,24 +33,18 @@ export async function RoundResultsDisplay({
   selectedGroupId,
   selectedRound,
 }: Props) {
-  const standings = selectedGroupId
-    ? await (async () => {
-        const participants = await getParticipantsInGroup(
-          Number(selectedGroupId),
-        );
-        const games = await getCompletedGames(
-          Number(selectedGroupId),
-          selectedRound ? Number(selectedRound) : undefined,
-        );
-        return calculateStandings(games, participants);
-      })()
-    : [];
+  const participants = await getParticipantsInGroup(Number(selectedGroupId));
+  const games = await getCompletedGames(
+    Number(selectedGroupId),
+    selectedRound ? Number(selectedRound) : undefined,
+  );
+  const standings = calculateStandings(games, participants);
 
   const selectedGroup = groups.find((g) => g.id.toString() === selectedGroupId);
 
   return (
     <>
-      <Results
+      <ResultsSelector
         tournamentNames={tournamentNames}
         groups={groups}
         rounds={rounds}
@@ -76,20 +70,14 @@ export async function RoundResultsDisplay({
             {standings.length === 0 ? (
               <TableRow>
                 <TableCell colSpan={7} className="text-center h-24">
-                  {selectedGroupId ? (
-                    <>
-                      Keine Ergebnisse für Gruppe{" "}
-                      {selectedGroup?.groupName || selectedGroupId}
-                      {selectedRound && ` bis Runde ${selectedRound}`} gefunden.
-                      <br />
-                      <span className="text-sm text-muted-foreground">
-                        Möglicherweise wurden noch keine Spiele eingegeben oder
-                        beendet.
-                      </span>
-                    </>
-                  ) : (
-                    "Bitte wähle eine Gruppe, um die Ergebnisse anzuzeigen."
-                  )}
+                  Keine Ergebnisse für Gruppe{" "}
+                  {selectedGroup?.groupName || selectedGroupId}
+                  {selectedRound && ` bis Runde ${selectedRound}`} gefunden.
+                  <br />
+                  <span className="text-sm text-muted-foreground">
+                    Möglicherweise wurden noch keine Spiele eingegeben oder
+                    beendet.
+                  </span>
                 </TableCell>
               </TableRow>
             ) : (
