@@ -163,6 +163,89 @@ export async function getGamesByGroup(
   });
 }
 
+export async function getCompletedGames(groupId: number, maxRound?: number) {
+  const result = await db.query.game.findMany({
+    where: (game, { and, eq, lte, isNotNull }) => {
+      const conditions = [eq(game.groupId, groupId), isNotNull(game.result)];
+
+      if (maxRound !== undefined) {
+        conditions.push(lte(game.round, maxRound));
+      }
+
+      return and(...conditions);
+    },
+    columns: {
+      id: true,
+      whiteParticipantId: true,
+      blackParticipantId: true,
+      result: true,
+      round: true,
+    },
+    with: {
+      whiteParticipant: {
+        columns: {
+          id: true,
+          dwzRating: true,
+          fideRating: true,
+          title: true,
+        },
+        with: {
+          profile: {
+            columns: {
+              firstName: true,
+              lastName: true,
+            },
+          },
+        },
+      },
+      blackParticipant: {
+        columns: {
+          id: true,
+          dwzRating: true,
+          fideRating: true,
+          title: true,
+        },
+        with: {
+          profile: {
+            columns: {
+              firstName: true,
+              lastName: true,
+            },
+          },
+        },
+      },
+    },
+    orderBy: (game, { asc }) => [asc(game.round), asc(game.boardNumber)],
+  });
+  return result;
+}
+
+export async function getParticipantsInGroup(groupId: number) {
+  const participantsInGroup = await db.query.participantGroup.findMany({
+    where: (participantGroup, { eq }) => eq(participantGroup.groupId, groupId),
+    with: {
+      participant: {
+        columns: {
+          id: true,
+          dwzRating: true,
+          fideRating: true,
+          title: true,
+        },
+        with: {
+          profile: {
+            columns: {
+              firstName: true,
+              lastName: true,
+            },
+          },
+        },
+      },
+    },
+  });
+
+  return participantsInGroup.map(({ participant }) => participant);
+}
+
 export async function getAllGroupNamesByTournamentId(tournamentId: number) {
   return await db
     .select({

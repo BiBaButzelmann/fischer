@@ -9,3 +9,8 @@ export type TournamentWithGroups = Tournament & {
 };
 
 export type TournamentStage = Tournament["stage"];
+
+export type TournamentNames = Pick<
+  Tournament,
+  "id" | "name" | "numberOfRounds"
+>;

@@ -19,3 +19,8 @@ export type GroupWithParticipantsAndGames = Group & {
   participants: ParticipantWithName[];
   games: Game[];
 };
+
+export type GroupSummary = {
+  id: number;
+  groupName: string;
+};

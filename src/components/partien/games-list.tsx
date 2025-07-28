@@ -39,19 +39,14 @@ import { useMemo, useTransition } from "react";
 import { useIsMobile } from "@/hooks/use-mobile";
 import { useRouter } from "next/navigation";
 
-type GameListProps = {
+type Props = {
   userId: string | undefined;
   userRole?: string;
   games: GameWithParticipantNamesAndRatings[];
   onResultChange: (gameId: number, result: GameResult) => Promise<void>;
 };
 
-export function GamesList({
-  userId,
-  userRole,
-  games,
-  onResultChange,
-}: GameListProps) {
+export function GamesList({ userId, userRole, games, onResultChange }: Props) {
   const isMobile = useIsMobile();
   const router = useRouter();
   const [isPending, startTransition] = useTransition();
