@@ -163,13 +163,10 @@ export async function getGamesByGroup(
   });
 }
 
-export async function getGamesForStandings(groupId: number, maxRound?: number) {
+export async function getCompletedGames(groupId: number, maxRound?: number) {
   const result = await db.query.game.findMany({
     where: (game, { and, eq, lte, isNotNull }) => {
-      const conditions = [
-        eq(game.groupId, groupId),
-        isNotNull(game.result), // Only games with results
-      ];
+      const conditions = [eq(game.groupId, groupId), isNotNull(game.result)];
 
       if (maxRound !== undefined) {
         conditions.push(lte(game.round, maxRound));
