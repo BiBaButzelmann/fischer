@@ -9,7 +9,7 @@ import {
   getTournamentById,
 } from "@/db/repositories/tournament";
 import { getAllGroupNamesByTournamentId } from "@/db/repositories/game";
-import { RoundResultsDisplay } from "@/components/results/round-results-display";
+import { ResultsDisplay } from "@/components/results/results-display";
 
 export default async function Page({
   searchParams,
@@ -57,9 +57,6 @@ export default async function Page({
     Number(selectedTournamentId),
   );
 
-  const selectedGroupId =
-    groupId || (groups.length > 0 ? groups[0].id.toString() : undefined);
-
   const selectedTournamentName =
     tournamentNames.find((t) => t.id.toString() === selectedTournamentId) ||
     tournamentNames[0];
@@ -75,6 +72,28 @@ export default async function Page({
       </div>
     );
   }
+
+  if (groups.length === 0) {
+    return (
+      <div className="bg-background text-foreground h-full p-4 sm:p-6 md:p-8">
+        <div className="max-w-5xl mx-auto">
+          <Card>
+            <CardHeader>
+              <CardTitle className="text-2xl font-bold tracking-tight">
+                Ergebnisse
+              </CardTitle>
+            </CardHeader>
+            <div className="p-6 text-center text-muted-foreground">
+              Keine Gruppen für dieses Turnier gefunden.
+            </div>
+          </Card>
+        </div>
+      </div>
+    );
+  }
+
+  const selectedGroupId = groupId || groups[0].id.toString();
+  const selectedRound = round || "1";
 
   const rounds = Array.from(
     { length: selectedTournamentName.numberOfRounds },
@@ -95,13 +114,13 @@ export default async function Page({
               verwendet.
             </CardDescription>
           </CardHeader>
-          <RoundResultsDisplay
+          <ResultsDisplay
             tournamentNames={tournamentNames}
             groups={groups}
             rounds={rounds}
             selectedTournamentId={selectedTournamentId}
             selectedGroupId={selectedGroupId}
-            selectedRound={round}
+            selectedRound={selectedRound}
           />
         </Card>
       </div>
