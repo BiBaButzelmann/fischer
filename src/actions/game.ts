@@ -119,7 +119,10 @@ export async function updateGameResult(gameId: number, result: GameResult) {
     gameId,
     session.user.id,
   );
-  invariant(isUserParticipating, "User is not participating in this game");
+  invariant(
+    isUserParticipating || session.user.role === "admin",
+    "User is not participating in this game",
+  );
 
   await db
     .update(game)

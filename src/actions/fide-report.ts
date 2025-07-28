@@ -1,3 +1,5 @@
+"use server";
+
 import { authWithRedirect } from "@/auth/utils";
 import { db } from "@/db/client";
 import { Game } from "@/db/types/game";
