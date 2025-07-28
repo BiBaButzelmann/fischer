@@ -1,6 +1,7 @@
 "use server";
 
 import { authWithRedirect } from "@/auth/utils";
+import { months } from "@/constants/constants";
 import { db } from "@/db/client";
 import { Game } from "@/db/types/game";
 import { generateFideReport } from "@/lib/fide-report";
@@ -163,7 +164,7 @@ export async function generateFideReportFile(groupId: number, month: number) {
       (s) => s.participantId === participant.id,
     );
     invariant(
-      currentGroupPosition < 0,
+      currentGroupPosition >= 0,
       `Participant ${participant.id} is not in the standings`,
     );
 
@@ -220,7 +221,7 @@ export async function generateFideReportFile(groupId: number, month: number) {
   // 122
   const timeLimit = data.tournament.timeLimit;
 
-  return generateFideReport(
+  const fideReport = generateFideReport(
     {
       tournamentName,
       location,
@@ -235,6 +236,14 @@ export async function generateFideReportFile(groupId: number, month: number) {
     },
     entries,
   );
+
+  const monthName = months[month - 1];
+  const fileName = `FIDE_Export_${data.tournament.name.replace(" ", "_")}_${data.groupName.replace(" ", "_")} ${monthName}.txt`;
+
+  return {
+    fideReport,
+    fileName,
+  };
 }
 
 function mapResult(result: NonNullable<Game["result"]>): Result["result"] {

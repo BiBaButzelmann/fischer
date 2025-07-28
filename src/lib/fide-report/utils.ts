@@ -48,7 +48,6 @@ export function getStringRepresentationForResult(game: Result) {
 }
 
 export function getStringRepresentationForScheduled(scheduled: DateTime) {
-  console.log("rep", scheduled);
   return scheduled.toFormat("yyyy-MM-dd");
 }
 

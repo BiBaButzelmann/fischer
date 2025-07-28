@@ -10,7 +10,6 @@ export function generateTournamentSection(
   const gameDates = Array.from(
     games.keys().map((dateString) => {
       const date = DateTime.fromISO(dateString);
-      console.log(dateString);
       return ` ${date.toFormat("yy/MM/dd")} `;
     }),
   ).join("");

@@ -77,16 +77,17 @@ export function GenerateFideReport({
     }
 
     startTransition(async () => {
-      const report = await generateFideReportFile(
+      const result = await generateFideReportFile(
         parseInt(selectedGroupId),
         parseInt(selectedMonth),
       );
       const element = document.createElement("a");
       element.setAttribute(
         "href",
-        "data:text/plain;charset=utf-8," + encodeURIComponent(report),
+        "data:text/plain;charset=utf-8," +
+          encodeURIComponent(result.fideReport),
       );
-      element.setAttribute("download", "fide-report.txt");
+      element.setAttribute("download", result.fileName);
 
       element.style.display = "none";
       document.body.appendChild(element);
