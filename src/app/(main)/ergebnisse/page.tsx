@@ -11,7 +11,7 @@ import {
 } from "@/db/repositories/tournament";
 import { getAllGroupNamesByTournamentId } from "@/db/repositories/game";
 
-export default async function ResultsPage({
+export default async function Page({
   searchParams,
 }: {
   searchParams: Promise<{
