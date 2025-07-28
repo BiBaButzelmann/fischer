@@ -9,3 +9,13 @@ export type ParticipantWithName = Participant & {
     lastName: string;
   };
 };
+
+export type ParticipantWithRating = Pick<
+  Participant,
+  "id" | "dwzRating" | "fideRating" | "title"
+> & {
+  profile: {
+    firstName: string;
+    lastName: string;
+  };
+};
