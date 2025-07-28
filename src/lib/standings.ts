@@ -11,32 +11,25 @@ export type PlayerStanding = {
   sonnebornBerger: number;
 };
 
+export type ParticipantWithRating = {
+  id: number;
+  dwzRating: number | null;
+  fideRating: number | null;
+  title: string | null;
+  profile: {
+    firstName: string;
+    lastName: string;
+  };
+};
+
 export type GameWithParticipants = {
   id: number;
   whiteParticipantId: number;
   blackParticipantId: number;
   result: (typeof gameResults)[number] | null;
   round: number;
-  whiteParticipant: {
-    id: number;
-    dwzRating: number | null;
-    fideRating: number | null;
-    title: string | null;
-    profile: {
-      firstName: string;
-      lastName: string;
-    };
-  };
-  blackParticipant: {
-    id: number;
-    dwzRating: number | null;
-    fideRating: number | null;
-    title: string | null;
-    profile: {
-      firstName: string;
-      lastName: string;
-    };
-  };
+  whiteParticipant: ParticipantWithRating;
+  blackParticipant: ParticipantWithRating;
 };
 
 function calculatePointsFromResult(
@@ -65,28 +58,14 @@ function calculatePointsFromResult(
   }
 }
 
-export type ParticipantInGroup = {
-  participant: {
-    id: number;
-    dwzRating: number | null;
-    fideRating: number | null;
-    title: string | null;
-    profile: {
-      firstName: string;
-      lastName: string;
-    };
-  };
-};
-
 export function calculateStandings(
   games: GameWithParticipants[],
-  participants?: ParticipantInGroup[],
+  participants?: ParticipantWithRating[],
 ): PlayerStanding[] {
   const playerStats = new Map<number, PlayerStanding>();
 
   if (participants) {
-    participants.forEach((participantGroup) => {
-      const participant = participantGroup.participant;
+    participants.forEach((participant) => {
       playerStats.set(participant.id, {
         participantId: participant.id,
         name: `${participant.profile.firstName} ${participant.profile.lastName}`,

@@ -224,7 +224,7 @@ export async function getGamesForStandings(groupId: number, maxRound?: number) {
 }
 
 export async function getParticipantsInGroup(groupId: number) {
-  return await db.query.participantGroup.findMany({
+  const participantsInGroup = await db.query.participantGroup.findMany({
     where: (participantGroup, { eq }) => eq(participantGroup.groupId, groupId),
     with: {
       participant: {
@@ -245,6 +245,8 @@ export async function getParticipantsInGroup(groupId: number) {
       },
     },
   });
+
+  return participantsInGroup.map(({ participant }) => participant);
 }
 
 export async function getAllGroupNamesByTournamentId(tournamentId: number) {
