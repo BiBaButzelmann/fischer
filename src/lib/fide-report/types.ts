@@ -38,7 +38,7 @@ export type Result = {
   scheduled: DateTime;
   opponentGroupPosition: number;
   pieceColor: "w" | "b";
-  result: "1" | "0" | "+" | "-";
+  result: "1" | "0" | "+" | "-" | "=";
 };
 
 export type TableEntryKeyValue = {
