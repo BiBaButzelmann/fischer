@@ -19,7 +19,7 @@ import {
 } from "../ui/select";
 import { Label } from "../ui/label";
 import { cn } from "@/lib/utils";
-import type { PlayerStanding } from "@/lib/standings";
+import type { PlayerStanding } from "@/db/types/standings";
 import type { TournamentNames } from "@/db/types/tournament";
 import type { GroupSummary } from "@/db/types/group";
 
