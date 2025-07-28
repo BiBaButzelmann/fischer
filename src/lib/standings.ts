@@ -1,36 +1,9 @@
 import type { gameResults } from "@/db/schema/columns.helpers";
-
-export type PlayerStanding = {
-  participantId: number;
-  name: string;
-  title: string | null;
-  dwz: number | null;
-  elo: number | null;
-  points: number;
-  gamesPlayed: number;
-  sonnebornBerger: number;
-};
-
-export type ParticipantWithRating = {
-  id: number;
-  dwzRating: number | null;
-  fideRating: number | null;
-  title: string | null;
-  profile: {
-    firstName: string;
-    lastName: string;
-  };
-};
-
-export type GameWithParticipants = {
-  id: number;
-  whiteParticipantId: number;
-  blackParticipantId: number;
-  result: (typeof gameResults)[number] | null;
-  round: number;
-  whiteParticipant: ParticipantWithRating;
-  blackParticipant: ParticipantWithRating;
-};
+import type {
+  PlayerStanding,
+  ParticipantWithRating,
+  GameWithParticipants,
+} from "@/db/types/standings";
 
 function calculatePointsFromResult(
   result: (typeof gameResults)[number],
