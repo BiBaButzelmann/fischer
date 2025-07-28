@@ -3,6 +3,7 @@ import { db } from "@/db/client";
 import { Game } from "@/db/types/game";
 import { generateFideReport } from "@/lib/fide-report";
 import { PlayerEntry, Result } from "@/lib/fide-report/types";
+import { calculateStandings } from "@/lib/standings";
 import { DateTime } from "luxon";
 import invariant from "tiny-invariant";
 import { match } from "ts-pattern";
@@ -48,16 +49,39 @@ export async function generateFideReportFile(groupId: number, month: number) {
   });
   invariant(organizerProfile, "Organizer profile not found");
 
-  const games = await db.query.game.findMany({
-    where: (game, { eq, and, sql }) =>
+  const completedGames = await db.query.game.findMany({
+    where: (game, { eq, and, sql, isNotNull }) =>
       and(
         eq(game.groupId, groupId),
         sql`EXTRACT(MONTH FROM ${game.scheduled}) = ${month}`,
+        isNotNull(game.result),
       ),
     orderBy: (game, { asc }) => asc(game.scheduled),
+    with: {
+      whiteParticipant: {
+        with: {
+          profile: {
+            columns: {
+              firstName: true,
+              lastName: true,
+            },
+          },
+        },
+      },
+      blackParticipant: {
+        with: {
+          profile: {
+            columns: {
+              firstName: true,
+              lastName: true,
+            },
+          },
+        },
+      },
+    },
   });
 
-  const gamesAsWhiteParticipant = games.reduce(
+  const gamesAsWhiteParticipant = completedGames.reduce(
     (acc, game) => {
       acc[game.whiteParticipantId] ??= [];
       acc[game.whiteParticipantId].push(game.id);
@@ -66,7 +90,7 @@ export async function generateFideReportFile(groupId: number, month: number) {
     {} as Record<number, number[]>,
   );
 
-  const gamesAsBlackParticipant = games.reduce(
+  const gamesAsBlackParticipant = completedGames.reduce(
     (acc, game) => {
       acc[game.blackParticipantId] ??= [];
       acc[game.blackParticipantId].push(game.id);
@@ -75,10 +99,35 @@ export async function generateFideReportFile(groupId: number, month: number) {
     {} as Record<number, number[]>,
   );
 
+  const standings = calculateStandings(
+    completedGames,
+    data.participants.map((p) => p.participant),
+  );
+
+  const getPointsOfPlayer = (participantId: number) => {
+    const standing = standings.find((s) => s.participantId === participantId);
+    invariant(
+      standing != null,
+      `Participant ${participantId} could not be found in standings`,
+    );
+    return standing.points;
+  };
+
+  const getGroupPositionOfPlayer = (participantId: number) => {
+    const currentGroupPosition = standings.findIndex(
+      (s) => s.participantId === participantId,
+    );
+    invariant(
+      currentGroupPosition >= 0,
+      `Participant ${participantId} is not in the standings`,
+    );
+    return currentGroupPosition + 1;
+  };
+
   const entries = data.participants.map(({ groupPosition, participant }) => {
     const whiteGameIds = gamesAsWhiteParticipant[participant.id] ?? [];
     const blackGameIds = gamesAsBlackParticipant[participant.id] ?? [];
-    const participantGames = games.filter(
+    const participantGames = completedGames.filter(
       (game) =>
         whiteGameIds.includes(game.id) || blackGameIds.includes(game.id),
     );
@@ -100,6 +149,24 @@ export async function generateFideReportFile(groupId: number, month: number) {
       `Participant ${participant.id} does not have a nationality`,
     );
 
+    const participantStanding = standings.find(
+      (s) => s.participantId === participant.id,
+    );
+    invariant(
+      participantStanding,
+      `Participant ${participant.id} does not have a standing`,
+    );
+
+    const currentGroupPosition = standings.findIndex(
+      (s) => s.participantId === participant.id,
+    );
+    invariant(
+      currentGroupPosition < 0,
+      `Participant ${participant.id} is not in the standings`,
+    );
+
+    const currentPoints = getPointsOfPlayer(participant.id);
+
     return {
       index: 1,
       startingGroupPosition: groupPosition,
@@ -110,14 +177,18 @@ export async function generateFideReportFile(groupId: number, month: number) {
       fideNation: participant.nationality!,
       fideId: participant.fideId,
       birthYear: DateTime.local(participant.birthYear),
-      currentPoints: -1, // TODO: calculate from games
-      currentGroupPosition: -1, // TODO: calculate from games
+      currentPoints,
+      currentGroupPosition,
       results: participantGames.map((game) => {
         invariant(game.result, `Game ${game.id} does not have a result`);
+        const isWhite = whiteGameIds.includes(game.id);
+
         return {
           scheduled: DateTime.fromJSDate(game.scheduled),
-          opponentGroupPosition: -1, // TODO: get from relations table
-          pieceColor: whiteGameIds.includes(game.id) ? "w" : "b",
+          opponentGroupPosition: isWhite
+            ? getGroupPositionOfPlayer(game.blackParticipantId)
+            : getGroupPositionOfPlayer(game.whiteParticipantId),
+          pieceColor: isWhite ? "w" : "b",
           result: mapResult(game.result),
         };
       }),
