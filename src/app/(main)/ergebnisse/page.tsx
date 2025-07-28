@@ -9,7 +9,12 @@ import {
   getAllActiveTournamentNames,
   getTournamentById,
 } from "@/db/repositories/tournament";
-import { getAllGroupNamesByTournamentId } from "@/db/repositories/game";
+import {
+  getAllGroupNamesByTournamentId,
+  getGamesForStandings,
+  getParticipantsInGroup,
+} from "@/db/repositories/game";
+import { calculateStandings } from "@/lib/standings";
 
 export default async function ResultsPage({
   searchParams,
@@ -68,7 +73,7 @@ export default async function ResultsPage({
 
   if (!tournament) {
     return (
-      <div className="bg-background text-foreground min-h-screen p-4 sm:p-6 md:p-8 flex items-center justify-center">
+      <div className="bg-background text-foreground h-full p-4 sm:p-6 md:p-8 flex items-center justify-center">
         <div className="text-center text-lg text-muted-foreground">
           Turnier nicht gefunden.
         </div>
@@ -81,8 +86,21 @@ export default async function ResultsPage({
     (_, i) => i + 1,
   );
 
+  const standings = selectedGroupId
+    ? await (async () => {
+        const participants = await getParticipantsInGroup(
+          Number(selectedGroupId),
+        );
+        const games = await getGamesForStandings(
+          Number(selectedGroupId),
+          round ? Number(round) : undefined,
+        );
+        return calculateStandings(games, participants);
+      })()
+    : [];
+
   return (
-    <div className="bg-background text-foreground min-h-screen p-4 sm:p-6 md:p-8">
+    <div className="bg-background text-foreground h-full p-4 sm:p-6 md:p-8">
       <div className="max-w-5xl mx-auto">
         <Card>
           <CardHeader>
@@ -102,6 +120,7 @@ export default async function ResultsPage({
             selectedTournamentId={selectedTournamentId}
             selectedGroupId={selectedGroupId}
             selectedRound={round}
+            standings={standings}
           />
         </Card>
       </div>
