@@ -9,19 +9,19 @@ import {
   SelectValue,
 } from "../ui/select";
 import { Label } from "../ui/label";
-import type { TournamentSummary } from "@/db/types/tournament";
+import type { TournamentNames } from "@/db/types/tournament";
 import type { GroupSummary } from "@/db/types/group";
-import type { ParticipantSummary } from "@/db/types/participant";
+import type { ParticipantWithName } from "@/db/types/participant";
 
 export type Props = {
   selectedTournamentId: string;
-  tournamentNames: TournamentSummary[];
+  tournamentNames: TournamentNames[];
   selectedGroupId: string;
   groups: GroupSummary[];
   selectedRound?: string;
   rounds: number[];
   selectedParticipantId?: string;
-  participants: ParticipantSummary[];
+  participants: ParticipantWithName[];
 };
 
 export function PartienSelector({
