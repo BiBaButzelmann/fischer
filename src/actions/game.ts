@@ -175,6 +175,41 @@ export async function scheduleGamesForGroup(
   revalidatePath("/admin/paarungen");
 }
 
+export async function updateGameMatchday(
+  gameId: number,
+  newMatchdayId: number,
+) {
+  const session = await authWithRedirect();
+
+  await db.transaction(async (tx) => {
+    const gameExists = await tx.query.game.findFirst({
+      where: eq(game.id, gameId),
+      with: {
+        whiteParticipant: { with: { profile: true } },
+        blackParticipant: { with: { profile: true } },
+      },
+    });
+
+    invariant(gameExists, "Game not found");
+
+    const isUserInGame =
+      gameExists.whiteParticipant.profile.userId === session.user.id ||
+      gameExists.blackParticipant.profile.userId === session.user.id;
+
+    invariant(
+      isUserInGame || session.user.role === "admin",
+      "Unauthorized to move this game",
+    );
+
+    await tx
+      .update(matchdayGame)
+      .set({ matchdayId: newMatchdayId })
+      .where(eq(matchdayGame.gameId, gameId));
+  });
+
+  revalidatePath("/kalender");
+}
+
 export async function rescheduleGamesForGroup(
   tournamentId: number,
   groupId: number,
