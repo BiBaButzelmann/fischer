@@ -9,7 +9,7 @@ import { verifyPgnPassword } from "@/actions/game";
 import PgnViewer from "@/components/game/chessboard/pgn-viewer";
 import { Suspense } from "react";
 import { DateTime } from "luxon";
-import { GAME_START_TIME } from "@/constants/constants";
+import { getGameTimeFromGame } from "@/lib/game-time";
 
 type PageProps = {
   params: Promise<{ partieId: string }>;
@@ -59,25 +59,10 @@ async function PgnContainer({
     return <p className="p-4 text-red-600">Game with ID {gameId} not found.</p>;
   }
 
-  if (!game.matchdayGame || !game.matchdayGame.matchday) {
-    return (
-      <p className="p-4 text-red-600">
-        Game {gameId} has no matchday relation. Please check the game
-        scheduling.
-      </p>
-    );
-  }
-
   const whiteDisplay = formatDisplayName(game.whiteParticipant);
   const blackDisplay = formatDisplayName(game.blackParticipant);
 
-  const matchdayDate = game.matchdayGame.matchday.date;
-  const gameDateTime = new Date(matchdayDate);
-  gameDateTime.setHours(
-    GAME_START_TIME.hours,
-    GAME_START_TIME.minutes,
-    GAME_START_TIME.seconds,
-  );
+  const gameDateTime = getGameTimeFromGame(game);
 
   const pgn =
     game.pgn != null

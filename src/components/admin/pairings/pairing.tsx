@@ -4,6 +4,7 @@ import { GroupWithParticipantsAndGames } from "@/db/types/group";
 import { Game } from "@/db/types/game";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { ParticipantEntry } from "../groups/participant-entry";
+import { getGameDateTime, formatGameDate } from "@/lib/game-time";
 
 export function Pairing({ group }: { group: GroupWithParticipantsAndGames }) {
   if (!group.games || group.games.length === 0) {
@@ -69,14 +70,13 @@ export function Pairing({ group }: { group: GroupWithParticipantsAndGames }) {
               };
             };
           };
+
           let dateDisplay = "Datum unbekannt";
-          
           if (firstGame?.matchdayGame?.matchday?.date) {
-            dateDisplay = new Date(firstGame.matchdayGame.matchday.date).toLocaleDateString("de-DE", {
-              year: "numeric",
-              month: "2-digit",
-              day: "2-digit",
-            });
+            const gameDateTime = getGameDateTime(
+              firstGame.matchdayGame.matchday.date,
+            );
+            dateDisplay = formatGameDate(gameDateTime);
           }
 
           return (

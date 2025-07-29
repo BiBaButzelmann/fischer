@@ -2,7 +2,7 @@ import { db } from "../client";
 import { eq } from "drizzle-orm";
 import { group } from "../schema/group";
 import { CalendarEvent } from "../types/calendar";
-import { GAME_START_TIME } from "@/constants/constants";
+import { getGameTimeFromGame } from "@/lib/game-time";
 
 export async function getGameById(gameId: number) {
   return await db.query.game.findFirst({
@@ -92,25 +92,12 @@ export async function getCalendarEventsForParticipant(
   participantId: number,
 ): Promise<CalendarEvent[]> {
   const games = await getGamesOfParticipant(participantId);
-  console.log("Games for participant:", games);
 
   return games.map((game) => {
     const isWhite = game.whiteParticipantId === participantId;
     const opponent = isWhite ? game.blackParticipant : game.whiteParticipant;
 
-    if (!game.matchdayGame || !game.matchdayGame.matchday) {
-      throw new Error(
-        `Game ${game.id} (Round ${game.round}) has no matchday relation. Please check the game scheduling.`,
-      );
-    }
-
-    const matchdayDate = game.matchdayGame.matchday.date;
-    const gameDateTime = new Date(matchdayDate);
-    gameDateTime.setHours(
-      GAME_START_TIME.hours,
-      GAME_START_TIME.minutes,
-      GAME_START_TIME.seconds,
-    );
+    const gameDateTime = getGameTimeFromGame(game);
 
     return {
       id: `game-${game.id}`,
