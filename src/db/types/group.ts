@@ -17,7 +17,13 @@ export type GroupWithGames = Group & {
 
 export type GroupWithParticipantsAndGames = Group & {
   participants: ParticipantWithName[];
-  games: Game[];
+  games: (Game & {
+    matchdayGame: {
+      matchday: {
+        date: Date;
+      };
+    } | null;
+  })[];
 };
 
 export type GroupSummary = {
