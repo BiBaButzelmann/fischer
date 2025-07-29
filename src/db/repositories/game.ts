@@ -34,6 +34,15 @@ export async function getGameById(gameId: number) {
           name: true,
         },
       },
+      matchdayGame: {
+        with: {
+          matchday: {
+            columns: {
+              date: true,
+            },
+          },
+        },
+      },
     },
   });
 }
