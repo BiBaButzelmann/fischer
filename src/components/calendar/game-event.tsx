@@ -7,10 +7,10 @@ type Props = {
   isSingleEvent?: boolean;
 };
 
-export function GameEvent({ 
-  eventInfo, 
-  isDragging = false, 
-  isSingleEvent = false 
+export function GameEvent({
+  eventInfo,
+  isDragging = false,
+  isSingleEvent = false,
 }: Props) {
   return (
     <div

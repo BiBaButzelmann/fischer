@@ -11,6 +11,7 @@ import deLocale from "@fullcalendar/core/locales/de.js";
 import interactionPlugin from "@fullcalendar/interaction";
 import { useCallback, useState } from "react";
 import { GameEvent } from "./game-event";
+import { toast } from "sonner";
 
 type Props = {
   events: EventInput[];
@@ -50,7 +51,7 @@ export function Calendar({ events, onEventDrop, validDropDates = [] }: Props) {
       try {
         await onEventDrop(gameId, newDate);
       } catch (error) {
-        console.error("Failed to move game:", error);
+        toast.error("Fehler beim Verschieben des Spiels.");
         info.revert();
       }
     },

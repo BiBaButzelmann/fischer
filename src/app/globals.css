@@ -102,7 +102,9 @@
   }
 
   /* Single event takes more space */
-  .calendar-container .fc-daygrid-day-events:has(.fc-daygrid-event:only-child) .fc-daygrid-event {
+  .calendar-container
+    .fc-daygrid-day-events:has(.fc-daygrid-event:only-child)
+    .fc-daygrid-event {
     min-height: 60px;
   }
 
