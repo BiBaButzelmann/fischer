@@ -82,3 +82,36 @@
     @apply bg-background text-foreground;
   }
 }
+
+@layer utilities {
+  /* Calendar component styles using Tailwind utilities */
+  .calendar-container .fc-daygrid-day-frame {
+    min-height: 120px;
+  }
+
+  .calendar-container .fc-daygrid-day-events {
+    @apply m-2 flex flex-col gap-1;
+  }
+
+  .calendar-container .fc-daygrid-event-harness {
+    @apply mb-0;
+  }
+
+  .calendar-container .fc-daygrid-event {
+    @apply m-0 p-0 border-none bg-transparent h-auto;
+  }
+
+  /* Single event takes more space */
+  .calendar-container .fc-daygrid-day-events:has(.fc-daygrid-event:only-child) .fc-daygrid-event {
+    min-height: 60px;
+  }
+
+  /* Valid drop zone styling */
+  .calendar-container .fc-daygrid-day.drop-zone-valid {
+    @apply !bg-green-100 !border-green-500 !border-2 !border-dashed;
+  }
+
+  .calendar-container .fc-daygrid-day.drop-zone-valid:hover {
+    @apply !bg-green-200;
+  }
+}
