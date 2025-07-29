@@ -65,11 +65,11 @@ export async function scheduleGamesForGroup(
   if (group == null) {
     return { error: `Keine Gruppe ${groupId} gefunden` };
   }
-  if (group.matchDay == null) {
+  if (group.dayOfWeek == null) {
     return { error: `${group.groupName} hat keinen Spieltag gesetzt` };
   }
 
-  const dayOfWeek = group.matchDay;
+  const dayOfWeek = group.dayOfWeek;
 
   const players = group.participants
     .filter((p) => p.groupPosition !== null && p.groupPosition !== undefined)
@@ -129,7 +129,6 @@ export async function scheduleGamesForGroup(
             groupId: group.id,
             round: roundIdx + 1,
             boardNumber: boardIdx + 1,
-            scheduled: new Date(), // TODO: remove scheduled
           });
         });
       });

@@ -20,7 +20,7 @@ export async function EditGroups({ tournament }: { tournament: Tournament }) {
         isNew: false,
         groupName: g.groupName,
         groupNumber: g.groupNumber,
-        matchDay: g.matchDay,
+        dayOfWeek: g.dayOfWeek,
         participants: g.participants.map(({ groupPosition, participant }) => ({
           groupPosition: groupPosition,
           ...participant,

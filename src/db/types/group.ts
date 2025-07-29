@@ -3,7 +3,7 @@ import { group } from "../schema/group";
 import { ParticipantWithName } from "./participant";
 import { GameWithParticipants, Game } from "./game";
 
-export type DayOfWeek = InferEnum<typeof group.matchDay>;
+export type DayOfWeek = InferEnum<typeof group.dayOfWeek>;
 
 export type Group = InferSelectModel<typeof group>;
 
