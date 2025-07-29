@@ -2,6 +2,7 @@ import { db } from "../client";
 import { eq } from "drizzle-orm";
 import { group } from "../schema/group";
 import { CalendarEvent } from "../types/calendar";
+import { GAME_START_TIME } from "@/constants/constants";
 
 export async function getGameById(gameId: number) {
   return await db.query.game.findFirst({
@@ -65,6 +66,15 @@ export async function getGamesOfParticipant(participantId: number) {
           },
         },
       },
+      matchdayGame: {
+        with: {
+          matchday: {
+            columns: {
+              date: true,
+            },
+          },
+        },
+      },
     },
   });
 }
@@ -75,27 +85,39 @@ export async function getCalendarEventsForParticipant(
   const games = await getGamesOfParticipant(participantId);
   console.log("Games for participant:", games);
 
-  return games
-    .filter((game) => game.scheduled)
-    .map((game) => {
-      const isWhite = game.whiteParticipantId === participantId;
-      const opponent = isWhite ? game.blackParticipant : game.whiteParticipant;
+  return games.map((game) => {
+    const isWhite = game.whiteParticipantId === participantId;
+    const opponent = isWhite ? game.blackParticipant : game.whiteParticipant;
 
-      return {
-        id: `game-${game.id}`,
-        title: `Runde ${game.round}`,
-        start: game.scheduled,
-        extendedProps: {
-          gameId: game.id,
-          participantId: participantId,
-          isWhite: isWhite,
-          opponentName: `${opponent.profile.firstName} ${opponent.profile.lastName}`,
-          round: game.round,
-          boardNumber: game.boardNumber,
-          color: isWhite ? "white" : "black",
-        },
-      };
-    });
+    if (!game.matchdayGame || !game.matchdayGame.matchday) {
+      throw new Error(
+        `Game ${game.id} (Round ${game.round}) has no matchday relation. Please check the game scheduling.`,
+      );
+    }
+
+    const matchdayDate = game.matchdayGame.matchday.date;
+    const gameDateTime = new Date(matchdayDate);
+    gameDateTime.setHours(
+      GAME_START_TIME.hours,
+      GAME_START_TIME.minutes,
+      GAME_START_TIME.seconds,
+    );
+
+    return {
+      id: `game-${game.id}`,
+      title: `Runde ${game.round}`,
+      start: gameDateTime,
+      extendedProps: {
+        gameId: game.id,
+        participantId: participantId,
+        isWhite: isWhite,
+        opponentName: `${opponent.profile.firstName} ${opponent.profile.lastName}`,
+        round: game.round,
+        boardNumber: game.boardNumber,
+        color: isWhite ? "white" : "black",
+      },
+    };
+  });
 }
 
 export async function isUserParticipantInGame(

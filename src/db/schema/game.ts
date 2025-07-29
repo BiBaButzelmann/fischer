@@ -5,6 +5,7 @@ import { tournament } from "./tournament";
 import { group } from "./group";
 import { gameResult, timestamps } from "./columns.helpers";
 import { pgn } from "./pgn";
+import { matchdayGame } from "./matchday";
 
 export const game = pgTable("game", {
   id: integer("id").generatedAlwaysAsIdentity().primaryKey(),
@@ -47,5 +48,9 @@ export const gameRelations = relations(game, ({ one }) => ({
   pgn: one(pgn, {
     fields: [game.id],
     references: [pgn.gameId],
+  }),
+  matchdayGame: one(matchdayGame, {
+    fields: [game.id],
+    references: [matchdayGame.gameId],
   }),
 }));
