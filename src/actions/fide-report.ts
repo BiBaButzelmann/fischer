@@ -116,6 +116,17 @@ export async function generateFideReportFile(groupId: number, month: number) {
     return standing.points;
   };
 
+  const getInitialGroupPositionOfPlayer = (participantId: number) => {
+    const participant = data.participants.find(
+      (p) => p.participant.id === participantId,
+    );
+    invariant(
+      participant != null,
+      `Participant ${participantId} could not be found in participants`,
+    );
+    return participant.groupPosition;
+  };
+
   const getGroupPositionOfPlayer = (participantId: number) => {
     const currentGroupPosition = standings.findIndex(
       (s) => s.participantId === participantId,
@@ -173,11 +184,12 @@ export async function generateFideReportFile(groupId: number, month: number) {
 
         return {
           scheduled: DateTime.fromJSDate(game.scheduled),
-          opponentGroupPosition: isWhite
-            ? getGroupPositionOfPlayer(game.blackParticipantId)
-            : getGroupPositionOfPlayer(game.whiteParticipantId),
+          // TODO: this is not the current group position, but the starting group position
+          opponentGroupPosition: getInitialGroupPositionOfPlayer(
+            isWhite ? game.blackParticipantId : game.whiteParticipantId,
+          ),
           pieceColor: isWhite ? "w" : "b",
-          result: mapResult(game.result),
+          result: mapResult(game.result, isWhite),
         };
       }),
     } as PlayerEntry;
@@ -231,15 +243,18 @@ export async function generateFideReportFile(groupId: number, month: number) {
   };
 }
 
-function mapResult(result: NonNullable<Game["result"]>): Result["result"] {
+function mapResult(
+  result: NonNullable<Game["result"]>,
+  isWhite: boolean,
+): Result["result"] {
   return match<NonNullable<Game["result"]>, Result["result"]>(result)
-    .with("+:-", () => "+")
-    .with("-:-", () => "-")
-    .with("-:+", () => "-")
-    .with("0-½", () => "0")
-    .with("0:1", () => "0")
-    .with("1:0", () => "1")
-    .with("½-0", () => "=")
-    .with("½-½", () => "=")
+    .with("+:-", () => (isWhite ? "+" : "-"))
+    .with("-:-", () => (isWhite ? "-" : "-"))
+    .with("-:+", () => (isWhite ? "-" : "+"))
+    .with("0-½", () => (isWhite ? "0" : "="))
+    .with("0:1", () => (isWhite ? "0" : "1"))
+    .with("1:0", () => (isWhite ? "1" : "0"))
+    .with("½-0", () => (isWhite ? "=" : "0"))
+    .with("½-½", () => (isWhite ? "=" : "="))
     .exhaustive();
 }
