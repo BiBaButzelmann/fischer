@@ -1,7 +1,7 @@
 "use client";
 
 import { GroupWithParticipantsAndGames } from "@/db/types/group";
-import { Game } from "@/db/types/game";
+import { GameWithMatchday } from "@/db/types/game";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { ParticipantEntry } from "../groups/participant-entry";
 import { getGameDateTime, formatGameDate } from "@/lib/game-time";
@@ -31,7 +31,7 @@ export function Pairing({ group }: { group: GroupWithParticipantsAndGames }) {
     }
     acc.get(game.round)!.push(game);
     return acc;
-  }, new Map<number, Game[]>());
+  }, new Map<number, GameWithMatchday[]>());
 
   const rounds = Array.from(gamesByRound.keys()).sort((a, b) => a - b);
 
@@ -63,21 +63,11 @@ export function Pairing({ group }: { group: GroupWithParticipantsAndGames }) {
 
         {rounds.map((round) => {
           const games = gamesByRound.get(round) || [];
-          const firstGame = games[0] as Game & {
-            matchdayGame?: {
-              matchday?: {
-                date: Date;
-              };
-            };
-          };
 
-          let dateDisplay = "Datum unbekannt";
-          if (firstGame?.matchdayGame?.matchday?.date) {
-            const gameDateTime = getGameDateTime(
-              firstGame.matchdayGame.matchday.date,
-            );
-            dateDisplay = formatGameDate(gameDateTime);
-          }
+          const gameDateTime = getGameDateTime(
+            games[0].matchdayGame.matchday.date,
+          );
+          const dateDisplay = formatGameDate(gameDateTime);
 
           return (
             <TabsContent key={round} value={`round-${round}`} className="mt-0">
