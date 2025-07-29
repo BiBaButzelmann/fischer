@@ -118,7 +118,7 @@ export async function getGroupsWithGamesByTournamentId(tournamentId: number) {
 export async function getGroupsWithParticipantsAndGamesByTournamentId(
   tournamentId: number,
 ) {
-  return await db.query.group.findMany({
+  const groups = await db.query.group.findMany({
     where: (group, { eq }) => eq(group.tournamentId, tournamentId),
     with: {
       participants: {
@@ -153,4 +153,16 @@ export async function getGroupsWithParticipantsAndGamesByTournamentId(
     },
     orderBy: (group, { asc }) => [asc(group.groupNumber)],
   });
+
+  for (const group of groups) {
+    for (const game of group.games) {
+      if (!game.matchdayGame?.matchday?.date) {
+        throw new Error(
+          `Game ${game.id} in group ${group.groupName || group.groupNumber} has no matchday relation. All games must be scheduled to matchdays.`,
+        );
+      }
+    }
+  }
+
+  return groups;
 }
