@@ -1,4 +1,5 @@
 import { GAME_START_TIME } from "@/constants/constants";
+import { GameWithMatchday } from "@/db/types/game";
 
 /**
  * Creates a Date object for a game with the specified matchday date and the standard game start time (7 PM German time)
@@ -19,19 +20,8 @@ export function getGameDateTime(matchdayDate: Date): Date {
  * Creates a Date object for a game from a complete game object
  * @param game - The game object with matchdayGame relation
  * @returns A Date object with the game date and time
- * @throws Error if the matchday relation is missing
  */
-export function getGameTimeFromGame(game: {
-  matchdayGame: {
-    matchday: { date: Date } | null;
-  } | null;
-}): Date {
-  if (!game.matchdayGame || !game.matchdayGame.matchday) {
-    throw new Error(
-      "Game has no matchday relation. Please check the game scheduling.",
-    );
-  }
-
+export function getGameTimeFromGame(game: GameWithMatchday): Date {
   return getGameDateTime(game.matchdayGame.matchday.date);
 }
 

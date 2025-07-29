@@ -1,7 +1,7 @@
 import { InferEnum, InferSelectModel } from "drizzle-orm";
 import { group } from "../schema/group";
 import { ParticipantWithName } from "./participant";
-import { GameWithParticipants, Game, GameWithMatchday } from "./game";
+import { GameWithParticipants, GameWithMatchday } from "./game";
 
 export type DayOfWeek = InferEnum<typeof group.dayOfWeek>;
 
