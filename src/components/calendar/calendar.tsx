@@ -56,7 +56,7 @@ export function Calendar({
 
       try {
         await onEventDrop(gameId, newDate);
-      } catch (error) {
+      } catch {
         toast.error("Fehler beim Verschieben des Spiels.");
         info.revert();
       }

@@ -7,13 +7,16 @@ import { isUserParticipantInGame } from "@/db/repositories/game";
 import { getGroupById } from "@/db/repositories/group";
 import { getTournamentById } from "@/db/repositories/tournament";
 import { game } from "@/db/schema/game";
+import { matchday, matchdayGame } from "@/db/schema/matchday";
+import { profile } from "@/db/schema/profile";
 import { GameResult } from "@/db/types/game";
 import { and, eq, InferInsertModel, inArray } from "drizzle-orm";
 import { revalidatePath } from "next/cache";
 import invariant from "tiny-invariant";
 import { roundRobinPairs } from "@/lib/pairing-utils";
 import { redirect } from "next/navigation";
-import { matchdayGame } from "@/db/schema/matchday";
+import { updateGamePostponement } from "@/db/repositories/game-postponement";
+import { GAME_START_TIME } from "@/constants/constants";
 
 export async function removeScheduledGamesForGroup(
   tournamentId: number,
@@ -181,26 +184,72 @@ export async function updateGameMatchday(
 ) {
   const session = await authWithRedirect();
 
-  await db.transaction(async (tx) => {
-    const gameExists = await tx.query.game.findFirst({
-      where: eq(game.id, gameId),
-      with: {
-        whiteParticipant: { with: { profile: true } },
-        blackParticipant: { with: { profile: true } },
+  const gameExists = await db.query.game.findFirst({
+    where: eq(game.id, gameId),
+    with: {
+      whiteParticipant: { with: { profile: true } },
+      blackParticipant: { with: { profile: true } },
+      matchdayGame: {
+        with: {
+          matchday: true,
+        },
       },
-    });
+    },
+  });
 
-    invariant(gameExists, "Game not found");
+  invariant(gameExists, "Game not found");
 
-    const isUserInGame =
-      gameExists.whiteParticipant.profile.userId === session.user.id ||
-      gameExists.blackParticipant.profile.userId === session.user.id;
+  const isUserInGame =
+    gameExists.whiteParticipant.profile.userId === session.user.id ||
+    gameExists.blackParticipant.profile.userId === session.user.id;
 
-    invariant(
-      isUserInGame || session.user.role === "admin",
-      "Unauthorized to move this game",
+  invariant(
+    isUserInGame || session.user.role === "admin",
+    "Unauthorized to move this game",
+  );
+
+  const currentMatchday = gameExists.matchdayGame?.matchday;
+  const newMatchday = await db.query.matchday.findFirst({
+    where: eq(matchday.id, newMatchdayId),
+  });
+
+  invariant(currentMatchday, "Current matchday not found");
+  invariant(newMatchday, "New matchday not found");
+
+  const postponingParticipant =
+    gameExists.whiteParticipant.profile.userId === session.user.id
+      ? gameExists.whiteParticipant
+      : gameExists.blackParticipant;
+
+  const userProfile = await db.query.profile.findFirst({
+    where: eq(profile.userId, session.user.id),
+  });
+
+  invariant(userProfile, "User profile not found");
+
+  const createGameTimestamp = (date: Date) => {
+    const timestamp = new Date(date);
+    timestamp.setHours(
+      GAME_START_TIME.hours,
+      GAME_START_TIME.minutes,
+      GAME_START_TIME.seconds,
+      0,
     );
+    return timestamp;
+  };
 
+  const fromTimestamp = createGameTimestamp(currentMatchday.date);
+  const toTimestamp = createGameTimestamp(newMatchday.date);
+
+  await updateGamePostponement(
+    gameId,
+    postponingParticipant.id,
+    userProfile.id,
+    fromTimestamp,
+    toTimestamp,
+  );
+
+  await db.transaction(async (tx) => {
     await tx
       .update(matchdayGame)
       .set({ matchdayId: newMatchdayId })

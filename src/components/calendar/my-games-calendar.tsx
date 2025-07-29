@@ -42,7 +42,7 @@ export function MyGamesCalendar({ events, matchdays = [] }: Props) {
       try {
         await updateGameMatchday(gameId, targetMatchday.id);
         toast.success("Spiel erfolgreich verschoben!");
-      } catch (error) {
+      } catch {
         toast.error("Fehler beim Verschieben des Spiels.");
       }
     });
