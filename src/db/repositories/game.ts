@@ -1,6 +1,7 @@
 import { db } from "../client";
 import { eq } from "drizzle-orm";
 import { group } from "../schema/group";
+import { CalendarEvent } from "../types/calendar";
 
 export async function getGameById(gameId: number) {
   return await db.query.game.findFirst({
@@ -66,6 +67,35 @@ export async function getGamesOfParticipant(participantId: number) {
       },
     },
   });
+}
+
+export async function getCalendarEventsForParticipant(
+  participantId: number,
+): Promise<CalendarEvent[]> {
+  const games = await getGamesOfParticipant(participantId);
+  console.log("Games for participant:", games);
+
+  return games
+    .filter((game) => game.scheduled)
+    .map((game) => {
+      const isWhite = game.whiteParticipantId === participantId;
+      const opponent = isWhite ? game.blackParticipant : game.whiteParticipant;
+
+      return {
+        id: `game-${game.id}`,
+        title: `Runde ${game.round}`,
+        start: game.scheduled,
+        extendedProps: {
+          gameId: game.id,
+          participantId: participantId,
+          isWhite: isWhite,
+          opponentName: `${opponent.profile.firstName} ${opponent.profile.lastName}`,
+          round: game.round,
+          boardNumber: game.boardNumber,
+          color: isWhite ? "white" : "black",
+        },
+      };
+    });
 }
 
 export async function isUserParticipantInGame(
