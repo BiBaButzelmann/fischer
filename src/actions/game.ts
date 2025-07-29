@@ -96,81 +96,71 @@ export async function scheduleGamesForGroup(
     };
   }
 
-  try {
-    await db.transaction(async (tx) => {
-      const gamesToInsert: InferInsertModel<typeof game>[] = [];
-      const matchdayGameRelations: InferInsertModel<typeof matchdayGame>[] = [];
+  await db.transaction(async (tx) => {
+    const gamesToInsert: InferInsertModel<typeof game>[] = [];
+    const matchdayGameRelations: InferInsertModel<typeof matchdayGame>[] = [];
 
-      for (let roundIdx = 0; roundIdx < pairings.length; roundIdx++) {
-        const tournamentWeekForRound = regularWeeks[roundIdx];
+    const matchdays = await tx.query.matchday.findMany({
+      where: (md, { eq, and }) =>
+        and(
+          eq(md.tournamentId, tournamentId),
+          eq(md.dayOfWeek, dayOfWeek),
+          inArray(
+            md.tournamentWeekId,
+            regularWeeks.map((w) => w.id),
+          ),
+        ),
+    });
 
-        const matchday = await tx.query.matchday.findFirst({
-          where: (md, { eq, and }) =>
-            and(
-              eq(md.tournamentId, tournamentId),
-              eq(md.tournamentWeekId, tournamentWeekForRound.id),
-              eq(md.dayOfWeek, dayOfWeek),
-            ),
-        });
+    for (let roundIdx = 0; roundIdx < pairings.length; roundIdx++) {
+      const tournamentWeekForRound = regularWeeks[roundIdx];
+      const matchday = matchdays.find(
+        (m) => m.tournamentWeekId === tournamentWeekForRound.id,
+      );
 
-        if (!matchday) {
-          throw new Error(
-            `Kein Spieltag gefunden für Turnier ${tournamentId}, Woche ${tournamentWeekForRound.weekNumber}, ${dayOfWeek}`,
-          );
-        }
+      if (!matchday) {
+        return {
+          error: `Kein Spieltag gefunden für Turnier ${tournamentId}, Woche ${tournamentWeekForRound.weekNumber}, ${dayOfWeek}`,
+        };
       }
 
-      pairings.forEach((pairsInRound, roundIdx) => {
-        pairsInRound.forEach(([whiteNo, blackNo], boardIdx) => {
-          gamesToInsert.push({
-            whiteParticipantId: players[whiteNo - 1].participant.id,
-            blackParticipantId: players[blackNo - 1].participant.id,
-            tournamentId,
-            groupId: group.id,
-            round: roundIdx + 1,
-            boardNumber: boardIdx + 1,
-          });
+      const pairsInRound = pairings[roundIdx];
+      pairsInRound.forEach(([whiteNo, blackNo], boardIdx) => {
+        gamesToInsert.push({
+          whiteParticipantId: players[whiteNo - 1].participant.id,
+          blackParticipantId: players[blackNo - 1].participant.id,
+          tournamentId,
+          groupId: group.id,
+          round: roundIdx + 1,
+          boardNumber: boardIdx + 1,
         });
       });
+    }
 
-      const insertedGames = await tx
-        .insert(game)
-        .values(gamesToInsert)
-        .returning({ id: game.id });
+    const insertedGames = await tx
+      .insert(game)
+      .values(gamesToInsert)
+      .returning({ id: game.id });
 
-      let gameIndex = 0;
-      for (let roundIdx = 0; roundIdx < pairings.length; roundIdx++) {
-        const tournamentWeekForRound = regularWeeks[roundIdx];
+    let gameIndex = 0;
+    for (let roundIdx = 0; roundIdx < pairings.length; roundIdx++) {
+      const tournamentWeekForRound = regularWeeks[roundIdx];
+      const matchday = matchdays.find(
+        (m) => m.tournamentWeekId === tournamentWeekForRound.id,
+      );
 
-        const matchday = await tx.query.matchday.findFirst({
-          where: (md, { eq, and }) =>
-            and(
-              eq(md.tournamentId, tournamentId),
-              eq(md.tournamentWeekId, tournamentWeekForRound.id),
-              eq(md.dayOfWeek, dayOfWeek),
-            ),
+      const pairsInRound = pairings[roundIdx];
+      for (let boardIdx = 0; boardIdx < pairsInRound.length; boardIdx++) {
+        matchdayGameRelations.push({
+          matchdayId: matchday!.id,
+          gameId: insertedGames[gameIndex].id,
         });
-
-        const pairsInRound = pairings[roundIdx];
-        for (let boardIdx = 0; boardIdx < pairsInRound.length; boardIdx++) {
-          matchdayGameRelations.push({
-            matchdayId: matchday!.id,
-            gameId: insertedGames[gameIndex].id,
-          });
-          gameIndex++;
-        }
+        gameIndex++;
       }
+    }
 
-      await tx.insert(matchdayGame).values(matchdayGameRelations);
-    });
-  } catch (error) {
-    return {
-      error:
-        error instanceof Error
-          ? error.message
-          : "Unbekannter Fehler beim Erstellen der Paarungen",
-    };
-  }
+    await tx.insert(matchdayGame).values(matchdayGameRelations);
+  });
 
   revalidatePath("/admin/paarungen");
 }
