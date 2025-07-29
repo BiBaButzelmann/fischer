@@ -2,6 +2,8 @@ import { authWithRedirect } from "@/auth/utils";
 import { MyGamesCalendar } from "@/components/calendar/my-games-calendar";
 import { getCalendarEventsForParticipant } from "@/db/repositories/game";
 import { getParticipantByUserId } from "@/db/repositories/participant";
+import { getAllMatchdaysByTournamentId } from "@/db/repositories/match-day";
+import { getActiveTournament } from "@/db/repositories/tournament";
 
 export default async function Page() {
   const session = await authWithRedirect();
@@ -15,6 +17,11 @@ export default async function Page() {
     currentParticipant.id,
   );
 
+  const activeTournament = await getActiveTournament();
+  const matchdays = activeTournament
+    ? await getAllMatchdaysByTournamentId(activeTournament.id)
+    : [];
+
   return (
     <div>
       <div className="mb-4">
@@ -26,7 +33,7 @@ export default async function Page() {
           </p>
         </div>
       </div>
-      <MyGamesCalendar events={calendarEvents} />
+      <MyGamesCalendar events={calendarEvents} matchdays={matchdays} />
     </div>
   );
 }
