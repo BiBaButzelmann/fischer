@@ -18,6 +18,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
+import { monthLabels } from "@/constants/constants";
 import { GroupSummary } from "@/db/types/group";
 import { Download } from "lucide-react";
 import { useRouter } from "next/navigation";
@@ -131,7 +132,7 @@ export function GenerateFideReport({
               <SelectContent>
                 {months.map((month) => (
                   <SelectItem key={month.toString()} value={month.toString()}>
-                    {month}
+                    {monthLabels[month - 1]}
                   </SelectItem>
                 ))}
               </SelectContent>

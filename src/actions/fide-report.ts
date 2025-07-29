@@ -1,7 +1,7 @@
 "use server";
 
 import { authWithRedirect } from "@/auth/utils";
-import { months } from "@/constants/constants";
+import { monthLabels } from "@/constants/constants";
 import { db } from "@/db/client";
 import { Game } from "@/db/types/game";
 import { generateFideReport } from "@/lib/fide-report";
@@ -152,22 +152,7 @@ export async function generateFideReportFile(groupId: number, month: number) {
       `Participant ${participant.id} does not have a nationality`,
     );
 
-    const participantStanding = standings.find(
-      (s) => s.participantId === participant.id,
-    );
-    invariant(
-      participantStanding,
-      `Participant ${participant.id} does not have a standing`,
-    );
-
-    const currentGroupPosition = standings.findIndex(
-      (s) => s.participantId === participant.id,
-    );
-    invariant(
-      currentGroupPosition >= 0,
-      `Participant ${participant.id} is not in the standings`,
-    );
-
+    const currentGroupPosition = getGroupPositionOfPlayer(participant.id);
     const currentPoints = getPointsOfPlayer(participant.id);
 
     return {
@@ -237,7 +222,7 @@ export async function generateFideReportFile(groupId: number, month: number) {
     entries,
   );
 
-  const monthName = months[month - 1];
+  const monthName = monthLabels[month - 1];
   const fileName = `FIDE_Export_${data.tournament.name.replace(" ", "_")}_${data.groupName.replace(" ", "_")} ${monthName}.txt`;
 
   return {
