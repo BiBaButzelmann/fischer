@@ -116,4 +116,8 @@
   .calendar-container .fc-daygrid-day.drop-zone-valid:hover {
     @apply !bg-green-200;
   }
+
+  .calendar-container.blur-content .fc-daygrid {
+    filter: blur(2px);
+  }
 }

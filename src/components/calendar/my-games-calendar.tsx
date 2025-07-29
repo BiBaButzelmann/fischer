@@ -7,6 +7,7 @@ import { useTransition } from "react";
 import { updateGameMatchday } from "@/actions/game";
 import { MatchDay } from "@/db/types/match-day";
 import { toast } from "sonner";
+import { Skeleton } from "@/components/ui/skeleton";
 
 /*TODO: 
 add personal events for 
@@ -21,7 +22,7 @@ type Props = {
 };
 
 export function MyGamesCalendar({ events, matchdays = [] }: Props) {
-  const [, startTransition] = useTransition();
+  const [isPending, startTransition] = useTransition();
 
   const calendarEvents: EventInput[] = events.map((event) => ({
     id: event.id,
@@ -37,27 +38,38 @@ export function MyGamesCalendar({ events, matchdays = [] }: Props) {
       (matchday) => matchday.date.toDateString() === newDate.toDateString(),
     ) as MatchDay;
 
-    return new Promise<void>((resolve, reject) => {
-      startTransition(async () => {
-        try {
-          await updateGameMatchday(gameId, targetMatchday.id);
-          toast.success("Spiel erfolgreich verschoben!");
-          resolve();
-        } catch (error) {
-          toast.error("Fehler beim Verschieben des Spiels.");
-          reject(error);
-        }
-      });
+    startTransition(async () => {
+      try {
+        await updateGameMatchday(gameId, targetMatchday.id);
+        toast.success("Spiel erfolgreich verschoben!");
+      } catch (error) {
+        toast.error("Fehler beim Verschieben des Spiels.");
+      }
     });
   };
 
   return (
     <div className="space-y-4">
-      <Calendar
-        events={calendarEvents}
-        onEventDrop={handleEventDrop}
-        validDropDates={validDropDates}
-      />
+      <div className="relative">
+        {isPending && (
+          <div className="absolute inset-0 z-10 flex items-center justify-center">
+            <div className="flex items-center gap-2 bg-white/90 px-4 py-2 rounded-lg shadow-sm">
+              <Skeleton className="h-4 w-4 rounded-full" />
+              <span className="text-sm text-muted-foreground">
+                Ereignis wird verschoben...
+              </span>
+            </div>
+          </div>
+        )}
+        <div className={isPending ? "pointer-events-none opacity-50" : ""}>
+          <Calendar
+            events={calendarEvents}
+            onEventDrop={handleEventDrop}
+            validDropDates={validDropDates}
+            className={isPending ? "blur-content" : ""}
+          />
+        </div>
+      </div>
     </div>
   );
 }

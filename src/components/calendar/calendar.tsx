@@ -17,9 +17,15 @@ type Props = {
   events: EventInput[];
   onEventDrop?: (gameId: number, newDate: Date) => Promise<void>;
   validDropDates?: Date[];
+  className?: string;
 };
 
-export function Calendar({ events, onEventDrop, validDropDates = [] }: Props) {
+export function Calendar({
+  events,
+  onEventDrop,
+  validDropDates = [],
+  className = "",
+}: Props) {
   const [isDragging, setIsDragging] = useState(false);
 
   const handleEventDrop = useCallback(
@@ -82,7 +88,7 @@ export function Calendar({ events, onEventDrop, validDropDates = [] }: Props) {
   );
 
   return (
-    <div className="calendar-container">
+    <div className={`calendar-container ${className}`}>
       <FullCalendar
         plugins={[dayGridPlugin, interactionPlugin]}
         initialView="dayGridMonth"
