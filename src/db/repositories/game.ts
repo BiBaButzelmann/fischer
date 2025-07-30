@@ -106,6 +106,8 @@ export async function getCalendarEventsForParticipant(
       extendedProps: {
         gameId: game.id,
         participantId: participantId,
+        tournamentId: game.tournamentId,
+        groupId: game.groupId,
         isWhite: isWhite,
         opponentName: `${opponent.profile.firstName} ${opponent.profile.lastName}`,
         round: game.round,

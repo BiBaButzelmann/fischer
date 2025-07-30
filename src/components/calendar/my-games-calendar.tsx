@@ -8,10 +8,10 @@ import { updateGameMatchday } from "@/actions/game";
 import { MatchDay } from "@/db/types/match-day";
 import { toast } from "sonner";
 import { Skeleton } from "@/components/ui/skeleton";
+import { useRouter } from "next/navigation";
 
 /*TODO: 
 add personal events for 
-participants -> individual game, drag and droppable for postponements,
 referees -> match days, 
 setups helpers -> match days
 */
@@ -23,6 +23,7 @@ type Props = {
 
 export function MyGamesCalendar({ events, matchdays = [] }: Props) {
   const [isPending, startTransition] = useTransition();
+  const router = useRouter();
 
   const calendarEvents: EventInput[] = events.map((event) => ({
     id: event.id,
@@ -48,6 +49,30 @@ export function MyGamesCalendar({ events, matchdays = [] }: Props) {
     });
   };
 
+  const handleEventClick = (
+    gameId: number,
+    participantId: number,
+    round: number,
+  ) => {
+    const event = events.find((e) => e.extendedProps.gameId === gameId);
+
+    if (!event) {
+      toast.error("Spiel nicht gefunden.");
+      return;
+    }
+
+    const url = new URL("/partien", window.location.origin);
+    url.searchParams.set(
+      "tournamentId",
+      event.extendedProps.tournamentId.toString(),
+    );
+    url.searchParams.set("groupId", event.extendedProps.groupId.toString());
+    url.searchParams.set("round", round.toString());
+    url.searchParams.set("participantId", participantId.toString());
+
+    router.push(url.toString());
+  };
+
   return (
     <div className="space-y-4">
       <div className="relative">
@@ -65,6 +90,7 @@ export function MyGamesCalendar({ events, matchdays = [] }: Props) {
           <Calendar
             events={calendarEvents}
             onEventDrop={handleEventDrop}
+            onEventClick={handleEventClick}
             validDropDates={validDropDates}
             className={isPending ? "blur-content" : ""}
           />

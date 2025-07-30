@@ -117,6 +117,15 @@
     @apply !bg-green-200;
   }
 
+  /* Clickable event styling */
+  .calendar-container .fc-daygrid-event-harness:hover .fc-daygrid-event {
+    @apply cursor-pointer;
+  }
+
+  .calendar-container .fc-daygrid-event-harness:active .fc-daygrid-event {
+    @apply transform scale-95;
+  }
+
   .calendar-container.blur-content .fc-daygrid {
     filter: blur(2px);
   }
