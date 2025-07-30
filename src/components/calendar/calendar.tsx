@@ -8,6 +8,7 @@ import type {
   EventDropArg,
   EventClickArg,
   DayCellMountArg,
+  DatesSetArg,
 } from "@fullcalendar/core/index.js";
 import deLocale from "@fullcalendar/core/locales/de.js";
 import interactionPlugin from "@fullcalendar/interaction";
@@ -24,6 +25,7 @@ type Props = {
   onDayCellDidMount?: (info: DayCellMountArg) => void;
   eventAllow?: (dropInfo: any, draggedEvent: any) => boolean;
   initialDate?: Date;
+  onDatesSet?: (info: DatesSetArg) => void;
 };
 
 export function Calendar({
@@ -36,6 +38,7 @@ export function Calendar({
   onDayCellDidMount,
   eventAllow,
   initialDate,
+  onDatesSet,
 }: Props) {
   return (
     <div className={cn("calendar-container", className)}>
@@ -59,6 +62,7 @@ export function Calendar({
         eventClassNames="cursor-pointer hover:opacity-80"
         eventAllow={eventAllow}
         dayCellDidMount={onDayCellDidMount}
+        datesSet={onDatesSet}
         eventDragStart={onEventDragStart}
         eventDragStop={onEventDragStop}
       />

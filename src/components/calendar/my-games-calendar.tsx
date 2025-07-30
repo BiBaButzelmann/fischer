@@ -6,6 +6,7 @@ import {
   type EventDropArg,
   type EventClickArg,
   type DayCellMountArg,
+  type DatesSetArg,
 } from "@fullcalendar/core/index.js";
 import { CalendarEvent } from "@/db/types/calendar";
 import { useTransition, useCallback } from "react";
@@ -146,6 +147,34 @@ export function MyGamesCalendar({ events, matchdays = [] }: Props) {
     document.body.classList.remove("calendar-dragging");
   }, []);
 
+  const handleDatesSet = useCallback(
+    (info: DatesSetArg) => {
+      // When the view changes, re-apply drop-zone-valid classes
+      // This is needed because FullCalendar doesn't re-run dayCellDidMount for existing cells
+      setTimeout(() => {
+        const dayCells = document.querySelectorAll('.fc-daygrid-day');
+        
+        dayCells.forEach((cell: Element) => {
+          const htmlElement = cell as HTMLElement;
+          const dateStr = htmlElement.getAttribute('data-date');
+          if (dateStr) {
+            const cellDate = new Date(dateStr);
+            const isValidDropDate = validDropDates.some((validDate: Date) =>
+              isSameDate(validDate, cellDate),
+            );
+            
+            if (isValidDropDate) {
+              htmlElement.classList.add("drop-zone-valid");
+            } else {
+              htmlElement.classList.remove("drop-zone-valid");
+            }
+          }
+        });
+      }, 0);
+    },
+    [validDropDates, isSameDate],
+  );
+
   return (
     <div className="space-y-4">
       <div className="relative">
@@ -168,6 +197,7 @@ export function MyGamesCalendar({ events, matchdays = [] }: Props) {
             onDayCellDidMount={handleDayCellDidMount}
             onEventDragStart={handleEventDragStart}
             onEventDragStop={handleEventDragStop}
+            onDatesSet={handleDatesSet}
             initialDate={initialDate}
             className={isPending ? "blur-content" : ""}
           />
