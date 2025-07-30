@@ -233,6 +233,7 @@ export async function updateGameMatchday(
       userProfile.id,
       fromTimestamp,
       toTimestamp,
+      tx,
     );
 
     await tx
