@@ -1,10 +1,11 @@
 import { relations } from "drizzle-orm";
-import { integer, pgTable, timestamp } from "drizzle-orm/pg-core";
+import { integer, pgTable } from "drizzle-orm/pg-core";
 import { participant } from "./participant";
 import { tournament } from "./tournament";
 import { group } from "./group";
 import { gameResult, timestamps } from "./columns.helpers";
 import { pgn } from "./pgn";
+import { matchdayGame } from "./matchday";
 
 export const game = pgTable("game", {
   id: integer("id").generatedAlwaysAsIdentity().primaryKey(),
@@ -15,10 +16,6 @@ export const game = pgTable("game", {
   pgnId: integer("pgn_id"),
   round: integer("round").notNull(),
   boardNumber: integer("board_number").notNull(),
-  scheduled: timestamp("scheduled", {
-    mode: "date",
-    withTimezone: true,
-  }).notNull(),
 
   result: gameResult(),
 
@@ -47,5 +44,9 @@ export const gameRelations = relations(game, ({ one }) => ({
   pgn: one(pgn, {
     fields: [game.id],
     references: [pgn.gameId],
+  }),
+  matchdayGame: one(matchdayGame, {
+    fields: [game.id],
+    references: [matchdayGame.gameId],
   }),
 }));

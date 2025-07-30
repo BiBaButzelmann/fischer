@@ -6,6 +6,6 @@ export type GridGroup = {
   isNew: boolean;
   groupNumber: number;
   groupName: string;
-  matchDay: DayOfWeek | null;
+  dayOfWeek: DayOfWeek | null;
   participants: ParticipantWithName[];
 };

@@ -1,6 +1,6 @@
 import { authWithRedirect } from "@/auth/utils";
 import { MyGamesCalendar } from "@/components/calendar/my-games-calendar";
-import { getGamesOfParticipant } from "@/db/repositories/game";
+import { getCalendarEventsForParticipant } from "@/db/repositories/game";
 import { getParticipantByUserId } from "@/db/repositories/participant";
 
 export default async function Page() {
@@ -11,7 +11,10 @@ export default async function Page() {
     return <div>Du bist nicht für ein Turnier angemeldet.</div>;
   }
 
-  const games = await getGamesOfParticipant(currentParticipant.id);
+  const calendarEvents = await getCalendarEventsForParticipant(
+    currentParticipant.id,
+  );
+
   return (
     <div>
       <div className="mb-4">
@@ -23,7 +26,7 @@ export default async function Page() {
           </p>
         </div>
       </div>
-      <MyGamesCalendar games={games} />
+      <MyGamesCalendar events={calendarEvents} />
     </div>
   );
 }

@@ -1,9 +1,10 @@
 "use client";
 
 import { GroupWithParticipantsAndGames } from "@/db/types/group";
-import { Game } from "@/db/types/game";
+import { GameWithMatchday } from "@/db/types/game";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { ParticipantEntry } from "../groups/participant-entry";
+import { getGameDateTime, formatGameDate } from "@/lib/game-time";
 
 export function Pairing({ group }: { group: GroupWithParticipantsAndGames }) {
   if (!group.games || group.games.length === 0) {
@@ -30,7 +31,7 @@ export function Pairing({ group }: { group: GroupWithParticipantsAndGames }) {
     }
     acc.get(game.round)!.push(game);
     return acc;
-  }, new Map<number, Game[]>());
+  }, new Map<number, GameWithMatchday[]>());
 
   const rounds = Array.from(gamesByRound.keys()).sort((a, b) => a - b);
 
@@ -62,18 +63,19 @@ export function Pairing({ group }: { group: GroupWithParticipantsAndGames }) {
 
         {rounds.map((round) => {
           const games = gamesByRound.get(round) || [];
+
+          const gameDateTime = getGameDateTime(
+            games[0].matchdayGame.matchday.date,
+          );
+          const dateDisplay = formatGameDate(gameDateTime);
+
           return (
             <TabsContent key={round} value={`round-${round}`} className="mt-0">
               <div className="bg-white rounded-lg border border-gray-200 shadow-sm">
                 {/* Header Section */}
                 <div className="bg-gray-50 border-b border-gray-200 px-6 py-4 rounded-t-lg">
                   <h3 className="text-lg font-semibold text-gray-900">
-                    Runde {round} am{" "}
-                    {games[0]?.scheduled.toLocaleDateString("de-DE", {
-                      year: "numeric",
-                      month: "2-digit",
-                      day: "2-digit",
-                    })}
+                    Runde {round} am {dateDisplay}
                   </h3>
                 </div>
 

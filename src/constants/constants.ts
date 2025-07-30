@@ -29,3 +29,9 @@ export const monthLabels = [
   "November",
   "Dezember",
 ];
+
+export const GAME_START_TIME = {
+  hours: 19,
+  minutes: 0,
+  seconds: 0,
+} as const;

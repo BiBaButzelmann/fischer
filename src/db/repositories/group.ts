@@ -138,6 +138,17 @@ export async function getGroupsWithParticipantsAndGamesByTournamentId(
       },
       games: {
         orderBy: (game, { asc }) => [asc(game.round), asc(game.boardNumber)],
+        with: {
+          matchdayGame: {
+            with: {
+              matchday: {
+                columns: {
+                  date: true,
+                },
+              },
+            },
+          },
+        },
       },
     },
     orderBy: (group, { asc }) => [asc(group.groupNumber)],

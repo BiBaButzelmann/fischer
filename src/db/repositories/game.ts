@@ -1,6 +1,8 @@
 import { db } from "../client";
 import { eq } from "drizzle-orm";
 import { group } from "../schema/group";
+import { CalendarEvent } from "../types/calendar";
+import { getGameTimeFromGame } from "@/lib/game-time";
 
 export async function getGameById(gameId: number) {
   return await db.query.game.findFirst({
@@ -30,6 +32,15 @@ export async function getGameById(gameId: number) {
       tournament: {
         columns: {
           name: true,
+        },
+      },
+      matchdayGame: {
+        with: {
+          matchday: {
+            columns: {
+              date: true,
+            },
+          },
         },
       },
     },
@@ -64,7 +75,44 @@ export async function getGamesOfParticipant(participantId: number) {
           },
         },
       },
+      matchdayGame: {
+        with: {
+          matchday: {
+            columns: {
+              date: true,
+            },
+          },
+        },
+      },
     },
+  });
+}
+
+export async function getCalendarEventsForParticipant(
+  participantId: number,
+): Promise<CalendarEvent[]> {
+  const games = await getGamesOfParticipant(participantId);
+
+  return games.map((game) => {
+    const isWhite = game.whiteParticipantId === participantId;
+    const opponent = isWhite ? game.blackParticipant : game.whiteParticipant;
+
+    const gameDateTime = getGameTimeFromGame(game);
+
+    return {
+      id: `game-${game.id}`,
+      title: `Runde ${game.round}`,
+      start: gameDateTime,
+      extendedProps: {
+        gameId: game.id,
+        participantId: participantId,
+        isWhite: isWhite,
+        opponentName: `${opponent.profile.firstName} ${opponent.profile.lastName}`,
+        round: game.round,
+        boardNumber: game.boardNumber,
+        color: isWhite ? "white" : "black",
+      },
+    };
   });
 }
 

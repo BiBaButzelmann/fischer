@@ -8,11 +8,12 @@ import { getGroupById } from "@/db/repositories/group";
 import { getTournamentById } from "@/db/repositories/tournament";
 import { game } from "@/db/schema/game";
 import { GameResult } from "@/db/types/game";
-import { and, eq, InferInsertModel } from "drizzle-orm";
+import { and, eq, InferInsertModel, inArray } from "drizzle-orm";
 import { revalidatePath } from "next/cache";
 import invariant from "tiny-invariant";
-import { addDays, firstMatchDate, roundRobinPairs } from "@/lib/pairing-utils";
+import { roundRobinPairs } from "@/lib/pairing-utils";
 import { redirect } from "next/navigation";
+import { matchdayGame } from "@/db/schema/matchday";
 
 export async function removeScheduledGamesForGroup(
   tournamentId: number,
@@ -23,9 +24,27 @@ export async function removeScheduledGamesForGroup(
     redirect("/willkommen");
   }
 
-  await db
-    .delete(game)
-    .where(and(eq(game.tournamentId, tournamentId), eq(game.groupId, groupId)));
+  await db.transaction(async (tx) => {
+    const gamesToDelete = await tx.query.game.findMany({
+      where: (game, { eq, and }) =>
+        and(eq(game.tournamentId, tournamentId), eq(game.groupId, groupId)),
+      columns: { id: true },
+    });
+
+    const gameIds = gamesToDelete.map((g) => g.id);
+
+    if (gameIds.length > 0) {
+      await tx
+        .delete(matchdayGame)
+        .where(inArray(matchdayGame.gameId, gameIds));
+    }
+
+    await tx
+      .delete(game)
+      .where(
+        and(eq(game.tournamentId, tournamentId), eq(game.groupId, groupId)),
+      );
+  });
 }
 
 export async function scheduleGamesForGroup(
@@ -46,11 +65,12 @@ export async function scheduleGamesForGroup(
   if (group == null) {
     return { error: `Keine Gruppe ${groupId} gefunden` };
   }
-  if (group.matchDay == null) {
+  if (group.dayOfWeek == null) {
     return { error: `${group.groupName} hat keinen Spieltag gesetzt` };
   }
 
-  const scheduledGames: InferInsertModel<typeof game>[] = [];
+  const dayOfWeek = group.dayOfWeek;
+
   const players = group.participants
     .filter((p) => p.groupPosition !== null && p.groupPosition !== undefined)
     .sort((a, b) => (a.groupPosition ?? 0) - (b.groupPosition ?? 0));
@@ -62,26 +82,92 @@ export async function scheduleGamesForGroup(
     };
   }
 
-  const pairings = roundRobinPairs(n); // array[round][pair] -> [white#, black#]
-  const firstDate = firstMatchDate(tournament.startDate, group.matchDay);
-
-  pairings.forEach((pairsInRound, roundIdx) => {
-    // TODO: set the time from the tournament settings
-    const roundDate = addDays(firstDate, roundIdx * 7); // weekly cadence
-    pairsInRound.forEach(([whiteNo, blackNo], boardIdx) => {
-      scheduledGames.push({
-        whiteParticipantId: players[whiteNo - 1].participant.id,
-        blackParticipantId: players[blackNo - 1].participant.id,
-        tournamentId,
-        groupId: group.id,
-        round: roundIdx + 1,
-        boardNumber: boardIdx + 1,
-        scheduled: roundDate,
-      });
-    });
+  const regularWeeks = await db.query.tournamentWeek.findMany({
+    where: (week, { eq, and }) =>
+      and(eq(week.tournamentId, tournamentId), eq(week.status, "regular")),
+    orderBy: (week, { asc }) => asc(week.weekNumber),
   });
 
-  await db.insert(game).values(scheduledGames);
+  const pairings = roundRobinPairs(n); // array[round][pair] -> [white#, black#]
+
+  if (pairings.length > regularWeeks.length) {
+    return {
+      error: `Nicht genug reguläre Wochen (${regularWeeks.length}) für alle Runden (${pairings.length}) in ${group.groupName}`,
+    };
+  }
+
+  await db.transaction(async (tx) => {
+    const gamesToInsert: InferInsertModel<typeof game>[] = [];
+    const matchdayGameRelations: InferInsertModel<typeof matchdayGame>[] = [];
+
+    const matchdays = await tx.query.matchday.findMany({
+      where: (md, { eq, and }) =>
+        and(
+          eq(md.tournamentId, tournamentId),
+          eq(md.dayOfWeek, dayOfWeek),
+          inArray(
+            md.tournamentWeekId,
+            regularWeeks.map((w) => w.id),
+          ),
+        ),
+    });
+
+    for (let roundIdx = 0; roundIdx < pairings.length; roundIdx++) {
+      const tournamentWeekForRound = regularWeeks[roundIdx];
+      const matchday = matchdays.find(
+        (m) => m.tournamentWeekId === tournamentWeekForRound.id,
+      );
+
+      if (!matchday) {
+        return {
+          error: `Kein Spieltag gefunden für Turnier ${tournamentId}, Woche ${tournamentWeekForRound.weekNumber}, ${dayOfWeek}`,
+        };
+      }
+
+      const pairsInRound = pairings[roundIdx];
+      pairsInRound.forEach(([whiteNo, blackNo], boardIdx) => {
+        gamesToInsert.push({
+          whiteParticipantId: players[whiteNo - 1].participant.id,
+          blackParticipantId: players[blackNo - 1].participant.id,
+          tournamentId,
+          groupId: group.id,
+          round: roundIdx + 1,
+          boardNumber: boardIdx + 1,
+        });
+      });
+    }
+
+    const insertedGames = await tx
+      .insert(game)
+      .values(gamesToInsert)
+      .returning({ id: game.id });
+
+    let gameIndex = 0;
+    for (let roundIdx = 0; roundIdx < pairings.length; roundIdx++) {
+      const tournamentWeekForRound = regularWeeks[roundIdx];
+      const matchday = matchdays.find(
+        (m) => m.tournamentWeekId === tournamentWeekForRound.id,
+      );
+
+      if (!matchday) {
+        return {
+          error: `Kein Spieltag gefunden für Turnier ${tournamentId}, Woche ${tournamentWeekForRound.weekNumber}, ${dayOfWeek}`,
+        };
+      }
+
+      const pairsInRound = pairings[roundIdx];
+      for (let boardIdx = 0; boardIdx < pairsInRound.length; boardIdx++) {
+        matchdayGameRelations.push({
+          matchdayId: matchday.id,
+          gameId: insertedGames[gameIndex].id,
+        });
+        gameIndex++;
+      }
+    }
+
+    await tx.insert(matchdayGame).values(matchdayGameRelations);
+  });
+
   revalidatePath("/admin/paarungen");
 }
 
