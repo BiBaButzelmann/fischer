@@ -1,6 +1,6 @@
 import { db } from "../client";
 import { gamePostponement } from "../schema/gamePostponement";
-import { eq, and, desc } from "drizzle-orm";
+import { eq, and } from "drizzle-orm";
 import { GamePostponement } from "../types/game-postponement";
 
 export async function createGamePostponement(
