@@ -8,9 +8,8 @@ export async function createGamePostponement(
   postponedByProfileId: number,
   fromDate: Date,
   toDate: Date,
-  tx: Parameters<Parameters<typeof db.transaction>[0]>[0],
 ): Promise<GamePostponement> {
-  const [result] = await tx
+  const [result] = await db
     .insert(gamePostponement)
     .values({
       gameId,

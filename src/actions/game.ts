@@ -6,6 +6,7 @@ import { db } from "@/db/client";
 import { isUserParticipantInGame } from "@/db/repositories/game";
 import { getGroupById } from "@/db/repositories/group";
 import { getTournamentById } from "@/db/repositories/tournament";
+import { createGamePostponement } from "@/db/repositories/game-postponement";
 import { game } from "@/db/schema/game";
 import { matchday, matchdayGame } from "@/db/schema/matchday";
 import { profile } from "@/db/schema/profile";
@@ -15,7 +16,6 @@ import { revalidatePath } from "next/cache";
 import invariant from "tiny-invariant";
 import { roundRobinPairs } from "@/lib/pairing-utils";
 import { redirect } from "next/navigation";
-import { createGamePostponement } from "@/db/repositories/game-postponement";
 import { getGameDateTime } from "@/lib/game-time";
 
 export async function removeScheduledGamesForGroup(
@@ -233,7 +233,6 @@ export async function updateGameMatchday(
       userProfile.id,
       fromTimestamp,
       toTimestamp,
-      tx,
     );
 
     await tx
