@@ -54,6 +54,7 @@ export async function updateGroups(tournamentId: number, groups: GridGroup[]) {
   });
 
   revalidatePath("/admin/gruppen");
+  revalidatePath("/admin/paarungen");
 }
 
 export async function updateGroupPositions(
