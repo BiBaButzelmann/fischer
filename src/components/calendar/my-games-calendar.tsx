@@ -47,17 +47,15 @@ export function MyGamesCalendar({ events, matchdays = [] }: Props) {
       }
 
       const gameId = info.event.extendedProps.gameId;
-      const newDate = info.event.start;
-
       if (!gameId) {
         info.revert();
         return;
       }
 
+      const newDate = info.event.start;
       const isValidDate = validDropDates.some(
         (validDate) => validDate.toDateString() === newDate.toDateString(),
       );
-
       if (!isValidDate) {
         info.revert();
         return;

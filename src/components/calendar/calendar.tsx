@@ -11,6 +11,7 @@ import type {
 import deLocale from "@fullcalendar/core/locales/de.js";
 import interactionPlugin from "@fullcalendar/interaction";
 import { GameEvent } from "./game-event";
+import { cn } from "@/lib/utils";
 
 type Props = {
   events: EventInput[];
@@ -23,10 +24,10 @@ export function Calendar({
   events,
   onEventDrop,
   onEventClick,
-  className = "",
+  className,
 }: Props) {
   return (
-    <div className={`calendar-container ${className}`}>
+    <div className={cn("calendar-container", className)}>
       <FullCalendar
         plugins={[dayGridPlugin, interactionPlugin]}
         initialView="dayGridMonth"

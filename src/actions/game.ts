@@ -180,7 +180,7 @@ export async function updateGameMatchday(
 ) {
   const session = await authWithRedirect();
 
-  const gameExists = await db.query.game.findFirst({
+  const gameData = await db.query.game.findFirst({
     where: eq(game.id, gameId),
     with: {
       whiteParticipant: { with: { profile: true } },
@@ -193,18 +193,18 @@ export async function updateGameMatchday(
     },
   });
 
-  invariant(gameExists, "Game not found");
+  invariant(gameData, "Game not found");
 
   const isUserInGame =
-    gameExists.whiteParticipant.profile.userId === session.user.id ||
-    gameExists.blackParticipant.profile.userId === session.user.id;
+    gameData.whiteParticipant.profile.userId === session.user.id ||
+    gameData.blackParticipant.profile.userId === session.user.id;
 
   invariant(
     isUserInGame || session.user.role === "admin",
     "Unauthorized to move this game",
   );
 
-  const currentMatchday = gameExists.matchdayGame?.matchday;
+  const currentMatchday = gameData.matchdayGame?.matchday;
   const newMatchday = await db.query.matchday.findFirst({
     where: eq(matchday.id, newMatchdayId),
   });
@@ -213,9 +213,9 @@ export async function updateGameMatchday(
   invariant(newMatchday, "New matchday not found");
 
   const postponingParticipant =
-    gameExists.whiteParticipant.profile.userId === session.user.id
-      ? gameExists.whiteParticipant
-      : gameExists.blackParticipant;
+    gameData.whiteParticipant.profile.userId === session.user.id
+      ? gameData.whiteParticipant
+      : gameData.blackParticipant;
 
   const userProfile = await db.query.profile.findFirst({
     where: eq(profile.userId, session.user.id),
