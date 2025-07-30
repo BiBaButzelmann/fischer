@@ -3,6 +3,7 @@
 import { authWithRedirect } from "@/auth/utils";
 import { monthLabels } from "@/constants/constants";
 import { db } from "@/db/client";
+import { getCompletedGames } from "@/db/repositories/game";
 import { Game } from "@/db/types/game";
 import { generateFideReport } from "@/lib/fide-report";
 import { PlayerEntry, Result } from "@/lib/fide-report/types";
@@ -52,39 +53,14 @@ export async function generateFideReportFile(groupId: number, month: number) {
   });
   invariant(organizerProfile, "Organizer profile not found");
 
-  const completedGames = await db.query.game.findMany({
-    where: (game, { eq, and, sql, isNotNull }) =>
-      and(
-        eq(game.groupId, groupId),
-        sql`EXTRACT(MONTH FROM ${game.scheduled}) = ${month}`,
-        isNotNull(game.result),
-      ),
-    orderBy: (game, { asc }) => asc(game.scheduled),
-    with: {
-      whiteParticipant: {
-        with: {
-          profile: {
-            columns: {
-              firstName: true,
-              lastName: true,
-            },
-          },
-        },
-      },
-      blackParticipant: {
-        with: {
-          profile: {
-            columns: {
-              firstName: true,
-              lastName: true,
-            },
-          },
-        },
-      },
-    },
+  const completedGames = await getCompletedGames(groupId);
+  // TODO: this can probably be achieved by filtering the games in the query above
+  const completedGamesInMonth = completedGames.filter((game) => {
+    const gameDate = DateTime.fromJSDate(game.matchdayGame.matchday.date);
+    return gameDate.month === month && gameDate.year === DateTime.now().year;
   });
 
-  const gamesAsWhiteParticipant = completedGames.reduce(
+  const gamesAsWhiteParticipant = completedGamesInMonth.reduce(
     (acc, game) => {
       acc[game.whiteParticipantId] ??= [];
       acc[game.whiteParticipantId].push(game.id);
@@ -93,7 +69,7 @@ export async function generateFideReportFile(groupId: number, month: number) {
     {} as Record<number, number[]>,
   );
 
-  const gamesAsBlackParticipant = completedGames.reduce(
+  const gamesAsBlackParticipant = completedGamesInMonth.reduce(
     (acc, game) => {
       acc[game.blackParticipantId] ??= [];
       acc[game.blackParticipantId].push(game.id);
@@ -103,7 +79,7 @@ export async function generateFideReportFile(groupId: number, month: number) {
   );
 
   const standings = calculateStandings(
-    completedGames,
+    completedGamesInMonth,
     data.participants.map((p) => p.participant),
   );
 
@@ -141,7 +117,7 @@ export async function generateFideReportFile(groupId: number, month: number) {
   const entries = data.participants.map(({ groupPosition, participant }) => {
     const whiteGameIds = gamesAsWhiteParticipant[participant.id] ?? [];
     const blackGameIds = gamesAsBlackParticipant[participant.id] ?? [];
-    const participantGames = completedGames.filter(
+    const participantGames = completedGamesInMonth.filter(
       (game) =>
         whiteGameIds.includes(game.id) || blackGameIds.includes(game.id),
     );
@@ -183,7 +159,7 @@ export async function generateFideReportFile(groupId: number, month: number) {
         const isWhite = whiteGameIds.includes(game.id);
 
         return {
-          scheduled: DateTime.fromJSDate(game.scheduled),
+          scheduled: DateTime.fromJSDate(game.matchdayGame.matchday.date),
           // TODO: this is not the current group position, but the starting group position
           opponentGroupPosition: getInitialGroupPositionOfPlayer(
             isWhite ? game.blackParticipantId : game.whiteParticipantId,
