@@ -16,7 +16,7 @@ import invariant from "tiny-invariant";
 import { roundRobinPairs } from "@/lib/pairing-utils";
 import { redirect } from "next/navigation";
 import { updateGamePostponement } from "@/db/repositories/game-postponement";
-import { GAME_START_TIME } from "@/constants/constants";
+import { getGameDateTime } from "@/lib/game-time";
 
 export async function removeScheduledGamesForGroup(
   tournamentId: number,
@@ -223,19 +223,8 @@ export async function updateGameMatchday(
 
   invariant(userProfile, "User profile not found");
 
-  const createGameTimestamp = (date: Date) => {
-    const timestamp = new Date(date);
-    timestamp.setHours(
-      GAME_START_TIME.hours,
-      GAME_START_TIME.minutes,
-      GAME_START_TIME.seconds,
-      0,
-    );
-    return timestamp;
-  };
-
-  const fromTimestamp = createGameTimestamp(currentMatchday.date);
-  const toTimestamp = createGameTimestamp(newMatchday.date);
+  const fromTimestamp = getGameDateTime(currentMatchday.date);
+  const toTimestamp = getGameDateTime(newMatchday.date);
 
   await updateGamePostponement(
     gameId,
