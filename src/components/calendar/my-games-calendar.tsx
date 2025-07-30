@@ -18,7 +18,7 @@ setups helpers -> match days
 
 type Props = {
   events: CalendarEvent[];
-  matchdays?: MatchDay[];
+  matchdays: MatchDay[];
 };
 
 export function MyGamesCalendar({ events, matchdays = [] }: Props) {
