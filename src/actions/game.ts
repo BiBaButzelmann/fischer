@@ -149,10 +149,16 @@ export async function scheduleGamesForGroup(
         (m) => m.tournamentWeekId === tournamentWeekForRound.id,
       );
 
+      if (!matchday) {
+        return {
+          error: `Kein Spieltag gefunden für Turnier ${tournamentId}, Woche ${tournamentWeekForRound.weekNumber}, ${dayOfWeek}`,
+        };
+      }
+
       const pairsInRound = pairings[roundIdx];
       for (let boardIdx = 0; boardIdx < pairsInRound.length; boardIdx++) {
         matchdayGameRelations.push({
-          matchdayId: matchday!.id,
+          matchdayId: matchday.id,
           gameId: insertedGames[gameIndex].id,
         });
         gameIndex++;
