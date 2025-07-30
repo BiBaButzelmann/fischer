@@ -7,6 +7,7 @@ import type {
   EventInput,
   EventDropArg,
   EventClickArg,
+  DayCellMountArg,
 } from "@fullcalendar/core/index.js";
 import deLocale from "@fullcalendar/core/locales/de.js";
 import interactionPlugin from "@fullcalendar/interaction";
@@ -18,6 +19,11 @@ type Props = {
   onEventDrop?: (event: EventDropArg) => Promise<void>;
   onEventClick?: (event: EventClickArg) => void;
   className?: string;
+  onEventDragStart?: () => void;
+  onEventDragStop?: () => void;
+  onDayCellDidMount?: (info: DayCellMountArg) => void;
+  eventAllow?: (dropInfo: any, draggedEvent: any) => boolean;
+  initialDate?: Date;
 };
 
 export function Calendar({
@@ -25,12 +31,18 @@ export function Calendar({
   onEventDrop,
   onEventClick,
   className,
+  onEventDragStart,
+  onEventDragStop,
+  onDayCellDidMount,
+  eventAllow,
+  initialDate,
 }: Props) {
   return (
     <div className={cn("calendar-container", className)}>
       <FullCalendar
         plugins={[dayGridPlugin, interactionPlugin]}
         initialView="dayGridMonth"
+        initialDate={initialDate}
         weekends={false}
         events={events}
         eventContent={renderEventContent}
@@ -38,11 +50,17 @@ export function Calendar({
         locale="de"
         editable={true}
         eventStartEditable={true}
+        selectOverlap={true}
+        eventOverlap={true}
         selectable={false}
         eventDrop={onEventDrop}
         eventClick={onEventClick}
         height="auto"
         eventClassNames="cursor-pointer hover:opacity-80"
+        eventAllow={eventAllow}
+        dayCellDidMount={onDayCellDidMount}
+        eventDragStart={onEventDragStart}
+        eventDragStop={onEventDragStop}
       />
     </div>
   );

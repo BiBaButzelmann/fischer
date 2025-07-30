@@ -5,6 +5,7 @@ import {
   type EventInput,
   type EventDropArg,
   type EventClickArg,
+  type DayCellMountArg,
 } from "@fullcalendar/core/index.js";
 import { CalendarEvent } from "@/db/types/calendar";
 import { useTransition, useCallback } from "react";
@@ -39,6 +40,13 @@ export function MyGamesCalendar({ events, matchdays = [] }: Props) {
 
   const validDropDates = matchdays.map((matchday) => matchday.date);
 
+  const initialDate =
+    validDropDates.length > 0 ? validDropDates[0] : new Date();
+
+  const isSameDate = useCallback((date1: Date, date2: Date): boolean => {
+    return date1.toDateString() === date2.toDateString();
+  }, []);
+
   const handleEventDrop = useCallback(
     async (info: EventDropArg) => {
       if (!info.event.start) {
@@ -53,16 +61,16 @@ export function MyGamesCalendar({ events, matchdays = [] }: Props) {
       }
 
       const newDate = info.event.start;
-      const isValidDate = validDropDates.some(
-        (validDate) => validDate.toDateString() === newDate.toDateString(),
+      const isValidDate = validDropDates.some((validDate) =>
+        isSameDate(validDate, newDate),
       );
       if (!isValidDate) {
         info.revert();
         return;
       }
 
-      const targetMatchday = matchdays.find(
-        (matchday) => matchday.date.toDateString() === newDate.toDateString(),
+      const targetMatchday = matchdays.find((matchday) =>
+        isSameDate(matchday.date, newDate),
       ) as MatchDay;
 
       startTransition(async () => {
@@ -102,6 +110,42 @@ export function MyGamesCalendar({ events, matchdays = [] }: Props) {
     [router],
   );
 
+  const handleEventAllow = useCallback(
+    (dropInfo: any, draggedEvent: any) => {
+      if (validDropDates.length === 0) return true;
+
+      const dropDate = new Date(dropInfo.start);
+      return validDropDates.some((validDate: Date) =>
+        isSameDate(validDate, dropDate),
+      );
+    },
+    [validDropDates, isSameDate],
+  );
+
+  const handleDayCellDidMount = useCallback(
+    (info: DayCellMountArg) => {
+      if (validDropDates.length === 0) return;
+
+      const cellDate = new Date(info.date);
+      const isValidDropDate = validDropDates.some((validDate: Date) =>
+        isSameDate(validDate, cellDate),
+      );
+
+      if (isValidDropDate) {
+        info.el.classList.add("drop-zone-valid");
+      }
+    },
+    [validDropDates, isSameDate],
+  );
+
+  const handleEventDragStart = useCallback(() => {
+    document.body.classList.add("calendar-dragging");
+  }, []);
+
+  const handleEventDragStop = useCallback(() => {
+    document.body.classList.remove("calendar-dragging");
+  }, []);
+
   return (
     <div className="space-y-4">
       <div className="relative">
@@ -120,6 +164,11 @@ export function MyGamesCalendar({ events, matchdays = [] }: Props) {
             events={calendarEvents}
             onEventDrop={handleEventDrop}
             onEventClick={handleEventClick}
+            eventAllow={handleEventAllow}
+            onDayCellDidMount={handleDayCellDidMount}
+            onEventDragStart={handleEventDragStart}
+            onEventDragStop={handleEventDragStop}
+            initialDate={initialDate}
             className={isPending ? "blur-content" : ""}
           />
         </div>

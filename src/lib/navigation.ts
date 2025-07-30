@@ -4,40 +4,18 @@
 export function buildGameViewUrl(params: {
   tournamentId: number;
   groupId: number;
-  round: number;
-  participantId: number;
-}): string {
-  const url = new URL("/partien", window.location.origin);
-  url.searchParams.set("tournamentId", params.tournamentId.toString());
-  url.searchParams.set("groupId", params.groupId.toString());
-  url.searchParams.set("round", params.round.toString());
-  url.searchParams.set("participantId", params.participantId.toString());
-
-  return url.toString();
-}
-
-/**
- * Builds query parameters for partien/results pages
- */
-export function buildPartienQueryParams(params: {
-  tournamentId: string;
-  groupId: string;
-  round?: string;
-  participantId?: string;
+  round?: number;
+  participantId?: number;
 }): string {
   const searchParams = new URLSearchParams();
-  searchParams.set("tournamentId", params.tournamentId);
-  searchParams.set("groupId", params.groupId);
+  searchParams.set("tournamentId", params.tournamentId.toString());
+  searchParams.set("groupId", params.groupId.toString());
 
-  if (params.round != null && params.round !== "") {
-    searchParams.set("round", params.round);
-  }
+  params.round && searchParams.set("round", params.round.toString());
+  params.participantId &&
+    searchParams.set("participantId", params.participantId.toString());
 
-  if (params.participantId != null && params.participantId !== "") {
-    searchParams.set("participantId", params.participantId);
-  }
-
-  return `?${searchParams.toString()}`;
+  return `/partien?${searchParams.toString()}`;
 }
 
 /**
