@@ -15,7 +15,7 @@ import { revalidatePath } from "next/cache";
 import invariant from "tiny-invariant";
 import { roundRobinPairs } from "@/lib/pairing-utils";
 import { redirect } from "next/navigation";
-import { updateGamePostponement } from "@/db/repositories/game-postponement";
+import { createGamePostponement } from "@/db/repositories/game-postponement";
 import { getGameDateTime } from "@/lib/game-time";
 
 export async function removeScheduledGamesForGroup(
@@ -226,15 +226,15 @@ export async function updateGameMatchday(
   const fromTimestamp = getGameDateTime(currentMatchday.date);
   const toTimestamp = getGameDateTime(newMatchday.date);
 
-  await updateGamePostponement(
-    gameId,
-    postponingParticipant.id,
-    userProfile.id,
-    fromTimestamp,
-    toTimestamp,
-  );
-
   await db.transaction(async (tx) => {
+    await createGamePostponement(
+      gameId,
+      postponingParticipant.id,
+      userProfile.id,
+      fromTimestamp,
+      toTimestamp,
+    );
+
     await tx
       .update(matchdayGame)
       .set({ matchdayId: newMatchdayId })
