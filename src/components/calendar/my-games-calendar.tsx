@@ -84,30 +84,22 @@ export function MyGamesCalendar({ events, matchdays = [] }: Props) {
       const gameId = info.event.extendedProps.gameId;
       const participantId = info.event.extendedProps.participantId;
       const round = info.event.extendedProps.round;
+      const tournamentId = info.event.extendedProps.tournamentId;
+      const groupId = info.event.extendedProps.groupId;
 
-      if (!gameId || !participantId || !round) {
-        return;
-      }
-
-      const event = events.find((e) => e.extendedProps.gameId === gameId);
-
-      if (!event) {
-        toast.error("Spiel nicht gefunden.");
+      if (!gameId || !participantId || !round || !tournamentId || !groupId) {
         return;
       }
 
       const url = new URL("/partien", window.location.origin);
-      url.searchParams.set(
-        "tournamentId",
-        event.extendedProps.tournamentId.toString(),
-      );
-      url.searchParams.set("groupId", event.extendedProps.groupId.toString());
+      url.searchParams.set("tournamentId", tournamentId.toString());
+      url.searchParams.set("groupId", groupId.toString());
       url.searchParams.set("round", round.toString());
       url.searchParams.set("participantId", participantId.toString());
 
       router.push(url.toString());
     },
-    [events, router],
+    [router],
   );
 
   return (
