@@ -24,8 +24,8 @@ export function GroupMatchDay({ group, onChangeGroupMatchDay }: Props) {
   };
 
   const defaultValue = useMemo(
-    () => group.matchDay || "none",
-    [group.matchDay],
+    () => group.dayOfWeek || "none",
+    [group.dayOfWeek],
   );
 
   return (

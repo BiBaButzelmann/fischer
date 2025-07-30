@@ -36,4 +36,12 @@ export type GameWithParticipantNamesAndRatings = Game & {
   };
 };
 
+export type GameWithMatchday = Game & {
+  matchdayGame: {
+    matchday: {
+      date: Date;
+    };
+  };
+};
+
 export type GameResult = InferEnum<typeof game.result>;

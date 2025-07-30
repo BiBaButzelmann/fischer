@@ -33,7 +33,7 @@ export async function updateGroups(tournamentId: number, groups: GridGroup[]) {
         ({
           groupName: g.groupName,
           groupNumber: g.groupNumber,
-          matchDay: g.matchDay,
+          dayOfWeek: g.dayOfWeek,
           tournamentId,
         }) as typeof group.$inferInsert,
     );

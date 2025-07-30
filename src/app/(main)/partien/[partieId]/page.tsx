@@ -9,6 +9,7 @@ import { verifyPgnPassword } from "@/actions/game";
 import PgnViewer from "@/components/game/chessboard/pgn-viewer";
 import { Suspense } from "react";
 import { DateTime } from "luxon";
+import { getGameTimeFromGame } from "@/lib/game-time";
 
 type PageProps = {
   params: Promise<{ partieId: string }>;
@@ -60,12 +61,15 @@ async function PgnContainer({
 
   const whiteDisplay = formatDisplayName(game.whiteParticipant);
   const blackDisplay = formatDisplayName(game.blackParticipant);
+
+  const gameDateTime = getGameTimeFromGame(game);
+
   const pgn =
     game.pgn != null
       ? game.pgn.value
       : getInitialPGN(
           game.tournament.name,
-          game.scheduled,
+          gameDateTime,
           game.round,
           whiteDisplay,
           blackDisplay,

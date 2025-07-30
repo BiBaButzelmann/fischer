@@ -31,7 +31,7 @@ export function EditGroupsGrid({
         isNew: true,
         groupNumber: prev.length + 1,
         groupName: `Gruppe ${prev.length + 1}`,
-        matchDay: null,
+        dayOfWeek: null,
         participants: [],
       } as GridGroup,
     ]);
