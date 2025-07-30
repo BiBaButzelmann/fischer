@@ -1,9 +1,13 @@
 "use client";
 
 import { Calendar } from ".";
-import { type EventInput } from "@fullcalendar/core/index.js";
+import {
+  type EventInput,
+  type EventDropArg,
+  type EventClickArg,
+} from "@fullcalendar/core/index.js";
 import { CalendarEvent } from "@/db/types/calendar";
-import { useTransition } from "react";
+import { useTransition, useCallback } from "react";
 import { updateGameMatchday } from "@/actions/game";
 import { MatchDay } from "@/db/types/match-day";
 import { toast } from "sonner";
@@ -34,44 +38,77 @@ export function MyGamesCalendar({ events, matchdays = [] }: Props) {
 
   const validDropDates = matchdays.map((matchday) => matchday.date);
 
-  const handleEventDrop = async (gameId: number, newDate: Date) => {
-    const targetMatchday = matchdays.find(
-      (matchday) => matchday.date.toDateString() === newDate.toDateString(),
-    ) as MatchDay;
-
-    startTransition(async () => {
-      try {
-        await updateGameMatchday(gameId, targetMatchday.id);
-        toast.success("Spiel erfolgreich verschoben!");
-      } catch {
-        toast.error("Fehler beim Verschieben des Spiels.");
+  const handleEventDrop = useCallback(
+    async (info: EventDropArg) => {
+      if (!info.event.start) {
+        info.revert();
+        return;
       }
-    });
-  };
 
-  const handleEventClick = (
-    gameId: number,
-    participantId: number,
-    round: number,
-  ) => {
-    const event = events.find((e) => e.extendedProps.gameId === gameId);
+      const gameId = info.event.extendedProps.gameId;
+      const newDate = info.event.start;
 
-    if (!event) {
-      toast.error("Spiel nicht gefunden.");
-      return;
-    }
+      if (!gameId) {
+        info.revert();
+        return;
+      }
 
-    const url = new URL("/partien", window.location.origin);
-    url.searchParams.set(
-      "tournamentId",
-      event.extendedProps.tournamentId.toString(),
-    );
-    url.searchParams.set("groupId", event.extendedProps.groupId.toString());
-    url.searchParams.set("round", round.toString());
-    url.searchParams.set("participantId", participantId.toString());
+      const isValidDate = validDropDates.some(
+        (validDate) => validDate.toDateString() === newDate.toDateString(),
+      );
 
-    router.push(url.toString());
-  };
+      if (!isValidDate) {
+        info.revert();
+        return;
+      }
+
+      const targetMatchday = matchdays.find(
+        (matchday) => matchday.date.toDateString() === newDate.toDateString(),
+      ) as MatchDay;
+
+      startTransition(async () => {
+        try {
+          await updateGameMatchday(gameId, targetMatchday.id);
+          toast.success("Spiel erfolgreich verschoben!");
+        } catch {
+          toast.error("Fehler beim Verschieben des Spiels.");
+          info.revert();
+        }
+      });
+    },
+    [matchdays, validDropDates],
+  );
+
+  const handleEventClick = useCallback(
+    (info: EventClickArg) => {
+      const gameId = info.event.extendedProps.gameId;
+      const participantId = info.event.extendedProps.participantId;
+      const round = info.event.extendedProps.round;
+
+      if (!gameId || !participantId || !round) {
+        return;
+      }
+
+      const event = events.find((e) => e.extendedProps.gameId === gameId);
+
+      if (!event) {
+        toast.error("Spiel nicht gefunden.");
+        return;
+      }
+
+      const url = new URL("/partien", window.location.origin);
+      url.searchParams.set(
+        "tournamentId",
+        event.extendedProps.tournamentId.toString(),
+      );
+      url.searchParams.set("groupId", event.extendedProps.groupId.toString());
+      url.searchParams.set("round", round.toString());
+      url.searchParams.set("participantId", participantId.toString());
+
+      router.push(url.toString());
+    },
+    [events, router],
+  );
 
   return (
     <div className="space-y-4">
@@ -91,7 +128,6 @@ export function MyGamesCalendar({ events, matchdays = [] }: Props) {
             events={calendarEvents}
             onEventDrop={handleEventDrop}
             onEventClick={handleEventClick}
-            validDropDates={validDropDates}
             className={isPending ? "blur-content" : ""}
           />
         </div>
