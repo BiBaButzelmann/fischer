@@ -38,15 +38,16 @@ import {
 import { useMemo, useTransition } from "react";
 import { useIsMobile } from "@/hooks/use-mobile";
 import { useRouter } from "next/navigation";
+import { authClient } from "@/auth-client";
 
 type Props = {
-  userId: string | undefined;
   userRole?: string;
   games: GameWithParticipantNamesAndRatings[];
   onResultChange: (gameId: number, result: GameResult) => Promise<void>;
 };
 
-export function GamesList({ userId, userRole, games, onResultChange }: Props) {
+export function GamesList({ userRole, games, onResultChange }: Props) {
+  const session = authClient.useSession();
   const isMobile = useIsMobile();
   const router = useRouter();
   const [isPending, startTransition] = useTransition();
@@ -144,8 +145,9 @@ export function GamesList({ userId, userRole, games, onResultChange }: Props) {
                 </TooltipContent>
               </Tooltip>
               {/* TODO: Schiedsrichter darf Ergebnisse melden (global) */}
-              {userId != null &&
-              gameParticipantsMap[game.id].includes(userId) ? (
+              {session.data?.user.id != null &&
+              (gameParticipantsMap[game.id].includes(session.data.user.id) ||
+                session.data.user.role === "admin") ? (
                 <Dialog>
                   <Tooltip>
                     <TooltipTrigger asChild>
