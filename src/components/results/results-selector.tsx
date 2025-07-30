@@ -12,6 +12,7 @@ import {
 import { Label } from "../ui/label";
 import type { TournamentNames } from "@/db/types/tournament";
 import type { GroupSummary } from "@/db/types/group";
+import { buildResultsUrl } from "@/lib/navigation";
 
 export type Props = {
   selectedTournamentId: string;
@@ -32,28 +33,9 @@ export function ResultsSelector({
 }: Props) {
   const router = useRouter();
 
-  const buildUrl = (params: {
-    tournamentId: string;
-    groupId?: string;
-    round?: string;
-  }) => {
-    const searchParams = new URLSearchParams();
-    searchParams.set("tournamentId", params.tournamentId);
-
-    if (params.groupId) {
-      searchParams.set("groupId", params.groupId);
-    }
-
-    if (params.round) {
-      searchParams.set("round", params.round);
-    }
-
-    return `/ergebnisse?${searchParams.toString()}`;
-  };
-
   const handleTournamentChange = (tournamentId: string) => {
     router.push(
-      buildUrl({
+      buildResultsUrl({
         tournamentId,
         groupId: selectedGroupId,
         round: selectedRound,
@@ -63,7 +45,7 @@ export function ResultsSelector({
 
   const handleGroupChange = (groupId: string) => {
     router.push(
-      buildUrl({
+      buildResultsUrl({
         tournamentId: selectedTournamentId,
         groupId,
         round: selectedRound,
@@ -73,7 +55,7 @@ export function ResultsSelector({
 
   const handleRoundChange = (round: string | undefined) => {
     router.push(
-      buildUrl({
+      buildResultsUrl({
         tournamentId: selectedTournamentId,
         groupId: selectedGroupId,
         round,

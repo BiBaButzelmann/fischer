@@ -13,6 +13,7 @@ import { MatchDay } from "@/db/types/match-day";
 import { toast } from "sonner";
 import { Skeleton } from "@/components/ui/skeleton";
 import { useRouter } from "next/navigation";
+import { buildGameViewUrl } from "@/lib/navigation";
 
 /*TODO: 
 add personal events for 
@@ -91,13 +92,14 @@ export function MyGamesCalendar({ events, matchdays = [] }: Props) {
         return;
       }
 
-      const url = new URL("/partien", window.location.origin);
-      url.searchParams.set("tournamentId", tournamentId.toString());
-      url.searchParams.set("groupId", groupId.toString());
-      url.searchParams.set("round", round.toString());
-      url.searchParams.set("participantId", participantId.toString());
+      const url = buildGameViewUrl({
+        tournamentId,
+        groupId,
+        round,
+        participantId,
+      });
 
-      router.push(url.toString());
+      router.push(url);
     },
     [router],
   );

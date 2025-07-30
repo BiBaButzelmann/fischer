@@ -12,6 +12,7 @@ import { Label } from "../ui/label";
 import type { TournamentNames } from "@/db/types/tournament";
 import type { GroupSummary } from "@/db/types/group";
 import type { ParticipantWithName } from "@/db/types/participant";
+import { buildPartienQueryParams } from "@/lib/navigation";
 
 export type Props = {
   selectedTournamentId: string;
@@ -36,30 +37,9 @@ export function PartienSelector({
 }: Props) {
   const router = useRouter();
 
-  const buildUrl = (params: {
-    tournamentId: string;
-    groupId: string;
-    round?: string;
-    participantId?: string;
-  }) => {
-    const searchParams = new URLSearchParams();
-    searchParams.set("tournamentId", params.tournamentId);
-    searchParams.set("groupId", params.groupId);
-
-    if (params.round != null && params.round !== "") {
-      searchParams.set("round", params.round);
-    }
-
-    if (params.participantId != null && params.participantId !== "") {
-      searchParams.set("participantId", params.participantId);
-    }
-
-    return `?${searchParams.toString()}`;
-  };
-
   const handleTournamentChange = (tournamentId: string) => {
     router.push(
-      buildUrl({
+      buildPartienQueryParams({
         tournamentId,
         groupId: selectedGroupId,
         round: selectedRound,
@@ -70,7 +50,7 @@ export function PartienSelector({
 
   const handleGroupChange = (group: string) => {
     router.push(
-      buildUrl({
+      buildPartienQueryParams({
         tournamentId: selectedTournamentId,
         groupId: group,
         round: selectedRound,
@@ -81,7 +61,7 @@ export function PartienSelector({
 
   const handleRoundChange = (round: string | undefined) => {
     router.push(
-      buildUrl({
+      buildPartienQueryParams({
         tournamentId: selectedTournamentId,
         groupId: selectedGroupId,
         round,
@@ -92,7 +72,7 @@ export function PartienSelector({
 
   const handleParticipantChange = (participantId: string | undefined) => {
     router.push(
-      buildUrl({
+      buildPartienQueryParams({
         tournamentId: selectedTournamentId,
         groupId: selectedGroupId,
         round: selectedRound,
