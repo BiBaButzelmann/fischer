@@ -11,9 +11,13 @@ export function buildGameViewUrl(params: {
   searchParams.set("tournamentId", params.tournamentId.toString());
   searchParams.set("groupId", params.groupId.toString());
 
-  params.round && searchParams.set("round", params.round.toString());
-  params.participantId &&
+  if (params.round) {
+    searchParams.set("round", params.round.toString());
+  }
+
+  if (params.participantId) {
     searchParams.set("participantId", params.participantId.toString());
+  }
 
   return `/partien?${searchParams.toString()}`;
 }
