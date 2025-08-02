@@ -6,14 +6,17 @@ import { db } from "@/db/client";
 import { isUserParticipantInGame } from "@/db/repositories/game";
 import { getGroupById } from "@/db/repositories/group";
 import { getTournamentById } from "@/db/repositories/tournament";
+import { createGamePostponement } from "@/db/repositories/game-postponement";
 import { game } from "@/db/schema/game";
+import { matchday, matchdayGame } from "@/db/schema/matchday";
+import { profile } from "@/db/schema/profile";
 import { GameResult } from "@/db/types/game";
 import { and, eq, InferInsertModel, inArray } from "drizzle-orm";
 import { revalidatePath } from "next/cache";
 import invariant from "tiny-invariant";
 import { roundRobinPairs } from "@/lib/pairing-utils";
 import { redirect } from "next/navigation";
-import { matchdayGame } from "@/db/schema/matchday";
+import { getGameDateTime } from "@/lib/game-time";
 
 export async function removeScheduledGamesForGroup(
   tournamentId: number,
@@ -169,6 +172,76 @@ export async function scheduleGamesForGroup(
   });
 
   revalidatePath("/admin/paarungen");
+}
+
+export async function updateGameMatchday(
+  gameId: number,
+  newMatchdayId: number,
+) {
+  const session = await authWithRedirect();
+
+  const gameData = await db.query.game.findFirst({
+    where: eq(game.id, gameId),
+    with: {
+      whiteParticipant: { with: { profile: true } },
+      blackParticipant: { with: { profile: true } },
+      matchdayGame: {
+        with: {
+          matchday: true,
+        },
+      },
+    },
+  });
+
+  invariant(gameData, "Game not found");
+
+  const isUserInGame =
+    gameData.whiteParticipant.profile.userId === session.user.id ||
+    gameData.blackParticipant.profile.userId === session.user.id;
+
+  invariant(
+    isUserInGame || session.user.role === "admin",
+    "Unauthorized to move this game",
+  );
+
+  const currentMatchday = gameData.matchdayGame?.matchday;
+  const newMatchday = await db.query.matchday.findFirst({
+    where: eq(matchday.id, newMatchdayId),
+  });
+
+  invariant(currentMatchday, "Current matchday not found");
+  invariant(newMatchday, "New matchday not found");
+
+  const postponingParticipant =
+    gameData.whiteParticipant.profile.userId === session.user.id
+      ? gameData.whiteParticipant
+      : gameData.blackParticipant;
+
+  const userProfile = await db.query.profile.findFirst({
+    where: eq(profile.userId, session.user.id),
+  });
+
+  invariant(userProfile, "User profile not found");
+
+  const fromTimestamp = getGameDateTime(currentMatchday.date);
+  const toTimestamp = getGameDateTime(newMatchday.date);
+
+  await db.transaction(async (tx) => {
+    await createGamePostponement(
+      gameId,
+      postponingParticipant.id,
+      userProfile.id,
+      fromTimestamp,
+      toTimestamp,
+    );
+
+    await tx
+      .update(matchdayGame)
+      .set({ matchdayId: newMatchdayId })
+      .where(eq(matchdayGame.gameId, gameId));
+  });
+
+  revalidatePath("/kalender");
 }
 
 export async function rescheduleGamesForGroup(
