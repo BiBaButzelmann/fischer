@@ -85,7 +85,7 @@ export function MyGamesCalendar({ events, matchdays = [] }: Props) {
         }
       });
     },
-    [matchdays, validDropDates],
+    [matchdays, validDropDates, isSameDate],
   );
 
   const handleEventClick = useCallback(
