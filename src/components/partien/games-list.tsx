@@ -143,7 +143,8 @@ export function GamesList({
                     </TooltipContent>
                   </Tooltip>
                   {/* TODO: Schiedsrichter darf Ergebnisse melden (global) */}
-                  {gameParticipantsMap[game.id].includes(userId) ? (
+                  {gameParticipantsMap[game.id].includes(userId) ||
+                  userRole === "admin" ? (
                     <ReportResultDialog
                       gameId={game.id}
                       currentResult={game.result}
@@ -151,11 +152,13 @@ export function GamesList({
                       onResultChange={onResultChange}
                     />
                   ) : null}
-                  {gameParticipantsMap[game.id].includes(userId) ? (
+                  {gameParticipantsMap[game.id].includes(userId) ||
+                  userRole === "admin" ? (
                     <PostponeGameDialog
                       gameId={game.id}
                       availableMatchdays={availableMatchdays}
                       currentGameDate={getGameTimeFromGame(game)}
+                      game={game}
                     />
                   ) : null}
                 </TableCell>
