@@ -9,6 +9,7 @@ import type {
   EventClickArg,
   DayCellMountArg,
   DatesSetArg,
+  AllowFunc,
 } from "@fullcalendar/core/index.js";
 import deLocale from "@fullcalendar/core/locales/de.js";
 import interactionPlugin from "@fullcalendar/interaction";
@@ -23,7 +24,7 @@ type Props = {
   onEventDragStart?: () => void;
   onEventDragStop?: () => void;
   onDayCellDidMount?: (info: DayCellMountArg) => void;
-  eventAllow?: (dropInfo: any, draggedEvent: any) => boolean;
+  eventAllow?: AllowFunc;
   initialDate?: Date;
   onDatesSet?: (info: DatesSetArg) => void;
 };
