@@ -38,6 +38,7 @@ import {
 import { useMemo, useTransition } from "react";
 import { useIsMobile } from "@/hooks/use-mobile";
 import { useRouter } from "next/navigation";
+import { formatGameDate, getGameTimeFromGame } from "@/lib/game-time";
 
 type Props = {
   userId: string | undefined;
@@ -85,14 +86,19 @@ export function GamesList({ userId, userRole, games, onResultChange }: Props) {
       <TableHeader>
         <TableRow>
           <TableHead className="hidden md:table-cell sticky top-0 bg-card">
+            Datum
+          </TableHead>
+          <TableHead className="hidden md:table-cell sticky top-0 bg-card">
             Brett
           </TableHead>
           <TableHead className="hidden md:table-cell sticky top-0 bg-card">
             Runde
           </TableHead>
           <TableHead className="sticky top-0 bg-card">Weiß</TableHead>
+          <TableHead className="sticky top-0 bg-card text-center">
+            Ergebnis
+          </TableHead>
           <TableHead className="sticky top-0 bg-card">Schwarz</TableHead>
-          <TableHead className="sticky top-0 bg-card">Ergebnis</TableHead>
           <TableHead className="hidden md:table-cell sticky top-0 bg-card"></TableHead>
         </TableRow>
       </TableHeader>
@@ -103,11 +109,16 @@ export function GamesList({ userId, userRole, games, onResultChange }: Props) {
             onClick={isMobile ? () => handleNavigate(game.id) : undefined}
             className="cursor-default"
           >
-            <TableCell className="hidden md:table-cell">
+            <TableCell className="hidden md:table-cell w-24">
+              {formatGameDate(getGameTimeFromGame(game))}
+            </TableCell>
+            <TableCell className="hidden md:table-cell w-16">
               <Badge variant="outline">{game.boardNumber}</Badge>
             </TableCell>
-            <TableCell className="hidden md:table-cell">{game.round}</TableCell>
-            <TableCell>
+            <TableCell className="hidden md:table-cell w-16">
+              {game.round}
+            </TableCell>
+            <TableCell className="w-1/5">
               {game.whiteParticipant.profile.firstName}{" "}
               {game.whiteParticipant.profile.lastName}
               {game.whiteParticipant.fideRating && (
@@ -116,7 +127,10 @@ export function GamesList({ userId, userRole, games, onResultChange }: Props) {
                 </span>
               )}
             </TableCell>
-            <TableCell>
+            <TableCell className="w-20 text-center">
+              {game.result ?? "-"}
+            </TableCell>
+            <TableCell className="w-1/5">
               {game.blackParticipant.profile.firstName}{" "}
               {game.blackParticipant.profile.lastName}
               {game.blackParticipant.fideRating && (
@@ -125,7 +139,6 @@ export function GamesList({ userId, userRole, games, onResultChange }: Props) {
                 </span>
               )}
             </TableCell>
-            <TableCell>{game.result ?? "-"}</TableCell>
             <TableCell className="hidden md:flex items-center gap-2">
               <Tooltip>
                 <TooltipTrigger asChild>

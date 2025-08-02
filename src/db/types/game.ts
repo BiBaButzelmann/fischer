@@ -34,6 +34,11 @@ export type GameWithParticipantNamesAndRatings = Game & {
     };
     fideRating: number | null;
   };
+  matchdayGame: {
+    matchday: {
+      date: Date;
+    };
+  };
 };
 
 export type GameWithMatchday = Game & {
