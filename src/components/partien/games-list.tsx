@@ -62,104 +62,108 @@ export function GamesList({
   };
 
   return (
-    <Table>
-      <TableHeader>
-        <TableRow>
-          <TableHead className="hidden md:table-cell sticky top-0 bg-card text-center">
-            Runde
-          </TableHead>
-          <TableHead className="hidden md:table-cell sticky top-0 bg-card">
-            Brett
-          </TableHead>
-          <TableHead className="sticky top-0 bg-card">Weiß</TableHead>
-          <TableHead className="sticky top-0 bg-card text-center">
-            Ergebnis
-          </TableHead>
-          <TableHead className="sticky top-0 bg-card">Schwarz</TableHead>
-          <TableHead className="hidden md:table-cell sticky top-0 bg-card">
-            Datum
-          </TableHead>
-          <TableHead className="hidden md:table-cell sticky top-0 bg-card w-32">
-            Aktionen
-          </TableHead>
-        </TableRow>
-      </TableHeader>
-      <TableBody>
-        {games.map((game) => (
-          <TableRow
-            key={game.id}
-            onClick={isMobile ? () => handleNavigate(game.id) : undefined}
-            className="cursor-default"
-          >
-            <TableCell className="hidden md:table-cell w-16 text-center">
-              {game.round}
-            </TableCell>
-            <TableCell className="hidden md:table-cell w-16">
-              <Badge variant="outline">{game.boardNumber}</Badge>
-            </TableCell>
-            <TableCell className="w-40 truncate">
-              {game.whiteParticipant.profile.firstName}{" "}
-              {game.whiteParticipant.profile.lastName}
-              {game.whiteParticipant.fideRating && (
-                <span className="ml-2 text-muted-foreground text-sm">
-                  ({game.whiteParticipant.fideRating})
-                </span>
-              )}
-            </TableCell>
-            <TableCell className="w-20 text-center font-medium">
-              {game.result ? game.result.replace(":", " : ") : "-"}
-            </TableCell>
-            <TableCell className="w-40 truncate">
-              {game.blackParticipant.profile.firstName}{" "}
-              {game.blackParticipant.profile.lastName}
-              {game.blackParticipant.fideRating && (
-                <span className="ml-2 text-muted-foreground text-sm">
-                  ({game.blackParticipant.fideRating})
-                </span>
-              )}
-            </TableCell>
-            <TableCell className="hidden md:table-cell w-24">
-              {formatGameDate(getGameTimeFromGame(game))}
-            </TableCell>
-            <TableCell className="hidden md:flex items-center gap-2 w-32">
-              <Tooltip>
-                <TooltipTrigger asChild>
-                  <Link href={`/partien/${game.id}`}>
-                    <Button
-                      aria-label="Partie eingeben"
-                      variant="outline"
-                      size="icon"
-                    >
-                      <NotebookPen className="h-4 w-4" />
-                    </Button>
-                  </Link>
-                </TooltipTrigger>
-                <TooltipContent>
-                  <p>Partie anschauen</p>
-                </TooltipContent>
-              </Tooltip>
-              {/* TODO: Schiedsrichter darf Ergebnisse melden (global) */}
-              {userId != null &&
-              gameParticipantsMap[game.id].includes(userId) ? (
-                <ReportResultDialog
-                  gameId={game.id}
-                  currentResult={game.result}
-                  userRole={userRole}
-                  onResultChange={onResultChange}
-                />
-              ) : null}
-              {userId != null &&
-              gameParticipantsMap[game.id].includes(userId) ? (
-                <PostponeGameDialog
-                  gameId={game.id}
-                  availableMatchdays={availableMatchdays}
-                  currentGameDate={getGameTimeFromGame(game)}
-                />
-              ) : null}
-            </TableCell>
+    <div className="border rounded-lg overflow-hidden">
+      <Table>
+        <TableHeader>
+          <TableRow>
+            <TableHead className="hidden md:table-cell sticky top-0 bg-card text-center">
+              Runde
+            </TableHead>
+            <TableHead className="hidden md:table-cell sticky top-0 bg-card">
+              Brett
+            </TableHead>
+            <TableHead className="sticky top-0 bg-card">Weiß</TableHead>
+            <TableHead className="sticky top-0 bg-card text-center">
+              Ergebnis
+            </TableHead>
+            <TableHead className="sticky top-0 bg-card">Schwarz</TableHead>
+            <TableHead className="hidden md:table-cell sticky top-0 bg-card">
+              Datum
+            </TableHead>
+            {userId != null && (
+              <TableHead className="hidden md:table-cell sticky top-0 bg-card w-32">
+                Aktionen
+              </TableHead>
+            )}
           </TableRow>
-        ))}
-      </TableBody>
-    </Table>
+        </TableHeader>
+        <TableBody>
+          {games.map((game) => (
+            <TableRow
+              key={game.id}
+              onClick={isMobile ? () => handleNavigate(game.id) : undefined}
+              className="cursor-default"
+            >
+              <TableCell className="hidden md:table-cell w-16 text-center">
+                {game.round}
+              </TableCell>
+              <TableCell className="hidden md:table-cell w-16">
+                <Badge variant="outline">{game.boardNumber}</Badge>
+              </TableCell>
+              <TableCell className="w-40 truncate">
+                {game.whiteParticipant.profile.firstName}{" "}
+                {game.whiteParticipant.profile.lastName}
+                {game.whiteParticipant.fideRating && (
+                  <span className="ml-2 text-muted-foreground text-sm">
+                    ({game.whiteParticipant.fideRating})
+                  </span>
+                )}
+              </TableCell>
+              <TableCell className="w-20 text-center font-medium">
+                {game.result ? game.result.replace(":", " : ") : "-"}
+              </TableCell>
+              <TableCell className="w-40 truncate">
+                {game.blackParticipant.profile.firstName}{" "}
+                {game.blackParticipant.profile.lastName}
+                {game.blackParticipant.fideRating && (
+                  <span className="ml-2 text-muted-foreground text-sm">
+                    ({game.blackParticipant.fideRating})
+                  </span>
+                )}
+              </TableCell>
+              <TableCell className="hidden md:table-cell w-24">
+                {formatGameDate(getGameTimeFromGame(game))}
+              </TableCell>
+              {userId != null && (
+                <TableCell className="hidden md:flex items-center gap-2 w-32">
+                  <Tooltip>
+                    <TooltipTrigger asChild>
+                      <Link href={`/partien/${game.id}`}>
+                        <Button
+                          aria-label="Partie eingeben"
+                          variant="outline"
+                          size="icon"
+                        >
+                          <NotebookPen className="h-4 w-4" />
+                        </Button>
+                      </Link>
+                    </TooltipTrigger>
+                    <TooltipContent>
+                      <p>Partie anschauen</p>
+                    </TooltipContent>
+                  </Tooltip>
+                  {/* TODO: Schiedsrichter darf Ergebnisse melden (global) */}
+                  {gameParticipantsMap[game.id].includes(userId) ? (
+                    <ReportResultDialog
+                      gameId={game.id}
+                      currentResult={game.result}
+                      userRole={userRole}
+                      onResultChange={onResultChange}
+                    />
+                  ) : null}
+                  {gameParticipantsMap[game.id].includes(userId) ? (
+                    <PostponeGameDialog
+                      gameId={game.id}
+                      availableMatchdays={availableMatchdays}
+                      currentGameDate={getGameTimeFromGame(game)}
+                    />
+                  ) : null}
+                </TableCell>
+              )}
+            </TableRow>
+          ))}
+        </TableBody>
+      </Table>
+    </div>
   );
 }
