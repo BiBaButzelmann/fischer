@@ -16,7 +16,7 @@ import { updateProfile } from "@/actions/profile";
 export function ChangePhoneNumberCard({
   phoneNumber: initialPhoneNumber = "",
 }: {
-  phoneNumber: string | null;
+  phoneNumber: string;
 }) {
   const [isPending, startTransition] = useTransition();
   const [phoneNumber, setPhoneNumber] = useState(initialPhoneNumber);
