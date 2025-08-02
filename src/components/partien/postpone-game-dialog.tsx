@@ -20,19 +20,24 @@ import { Calendar } from "../ui/calendar";
 import { Tooltip, TooltipContent, TooltipTrigger } from "../ui/tooltip";
 import { updateGameMatchday } from "@/actions/game";
 import { MatchDay } from "@/db/types/match-day";
+import { GameWithParticipantNamesAndRatings } from "@/db/types/game";
 import { toast } from "sonner";
 import { cn } from "@/lib/utils";
+import { Card, CardContent } from "../ui/card";
+import { Mail, Phone } from "lucide-react";
 
 type Props = {
   gameId: number;
   availableMatchdays: MatchDay[];
   currentGameDate: Date;
+  game: GameWithParticipantNamesAndRatings;
 };
 
 export function PostponeGameDialog({
   gameId,
   availableMatchdays,
   currentGameDate,
+  game,
 }: Props) {
   const [isPending, startTransition] = useTransition();
   const [selectedDate, setSelectedDate] = useState<Date | undefined>();
@@ -111,12 +116,48 @@ export function PostponeGameDialog({
           <DialogHeader>
             <DialogTitle>Partie verschieben</DialogTitle>
             <DialogDescription>
-              Sprich dich mit deinem Gegner ab und trage hier anschließend das
-              neue Datum ein.
+              Sprich dich zuerst mit deinem Gegner ab und trage hier
+              anschließend das neue Datum ein.
             </DialogDescription>
           </DialogHeader>
+
+          <div className="space-y-4 my-4">
+            <Card>
+              <CardContent className="space-y-2 pt-6">
+                <h3 className="text-base">
+                  {game.whiteParticipant.profile.firstName}{" "}
+                  {game.whiteParticipant.profile.lastName}
+                </h3>
+                <div className="flex items-center gap-2 text-sm text-muted-foreground">
+                  <Mail className="h-3 w-3" />
+                  {game.whiteParticipant.profile.email}
+                </div>
+                <div className="flex items-center gap-2 text-sm text-muted-foreground">
+                  <Phone className="h-3 w-3" />
+                  {game.whiteParticipant.profile.phoneNumber}
+                </div>
+              </CardContent>
+            </Card>
+
+            <Card>
+              <CardContent className="space-y-2 pt-6">
+                <h3 className="text-base">
+                  {game.blackParticipant.profile.firstName}{" "}
+                  {game.blackParticipant.profile.lastName}
+                </h3>
+                <div className="flex items-center gap-2 text-sm text-muted-foreground">
+                  <Mail className="h-3 w-3" />
+                  {game.blackParticipant.profile.email}
+                </div>
+                <div className="flex items-center gap-2 text-sm text-muted-foreground">
+                  <Phone className="h-3 w-3" />
+                  {game.blackParticipant.profile.phoneNumber}
+                </div>
+              </CardContent>
+            </Card>
+          </div>
+
           <div className="flex flex-col gap-2 py-4">
-            <Label className="font-medium">Neues Datum</Label>
             <Popover>
               <PopoverTrigger asChild>
                 <Button
