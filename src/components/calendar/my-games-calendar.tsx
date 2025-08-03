@@ -55,6 +55,12 @@ export function MyGamesCalendar({ events, matchdays = [] }: Props) {
         return;
       }
 
+      if (info.event.extendedProps.eventType === "referee") {
+        info.revert();
+        toast.error("Schiedsrichter-Termine können nicht verschoben werden.");
+        return;
+      }
+
       const gameId = info.event.extendedProps.gameId;
       if (!gameId) {
         info.revert();
@@ -89,6 +95,13 @@ export function MyGamesCalendar({ events, matchdays = [] }: Props) {
 
   const handleEventClick = useCallback(
     (info: EventClickArg) => {
+      if (info.event.extendedProps.eventType === "referee") {
+        toast.info(
+          "Das ist dein Schiedsrichter-Termin. Weitere Funktionen folgen.",
+        );
+        return;
+      }
+
       const gameId = info.event.extendedProps.gameId;
       const participantId = info.event.extendedProps.participantId;
       const round = info.event.extendedProps.round;

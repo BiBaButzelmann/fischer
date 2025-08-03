@@ -1,7 +1,11 @@
 import { authWithRedirect } from "@/auth/utils";
 import { MyGamesCalendar } from "@/components/calendar/my-games-calendar";
-import { getCalendarEventsForParticipant } from "@/db/repositories/calendar-events";
+import {
+  getCalendarEventsForParticipant,
+  getCalendarEventsForReferee,
+} from "@/db/repositories/calendar-events";
 import { getParticipantByUserId } from "@/db/repositories/participant";
+import { getRefereeByUserId } from "@/db/repositories/referee";
 import { getAllMatchdaysByTournamentId } from "@/db/repositories/match-day";
 import { getActiveTournament } from "@/db/repositories/tournament";
 
@@ -9,13 +13,31 @@ export default async function Page() {
   const session = await authWithRedirect();
 
   const currentParticipant = await getParticipantByUserId(session.user.id);
-  if (currentParticipant == null) {
-    return <div>Du bist nicht für ein Turnier angemeldet.</div>;
+  const currentReferee = await getRefereeByUserId(session.user.id);
+
+  if (!currentParticipant && !currentReferee) {
+    return (
+      <div>
+        <h1 className="text-3xl font-bold text-gray-900 mb-2">Kalender</h1>
+        <div className="bg-yellow-50 border border-yellow-200 rounded-lg p-4">
+          <p className="text-yellow-800 text-sm">
+            Du bist weder als Teilnehmer noch als Schiedsrichter für ein Turnier
+            angemeldet.
+          </p>
+        </div>
+      </div>
+    );
   }
 
-  const calendarEvents = await getCalendarEventsForParticipant(
-    currentParticipant.id,
-  );
+  const participantEvents = currentParticipant
+    ? await getCalendarEventsForParticipant(currentParticipant.id)
+    : [];
+
+  const refereeEvents = currentReferee
+    ? await getCalendarEventsForReferee(currentReferee.id)
+    : [];
+
+  const calendarEvents = [...participantEvents, ...refereeEvents];
 
   const activeTournament = await getActiveTournament();
   const matchdays = activeTournament
@@ -28,8 +50,11 @@ export default async function Page() {
         <h1 className="text-3xl font-bold text-gray-900 mb-2">Kalender</h1>
         <div className="bg-blue-50 border border-blue-200 rounded-lg p-4 mb-4">
           <p className="text-blue-800 text-sm">
-            Deine persönlichen Termine werden in diesem Kalender am{" "}
-            <strong>02.09.2025</strong> angezeigt werden
+            {currentParticipant && currentReferee
+              ? "Hier siehst du deine Spiele als Teilnehmer (blau) und deine Termine als Schiedsrichter (rot)."
+              : currentParticipant
+                ? "Hier siehst du deine Spiele als Teilnehmer. Du kannst Spiele per Drag & Drop verschieben."
+                : "Hier siehst du deine Termine als Schiedsrichter."}
           </p>
         </div>
       </div>
