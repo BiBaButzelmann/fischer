@@ -68,7 +68,7 @@ export default async function Page({
   );
 
   //TODO: proper validation
-  const participants = selectedGroup 
+  const participants = selectedGroup
     ? await getParticipantsByGroupId(Number(selectedGroup))
     : [];
 

@@ -9,6 +9,13 @@ import {
   SelectValue,
 } from "../ui/select";
 import { Label } from "../ui/label";
+import { Button } from "../ui/button";
+import { Calendar } from "../ui/calendar";
+import { Popover, PopoverContent, PopoverTrigger } from "../ui/popover";
+import { CalendarIcon } from "lucide-react";
+import { cn } from "@/lib/utils";
+import { format } from "date-fns";
+import { de } from "date-fns/locale";
 import type { TournamentNames } from "@/db/types/tournament";
 import type { GroupSummary } from "@/db/types/group";
 import type { ParticipantWithName } from "@/db/types/participant";
@@ -118,6 +125,26 @@ export function PartienSelector({
     );
   };
 
+  const handleDateChange = (date: Date | undefined) => {
+    if (!date) {
+      handleMatchdayChange(undefined);
+      return;
+    }
+
+    const matchday = matchdays.find((md) => {
+      const mdDate = new Date(md.date);
+      return mdDate.toDateString() === date.toDateString();
+    });
+
+    if (matchday) {
+      handleMatchdayChange(matchday.id.toString());
+    }
+  };
+
+  const selectedMatchday = selectedMatchdayId
+    ? matchdays.find((md) => md.id === Number(selectedMatchdayId))
+    : undefined;
+
   return (
     <div className="flex flex-wrap gap-2 md:gap-4 mb-4">
       <div className="flex flex-col gap-1">
@@ -139,6 +166,60 @@ export function PartienSelector({
             ))}
           </SelectContent>
         </Select>
+      </div>
+      <div className="flex flex-col gap-1">
+        <Label className="text-sm font-medium">Spieltag</Label>
+        <div className="relative">
+          <Popover>
+            <PopoverTrigger asChild>
+              <Button
+                variant="outline"
+                className={cn(
+                  "w-48 justify-start text-left font-normal",
+                  !selectedMatchday && "text-muted-foreground",
+                )}
+              >
+                <CalendarIcon className="mr-2 h-4 w-4" />
+                {selectedMatchday ? (
+                  format(new Date(selectedMatchday.date), "dd.MM.yyyy", {
+                    locale: de,
+                  })
+                ) : (
+                  <span>Datum wählen</span>
+                )}
+                {selectedMatchday && (
+                  <Button
+                    variant="ghost"
+                    size="sm"
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      handleMatchdayChange(undefined);
+                    }}
+                    className="absolute right-1 h-6 w-6 p-0 hover:bg-gray-100"
+                  >
+                    ✕
+                  </Button>
+                )}
+              </Button>
+            </PopoverTrigger>
+            <PopoverContent className="w-auto p-0">
+              <Calendar
+                mode="single"
+                selected={
+                  selectedMatchday ? new Date(selectedMatchday.date) : undefined
+                }
+                onSelect={handleDateChange}
+                disabled={(date) => {
+                  // Only enable dates that have matchdays
+                  return !matchdays.some((md) => {
+                    const mdDate = new Date(md.date);
+                    return mdDate.toDateString() === date.toDateString();
+                  });
+                }}
+              />
+            </PopoverContent>
+          </Popover>
+        </div>
       </div>
       <div className="flex flex-col gap-1">
         <Label htmlFor="group-select" className="text-sm font-medium">
@@ -213,32 +294,6 @@ export function PartienSelector({
             {participants.map((p) => (
               <SelectItem key={p.id} value={p.id.toString()}>
                 {p.title} {p.profile.firstName} {p.profile.lastName}
-              </SelectItem>
-            ))}
-          </SelectContent>
-        </Select>
-      </div>
-      <div className="flex flex-col gap-1">
-        <Label htmlFor="matchday-select" className="text-sm font-medium">
-          Spieltag
-        </Label>
-        <Select
-          key={selectedMatchdayId}
-          value={selectedMatchdayId}
-          onValueChange={handleMatchdayChange}
-        >
-          <SelectTrigger
-            id="matchday-select"
-            className="w-48"
-            clearable={selectedMatchdayId != null}
-            onClear={() => handleMatchdayChange(undefined)}
-          >
-            <SelectValue />
-          </SelectTrigger>
-          <SelectContent>
-            {matchdays.map((md) => (
-              <SelectItem key={md.id} value={md.id.toString()}>
-                {new Date(md.date).toLocaleDateString("de-DE")}
               </SelectItem>
             ))}
           </SelectContent>
