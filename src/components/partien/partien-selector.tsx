@@ -210,7 +210,6 @@ export function PartienSelector({
                 }
                 onSelect={handleDateChange}
                 disabled={(date) => {
-                  // Only enable dates that have matchdays
                   return !matchdays.some((md) => {
                     const mdDate = new Date(md.date);
                     return mdDate.toDateString() === date.toDateString();
