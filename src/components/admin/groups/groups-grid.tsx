@@ -38,6 +38,7 @@ export function GroupsGrid({
   onChangeUnassignedParticipants,
   onDeleteGroup,
   onSaveGroup,
+  onUpdateGroupName,
 }: {
   tournamentId: number;
   groups: GridGroup[];
@@ -46,6 +47,7 @@ export function GroupsGrid({
   onChangeUnassignedParticipants: (participants: ParticipantWithName[]) => void;
   onDeleteGroup: (groupId: number) => void;
   onSaveGroup: (group: GridGroup) => void;
+  onUpdateGroupName: (groupId: number, newName: string) => void;
 }) {
   const [activeItem, setActiveItem] = useState<ParticipantWithName | null>(
     null,
@@ -68,10 +70,7 @@ export function GroupsGrid({
   });
 
   const handleChangeGroupName = (groupId: number, newName: string) => {
-    const updatedGroups = groups.map((g) =>
-      g.id === groupId ? { ...g, groupName: newName } : g,
-    );
-    onChangeGroups(updatedGroups);
+    onUpdateGroupName(groupId, newName);
   };
 
   const handleChangeGroupMatchDay = (
@@ -316,12 +315,10 @@ function useDragAndDrop({
       return;
     }
 
-    // Handle moving an item to a new container
     const newGroups = [...groups];
     let newUnassigned = [...unassignedParticipants];
     const participant = active.data.current?.participant;
 
-    // Remove from original container
     if (originalContainerId === UNASSIGNED_CONTAINER_ID) {
       newUnassigned = newUnassigned.filter((p) => p.id !== active.id);
     } else {
@@ -338,7 +335,6 @@ function useDragAndDrop({
       }
     }
 
-    // Add to new container
     if (overContainerId === UNASSIGNED_CONTAINER_ID) {
       newUnassigned.push(participant);
     } else {
@@ -374,7 +370,6 @@ function useDragAndDrop({
       !overContainerId ||
       originalContainerId === overContainerId
     ) {
-      // This handles re-ordering within the same list
       if (originalContainerId === UNASSIGNED_CONTAINER_ID) {
         const newUnassignedParticipants = [...unassignedParticipants];
         const oldIndex = unassignedParticipants.findIndex(
@@ -384,8 +379,6 @@ function useDragAndDrop({
           (p) => p.id === over.id,
         );
         return arrayMove(newUnassignedParticipants, oldIndex, newIndex);
-        onChangeUnassignedParticipants(newUnassignedParticipants);
-        return;
       } else {
         const groupIndex = groups.findIndex(
           (g) => g.id === originalContainerId,

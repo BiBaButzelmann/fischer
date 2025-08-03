@@ -15,7 +15,50 @@ import { groupMatchEnteringHelper } from "@/db/schema/matchEnteringHelper";
 import { authWithRedirect } from "@/auth/utils";
 import invariant from "tiny-invariant";
 
-export async function updateGroup(tournamentId: number, groupData: GridGroup) {
+export async function deleteGroup(groupId: number) {
+  const session = await authWithRedirect();
+  invariant(session?.user.role === "admin", "Unauthorized");
+
+  await db.transaction(async (tx) => {
+    const gamesToDelete = await tx.query.game.findMany({
+      where: eq(game.groupId, groupId),
+      columns: { id: true },
+    });
+
+    const gameIds = gamesToDelete.map((g: { id: number }) => g.id);
+
+    if (gameIds.length > 0) {
+      await tx
+        .delete(gamePostponement)
+        .where(inArray(gamePostponement.gameId, gameIds));
+
+      await tx
+        .delete(matchdayGame)
+        .where(inArray(matchdayGame.gameId, gameIds));
+
+      await tx.delete(pgn).where(inArray(pgn.gameId, gameIds));
+
+      await tx.delete(game).where(eq(game.groupId, groupId));
+    }
+
+    await tx
+      .delete(groupMatchEnteringHelper)
+      .where(eq(groupMatchEnteringHelper.groupId, groupId));
+
+    await tx
+      .delete(participantGroup)
+      .where(eq(participantGroup.groupId, groupId));
+
+    await tx.delete(group).where(eq(group.id, groupId));
+  });
+
+  revalidatePath("/admin/gruppen");
+  revalidatePath("/admin/paarungen");
+  revalidatePath("/partien");
+  revalidatePath("/kalender");
+}
+
+export async function saveGroup(tournamentId: number, groupData: GridGroup) {
   const session = await authWithRedirect();
   invariant(session?.user.role === "admin", "Unauthorized");
 
@@ -54,7 +97,7 @@ export async function updateGroup(tournamentId: number, groupData: GridGroup) {
         columns: { id: true },
       });
 
-      const gameIds = gamesToDelete.map((g) => g.id);
+      const gameIds = gamesToDelete.map((g: { id: number }) => g.id);
 
       if (gameIds.length > 0) {
         await tx
@@ -103,6 +146,19 @@ export async function updateGroup(tournamentId: number, groupData: GridGroup) {
   revalidatePath("/admin/paarungen");
   revalidatePath("/partien");
   revalidatePath("/kalender");
+}
+
+export async function updateGroupName(groupId: number, newName: string) {
+  const session = await authWithRedirect();
+  invariant(session?.user.role === "admin", "Unauthorized");
+
+  await db
+    .update(group)
+    .set({ groupName: newName })
+    .where(eq(group.id, groupId));
+
+  revalidatePath("/admin/gruppen");
+  revalidatePath("/admin/paarungen");
 }
 
 export async function updateGroupPositions(
