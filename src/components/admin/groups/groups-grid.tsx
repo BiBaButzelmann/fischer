@@ -74,10 +74,10 @@ export function GroupsGrid({
 
   const handleChangeGroupMatchDay = (
     groupId: number,
-    matchDay: DayOfWeek | null,
+    dayOfWeek: DayOfWeek | null,
   ) => {
     const updatedGroups = groups.map((g) =>
-      g.id === groupId ? { ...g, matchDay } : g,
+      g.id === groupId ? { ...g, dayOfWeek } : g,
     );
     onChangeGroups(updatedGroups);
   };
