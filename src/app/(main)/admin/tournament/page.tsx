@@ -65,28 +65,18 @@ async function ManageTournament({ tournament }: { tournament?: Tournament }) {
         </CollapsibleContent>
       </Collapsible>
 
-      <Collapsible
-        defaultOpen={false}
-        className="border border-primary rounded-md p-4"
-      >
-        <CollapsibleTrigger className="w-full">
-          <div className="flex">
-            <span className="flex-grow text-left">Turnierphase verwalten</span>
-            <ChevronDownIcon />
+      <div className="border border-primary rounded-md p-4">
+        <h2 className="text-lg font-semibold mb-4">Turnierphase verwalten</h2>
+        {tournament ? (
+          <TournamentStageManager tournament={tournament} />
+        ) : (
+          <div>
+            <p className="text-sm text-gray-600">
+              Kein aktives Turnier gefunden. Bitte erstelle ein neues Turnier.
+            </p>
           </div>
-        </CollapsibleTrigger>
-        <CollapsibleContent className="mt-4">
-          {tournament ? (
-            <TournamentStageManager tournament={tournament} />
-          ) : (
-            <div>
-              <p className="text-sm text-gray-600">
-                Kein aktives Turnier gefunden. Bitte erstelle ein neues Turnier.
-              </p>
-            </div>
-          )}
-        </CollapsibleContent>
-      </Collapsible>
+        )}
+      </div>
     </div>
   );
 }
