@@ -58,7 +58,10 @@ export function EditGroupsGrid({
 
   return (
     <div className="flex flex-col gap-4">
-      <div className="flex justify-end">
+      <div className="flex justify-left gap-2">
+        <Button variant="outline" onClick={handleSave} disabled={isPending}>
+          Gruppenaufteilung speichern
+        </Button>
         <Button variant="outline" onClick={handleAddNewGroup}>
           Gruppe hinzufügen
         </Button>
@@ -71,9 +74,6 @@ export function EditGroupsGrid({
         onChangeUnassignedParticipants={setUnassignedParticipants}
         onDeleteGroup={handleDeleteGroup}
       />
-      <Button onClick={handleSave} disabled={isPending}>
-        Gruppenaufteilung Speichern
-      </Button>
     </div>
   );
 }
