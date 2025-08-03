@@ -23,7 +23,7 @@ import { GroupMatchDay } from "./group-match-day";
 import { ParticipantEntry } from "./participant-entry";
 import { GroupDetails } from "./group-details";
 import { Button } from "@/components/ui/button";
-import { Trash } from "lucide-react";
+import { Trash, Save } from "lucide-react";
 import { DayOfWeek } from "@/db/types/group";
 
 export const UNASSIGNED_CONTAINER_ID = "unassigned-droppable";
@@ -37,6 +37,7 @@ export function GroupsGrid({
   onChangeGroups,
   onChangeUnassignedParticipants,
   onDeleteGroup,
+  onSaveGroup,
 }: {
   tournamentId: number;
   groups: GridGroup[];
@@ -44,6 +45,7 @@ export function GroupsGrid({
   onChangeGroups: (groups: GridGroup[]) => void;
   onChangeUnassignedParticipants: (participants: ParticipantWithName[]) => void;
   onDeleteGroup: (groupId: number) => void;
+  onSaveGroup: (group: GridGroup) => void;
 }) {
   const [activeItem, setActiveItem] = useState<ParticipantWithName | null>(
     null,
@@ -100,6 +102,7 @@ export function GroupsGrid({
                 onChangeGroupName={handleChangeGroupName}
                 onChangeGroupMatchDay={handleChangeGroupMatchDay}
                 onDeleteGroup={onDeleteGroup}
+                onSaveGroup={onSaveGroup}
               />
             ))}
             <UnassignedContainer participants={unassignedParticipants} />
@@ -120,11 +123,13 @@ export function GroupContainer({
   onChangeGroupName,
   onChangeGroupMatchDay,
   onDeleteGroup,
+  onSaveGroup,
 }: {
   group: GridGroup;
   onChangeGroupName: (groupId: number, newName: string) => void;
   onChangeGroupMatchDay: (groupId: number, matchDay: DayOfWeek | null) => void;
   onDeleteGroup: (groupId: number) => void;
+  onSaveGroup: (group: GridGroup) => void;
 }) {
   const { setNodeRef } = useDroppable({
     id: group.id,
@@ -150,6 +155,14 @@ export function GroupContainer({
                 onChangeGroupName={onChangeGroupName}
               />
             </div>
+            <Button
+              size="icon"
+              variant="outline"
+              className="text-blue-600 border-blue-600"
+              onClick={() => onSaveGroup(group)}
+            >
+              <Save className="h-4 w-4" />
+            </Button>
             <Button
               size="icon"
               variant="outline"

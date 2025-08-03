@@ -15,21 +15,42 @@ import { groupMatchEnteringHelper } from "@/db/schema/matchEnteringHelper";
 import { authWithRedirect } from "@/auth/utils";
 import invariant from "tiny-invariant";
 
-export async function updateGroups(tournamentId: number, groups: GridGroup[]) {
+export async function updateGroup(tournamentId: number, groupData: GridGroup) {
   const session = await authWithRedirect();
   invariant(session?.user.role === "admin", "Unauthorized");
 
   await db.transaction(async (tx) => {
-    const deletedGroups = await tx
-      .delete(group)
-      .where(eq(group.tournamentId, tournamentId))
-      .returning();
+    if (groupData.isNew) {
+      const insertedGroup = await tx
+        .insert(group)
+        .values({
+          groupName: groupData.groupName,
+          groupNumber: groupData.groupNumber,
+          dayOfWeek: groupData.dayOfWeek,
+          tournamentId,
+        })
+        .returning();
 
-    if (deletedGroups.length > 0) {
-      const deletedGroupIds = deletedGroups.map((g) => g.id);
+      if (groupData.participants.length > 0) {
+        await tx.insert(participantGroup).values(
+          groupData.participants.map((p, index) => ({
+            participantId: p.id,
+            groupId: insertedGroup[0].id,
+            groupPosition: index + 1,
+          })),
+        );
+      }
+    } else {
+      const existingGroup = await tx.query.group.findFirst({
+        where: eq(group.id, groupData.id),
+      });
+
+      if (!existingGroup) {
+        throw new Error(`Group ${groupData.id} not found`);
+      }
 
       const gamesToDelete = await tx.query.game.findMany({
-        where: inArray(game.groupId, deletedGroupIds),
+        where: eq(game.groupId, groupData.id),
         columns: { id: true },
       });
 
@@ -46,46 +67,35 @@ export async function updateGroups(tournamentId: number, groups: GridGroup[]) {
 
         await tx.delete(pgn).where(inArray(pgn.gameId, gameIds));
 
-        await tx.delete(game).where(inArray(game.groupId, deletedGroupIds));
+        await tx.delete(game).where(eq(game.groupId, groupData.id));
       }
 
       await tx
         .delete(groupMatchEnteringHelper)
-        .where(inArray(groupMatchEnteringHelper.groupId, deletedGroupIds));
+        .where(eq(groupMatchEnteringHelper.groupId, groupData.id));
 
       await tx
         .delete(participantGroup)
-        .where(inArray(participantGroup.groupId, deletedGroupIds));
-    }
+        .where(eq(participantGroup.groupId, groupData.id));
 
-    const insertGroupValues = groups.map(
-      (g) =>
-        ({
-          groupName: g.groupName,
-          groupNumber: g.groupNumber,
-          dayOfWeek: g.dayOfWeek,
-          tournamentId,
-        }) as typeof group.$inferInsert,
-    );
+      await tx
+        .update(group)
+        .set({
+          groupName: groupData.groupName,
+          groupNumber: groupData.groupNumber,
+          dayOfWeek: groupData.dayOfWeek,
+        })
+        .where(eq(group.id, groupData.id));
 
-    let insertedGroups: { id: number }[] = [];
-    if (insertGroupValues.length > 0) {
-      insertedGroups = await tx
-        .insert(group)
-        .values(insertGroupValues)
-        .returning();
-    }
-
-    const insertParticipantGroupValues = groups.flatMap((g, groupIndex) =>
-      g.participants.map((p, index) => ({
-        participantId: p.id,
-        groupId: insertedGroups[groupIndex].id,
-        groupPosition: index + 1,
-      })),
-    );
-
-    if (insertParticipantGroupValues.length > 0) {
-      await tx.insert(participantGroup).values(insertParticipantGroupValues);
+      if (groupData.participants.length > 0) {
+        await tx.insert(participantGroup).values(
+          groupData.participants.map((p, index) => ({
+            participantId: p.id,
+            groupId: groupData.id,
+            groupPosition: index + 1,
+          })),
+        );
+      }
     }
   });
 
