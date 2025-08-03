@@ -35,10 +35,14 @@ export async function updateGroups(tournamentId: number, groups: GridGroup[]) {
           tournamentId,
         }) as typeof group.$inferInsert,
     );
-    const insertedGroups = await tx
-      .insert(group)
-      .values(insertGroupValues)
-      .returning();
+
+    let insertedGroups: { id: number }[] = [];
+    if (insertGroupValues.length > 0) {
+      insertedGroups = await tx
+        .insert(group)
+        .values(insertGroupValues)
+        .returning();
+    }
 
     const insertParticipantGroupValues = groups.flatMap((g, groupIndex) =>
       g.participants.map((p, index) => ({
@@ -47,7 +51,10 @@ export async function updateGroups(tournamentId: number, groups: GridGroup[]) {
         groupPosition: index + 1,
       })),
     );
-    await tx.insert(participantGroup).values(insertParticipantGroupValues);
+
+    if (insertParticipantGroupValues.length > 0) {
+      await tx.insert(participantGroup).values(insertParticipantGroupValues);
+    }
   });
 
   revalidatePath("/admin/gruppen");
