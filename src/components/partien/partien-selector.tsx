@@ -18,7 +18,7 @@ import { buildGameViewUrl } from "@/lib/navigation";
 export type Props = {
   selectedTournamentId: string;
   tournamentNames: TournamentNames[];
-  selectedGroupId: string;
+  selectedGroupId?: string;
   groups: GroupSummary[];
   selectedRound?: string;
   rounds: number[];
@@ -46,7 +46,7 @@ export function PartienSelector({
     router.push(
       buildGameViewUrl({
         tournamentId: parseInt(tournamentId),
-        groupId: parseInt(selectedGroupId),
+        groupId: selectedGroupId ? parseInt(selectedGroupId) : undefined,
         round: selectedRound ? parseInt(selectedRound) : undefined,
         participantId: selectedParticipantId
           ? parseInt(selectedParticipantId)
@@ -78,7 +78,7 @@ export function PartienSelector({
     router.push(
       buildGameViewUrl({
         tournamentId: parseInt(selectedTournamentId),
-        groupId: parseInt(selectedGroupId),
+        groupId: selectedGroupId ? parseInt(selectedGroupId) : undefined,
         round: round ? parseInt(round) : undefined,
         participantId: selectedParticipantId
           ? parseInt(selectedParticipantId)
@@ -94,7 +94,7 @@ export function PartienSelector({
     router.push(
       buildGameViewUrl({
         tournamentId: parseInt(selectedTournamentId),
-        groupId: parseInt(selectedGroupId),
+        groupId: selectedGroupId ? parseInt(selectedGroupId) : undefined,
         round: selectedRound ? parseInt(selectedRound) : undefined,
         participantId: participantId ? parseInt(participantId) : undefined,
         matchdayId: selectedMatchdayId
@@ -108,7 +108,7 @@ export function PartienSelector({
     router.push(
       buildGameViewUrl({
         tournamentId: parseInt(selectedTournamentId),
-        groupId: parseInt(selectedGroupId),
+        groupId: selectedGroupId ? parseInt(selectedGroupId) : undefined,
         round: selectedRound ? parseInt(selectedRound) : undefined,
         participantId: selectedParticipantId
           ? parseInt(selectedParticipantId)

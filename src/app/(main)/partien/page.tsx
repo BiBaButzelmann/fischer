@@ -68,11 +68,13 @@ export default async function Page({
   );
 
   //TODO: proper validation
-  const participants = await getParticipantsByGroupId(Number(selectedGroup));
+  const participants = selectedGroup 
+    ? await getParticipantsByGroupId(Number(selectedGroup))
+    : [];
 
   const games = await getGamesByTournamentId(
     Number(selectedTournamentId),
-    groupId ? Number(groupId) : Number(selectedGroup),
+    groupId ? Number(groupId) : undefined,
     matchdayId ? Number(matchdayId) : undefined,
     round != null ? Number(round) : undefined,
     participantId != null ? Number(participantId) : undefined,
@@ -93,7 +95,7 @@ export default async function Page({
         <PartienSelector
           selectedTournamentId={selectedTournamentId}
           tournamentNames={tournamentNames}
-          selectedGroupId={selectedGroup}
+          selectedGroupId={groupId}
           groups={groups}
           selectedRound={round}
           rounds={rounds}
