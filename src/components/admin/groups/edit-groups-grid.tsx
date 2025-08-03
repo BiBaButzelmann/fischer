@@ -79,20 +79,26 @@ export function EditGroupsGrid({
   return (
     <div className="flex flex-col gap-4">
       <div className="flex justify-end">
-        <Button variant="outline" onClick={handleAddNewGroup}>
+        <Button
+          variant="outline"
+          onClick={handleAddNewGroup}
+          disabled={isPending}
+        >
           Gruppe hinzufügen
         </Button>
       </div>
-      <GroupsGrid
-        tournamentId={tournamentId}
-        groups={gridGroups}
-        unassignedParticipants={unassignedParticipants}
-        onChangeGroups={setGridGroups}
-        onChangeUnassignedParticipants={setUnassignedParticipants}
-        onDeleteGroup={handleDeleteGroup}
-        onSaveGroup={handleSaveGroup}
-        onUpdateGroupName={handleUpdateGroupName}
-      />
+      <div className={isPending ? "opacity-50 pointer-events-none" : ""}>
+        <GroupsGrid
+          tournamentId={tournamentId}
+          groups={gridGroups}
+          unassignedParticipants={unassignedParticipants}
+          onChangeGroups={setGridGroups}
+          onChangeUnassignedParticipants={setUnassignedParticipants}
+          onDeleteGroup={handleDeleteGroup}
+          onSaveGroup={handleSaveGroup}
+          onUpdateGroupName={handleUpdateGroupName}
+        />
+      </div>
     </div>
   );
 }
