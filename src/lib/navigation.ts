@@ -3,13 +3,17 @@
  */
 export function buildGameViewUrl(params: {
   tournamentId: number;
-  groupId: number;
+  groupId?: number;
   round?: number;
   participantId?: number;
+  matchdayId?: number;
 }): string {
   const searchParams = new URLSearchParams();
   searchParams.set("tournamentId", params.tournamentId.toString());
-  searchParams.set("groupId", params.groupId.toString());
+
+  if (params.groupId) {
+    searchParams.set("groupId", params.groupId.toString());
+  }
 
   if (params.round) {
     searchParams.set("round", params.round.toString());
@@ -19,13 +23,17 @@ export function buildGameViewUrl(params: {
     searchParams.set("participantId", params.participantId.toString());
   }
 
+  if (params.matchdayId) {
+    searchParams.set("matchdayId", params.matchdayId.toString());
+  }
+
   return `/partien?${searchParams.toString()}`;
 }
 
 /**
  * Builds URL for results page with query parameters
  */
-export function buildResultsUrl(params: {
+export function buildResultsViewUrl(params: {
   tournamentId: string;
   groupId?: string;
   round?: string;

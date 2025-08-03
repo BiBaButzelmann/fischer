@@ -25,3 +25,11 @@ type RefereeEvent = {
 };
 
 export type CalendarEvent = GameEvent | RefereeEvent;
+
+export function isGameEvent(event: CalendarEvent): event is GameEvent {
+  return event.extendedProps.eventType === "game";
+}
+
+export function isRefereeEvent(event: CalendarEvent): event is RefereeEvent {
+  return event.extendedProps.eventType === "referee";
+}

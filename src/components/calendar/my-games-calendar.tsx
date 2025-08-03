@@ -96,9 +96,20 @@ export function MyGamesCalendar({ events, matchdays = [] }: Props) {
   const handleEventClick = useCallback(
     (info: EventClickArg) => {
       if (info.event.extendedProps.eventType === "referee") {
-        toast.info(
-          "Das ist dein Schiedsrichter-Termin. Weitere Funktionen folgen.",
-        );
+        const tournamentId = info.event.extendedProps.tournamentId;
+        const matchdayId = info.event.extendedProps.matchdayId;
+
+        if (!tournamentId || !matchdayId) {
+          toast.error("Fehler: Turnier oder Spieltag nicht gefunden.");
+          return;
+        }
+
+        const url = buildGameViewUrl({
+          tournamentId,
+          matchdayId,
+        });
+
+        router.push(url);
         return;
       }
 

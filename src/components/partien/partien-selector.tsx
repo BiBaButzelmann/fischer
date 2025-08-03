@@ -12,6 +12,7 @@ import { Label } from "../ui/label";
 import type { TournamentNames } from "@/db/types/tournament";
 import type { GroupSummary } from "@/db/types/group";
 import type { ParticipantWithName } from "@/db/types/participant";
+import type { MatchDay } from "@/db/types/match-day";
 import { buildGameViewUrl } from "@/lib/navigation";
 
 export type Props = {
@@ -23,6 +24,8 @@ export type Props = {
   rounds: number[];
   selectedParticipantId?: string;
   participants: ParticipantWithName[];
+  selectedMatchdayId?: string;
+  matchdays: MatchDay[];
 };
 
 export function PartienSelector({
@@ -34,6 +37,8 @@ export function PartienSelector({
   rounds,
   selectedParticipantId,
   participants,
+  selectedMatchdayId,
+  matchdays,
 }: Props) {
   const router = useRouter();
 
@@ -46,18 +51,24 @@ export function PartienSelector({
         participantId: selectedParticipantId
           ? parseInt(selectedParticipantId)
           : undefined,
+        matchdayId: selectedMatchdayId
+          ? parseInt(selectedMatchdayId)
+          : undefined,
       }),
     );
   };
 
-  const handleGroupChange = (group: string) => {
+  const handleGroupChange = (group: string | undefined) => {
     router.push(
       buildGameViewUrl({
         tournamentId: parseInt(selectedTournamentId),
-        groupId: parseInt(group),
+        groupId: group ? parseInt(group) : undefined,
         round: selectedRound ? parseInt(selectedRound) : undefined,
         participantId: selectedParticipantId
           ? parseInt(selectedParticipantId)
+          : undefined,
+        matchdayId: selectedMatchdayId
+          ? parseInt(selectedMatchdayId)
           : undefined,
       }),
     );
@@ -72,6 +83,9 @@ export function PartienSelector({
         participantId: selectedParticipantId
           ? parseInt(selectedParticipantId)
           : undefined,
+        matchdayId: selectedMatchdayId
+          ? parseInt(selectedMatchdayId)
+          : undefined,
       }),
     );
   };
@@ -83,6 +97,23 @@ export function PartienSelector({
         groupId: parseInt(selectedGroupId),
         round: selectedRound ? parseInt(selectedRound) : undefined,
         participantId: participantId ? parseInt(participantId) : undefined,
+        matchdayId: selectedMatchdayId
+          ? parseInt(selectedMatchdayId)
+          : undefined,
+      }),
+    );
+  };
+
+  const handleMatchdayChange = (matchdayId: string | undefined) => {
+    router.push(
+      buildGameViewUrl({
+        tournamentId: parseInt(selectedTournamentId),
+        groupId: parseInt(selectedGroupId),
+        round: selectedRound ? parseInt(selectedRound) : undefined,
+        participantId: selectedParticipantId
+          ? parseInt(selectedParticipantId)
+          : undefined,
+        matchdayId: matchdayId ? parseInt(matchdayId) : undefined,
       }),
     );
   };
@@ -113,8 +144,17 @@ export function PartienSelector({
         <Label htmlFor="group-select" className="text-sm font-medium">
           Gruppe
         </Label>
-        <Select value={selectedGroupId} onValueChange={handleGroupChange}>
-          <SelectTrigger id="group-select" className="w-48">
+        <Select
+          key={selectedGroupId}
+          value={selectedGroupId}
+          onValueChange={handleGroupChange}
+        >
+          <SelectTrigger
+            id="group-select"
+            className="w-48"
+            clearable={selectedGroupId != null}
+            onClear={() => handleGroupChange(undefined)}
+          >
             <SelectValue />
           </SelectTrigger>
           <SelectContent>
@@ -173,6 +213,32 @@ export function PartienSelector({
             {participants.map((p) => (
               <SelectItem key={p.id} value={p.id.toString()}>
                 {p.title} {p.profile.firstName} {p.profile.lastName}
+              </SelectItem>
+            ))}
+          </SelectContent>
+        </Select>
+      </div>
+      <div className="flex flex-col gap-1">
+        <Label htmlFor="matchday-select" className="text-sm font-medium">
+          Spieltag
+        </Label>
+        <Select
+          key={selectedMatchdayId}
+          value={selectedMatchdayId}
+          onValueChange={handleMatchdayChange}
+        >
+          <SelectTrigger
+            id="matchday-select"
+            className="w-48"
+            clearable={selectedMatchdayId != null}
+            onClear={() => handleMatchdayChange(undefined)}
+          >
+            <SelectValue />
+          </SelectTrigger>
+          <SelectContent>
+            {matchdays.map((md) => (
+              <SelectItem key={md.id} value={md.id.toString()}>
+                {new Date(md.date).toLocaleDateString("de-DE")}
               </SelectItem>
             ))}
           </SelectContent>

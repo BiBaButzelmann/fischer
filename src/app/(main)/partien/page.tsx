@@ -1,7 +1,7 @@
 import { getAllActiveTournamentNames } from "@/db/repositories/tournament";
 import {
   getAllGroupNamesByTournamentId,
-  getGamesByGroup as getGamesByGroup,
+  getGamesByTournamentId,
 } from "@/db/repositories/game";
 import { PartienSelector } from "@/components/partien/partien-selector";
 import { GamesList } from "@/components/partien/games-list";
@@ -19,10 +19,12 @@ export default async function Page({
     groupId?: string;
     round?: string;
     participantId?: string;
+    matchdayId?: string;
   }>;
 }) {
   const session = await auth();
-  const { tournamentId, groupId, round, participantId } = await searchParams;
+  const { tournamentId, groupId, round, participantId, matchdayId } =
+    await searchParams;
 
   const tournamentNames = await getAllActiveTournamentNames();
   if (tournamentNames.length === 0) {
@@ -68,8 +70,10 @@ export default async function Page({
   //TODO: proper validation
   const participants = await getParticipantsByGroupId(Number(selectedGroup));
 
-  const games = await getGamesByGroup(
-    Number(selectedGroup),
+  const games = await getGamesByTournamentId(
+    Number(selectedTournamentId),
+    groupId ? Number(groupId) : Number(selectedGroup),
+    matchdayId ? Number(matchdayId) : undefined,
     round != null ? Number(round) : undefined,
     participantId != null ? Number(participantId) : undefined,
   );
@@ -77,6 +81,10 @@ export default async function Page({
   const matchdays = await getAllMatchdaysByTournamentId(
     Number(selectedTournamentId),
   );
+
+  const selectedMatchday = matchdayId
+    ? matchdays.find((md) => md.id === Number(matchdayId))
+    : null;
 
   return (
     <div>
@@ -91,6 +99,8 @@ export default async function Page({
           rounds={rounds}
           selectedParticipantId={participantId}
           participants={participants}
+          selectedMatchdayId={matchdayId}
+          matchdays={matchdays}
         />
         {games.length > 0 ? (
           <ScrollArea className="h-[calc(100vh-200px)]">
