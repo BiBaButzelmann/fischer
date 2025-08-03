@@ -26,6 +26,7 @@ import { PostponeGameDialog } from "./postpone-game-dialog";
 import { ReportResultDialog } from "./report-result-dialog";
 
 type Props = {
+  userId?: string;
   userRole?: string;
   games: GameWithParticipantNamesAndRatings[];
   onResultChange: (gameId: number, result: GameResult) => Promise<void>;
@@ -142,7 +143,7 @@ export function GamesList({
                     </TooltipContent>
                   </Tooltip>
                   {/* TODO: Schiedsrichter darf Ergebnisse melden (global) */}
-                  {gameParticipantsMap[game.id].includes(userId) ||
+                  {(userId && gameParticipantsMap[game.id].includes(userId)) ||
                   userRole === "admin" ? (
                     <ReportResultDialog
                       gameId={game.id}
@@ -151,7 +152,7 @@ export function GamesList({
                       onResultChange={onResultChange}
                     />
                   ) : null}
-                  {gameParticipantsMap[game.id].includes(userId) ||
+                  {(userId && gameParticipantsMap[game.id].includes(userId)) ||
                   userRole === "admin" ? (
                     <PostponeGameDialog
                       gameId={game.id}
