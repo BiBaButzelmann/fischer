@@ -24,23 +24,24 @@ import { formatGameDate, getGameTimeFromGame } from "@/lib/game-time";
 import { MatchDay } from "@/db/types/match-day";
 import { PostponeGameDialog } from "./postpone-game-dialog";
 import { ReportResultDialog } from "./report-result-dialog";
-import { auth } from "@/auth/utils";
+import { authClient } from "@/auth-client";
 
 type Props = {
-  session: Awaited<ReturnType<typeof auth>>;
   games: GameWithParticipantNamesAndRatings[];
   onResultChange: (gameId: number, result: GameResult) => Promise<void>;
   availableMatchdays: MatchDay[];
 };
 
 export function GamesList({
-  session,
   games,
   onResultChange,
   availableMatchdays = [],
 }: Props) {
   const isMobile = useIsMobile();
   const router = useRouter();
+  const { data: session } = authClient.useSession();
+  const userId = session?.user?.id;
+  const userRole = session?.user?.role;
 
   const gameParticipantsMap = useMemo(
     () =>
@@ -79,7 +80,7 @@ export function GamesList({
             <TableHead className="hidden md:table-cell sticky top-0 bg-card">
               Datum
             </TableHead>
-            {session?.user && (
+            {userId && (
               <TableHead className="hidden md:table-cell sticky top-0 bg-card w-32">
                 Aktionen
               </TableHead>
@@ -123,7 +124,7 @@ export function GamesList({
               <TableCell className="hidden md:table-cell w-24">
                 {formatGameDate(getGameTimeFromGame(game))}
               </TableCell>
-              {session?.user && (
+              {userId && (
                 <TableCell className="hidden md:flex items-center gap-2 w-32">
                   <Tooltip>
                     <TooltipTrigger asChild>
@@ -142,17 +143,16 @@ export function GamesList({
                     </TooltipContent>
                   </Tooltip>
                   {/* TODO: Schiedsrichter darf Ergebnisse melden (global) */}
-                  {gameParticipantsMap[game.id].includes(session.user.id) ||
-                  session.user.role === "admin" ? (
+                  {gameParticipantsMap[game.id].includes(userId) ||
+                  userRole === "admin" ? (
                     <ReportResultDialog
                       gameId={game.id}
                       currentResult={game.result}
-                      userRole={session.user.role || undefined}
                       onResultChange={onResultChange}
                     />
                   ) : null}
-                  {gameParticipantsMap[game.id].includes(session.user.id) ||
-                  session.user.role === "admin" ? (
+                  {gameParticipantsMap[game.id].includes(userId) ||
+                  userRole === "admin" ? (
                     <PostponeGameDialog
                       gameId={game.id}
                       availableMatchdays={availableMatchdays}

@@ -95,7 +95,6 @@ export default async function Page({
         {games.length > 0 ? (
           <ScrollArea className="h-[calc(100vh-200px)]">
             <GamesList
-              session={session}
               games={games}
               onResultChange={updateGameResult}
               availableMatchdays={matchdays}

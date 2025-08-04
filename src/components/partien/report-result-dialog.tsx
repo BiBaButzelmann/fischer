@@ -27,21 +27,21 @@ import {
 import { GameResult } from "@/db/types/game";
 import { Handshake } from "lucide-react";
 import { useTransition } from "react";
+import { authClient } from "@/auth-client";
 
 type Props = {
   gameId: number;
   currentResult: string | null;
-  userRole?: string;
   onResultChange: (gameId: number, result: GameResult) => Promise<void>;
 };
 
 export function ReportResultDialog({
   gameId,
   currentResult,
-  userRole,
   onResultChange,
 }: Props) {
   const [isPending, startTransition] = useTransition();
+  const { data: session } = authClient.useSession();
 
   const handleResultFormSubmit = async (
     event: React.FormEvent<HTMLFormElement>,
@@ -94,7 +94,7 @@ export function ReportResultDialog({
                 <SelectItem value="-:-">
                   Beide Spieler nicht angetreten.
                 </SelectItem>
-                {userRole === "admin" && (
+                {session?.user.role === "admin" && (
                   <>
                     <SelectItem value="0-½">
                       Weiß verliert durch Regelverstoß, aber Schwarz hat
