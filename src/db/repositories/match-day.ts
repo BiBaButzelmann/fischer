@@ -59,3 +59,10 @@ export async function getRefereeAssignmentsByTournamentId(
     } as Record<DayOfWeek, RefereeWithName | null>,
   );
 }
+
+export async function getAllMatchdaysByTournamentId(tournamentId: number) {
+  return await db.query.matchday.findMany({
+    where: eq(matchday.tournamentId, tournamentId),
+    orderBy: (matchday, { asc }) => [asc(matchday.date)],
+  });
+}

@@ -12,6 +12,7 @@ import { Label } from "../ui/label";
 import type { TournamentNames } from "@/db/types/tournament";
 import type { GroupSummary } from "@/db/types/group";
 import type { ParticipantWithName } from "@/db/types/participant";
+import { buildGameViewUrl } from "@/lib/navigation";
 
 export type Props = {
   selectedTournamentId: string;
@@ -36,67 +37,52 @@ export function PartienSelector({
 }: Props) {
   const router = useRouter();
 
-  const buildUrl = (params: {
-    tournamentId: string;
-    groupId: string;
-    round?: string;
-    participantId?: string;
-  }) => {
-    const searchParams = new URLSearchParams();
-    searchParams.set("tournamentId", params.tournamentId);
-    searchParams.set("groupId", params.groupId);
-
-    if (params.round != null && params.round !== "") {
-      searchParams.set("round", params.round);
-    }
-
-    if (params.participantId != null && params.participantId !== "") {
-      searchParams.set("participantId", params.participantId);
-    }
-
-    return `?${searchParams.toString()}`;
-  };
-
   const handleTournamentChange = (tournamentId: string) => {
     router.push(
-      buildUrl({
-        tournamentId,
-        groupId: selectedGroupId,
-        round: selectedRound,
-        participantId: selectedParticipantId,
+      buildGameViewUrl({
+        tournamentId: parseInt(tournamentId),
+        groupId: parseInt(selectedGroupId),
+        round: selectedRound ? parseInt(selectedRound) : undefined,
+        participantId: selectedParticipantId
+          ? parseInt(selectedParticipantId)
+          : undefined,
       }),
     );
   };
 
   const handleGroupChange = (group: string) => {
     router.push(
-      buildUrl({
-        tournamentId: selectedTournamentId,
-        groupId: group,
-        round: selectedRound,
-        participantId: selectedParticipantId,
+      buildGameViewUrl({
+        tournamentId: parseInt(selectedTournamentId),
+        groupId: parseInt(group),
+        round: selectedRound ? parseInt(selectedRound) : undefined,
+        participantId: selectedParticipantId
+          ? parseInt(selectedParticipantId)
+          : undefined,
       }),
     );
   };
 
   const handleRoundChange = (round: string | undefined) => {
     router.push(
-      buildUrl({
-        tournamentId: selectedTournamentId,
-        groupId: selectedGroupId,
-        round,
-        participantId: selectedParticipantId,
+      buildGameViewUrl({
+        tournamentId: parseInt(selectedTournamentId),
+        groupId: parseInt(selectedGroupId),
+        round: round ? parseInt(round) : undefined,
+        participantId: selectedParticipantId
+          ? parseInt(selectedParticipantId)
+          : undefined,
       }),
     );
   };
 
   const handleParticipantChange = (participantId: string | undefined) => {
     router.push(
-      buildUrl({
-        tournamentId: selectedTournamentId,
-        groupId: selectedGroupId,
-        round: selectedRound,
-        participantId,
+      buildGameViewUrl({
+        tournamentId: parseInt(selectedTournamentId),
+        groupId: parseInt(selectedGroupId),
+        round: selectedRound ? parseInt(selectedRound) : undefined,
+        participantId: participantId ? parseInt(participantId) : undefined,
       }),
     );
   };

@@ -5,10 +5,8 @@ export type CalendarEvent = {
   extendedProps: {
     gameId: number;
     participantId: number;
-    isWhite: boolean;
-    opponentName: string;
     round: number;
-    boardNumber: number;
-    color: "white" | "black";
+    tournamentId: number;
+    groupId: number;
   };
 };
