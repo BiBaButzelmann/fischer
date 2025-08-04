@@ -6,7 +6,6 @@ import {
 import { PartienSelector } from "@/components/partien/partien-selector";
 import { GamesList } from "@/components/partien/games-list";
 import { updateGameResult } from "@/actions/game";
-import { auth } from "@/auth/utils";
 import { getParticipantsByGroupId } from "@/db/repositories/participant";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { getAllMatchdaysByTournamentId } from "@/db/repositories/match-day";
