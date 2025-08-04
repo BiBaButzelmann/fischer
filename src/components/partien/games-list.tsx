@@ -24,18 +24,17 @@ import { formatGameDate, getGameTimeFromGame } from "@/lib/game-time";
 import { MatchDay } from "@/db/types/match-day";
 import { PostponeGameDialog } from "./postpone-game-dialog";
 import { ReportResultDialog } from "./report-result-dialog";
+import { auth } from "@/auth/utils";
 
 type Props = {
-  userId: string | undefined;
-  userRole?: string;
+  session: Awaited<ReturnType<typeof auth>>;
   games: GameWithParticipantNamesAndRatings[];
   onResultChange: (gameId: number, result: GameResult) => Promise<void>;
   availableMatchdays: MatchDay[];
 };
 
 export function GamesList({
-  userId,
-  userRole,
+  session,
   games,
   onResultChange,
   availableMatchdays = [],
@@ -80,7 +79,7 @@ export function GamesList({
             <TableHead className="hidden md:table-cell sticky top-0 bg-card">
               Datum
             </TableHead>
-            {userId != null && (
+            {session?.user && (
               <TableHead className="hidden md:table-cell sticky top-0 bg-card w-32">
                 Aktionen
               </TableHead>
@@ -124,7 +123,7 @@ export function GamesList({
               <TableCell className="hidden md:table-cell w-24">
                 {formatGameDate(getGameTimeFromGame(game))}
               </TableCell>
-              {userId != null && (
+              {session?.user && (
                 <TableCell className="hidden md:flex items-center gap-2 w-32">
                   <Tooltip>
                     <TooltipTrigger asChild>
@@ -143,17 +142,17 @@ export function GamesList({
                     </TooltipContent>
                   </Tooltip>
                   {/* TODO: Schiedsrichter darf Ergebnisse melden (global) */}
-                  {gameParticipantsMap[game.id].includes(userId) ||
-                  userRole === "admin" ? (
+                  {gameParticipantsMap[game.id].includes(session.user.id) ||
+                  session.user.role === "admin" ? (
                     <ReportResultDialog
                       gameId={game.id}
                       currentResult={game.result}
-                      userRole={userRole}
+                      userRole={session.user.role || undefined}
                       onResultChange={onResultChange}
                     />
                   ) : null}
-                  {gameParticipantsMap[game.id].includes(userId) ||
-                  userRole === "admin" ? (
+                  {gameParticipantsMap[game.id].includes(session.user.id) ||
+                  session.user.role === "admin" ? (
                     <PostponeGameDialog
                       gameId={game.id}
                       availableMatchdays={availableMatchdays}
