@@ -21,7 +21,6 @@ export default async function Page({
     participantId?: string;
   }>;
 }) {
-  const session = await auth();
   const { tournamentId, groupId, round, participantId } = await searchParams;
 
   const tournamentNames = await getAllActiveTournamentNames();
