@@ -192,24 +192,22 @@ export async function updateGameMatchday(
       },
     },
   });
-
   invariant(gameData, "Game not found");
 
   const isUserInGame =
     gameData.whiteParticipant.profile.userId === session.user.id ||
     gameData.blackParticipant.profile.userId === session.user.id;
-
   invariant(
     isUserInGame || session.user.role === "admin",
     "Unauthorized to move this game",
   );
 
   const currentMatchday = gameData.matchdayGame?.matchday;
+  invariant(currentMatchday, "Current matchday not found");
+
   const newMatchday = await db.query.matchday.findFirst({
     where: eq(matchday.id, newMatchdayId),
   });
-
-  invariant(currentMatchday, "Current matchday not found");
   invariant(newMatchday, "New matchday not found");
 
   const postponingParticipant =
@@ -220,7 +218,6 @@ export async function updateGameMatchday(
   const userProfile = await db.query.profile.findFirst({
     where: eq(profile.userId, session.user.id),
   });
-
   invariant(userProfile, "User profile not found");
 
   const fromTimestamp = getGameDateTime(currentMatchday.date);
