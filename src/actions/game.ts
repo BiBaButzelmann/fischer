@@ -6,8 +6,8 @@ import { db } from "@/db/client";
 import { isUserParticipantInGame } from "@/db/repositories/game";
 import { getGroupById } from "@/db/repositories/group";
 import { getTournamentById } from "@/db/repositories/tournament";
-import { createGamePostponement } from "@/db/repositories/game-postponement";
 import { game } from "@/db/schema/game";
+import { gamePostponement } from "@/db/schema/gamePostponement";
 import { matchday, matchdayGame } from "@/db/schema/matchday";
 import { profile } from "@/db/schema/profile";
 import { GameResult } from "@/db/types/game";
@@ -224,13 +224,15 @@ export async function updateGameMatchday(
   const toTimestamp = getGameDateTime(newMatchday.date);
 
   await db.transaction(async (tx) => {
-    await createGamePostponement(
-      gameId,
-      postponingParticipant.id,
-      userProfile.id,
-      fromTimestamp,
-      toTimestamp,
-    );
+    await tx
+      .insert(gamePostponement)
+      .values({
+        gameId,
+        postponingParticipantId: postponingParticipant.id,
+        postponedByProfileId: userProfile.id,
+        from: fromTimestamp,
+        to: toTimestamp,
+      });
 
     await tx
       .update(matchdayGame)
