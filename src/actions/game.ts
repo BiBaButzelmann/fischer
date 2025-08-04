@@ -224,15 +224,13 @@ export async function updateGameMatchday(
   const toTimestamp = getGameDateTime(newMatchday.date);
 
   await db.transaction(async (tx) => {
-    await tx
-      .insert(gamePostponement)
-      .values({
-        gameId,
-        postponingParticipantId: postponingParticipant.id,
-        postponedByProfileId: userProfile.id,
-        from: fromTimestamp,
-        to: toTimestamp,
-      });
+    await tx.insert(gamePostponement).values({
+      gameId,
+      postponingParticipantId: postponingParticipant.id,
+      postponedByProfileId: userProfile.id,
+      from: fromTimestamp,
+      to: toTimestamp,
+    });
 
     await tx
       .update(matchdayGame)
