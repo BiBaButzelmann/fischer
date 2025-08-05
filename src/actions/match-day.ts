@@ -21,7 +21,7 @@ export async function updateRefereeIdByMatchdayId(
     })
     .where(eq(matchday.id, matchdayId));
 
-  revalidatePath("/admin/schiedsrichter");
+  revalidatePath("/admin/spieltage");
 }
 
 export async function updateSetupHelpersForMatchday(
@@ -45,5 +45,5 @@ export async function updateSetupHelpersForMatchday(
     }
   });
 
-  revalidatePath("/admin/schiedsrichter");
+  revalidatePath("/admin/spieltage");
 }
