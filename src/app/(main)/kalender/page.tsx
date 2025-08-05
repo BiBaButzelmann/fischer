@@ -52,13 +52,34 @@ export default async function Page() {
       <div className="mb-4">
         <h1 className="text-3xl font-bold text-gray-900 mb-2">Kalender</h1>
         <div className="bg-blue-50 border border-blue-200 rounded-lg p-4 mb-4">
-          <p className="text-blue-800 text-sm">
-            {currentParticipant && currentReferee
-              ? "Hier siehst du deine Spiele als Teilnehmer (blau) und deine Termine als Schiedsrichter (rot)."
-              : currentParticipant
-                ? "Hier siehst du deine Spiele als Teilnehmer. Du kannst Spiele per Drag & Drop verschieben."
-                : "Hier siehst du deine Termine als Schiedsrichter."}
-          </p>
+          <div className="space-y-2">
+            <p className="text-blue-800 text-sm">
+              Hier siehst du deine Termine.
+              {currentParticipant && (
+                <span>
+                  {" "}
+                  Du kannst deine Spiele per Drag & Drop verschieben.
+                </span>
+              )}
+            </p>
+
+            {(currentParticipant || currentReferee) && (
+              <div className="flex flex-wrap gap-4 text-xs">
+                {currentParticipant && (
+                  <div className="flex items-center gap-1">
+                    <div className="w-3 h-3 bg-blue-500 rounded"></div>
+                    <span className="text-blue-700">Deine Spiele</span>
+                  </div>
+                )}
+                {currentReferee && (
+                  <div className="flex items-center gap-1">
+                    <div className="w-3 h-3 bg-red-500 rounded"></div>
+                    <span className="text-red-700">Schiedsrichter-Termine</span>
+                  </div>
+                )}
+              </div>
+            )}
+          </div>
         </div>
       </div>
       <MyGamesCalendar events={calendarEvents} matchdays={matchdays} />
