@@ -12,8 +12,12 @@ import { getActiveTournament } from "@/db/repositories/tournament";
 export default async function Page() {
   const session = await authWithRedirect();
 
-  const currentParticipant = await getParticipantByUserId(session.user.id);
-  const currentReferee = await getRefereeByUserId(session.user.id);
+  const [currentParticipant, currentReferee, activeTournament] =
+    await Promise.all([
+      getParticipantByUserId(session.user.id),
+      getRefereeByUserId(session.user.id),
+      getActiveTournament(),
+    ]);
 
   if (!currentParticipant && !currentReferee) {
     return (
@@ -29,33 +33,53 @@ export default async function Page() {
     );
   }
 
-  const participantEvents = currentParticipant
-    ? await getCalendarEventsForParticipant(currentParticipant.id)
-    : [];
-
-  const refereeEvents = currentReferee
-    ? await getCalendarEventsForReferee(currentReferee.id)
-    : [];
+  const [participantEvents, refereeEvents, matchdays] = await Promise.all([
+    currentParticipant
+      ? getCalendarEventsForParticipant(currentParticipant.id)
+      : Promise.resolve([]),
+    currentReferee
+      ? getCalendarEventsForReferee(currentReferee.id)
+      : Promise.resolve([]),
+    activeTournament
+      ? getAllMatchdaysByTournamentId(activeTournament.id)
+      : Promise.resolve([]),
+  ]);
 
   const calendarEvents = [...participantEvents, ...refereeEvents];
-
-  const activeTournament = await getActiveTournament();
-  const matchdays = activeTournament
-    ? await getAllMatchdaysByTournamentId(activeTournament.id)
-    : [];
 
   return (
     <div>
       <div className="mb-4">
         <h1 className="text-3xl font-bold text-gray-900 mb-2">Kalender</h1>
         <div className="bg-blue-50 border border-blue-200 rounded-lg p-4 mb-4">
-          <p className="text-blue-800 text-sm">
-            {currentParticipant && currentReferee
-              ? "Hier siehst du deine Spiele als Teilnehmer (blau) und deine Termine als Schiedsrichter (rot)."
-              : currentParticipant
-                ? "Hier siehst du deine Spiele als Teilnehmer. Du kannst Spiele per Drag & Drop verschieben."
-                : "Hier siehst du deine Termine als Schiedsrichter."}
-          </p>
+          <div className="space-y-2">
+            <p className="text-blue-800 text-sm">
+              Hier siehst du deine Termine.
+              {currentParticipant && (
+                <span>
+                  {" "}
+                  Du kannst deine Spiele per Drag & Drop verschieben.
+                </span>
+              )}
+            </p>
+
+            {(currentParticipant || currentReferee) && (
+              <div className="flex flex-wrap gap-4 text-xs">
+                {currentParticipant && (
+                  <div className="flex items-center gap-1">
+                    <div className="w-3 h-3 bg-blue-500 rounded"></div>
+                    <span className="text-blue-700">Deine Spiele</span>
+                  </div>
+                )}
+                {currentReferee && (
+                  <div className="flex items-center gap-1">
+                    <div className="w-3 h-3 bg-red-500 rounded"></div>
+                    <span className="text-red-700">Schiedsrichter-Termine</span>
+                  </div>
+                )}
+              </div>
+            )}
+          </div>
         </div>
       </div>
       <MyGamesCalendar events={calendarEvents} matchdays={matchdays} />

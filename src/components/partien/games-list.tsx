@@ -24,24 +24,24 @@ import { formatGameDate, getGameTimeFromGame } from "@/lib/game-time";
 import { MatchDay } from "@/db/types/match-day";
 import { PostponeGameDialog } from "./postpone-game-dialog";
 import { ReportResultDialog } from "./report-result-dialog";
+import { authClient } from "@/auth-client";
 
 type Props = {
-  userId?: string;
-  userRole?: string;
-  games: GameWithParticipantProfilesAndGroupAndMatchday[];
+  games: GameWithParticipantNamesAndRatings[];
   onResultChange: (gameId: number, result: GameResult) => Promise<void>;
   availableMatchdays: MatchDay[];
 };
 
 export function GamesList({
-  userId,
-  userRole,
   games,
   onResultChange,
   availableMatchdays = [],
 }: Props) {
   const isMobile = useIsMobile();
   const router = useRouter();
+  const { data: session } = authClient.useSession();
+  const userId = session?.user?.id;
+  const userRole = session?.user?.role;
 
   const gameParticipantsMap = useMemo(
     () =>
@@ -83,7 +83,7 @@ export function GamesList({
             <TableHead className="hidden md:table-cell sticky top-0 bg-card text-center">
               Datum
             </TableHead>
-            {userId != null && (
+            {userId && (
               <TableHead className="hidden md:table-cell sticky top-0 bg-card w-32">
                 Aktionen
               </TableHead>
@@ -130,7 +130,7 @@ export function GamesList({
               <TableCell className="hidden md:table-cell w-24 text-center">
                 {formatGameDate(getGameTimeFromGame(game))}
               </TableCell>
-              {userId != null && (
+              {userId && (
                 <TableCell className="hidden md:flex items-center gap-2 w-32">
                   <Tooltip>
                     <TooltipTrigger asChild>
@@ -154,7 +154,6 @@ export function GamesList({
                     <ReportResultDialog
                       gameId={game.id}
                       currentResult={game.result}
-                      userRole={userRole}
                       onResultChange={onResultChange}
                     />
                   ) : null}

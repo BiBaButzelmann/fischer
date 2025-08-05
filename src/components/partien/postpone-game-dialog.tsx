@@ -24,6 +24,7 @@ import { toast } from "sonner";
 import { cn } from "@/lib/utils";
 import { Card, CardContent } from "../ui/card";
 import { Mail, Phone } from "lucide-react";
+import { isSameDate } from "@/lib/date";
 
 type Props = {
   gameId: number;
@@ -49,10 +50,6 @@ export function PostponeGameDialog({
 
     if (!selectedDate) return;
 
-    const isSameDate = (date1: Date, date2: Date): boolean => {
-      return date1.toDateString() === date2.toDateString();
-    };
-
     const selectedMatchday = availableMatchdays.find((matchday) =>
       isSameDate(matchday.date, selectedDate),
     );
@@ -72,10 +69,6 @@ export function PostponeGameDialog({
   };
 
   const isDateDisabled = (date: Date) => {
-    const isSameDate = (date1: Date, date2: Date): boolean => {
-      return date1.toDateString() === date2.toDateString();
-    };
-
     if (isSameDate(date, currentGameDate)) {
       return true;
     }

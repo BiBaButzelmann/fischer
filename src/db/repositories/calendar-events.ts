@@ -1,6 +1,9 @@
 import { CalendarEvent } from "../types/calendar";
 import { getGamesOfParticipant } from "./game";
-import { getGameTimeFromGame } from "@/lib/game-time";
+import {
+  getGameTimeFromGame,
+  getDateTimeFromDefaultTime,
+} from "@/lib/game-time";
 import { getMatchdaysByRefereeId } from "./referee";
 
 export async function getCalendarEventsForParticipant(
@@ -36,7 +39,7 @@ export async function getCalendarEventsForReferee(
     return {
       id: `referee-${entry.matchday.id}`,
       title: `Schiedsrichter`,
-      start: entry.matchday.date,
+      start: getDateTimeFromDefaultTime(entry.matchday.date),
       extendedProps: {
         eventType: "referee" as const,
         refereeId: entry.referee.id,

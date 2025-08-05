@@ -6,7 +6,6 @@ import {
 import { PartienSelector } from "@/components/partien/partien-selector";
 import { GamesList } from "@/components/partien/games-list";
 import { updateGameResult } from "@/actions/game";
-import { auth } from "@/auth/utils";
 import { getParticipantsByGroupId } from "@/db/repositories/participant";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { getAllMatchdaysByTournamentId } from "@/db/repositories/match-day";
@@ -22,7 +21,6 @@ export default async function Page({
     matchdayId?: string;
   }>;
 }) {
-  const session = await auth();
   const { tournamentId, groupId, round, participantId, matchdayId } =
     await searchParams;
 
@@ -103,8 +101,6 @@ export default async function Page({
         {games.length > 0 ? (
           <ScrollArea className="h-[calc(100vh-200px)]">
             <GamesList
-              userId={session?.user.id}
-              userRole={session?.user.role || undefined}
               games={games}
               onResultChange={updateGameResult}
               availableMatchdays={matchdays}

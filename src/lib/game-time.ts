@@ -6,7 +6,7 @@ import { GameWithMatchday } from "@/db/types/game";
  * @param matchdayDate - The date of the matchday (Date object or string)
  * @returns A Date object with the game date and time
  */
-export function getGameDateTime(matchdayDate: Date): Date {
+export function getDateTimeFromDefaultTime(matchdayDate: Date): Date {
   const gameDateTime = new Date(matchdayDate);
   gameDateTime.setHours(
     GAME_START_TIME.hours,
@@ -22,7 +22,7 @@ export function getGameDateTime(matchdayDate: Date): Date {
  * @returns A Date object with the game date and time
  */
 export function getGameTimeFromGame(game: GameWithMatchday): Date {
-  return getGameDateTime(game.matchdayGame.matchday.date);
+  return getDateTimeFromDefaultTime(game.matchdayGame.matchday.date);
 }
 
 /**
