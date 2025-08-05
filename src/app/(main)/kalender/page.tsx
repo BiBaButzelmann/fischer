@@ -12,8 +12,12 @@ import { getActiveTournament } from "@/db/repositories/tournament";
 export default async function Page() {
   const session = await authWithRedirect();
 
-  const currentParticipant = await getParticipantByUserId(session.user.id);
-  const currentReferee = await getRefereeByUserId(session.user.id);
+  const [currentParticipant, currentReferee, activeTournament] =
+    await Promise.all([
+      getParticipantByUserId(session.user.id),
+      getRefereeByUserId(session.user.id),
+      getActiveTournament(),
+    ]);
 
   if (!currentParticipant && !currentReferee) {
     return (
@@ -29,20 +33,19 @@ export default async function Page() {
     );
   }
 
-  const participantEvents = currentParticipant
-    ? await getCalendarEventsForParticipant(currentParticipant.id)
-    : [];
-
-  const refereeEvents = currentReferee
-    ? await getCalendarEventsForReferee(currentReferee.id)
-    : [];
+  const [participantEvents, refereeEvents, matchdays] = await Promise.all([
+    currentParticipant
+      ? getCalendarEventsForParticipant(currentParticipant.id)
+      : Promise.resolve([]),
+    currentReferee
+      ? getCalendarEventsForReferee(currentReferee.id)
+      : Promise.resolve([]),
+    activeTournament
+      ? getAllMatchdaysByTournamentId(activeTournament.id)
+      : Promise.resolve([]),
+  ]);
 
   const calendarEvents = [...participantEvents, ...refereeEvents];
-
-  const activeTournament = await getActiveTournament();
-  const matchdays = activeTournament
-    ? await getAllMatchdaysByTournamentId(activeTournament.id)
-    : [];
 
   return (
     <div>
