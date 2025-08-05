@@ -143,12 +143,6 @@ export async function AppSidebar() {
               </SidebarMenuButton>
 
               <SidebarMenuButton asChild>
-                <Link href="/admin/eingabehelfer">
-                  <Users />
-                  <span>Eingabehelfer verwalten</span>
-                </Link>
-              </SidebarMenuButton>
-              <SidebarMenuButton asChild>
                 <Link href="/admin/fide-bericht">
                   <FileCheck />
                   <span>Fide Bericht</span>

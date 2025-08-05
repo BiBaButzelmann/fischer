@@ -105,5 +105,5 @@ export async function updateMatchEnteringHelpers(
     await tx.insert(groupMatchEnteringHelper).values(insertValues);
   });
 
-  revalidatePath("/admin/eingabehelfer");
+  revalidatePath("/admin/gruppen");
 }

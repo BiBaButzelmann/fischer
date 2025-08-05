@@ -23,7 +23,7 @@ import { GroupMatchDay } from "./group-match-day";
 import { ParticipantEntry } from "./participant-entry";
 import { GroupTitle } from "./group-title";
 import { GroupStats } from "./group-stats";
-import { GroupMatchEnteringHelperSelector } from "./group-match-entering-helper-selector";
+import { GroupMatchEnteringHelperSelector } from "../match-entering-helper/match-entering-helper-selector";
 import { Button } from "@/components/ui/button";
 import { Trash, Save } from "lucide-react";
 import { DayOfWeek } from "@/db/types/group";
