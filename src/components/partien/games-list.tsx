@@ -15,7 +15,7 @@ import { Tooltip, TooltipContent, TooltipTrigger } from "../ui/tooltip";
 import Link from "next/link";
 import {
   GameResult,
-  GameWithParticipantNamesAndRatings,
+  GameWithParticipantProfilesAndGroupAndMatchday,
 } from "@/db/types/game";
 import { useMemo } from "react";
 import { useIsMobile } from "@/hooks/use-mobile";
@@ -28,7 +28,7 @@ import { ReportResultDialog } from "./report-result-dialog";
 type Props = {
   userId?: string;
   userRole?: string;
-  games: GameWithParticipantNamesAndRatings[];
+  games: GameWithParticipantProfilesAndGroupAndMatchday[];
   onResultChange: (gameId: number, result: GameResult) => Promise<void>;
   availableMatchdays: MatchDay[];
 };
@@ -67,17 +67,20 @@ export function GamesList({
         <TableHeader>
           <TableRow>
             <TableHead className="hidden md:table-cell sticky top-0 bg-card text-center">
-              Runde
+              Gruppe
             </TableHead>
-            <TableHead className="hidden md:table-cell sticky top-0 bg-card">
+            <TableHead className="hidden md:table-cell sticky top-0 bg-card text-center">
               Brett
+            </TableHead>
+            <TableHead className="hidden md:table-cell sticky top-0 bg-card text-center">
+              Runde
             </TableHead>
             <TableHead className="sticky top-0 bg-card">Weiß</TableHead>
             <TableHead className="sticky top-0 bg-card text-center">
               Ergebnis
             </TableHead>
             <TableHead className="sticky top-0 bg-card">Schwarz</TableHead>
-            <TableHead className="hidden md:table-cell sticky top-0 bg-card">
+            <TableHead className="hidden md:table-cell sticky top-0 bg-card text-center">
               Datum
             </TableHead>
             {userId != null && (
@@ -95,10 +98,13 @@ export function GamesList({
               className="cursor-default"
             >
               <TableCell className="hidden md:table-cell w-16 text-center">
-                {game.round}
+                <Badge variant="secondary">{game.group.groupName}</Badge>
               </TableCell>
-              <TableCell className="hidden md:table-cell w-16">
+              <TableCell className="hidden md:table-cell w-16 text-center">
                 <Badge variant="outline">{game.boardNumber}</Badge>
+              </TableCell>
+              <TableCell className="hidden md:table-cell w-16 text-center">
+                {game.round}
               </TableCell>
               <TableCell className="w-40 truncate">
                 {game.whiteParticipant.profile.firstName}{" "}
@@ -121,7 +127,7 @@ export function GamesList({
                   </span>
                 )}
               </TableCell>
-              <TableCell className="hidden md:table-cell w-24">
+              <TableCell className="hidden md:table-cell w-24 text-center">
                 {formatGameDate(getGameTimeFromGame(game))}
               </TableCell>
               {userId != null && (

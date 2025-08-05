@@ -202,6 +202,13 @@ export async function getGamesByTournamentId(
           },
         },
       },
+      group: {
+        columns: {
+          id: true,
+          groupName: true,
+          groupNumber: true,
+        },
+      },
       matchdayGame: {
         with: {
           matchday: {
@@ -212,7 +219,11 @@ export async function getGamesByTournamentId(
         },
       },
     },
-    orderBy: (game, { asc }) => [asc(game.round), asc(game.boardNumber)],
+    orderBy: (game, { asc }) => [
+      asc(game.groupId),
+      asc(game.round),
+      asc(game.boardNumber),
+    ],
   });
 }
 
@@ -277,7 +288,11 @@ export async function getCompletedGames(groupId: number, maxRound?: number) {
         },
       },
     },
-    orderBy: (game, { asc }) => [asc(game.round), asc(game.boardNumber)],
+    orderBy: (game, { asc }) => [
+      asc(game.groupId),
+      asc(game.round),
+      asc(game.boardNumber),
+    ],
   });
   return result;
 }
