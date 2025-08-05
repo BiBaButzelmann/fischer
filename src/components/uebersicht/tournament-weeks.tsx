@@ -1,5 +1,4 @@
 import { TournamentWeek } from "@/db/types/tournamentWeek";
-import { DateTime } from "luxon";
 import {
   Table,
   TableBody,
@@ -8,38 +7,15 @@ import {
   TableHeader,
   TableRow,
 } from "../ui/table";
-import { isHoliday } from "@/lib/holidays";
+import { displayShortDateOrHoliday } from "@/lib/date";
+import { generateTournamentWeeksSchedule } from "@/lib/tournament-schedule";
 
 type Props = {
   tournamentWeeks: TournamentWeek[];
 };
 
 export function TournamentWeeks({ tournamentWeeks }: Props) {
-  const getSchedule = () => {
-    let regularWeekCount = 0;
-    let catchUpWeekCount = 0;
-
-    return tournamentWeeks.map((week) => {
-      const weekStart = DateTime.now()
-        .set({ weekNumber: week.weekNumber })
-        .startOf("week");
-
-      const weekLabel =
-        week.status === "regular"
-          ? `Woche ${++regularWeekCount}`
-          : `Verlegungswoche ${++catchUpWeekCount}`;
-
-      return {
-        id: week.id,
-        weekLabel,
-        tuesday: weekStart.plus({ days: 1 }),
-        thursday: weekStart.plus({ days: 3 }),
-        friday: weekStart.plus({ days: 4 }),
-      };
-    });
-  };
-
-  const schedule = getSchedule();
+  const schedule = generateTournamentWeeksSchedule(tournamentWeeks);
 
   if (tournamentWeeks.length === 0) {
     return (
@@ -66,24 +42,17 @@ export function TournamentWeeks({ tournamentWeeks }: Props) {
               {week.weekLabel}
             </TableCell>
             <TableCell className="text-center">
-              {displayDate(week.tuesday)}
+              {displayShortDateOrHoliday(week.tuesday)}
             </TableCell>
             <TableCell className="text-center">
-              {displayDate(week.thursday)}
+              {displayShortDateOrHoliday(week.thursday)}
             </TableCell>
             <TableCell className="text-center">
-              {displayDate(week.friday)}
+              {displayShortDateOrHoliday(week.friday)}
             </TableCell>
           </TableRow>
         ))}
       </TableBody>
     </Table>
   );
-}
-
-function displayDate(date: DateTime) {
-  if (isHoliday(date.toJSDate())) {
-    return "Feiertag";
-  }
-  return date.toFormat("dd.MM");
 }

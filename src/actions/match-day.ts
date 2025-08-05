@@ -2,15 +2,14 @@
 
 import { db } from "@/db/client";
 import { matchday, matchdaySetupHelper } from "@/db/schema/matchday";
-import { and, eq, inArray } from "drizzle-orm";
+import { eq, inArray } from "drizzle-orm";
 import { authWithRedirect } from "@/auth/utils";
 import invariant from "tiny-invariant";
 import { revalidatePath } from "next/cache";
 import { DayOfWeek } from "@/db/types/group";
 
-export async function updateRefereeIdByTournamentIdAndDayofWeek(
-  dayofWeek: DayOfWeek,
-  tournamentId: number,
+export async function updateRefereeIdByMatchdayId(
+  matchdayId: number,
   refereeId: number | null,
 ) {
   const session = await authWithRedirect();
@@ -21,13 +20,7 @@ export async function updateRefereeIdByTournamentIdAndDayofWeek(
     .set({
       refereeId,
     })
-    .where(
-      and(
-        eq(matchday.tournamentId, tournamentId),
-        eq(matchday.dayOfWeek, dayofWeek),
-        eq(matchday.refereeNeeded, true),
-      ),
-    );
+    .where(eq(matchday.id, matchdayId));
 
   revalidatePath("/admin/schiedsrichter");
 }
