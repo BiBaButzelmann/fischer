@@ -22,7 +22,7 @@ export function MatchEnteringHelperSelector({
   return (
     <Select value="" onValueChange={onSelect}>
       <SelectTrigger>
-        <SelectValue placeholder="Aufbauhelfer hinzufügen..." />
+        <SelectValue placeholder="Eingabehelfer hinzufügen..." />
       </SelectTrigger>
       <SelectContent>
         {matchEnteringHelpers.map((helper) => (
