@@ -138,15 +138,10 @@ export async function AppSidebar() {
               <SidebarMenuButton asChild>
                 <Link href="/admin/schiedsrichter">
                   <Users />
-                  <span>Schiedsrichter verwalten</span>
+                  <span>Spieltage verwalten</span>
                 </Link>
               </SidebarMenuButton>
-              <SidebarMenuButton asChild>
-                <Link href="/admin/aufbauhelfer">
-                  <Users />
-                  <span>Aufbauhelfer verwalten</span>
-                </Link>
-              </SidebarMenuButton>
+
               <SidebarMenuButton asChild>
                 <Link href="/admin/eingabehelfer">
                   <Users />
