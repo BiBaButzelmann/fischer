@@ -2,7 +2,7 @@
 
 import { useState, useTransition } from "react";
 import { Button } from "@/components/ui/button";
-import { updateRefereeIdByMatchdayId } from "@/actions/match-day";
+import { updateRefereeAssignments } from "@/actions/match-day";
 import { RefereeWithName } from "@/db/types/referee";
 import { MatchDayWithReferee } from "@/db/types/match-day";
 import { RefereeSelector } from "./referee-selector";
@@ -56,13 +56,12 @@ export function RefereeAssignmentForm({ referees, matchdays }: Props) {
 
   const handleSave = () => {
     startTransition(async () => {
-      const promises = Array.from(changedMatchdays).map((matchdayId) => {
-        const referee = assignments[matchdayId];
-        const refereeId = referee ? referee.id : null;
-        return updateRefereeIdByMatchdayId(matchdayId, refereeId);
-      });
-
-      await Promise.all(promises);
+      await updateRefereeAssignments(
+        Array.from(changedMatchdays).map((matchdayId) => [
+          matchdayId,
+          assignments[matchdayId]?.id ?? null,
+        ]),
+      );
       setChangedMatchdays(new Set());
     });
   };

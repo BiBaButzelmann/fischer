@@ -25,6 +25,24 @@ export async function updateRefereeIdByMatchdayId(
   revalidatePath("/admin/schiedsrichter");
 }
 
+export async function updateRefereeAssignments(
+  assignments: [number, number | null][],
+) {
+  const session = await authWithRedirect();
+  invariant(session?.user.role === "admin", "Unauthorized");
+
+  await db.transaction(async (tx) => {
+    for (const [matchdayId, refereeId] of assignments) {
+      await tx
+        .update(matchday)
+        .set({ refereeId })
+        .where(eq(matchday.id, matchdayId));
+    }
+  });
+
+  revalidatePath("/admin/schiedsrichter");
+}
+
 export async function updateSetupHelpers(
   tournamentId: number,
   groupedSetupHelperIds: Record<DayOfWeek, string[]>,
