@@ -4,13 +4,13 @@ import { SetupHelperSelector } from "./setup-helper-selector";
 import { SetupHelperEntry } from "./setup-helper-entry";
 import { matchDays } from "@/constants/constants";
 
-interface DayAssignmentCardProps {
+type Props = {
   day: DayOfWeek;
   setupHelpers: SetupHelperWithName[];
   assignedHelpers: SetupHelperWithName[];
   onAddHelper: (helperId: string) => void;
   onRemoveHelper: (helperId: number) => void;
-}
+};
 
 export function DayAssignmentCard({
   day,
@@ -18,7 +18,7 @@ export function DayAssignmentCard({
   assignedHelpers,
   onAddHelper,
   onRemoveHelper,
-}: DayAssignmentCardProps) {
+}: Props) {
   return (
     <div>
       <div className="space-y-2">

@@ -3,14 +3,14 @@ import { MatchEnteringHelperWithName } from "@/db/types/match-entering-helper";
 import { MatchEnteringHelperSelector } from "./match-entering-helper-selector";
 import { MatchEnteringHelperEntry } from "./match-entering-helper-entry";
 
-interface GroupAssignmentCardProps {
+type Props = {
   group: Group;
   matchEnteringHelpers: MatchEnteringHelperWithName[];
   assignedHelpers: MatchEnteringHelperWithName[];
   helperAssignedCounts: Record<number, number>;
   onAddHelper: (helperId: string) => void;
   onRemoveHelper: (helperId: number) => void;
-}
+};
 
 export function GroupAssignmentCard({
   group,
@@ -19,7 +19,7 @@ export function GroupAssignmentCard({
   helperAssignedCounts,
   onAddHelper,
   onRemoveHelper,
-}: GroupAssignmentCardProps) {
+}: Props) {
   return (
     <div>
       <div className="space-y-2">

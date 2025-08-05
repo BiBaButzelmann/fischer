@@ -9,15 +9,12 @@ import { SetupHelperWithName } from "@/db/types/setup-helper";
 import { Badge } from "@/components/ui/badge";
 import { matchDaysShort } from "@/constants/constants";
 
-interface SetupHelperSelectorProps {
+type Props = {
   setupHelpers: SetupHelperWithName[];
   onSelect: (value: string) => void;
-}
+};
 
-export function SetupHelperSelector({
-  setupHelpers,
-  onSelect,
-}: SetupHelperSelectorProps) {
+export function SetupHelperSelector({ setupHelpers, onSelect }: Props) {
   return (
     <Select value="" onValueChange={onSelect}>
       <SelectTrigger>

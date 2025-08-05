@@ -1,14 +1,14 @@
 import { Badge } from "@/components/ui/badge";
 
-interface AssignmentsDisplayProps {
+type Props = {
   numberOfGroupsToEnter: number;
   assignedCount: number;
-}
+};
 
 export function AssignmentsDisplay({
   numberOfGroupsToEnter,
   assignedCount,
-}: AssignmentsDisplayProps) {
+}: Props) {
   return (
     <Badge>
       {assignedCount}/{numberOfGroupsToEnter}

@@ -20,17 +20,7 @@ import {
 import { toast } from "sonner";
 import { Badge } from "@/components/ui/badge";
 import { matchDaysShort } from "@/constants/constants";
-import { DayOfWeek } from "@/db/types/group";
-
-interface ProfileWithName {
-  id: number;
-  userId: string;
-  firstName: string;
-  lastName: string;
-  deletedAt: Date | null;
-  phoneNumber?: string | null;
-  preferredMatchDay?: DayOfWeek | null;
-}
+import { ProfileWithName } from "@/db/types/profile";
 
 type Props = {
   user: ProfileWithName;

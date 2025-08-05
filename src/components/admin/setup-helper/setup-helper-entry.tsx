@@ -3,15 +3,12 @@ import { Trash } from "lucide-react";
 import { SetupHelperWithName } from "@/db/types/setup-helper";
 import { UserWeekday } from "./user-weekday";
 
-interface SetupHelperEntryProps {
+type Props = {
   setupHelper: SetupHelperWithName;
   onDelete: () => void;
-}
+};
 
-export function SetupHelperEntry({
-  setupHelper,
-  onDelete,
-}: SetupHelperEntryProps) {
+export function SetupHelperEntry({ setupHelper, onDelete }: Props) {
   return (
     <div className="flex items-center">
       <span className="inline-flex flex-1">

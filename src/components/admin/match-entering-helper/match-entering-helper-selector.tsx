@@ -8,17 +8,17 @@ import {
 import { MatchEnteringHelperWithName } from "@/db/types/match-entering-helper";
 import { AssignmentsDisplay } from "./assignments-display";
 
-interface MatchEnteringHelperSelectorProps {
+type Props = {
   matchEnteringHelpers: MatchEnteringHelperWithName[];
   helperAssignedCounts: Record<number, number>;
   onSelect: (value: string) => void;
-}
+};
 
 export function MatchEnteringHelperSelector({
   matchEnteringHelpers,
   helperAssignedCounts,
   onSelect,
-}: MatchEnteringHelperSelectorProps) {
+}: Props) {
   return (
     <Select value="" onValueChange={onSelect}>
       <SelectTrigger>
