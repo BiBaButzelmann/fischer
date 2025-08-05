@@ -245,6 +245,15 @@ export async function getCompletedGames(groupId: number, maxRound?: number) {
           },
         },
       },
+      matchdayGame: {
+        with: {
+          matchday: {
+            columns: {
+              date: true,
+            },
+          },
+        },
+      },
     },
     orderBy: (game, { asc }) => [asc(game.round), asc(game.boardNumber)],
   });

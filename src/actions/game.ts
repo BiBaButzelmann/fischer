@@ -6,8 +6,8 @@ import { db } from "@/db/client";
 import { isUserParticipantInGame } from "@/db/repositories/game";
 import { getGroupById } from "@/db/repositories/group";
 import { getTournamentById } from "@/db/repositories/tournament";
-import { createGamePostponement } from "@/db/repositories/game-postponement";
 import { game } from "@/db/schema/game";
+import { gamePostponement } from "@/db/schema/gamePostponement";
 import { matchday, matchdayGame } from "@/db/schema/matchday";
 import { profile } from "@/db/schema/profile";
 import { GameResult } from "@/db/types/game";
@@ -192,24 +192,22 @@ export async function updateGameMatchday(
       },
     },
   });
-
   invariant(gameData, "Game not found");
 
   const isUserInGame =
     gameData.whiteParticipant.profile.userId === session.user.id ||
     gameData.blackParticipant.profile.userId === session.user.id;
-
   invariant(
     isUserInGame || session.user.role === "admin",
     "Unauthorized to move this game",
   );
 
   const currentMatchday = gameData.matchdayGame?.matchday;
+  invariant(currentMatchday, "Current matchday not found");
+
   const newMatchday = await db.query.matchday.findFirst({
     where: eq(matchday.id, newMatchdayId),
   });
-
-  invariant(currentMatchday, "Current matchday not found");
   invariant(newMatchday, "New matchday not found");
 
   const postponingParticipant =
@@ -220,20 +218,19 @@ export async function updateGameMatchday(
   const userProfile = await db.query.profile.findFirst({
     where: eq(profile.userId, session.user.id),
   });
-
   invariant(userProfile, "User profile not found");
 
   const fromTimestamp = getGameDateTime(currentMatchday.date);
   const toTimestamp = getGameDateTime(newMatchday.date);
 
   await db.transaction(async (tx) => {
-    await createGamePostponement(
+    await tx.insert(gamePostponement).values({
       gameId,
-      postponingParticipant.id,
-      userProfile.id,
-      fromTimestamp,
-      toTimestamp,
-    );
+      postponingParticipantId: postponingParticipant.id,
+      postponedByProfileId: userProfile.id,
+      from: fromTimestamp,
+      to: toTimestamp,
+    });
 
     await tx
       .update(matchdayGame)
@@ -278,7 +275,10 @@ export async function updateGameResult(gameId: number, result: GameResult) {
     gameId,
     session.user.id,
   );
-  invariant(isUserParticipating, "User is not participating in this game");
+  invariant(
+    isUserParticipating || session.user.role === "admin",
+    "User is not participating in this game",
+  );
 
   await db
     .update(game)
