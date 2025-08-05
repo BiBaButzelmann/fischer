@@ -212,6 +212,7 @@ export async function getGamesByTournamentId(
         },
       },
     },
+    // TODO: improve ordering
     orderBy: (game, { asc }) => [asc(game.round), asc(game.boardNumber)],
   });
 }
