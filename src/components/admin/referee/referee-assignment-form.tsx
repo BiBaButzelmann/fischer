@@ -153,7 +153,7 @@ export function RefereeAssignmentForm({ referees, matchdays }: Props) {
             </TableRow>
           </TableHeader>
           <TableBody>
-            {schedule.map((week, index) => (
+            {schedule.map((week) => (
               <TableRow key={week.week.id}>
                 <TableCell className="font-semibold text-nowrap">
                   {week.weekLabel}
