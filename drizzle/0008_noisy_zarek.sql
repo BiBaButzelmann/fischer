@@ -1,0 +1,1 @@
+ALTER TABLE "profile" ALTER COLUMN "phone_number" SET NOT NULL;

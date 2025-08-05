@@ -23,6 +23,8 @@ export type GameWithParticipantNamesAndRatings = Game & {
       userId: string;
       firstName: string;
       lastName: string;
+      email: string;
+      phoneNumber: string;
     };
     fideRating: number | null;
   };
@@ -31,8 +33,15 @@ export type GameWithParticipantNamesAndRatings = Game & {
       userId: string;
       firstName: string;
       lastName: string;
+      email: string;
+      phoneNumber: string;
     };
     fideRating: number | null;
+  };
+  matchdayGame: {
+    matchday: {
+      date: Date;
+    };
   };
 };
 

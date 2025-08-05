@@ -10,47 +10,38 @@ import {
   TableRow,
 } from "@/components/ui/table";
 import { Button } from "../ui/button";
-import { Handshake, NotebookPen } from "lucide-react";
+import { NotebookPen } from "lucide-react";
 import { Tooltip, TooltipContent, TooltipTrigger } from "../ui/tooltip";
 import Link from "next/link";
 import {
   GameResult,
   GameWithParticipantNamesAndRatings,
 } from "@/db/types/game";
-import {
-  Dialog,
-  DialogContent,
-  DialogHeader,
-  DialogTrigger,
-  DialogTitle,
-  DialogDescription,
-  DialogFooter,
-  DialogClose,
-} from "../ui/dialog";
-import { Label } from "../ui/label";
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "../ui/select";
-import { useMemo, useTransition } from "react";
+import { useMemo } from "react";
 import { useIsMobile } from "@/hooks/use-mobile";
 import { useRouter } from "next/navigation";
+import { formatGameDate, getGameTimeFromGame } from "@/lib/game-time";
+import { MatchDay } from "@/db/types/match-day";
+import { PostponeGameDialog } from "./postpone-game-dialog";
+import { ReportResultDialog } from "./report-result-dialog";
 import { authClient } from "@/auth-client";
 
 type Props = {
-  userRole?: string;
   games: GameWithParticipantNamesAndRatings[];
   onResultChange: (gameId: number, result: GameResult) => Promise<void>;
+  availableMatchdays: MatchDay[];
 };
 
-export function GamesList({ userRole, games, onResultChange }: Props) {
-  const session = authClient.useSession();
+export function GamesList({
+  games,
+  onResultChange,
+  availableMatchdays = [],
+}: Props) {
   const isMobile = useIsMobile();
   const router = useRouter();
-  const [isPending, startTransition] = useTransition();
+  const { data: session } = authClient.useSession();
+  const userId = session?.user?.id;
+  const userRole = session?.user?.role;
 
   const gameParticipantsMap = useMemo(
     () =>
@@ -66,177 +57,115 @@ export function GamesList({ userRole, games, onResultChange }: Props) {
     [games],
   );
 
-  const handleResultFormSubmit = (gameId: number) => {
-    return async (event: React.FormEvent<HTMLFormElement>) => {
-      event.preventDefault();
-      const formData = new FormData(event.currentTarget);
-      const result = formData.get("result") as GameResult;
-      startTransition(async () => {
-        await onResultChange(gameId, result);
-      });
-    };
-  };
-
   const handleNavigate = (gameId: number) => {
     router.push(`/partien/${gameId}`);
   };
 
   return (
-    <Table>
-      <TableHeader>
-        <TableRow>
-          <TableHead className="hidden md:table-cell sticky top-0 bg-card">
-            Brett
-          </TableHead>
-          <TableHead className="hidden md:table-cell sticky top-0 bg-card">
-            Runde
-          </TableHead>
-          <TableHead className="sticky top-0 bg-card">Weiß</TableHead>
-          <TableHead className="sticky top-0 bg-card">Schwarz</TableHead>
-          <TableHead className="sticky top-0 bg-card">Ergebnis</TableHead>
-          <TableHead className="hidden md:table-cell sticky top-0 bg-card"></TableHead>
-        </TableRow>
-      </TableHeader>
-      <TableBody>
-        {games.map((game) => (
-          <TableRow
-            key={game.id}
-            onClick={isMobile ? () => handleNavigate(game.id) : undefined}
-            className="cursor-default"
-          >
-            <TableCell className="hidden md:table-cell">
-              <Badge variant="outline">{game.boardNumber}</Badge>
-            </TableCell>
-            <TableCell className="hidden md:table-cell">{game.round}</TableCell>
-            <TableCell>
-              {game.whiteParticipant.profile.firstName}{" "}
-              {game.whiteParticipant.profile.lastName}
-              {game.whiteParticipant.fideRating && (
-                <span className="ml-2 text-muted-foreground text-sm">
-                  ({game.whiteParticipant.fideRating})
-                </span>
-              )}
-            </TableCell>
-            <TableCell>
-              {game.blackParticipant.profile.firstName}{" "}
-              {game.blackParticipant.profile.lastName}
-              {game.blackParticipant.fideRating && (
-                <span className="ml-2 text-muted-foreground text-sm">
-                  ({game.blackParticipant.fideRating})
-                </span>
-              )}
-            </TableCell>
-            <TableCell>{game.result ?? "-"}</TableCell>
-            <TableCell className="hidden md:flex items-center gap-2">
-              <Tooltip>
-                <TooltipTrigger asChild>
-                  <Link href={`/partien/${game.id}`}>
-                    <Button
-                      aria-label="Partie eingeben"
-                      variant="outline"
-                      size="icon"
-                    >
-                      <NotebookPen className="h-4 w-4" />
-                    </Button>
-                  </Link>
-                </TooltipTrigger>
-                <TooltipContent>
-                  <p>Partie anschauen</p>
-                </TooltipContent>
-              </Tooltip>
-              {/* TODO: Schiedsrichter darf Ergebnisse melden (global) */}
-              {session.data?.user.id != null &&
-              (gameParticipantsMap[game.id].includes(session.data.user.id) ||
-                session.data.user.role === "admin") ? (
-                <Dialog>
+    <div className="border rounded-lg overflow-hidden">
+      <Table>
+        <TableHeader>
+          <TableRow>
+            <TableHead className="hidden md:table-cell sticky top-0 bg-card text-center">
+              Runde
+            </TableHead>
+            <TableHead className="hidden md:table-cell sticky top-0 bg-card">
+              Brett
+            </TableHead>
+            <TableHead className="sticky top-0 bg-card">Weiß</TableHead>
+            <TableHead className="sticky top-0 bg-card text-center">
+              Ergebnis
+            </TableHead>
+            <TableHead className="sticky top-0 bg-card">Schwarz</TableHead>
+            <TableHead className="hidden md:table-cell sticky top-0 bg-card">
+              Datum
+            </TableHead>
+            {userId && (
+              <TableHead className="hidden md:table-cell sticky top-0 bg-card w-32">
+                Aktionen
+              </TableHead>
+            )}
+          </TableRow>
+        </TableHeader>
+        <TableBody>
+          {games.map((game) => (
+            <TableRow
+              key={game.id}
+              onClick={isMobile ? () => handleNavigate(game.id) : undefined}
+              className="cursor-default"
+            >
+              <TableCell className="hidden md:table-cell w-16 text-center">
+                {game.round}
+              </TableCell>
+              <TableCell className="hidden md:table-cell w-16">
+                <Badge variant="outline">{game.boardNumber}</Badge>
+              </TableCell>
+              <TableCell className="w-40 truncate">
+                {game.whiteParticipant.profile.firstName}{" "}
+                {game.whiteParticipant.profile.lastName}
+                {game.whiteParticipant.fideRating && (
+                  <span className="ml-2 text-muted-foreground text-sm">
+                    ({game.whiteParticipant.fideRating})
+                  </span>
+                )}
+              </TableCell>
+              <TableCell className="w-20 text-center font-medium">
+                {game.result ? game.result.replace(":", " : ") : "-"}
+              </TableCell>
+              <TableCell className="w-40 truncate">
+                {game.blackParticipant.profile.firstName}{" "}
+                {game.blackParticipant.profile.lastName}
+                {game.blackParticipant.fideRating && (
+                  <span className="ml-2 text-muted-foreground text-sm">
+                    ({game.blackParticipant.fideRating})
+                  </span>
+                )}
+              </TableCell>
+              <TableCell className="hidden md:table-cell w-24">
+                {formatGameDate(getGameTimeFromGame(game))}
+              </TableCell>
+              {userId && (
+                <TableCell className="hidden md:flex items-center gap-2 w-32">
                   <Tooltip>
                     <TooltipTrigger asChild>
-                      <DialogTrigger asChild>
+                      <Link href={`/partien/${game.id}`}>
                         <Button
-                          aria-label="Ergebnis melden"
+                          aria-label="Partie eingeben"
                           variant="outline"
                           size="icon"
                         >
-                          <Handshake className="h-4 w-4" />
+                          <NotebookPen className="h-4 w-4" />
                         </Button>
-                      </DialogTrigger>
+                      </Link>
                     </TooltipTrigger>
                     <TooltipContent>
-                      <p>Ergebnis melden</p>
+                      <p>Partie anschauen</p>
                     </TooltipContent>
                   </Tooltip>
-                  <DialogContent>
-                    <form onSubmit={handleResultFormSubmit(game.id)}>
-                      <DialogHeader>
-                        <DialogTitle>Ergebnis melden</DialogTitle>
-                        <DialogDescription>
-                          Melde hier das Ergebnis der Partie. Klicke speichern
-                          wenn du fertig bist.
-                        </DialogDescription>
-                      </DialogHeader>
-                      <div className="flex flex-col gap-2 py-4">
-                        <Label
-                          htmlFor={`result-select-${game.id}`}
-                          className="font-medium"
-                        >
-                          Ergebnis
-                        </Label>
-                        <Select
-                          name="result"
-                          defaultValue={game.result ?? ""}
-                          required
-                        >
-                          <SelectTrigger
-                            id={`result-select-${game.id}`}
-                            className="w-full"
-                          >
-                            <SelectValue placeholder="Ergebnis wählen" />
-                          </SelectTrigger>
-                          <SelectContent>
-                            <SelectItem value="1:0">Weiß gewinnt</SelectItem>
-                            <SelectItem value="0:1">Schwarz gewinnt</SelectItem>
-                            <SelectItem value="½-½">Remis</SelectItem>
-                            <SelectItem value="+:-">
-                              Schwarz nicht angetreten
-                            </SelectItem>
-                            <SelectItem value="-:+">
-                              Weiß nicht angetreten
-                            </SelectItem>
-                            <SelectItem value="-:-">
-                              Beide Spieler nicht angetreten.
-                            </SelectItem>
-                            {userRole === "admin" && (
-                              <>
-                                <SelectItem value="0-½">
-                                  Weiß verliert durch Regelverstoß, aber Schwarz
-                                  hat unzureichendes Material zum Matt
-                                  setzen.{" "}
-                                </SelectItem>
-                                <SelectItem value="½-0">
-                                  Schwarz verliert durch Regelverstoß, aber Weiß
-                                  hat unzureichendes Material zum Matt setzen.
-                                </SelectItem>
-                              </>
-                            )}
-                          </SelectContent>
-                        </Select>
-                      </div>
-                      <DialogFooter>
-                        <DialogClose asChild>
-                          <Button variant="outline">Schließen</Button>
-                        </DialogClose>
-                        <Button disabled={isPending} type="submit">
-                          Speichern
-                        </Button>
-                      </DialogFooter>
-                    </form>
-                  </DialogContent>
-                </Dialog>
-              ) : null}
-            </TableCell>
-          </TableRow>
-        ))}
-      </TableBody>
-    </Table>
+                  {/* TODO: Schiedsrichter darf Ergebnisse melden (global) */}
+                  {gameParticipantsMap[game.id].includes(userId) ||
+                  userRole === "admin" ? (
+                    <ReportResultDialog
+                      gameId={game.id}
+                      currentResult={game.result}
+                      onResultChange={onResultChange}
+                    />
+                  ) : null}
+                  {gameParticipantsMap[game.id].includes(userId) ||
+                  userRole === "admin" ? (
+                    <PostponeGameDialog
+                      gameId={game.id}
+                      availableMatchdays={availableMatchdays}
+                      currentGameDate={getGameTimeFromGame(game)}
+                      game={game}
+                    />
+                  ) : null}
+                </TableCell>
+              )}
+            </TableRow>
+          ))}
+        </TableBody>
+      </Table>
+    </div>
   );
 }

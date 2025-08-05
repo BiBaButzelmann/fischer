@@ -16,6 +16,7 @@ import { toast } from "sonner";
 import { Skeleton } from "@/components/ui/skeleton";
 import { useRouter } from "next/navigation";
 import { buildGameViewUrl } from "@/lib/navigation";
+import { isSameDate } from "@/lib/date";
 
 /*TODO: 
 add personal events for 
@@ -43,10 +44,6 @@ export function MyGamesCalendar({ events, matchdays = [] }: Props) {
 
   const initialDate =
     validDropDates.length > 0 ? validDropDates[0] : new Date();
-
-  const isSameDate = useCallback((date1: Date, date2: Date): boolean => {
-    return date1.toDateString() === date2.toDateString();
-  }, []);
 
   const handleEventDrop = useCallback(
     async (info: EventDropArg) => {
@@ -84,7 +81,7 @@ export function MyGamesCalendar({ events, matchdays = [] }: Props) {
         }
       });
     },
-    [matchdays, validDropDates, isSameDate],
+    [matchdays, validDropDates],
   );
 
   const handleEventClick = useCallback(
@@ -120,7 +117,7 @@ export function MyGamesCalendar({ events, matchdays = [] }: Props) {
         isSameDate(validDate, dropDate),
       );
     },
-    [validDropDates, isSameDate],
+    [validDropDates],
   );
 
   const handleDayCellDidMount = useCallback(
@@ -136,7 +133,7 @@ export function MyGamesCalendar({ events, matchdays = [] }: Props) {
         info.el.classList.add("drop-zone-valid");
       }
     },
-    [validDropDates, isSameDate],
+    [validDropDates],
   );
 
   const handleEventDragStart = useCallback(() => {
@@ -168,7 +165,7 @@ export function MyGamesCalendar({ events, matchdays = [] }: Props) {
         }
       });
     }, 0);
-  }, [validDropDates, isSameDate]);
+  }, [validDropDates]);
 
   return (
     <div className="space-y-4">

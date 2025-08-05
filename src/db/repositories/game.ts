@@ -158,6 +158,8 @@ export async function getGamesByGroup(
               userId: true,
               firstName: true,
               lastName: true,
+              email: true,
+              phoneNumber: true,
             },
           },
         },
@@ -172,6 +174,17 @@ export async function getGamesByGroup(
               userId: true,
               firstName: true,
               lastName: true,
+              email: true,
+              phoneNumber: true,
+            },
+          },
+        },
+      },
+      matchdayGame: {
+        with: {
+          matchday: {
+            columns: {
+              date: true,
             },
           },
         },

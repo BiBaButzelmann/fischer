@@ -8,7 +8,7 @@ export const profile = pgTable("profile", {
   firstName: text("first_name").notNull(),
   lastName: text("last_name").notNull(),
   email: text("email").notNull().unique(),
-  phoneNumber: text("phone_number"),
+  phoneNumber: text("phone_number").notNull(),
 
   userId: text("user_id").notNull(),
 

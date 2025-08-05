@@ -34,6 +34,7 @@ export async function AppSidebar() {
   const stage = tournament?.stage;
 
   const isRegistrationOpen = stage === "registration";
+  const isRunning = stage === "running";
   const isActive = stage === "registration" || stage === "running";
   const isAdmin = session?.user.role === "admin";
 
@@ -171,6 +172,11 @@ export async function AppSidebar() {
         {isRegistrationOpen && !session ? (
           <Button asChild>
             <Link href="/registrieren">Registrieren</Link>
+          </Button>
+        ) : null}
+        {isRunning && !session ? (
+          <Button asChild>
+            <Link href="/anmelden">Anmelden</Link>
           </Button>
         ) : null}
         {session ? <SidebarUserMenu session={session} /> : null}

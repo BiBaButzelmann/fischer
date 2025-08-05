@@ -6,9 +6,9 @@ import {
 import { PartienSelector } from "@/components/partien/partien-selector";
 import { GamesList } from "@/components/partien/games-list";
 import { updateGameResult } from "@/actions/game";
-import { auth } from "@/auth/utils";
 import { getParticipantsByGroupId } from "@/db/repositories/participant";
 import { ScrollArea } from "@/components/ui/scroll-area";
+import { getAllMatchdaysByTournamentId } from "@/db/repositories/match-day";
 
 export default async function Page({
   searchParams,
@@ -20,7 +20,6 @@ export default async function Page({
     participantId?: string;
   }>;
 }) {
-  const session = await auth();
   const { tournamentId, groupId, round, participantId } = await searchParams;
 
   const tournamentNames = await getAllActiveTournamentNames();
@@ -73,6 +72,10 @@ export default async function Page({
     participantId != null ? Number(participantId) : undefined,
   );
 
+  const matchdays = await getAllMatchdaysByTournamentId(
+    Number(selectedTournamentId),
+  );
+
   return (
     <div>
       <h1 className="text-3xl font-bold text-gray-900 mb-4">Partien</h1>
@@ -90,9 +93,9 @@ export default async function Page({
         {games.length > 0 ? (
           <ScrollArea className="h-[calc(100vh-200px)]">
             <GamesList
-              userRole={session?.user.role || undefined}
               games={games}
               onResultChange={updateGameResult}
+              availableMatchdays={matchdays}
             />
           </ScrollArea>
         ) : (
