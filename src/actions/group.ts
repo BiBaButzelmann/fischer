@@ -54,6 +54,7 @@ export async function deleteGroup(groupId: number) {
 
   revalidatePath("/admin/gruppen");
   revalidatePath("/admin/paarungen");
+  revalidatePath("/admin/eingabehelfer");
   revalidatePath("/partien");
   revalidatePath("/kalender");
 }
@@ -144,6 +145,7 @@ export async function saveGroup(tournamentId: number, groupData: GridGroup) {
 
   revalidatePath("/admin/gruppen");
   revalidatePath("/admin/paarungen");
+  revalidatePath("/admin/eingabehelfer");
   revalidatePath("/partien");
   revalidatePath("/kalender");
 }
