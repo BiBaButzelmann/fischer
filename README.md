@@ -9,3 +9,4 @@
 - Ergebnis eintragen: nach Speichern sollte sich der Popup schließen
 - Mobile: nach Auswahl in der Sidebar sollte die Sidebar einklappen
 - neue Seite: ÜBersicht einer persönlichen Partie (mit Anschrift, Tel., Gruppe, Elo)
+- group id raus aus match entering helper
