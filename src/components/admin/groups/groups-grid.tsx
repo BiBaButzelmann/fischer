@@ -180,7 +180,7 @@ export function GroupContainer({
   );
 
   return (
-    <Card>
+    <Card className="h-full flex flex-col">
       <CardHeader>
         <CardTitle>
           <div className="flex gap-2">
@@ -212,9 +212,9 @@ export function GroupContainer({
       </CardHeader>
       <CardContent
         ref={setNodeRef}
-        className="p-0 pl-4 pb-4 pr-4 md:p-0 md:pl-6 md:pb-6 md:pr-6"
+        className="p-0 pl-4 pb-4 pr-4 md:p-0 md:pl-6 md:pb-6 md:pr-6 flex flex-col h-full"
       >
-        <div className="space-y-4">
+        <div className="space-y-4 flex-1 flex flex-col">
           <div className="px-2">
             <GroupMatchDay
               group={group}
@@ -243,7 +243,7 @@ export function GroupContainer({
             )}
 
           {/* Participants */}
-          <div>
+          <div className="flex-1 flex flex-col justify-end">
             <SortableContext items={participantIds}>
               {group.participants.map((p) => (
                 <ParticipantItem key={p.id} participant={p} />
