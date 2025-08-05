@@ -21,10 +21,13 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { GridGroup } from "./types";
 import { GroupMatchDay } from "./group-match-day";
 import { ParticipantEntry } from "./participant-entry";
-import { GroupDetails } from "./group-details";
+import { GroupTitle } from "./group-title";
+import { GroupStats } from "./group-stats";
+import { GroupMatchEnteringHelperSelector } from "./group-match-entering-helper-selector";
 import { Button } from "@/components/ui/button";
 import { Trash, Save } from "lucide-react";
 import { DayOfWeek } from "@/db/types/group";
+import { MatchEnteringHelperWithName } from "@/db/types/match-entering-helper";
 
 export const UNASSIGNED_CONTAINER_ID = "unassigned-droppable";
 const UNASSIGNED_CONTAINER_TYPE = "unassigned";
@@ -39,6 +42,11 @@ export function GroupsGrid({
   onDeleteGroup,
   onSaveGroup,
   onUpdateGroupName,
+  matchEnteringHelpers,
+  helperAssignedCounts,
+  helperAssignments,
+  onAddHelperToGroup,
+  onRemoveHelperFromGroup,
 }: {
   tournamentId: number;
   groups: GridGroup[];
@@ -48,6 +56,11 @@ export function GroupsGrid({
   onDeleteGroup: (groupId: number) => void;
   onSaveGroup: (group: GridGroup) => void;
   onUpdateGroupName: (groupId: number, newName: string) => void;
+  matchEnteringHelpers: MatchEnteringHelperWithName[];
+  helperAssignedCounts: Record<number, number>;
+  helperAssignments: Record<number, MatchEnteringHelperWithName[]>;
+  onAddHelperToGroup: (groupId: number, helperId: string) => void;
+  onRemoveHelperFromGroup: (groupId: number, helperId: number) => void;
 }) {
   const [activeItem, setActiveItem] = useState<ParticipantWithName | null>(
     null,
@@ -83,6 +96,17 @@ export function GroupsGrid({
     onChangeGroups(updatedGroups);
   };
 
+  const groupsWithHelpers = useMemo(() => {
+    if (!matchEnteringHelpers || !helperAssignedCounts) {
+      return groups;
+    }
+
+    return groups.map((group) => ({
+      ...group,
+      matchEnteringHelpers: helperAssignments?.[group.id] || [],
+    }));
+  }, [groups, helperAssignments, matchEnteringHelpers, helperAssignedCounts]);
+
   return (
     <div className="flex flex-col gap-4">
       <DndContext
@@ -94,7 +118,7 @@ export function GroupsGrid({
       >
         <div className="flex flex-col gap-4">
           <div className="grid grid-cols-1 sm:grid-cols-1 lg:grid-cols-2 gap-4">
-            {groups.map((group) => (
+            {groupsWithHelpers.map((group) => (
               <GroupContainer
                 key={group.id}
                 group={group}
@@ -102,6 +126,10 @@ export function GroupsGrid({
                 onChangeGroupMatchDay={handleChangeGroupMatchDay}
                 onDeleteGroup={onDeleteGroup}
                 onSaveGroup={onSaveGroup}
+                matchEnteringHelpers={matchEnteringHelpers}
+                helperAssignedCounts={helperAssignedCounts}
+                onAddHelperToGroup={onAddHelperToGroup}
+                onRemoveHelperFromGroup={onRemoveHelperFromGroup}
               />
             ))}
             <UnassignedContainer participants={unassignedParticipants} />
@@ -123,12 +151,20 @@ export function GroupContainer({
   onChangeGroupMatchDay,
   onDeleteGroup,
   onSaveGroup,
+  matchEnteringHelpers,
+  helperAssignedCounts,
+  onAddHelperToGroup,
+  onRemoveHelperFromGroup,
 }: {
   group: GridGroup;
   onChangeGroupName: (groupId: number, newName: string) => void;
   onChangeGroupMatchDay: (groupId: number, matchDay: DayOfWeek | null) => void;
   onDeleteGroup: (groupId: number) => void;
   onSaveGroup: (group: GridGroup) => void;
+  matchEnteringHelpers: MatchEnteringHelperWithName[];
+  helperAssignedCounts: Record<number, number>;
+  onAddHelperToGroup: (groupId: number, helperId: string) => void;
+  onRemoveHelperFromGroup: (groupId: number, helperId: number) => void;
 }) {
   const { setNodeRef } = useDroppable({
     id: group.id,
@@ -149,9 +185,10 @@ export function GroupContainer({
         <CardTitle>
           <div className="flex gap-2">
             <div className="flex-1">
-              <GroupDetails
-                group={group}
+              <GroupTitle
                 onChangeGroupName={onChangeGroupName}
+                groupId={group.id}
+                groupName={group.groupName}
               />
             </div>
             <Button
@@ -177,17 +214,48 @@ export function GroupContainer({
         ref={setNodeRef}
         className="p-0 pl-4 pb-4 pr-4 md:p-0 md:pl-6 md:pb-6 md:pr-6"
       >
-        <div className="px-2 mb-2">
-          <GroupMatchDay
-            group={group}
-            onChangeGroupMatchDay={onChangeGroupMatchDay}
-          />
+        <div className="space-y-4">
+          <div className="px-2">
+            <GroupMatchDay
+              group={group}
+              onChangeGroupMatchDay={onChangeGroupMatchDay}
+            />
+          </div>
+
+          {/* Match Entering Helper Selector */}
+          {matchEnteringHelpers &&
+            helperAssignedCounts &&
+            onAddHelperToGroup &&
+            onRemoveHelperFromGroup && (
+              <div className="px-2">
+                <GroupMatchEnteringHelperSelector
+                  matchEnteringHelpers={matchEnteringHelpers}
+                  assignedHelpers={group.matchEnteringHelpers || []}
+                  helperAssignedCounts={helperAssignedCounts}
+                  onAddHelper={(helperId) =>
+                    onAddHelperToGroup(group.id, helperId)
+                  }
+                  onRemoveHelper={(helperId) =>
+                    onRemoveHelperFromGroup(group.id, helperId)
+                  }
+                />
+              </div>
+            )}
+
+          {/* Participants */}
+          <div>
+            <SortableContext items={participantIds}>
+              {group.participants.map((p) => (
+                <ParticipantItem key={p.id} participant={p} />
+              ))}
+            </SortableContext>
+          </div>
+
+          {/* Group Stats */}
+          <div className="px-2">
+            <GroupStats group={group} />
+          </div>
         </div>
-        <SortableContext items={participantIds}>
-          {group.participants.map((p) => (
-            <ParticipantItem key={p.id} participant={p} />
-          ))}
-        </SortableContext>
       </CardContent>
     </Card>
   );
