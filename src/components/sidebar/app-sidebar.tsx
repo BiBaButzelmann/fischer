@@ -137,7 +137,7 @@ export async function AppSidebar() {
               </SidebarMenuButton>
               <SidebarMenuButton asChild>
                 <Link href="/admin/spieltage">
-                  <Users />
+                  <CalendarIcon />
                   <span>Spieltage verwalten</span>
                 </Link>
               </SidebarMenuButton>
