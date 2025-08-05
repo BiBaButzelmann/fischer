@@ -14,7 +14,6 @@ export function GameEvent({
 }: Props) {
   const eventType = eventInfo.event.extendedProps.eventType;
 
-  // Define colors based on event type
   const getEventColors = (type: string) => {
     switch (type) {
       case "game":
