@@ -14,7 +14,7 @@ export default async function Page() {
     return (
       <div>
         <h1 className="text-3xl font-bold text-gray-900 mb-2">
-          Schiedsrichterverwaltung
+          Spieltagsverwaltung
         </h1>
         <p>Kein aktives Turnier gefunden.</p>
       </div>
@@ -31,10 +31,10 @@ export default async function Page() {
     <div>
       <div className="mb-8">
         <h1 className="text-3xl font-bold text-gray-900 mb-2">
-          Schiedsrichterverwaltung
+          Spieltagsverwaltung
         </h1>
         <p className="text-gray-600">
-          Schiedsrichter für {tournament.name} zuweisen
+          Spieltage für {tournament.name} verwalten
         </p>
       </div>
       <MatchdayAssignmentForm

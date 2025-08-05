@@ -10,7 +10,7 @@ import {
 import { RefereeWithName } from "@/db/types/referee";
 import { MatchDayWithRefereeAndSetupHelpers } from "@/db/types/match-day";
 import { SetupHelperWithName } from "@/db/types/setup-helper";
-import { MultipleSetupHelperSelector } from "./multiple-setup-helper-selector";
+import { SetupHelperSelector } from "./setup-helper-selector";
 import { DateTime } from "luxon";
 import { displayShortDateOrHoliday } from "@/lib/date";
 import { generateRefereeAssignmentSchedule } from "@/lib/tournament-schedule";
@@ -193,7 +193,7 @@ export function MatchdayAssignmentForm({
         />
       ),
       setupHelper: (
-        <MultipleSetupHelperSelector
+        <SetupHelperSelector
           setupHelpers={setupHelpers}
           selectedHelpers={currentSetupHelpers}
           onAdd={(setupHelperId) =>

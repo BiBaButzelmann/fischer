@@ -18,7 +18,7 @@ type Props = {
   onRemove: (helperId: number) => void;
 };
 
-export function MultipleSetupHelperSelector({
+export function SetupHelperSelector({
   setupHelpers,
   selectedHelpers,
   onAdd,
