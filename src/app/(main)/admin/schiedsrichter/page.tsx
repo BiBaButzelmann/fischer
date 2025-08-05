@@ -1,8 +1,9 @@
 import { authWithRedirect } from "@/auth/utils";
 import { getLatestTournament } from "@/db/repositories/tournament";
 import { getRefereesByTournamentId } from "@/db/repositories/referee";
-import { getMatchdaysWithRefereeByTournamentId } from "@/db/repositories/match-day";
-import { RefereeAssignmentForm } from "@/components/admin/referee/referee-assignment-form";
+import { getMatchdaysWithRefereeAndSetupHelpersByTournamentId } from "@/db/repositories/match-day";
+import { getAllSetupHelpersByTournamentId } from "@/db/repositories/setup-helper";
+import { MatchdayAssignmentForm } from "@/components/admin/matchday/matchday-assignment-form";
 
 export default async function Page() {
   await authWithRedirect();
@@ -20,9 +21,11 @@ export default async function Page() {
     );
   }
 
-  const referees = await getRefereesByTournamentId(tournament.id);
-
-  const matchdays = await getMatchdaysWithRefereeByTournamentId(tournament.id);
+  const [referees, matchdays, setupHelpers] = await Promise.all([
+    getRefereesByTournamentId(tournament.id),
+    getMatchdaysWithRefereeAndSetupHelpersByTournamentId(tournament.id),
+    getAllSetupHelpersByTournamentId(tournament.id),
+  ]);
 
   return (
     <div>
@@ -34,7 +37,11 @@ export default async function Page() {
           Schiedsrichter für {tournament.name} zuweisen
         </p>
       </div>
-      <RefereeAssignmentForm referees={referees} matchdays={matchdays} />
+      <MatchdayAssignmentForm
+        referees={referees}
+        matchdays={matchdays}
+        setupHelpers={setupHelpers}
+      />
     </div>
   );
 }

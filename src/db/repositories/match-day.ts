@@ -9,7 +9,7 @@ export async function getAllMatchdaysByTournamentId(tournamentId: number) {
   });
 }
 
-export async function getMatchdaysWithRefereeByTournamentId(
+export async function getMatchdaysWithRefereeAndSetupHelpersByTournamentId(
   tournamentId: number,
 ) {
   return await db.query.matchday.findMany({
@@ -21,6 +21,20 @@ export async function getMatchdaysWithRefereeByTournamentId(
             columns: {
               firstName: true,
               lastName: true,
+            },
+          },
+        },
+      },
+      setupHelpers: {
+        with: {
+          setupHelper: {
+            with: {
+              profile: {
+                columns: {
+                  firstName: true,
+                  lastName: true,
+                },
+              },
             },
           },
         },

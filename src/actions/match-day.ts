@@ -25,6 +25,30 @@ export async function updateRefereeIdByMatchdayId(
   revalidatePath("/admin/schiedsrichter");
 }
 
+export async function updateSetupHelpersForMatchday(
+  matchdayId: number,
+  setupHelperIds: number[],
+) {
+  const session = await authWithRedirect();
+  invariant(session?.user.role === "admin", "Unauthorized");
+
+  await db.transaction(async (tx) => {
+    await tx
+      .delete(matchdaySetupHelper)
+      .where(eq(matchdaySetupHelper.matchdayId, matchdayId));
+
+    if (setupHelperIds.length > 0) {
+      const insertValues = setupHelperIds.map((setupHelperId) => ({
+        matchdayId,
+        setupHelperId,
+      }));
+      await tx.insert(matchdaySetupHelper).values(insertValues);
+    }
+  });
+
+  revalidatePath("/admin/schiedsrichter");
+}
+
 export async function updateSetupHelpers(
   tournamentId: number,
   groupedSetupHelperIds: Record<DayOfWeek, string[]>,
