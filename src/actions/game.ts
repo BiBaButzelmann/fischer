@@ -16,7 +16,7 @@ import { revalidatePath } from "next/cache";
 import invariant from "tiny-invariant";
 import { roundRobinPairs } from "@/lib/pairing-utils";
 import { redirect } from "next/navigation";
-import { getGameDateTime } from "@/lib/game-time";
+import { getDateTimeFromDefaultTime } from "@/lib/game-time";
 
 export async function removeScheduledGamesForGroup(
   tournamentId: number,
@@ -220,8 +220,8 @@ export async function updateGameMatchday(
   });
   invariant(userProfile, "User profile not found");
 
-  const fromTimestamp = getGameDateTime(currentMatchday.date);
-  const toTimestamp = getGameDateTime(newMatchday.date);
+  const fromTimestamp = getDateTimeFromDefaultTime(currentMatchday.date);
+  const toTimestamp = getDateTimeFromDefaultTime(newMatchday.date);
 
   await db.transaction(async (tx) => {
     await tx.insert(gamePostponement).values({

@@ -1,6 +1,7 @@
 import { db } from "../client";
 import { eq } from "drizzle-orm";
 import { group } from "../schema/group";
+import { matchdayGame } from "../schema/matchday";
 
 export async function getGameById(gameId: number) {
   return await db.query.game.findFirst({
@@ -122,14 +123,20 @@ export async function isUserParticipantInGame(
   );
 }
 
-export async function getGamesByGroup(
-  groupId: number,
+export async function getGamesByTournamentId(
+  tournamentId: number,
+  groupId?: number,
+  matchdayId?: number,
   round?: number,
   participantId?: number,
 ) {
   return await db.query.game.findMany({
-    where: (game, { and, eq, or }) => {
-      const conditions = [eq(game.groupId, groupId)];
+    where: (game, { and, eq, or, exists }) => {
+      const conditions = [eq(game.tournamentId, tournamentId)];
+
+      if (groupId !== undefined) {
+        conditions.push(eq(game.groupId, groupId));
+      }
 
       if (round !== undefined) {
         conditions.push(eq(game.round, round));
@@ -143,6 +150,21 @@ export async function getGamesByGroup(
         if (participantCondition) {
           conditions.push(participantCondition);
         }
+      }
+
+      if (matchdayId !== undefined) {
+        const matchdayCondition = exists(
+          db
+            .select()
+            .from(matchdayGame)
+            .where(
+              and(
+                eq(matchdayGame.gameId, game.id),
+                eq(matchdayGame.matchdayId, matchdayId),
+              ),
+            ),
+        );
+        conditions.push(matchdayCondition);
       }
 
       return conditions.length > 1 ? and(...conditions) : conditions[0];
@@ -190,6 +212,7 @@ export async function getGamesByGroup(
         },
       },
     },
+    // TODO: improve ordering
     orderBy: (game, { asc }) => [asc(game.round), asc(game.boardNumber)],
   });
 }

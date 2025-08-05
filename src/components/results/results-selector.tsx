@@ -12,7 +12,7 @@ import {
 import { Label } from "../ui/label";
 import type { TournamentNames } from "@/db/types/tournament";
 import type { GroupSummary } from "@/db/types/group";
-import { buildResultsUrl } from "@/lib/navigation";
+import { buildResultsViewUrl } from "@/lib/navigation";
 
 export type Props = {
   selectedTournamentId: string;
@@ -35,7 +35,7 @@ export function ResultsSelector({
 
   const handleTournamentChange = (tournamentId: string) => {
     router.push(
-      buildResultsUrl({
+      buildResultsViewUrl({
         tournamentId,
         groupId: selectedGroupId,
         round: selectedRound,
@@ -45,7 +45,7 @@ export function ResultsSelector({
 
   const handleGroupChange = (groupId: string) => {
     router.push(
-      buildResultsUrl({
+      buildResultsViewUrl({
         tournamentId: selectedTournamentId,
         groupId,
         round: selectedRound,
@@ -55,7 +55,7 @@ export function ResultsSelector({
 
   const handleRoundChange = (round: string | undefined) => {
     router.push(
-      buildResultsUrl({
+      buildResultsViewUrl({
         tournamentId: selectedTournamentId,
         groupId: selectedGroupId,
         round,

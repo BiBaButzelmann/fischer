@@ -52,6 +52,12 @@ export function MyGamesCalendar({ events, matchdays = [] }: Props) {
         return;
       }
 
+      if (info.event.extendedProps.eventType === "referee") {
+        info.revert();
+        toast.error("Schiedsrichter-Termine können nicht verschoben werden.");
+        return;
+      }
+
       const gameId = info.event.extendedProps.gameId;
       if (!gameId) {
         info.revert();
@@ -86,6 +92,24 @@ export function MyGamesCalendar({ events, matchdays = [] }: Props) {
 
   const handleEventClick = useCallback(
     (info: EventClickArg) => {
+      if (info.event.extendedProps.eventType === "referee") {
+        const tournamentId = info.event.extendedProps.tournamentId;
+        const matchdayId = info.event.extendedProps.matchdayId;
+
+        if (!tournamentId || !matchdayId) {
+          toast.error("Fehler: Turnier oder Spieltag nicht gefunden.");
+          return;
+        }
+
+        const url = buildGameViewUrl({
+          tournamentId,
+          matchdayId,
+        });
+
+        router.push(url);
+        return;
+      }
+
       const gameId = info.event.extendedProps.gameId;
       const participantId = info.event.extendedProps.participantId;
       const round = info.event.extendedProps.round;

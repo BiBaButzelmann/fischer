@@ -9,20 +9,30 @@ import {
   SelectValue,
 } from "../ui/select";
 import { Label } from "../ui/label";
+import { Button } from "../ui/button";
+import { Calendar } from "../ui/calendar";
+import { Popover, PopoverContent, PopoverTrigger } from "../ui/popover";
+import { CalendarIcon } from "lucide-react";
+import { cn } from "@/lib/utils";
+import { format } from "date-fns";
+import { de } from "date-fns/locale";
 import type { TournamentNames } from "@/db/types/tournament";
 import type { GroupSummary } from "@/db/types/group";
 import type { ParticipantWithName } from "@/db/types/participant";
+import type { MatchDay } from "@/db/types/match-day";
 import { buildGameViewUrl } from "@/lib/navigation";
 
 export type Props = {
   selectedTournamentId: string;
   tournamentNames: TournamentNames[];
-  selectedGroupId: string;
+  selectedGroupId?: string;
   groups: GroupSummary[];
   selectedRound?: string;
   rounds: number[];
   selectedParticipantId?: string;
   participants: ParticipantWithName[];
+  selectedMatchdayId?: string;
+  matchdays: MatchDay[];
 };
 
 export function PartienSelector({
@@ -34,6 +44,8 @@ export function PartienSelector({
   rounds,
   selectedParticipantId,
   participants,
+  selectedMatchdayId,
+  matchdays,
 }: Props) {
   const router = useRouter();
 
@@ -41,23 +53,29 @@ export function PartienSelector({
     router.push(
       buildGameViewUrl({
         tournamentId: parseInt(tournamentId),
-        groupId: parseInt(selectedGroupId),
+        groupId: selectedGroupId ? parseInt(selectedGroupId) : undefined,
         round: selectedRound ? parseInt(selectedRound) : undefined,
         participantId: selectedParticipantId
           ? parseInt(selectedParticipantId)
+          : undefined,
+        matchdayId: selectedMatchdayId
+          ? parseInt(selectedMatchdayId)
           : undefined,
       }),
     );
   };
 
-  const handleGroupChange = (group: string) => {
+  const handleGroupChange = (group: string | undefined) => {
     router.push(
       buildGameViewUrl({
         tournamentId: parseInt(selectedTournamentId),
-        groupId: parseInt(group),
+        groupId: group ? parseInt(group) : undefined,
         round: selectedRound ? parseInt(selectedRound) : undefined,
         participantId: selectedParticipantId
           ? parseInt(selectedParticipantId)
+          : undefined,
+        matchdayId: selectedMatchdayId
+          ? parseInt(selectedMatchdayId)
           : undefined,
       }),
     );
@@ -67,10 +85,13 @@ export function PartienSelector({
     router.push(
       buildGameViewUrl({
         tournamentId: parseInt(selectedTournamentId),
-        groupId: parseInt(selectedGroupId),
+        groupId: selectedGroupId ? parseInt(selectedGroupId) : undefined,
         round: round ? parseInt(round) : undefined,
         participantId: selectedParticipantId
           ? parseInt(selectedParticipantId)
+          : undefined,
+        matchdayId: selectedMatchdayId
+          ? parseInt(selectedMatchdayId)
           : undefined,
       }),
     );
@@ -80,12 +101,49 @@ export function PartienSelector({
     router.push(
       buildGameViewUrl({
         tournamentId: parseInt(selectedTournamentId),
-        groupId: parseInt(selectedGroupId),
+        groupId: selectedGroupId ? parseInt(selectedGroupId) : undefined,
         round: selectedRound ? parseInt(selectedRound) : undefined,
         participantId: participantId ? parseInt(participantId) : undefined,
+        matchdayId: selectedMatchdayId
+          ? parseInt(selectedMatchdayId)
+          : undefined,
       }),
     );
   };
+
+  const handleMatchdayChange = (matchdayId: string | undefined) => {
+    router.push(
+      buildGameViewUrl({
+        tournamentId: parseInt(selectedTournamentId),
+        groupId: selectedGroupId ? parseInt(selectedGroupId) : undefined,
+        round: selectedRound ? parseInt(selectedRound) : undefined,
+        participantId: selectedParticipantId
+          ? parseInt(selectedParticipantId)
+          : undefined,
+        matchdayId: matchdayId ? parseInt(matchdayId) : undefined,
+      }),
+    );
+  };
+
+  const handleDateChange = (date: Date | undefined) => {
+    if (!date) {
+      handleMatchdayChange(undefined);
+      return;
+    }
+
+    const matchday = matchdays.find((md) => {
+      const mdDate = new Date(md.date);
+      return mdDate.toDateString() === date.toDateString();
+    });
+
+    if (matchday) {
+      handleMatchdayChange(matchday.id.toString());
+    }
+  };
+
+  const selectedMatchday = selectedMatchdayId
+    ? matchdays.find((md) => md.id === Number(selectedMatchdayId))
+    : undefined;
 
   return (
     <div className="flex flex-wrap gap-2 md:gap-4 mb-4">
@@ -110,11 +168,73 @@ export function PartienSelector({
         </Select>
       </div>
       <div className="flex flex-col gap-1">
+        <Label className="text-sm font-medium">Spieltag</Label>
+        <div className="relative">
+          <Popover>
+            <PopoverTrigger asChild>
+              <Button
+                variant="outline"
+                className={cn(
+                  "w-48 justify-start text-left font-normal",
+                  !selectedMatchday && "text-muted-foreground",
+                )}
+              >
+                <CalendarIcon className="mr-2 h-4 w-4" />
+                {selectedMatchday ? (
+                  format(new Date(selectedMatchday.date), "dd.MM.yyyy", {
+                    locale: de,
+                  })
+                ) : (
+                  <span>Datum wählen</span>
+                )}
+                {selectedMatchday && (
+                  <Button
+                    variant="ghost"
+                    size="sm"
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      handleMatchdayChange(undefined);
+                    }}
+                    className="absolute right-1 h-6 w-6 p-0 hover:bg-gray-100"
+                  >
+                    ✕
+                  </Button>
+                )}
+              </Button>
+            </PopoverTrigger>
+            <PopoverContent className="w-auto p-0">
+              <Calendar
+                mode="single"
+                selected={
+                  selectedMatchday ? new Date(selectedMatchday.date) : undefined
+                }
+                onSelect={handleDateChange}
+                disabled={(date) => {
+                  return !matchdays.some((md) => {
+                    const mdDate = new Date(md.date);
+                    return mdDate.toDateString() === date.toDateString();
+                  });
+                }}
+              />
+            </PopoverContent>
+          </Popover>
+        </div>
+      </div>
+      <div className="flex flex-col gap-1">
         <Label htmlFor="group-select" className="text-sm font-medium">
           Gruppe
         </Label>
-        <Select value={selectedGroupId} onValueChange={handleGroupChange}>
-          <SelectTrigger id="group-select" className="w-48">
+        <Select
+          key={selectedGroupId}
+          value={selectedGroupId}
+          onValueChange={handleGroupChange}
+        >
+          <SelectTrigger
+            id="group-select"
+            className="w-48"
+            clearable={selectedGroupId != null}
+            onClear={() => handleGroupChange(undefined)}
+          >
             <SelectValue />
           </SelectTrigger>
           <SelectContent>

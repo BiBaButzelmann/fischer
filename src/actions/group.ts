@@ -15,7 +15,6 @@ export async function updateGroups(tournamentId: number, groups: GridGroup[]) {
   invariant(session?.user.role === "admin", "Unauthorized");
 
   await db.transaction(async (tx) => {
-    // clear existing groups and participant associations
     const deletedGroups = await tx
       .delete(group)
       .where(eq(group.tournamentId, tournamentId))
@@ -27,7 +26,6 @@ export async function updateGroups(tournamentId: number, groups: GridGroup[]) {
       ),
     );
 
-    // insert new groups
     const insertGroupValues = groups.map(
       (g) =>
         ({
@@ -42,7 +40,6 @@ export async function updateGroups(tournamentId: number, groups: GridGroup[]) {
       .values(insertGroupValues)
       .returning();
 
-    // insert participant associations
     const insertParticipantGroupValues = groups.flatMap((g, groupIndex) =>
       g.participants.map((p, index) => ({
         participantId: p.id,

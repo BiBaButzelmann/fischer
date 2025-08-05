@@ -4,7 +4,7 @@ import { GroupWithParticipantsAndGames } from "@/db/types/group";
 import { GameWithMatchday } from "@/db/types/game";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { ParticipantEntry } from "../groups/participant-entry";
-import { getGameDateTime, formatGameDate } from "@/lib/game-time";
+import { getDateTimeFromDefaultTime, formatGameDate } from "@/lib/game-time";
 
 export function Pairing({ group }: { group: GroupWithParticipantsAndGames }) {
   if (!group.games || group.games.length === 0) {
@@ -64,7 +64,7 @@ export function Pairing({ group }: { group: GroupWithParticipantsAndGames }) {
         {rounds.map((round) => {
           const games = gamesByRound.get(round) || [];
 
-          const gameDateTime = getGameDateTime(
+          const gameDateTime = getDateTimeFromDefaultTime(
             games[0].matchdayGame.matchday.date,
           );
           const dateDisplay = formatGameDate(gameDateTime);

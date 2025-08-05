@@ -1,7 +1,7 @@
 import { getAllActiveTournamentNames } from "@/db/repositories/tournament";
 import {
   getAllGroupNamesByTournamentId,
-  getGamesByGroup as getGamesByGroup,
+  getGamesByTournamentId,
 } from "@/db/repositories/game";
 import { PartienSelector } from "@/components/partien/partien-selector";
 import { GamesList } from "@/components/partien/games-list";
@@ -18,9 +18,12 @@ export default async function Page({
     groupId?: string;
     round?: string;
     participantId?: string;
+    matchdayId?: string;
   }>;
 }) {
-  const { tournamentId, groupId, round, participantId } = await searchParams;
+  const session = await auth();
+  const { tournamentId, groupId, round, participantId, matchdayId } =
+    await searchParams;
 
   const tournamentNames = await getAllActiveTournamentNames();
   if (tournamentNames.length === 0) {
@@ -64,10 +67,14 @@ export default async function Page({
   );
 
   //TODO: proper validation
-  const participants = await getParticipantsByGroupId(Number(selectedGroup));
+  const participants = selectedGroup
+    ? await getParticipantsByGroupId(Number(selectedGroup))
+    : [];
 
-  const games = await getGamesByGroup(
-    Number(selectedGroup),
+  const games = await getGamesByTournamentId(
+    Number(selectedTournamentId),
+    groupId ? Number(groupId) : undefined,
+    matchdayId ? Number(matchdayId) : undefined,
     round != null ? Number(round) : undefined,
     participantId != null ? Number(participantId) : undefined,
   );
@@ -83,12 +90,14 @@ export default async function Page({
         <PartienSelector
           selectedTournamentId={selectedTournamentId}
           tournamentNames={tournamentNames}
-          selectedGroupId={selectedGroup}
+          selectedGroupId={groupId}
           groups={groups}
           selectedRound={round}
           rounds={rounds}
           selectedParticipantId={participantId}
           participants={participants}
+          selectedMatchdayId={matchdayId}
+          matchdays={matchdays}
         />
         {games.length > 0 ? (
           <ScrollArea className="h-[calc(100vh-200px)]">
