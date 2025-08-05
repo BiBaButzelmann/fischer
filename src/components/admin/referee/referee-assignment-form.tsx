@@ -134,6 +134,14 @@ export function RefereeAssignmentForm({ referees, matchdays }: Props) {
 
   return (
     <div className="space-y-6">
+      <div className="flex justify-end items-center">
+        <Button
+          onClick={handleSave}
+          disabled={isPending || changedMatchdays.size === 0}
+        >
+          {isPending ? "Speichern..." : "Speichern"}
+        </Button>
+      </div>
       <div className="border rounded-lg overflow-hidden">
         <Table className="w-full">
           <TableHeader>
@@ -178,22 +186,6 @@ export function RefereeAssignmentForm({ referees, matchdays }: Props) {
             ))}
           </TableBody>
         </Table>
-      </div>{" "}
-      <div className="flex justify-between items-center">
-        <div className="text-sm text-gray-600">
-          {changedMatchdays.size > 0 && (
-            <span>
-              {changedMatchdays.size} Änderung
-              {changedMatchdays.size > 1 ? "en" : ""} ausstehend
-            </span>
-          )}
-        </div>
-        <Button
-          onClick={handleSave}
-          disabled={isPending || changedMatchdays.size === 0}
-        >
-          {isPending ? "Speichern..." : "Speichern"}
-        </Button>
       </div>
     </div>
   );
