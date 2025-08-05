@@ -23,6 +23,7 @@ import {
   TableRow,
 } from "@/components/ui/table";
 import { RefereeSelector } from "./referee-selector";
+import { useSetupHelperAssignments } from "@/hooks/useSetupHelperAssignments";
 
 type Props = {
   referees: RefereeWithName[];
@@ -47,17 +48,20 @@ export function MatchdayAssignmentForm({
     ),
   );
 
-  const [setupHelperAssignments, setSetupHelperAssignments] = useState<
-    Record<number, SetupHelperWithName[]>
-  >(
-    matchdays.reduce(
-      (acc, matchday) => {
-        acc[matchday.id] = matchday.setupHelpers.map((sh) => sh.setupHelper);
-        return acc;
-      },
-      {} as Record<number, SetupHelperWithName[]>,
-    ),
+  const initialSetupHelperAssignments = matchdays.reduce(
+    (acc, matchday) => {
+      acc[matchday.id] = matchday.setupHelpers.map((sh) => sh.setupHelper);
+      return acc;
+    },
+    {} as Record<number, SetupHelperWithName[]>,
   );
+
+  const {
+    assignments: setupHelperAssignments,
+    addHelperToMatchday,
+    removeHelperFromMatchday,
+    getAssignmentsByMatchday,
+  } = useSetupHelperAssignments(initialSetupHelperAssignments, setupHelpers);
 
   const [isPending, startTransition] = useTransition();
   const [changedMatchdays, setChangedMatchdays] = useState<Set<number>>(
@@ -79,15 +83,7 @@ export function MatchdayAssignmentForm({
   };
 
   const handleSetupHelperAdd = (matchdayId: number, setupHelperId: string) => {
-    const setupHelper = setupHelpers.find(
-      (sh) => sh.id.toString() === setupHelperId,
-    );
-    if (!setupHelper) return;
-
-    setSetupHelperAssignments((prev) => ({
-      ...prev,
-      [matchdayId]: [...(prev[matchdayId] || []), setupHelper],
-    }));
+    addHelperToMatchday(matchdayId, setupHelperId);
     setChangedMatchdays((prev) => new Set(prev).add(matchdayId));
   };
 
@@ -95,23 +91,18 @@ export function MatchdayAssignmentForm({
     matchdayId: number,
     setupHelperId: number,
   ) => {
-    setSetupHelperAssignments((prev) => ({
-      ...prev,
-      [matchdayId]: (prev[matchdayId] || []).filter(
-        (sh) => sh.id !== setupHelperId,
-      ),
-    }));
+    removeHelperFromMatchday(matchdayId, setupHelperId);
     setChangedMatchdays((prev) => new Set(prev).add(matchdayId));
   };
 
   const handleSave = () => {
     startTransition(async () => {
+      const setupHelperIdsByMatchday = getAssignmentsByMatchday();
+
       const promises = Array.from(changedMatchdays).map(async (matchdayId) => {
         const referee = refereeAssignments[matchdayId];
         const refereeId = referee ? referee.id : null;
-        const setupHelperIds = (setupHelperAssignments[matchdayId] || []).map(
-          (sh) => sh.id,
-        );
+        const setupHelperIds = setupHelperIdsByMatchday[matchdayId] || [];
 
         await Promise.all([
           updateRefereeIdByMatchdayId(matchdayId, refereeId),

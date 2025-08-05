@@ -10,16 +10,3 @@ export type RefereeWithName = Referee & {
     lastName: string;
   };
 };
-
-export type RefereeWithProfile = {
-  id: number;
-  preferredMatchDay: DayOfWeek;
-  profile: {
-    id: number;
-    userId: string;
-    firstName: string;
-    lastName: string;
-    phoneNumber: string | null;
-    deletedAt: Date | null;
-  };
-};
