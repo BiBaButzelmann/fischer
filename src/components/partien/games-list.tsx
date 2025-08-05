@@ -27,7 +27,7 @@ import { ReportResultDialog } from "./report-result-dialog";
 import { authClient } from "@/auth-client";
 
 type Props = {
-  games: GameWithParticipantNamesAndRatings[];
+  games: GameWithParticipantProfilesAndGroupAndMatchday[];
   onResultChange: (gameId: number, result: GameResult) => Promise<void>;
   availableMatchdays: MatchDay[];
 };
