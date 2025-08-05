@@ -19,7 +19,7 @@ import { Calendar } from "../ui/calendar";
 import { Tooltip, TooltipContent, TooltipTrigger } from "../ui/tooltip";
 import { updateGameMatchday } from "@/actions/game";
 import { MatchDay } from "@/db/types/match-day";
-import { GameWithParticipantNamesAndRatings } from "@/db/types/game";
+import { GameWithParticipantProfilesAndGroupAndMatchday } from "@/db/types/game";
 import { toast } from "sonner";
 import { cn } from "@/lib/utils";
 import { Card, CardContent } from "../ui/card";
@@ -30,7 +30,7 @@ type Props = {
   gameId: number;
   availableMatchdays: MatchDay[];
   currentGameDate: Date;
-  game: GameWithParticipantNamesAndRatings;
+  game: GameWithParticipantProfilesAndGroupAndMatchday;
 };
 
 export function PostponeGameDialog({

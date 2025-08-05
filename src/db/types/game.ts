@@ -17,7 +17,7 @@ export type GameWithParticipantRatings = Pick<
   blackParticipant: ParticipantWithRating;
 };
 
-export type GameWithParticipantNamesAndRatings = Game & {
+export type GameWithParticipantProfilesAndGroupAndMatchday = Game & {
   whiteParticipant: {
     profile: {
       userId: string;
@@ -37,6 +37,11 @@ export type GameWithParticipantNamesAndRatings = Game & {
       phoneNumber: string;
     };
     fideRating: number | null;
+  };
+  group: {
+    id: number;
+    groupName: string;
+    groupNumber: number;
   };
   matchdayGame: {
     matchday: {
