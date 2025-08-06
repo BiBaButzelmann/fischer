@@ -4,8 +4,8 @@ import { useState, useTransition, Fragment } from "react";
 import { format } from "date-fns";
 import { Button } from "@/components/ui/button";
 import {
-  updateRefereeIdByMatchdayId,
-  updateSetupHelpersForMatchday,
+  updateRefereeAssignments,
+  updateSetupHelperAssignments,
 } from "@/actions/match-day";
 import { RefereeWithName } from "@/db/types/referee";
 import { MatchDayWithRefereeAndSetupHelpers } from "@/db/types/match-day";
@@ -99,18 +99,26 @@ export function MatchdayAssignmentForm({
     startTransition(async () => {
       const setupHelperIdsByMatchday = getAssignmentsByMatchday();
 
-      const promises = Array.from(changedMatchdays).map(async (matchdayId) => {
+      const matchdayRefereeAssignments: [number, number | null][] = Array.from(
+        changedMatchdays,
+      ).map((matchdayId) => {
         const referee = refereeAssignments[matchdayId];
         const refereeId = referee ? referee.id : null;
-        const setupHelperIds = setupHelperIdsByMatchday[matchdayId] || [];
-
-        await Promise.all([
-          updateRefereeIdByMatchdayId(matchdayId, refereeId),
-          updateSetupHelpersForMatchday(matchdayId, setupHelperIds),
-        ]);
+        return [matchdayId, refereeId];
       });
 
-      await Promise.all(promises);
+      const matchdaySetupHelperAssignments: [number, number[]][] = Array.from(
+        changedMatchdays,
+      ).map((matchdayId) => {
+        const setupHelperIds = setupHelperIdsByMatchday[matchdayId] || [];
+        return [matchdayId, setupHelperIds];
+      });
+
+      await Promise.all([
+        updateRefereeAssignments(matchdayRefereeAssignments),
+        updateSetupHelperAssignments(matchdaySetupHelperAssignments),
+      ]);
+
       setChangedMatchdays(new Set());
     });
   };
