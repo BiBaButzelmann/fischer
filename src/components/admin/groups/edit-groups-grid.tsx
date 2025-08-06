@@ -37,8 +37,8 @@ export function EditGroupsGrid({
     removeHelperFromGroup,
     getGroupedHelperIds,
   } = useHelperAssignments(
-    currentAssignments || {},
-    matchEnteringHelpers || [],
+    currentAssignments,
+    matchEnteringHelpers,
   );
 
   const handleAddNewGroup = () => {
