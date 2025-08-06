@@ -24,6 +24,7 @@ import {
 } from "@/components/ui/table";
 import { RefereeSelector } from "./referee-selector";
 import { useSetupHelperAssignments } from "@/hooks/useSetupHelperAssignments";
+import { useRefereeAssignments } from "@/hooks/useRefereeAssignments";
 
 type Props = {
   referees: RefereeWithName[];
@@ -36,17 +37,19 @@ export function MatchdayAssignmentForm({
   matchdays,
   setupHelpers,
 }: Props) {
-  const [refereeAssignments, setRefereeAssignments] = useState<
-    Record<number, RefereeWithName | null>
-  >(
-    matchdays.reduce(
-      (acc, matchday) => {
-        acc[matchday.id] = matchday.referee;
-        return acc;
-      },
-      {} as Record<number, RefereeWithName | null>,
-    ),
+  const initialRefereeAssignments = matchdays.reduce(
+    (acc, matchday) => {
+      acc[matchday.id] = matchday.referee;
+      return acc;
+    },
+    {} as Record<number, RefereeWithName | null>,
   );
+
+  const {
+    assignments: refereeAssignments,
+    updateRefereeAssignment,
+    getAssignmentsByMatchday: getRefereeAssignmentsByMatchday,
+  } = useRefereeAssignments(initialRefereeAssignments, referees);
 
   const initialSetupHelperAssignments = matchdays.reduce(
     (acc, matchday) => {
@@ -72,13 +75,7 @@ export function MatchdayAssignmentForm({
     matchdayId: number,
     refereeId: string | null,
   ) => {
-    setRefereeAssignments((prev) => ({
-      ...prev,
-      [matchdayId]:
-        refereeId === "none" || !refereeId
-          ? null
-          : referees.find((r) => r.id.toString() === refereeId) || null,
-    }));
+    updateRefereeAssignment(matchdayId, refereeId);
     setChangedMatchdays((prev) => new Set(prev).add(matchdayId));
   };
 
@@ -97,11 +94,11 @@ export function MatchdayAssignmentForm({
 
   const handleSave = () => {
     startTransition(async () => {
+      const refereeIdsByMatchday = getRefereeAssignmentsByMatchday();
       const setupHelperIdsByMatchday = getAssignmentsByMatchday();
 
       const promises = Array.from(changedMatchdays).map(async (matchdayId) => {
-        const referee = refereeAssignments[matchdayId];
-        const refereeId = referee ? referee.id : null;
+        const refereeId = refereeIdsByMatchday[matchdayId];
         const setupHelperIds = setupHelperIdsByMatchday[matchdayId] || [];
 
         await Promise.all([
