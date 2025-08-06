@@ -1,3 +1,6 @@
+import { DateTime } from "luxon";
+import { isHoliday } from "./holidays";
+
 export function getDatetimeString(date: Date) {
   const options: Intl.DateTimeFormatOptions = {
     year: "numeric",
@@ -18,4 +21,16 @@ export function getDatetimeString(date: Date) {
  */
 export function isSameDate(date1: Date, date2: Date): boolean {
   return date1.toDateString() === date2.toDateString();
+}
+
+/**
+ * Displays a date in dd.MM format, or "Feiertag" if it's a holiday
+ * @param date - The DateTime object to format
+ * @returns Formatted date string or "Feiertag"
+ */
+export function displayShortDateOrHoliday(date: DateTime): string {
+  if (isHoliday(date.toJSDate())) {
+    return "Feiertag";
+  }
+  return date.toFormat("dd.MM");
 }

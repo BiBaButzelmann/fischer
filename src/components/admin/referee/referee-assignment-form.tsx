@@ -2,95 +2,189 @@
 
 import { useState, useTransition } from "react";
 import { Button } from "@/components/ui/button";
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select";
-import { availableMatchDays } from "@/db/schema/columns.helpers";
-import { updateRefereeIdByTournamentIdAndDayofWeek } from "@/actions/match-day";
+import { updateRefereeAssignments } from "@/actions/match-day";
 import { RefereeWithName } from "@/db/types/referee";
-import { matchDays } from "@/constants/constants";
-import { DayOfWeek } from "@/db/types/group";
+import { MatchDayWithReferee } from "@/db/types/match-day";
+import { RefereeSelector } from "./referee-selector";
+import { DateTime } from "luxon";
+import { displayShortDateOrHoliday } from "@/lib/date";
+import { generateRefereeAssignmentSchedule } from "@/lib/tournament-schedule";
+import {
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableRow,
+} from "@/components/ui/table";
 
 type Props = {
-  tournamentId: number;
   referees: RefereeWithName[];
-  currentAssignments: Record<DayOfWeek, RefereeWithName | null>;
+  matchdays: MatchDayWithReferee[];
 };
 
-export function RefereeAssignmentForm({
-  tournamentId,
-  referees,
-  currentAssignments,
-}: Props) {
-  const [assignments, setAssignments] =
-    useState<Record<DayOfWeek, RefereeWithName | null>>(currentAssignments);
+export function RefereeAssignmentForm({ referees, matchdays }: Props) {
+  const [assignments, setAssignments] = useState<
+    Record<number, RefereeWithName | null>
+  >(
+    matchdays.reduce(
+      (acc, matchday) => {
+        acc[matchday.id] = matchday.referee;
+        return acc;
+      },
+      {} as Record<number, RefereeWithName | null>,
+    ),
+  );
   const [isPending, startTransition] = useTransition();
+  const [changedMatchdays, setChangedMatchdays] = useState<Set<number>>(
+    new Set(),
+  );
 
-  const handleAssignmentChange = (day: DayOfWeek, refereeId: string | null) => {
+  const handleAssignmentChange = (
+    matchdayId: number,
+    refereeId: string | null,
+  ) => {
     setAssignments((prev) => ({
       ...prev,
-      [day]:
+      [matchdayId]:
         refereeId === "none" || !refereeId
           ? null
           : referees.find((r) => r.id.toString() === refereeId) || null,
     }));
+    setChangedMatchdays((prev) => new Set(prev).add(matchdayId));
   };
 
   const handleSave = () => {
     startTransition(async () => {
-      const promises = availableMatchDays.map((day) => {
-        const referee = assignments[day];
-        const refereeId = referee ? referee.id : null;
-        return updateRefereeIdByTournamentIdAndDayofWeek(
-          day,
-          tournamentId,
-          refereeId,
-        );
-      });
-
-      await Promise.all(promises);
+      await updateRefereeAssignments(
+        Array.from(changedMatchdays).map((matchdayId) => [
+          matchdayId,
+          assignments[matchdayId]?.id ?? null,
+        ]),
+      );
+      setChangedMatchdays(new Set());
     });
   };
 
+  const groupedMatchdays = matchdays.reduce(
+    (acc, matchday) => {
+      const weekId = matchday.tournamentWeekId;
+      if (!acc[weekId]) {
+        acc[weekId] = {
+          week: matchday.tournamentWeek,
+          matchdays: [],
+        };
+      }
+      acc[weekId].matchdays.push(matchday);
+      return acc;
+    },
+    {} as Record<
+      number,
+      {
+        week: MatchDayWithReferee["tournamentWeek"];
+        matchdays: MatchDayWithReferee[];
+      }
+    >,
+  );
+
+  const schedule = generateRefereeAssignmentSchedule(
+    groupedMatchdays,
+    (matchdays, dayOfWeek) =>
+      matchdays.find((md) => md.dayOfWeek === dayOfWeek),
+  );
+
+  const displayDateWithStyling = (date: DateTime) => {
+    const dateText = displayShortDateOrHoliday(date);
+    if (dateText === "Feiertag") {
+      return <span className="text-red-500 italic">Feiertag</span>;
+    }
+    return <span className="text-gray-900">{dateText}</span>;
+  };
+
+  const displayReferee = (matchday: MatchDayWithReferee | undefined) => {
+    if (!matchday || !matchday.refereeNeeded) {
+      return (
+        <div className="text-xs text-gray-400 italic">
+          Kein Schiedsrichter benötigt
+        </div>
+      );
+    }
+
+    const currentReferee = assignments[matchday.id];
+
+    return (
+      <div className="space-y-2">
+        <RefereeSelector
+          referees={referees}
+          value={currentReferee ? currentReferee.id.toString() : "none"}
+          onSelect={(value) => handleAssignmentChange(matchday.id, value)}
+        />
+      </div>
+    );
+  };
+
+  if (matchdays.length === 0) {
+    return (
+      <div className="text-center py-8 text-muted-foreground">
+        Keine Spieltage verfügbar
+      </div>
+    );
+  }
+
   return (
     <div className="space-y-6">
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-        {availableMatchDays.map((day) => {
-          const currentReferee = assignments[day];
-          return (
-            <div key={day} className="space-y-2">
-              <label className="text-sm font-medium text-gray-700">
-                {matchDays[day]}
-              </label>
-              <Select
-                value={currentReferee ? currentReferee.id.toString() : "none"}
-                onValueChange={(value) => handleAssignmentChange(day, value)}
-              >
-                <SelectTrigger>
-                  <SelectValue placeholder="Schiedsrichter wählen..." />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="none">Kein Schiedsrichter</SelectItem>
-                  {referees.map((referee) => (
-                    <SelectItem key={referee.id} value={referee.id.toString()}>
-                      {referee.profile.firstName} {referee.profile.lastName}
-                    </SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
-            </div>
-          );
-        })}
-      </div>
-
-      <div className="flex justify-end">
-        <Button onClick={handleSave} disabled={isPending}>
+      <div className="flex justify-end items-center">
+        <Button
+          onClick={handleSave}
+          disabled={isPending || changedMatchdays.size === 0}
+        >
           {isPending ? "Speichern..." : "Speichern"}
         </Button>
+      </div>
+      <div className="border rounded-lg overflow-hidden">
+        <Table className="w-full">
+          <TableHeader>
+            <TableRow>
+              <TableHead className="w-[140px] min-w-[140px]">Woche</TableHead>
+              <TableHead className="text-center">Dienstag</TableHead>
+              <TableHead className="text-center">Donnerstag</TableHead>
+              <TableHead className="text-center">Freitag</TableHead>
+            </TableRow>
+          </TableHeader>
+          <TableBody>
+            {schedule.map((week) => (
+              <TableRow key={week.week.id}>
+                <TableCell className="font-semibold text-nowrap">
+                  {week.weekLabel}
+                </TableCell>
+                <TableCell className="text-center min-w-[200px]">
+                  <div className="space-y-1">
+                    <div className="text-sm font-medium">
+                      {displayDateWithStyling(week.tuesday.date)}
+                    </div>
+                    {displayReferee(week.tuesday.matchday)}
+                  </div>
+                </TableCell>
+                <TableCell className="text-center min-w-[200px]">
+                  <div className="space-y-1">
+                    <div className="text-sm font-medium">
+                      {displayDateWithStyling(week.thursday.date)}
+                    </div>
+                    {displayReferee(week.thursday.matchday)}
+                  </div>
+                </TableCell>
+                <TableCell className="text-center min-w-[200px]">
+                  <div className="space-y-1">
+                    <div className="text-sm font-medium">
+                      {displayDateWithStyling(week.friday.date)}
+                    </div>
+                    {displayReferee(week.friday.matchday)}
+                  </div>
+                </TableCell>
+              </TableRow>
+            ))}
+          </TableBody>
+        </Table>
       </div>
     </div>
   );

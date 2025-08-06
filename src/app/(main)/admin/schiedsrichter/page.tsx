@@ -1,7 +1,7 @@
 import { authWithRedirect } from "@/auth/utils";
 import { getLatestTournament } from "@/db/repositories/tournament";
 import { getRefereesByTournamentId } from "@/db/repositories/referee";
-import { getRefereeAssignmentsByTournamentId } from "@/db/repositories/match-day";
+import { getMatchdaysWithRefereeByTournamentId } from "@/db/repositories/match-day";
 import { RefereeAssignmentForm } from "@/components/admin/referee/referee-assignment-form";
 
 export default async function Page() {
@@ -22,9 +22,7 @@ export default async function Page() {
 
   const referees = await getRefereesByTournamentId(tournament.id);
 
-  const currentAssignments = await getRefereeAssignmentsByTournamentId(
-    tournament.id,
-  );
+  const matchdays = await getMatchdaysWithRefereeByTournamentId(tournament.id);
 
   return (
     <div>
@@ -36,12 +34,7 @@ export default async function Page() {
           Schiedsrichter für {tournament.name} zuweisen
         </p>
       </div>
-      {/* TODO: es muss eine Möglichkeit geben, granularer Schiedsrichtern Spieltage zuzuweisen. Gerade für Nachholwochen müuss es möglich sein, anderen Schiedsrichtern die Termine einzustellen */}
-      <RefereeAssignmentForm
-        tournamentId={tournament.id}
-        referees={referees}
-        currentAssignments={currentAssignments}
-      />
+      <RefereeAssignmentForm referees={referees} matchdays={matchdays} />
     </div>
   );
 }
