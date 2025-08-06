@@ -79,7 +79,7 @@ export function GroupPositionManager({
   );
 
   const currentParticipants = selectedGroup
-    ? groupParticipants[selectedGroup.id] || []
+    ? groupParticipants[selectedGroup.id]
     : [];
 
   const handleGroupChange = (value: string) => {
@@ -90,7 +90,7 @@ export function GroupPositionManager({
   const handleDragStart = (event: DragStartEvent) => {
     const { active } = event;
     const participant = currentParticipants.find((p) => p.id === active.id);
-    setActiveItem(participant || null);
+    setActiveItem(participant ?? null);
   };
 
   const handleDragEnd = (event: DragEndEvent) => {

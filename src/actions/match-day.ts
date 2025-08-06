@@ -7,23 +7,6 @@ import { authWithRedirect } from "@/auth/utils";
 import invariant from "tiny-invariant";
 import { revalidatePath } from "next/cache";
 
-export async function updateRefereeIdByMatchdayId(
-  matchdayId: number,
-  refereeId: number | null,
-) {
-  const session = await authWithRedirect();
-  invariant(session?.user.role === "admin", "Unauthorized");
-
-  await db
-    .update(matchday)
-    .set({
-      refereeId,
-    })
-    .where(eq(matchday.id, matchdayId));
-
-  revalidatePath("/admin/spieltage");
-}
-
 export async function updateRefereeAssignments(
   assignments: [number, number | null][],
 ) {
@@ -42,24 +25,25 @@ export async function updateRefereeAssignments(
   revalidatePath("/admin/spieltage");
 }
 
-export async function updateSetupHelpersForMatchday(
-  matchdayId: number,
-  setupHelperIds: number[],
+export async function updateSetupHelperAssignments(
+  assignments: [number, number[]][],
 ) {
   const session = await authWithRedirect();
   invariant(session?.user.role === "admin", "Unauthorized");
 
   await db.transaction(async (tx) => {
-    await tx
-      .delete(matchdaySetupHelper)
-      .where(eq(matchdaySetupHelper.matchdayId, matchdayId));
+    for (const [matchdayId, setupHelperIds] of assignments) {
+      await tx
+        .delete(matchdaySetupHelper)
+        .where(eq(matchdaySetupHelper.matchdayId, matchdayId));
 
-    if (setupHelperIds.length > 0) {
-      const insertValues = setupHelperIds.map((setupHelperId) => ({
-        matchdayId,
-        setupHelperId,
-      }));
-      await tx.insert(matchdaySetupHelper).values(insertValues);
+      if (setupHelperIds.length > 0) {
+        const insertValues = setupHelperIds.map((setupHelperId) => ({
+          matchdayId,
+          setupHelperId,
+        }));
+        await tx.insert(matchdaySetupHelper).values(insertValues);
+      }
     }
   });
 

@@ -1,13 +1,12 @@
 import { useMemo } from "react";
-import { GroupTitle } from "./group-title";
 import { GridGroup } from "./types";
+import { CircleSlash2, Users } from "lucide-react";
 
 type Props = {
   group: GridGroup;
-  onChangeGroupName: (groupId: number, newName: string) => void;
 };
 
-export function GroupDetails({ group, onChangeGroupName }: Props) {
+export function GroupStats({ group }: Props) {
   const averageElo = useMemo(() => {
     const participantsWithElo = group.participants.filter(
       (participant) => participant.fideRating !== null,
@@ -35,16 +34,18 @@ export function GroupDetails({ group, onChangeGroupName }: Props) {
   }, [group.participants]);
 
   return (
-    <div className="flex flex-col gap-1">
-      <GroupTitle
-        onChangeGroupName={onChangeGroupName}
-        groupId={group.id}
-        groupName={group.groupName}
-      />
-      <div className="flex flex-col gap-1 text-muted-foreground text-sm font-normal">
-        <span>Teilnehmer: {group.participants.length}</span>
-        <span>Elo-Durchschnitt: {Math.round(averageElo)}</span>
-        <span>DWZ-Durchschnitt: {Math.round(averageDwz)}</span>
+    <div className="flex items-center justify-between text-xs text-muted-foreground">
+      <div className="flex items-center gap-1">
+        <Users className="h-3 w-3" />
+        <span>{group.participants.length}</span>
+      </div>
+      <div className="flex items-center gap-1">
+        <CircleSlash2 className="h-3 w-3" />
+        <span>Elo: {Math.round(averageElo)}</span>
+      </div>
+      <div className="flex items-center gap-1">
+        <CircleSlash2 className="h-3 w-3" />
+        <span>DWZ: {Math.round(averageDwz)}</span>
       </div>
     </div>
   );

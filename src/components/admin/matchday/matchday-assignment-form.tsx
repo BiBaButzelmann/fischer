@@ -1,11 +1,10 @@
 "use client";
 
 import { useState, useTransition, Fragment } from "react";
-import { format } from "date-fns";
 import { Button } from "@/components/ui/button";
 import {
-  updateRefereeIdByMatchdayId,
-  updateSetupHelpersForMatchday,
+  updateRefereeAssignments,
+  updateSetupHelperAssignments,
 } from "@/actions/match-day";
 import { RefereeWithName } from "@/db/types/referee";
 import { MatchDayWithRefereeAndSetupHelpers } from "@/db/types/match-day";
@@ -75,7 +74,13 @@ export function MatchdayAssignmentForm({
     matchdayId: number,
     refereeId: string | null,
   ) => {
-    updateRefereeAssignment(matchdayId, refereeId);
+    setRefereeAssignments((prev) => ({
+      ...prev,
+      [matchdayId]:
+        refereeId === "none" || !refereeId
+          ? null
+          : (referees.find((r) => r.id.toString() === refereeId) ?? null),
+    }));
     setChangedMatchdays((prev) => new Set(prev).add(matchdayId));
   };
 
@@ -97,17 +102,26 @@ export function MatchdayAssignmentForm({
       const refereeIdsByMatchday = getRefereeAssignmentsByMatchday();
       const setupHelperIdsByMatchday = getAssignmentsByMatchday();
 
-      const promises = Array.from(changedMatchdays).map(async (matchdayId) => {
-        const refereeId = refereeIdsByMatchday[matchdayId];
-        const setupHelperIds = setupHelperIdsByMatchday[matchdayId] || [];
-
-        await Promise.all([
-          updateRefereeIdByMatchdayId(matchdayId, refereeId),
-          updateSetupHelpersForMatchday(matchdayId, setupHelperIds),
-        ]);
+      const matchdayRefereeAssignments: [number, number | null][] = Array.from(
+        changedMatchdays,
+      ).map((matchdayId) => {
+        const referee = refereeAssignments[matchdayId];
+        const refereeId = referee ? referee.id : null;
+        return [matchdayId, refereeId];
       });
 
-      await Promise.all(promises);
+      const matchdaySetupHelperAssignments: [number, number[]][] = Array.from(
+        changedMatchdays,
+      ).map((matchdayId) => {
+        const setupHelperIds = setupHelperIdsByMatchday[matchdayId];
+        return [matchdayId, setupHelperIds];
+      });
+
+      await Promise.all([
+        updateRefereeAssignments(matchdayRefereeAssignments),
+        updateSetupHelperAssignments(matchdaySetupHelperAssignments),
+      ]);
+
       setChangedMatchdays(new Set());
     });
   };
@@ -147,51 +161,59 @@ export function MatchdayAssignmentForm({
     return <span className="text-gray-900">{dateText}</span>;
   };
 
-  const displayAssignments = (
+  const getRefereeSelectorForMatchday = (
     matchday: MatchDayWithRefereeAndSetupHelpers | undefined,
   ) => {
     if (!matchday || !matchday.refereeNeeded) {
-      return {
-        date: "",
-        referee: (
-          <div className="text-xs text-gray-400 italic">
-            Keine Schiedsrichter benötigt
-          </div>
-        ),
-        setupHelper: (
-          <div className="text-xs text-gray-400 italic">
-            Kein Aufbauhelfer benötigt
-          </div>
-        ),
-      };
+      return (
+        <div className="text-xs text-gray-400 italic">
+          Keine Schiedsrichter benötigt
+        </div>
+      );
     }
 
     const currentReferee = refereeAssignments[matchday.id];
-    const currentSetupHelpers = setupHelperAssignments[matchday.id] || [];
+    return (
+      <RefereeSelector
+        referees={referees}
+        onSelect={(value) => handleRefereeAssignmentChange(matchday.id, value)}
+        value={currentReferee ? currentReferee.id.toString() : "none"}
+      />
+    );
+  };
 
+  const getSetupHelpersSelectorForMatchday = (
+    matchday: MatchDayWithRefereeAndSetupHelpers | undefined,
+  ) => {
+    if (!matchday || !matchday.refereeNeeded) {
+      return (
+        <div className="text-xs text-gray-400 italic">
+          Kein Aufbauhelfer benötigt
+        </div>
+      );
+    }
+
+    const currentSetupHelpers = setupHelperAssignments[matchday.id];
+    return (
+      <SetupHelperSelector
+        setupHelpers={setupHelpers}
+        selectedHelpers={currentSetupHelpers}
+        onAdd={(setupHelperId) =>
+          handleSetupHelperAdd(matchday.id, setupHelperId)
+        }
+        onRemove={(setupHelperId) =>
+          handleSetupHelperRemove(matchday.id, setupHelperId)
+        }
+      />
+    );
+  };
+
+  const displayAssignments = (
+    matchday: MatchDayWithRefereeAndSetupHelpers | undefined,
+  ) => {
     return {
-      date: format(matchday.date, "dd.MM.yy"),
-      referee: (
-        <RefereeSelector
-          referees={referees}
-          onSelect={(value) =>
-            handleRefereeAssignmentChange(matchday.id, value)
-          }
-          value={currentReferee ? currentReferee.id.toString() : "none"}
-        />
-      ),
-      setupHelper: (
-        <SetupHelperSelector
-          setupHelpers={setupHelpers}
-          selectedHelpers={currentSetupHelpers}
-          onAdd={(setupHelperId) =>
-            handleSetupHelperAdd(matchday.id, setupHelperId)
-          }
-          onRemove={(setupHelperId) =>
-            handleSetupHelperRemove(matchday.id, setupHelperId)
-          }
-        />
-      ),
+      referee: getRefereeSelectorForMatchday(matchday),
+      setupHelper: getSetupHelpersSelectorForMatchday(matchday),
     };
   };
 
