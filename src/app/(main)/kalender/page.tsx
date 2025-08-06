@@ -53,31 +53,42 @@ export default async function Page() {
         <h1 className="text-3xl font-bold text-gray-900 mb-2">Kalender</h1>
         <div className="bg-blue-50 border border-blue-200 rounded-lg p-4 mb-4">
           <div className="space-y-2">
-            <p className="text-blue-800 text-sm">
-              Hier siehst du deine Termine.
-              {currentParticipant && (
-                <span>
-                  {" "}
-                  Du kannst deine Spiele per Drag & Drop verschieben.
-                </span>
-              )}
-            </p>
+            {activeTournament?.stage === "running" ? (
+              <>
+                <p className="text-blue-800 text-sm">
+                  Hier siehst du deine Termine.
+                  {currentParticipant && (
+                    <span>
+                      {" "}
+                      Du kannst deine Spiele per Drag & Drop verschieben.
+                    </span>
+                  )}
+                </p>
 
-            {(currentParticipant || currentReferee) && (
-              <div className="flex flex-wrap gap-4 text-xs">
-                {currentParticipant && (
-                  <div className="flex items-center gap-1">
-                    <div className="w-3 h-3 bg-blue-500 rounded"></div>
-                    <span className="text-blue-700">Deine Spiele</span>
+                {(currentParticipant || currentReferee) && (
+                  <div className="flex flex-wrap gap-4 text-xs">
+                    {currentParticipant && (
+                      <div className="flex items-center gap-1">
+                        <div className="w-3 h-3 bg-blue-500 rounded"></div>
+                        <span className="text-blue-700">Deine Spiele</span>
+                      </div>
+                    )}
+                    {currentReferee && (
+                      <div className="flex items-center gap-1">
+                        <div className="w-3 h-3 bg-red-500 rounded"></div>
+                        <span className="text-red-700">
+                          Schiedsrichter-Termine
+                        </span>
+                      </div>
+                    )}
                   </div>
                 )}
-                {currentReferee && (
-                  <div className="flex items-center gap-1">
-                    <div className="w-3 h-3 bg-red-500 rounded"></div>
-                    <span className="text-red-700">Schiedsrichter-Termine</span>
-                  </div>
-                )}
-              </div>
+              </>
+            ) : (
+              <p className="text-blue-800 text-sm">
+                Deine Termine werden hier ab dem <strong>02.09.2025</strong>{" "}
+                angezeigt.
+              </p>
             )}
           </div>
         </div>
