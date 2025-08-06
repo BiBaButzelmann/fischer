@@ -158,51 +158,59 @@ export function MatchdayAssignmentForm({
     return <span className="text-gray-900">{dateText}</span>;
   };
 
-  const displayAssignments = (
+  const getRefereeSelectorForMatchday = (
     matchday: MatchDayWithRefereeAndSetupHelpers | undefined,
   ) => {
     if (!matchday || !matchday.refereeNeeded) {
-      return {
-        date: "",
-        referee: (
-          <div className="text-xs text-gray-400 italic">
-            Keine Schiedsrichter benötigt
-          </div>
-        ),
-        setupHelper: (
-          <div className="text-xs text-gray-400 italic">
-            Kein Aufbauhelfer benötigt
-          </div>
-        ),
-      };
+      return (
+        <div className="text-xs text-gray-400 italic">
+          Keine Schiedsrichter benötigt
+        </div>
+      );
     }
 
     const currentReferee = refereeAssignments[matchday.id];
-    const currentSetupHelpers = setupHelperAssignments[matchday.id] || [];
+    return (
+      <RefereeSelector
+        referees={referees}
+        onSelect={(value) => handleRefereeAssignmentChange(matchday.id, value)}
+        value={currentReferee ? currentReferee.id.toString() : "none"}
+      />
+    );
+  };
 
+  const getSetupHelpersSelectorForMatchday = (
+    matchday: MatchDayWithRefereeAndSetupHelpers | undefined,
+  ) => {
+    if (!matchday || !matchday.refereeNeeded) {
+      return (
+        <div className="text-xs text-gray-400 italic">
+          Kein Aufbauhelfer benötigt
+        </div>
+      );
+    }
+
+    const currentSetupHelpers = setupHelperAssignments[matchday.id] || [];
+    return (
+      <SetupHelperSelector
+        setupHelpers={setupHelpers}
+        selectedHelpers={currentSetupHelpers}
+        onAdd={(setupHelperId) =>
+          handleSetupHelperAdd(matchday.id, setupHelperId)
+        }
+        onRemove={(setupHelperId) =>
+          handleSetupHelperRemove(matchday.id, setupHelperId)
+        }
+      />
+    );
+  };
+
+  const displayAssignments = (
+    matchday: MatchDayWithRefereeAndSetupHelpers | undefined,
+  ) => {
     return {
-      date: format(matchday.date, "dd.MM.yy"),
-      referee: (
-        <RefereeSelector
-          referees={referees}
-          onSelect={(value) =>
-            handleRefereeAssignmentChange(matchday.id, value)
-          }
-          value={currentReferee ? currentReferee.id.toString() : "none"}
-        />
-      ),
-      setupHelper: (
-        <SetupHelperSelector
-          setupHelpers={setupHelpers}
-          selectedHelpers={currentSetupHelpers}
-          onAdd={(setupHelperId) =>
-            handleSetupHelperAdd(matchday.id, setupHelperId)
-          }
-          onRemove={(setupHelperId) =>
-            handleSetupHelperRemove(matchday.id, setupHelperId)
-          }
-        />
-      ),
+      referee: getRefereeSelectorForMatchday(matchday),
+      setupHelper: getSetupHelpersSelectorForMatchday(matchday),
     };
   };
 
