@@ -38,6 +38,15 @@ export default function RootLayout({
               >
                 Impressum
               </a>
+              <span className="mx-2">|</span>
+              <a
+                href="https://hsk1830.de/Kontakt"
+                target="_blank"
+                rel="noopener noreferrer"
+                className="text-muted-foreground hover:text-foreground"
+              >
+                Anfahrt
+              </a>
             </p>
           </div>
         </footer>
