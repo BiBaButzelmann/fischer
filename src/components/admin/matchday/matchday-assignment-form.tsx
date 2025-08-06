@@ -74,13 +74,7 @@ export function MatchdayAssignmentForm({
     matchdayId: number,
     refereeId: string | null,
   ) => {
-    setRefereeAssignments((prev) => ({
-      ...prev,
-      [matchdayId]:
-        refereeId === "none" || !refereeId
-          ? null
-          : (referees.find((r) => r.id.toString() === refereeId) ?? null),
-    }));
+    updateRefereeAssignment(matchdayId, refereeId);
     setChangedMatchdays((prev) => new Set(prev).add(matchdayId));
   };
 
@@ -105,8 +99,7 @@ export function MatchdayAssignmentForm({
       const matchdayRefereeAssignments: [number, number | null][] = Array.from(
         changedMatchdays,
       ).map((matchdayId) => {
-        const referee = refereeAssignments[matchdayId];
-        const refereeId = referee ? referee.id : null;
+        const refereeId = refereeIdsByMatchday[matchdayId];
         return [matchdayId, refereeId];
       });
 
