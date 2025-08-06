@@ -101,7 +101,7 @@ export function GroupsGrid({
       ...group,
       matchEnteringHelpers: helperAssignments?.[group.id] ?? [],
     }));
-  }, [groups, helperAssignments, matchEnteringHelpers, helperAssignedCounts]);
+  }, [groups, helperAssignments]);
 
   return (
     <div className="flex flex-col gap-4">
