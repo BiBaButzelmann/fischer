@@ -44,7 +44,7 @@ export default async function Page({
             </a>
           </p>
           <p>
-            Die neue Seite wird deine Paarungen ab dem 02.09.2025 hier anzeigen.
+            Diese Seite wird deine Paarungen ab dem 02.09.2025 hier anzeigen.
           </p>
         </div>
       </div>

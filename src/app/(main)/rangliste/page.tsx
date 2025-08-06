@@ -41,9 +41,7 @@ export default async function Page({
               hsk1830.de/spielbetrieb/turniere/klubturnier
             </a>
           </p>
-          <p>
-            Die neue Seite wird die Rangliste ab dem 02.09.2025 hier anzeigen.
-          </p>
+          <p>Diese Seite wird die Rangliste ab dem 02.09.2025 hier anzeigen.</p>
         </div>
       </div>
     );
