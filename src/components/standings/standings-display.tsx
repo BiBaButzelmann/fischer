@@ -1,4 +1,4 @@
-import { ResultsSelector } from "./results-selector";
+import { StandingsSelector } from "./standings-selector";
 import {
   getParticipantsInGroup,
   getCompletedGames,
@@ -25,7 +25,7 @@ type Props = {
   selectedRound: string;
 };
 
-export async function ResultsDisplay({
+export async function StandingsDisplay({
   tournamentNames,
   groups,
   rounds,
@@ -44,7 +44,7 @@ export async function ResultsDisplay({
 
   return (
     <>
-      <ResultsSelector
+      <StandingsSelector
         tournamentNames={tournamentNames}
         groups={groups}
         rounds={rounds}
