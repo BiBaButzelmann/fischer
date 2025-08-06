@@ -19,6 +19,7 @@ import {
   CalendarIcon,
   FileCheck,
   LayoutDashboard,
+  Medal,
   SwordsIcon,
   Trophy,
   UserRoundCogIcon,
@@ -70,9 +71,9 @@ export async function AppSidebar() {
                 </Link>
               </SidebarMenuButton>
               <SidebarMenuButton asChild>
-                <Link href="/ergebnisse">
-                  <Trophy />
-                  <span>Ergebnisse</span>
+                <Link href="/rangliste">
+                  <Medal />
+                  <span>Rangliste</span>
                 </Link>
               </SidebarMenuButton>
               {session != null ? (

@@ -9,7 +9,7 @@ import {
   getTournamentById,
 } from "@/db/repositories/tournament";
 import { getAllGroupNamesByTournamentId } from "@/db/repositories/game";
-import { ResultsDisplay } from "@/components/results/results-display";
+import { StandingsDisplay } from "@/components/standings/standings-display";
 
 export default async function Page({
   searchParams,
@@ -42,7 +42,7 @@ export default async function Page({
             </a>
           </p>
           <p>
-            Die neue Seite wird alle Ergebnisse ab dem 02.09.2025 hier anzeigen.
+            Die neue Seite wird die Rangliste ab dem 02.09.2025 hier anzeigen.
           </p>
         </div>
       </div>
@@ -80,7 +80,7 @@ export default async function Page({
           <Card>
             <CardHeader>
               <CardTitle className="text-2xl font-bold tracking-tight">
-                Ergebnisse
+                Rangliste
               </CardTitle>
             </CardHeader>
             <div className="p-6 text-center text-muted-foreground">
@@ -106,15 +106,15 @@ export default async function Page({
         <Card>
           <CardHeader>
             <CardTitle className="text-2xl font-bold tracking-tight">
-              Ergebnisse
+              Rangliste
             </CardTitle>
             <CardDescription>
-              Wenn du keine Runde auswählst, werden die Ergebnisse aller Runden
-              angezeigt. Als Feinwertungssystem wird das Sonneborn-Berger-System
+              Ohne Rundenauswahl wird die Gesamtrangliste über alle Runden
+              angezeigt. Zur Feinwertung wird das Sonneborn-Berger-System
               verwendet.
             </CardDescription>
           </CardHeader>
-          <ResultsDisplay
+          <StandingsDisplay
             tournamentNames={tournamentNames}
             groups={groups}
             rounds={rounds}
