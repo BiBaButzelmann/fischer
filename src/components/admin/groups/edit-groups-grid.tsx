@@ -24,17 +24,25 @@ export function EditGroupsGrid({
   const [gridGroups, setGridGroups] = useState(initialGroups);
 
   const handleAddNewGroup = () => {
-    setGridGroups((prev) => [
-      ...prev,
-      {
-        id: Date.now(),
-        isNew: true,
-        groupNumber: prev.length + 1,
-        groupName: `Gruppe ${prev.length + 1}`,
-        dayOfWeek: null,
-        participants: [],
-      } as GridGroup,
-    ]);
+    setGridGroups((prev) => {
+      const existingNumbers = prev.map((g) => g.groupNumber);
+      let nextGroupNumber = 1;
+      while (existingNumbers.includes(nextGroupNumber)) {
+        nextGroupNumber++;
+      }
+
+      return [
+        ...prev,
+        {
+          id: Date.now(),
+          isNew: true,
+          groupNumber: nextGroupNumber,
+          groupName: `Gruppe ${nextGroupNumber}`,
+          dayOfWeek: null,
+          participants: [],
+        } as GridGroup,
+      ];
+    });
   };
 
   const handleDeleteGroup = (groupId: number) => {

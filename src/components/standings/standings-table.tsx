@@ -1,9 +1,5 @@
-import { ResultsSelector } from "./results-selector";
-import {
-  getParticipantsInGroup,
-  getCompletedGames,
-} from "@/db/repositories/game";
-import { calculateStandings } from "@/lib/standings";
+"use client";
+
 import {
   Table,
   TableBody,
@@ -12,47 +8,41 @@ import {
   TableHeader,
   TableRow,
 } from "../ui/table";
+import { CardContent } from "../ui/card";
 import { cn } from "@/lib/utils";
-import type { TournamentNames } from "@/db/types/tournament";
+import { buildGameViewUrl } from "@/lib/navigation";
+import { useRouter } from "next/navigation";
 import type { GroupSummary } from "@/db/types/group";
+import type { PlayerStanding } from "@/db/types/standings";
 
 type Props = {
-  tournamentNames: TournamentNames[];
-  groups: GroupSummary[];
-  rounds: number[];
-  selectedTournamentId: string;
+  standings: PlayerStanding[];
+  selectedGroup?: GroupSummary;
   selectedGroupId: string;
-  selectedRound: string;
+  selectedTournamentId: string;
+  selectedRound?: string;
 };
 
-export async function ResultsDisplay({
-  tournamentNames,
-  groups,
-  rounds,
-  selectedTournamentId,
+export function StandingsTable({
+  standings,
+  selectedGroup,
   selectedGroupId,
+  selectedTournamentId,
   selectedRound,
 }: Props) {
-  const participants = await getParticipantsInGroup(Number(selectedGroupId));
-  const games = await getCompletedGames(
-    Number(selectedGroupId),
-    selectedRound ? Number(selectedRound) : undefined,
-  );
-  const standings = calculateStandings(games, participants);
+  const router = useRouter();
 
-  const selectedGroup = groups.find((g) => g.id.toString() === selectedGroupId);
+  const handlePlayerClick = (participantId: number) => {
+    const url = buildGameViewUrl({
+      tournamentId: Number(selectedTournamentId),
+      groupId: Number(selectedGroupId),
+      participantId,
+    });
+    router.push(url);
+  };
 
   return (
-    <>
-      <ResultsSelector
-        tournamentNames={tournamentNames}
-        groups={groups}
-        rounds={rounds}
-        selectedTournamentId={selectedTournamentId}
-        selectedGroupId={selectedGroupId}
-        selectedRound={selectedRound}
-      />
-
+    <CardContent>
       <div className="border rounded-lg overflow-hidden">
         <Table>
           <TableHeader>
@@ -82,7 +72,11 @@ export async function ResultsDisplay({
               </TableRow>
             ) : (
               standings.map((player, index) => (
-                <TableRow key={player.participantId}>
+                <TableRow 
+                  key={player.participantId}
+                  className="cursor-pointer hover:bg-muted/50 transition-colors"
+                  onClick={() => handlePlayerClick(player.participantId)}
+                >
                   <TableCell className="py-2">
                     <div
                       className={cn(
@@ -120,6 +114,6 @@ export async function ResultsDisplay({
           </TableBody>
         </Table>
       </div>
-    </>
+    </CardContent>
   );
 }

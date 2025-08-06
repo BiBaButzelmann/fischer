@@ -23,7 +23,7 @@ export type Props = {
   rounds: number[];
 };
 
-export function ResultsSelector({
+export function StandingsSelector({
   tournamentNames,
   groups,
   rounds,

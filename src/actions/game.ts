@@ -174,7 +174,7 @@ export async function scheduleGamesForGroup(
   revalidatePath("/admin/paarungen");
 }
 
-export async function updateGameMatchday(
+export async function updateGameMatchdayAndBoardNumber(
   gameId: number,
   newMatchdayId: number,
 ) {
@@ -224,6 +224,31 @@ export async function updateGameMatchday(
   const toTimestamp = getDateTimeFromDefaultTime(newMatchday.date);
 
   await db.transaction(async (tx) => {
+    const existingMatchdayGames = await tx.query.matchdayGame.findMany({
+      where: (mdg, { eq }) => eq(mdg.matchdayId, newMatchdayId),
+      with: {
+        game: true,
+      },
+    });
+
+    const gamesOnNewMatchday = existingMatchdayGames
+      .map((mdg) => mdg.game)
+      .filter((g) => g.groupId === gameData.groupId && g.id !== gameId);
+
+    const usedBoardNumbers = gamesOnNewMatchday
+      .map((g) => g.boardNumber)
+      .filter((bn) => bn !== null)
+      .sort((a, b) => a! - b!);
+
+    let nextBoardNumber = 1;
+    for (const usedNumber of usedBoardNumbers) {
+      if (usedNumber === nextBoardNumber) {
+        nextBoardNumber++;
+      } else {
+        break;
+      }
+    }
+
     await tx.insert(gamePostponement).values({
       gameId,
       postponingParticipantId: postponingParticipant.id,
@@ -236,9 +261,15 @@ export async function updateGameMatchday(
       .update(matchdayGame)
       .set({ matchdayId: newMatchdayId })
       .where(eq(matchdayGame.gameId, gameId));
+
+    await tx
+      .update(game)
+      .set({ boardNumber: nextBoardNumber })
+      .where(eq(game.id, gameId));
   });
 
   revalidatePath("/kalender");
+  revalidatePath("/partien");
 }
 
 export async function rescheduleGamesForGroup(
