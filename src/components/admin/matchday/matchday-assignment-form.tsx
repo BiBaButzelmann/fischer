@@ -1,7 +1,6 @@
 "use client";
 
 import { useState, useTransition, Fragment } from "react";
-import { format } from "date-fns";
 import { Button } from "@/components/ui/button";
 import {
   updateRefereeAssignments,
@@ -77,7 +76,7 @@ export function MatchdayAssignmentForm({
       [matchdayId]:
         refereeId === "none" || !refereeId
           ? null
-          : referees.find((r) => r.id.toString() === refereeId) ?? null,
+          : (referees.find((r) => r.id.toString() === refereeId) ?? null),
     }));
     setChangedMatchdays((prev) => new Set(prev).add(matchdayId));
   };
