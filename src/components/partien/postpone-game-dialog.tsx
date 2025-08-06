@@ -17,7 +17,7 @@ import { Button } from "../ui/button";
 import { Popover, PopoverContent, PopoverTrigger } from "../ui/popover";
 import { Calendar } from "../ui/calendar";
 import { Tooltip, TooltipContent, TooltipTrigger } from "../ui/tooltip";
-import { updateGameMatchday } from "@/actions/game";
+import { updateGameMatchdayAndBoardNumber } from "@/actions/game";
 import { MatchDay } from "@/db/types/match-day";
 import { GameWithParticipantProfilesAndGroupAndMatchday } from "@/db/types/game";
 import { toast } from "sonner";
@@ -58,7 +58,7 @@ export function PostponeGameDialog({
 
     startTransition(async () => {
       try {
-        await updateGameMatchday(gameId, selectedMatchday.id);
+        await updateGameMatchdayAndBoardNumber(gameId, selectedMatchday.id);
         toast.success("Partie erfolgreich verschoben!");
         setSelectedDate(undefined);
         setIsOpen(false);
