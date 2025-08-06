@@ -21,7 +21,6 @@ import {
   LayoutDashboard,
   Medal,
   SwordsIcon,
-  Trophy,
   UserRoundCogIcon,
   Users,
 } from "lucide-react";
