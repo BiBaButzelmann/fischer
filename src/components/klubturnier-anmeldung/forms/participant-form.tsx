@@ -423,7 +423,7 @@ export function ParticipateForm({
                 <PopoverContent className="w-auto p-0" align="start">
                   <Calendar
                     mode="multiple"
-                    selected={field.value || []}
+                    selected={field.value ?? []}
                     onSelect={(selectedDates) => {
                       if (selectedDates && selectedDates.length <= 5) {
                         field.onChange(selectedDates);

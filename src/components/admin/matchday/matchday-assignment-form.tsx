@@ -77,7 +77,7 @@ export function MatchdayAssignmentForm({
       [matchdayId]:
         refereeId === "none" || !refereeId
           ? null
-          : referees.find((r) => r.id.toString() === refereeId) || null,
+          : referees.find((r) => r.id.toString() === refereeId) ?? null,
     }));
     setChangedMatchdays((prev) => new Set(prev).add(matchdayId));
   };
@@ -110,7 +110,7 @@ export function MatchdayAssignmentForm({
       const matchdaySetupHelperAssignments: [number, number[]][] = Array.from(
         changedMatchdays,
       ).map((matchdayId) => {
-        const setupHelperIds = setupHelperIdsByMatchday[matchdayId] || [];
+        const setupHelperIds = setupHelperIdsByMatchday[matchdayId];
         return [matchdayId, setupHelperIds];
       });
 
@@ -190,7 +190,7 @@ export function MatchdayAssignmentForm({
       );
     }
 
-    const currentSetupHelpers = setupHelperAssignments[matchday.id] || [];
+    const currentSetupHelpers = setupHelperAssignments[matchday.id];
     return (
       <SetupHelperSelector
         setupHelpers={setupHelpers}
