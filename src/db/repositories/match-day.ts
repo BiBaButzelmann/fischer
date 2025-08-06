@@ -1,7 +1,6 @@
 import { db } from "../client";
 import { matchday } from "../schema/matchday";
 import { eq } from "drizzle-orm";
-import type { MatchDayWithRefereeAndSetupHelpers } from "../types/match-day";
 
 export async function getAllMatchdaysByTournamentId(tournamentId: number) {
   return await db.query.matchday.findMany({
