@@ -269,6 +269,7 @@ export async function updateGameMatchdayAndBoardNumber(
   });
 
   revalidatePath("/kalender");
+  revalidatePath("/partien");
 }
 
 export async function rescheduleGamesForGroup(
