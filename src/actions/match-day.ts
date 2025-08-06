@@ -1,7 +1,7 @@
 "use server";
 
 import { db } from "@/db/client";
-import { matchday, matchdaySetupHelper } from "@/db/schema/matchday";
+import { matchdaySetupHelper, matchdayReferee } from "@/db/schema/matchday";
 import { eq } from "drizzle-orm";
 import { authWithRedirect } from "@/auth/utils";
 import invariant from "tiny-invariant";
@@ -16,9 +16,14 @@ export async function updateRefereeAssignments(
   await db.transaction(async (tx) => {
     for (const [matchdayId, refereeId] of assignments) {
       await tx
-        .update(matchday)
-        .set({ refereeId })
-        .where(eq(matchday.id, matchdayId));
+        .delete(matchdayReferee)
+        .where(eq(matchdayReferee.matchdayId, matchdayId));
+      if (refereeId !== null) {
+        await tx.insert(matchdayReferee).values({
+          matchdayId,
+          refereeId,
+        });
+      }
     }
   });
 

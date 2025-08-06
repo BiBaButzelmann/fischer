@@ -1,6 +1,7 @@
 import { db } from "../client";
 import { matchday } from "../schema/matchday";
 import { eq } from "drizzle-orm";
+import type { MatchDayWithRefereeAndSetupHelpers } from "../types/match-day";
 
 export async function getAllMatchdaysByTournamentId(tournamentId: number) {
   return await db.query.matchday.findMany({
@@ -12,15 +13,19 @@ export async function getAllMatchdaysByTournamentId(tournamentId: number) {
 export async function getMatchdaysWithRefereeAndSetupHelpersByTournamentId(
   tournamentId: number,
 ) {
-  return await db.query.matchday.findMany({
+  const rawMatchdays = await db.query.matchday.findMany({
     where: eq(matchday.tournamentId, tournamentId),
     with: {
-      referee: {
+      referees: {
         with: {
-          profile: {
-            columns: {
-              firstName: true,
-              lastName: true,
+          referee: {
+            with: {
+              profile: {
+                columns: {
+                  firstName: true,
+                  lastName: true,
+                },
+              },
             },
           },
         },
@@ -43,4 +48,9 @@ export async function getMatchdaysWithRefereeAndSetupHelpersByTournamentId(
     },
     orderBy: (matchday, { asc }) => [asc(matchday.date)],
   });
+
+  return rawMatchdays.map(({ referees, ...matchday }) => ({
+    ...matchday,
+    referee: referees.length > 0 ? referees[0].referee : null,
+  }));
 }

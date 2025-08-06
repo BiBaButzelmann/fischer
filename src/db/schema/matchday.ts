@@ -19,11 +19,19 @@ export const matchday = pgTable("matchday", {
   tournamentWeekId: integer("tournament_week_id").notNull(),
   date: date("date", { mode: "date" }).notNull(),
   dayOfWeek: matchDay("day_of_week").notNull(), // tuesday, thursday, friday
-  refereeId: integer("referee_id"),
   refereeNeeded: boolean("referee_needed").notNull().default(true),
 
   ...timestamps,
 });
+
+export const matchdayReferee = pgTable(
+  "matchday_referee",
+  {
+    matchdayId: integer("matchday_id").notNull(),
+    refereeId: integer("referee_id").notNull(),
+  },
+  (table) => [primaryKey({ columns: [table.matchdayId, table.refereeId] })],
+);
 
 export const matchdaySetupHelper = pgTable(
   "matchday_setup_helper",
@@ -52,13 +60,24 @@ export const matchdayRelations = relations(matchday, ({ one, many }) => ({
     fields: [matchday.tournamentWeekId],
     references: [tournamentWeek.id],
   }),
-  referee: one(referee, {
-    fields: [matchday.refereeId],
-    references: [referee.id],
-  }),
+  referees: many(matchdayReferee),
   setupHelpers: many(matchdaySetupHelper),
   games: many(matchdayGame),
 }));
+
+export const matchdayRefereeRelations = relations(
+  matchdayReferee,
+  ({ one }) => ({
+    matchday: one(matchday, {
+      fields: [matchdayReferee.matchdayId],
+      references: [matchday.id],
+    }),
+    referee: one(referee, {
+      fields: [matchdayReferee.refereeId],
+      references: [referee.id],
+    }),
+  }),
+);
 
 export const matchdaySetupHelperRelations = relations(
   matchdaySetupHelper,

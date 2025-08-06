@@ -1,7 +1,7 @@
 import { db } from "../client";
 import { referee } from "../schema/referee";
 import { profile } from "../schema/profile";
-import { matchday } from "../schema/matchday";
+import { matchday, matchdayReferee } from "../schema/matchday";
 import { and, eq } from "drizzle-orm";
 import type { RefereeWithName } from "../types/referee";
 
@@ -49,6 +49,7 @@ export async function getMatchdaysByRefereeId(refereeId: number) {
       matchday: matchday,
     })
     .from(referee)
-    .innerJoin(matchday, eq(matchday.refereeId, referee.id))
+    .innerJoin(matchdayReferee, eq(matchdayReferee.refereeId, referee.id))
+    .innerJoin(matchday, eq(matchday.id, matchdayReferee.matchdayId))
     .where(eq(referee.id, refereeId));
 }
