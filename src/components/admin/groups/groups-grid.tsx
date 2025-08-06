@@ -97,13 +97,9 @@ export function GroupsGrid({
   };
 
   const groupsWithHelpers = useMemo(() => {
-    if (!matchEnteringHelpers || !helperAssignedCounts) {
-      return groups;
-    }
-
     return groups.map((group) => ({
       ...group,
-      matchEnteringHelpers: helperAssignments?.[group.id] || [],
+      matchEnteringHelpers: helperAssignments?.[group.id] ?? [],
     }));
   }, [groups, helperAssignments, matchEnteringHelpers, helperAssignedCounts]);
 
@@ -223,24 +219,17 @@ export function GroupContainer({
           </div>
 
           {/* Match Entering Helper Selector */}
-          {matchEnteringHelpers &&
-            helperAssignedCounts &&
-            onAddHelperToGroup &&
-            onRemoveHelperFromGroup && (
-              <div className="px-2">
-                <GroupMatchEnteringHelperSelector
-                  matchEnteringHelpers={matchEnteringHelpers}
-                  assignedHelpers={group.matchEnteringHelpers || []}
-                  helperAssignedCounts={helperAssignedCounts}
-                  onAddHelper={(helperId) =>
-                    onAddHelperToGroup(group.id, helperId)
-                  }
-                  onRemoveHelper={(helperId) =>
-                    onRemoveHelperFromGroup(group.id, helperId)
-                  }
-                />
-              </div>
-            )}
+          <div className="px-2">
+            <GroupMatchEnteringHelperSelector
+              matchEnteringHelpers={matchEnteringHelpers}
+              assignedHelpers={group.matchEnteringHelpers ?? []}
+              helperAssignedCounts={helperAssignedCounts}
+              onAddHelper={(helperId) => onAddHelperToGroup(group.id, helperId)}
+              onRemoveHelper={(helperId) =>
+                onRemoveHelperFromGroup(group.id, helperId)
+              }
+            />
+          </div>
 
           {/* Participants */}
           <div className="flex-1 flex flex-col justify-end">

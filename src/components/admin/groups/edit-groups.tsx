@@ -48,7 +48,7 @@ export async function EditGroups({ tournament }: { tournament: Tournament }) {
           groupPosition: groupPosition,
           ...participant,
         })),
-        matchEnteringHelpers: currentAssignments[g.id] || [],
+        matchEnteringHelpers: currentAssignments[g.id] ?? [],
       }) as GridGroup,
   );
 
