@@ -35,12 +35,12 @@ const COUNTRY_OPTIONS = countries.all.filter(
     country.emoji && country.status !== "deleted" && country.ioc !== "PRK",
 );
 
-interface CountryDropdownProps {
+type Props = {
   onChange: (country: Country) => void;
   defaultValue?: string;
   placeholder?: string;
   className?: string;
-}
+};
 
 const CountryDropdownComponent = (
   {
@@ -49,7 +49,7 @@ const CountryDropdownComponent = (
     placeholder = "Land wählen",
     className,
     ...props
-  }: CountryDropdownProps,
+  }: Props,
   ref: React.ForwardedRef<HTMLButtonElement>,
 ) => {
   const [open, setOpen] = useState(false);

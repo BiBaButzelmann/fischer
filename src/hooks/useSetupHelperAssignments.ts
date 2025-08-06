@@ -1,26 +1,25 @@
 import { useState } from "react";
-import { DayOfWeek } from "@/db/types/group";
 import { SetupHelperWithName } from "@/db/types/setup-helper";
 import invariant from "tiny-invariant";
 
 export function useSetupHelperAssignments(
-  initialAssignments: Record<DayOfWeek, SetupHelperWithName[]>,
+  initialAssignments: Record<number, SetupHelperWithName[]>,
   setupHelpers: SetupHelperWithName[],
 ) {
   const [assignments, setAssignments] =
-    useState<Record<DayOfWeek, SetupHelperWithName[]>>(initialAssignments);
+    useState<Record<number, SetupHelperWithName[]>>(initialAssignments);
 
-  const addHelperToDay = (day: DayOfWeek, setupHelperId: string) => {
+  const addHelperToMatchday = (matchdayId: number, setupHelperId: string) => {
     setAssignments((prev) => {
       const setupHelper = setupHelpers.find(
         (helper) => helper.id.toString() === setupHelperId,
       );
       invariant(setupHelper, "Setup helper not found");
 
-      if (prev[day] == null) {
-        prev[day] = [];
+      if (prev[matchdayId] == null) {
+        prev[matchdayId] = [];
       }
-      const currentlyAssigned = prev[day];
+      const currentlyAssigned = prev[matchdayId];
       const currentlyAssignedIds = new Set(
         currentlyAssigned.map((helper) => helper.id),
       );
@@ -31,35 +30,38 @@ export function useSetupHelperAssignments(
 
       return {
         ...prev,
-        [day]: Array.from(currentlyAssigned),
+        [matchdayId]: Array.from(currentlyAssigned),
       };
     });
   };
 
-  const removeHelperFromDay = (day: DayOfWeek, setupHelperId: number) => {
+  const removeHelperFromMatchday = (
+    matchdayId: number,
+    setupHelperId: number,
+  ) => {
     setAssignments((prev) => {
       const currentlyAssigned =
-        prev[day]?.filter((helper) => helper.id !== setupHelperId) ?? [];
+        prev[matchdayId]?.filter((helper) => helper.id !== setupHelperId) ?? [];
       return {
         ...prev,
-        [day]: currentlyAssigned,
+        [matchdayId]: currentlyAssigned,
       };
     });
   };
 
-  const getGroupedHelperIds = () => {
+  const getAssignmentsByMatchday = () => {
     return Object.fromEntries(
-      Object.entries(assignments).map(([day, helpers]) => [
-        day,
-        helpers.map((helper) => helper.id.toString()),
+      Object.entries(assignments).map(([matchdayId, helpers]) => [
+        matchdayId,
+        helpers.map((helper) => helper.id),
       ]),
-    ) as Record<DayOfWeek, string[]>;
+    ) as Record<number, number[]>;
   };
 
   return {
     assignments,
-    addHelperToDay,
-    removeHelperFromDay,
-    getGroupedHelperIds,
+    addHelperToMatchday,
+    removeHelperFromMatchday,
+    getAssignmentsByMatchday,
   };
 }

@@ -2,24 +2,20 @@
 
 import clsx from "clsx";
 
-interface MoveHistoryProps {
+type Props = {
   /** Verbose move objects (must at least have `san`). */
   history: { san: string }[];
   /** 0‑based ply index of the current board position (‑1 = before first move). */
   currentMoveIndex: number;
   /** Jump to the given ply index. */
   goToMove: (ply: number) => void;
-}
+};
 
 /**
  * Renders the moves in two columns (white / black) and highlights the cell
  * whose ply index equals `currentMoveIndex`.
  */
-const MoveHistory: React.FC<MoveHistoryProps> = ({
-  history,
-  currentMoveIndex,
-  goToMove,
-}) => {
+function MoveHistory({ history, currentMoveIndex, goToMove }: Props) {
   const rows: React.ReactNode[] = [];
   for (let i = 0; i < history.length; i += 2) {
     const white = history[i];
@@ -60,6 +56,6 @@ const MoveHistory: React.FC<MoveHistoryProps> = ({
       </table>
     </div>
   );
-};
+}
 
 export default MoveHistory;

@@ -6,15 +6,22 @@ import { useState, useTransition } from "react";
 import { GridGroup } from "./types";
 import { Button } from "@/components/ui/button";
 import { saveGroup, deleteGroup, updateGroupName } from "@/actions/group";
+import { MatchEnteringHelperWithName } from "@/db/types/match-entering-helper";
+import { useHelperAssignments } from "@/hooks/useHelperAssignments";
+import { updateMatchEnteringHelpers } from "@/actions/match-entering-helper";
 
 export function EditGroupsGrid({
   tournamentId,
   groups: initialGroups,
   unassignedParticipants: initialUnassignedParticipants,
+  matchEnteringHelpers,
+  currentAssignments,
 }: {
   tournamentId: number;
   groups: GridGroup[];
   unassignedParticipants: ParticipantWithName[];
+  matchEnteringHelpers: MatchEnteringHelperWithName[];
+  currentAssignments: Record<number, MatchEnteringHelperWithName[]>;
 }) {
   const [isPending, startTransition] = useTransition();
 
@@ -22,6 +29,14 @@ export function EditGroupsGrid({
     initialUnassignedParticipants,
   );
   const [gridGroups, setGridGroups] = useState(initialGroups);
+
+  const {
+    assignments: helperAssignments,
+    helperAssignedCounts,
+    addHelperToGroup,
+    removeHelperFromGroup,
+    getGroupedHelperIds,
+  } = useHelperAssignments(currentAssignments, matchEnteringHelpers);
 
   const handleAddNewGroup = () => {
     setGridGroups((prev) => {
@@ -40,6 +55,7 @@ export function EditGroupsGrid({
           groupName: `Gruppe ${nextGroupNumber}`,
           dayOfWeek: null,
           participants: [],
+          matchEnteringHelpers: [],
         } as GridGroup,
       ];
     });
@@ -81,6 +97,7 @@ export function EditGroupsGrid({
   const handleSaveGroup = (groupData: GridGroup) => {
     startTransition(async () => {
       await saveGroup(tournamentId, groupData);
+      await updateMatchEnteringHelpers(tournamentId, getGroupedHelperIds());
     });
   };
 
@@ -105,6 +122,11 @@ export function EditGroupsGrid({
           onDeleteGroup={handleDeleteGroup}
           onSaveGroup={handleSaveGroup}
           onUpdateGroupName={handleUpdateGroupName}
+          matchEnteringHelpers={matchEnteringHelpers}
+          helperAssignedCounts={helperAssignedCounts}
+          helperAssignments={helperAssignments}
+          onAddHelperToGroup={addHelperToGroup}
+          onRemoveHelperFromGroup={removeHelperFromGroup}
         />
       </div>
     </div>

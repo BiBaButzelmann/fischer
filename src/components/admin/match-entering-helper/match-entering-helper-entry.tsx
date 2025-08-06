@@ -3,17 +3,17 @@ import { Trash } from "lucide-react";
 import { MatchEnteringHelperWithName } from "@/db/types/match-entering-helper";
 import { AssignmentsDisplay } from "./assignments-display";
 
-interface MatchEnteringHelperEntryProps {
+type Props = {
   matchEnteringHelper: MatchEnteringHelperWithName;
   assignedCount: number;
   onDelete: () => void;
-}
+};
 
 export function MatchEnteringHelperEntry({
   matchEnteringHelper,
   assignedCount,
   onDelete,
-}: MatchEnteringHelperEntryProps) {
+}: Props) {
   return (
     <div className="flex items-center">
       <span className="inline-flex flex-1">

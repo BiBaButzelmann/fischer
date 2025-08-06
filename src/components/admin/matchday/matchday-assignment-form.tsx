@@ -1,0 +1,304 @@
+"use client";
+
+import { useState, useTransition, Fragment } from "react";
+import { Button } from "@/components/ui/button";
+import {
+  updateRefereeAssignments,
+  updateSetupHelperAssignments,
+} from "@/actions/match-day";
+import { RefereeWithName } from "@/db/types/referee";
+import { MatchDayWithRefereeAndSetupHelpers } from "@/db/types/match-day";
+import { SetupHelperWithName } from "@/db/types/setup-helper";
+import { SetupHelperSelector } from "./setup-helper-selector";
+import { DateTime } from "luxon";
+import { displayShortDateOrHoliday } from "@/lib/date";
+import { generateRefereeAssignmentSchedule } from "@/lib/tournament-schedule";
+import {
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableRow,
+} from "@/components/ui/table";
+import { RefereeSelector } from "./referee-selector";
+import { useSetupHelperAssignments } from "@/hooks/useSetupHelperAssignments";
+import { useRefereeAssignments } from "@/hooks/useRefereeAssignments";
+
+type Props = {
+  referees: RefereeWithName[];
+  matchdays: MatchDayWithRefereeAndSetupHelpers[];
+  setupHelpers: SetupHelperWithName[];
+};
+
+export function MatchdayAssignmentForm({
+  referees,
+  matchdays,
+  setupHelpers,
+}: Props) {
+  const initialRefereeAssignments = matchdays.reduce(
+    (acc, matchday) => {
+      acc[matchday.id] = matchday.referee;
+      return acc;
+    },
+    {} as Record<number, RefereeWithName | null>,
+  );
+
+  const {
+    assignments: refereeAssignments,
+    updateRefereeAssignment,
+    getAssignmentsByMatchday: getRefereeAssignmentsByMatchday,
+  } = useRefereeAssignments(initialRefereeAssignments, referees);
+
+  const initialSetupHelperAssignments = matchdays.reduce(
+    (acc, matchday) => {
+      acc[matchday.id] = matchday.setupHelpers.map((sh) => sh.setupHelper);
+      return acc;
+    },
+    {} as Record<number, SetupHelperWithName[]>,
+  );
+
+  const {
+    assignments: setupHelperAssignments,
+    addHelperToMatchday,
+    removeHelperFromMatchday,
+    getAssignmentsByMatchday,
+  } = useSetupHelperAssignments(initialSetupHelperAssignments, setupHelpers);
+
+  const [isPending, startTransition] = useTransition();
+  const [changedMatchdays, setChangedMatchdays] = useState<Set<number>>(
+    new Set(),
+  );
+
+  const handleRefereeAssignmentChange = (
+    matchdayId: number,
+    refereeId: string | null,
+  ) => {
+    updateRefereeAssignment(matchdayId, refereeId);
+    setChangedMatchdays((prev) => new Set(prev).add(matchdayId));
+  };
+
+  const handleSetupHelperAdd = (matchdayId: number, setupHelperId: string) => {
+    addHelperToMatchday(matchdayId, setupHelperId);
+    setChangedMatchdays((prev) => new Set(prev).add(matchdayId));
+  };
+
+  const handleSetupHelperRemove = (
+    matchdayId: number,
+    setupHelperId: number,
+  ) => {
+    removeHelperFromMatchday(matchdayId, setupHelperId);
+    setChangedMatchdays((prev) => new Set(prev).add(matchdayId));
+  };
+
+  const handleSave = () => {
+    startTransition(async () => {
+      const refereeIdsByMatchday = getRefereeAssignmentsByMatchday();
+      const setupHelperIdsByMatchday = getAssignmentsByMatchday();
+
+      const matchdayRefereeAssignments: [number, number | null][] = Array.from(
+        changedMatchdays,
+      ).map((matchdayId) => {
+        const refereeId = refereeIdsByMatchday[matchdayId];
+        return [matchdayId, refereeId];
+      });
+
+      const matchdaySetupHelperAssignments: [number, number[]][] = Array.from(
+        changedMatchdays,
+      ).map((matchdayId) => {
+        const setupHelperIds = setupHelperIdsByMatchday[matchdayId];
+        return [matchdayId, setupHelperIds];
+      });
+
+      await Promise.all([
+        updateRefereeAssignments(matchdayRefereeAssignments),
+        updateSetupHelperAssignments(matchdaySetupHelperAssignments),
+      ]);
+
+      setChangedMatchdays(new Set());
+    });
+  };
+
+  const groupedMatchdays = matchdays.reduce(
+    (acc, matchday) => {
+      const weekId = matchday.tournamentWeekId;
+      if (!acc[weekId]) {
+        acc[weekId] = {
+          week: matchday.tournamentWeek,
+          matchdays: [],
+        };
+      }
+      acc[weekId].matchdays.push(matchday);
+      return acc;
+    },
+    {} as Record<
+      number,
+      {
+        week: MatchDayWithRefereeAndSetupHelpers["tournamentWeek"];
+        matchdays: MatchDayWithRefereeAndSetupHelpers[];
+      }
+    >,
+  );
+
+  const schedule = generateRefereeAssignmentSchedule(
+    groupedMatchdays,
+    (matchdays, dayOfWeek) =>
+      matchdays.find((md) => md.dayOfWeek === dayOfWeek),
+  );
+
+  const displayDateWithStyling = (date: DateTime) => {
+    const dateText = displayShortDateOrHoliday(date);
+    if (dateText === "Feiertag") {
+      return <span className="text-red-500 italic">Feiertag</span>;
+    }
+    return <span className="text-gray-900">{dateText}</span>;
+  };
+
+  const getRefereeSelectorForMatchday = (
+    matchday: MatchDayWithRefereeAndSetupHelpers | undefined,
+  ) => {
+    if (!matchday || !matchday.refereeNeeded) {
+      return (
+        <div className="text-xs text-gray-400 italic">
+          Keine Schiedsrichter benötigt
+        </div>
+      );
+    }
+
+    const currentReferee = refereeAssignments[matchday.id];
+    return (
+      <RefereeSelector
+        referees={referees}
+        onSelect={(value) => handleRefereeAssignmentChange(matchday.id, value)}
+        value={currentReferee ? currentReferee.id.toString() : "none"}
+      />
+    );
+  };
+
+  const getSetupHelpersSelectorForMatchday = (
+    matchday: MatchDayWithRefereeAndSetupHelpers | undefined,
+  ) => {
+    if (!matchday || !matchday.refereeNeeded) {
+      return (
+        <div className="text-xs text-gray-400 italic">
+          Kein Aufbauhelfer benötigt
+        </div>
+      );
+    }
+
+    const currentSetupHelpers = setupHelperAssignments[matchday.id];
+    return (
+      <SetupHelperSelector
+        setupHelpers={setupHelpers}
+        selectedHelpers={currentSetupHelpers}
+        onAdd={(setupHelperId) =>
+          handleSetupHelperAdd(matchday.id, setupHelperId)
+        }
+        onRemove={(setupHelperId) =>
+          handleSetupHelperRemove(matchday.id, setupHelperId)
+        }
+      />
+    );
+  };
+
+  const displayAssignments = (
+    matchday: MatchDayWithRefereeAndSetupHelpers | undefined,
+  ) => {
+    return {
+      referee: getRefereeSelectorForMatchday(matchday),
+      setupHelper: getSetupHelpersSelectorForMatchday(matchday),
+    };
+  };
+
+  if (matchdays.length === 0) {
+    return (
+      <div className="text-center py-8 text-muted-foreground">
+        Keine Spieltage verfügbar
+      </div>
+    );
+  }
+
+  return (
+    <div className="space-y-6">
+      <div className="flex justify-end items-center">
+        <Button
+          onClick={handleSave}
+          disabled={isPending || changedMatchdays.size === 0}
+        >
+          {isPending ? "Speichern..." : "Speichern"}
+        </Button>
+      </div>
+      <div className="border rounded-lg overflow-hidden">
+        <Table>
+          <TableHeader>
+            <TableRow>
+              <TableHead className="w-32">Woche</TableHead>
+              <TableHead className="text-center">Dienstag</TableHead>
+              <TableHead className="text-center">Donnerstag</TableHead>
+              <TableHead className="text-center">Freitag</TableHead>
+            </TableRow>
+          </TableHeader>
+          <TableBody>
+            {schedule.map((week) => {
+              const tuesdayData = displayAssignments(week.tuesday.matchday);
+              const thursdayData = displayAssignments(week.thursday.matchday);
+              const fridayData = displayAssignments(week.friday.matchday);
+
+              return (
+                <Fragment key={week.week.id}>
+                  {/* Date Row */}
+                  <TableRow className="border-b-2 border-gray-300">
+                    <TableCell className="font-semibold text-nowrap align-middle border-r-2 border-gray-300">
+                      {week.weekLabel}
+                    </TableCell>
+                    <TableCell className="text-center text-sm font-medium">
+                      {displayDateWithStyling(week.tuesday.date)}
+                    </TableCell>
+                    <TableCell className="text-center text-sm font-medium">
+                      {displayDateWithStyling(week.thursday.date)}
+                    </TableCell>
+                    <TableCell className="text-center text-sm font-medium">
+                      {displayDateWithStyling(week.friday.date)}
+                    </TableCell>
+                  </TableRow>
+
+                  {/* Referee Row */}
+                  <TableRow className="border-b border-gray-200">
+                    <TableCell className="font-medium text-nowrap align-middle border-r-2 border-gray-300 text-sm text-gray-600">
+                      Schiedsrichter
+                    </TableCell>
+                    <TableCell className="text-center min-w-[200px] bg-blue-50/50">
+                      {tuesdayData.referee}
+                    </TableCell>
+                    <TableCell className="text-center min-w-[200px] bg-blue-50/50">
+                      {thursdayData.referee}
+                    </TableCell>
+                    <TableCell className="text-center min-w-[200px] bg-blue-50/50">
+                      {fridayData.referee}
+                    </TableCell>
+                  </TableRow>
+
+                  {/* Setup Helper Row */}
+                  <TableRow className="border-b-2 border-gray-300">
+                    <TableCell className="font-medium text-nowrap align-middle border-r-2 border-gray-300 text-sm text-gray-600">
+                      Aufbauhelfer
+                    </TableCell>
+                    <TableCell className="text-center min-w-[200px] bg-green-50/50">
+                      {tuesdayData.setupHelper}
+                    </TableCell>
+                    <TableCell className="text-center min-w-[200px] bg-green-50/50">
+                      {thursdayData.setupHelper}
+                    </TableCell>
+                    <TableCell className="text-center min-w-[200px] bg-green-50/50">
+                      {fridayData.setupHelper}
+                    </TableCell>
+                  </TableRow>
+                </Fragment>
+              );
+            })}
+          </TableBody>
+        </Table>
+      </div>
+    </div>
+  );
+}
