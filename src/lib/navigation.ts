@@ -49,5 +49,5 @@ export function buildResultsViewUrl(params: {
     searchParams.set("round", params.round);
   }
 
-  return `/ergebnisse?${searchParams.toString()}`;
+  return `/rangliste?${searchParams.toString()}`;
 }

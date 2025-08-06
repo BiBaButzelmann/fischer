@@ -1,7 +1,9 @@
 import { db } from "../client";
-import { eq } from "drizzle-orm";
+import { eq, and, asc, or } from "drizzle-orm";
 import { group } from "../schema/group";
 import { matchdayGame } from "../schema/matchday";
+import { matchday } from "../schema/matchday";
+import { game } from "../schema/game";
 
 export async function getGameById(gameId: number) {
   return await db.query.game.findFirst({
@@ -130,45 +132,57 @@ export async function getGamesByTournamentId(
   round?: number,
   participantId?: number,
 ) {
-  return await db.query.game.findMany({
-    where: (game, { and, eq, or, exists }) => {
-      const conditions = [eq(game.tournamentId, tournamentId)];
+  const conditions = [eq(game.tournamentId, tournamentId)];
 
-      if (groupId !== undefined) {
-        conditions.push(eq(game.groupId, groupId));
-      }
+  if (groupId !== undefined) {
+    conditions.push(eq(game.groupId, groupId));
+  }
 
-      if (round !== undefined) {
-        conditions.push(eq(game.round, round));
-      }
+  if (round !== undefined) {
+    conditions.push(eq(game.round, round));
+  }
 
-      if (participantId !== undefined) {
-        const participantCondition = or(
-          eq(game.whiteParticipantId, participantId),
-          eq(game.blackParticipantId, participantId),
-        );
-        if (participantCondition) {
-          conditions.push(participantCondition);
-        }
-      }
+  if (participantId !== undefined) {
+    const participantCondition = or(
+      eq(game.whiteParticipantId, participantId),
+      eq(game.blackParticipantId, participantId),
+    );
+    if (participantCondition) {
+      conditions.push(participantCondition);
+    }
+  }
 
-      if (matchdayId !== undefined) {
-        const matchdayCondition = exists(
-          db
-            .select()
-            .from(matchdayGame)
-            .where(
-              and(
-                eq(matchdayGame.gameId, game.id),
-                eq(matchdayGame.matchdayId, matchdayId),
-              ),
-            ),
-        );
-        conditions.push(matchdayCondition);
-      }
+  if (matchdayId !== undefined) {
+    conditions.push(eq(matchdayGame.matchdayId, matchdayId));
+  }
 
-      return conditions.length > 1 ? and(...conditions) : conditions[0];
-    },
+  const result = await db
+    .select({
+      gameId: game.id,
+      date: matchday.date,
+      groupNumber: group.groupNumber,
+      round: game.round,
+      boardNumber: game.boardNumber,
+    })
+    .from(game)
+    .leftJoin(group, eq(game.groupId, group.id))
+    .leftJoin(matchdayGame, eq(matchdayGame.gameId, game.id))
+    .leftJoin(matchday, eq(matchdayGame.matchdayId, matchday.id))
+    .where(and(...conditions))
+    .orderBy(
+      asc(matchday.date),
+      asc(group.groupNumber),
+      asc(game.round),
+      asc(game.boardNumber),
+    );
+  const gameIds = result.map((row) => row.gameId);
+
+  if (gameIds.length === 0) {
+    return [];
+  }
+
+  const games = await db.query.game.findMany({
+    where: (game, { inArray }) => inArray(game.id, gameIds),
     with: {
       whiteParticipant: {
         columns: {
@@ -219,9 +233,10 @@ export async function getGamesByTournamentId(
         },
       },
     },
-    // TODO: improve ordering
-    orderBy: (game, { asc }) => [asc(game.round), asc(game.boardNumber)],
   });
+
+  const gameMap = new Map(games.map((game) => [game.id, game]));
+  return gameIds.map((id) => gameMap.get(id)).filter(Boolean);
 }
 
 export async function getCompletedGames(groupId: number, maxRound?: number) {

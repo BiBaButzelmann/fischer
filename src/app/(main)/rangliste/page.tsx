@@ -91,7 +91,7 @@ export default async function Page({
   }
 
   const selectedGroupId = groupId || groups[0].id.toString();
-  const selectedRound = round || "1";
+  const selectedRound = round;
 
   const rounds = Array.from(
     { length: selectedTournamentName.numberOfRounds },

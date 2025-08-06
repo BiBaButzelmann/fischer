@@ -10,7 +10,7 @@ import {
 } from "@fullcalendar/core/index.js";
 import { CalendarEvent } from "@/db/types/calendar";
 import { useTransition, useCallback } from "react";
-import { updateGameMatchday } from "@/actions/game";
+import { updateGameMatchdayAndBoardNumber } from "@/actions/game";
 import { MatchDay } from "@/db/types/match-day";
 import { toast } from "sonner";
 import { Skeleton } from "@/components/ui/skeleton";
@@ -79,7 +79,7 @@ export function MyGamesCalendar({ events, matchdays = [] }: Props) {
 
       startTransition(async () => {
         try {
-          await updateGameMatchday(gameId, targetMatchday.id);
+          await updateGameMatchdayAndBoardNumber(gameId, targetMatchday.id);
           toast.success("Spiel erfolgreich verschoben!");
         } catch {
           toast.error("Fehler beim Verschieben des Spiels.");
