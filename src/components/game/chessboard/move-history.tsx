@@ -15,11 +15,7 @@ type Props = {
  * Renders the moves in two columns (white / black) and highlights the cell
  * whose ply index equals `currentMoveIndex`.
  */
-const MoveHistory: React.FC<Props> = ({
-  history,
-  currentMoveIndex,
-  goToMove,
-}) => {
+function MoveHistory({ history, currentMoveIndex, goToMove }: Props) {
   const rows: React.ReactNode[] = [];
   for (let i = 0; i < history.length; i += 2) {
     const white = history[i];
@@ -60,6 +56,6 @@ const MoveHistory: React.FC<Props> = ({
       </table>
     </div>
   );
-};
+}
 
 export default MoveHistory;
