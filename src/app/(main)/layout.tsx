@@ -40,7 +40,7 @@ export default function RootLayout({
               </a>
               <span className="mx-2">|</span>
               <a
-                href="https://hsk1830.de/Kontakt"
+                href="https://hsk1830.de/Kontakt#Anfahrt"
                 target="_blank"
                 rel="noopener noreferrer"
                 className="text-muted-foreground hover:text-foreground"
