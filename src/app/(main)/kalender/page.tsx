@@ -14,13 +14,17 @@ import { getActiveTournament } from "@/db/repositories/tournament";
 export default async function Page() {
   const session = await authWithRedirect();
 
-  const [currentParticipant, currentReferee, currentSetupHelper, activeTournament] =
-    await Promise.all([
-      getParticipantByUserId(session.user.id),
-      getRefereeByUserId(session.user.id),
-      getSetupHelperByUserId(session.user.id),
-      getActiveTournament(),
-    ]);
+  const [
+    currentParticipant,
+    currentReferee,
+    currentSetupHelper,
+    activeTournament,
+  ] = await Promise.all([
+    getParticipantByUserId(session.user.id),
+    getRefereeByUserId(session.user.id),
+    getSetupHelperByUserId(session.user.id),
+    getActiveTournament(),
+  ]);
 
   if (!currentParticipant && !currentReferee && !currentSetupHelper) {
     return (
@@ -28,29 +32,35 @@ export default async function Page() {
         <h1 className="text-3xl font-bold text-gray-900 mb-2">Kalender</h1>
         <div className="bg-yellow-50 border border-yellow-200 rounded-lg p-4">
           <p className="text-yellow-800 text-sm">
-            Du bist weder als Teilnehmer, Schiedsrichter noch als Aufbauhelfer für ein Turnier angemeldet.
+            Du bist weder als Teilnehmer, Schiedsrichter noch als Aufbauhelfer
+            für ein Turnier angemeldet.
           </p>
         </div>
       </div>
     );
   }
 
-  const [participantEvents, refereeEvents, setupHelperEvents, matchdays] = await Promise.all([
-    currentParticipant
-      ? getCalendarEventsForParticipant(currentParticipant.id)
-      : Promise.resolve([]),
-    currentReferee
-      ? getCalendarEventsForReferee(currentReferee.id)
-      : Promise.resolve([]),
-    currentSetupHelper
-      ? getCalendarEventsForSetupHelper(currentSetupHelper.id)
-      : Promise.resolve([]),
-    activeTournament
-      ? getAllMatchdaysByTournamentId(activeTournament.id)
-      : Promise.resolve([]),
-  ]);
+  const [participantEvents, refereeEvents, setupHelperEvents, matchdays] =
+    await Promise.all([
+      currentParticipant
+        ? getCalendarEventsForParticipant(currentParticipant.id)
+        : Promise.resolve([]),
+      currentReferee
+        ? getCalendarEventsForReferee(currentReferee.id)
+        : Promise.resolve([]),
+      currentSetupHelper
+        ? getCalendarEventsForSetupHelper(currentSetupHelper.id)
+        : Promise.resolve([]),
+      activeTournament
+        ? getAllMatchdaysByTournamentId(activeTournament.id)
+        : Promise.resolve([]),
+    ]);
 
-  const calendarEvents = [...participantEvents, ...refereeEvents, ...setupHelperEvents];
+  const calendarEvents = [
+    ...participantEvents,
+    ...refereeEvents,
+    ...setupHelperEvents,
+  ];
 
   return (
     <div>
@@ -70,7 +80,9 @@ export default async function Page() {
                   )}
                 </p>
 
-                {(currentParticipant || currentReferee || currentSetupHelper) && (
+                {(currentParticipant ||
+                  currentReferee ||
+                  currentSetupHelper) && (
                   <div className="flex flex-wrap gap-4 text-xs">
                     {currentParticipant && (
                       <div className="flex items-center gap-1">

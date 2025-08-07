@@ -48,7 +48,10 @@ export async function getMatchdaysBySetupHelperId(setupHelperId: number) {
       matchday: matchday,
     })
     .from(setupHelper)
-    .innerJoin(matchdaySetupHelper, eq(matchdaySetupHelper.setupHelperId, setupHelper.id))
+    .innerJoin(
+      matchdaySetupHelper,
+      eq(matchdaySetupHelper.setupHelperId, setupHelper.id),
+    )
     .innerJoin(matchday, eq(matchday.id, matchdaySetupHelper.matchdayId))
     .where(eq(setupHelper.id, setupHelperId));
 }

@@ -32,6 +32,7 @@ export function MyGamesCalendar({ events, matchdays = [] }: Props) {
     title: event.title,
     start: event.start,
     extendedProps: event.extendedProps,
+    editable: event.extendedProps.eventType === "game",
   }));
 
   const validDropDates = matchdays.map((matchday) => matchday.date);
@@ -46,15 +47,8 @@ export function MyGamesCalendar({ events, matchdays = [] }: Props) {
         return;
       }
 
-      if (info.event.extendedProps.eventType === "referee") {
+      if (info.event.extendedProps.eventType !== "game") {
         info.revert();
-        toast.error("Schiedsrichter-Termine können nicht verschoben werden.");
-        return;
-      }
-
-      if (info.event.extendedProps.eventType === "setupHelper") {
-        info.revert();
-        toast.error("Aufbauhelfer-Termine können nicht verschoben werden.");
         return;
       }
 
