@@ -75,7 +75,8 @@ export default async function Page() {
                   {currentParticipant && (
                     <span>
                       {" "}
-                      Du kannst deine Spiele per Drag & Drop verschieben.
+                      Du kannst deine Spiele per Drag & Drop verschieben. Sprich
+                      dich bitte vorher mit deinem Gegner ab.
                     </span>
                   )}
                 </p>
