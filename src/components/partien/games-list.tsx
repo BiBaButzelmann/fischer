@@ -61,6 +61,26 @@ export function GamesList({
     [games],
   );
 
+  const getGameActionPermissions = (gameId: number) => {
+    const isGameParticipant = gameParticipantsMap[gameId]?.includes(
+      userId || "",
+    );
+
+    return {
+      canView: isUserParticipant || isUserReferee || userRole === "admin",
+      canSubmitResult:
+        isGameParticipant || isUserReferee || userRole === "admin",
+      canPostpone: isGameParticipant || userRole === "admin",
+    };
+  };
+
+  const hasAnyActions = games.some((game) => {
+    const { canView, canSubmitResult, canPostpone } = getGameActionPermissions(
+      game.id,
+    );
+    return canView || canSubmitResult || canPostpone;
+  });
+
   const handleNavigate = (gameId: number) => {
     router.push(`/partien/${gameId}`);
   };
@@ -87,7 +107,7 @@ export function GamesList({
             <TableHead className="hidden md:table-cell sticky top-0 bg-card text-center">
               Datum
             </TableHead>
-            {userId && (
+            {hasAnyActions && (
               <TableHead className="hidden md:table-cell sticky top-0 bg-card w-32">
                 Aktionen
               </TableHead>
@@ -134,50 +154,51 @@ export function GamesList({
               <TableCell className="hidden md:table-cell w-24 text-center">
                 {formatGameDate(getGameTimeFromGame(game))}
               </TableCell>
-              {userId && (
+              {hasAnyActions && (
                 <TableCell className="hidden md:flex items-center gap-2 w-32">
-                  {/* Partie anschauen: only if user is participant or referee of that tournament or admin */}
-                  {(isUserParticipant ||
-                    isUserReferee ||
-                    userRole === "admin") && (
-                    <Tooltip>
-                      <TooltipTrigger asChild>
-                        <Link href={`/partien/${game.id}`}>
-                          <Button
-                            aria-label="Partie eingeben"
-                            variant="outline"
-                            size="icon"
-                          >
-                            <NotebookPen className="h-4 w-4" />
-                          </Button>
-                        </Link>
-                      </TooltipTrigger>
-                      <TooltipContent>
-                        <p>Partie anschauen</p>
-                      </TooltipContent>
-                    </Tooltip>
-                  )}
-                  {/* Submit result: only if game includes userId, if user is referee in that tournament or if admin */}
-                  {(gameParticipantsMap[game.id]?.includes(userId) ||
-                    isUserReferee ||
-                    userRole === "admin") && (
-                    <ReportResultDialog
-                      gameId={game.id}
-                      currentResult={game.result}
-                      onResultChange={onResultChange}
-                      isReferee={isUserReferee}
-                    />
-                  )}
-                  {/* Postpone: only if game includes userId or if role is admin */}
-                  {(gameParticipantsMap[game.id]?.includes(userId) ||
-                    userRole === "admin") && (
-                    <PostponeGameDialog
-                      gameId={game.id}
-                      availableMatchdays={availableMatchdays}
-                      currentGameDate={getGameTimeFromGame(game)}
-                      game={game}
-                    />
-                  )}
+                  {(() => {
+                    const { canView, canSubmitResult, canPostpone } =
+                      getGameActionPermissions(game.id);
+
+                    return (
+                      <>
+                        {canView && (
+                          <Tooltip>
+                            <TooltipTrigger asChild>
+                              <Link href={`/partien/${game.id}`}>
+                                <Button
+                                  aria-label="Partie eingeben"
+                                  variant="outline"
+                                  size="icon"
+                                >
+                                  <NotebookPen className="h-4 w-4" />
+                                </Button>
+                              </Link>
+                            </TooltipTrigger>
+                            <TooltipContent>
+                              <p>Partie anschauen</p>
+                            </TooltipContent>
+                          </Tooltip>
+                        )}
+                        {canSubmitResult && (
+                          <ReportResultDialog
+                            gameId={game.id}
+                            currentResult={game.result}
+                            onResultChange={onResultChange}
+                            isReferee={isUserReferee}
+                          />
+                        )}
+                        {canPostpone && (
+                          <PostponeGameDialog
+                            gameId={game.id}
+                            availableMatchdays={availableMatchdays}
+                            currentGameDate={getGameTimeFromGame(game)}
+                            game={game}
+                          />
+                        )}
+                      </>
+                    );
+                  })()}
                 </TableCell>
               )}
             </TableRow>
