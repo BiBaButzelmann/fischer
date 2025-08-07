@@ -110,7 +110,7 @@
 
   /* Matchday highlighting - subtle background for matchday cells */
   .calendar-container .fc-daygrid-day.drop-zone-valid {
-    @apply relative bg-blue-50/30 border-blue-200;
+    @apply relative bg-blue-50/30 border-blue-200 cursor-pointer;
   }
 
   .calendar-container .fc-daygrid-day.drop-zone-valid:hover {
