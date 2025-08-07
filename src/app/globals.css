@@ -108,11 +108,16 @@
     min-height: 60px;
   }
 
-  /* Valid drop zone styling - only show during drag */
+  /* Matchday highlighting - subtle background for matchday cells */
   .calendar-container .fc-daygrid-day.drop-zone-valid {
-    @apply relative;
+    @apply relative bg-blue-50/30 border-blue-200;
   }
 
+  .calendar-container .fc-daygrid-day.drop-zone-valid:hover {
+    @apply bg-blue-50/50;
+  }
+
+  /* Enhanced highlighting during drag operations */
   .calendar-dragging .calendar-container .fc-daygrid-day.drop-zone-valid {
     @apply !bg-green-100 !border-green-500 !border-2 !border-dashed;
   }
