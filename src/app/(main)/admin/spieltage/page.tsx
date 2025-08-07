@@ -21,11 +21,16 @@ export default async function Page() {
     );
   }
 
-  const [referees, matchdays, setupHelpers] = await Promise.all([
+  const [referees, rawMatchdays, setupHelpers] = await Promise.all([
     getRefereesByTournamentId(tournament.id),
     getMatchdaysWithRefereeAndSetupHelpersByTournamentId(tournament.id),
     getAllSetupHelpersByTournamentId(tournament.id),
   ]);
+
+  const matchdays = rawMatchdays.map(({ referees, ...matchday }) => ({
+    ...matchday,
+    referee: referees?.referee || null,
+  }));
 
   return (
     <div>

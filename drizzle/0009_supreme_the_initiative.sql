@@ -1,0 +1,1 @@
+ALTER TABLE "match_entering_helper" DROP COLUMN "group_id";

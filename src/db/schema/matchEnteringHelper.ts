@@ -18,7 +18,6 @@ export const matchEnteringHelper = pgTable(
 
     profileId: integer("profile_id").notNull(),
     tournamentId: integer("tournament_id").notNull(),
-    groupId: integer("group_id"),
 
     numberOfGroupsToEnter: smallint("number_of_groups_to_enter").notNull(),
 

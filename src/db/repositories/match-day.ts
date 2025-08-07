@@ -15,12 +15,16 @@ export async function getMatchdaysWithRefereeAndSetupHelpersByTournamentId(
   return await db.query.matchday.findMany({
     where: eq(matchday.tournamentId, tournamentId),
     with: {
-      referee: {
+      referees: {
         with: {
-          profile: {
-            columns: {
-              firstName: true,
-              lastName: true,
+          referee: {
+            with: {
+              profile: {
+                columns: {
+                  firstName: true,
+                  lastName: true,
+                },
+              },
             },
           },
         },
