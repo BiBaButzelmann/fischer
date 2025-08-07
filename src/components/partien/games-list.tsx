@@ -30,12 +30,16 @@ type Props = {
   games: GameWithParticipantProfilesAndGroupAndMatchday[];
   onResultChange: (gameId: number, result: GameResult) => Promise<void>;
   availableMatchdays: MatchDay[];
+  isUserReferee?: boolean;
+  isUserParticipant?: boolean;
 };
 
 export function GamesList({
   games,
   onResultChange,
   availableMatchdays = [],
+  isUserReferee = false,
+  isUserParticipant = false,
 }: Props) {
   const isMobile = useIsMobile();
   const router = useRouter();
@@ -132,40 +136,48 @@ export function GamesList({
               </TableCell>
               {userId && (
                 <TableCell className="hidden md:flex items-center gap-2 w-32">
-                  <Tooltip>
-                    <TooltipTrigger asChild>
-                      <Link href={`/partien/${game.id}`}>
-                        <Button
-                          aria-label="Partie eingeben"
-                          variant="outline"
-                          size="icon"
-                        >
-                          <NotebookPen className="h-4 w-4" />
-                        </Button>
-                      </Link>
-                    </TooltipTrigger>
-                    <TooltipContent>
-                      <p>Partie anschauen</p>
-                    </TooltipContent>
-                  </Tooltip>
-                  {/* TODO: Schiedsrichter darf Ergebnisse melden (global) */}
-                  {gameParticipantsMap[game.id].includes(userId) ||
-                  userRole === "admin" ? (
+                  {/* Partie anschauen: only if user is participant or referee of that tournament or admin */}
+                  {(isUserParticipant ||
+                    isUserReferee ||
+                    userRole === "admin") && (
+                    <Tooltip>
+                      <TooltipTrigger asChild>
+                        <Link href={`/partien/${game.id}`}>
+                          <Button
+                            aria-label="Partie eingeben"
+                            variant="outline"
+                            size="icon"
+                          >
+                            <NotebookPen className="h-4 w-4" />
+                          </Button>
+                        </Link>
+                      </TooltipTrigger>
+                      <TooltipContent>
+                        <p>Partie anschauen</p>
+                      </TooltipContent>
+                    </Tooltip>
+                  )}
+                  {/* Submit result: only if game includes userId, if user is referee in that tournament or if admin */}
+                  {(gameParticipantsMap[game.id]?.includes(userId) ||
+                    isUserReferee ||
+                    userRole === "admin") && (
                     <ReportResultDialog
                       gameId={game.id}
                       currentResult={game.result}
                       onResultChange={onResultChange}
+                      isReferee={isUserReferee}
                     />
-                  ) : null}
-                  {gameParticipantsMap[game.id].includes(userId) ||
-                  userRole === "admin" ? (
+                  )}
+                  {/* Postpone: only if game includes userId or if role is admin */}
+                  {(gameParticipantsMap[game.id]?.includes(userId) ||
+                    userRole === "admin") && (
                     <PostponeGameDialog
                       gameId={game.id}
                       availableMatchdays={availableMatchdays}
                       currentGameDate={getGameTimeFromGame(game)}
                       game={game}
                     />
-                  ) : null}
+                  )}
                 </TableCell>
               )}
             </TableRow>

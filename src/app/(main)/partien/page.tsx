@@ -6,9 +6,14 @@ import {
 import { PartienSelector } from "@/components/partien/partien-selector";
 import { GamesList } from "@/components/partien/games-list";
 import { updateGameResult } from "@/actions/game";
-import { getParticipantsByGroupId } from "@/db/repositories/participant";
+import {
+  getParticipantsByGroupId,
+  getParticipantByUserId,
+} from "@/db/repositories/participant";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { getAllMatchdaysByTournamentId } from "@/db/repositories/match-day";
+import { getRefereeByUserId } from "@/db/repositories/referee";
+import { auth } from "@/auth/utils";
 
 export default async function Page({
   searchParams,
@@ -55,9 +60,12 @@ export default async function Page({
     ? tournamentId
     : tournamentNames[0].id.toString();
 
-  const groups = await getAllGroupNamesByTournamentId(
-    Number(selectedTournamentId),
-  );
+  const [groups, matchdays, session] = await Promise.all([
+    getAllGroupNamesByTournamentId(Number(selectedTournamentId)),
+    getAllMatchdaysByTournamentId(Number(selectedTournamentId)),
+    auth(),
+  ]);
+
   const selectedGroup = groupId ?? groups[0]?.id.toString();
 
   const rounds = Array.from(
@@ -65,22 +73,30 @@ export default async function Page({
     (_, i) => i + 1,
   );
 
-  //TODO: proper validation
-  const participants = selectedGroup
-    ? await getParticipantsByGroupId(Number(selectedGroup))
-    : [];
+  const [participants, games, referee, userParticipant] = await Promise.all([
+    //TODO: proper validation
+    selectedGroup
+      ? getParticipantsByGroupId(Number(selectedGroup))
+      : Promise.resolve([]),
+    getGamesByTournamentId(
+      Number(selectedTournamentId),
+      groupId ? Number(groupId) : undefined,
+      matchdayId ? Number(matchdayId) : undefined,
+      round != null ? Number(round) : undefined,
+      participantId != null ? Number(participantId) : undefined,
+    ),
+    session?.user.id
+      ? getRefereeByUserId(session.user.id)
+      : Promise.resolve(null),
+    session?.user.id
+      ? getParticipantByUserId(session.user.id)
+      : Promise.resolve(null),
+  ]);
 
-  const games = await getGamesByTournamentId(
-    Number(selectedTournamentId),
-    groupId ? Number(groupId) : undefined,
-    matchdayId ? Number(matchdayId) : undefined,
-    round != null ? Number(round) : undefined,
-    participantId != null ? Number(participantId) : undefined,
-  );
+  const isUserReferee = referee?.tournamentId === Number(selectedTournamentId);
 
-  const matchdays = await getAllMatchdaysByTournamentId(
-    Number(selectedTournamentId),
-  );
+  const isUserParticipant =
+    userParticipant?.tournamentId === Number(selectedTournamentId);
 
   return (
     <div>
@@ -104,6 +120,8 @@ export default async function Page({
               games={games}
               onResultChange={updateGameResult}
               availableMatchdays={matchdays}
+              isUserReferee={isUserReferee}
+              isUserParticipant={isUserParticipant}
             />
           </ScrollArea>
         ) : (
