@@ -12,7 +12,7 @@ export async function getAllMatchdaysByTournamentId(tournamentId: number) {
 export async function getMatchdaysWithRefereeAndSetupHelpersByTournamentId(
   tournamentId: number,
 ) {
-  const rawMatchdays = await db.query.matchday.findMany({
+  return await db.query.matchday.findMany({
     where: eq(matchday.tournamentId, tournamentId),
     with: {
       referees: {
@@ -47,9 +47,4 @@ export async function getMatchdaysWithRefereeAndSetupHelpersByTournamentId(
     },
     orderBy: (matchday, { asc }) => [asc(matchday.date)],
   });
-
-  return rawMatchdays.map(({ referees, ...matchday }) => ({
-    ...matchday,
-    referee: referees.length > 0 ? referees[0].referee : null,
-  }));
 }

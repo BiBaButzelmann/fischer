@@ -60,7 +60,7 @@ export const matchdayRelations = relations(matchday, ({ one, many }) => ({
     fields: [matchday.tournamentWeekId],
     references: [tournamentWeek.id],
   }),
-  referees: many(matchdayReferee),
+  referees: one(matchdayReferee),
   setupHelpers: many(matchdaySetupHelper),
   games: many(matchdayGame),
 }));
