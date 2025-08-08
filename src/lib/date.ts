@@ -34,3 +34,21 @@ export function displayShortDateOrHoliday(date: DateTime): string {
   }
   return date.toFormat("dd.MM");
 }
+
+/**
+ * Formats a date and time for display in event lists (e.g., "Mo 01.08 um 14:30")
+ * @param date - The date to format
+ * @returns Formatted date and time string
+ */
+export function formatEventDateTime(date: Date): string {
+  const dateStr = date.toLocaleDateString("de-DE", {
+    weekday: "short",
+    day: "2-digit",
+    month: "2-digit",
+  });
+  const timeStr = date.toLocaleTimeString("de-DE", {
+    hour: "2-digit",
+    minute: "2-digit",
+  });
+  return `${dateStr} um ${timeStr}`;
+}

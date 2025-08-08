@@ -5,6 +5,8 @@ import {
   getDateTimeFromDefaultTime,
 } from "@/lib/game-time";
 import { getMatchdaysByRefereeId } from "./referee";
+import { getParticipantByProfileIdAndTournamentId } from "./participant";
+import { getRefereeByProfileIdAndTournamentId } from "./referee";
 
 export async function getCalendarEventsForParticipant(
   participantId: number,
@@ -48,4 +50,40 @@ export async function getCalendarEventsForReferee(
       },
     };
   });
+}
+
+export async function getNumberOfEventsByProfileAndTournament(
+  profileId: number,
+  tournamentId: number,
+  limit: number = 3,
+): Promise<CalendarEvent[]> {
+  const [participant, referee] = await Promise.all([
+    getParticipantByProfileIdAndTournamentId(profileId, tournamentId),
+    getRefereeByProfileIdAndTournamentId(profileId, tournamentId),
+  ]);
+
+  const eventPromises: Promise<CalendarEvent[]>[] = [];
+  if (participant) {
+    eventPromises.push(getCalendarEventsForParticipant(participant.id));
+  }
+  if (referee) {
+    eventPromises.push(getCalendarEventsForReferee(referee.id));
+  }
+
+  if (eventPromises.length === 0) {
+    return [];
+  }
+
+  const allEvents = await Promise.all(eventPromises);
+
+  const berlinNow = new Date().toLocaleString("en-US", {
+    timeZone: "Europe/Berlin",
+  });
+  const currentBerlinTime = new Date(berlinNow);
+
+  return allEvents
+    .flat()
+    .filter((event) => event.start > currentBerlinTime)
+    .sort((a, b) => a.start.getTime() - b.start.getTime())
+    .slice(0, limit);
 }

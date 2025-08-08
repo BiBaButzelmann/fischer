@@ -1,0 +1,82 @@
+import { Calendar, Clock, Gamepad2, Gavel } from "lucide-react";
+import { CalendarEvent, FormattedEvent } from "@/db/types/calendar";
+import { formatEventDateTime } from "@/lib/date";
+
+type Props = {
+  events: CalendarEvent[];
+};
+
+const eventConfig = {
+  game: {
+    icon: Gamepad2,
+    bgColor: "bg-blue-100 dark:bg-blue-900/30",
+    iconColor: "text-blue-600 dark:text-blue-400",
+  },
+  referee: {
+    icon: Gavel,
+    bgColor: "bg-red-100 dark:bg-red-900/30",
+    iconColor: "text-red-600 dark:text-red-400",
+  },
+};
+
+export function UpcomingEvents({ events }: Props) {
+  const formattedEvents = formatCalendarEvents(events);
+
+  return (
+    <>
+      <div className="mb-4 flex items-center gap-2 text-sm text-muted-foreground">
+        <Calendar className="h-4 w-4" /> Deine nächsten Termine
+      </div>
+      {formattedEvents.length > 0 ? (
+        <div className="space-y-4">
+          {formattedEvents.map((event, index) => {
+            const config =
+              eventConfig[event.eventType as keyof typeof eventConfig];
+            const Icon = config.icon;
+            return (
+              <div
+                key={index}
+                className="flex items-center gap-4 p-4 bg-white dark:bg-card border border-gray-200 dark:border-card-border rounded-xl shadow-sm transition-all hover:shadow-md"
+              >
+                <div
+                  className={`flex-shrink-0 p-3 rounded-full ${config.bgColor}`}
+                >
+                  <Icon className={`w-6 h-6 ${config.iconColor}`} />
+                </div>
+                <div className="flex-grow">
+                  <p className="font-bold text-gray-800 dark:text-gray-100">
+                    {event.type === "Schiedsrichter" &&
+                    event.title === "Schiedsrichter"
+                      ? "Schiedsrichter"
+                      : `${event.type}: ${event.title}`}
+                  </p>
+                  <div className="flex items-center gap-2 text-sm text-gray-500 dark:text-gray-400 mt-1">
+                    <Clock className="w-4 h-4" />
+                    <span>{event.time}</span>
+                  </div>
+                </div>
+              </div>
+            );
+          })}
+        </div>
+      ) : (
+        <div className="text-center py-12 text-gray-500 dark:text-gray-400">
+          <Calendar className="h-16 w-16 mx-auto mb-4 opacity-50" />
+          <p className="text-lg">Keine anstehenden Termine</p>
+        </div>
+      )}
+    </>
+  );
+}
+
+function formatCalendarEvents(events: CalendarEvent[]): FormattedEvent[] {
+  return events.map((event) => {
+    const eventType = event.extendedProps.eventType;
+    return {
+      type: eventType === "game" ? "Spiel" : "Schiedsrichter",
+      title: event.title,
+      time: formatEventDateTime(event.start),
+      eventType,
+    };
+  });
+}
