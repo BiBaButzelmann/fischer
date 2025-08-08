@@ -1,6 +1,12 @@
+"use client";
+
 import { Calendar, Clock, Gamepad2, Gavel } from "lucide-react";
 import { CalendarEvent, FormattedEvent } from "@/db/types/calendar";
 import { formatEventDateTime } from "@/lib/date";
+import { useRouter } from "next/navigation";
+import { useCallback } from "react";
+import { buildGameViewUrl } from "@/lib/navigation";
+import { toast } from "sonner";
 
 type Props = {
   events: CalendarEvent[];
@@ -20,7 +26,50 @@ const eventConfig = {
 };
 
 export function UpcomingEvents({ events }: Props) {
+  const router = useRouter();
   const formattedEvents = formatCalendarEvents(events);
+
+  const handleEventClick = useCallback(
+    (event: CalendarEvent) => {
+      if (event.extendedProps.eventType === "referee") {
+        const tournamentId = event.extendedProps.tournamentId;
+        const matchdayId = event.extendedProps.matchdayId;
+
+        if (!tournamentId || !matchdayId) {
+          toast.error("Fehler: Turnier oder Spieltag nicht gefunden.");
+          return;
+        }
+
+        const url = buildGameViewUrl({
+          tournamentId,
+          matchdayId,
+        });
+
+        router.push(url);
+        return;
+      }
+
+      const gameId = event.extendedProps.gameId;
+      const participantId = event.extendedProps.participantId;
+      const round = event.extendedProps.round;
+      const tournamentId = event.extendedProps.tournamentId;
+      const groupId = event.extendedProps.groupId;
+
+      if (!gameId || !participantId || !round || !tournamentId || !groupId) {
+        return;
+      }
+
+      const url = buildGameViewUrl({
+        tournamentId,
+        groupId,
+        round,
+        participantId,
+      });
+
+      router.push(url);
+    },
+    [router],
+  );
 
   return (
     <>
@@ -33,10 +82,12 @@ export function UpcomingEvents({ events }: Props) {
             const config =
               eventConfig[event.eventType as keyof typeof eventConfig];
             const Icon = config.icon;
+            const originalEvent = events[index];
             return (
               <div
                 key={index}
-                className="flex items-center gap-4 p-4 bg-white dark:bg-card border border-gray-200 dark:border-card-border rounded-xl shadow-sm transition-all hover:shadow-md"
+                onClick={() => handleEventClick(originalEvent)}
+                className="flex items-center gap-4 p-4 bg-white dark:bg-card border border-gray-200 dark:border-card-border rounded-xl shadow-sm transition-all hover:shadow-md cursor-pointer hover:opacity-80"
               >
                 <div
                   className={`flex-shrink-0 p-3 rounded-full ${config.bgColor}`}
@@ -48,7 +99,7 @@ export function UpcomingEvents({ events }: Props) {
                     {event.type === "Schiedsrichter" &&
                     event.title === "Schiedsrichter"
                       ? "Schiedsrichter"
-                      : `${event.type}: ${event.title}`}
+                      : `${event.title}`}
                   </p>
                   <div className="flex items-center gap-2 text-sm text-gray-500 dark:text-gray-400 mt-1">
                     <Clock className="w-4 h-4" />
