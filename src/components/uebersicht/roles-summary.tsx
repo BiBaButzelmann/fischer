@@ -4,7 +4,6 @@ import {
   Wrench,
   Shield,
   Gavel,
-  Trophy,
   Calendar,
   Hash,
   BellIcon,
