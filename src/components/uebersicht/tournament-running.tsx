@@ -7,6 +7,8 @@ import {
   CardHeader,
   CardTitle,
 } from "../ui/card";
+import { Button } from "../ui/button";
+import Link from "next/link";
 import { auth } from "@/auth/utils";
 import { getProfileByUserId } from "@/db/repositories/profile";
 import { Participants } from "../participants/participants";
@@ -17,6 +19,7 @@ import { TournamentWeeks } from "./tournament-weeks";
 import { RolesSummary } from "./roles-summary";
 import { getNumberOfEventsByProfileAndTournament } from "@/db/repositories/calendar-events";
 import { UpcomingEvents } from "./upcoming-events";
+import { ArrowRight } from "lucide-react";
 
 type Props = {
   tournament: Tournament;
@@ -47,13 +50,23 @@ export async function TournamentRunning({ tournament }: Props) {
       <div className="lg:col-span-6">
         <Card>
           <CardHeader>
-            <CardTitle className="text-4xl font-bold">
-              Hallo, {playerFirstName}!
-            </CardTitle>
-            <CardDescription>
-              Das Klubturnier ist gestartet! Hier siehst du deine kommende
-              Termine
-            </CardDescription>
+            <div className="flex items-center justify-between">
+              <div>
+                <CardTitle className="text-4xl font-bold">
+                  Hallo, {playerFirstName}!
+                </CardTitle>
+                <CardDescription className="mt-2">
+                  Das Klubturnier ist gestartet! Hier siehst du deine kommenden
+                  Termine:
+                </CardDescription>
+              </div>
+              <Link href="/kalender">
+                <Button variant="outline" className="group w-full sm:w-auto">
+                  Hier geht's zum Kalender
+                  <ArrowRight className="w-4 h-4 ml-2 transition-transform group-hover:translate-x-1" />
+                </Button>
+              </Link>
+            </div>
           </CardHeader>
           <CardContent>
             <UpcomingEvents events={upcomingEvents} />
