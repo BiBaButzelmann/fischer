@@ -9,7 +9,10 @@ import { RefereeForm } from "./forms/referee-form";
 import { MatchEnteringForm } from "./forms/match-entering-form";
 import { SetupHelperForm } from "./forms/setup-helper-form";
 import { JurorForm } from "./forms/juror-form";
-import { hasSelectedAtLeastOneRole, RunningRolesData } from "@/db/types/role";
+import {
+  hasSelectedAtLeastOneRole,
+  RegistrationRolesData,
+} from "@/db/types/role";
 import { Tournament } from "@/db/types/tournament";
 import { useState, useTransition } from "react";
 import { z } from "zod";
@@ -33,7 +36,7 @@ import { createReferee, deleteReferee } from "@/actions/referee";
 
 type Props = {
   userId: string;
-  rolesData: RunningRolesData;
+  rolesData: RegistrationRolesData;
   tournament: Tournament;
   profile: Profile;
 };

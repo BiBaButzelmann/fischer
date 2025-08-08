@@ -15,14 +15,6 @@ export type Role =
   | "matchEnteringHelper"
   | "setupHelper";
 
-export type RunningRolesData = {
-  participant: ParticipantWithGroup | undefined;
-  referee: RefereeWithAssignments | undefined;
-  matchEnteringHelper: MatchEnteringHelperWithAssignments | undefined;
-  setupHelper: SetupHelperWithAssignments | undefined;
-  juror: Juror | undefined;
-};
-
 export type RegistrationRolesData = {
   participant: Participant | undefined;
   referee: Referee | undefined;
@@ -31,8 +23,16 @@ export type RegistrationRolesData = {
   juror: Juror | undefined;
 };
 
+export type RunningRolesData = {
+  participant: ParticipantWithGroup | undefined;
+  referee: RefereeWithAssignments | undefined;
+  matchEnteringHelper: MatchEnteringHelperWithAssignments | undefined;
+  setupHelper: SetupHelperWithAssignments | undefined;
+  juror: Juror | undefined;
+};
+
 export function hasSelectedAtLeastOneRole(
-  roles: RunningRolesData | RegistrationRolesData,
+  roles: RegistrationRolesData | RunningRolesData,
 ): boolean {
   return Object.values(roles).filter((role) => role !== undefined).length > 0;
 }

@@ -13,13 +13,13 @@ import { Card, CardContent, CardHeader } from "../ui/card";
 import { Badge } from "../ui/badge";
 import { Button } from "../ui/button";
 import { matchDays } from "../../constants/constants";
-import { getRunningRolesDataByProfileIdAndTournamentId } from "@/db/repositories/role";
+import { getRegistrationRolesDataByProfileIdAndTournamentId } from "@/db/repositories/role";
 import { PropsWithChildren } from "react";
 import { Separator } from "../ui/separator";
-import { ParticipantWithGroup } from "@/db/types/participant";
-import { MatchEnteringHelperWithAssignments } from "@/db/types/match-entering-helper";
-import { SetupHelperWithAssignments } from "@/db/types/setup-helper";
-import { RefereeWithAssignments } from "@/db/types/referee";
+import { Participant } from "@/db/types/participant";
+import { MatchEnteringHelper } from "@/db/types/match-entering-helper";
+import { SetupHelper } from "@/db/types/setup-helper";
+import { Referee } from "@/db/types/referee";
 
 type Props = {
   profileId: number;
@@ -33,7 +33,7 @@ export async function RolesSummary({
   showEditButton = false,
 }: Props) {
   const { participant, juror, referee, matchEnteringHelper, setupHelper } =
-    await getRunningRolesDataByProfileIdAndTournamentId(
+    await getRegistrationRolesDataByProfileIdAndTournamentId(
       profileId,
       tournamentId,
     );
@@ -106,7 +106,7 @@ function RoleSection({
   );
 }
 
-function PlayerSection({ participant }: { participant: ParticipantWithGroup }) {
+function PlayerSection({ participant }: { participant: Participant }) {
   return (
     <div className="space-y-4">
       <div className="flex items-center gap-2 mb-4">
@@ -201,11 +201,7 @@ function PlayerSection({ participant }: { participant: ParticipantWithGroup }) {
   );
 }
 
-function SetupHelperSection({
-  setupHelper,
-}: {
-  setupHelper: SetupHelperWithAssignments;
-}) {
+function SetupHelperSection({ setupHelper }: { setupHelper: SetupHelper }) {
   return (
     <RoleSection
       icon={<Wrench className="h-4 w-4 text-gray-600" />}
@@ -240,7 +236,7 @@ function SetupHelperSection({
   );
 }
 
-function RefereeSection({ referee }: { referee: RefereeWithAssignments }) {
+function RefereeSection({ referee }: { referee: Referee }) {
   return (
     <RoleSection
       icon={<BellIcon className="h-4 w-4 text-gray-600" />}
@@ -292,7 +288,7 @@ function JurorSection() {
 function MatchEnteringHelperSection({
   matchEnteringHelper,
 }: {
-  matchEnteringHelper: MatchEnteringHelperWithAssignments;
+  matchEnteringHelper: MatchEnteringHelper;
 }) {
   return (
     <RoleSection
@@ -303,7 +299,7 @@ function MatchEnteringHelperSection({
         <Users className="h-5 w-5 text-gray-600" />
         <span className="text-gray-700">Anzahl Gruppen:</span>
         <span className="text-lg font-bold text-gray-900">
-          {matchEnteringHelper.assignedGroupsCount}
+          {matchEnteringHelper.numberOfGroupsToEnter}
         </span>
       </div>
     </RoleSection>

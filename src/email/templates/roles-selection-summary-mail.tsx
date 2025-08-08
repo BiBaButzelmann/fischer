@@ -1,10 +1,10 @@
 import { DEFAULT_CLUB_LABEL, matchDays } from "@/constants/constants";
 import { DayOfWeek } from "@/db/types/group";
-import { RunningRolesData } from "@/db/types/role";
+import { RegistrationRolesData } from "@/db/types/role";
 
 type Props = {
   name: string;
-  roles: RunningRolesData;
+  roles: RegistrationRolesData;
 };
 
 const translateMatchDay = (day: DayOfWeek) => matchDays[day];

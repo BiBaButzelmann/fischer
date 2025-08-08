@@ -1,11 +1,11 @@
 import { resend } from "./client";
-import { RunningRolesData } from "@/db/types/role";
+import { RegistrationRolesData } from "@/db/types/role";
 import RoleSelectionSummaryMail from "./templates/roles-selection-summary-mail";
 
 export async function sendRolesSelectionSummaryMail(
   to: string,
   firstName: string,
-  roles: RunningRolesData,
+  roles: RegistrationRolesData,
 ) {
   let recipientAddress = to;
   if (process.env.NODE_ENV === "development") {
