@@ -18,7 +18,7 @@ import { getRolesDataByProfileIdAndTournamentId } from "@/db/repositories/role";
 import { PropsWithChildren } from "react";
 import { Separator } from "../ui/separator";
 import { ParticipantWithGroup } from "@/db/types/participant";
-import { MatchEnteringHelper } from "@/db/types/match-entering-helper";
+import { MatchEnteringHelperWithAssignments } from "@/db/types/match-entering-helper";
 import { type Tournament } from "@/db/types/tournament";
 import { SetupHelperWithAssignments } from "@/db/types/setup-helper";
 import { RefereeWithAssignments } from "@/db/types/referee";
@@ -45,14 +45,12 @@ export async function RolesSummary({
         <div className="flex flex-wrap items-center justify-between gap-4">
           <div className="flex items-center gap-3">
             <div className="p-2 bg-gray-100 border border-gray-200 rounded-lg">
-              <Trophy className="h-5 w-5 text-gray-600" />
+              <User className="h-5 w-5 text-gray-600" />
             </div>
             <div>
-              <h2 className="text-xl font-bold text-gray-900">
-                Meine Anmeldungen
-              </h2>
+              <h2 className="text-xl font-bold text-gray-900">Meine Daten</h2>
               <p className="text-sm text-gray-600 mt-1">
-                Übersicht deiner Anmeldungen für das Turnier
+                Übersicht deiner Daten für das Turnier.
               </p>
             </div>
           </div>
@@ -84,8 +82,8 @@ export async function RolesSummary({
             ) : null}
 
             {referee != null ? (
-              <RefereeSection 
-                referee={referee} 
+              <RefereeSection
+                referee={referee}
                 tournamentStage={tournamentStage}
               />
             ) : null}
@@ -308,10 +306,10 @@ function SetupHelperSection({
   );
 }
 
-function RefereeSection({ 
-  referee, 
-  tournamentStage 
-}: { 
+function RefereeSection({
+  referee,
+  tournamentStage,
+}: {
   referee: RefereeWithAssignments;
   tournamentStage: Tournament["stage"];
 }) {
@@ -379,7 +377,7 @@ function JurorSection() {
 function MatchEnteringHelperSection({
   matchEnteringHelper,
 }: {
-  matchEnteringHelper: MatchEnteringHelper;
+  matchEnteringHelper: MatchEnteringHelperWithAssignments;
 }) {
   return (
     <RoleSection
@@ -390,7 +388,7 @@ function MatchEnteringHelperSection({
         <Users className="h-5 w-5 text-gray-600" />
         <span className="text-gray-700">Anzahl Gruppen:</span>
         <span className="text-lg font-bold text-gray-900">
-          {matchEnteringHelper.numberOfGroupsToEnter}
+          {matchEnteringHelper.assignedGroupsCount}
         </span>
       </div>
     </RoleSection>

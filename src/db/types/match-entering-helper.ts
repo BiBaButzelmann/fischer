@@ -9,3 +9,7 @@ export type MatchEnteringHelperWithName = MatchEnteringHelper & {
     lastName: string;
   };
 };
+
+export type MatchEnteringHelperWithAssignments = MatchEnteringHelper & {
+  assignedGroupsCount: number;
+};

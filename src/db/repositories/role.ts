@@ -13,7 +13,7 @@ import { headers } from "next/headers";
 import { Role, RolesData } from "../types/role";
 import { getProfileByUserId } from "./profile";
 import { getJurorByProfileIdAndTournamentId } from "./juror";
-import { getMatchEnteringHelperByProfileIdAndTournamentId } from "./match-entering-helper";
+import { getMatchEnteringHelperWithAssignmentsByProfileIdAndTournamentId } from "./match-entering-helper";
 import { getParticipantWithGroupByProfileIdAndTournamentId } from "./participant";
 import { getRefereeWithAssignmentsByProfileIdAndTournamentId } from "./referee";
 import { getSetupHelperWithAssignmentsByProfileIdAndTournamentId } from "./setup-helper";
@@ -79,8 +79,14 @@ export async function getRolesDataByProfileIdAndTournamentId(
         profileId,
         tournamentId,
       ),
-      getRefereeWithAssignmentsByProfileIdAndTournamentId(profileId, tournamentId),
-      getMatchEnteringHelperByProfileIdAndTournamentId(profileId, tournamentId),
+      getRefereeWithAssignmentsByProfileIdAndTournamentId(
+        profileId,
+        tournamentId,
+      ),
+      getMatchEnteringHelperWithAssignmentsByProfileIdAndTournamentId(
+        profileId,
+        tournamentId,
+      ),
       getSetupHelperWithAssignmentsByProfileIdAndTournamentId(
         profileId,
         tournamentId,

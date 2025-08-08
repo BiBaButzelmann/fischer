@@ -1,5 +1,5 @@
 import { Juror } from "./juror";
-import { MatchEnteringHelper } from "./match-entering-helper";
+import { MatchEnteringHelperWithAssignments } from "./match-entering-helper";
 import { Participant } from "./participant";
 import { RefereeWithAssignments } from "./referee";
 import { SetupHelperWithAssignments } from "./setup-helper";
@@ -15,7 +15,7 @@ export type Role =
 export type RolesData = {
   participant: Participant | undefined;
   referee: RefereeWithAssignments | undefined;
-  matchEnteringHelper: MatchEnteringHelper | undefined;
+  matchEnteringHelper: MatchEnteringHelperWithAssignments | undefined;
   setupHelper: SetupHelperWithAssignments | undefined;
   juror: Juror | undefined;
 };
