@@ -47,9 +47,11 @@ export async function RolesSummary({
               <User className="h-5 w-5 text-gray-600" />
             </div>
             <div>
-              <h2 className="text-xl font-bold text-gray-900">Meine Daten</h2>
+              <h2 className="text-xl font-bold text-gray-900">
+                Meine Anmeldungen
+              </h2>
               <p className="text-sm text-gray-600 mt-1">
-                Übersicht deiner Daten für das Turnier.
+                Übersicht deiner Anmeldungen für das Turnier.
               </p>
             </div>
           </div>
