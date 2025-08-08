@@ -14,7 +14,7 @@ import { Card, CardContent, CardHeader } from "../ui/card";
 import { Badge } from "../ui/badge";
 import { Button } from "../ui/button";
 import { matchDays } from "../../constants/constants";
-import { getRolesDataByProfileIdAndTournamentId } from "@/db/repositories/role";
+import { getRunningRolesDataByProfileIdAndTournamentId } from "@/db/repositories/role";
 import { PropsWithChildren } from "react";
 import { Separator } from "../ui/separator";
 import { ParticipantWithGroup } from "@/db/types/participant";
@@ -34,7 +34,10 @@ export async function RolesSummary({
   showEditButton = false,
 }: Props) {
   const { participant, juror, referee, matchEnteringHelper, setupHelper } =
-    await getRolesDataByProfileIdAndTournamentId(profileId, tournamentId);
+    await getRunningRolesDataByProfileIdAndTournamentId(
+      profileId,
+      tournamentId,
+    );
 
   return (
     <Card>

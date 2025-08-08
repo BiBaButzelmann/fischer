@@ -10,13 +10,25 @@ import { matchEnteringHelper } from "../schema/matchEnteringHelper";
 import { setupHelper } from "../schema/setupHelper";
 import { auth } from "@/auth";
 import { headers } from "next/headers";
-import { Role, RolesData } from "../types/role";
+import { Role, RunningRolesData, RegistrationRolesData } from "../types/role";
 import { getProfileByUserId } from "./profile";
 import { getJurorByProfileIdAndTournamentId } from "./juror";
-import { getMatchEnteringHelperWithAssignmentsByProfileIdAndTournamentId } from "./match-entering-helper";
-import { getParticipantWithGroupByProfileIdAndTournamentId } from "./participant";
-import { getRefereeWithAssignmentsByProfileIdAndTournamentId } from "./referee";
-import { getSetupHelperWithAssignmentsByProfileIdAndTournamentId } from "./setup-helper";
+import {
+  getMatchEnteringHelperByProfileIdAndTournamentId,
+  getMatchEnteringHelperWithAssignmentsByProfileIdAndTournamentId,
+} from "./match-entering-helper";
+import {
+  getParticipantByProfileIdAndTournamentId,
+  getParticipantWithGroupByProfileIdAndTournamentId,
+} from "./participant";
+import {
+  getRefereeByProfileIdAndTournamentId,
+  getRefereeWithAssignmentsByProfileIdAndTournamentId,
+} from "./referee";
+import {
+  getSetupHelperByProfileIdAndTournamentId,
+  getSetupHelperWithAssignmentsByProfileIdAndTournamentId,
+} from "./setup-helper";
 
 export async function getRolesByProfileId(profileId: number): Promise<Role[]> {
   const participantQuery = db
@@ -69,10 +81,10 @@ export async function getRolesByUserId(userId: string): Promise<Role[]> {
   return getRolesByProfileId(profile.id);
 }
 
-export async function getRolesDataByProfileIdAndTournamentId(
+export async function getRunningRolesDataByProfileIdAndTournamentId(
   profileId: number,
   tournamentId: number,
-): Promise<RolesData> {
+): Promise<RunningRolesData> {
   const [participant, referee, matchEnteringHelper, setupHelper, juror] =
     await Promise.all([
       getParticipantWithGroupByProfileIdAndTournamentId(
@@ -91,6 +103,28 @@ export async function getRolesDataByProfileIdAndTournamentId(
         profileId,
         tournamentId,
       ),
+      getJurorByProfileIdAndTournamentId(profileId, tournamentId),
+    ]);
+
+  return {
+    participant: participant ?? undefined,
+    referee: referee ?? undefined,
+    matchEnteringHelper: matchEnteringHelper ?? undefined,
+    setupHelper: setupHelper ?? undefined,
+    juror: juror ?? undefined,
+  };
+}
+
+export async function getRegistrationRolesDataByProfileIdAndTournamentId(
+  profileId: number,
+  tournamentId: number,
+): Promise<RegistrationRolesData> {
+  const [participant, referee, matchEnteringHelper, setupHelper, juror] =
+    await Promise.all([
+      getParticipantByProfileIdAndTournamentId(profileId, tournamentId),
+      getRefereeByProfileIdAndTournamentId(profileId, tournamentId),
+      getMatchEnteringHelperByProfileIdAndTournamentId(profileId, tournamentId),
+      getSetupHelperByProfileIdAndTournamentId(profileId, tournamentId),
       getJurorByProfileIdAndTournamentId(profileId, tournamentId),
     ]);
 

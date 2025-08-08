@@ -1,8 +1,11 @@
 import { Juror } from "./juror";
-import { MatchEnteringHelperWithAssignments } from "./match-entering-helper";
-import { Participant } from "./participant";
-import { RefereeWithAssignments } from "./referee";
-import { SetupHelperWithAssignments } from "./setup-helper";
+import {
+  MatchEnteringHelper,
+  MatchEnteringHelperWithAssignments,
+} from "./match-entering-helper";
+import { Participant, ParticipantWithGroup } from "./participant";
+import { Referee, RefereeWithAssignments } from "./referee";
+import { SetupHelper, SetupHelperWithAssignments } from "./setup-helper";
 
 export type Role =
   | "admin"
@@ -12,14 +15,24 @@ export type Role =
   | "matchEnteringHelper"
   | "setupHelper";
 
-export type RolesData = {
-  participant: Participant | undefined;
+export type RunningRolesData = {
+  participant: ParticipantWithGroup | undefined;
   referee: RefereeWithAssignments | undefined;
   matchEnteringHelper: MatchEnteringHelperWithAssignments | undefined;
   setupHelper: SetupHelperWithAssignments | undefined;
   juror: Juror | undefined;
 };
 
-export function hasSelectedAtLeastOneRole(roles: RolesData): boolean {
+export type RegistrationRolesData = {
+  participant: Participant | undefined;
+  referee: Referee | undefined;
+  matchEnteringHelper: MatchEnteringHelper | undefined;
+  setupHelper: SetupHelper | undefined;
+  juror: Juror | undefined;
+};
+
+export function hasSelectedAtLeastOneRole(
+  roles: RunningRolesData | RegistrationRolesData,
+): boolean {
   return Object.values(roles).filter((role) => role !== undefined).length > 0;
 }

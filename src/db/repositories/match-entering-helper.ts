@@ -6,6 +6,18 @@ import {
 import { and, eq, count } from "drizzle-orm";
 import { type MatchEnteringHelperWithAssignments } from "../types/match-entering-helper";
 
+export async function getMatchEnteringHelperByProfileIdAndTournamentId(
+  profileId: number,
+  tournamentId: number,
+) {
+  return await db.query.matchEnteringHelper.findFirst({
+    where: and(
+      eq(matchEnteringHelper.profileId, profileId),
+      eq(matchEnteringHelper.tournamentId, tournamentId),
+    ),
+  });
+}
+
 export async function getMatchEnteringHelperWithAssignmentsByProfileIdAndTournamentId(
   profileId: number,
   tournamentId: number,

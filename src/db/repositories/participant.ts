@@ -5,6 +5,19 @@ import { profile } from "../schema/profile";
 import { and, eq, getTableColumns, isNull } from "drizzle-orm";
 import { type ParticipantWithGroup } from "../types/participant";
 
+export async function getParticipantByProfileIdAndTournamentId(
+  profileId: number,
+  tournamentId: number,
+) {
+  return await db.query.participant.findFirst({
+    where: (participant, { eq, and }) =>
+      and(
+        eq(participant.profileId, profileId),
+        eq(participant.tournamentId, tournamentId),
+      ),
+  });
+}
+
 export async function getParticipantWithGroupByProfileIdAndTournamentId(
   profileId: number,
   tournamentId: number,

@@ -6,6 +6,18 @@ import { matchdaySetupHelper } from "../schema/matchday";
 import { and, eq, count } from "drizzle-orm";
 import { type SetupHelperWithAssignments } from "../types/setup-helper";
 
+export async function getSetupHelperByProfileIdAndTournamentId(
+  profileId: number,
+  tournamentId: number,
+) {
+  return await db.query.setupHelper.findFirst({
+    where: and(
+      eq(setupHelper.profileId, profileId),
+      eq(setupHelper.tournamentId, tournamentId),
+    ),
+  });
+}
+
 export async function getSetupHelperWithAssignmentsByProfileIdAndTournamentId(
   profileId: number,
   tournamentId: number,
