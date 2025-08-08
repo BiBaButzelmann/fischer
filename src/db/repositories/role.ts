@@ -15,7 +15,7 @@ import { getProfileByUserId } from "./profile";
 import { getJurorByProfileIdAndTournamentId } from "./juror";
 import { getMatchEnteringHelperByProfileIdAndTournamentId } from "./match-entering-helper";
 import { getParticipantWithGroupByProfileIdAndTournamentId } from "./participant";
-import { getRefereeByProfileIdAndTournamentId } from "./referee";
+import { getRefereeWithAssignmentsByProfileIdAndTournamentId } from "./referee";
 import { getSetupHelperWithAssignmentsByProfileIdAndTournamentId } from "./setup-helper";
 
 export async function getRolesByProfileId(profileId: number): Promise<Role[]> {
@@ -79,7 +79,7 @@ export async function getRolesDataByProfileIdAndTournamentId(
         profileId,
         tournamentId,
       ),
-      getRefereeByProfileIdAndTournamentId(profileId, tournamentId),
+      getRefereeWithAssignmentsByProfileIdAndTournamentId(profileId, tournamentId),
       getMatchEnteringHelperByProfileIdAndTournamentId(profileId, tournamentId),
       getSetupHelperWithAssignmentsByProfileIdAndTournamentId(
         profileId,
