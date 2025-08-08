@@ -4,7 +4,6 @@ import {
   Wrench,
   Shield,
   Gavel,
-  Trophy,
   Calendar,
   Hash,
   BellIcon,
@@ -28,7 +27,7 @@ type Props = {
   showEditButton?: boolean;
 };
 
-export async function RolesSummary({
+export async function RolesSummaryRunning({
   profileId,
   tournamentId,
   showEditButton = false,
@@ -158,43 +157,42 @@ function PlayerSection({ participant }: { participant: ParticipantWithGroup }) {
 
       <Separator className="my-4" />
 
-      <div className="space-y-3">
-        <div>
-          <div className="flex items-center gap-2 mb-2">
-            <Calendar className="h-4 w-4 text-gray-500" />
-            <span className="text-sm font-medium text-gray-700">
-              Bevorzugter Spieltag
-            </span>
+      {participant.group?.group ? (
+        <div className="space-y-3">
+          <div>
+            <div className="flex items-center gap-2 mb-2">
+              <Users className="h-4 w-4 text-gray-500" />
+              <span className="text-sm font-medium text-gray-700">
+                Meine Gruppe
+              </span>
+            </div>
+            <div className="ml-6">
+              <Badge className="bg-gray-900 text-white hover:bg-gray-800 font-medium">
+                {participant.group.group.groupName}
+              </Badge>
+            </div>
           </div>
-          <div className="ml-6">
-            <Badge className="bg-gray-900 text-white hover:bg-gray-800 font-medium">
-              {matchDays[participant.preferredMatchDay]}
-            </Badge>
-          </div>
-        </div>
-        <div>
-          <div className="flex items-center gap-2 mb-2">
-            <Calendar className="h-4 w-4 text-gray-400" />
-            <span className="text-sm font-medium text-gray-700">
-              Alternative Spieltage
-            </span>
-          </div>
-          <div className="ml-6 flex gap-2 flex-wrap">
-            {participant.secondaryMatchDays.length > 0 ? (
-              participant.secondaryMatchDays.map((day) => (
-                <Badge
-                  key={day}
-                  className="bg-gray-200 text-gray-800 hover:bg-gray-300 font-medium"
-                >
-                  {matchDays[day]}
-                </Badge>
-              ))
-            ) : (
-              <span className="text-sm text-gray-500">Keine</span>
-            )}
+          <div>
+            <div className="flex items-center gap-2 mb-2">
+              <Calendar className="h-4 w-4 text-gray-500" />
+              <span className="text-sm font-medium text-gray-700">
+                Mein Gruppenspieltag
+              </span>
+            </div>
+            <div className="ml-6">
+              <Badge className="bg-gray-900 text-white hover:bg-gray-800 font-medium">
+                {participant.group.group.dayOfWeek
+                  ? matchDays[participant.group.group.dayOfWeek]
+                  : "Noch nicht festgelegt"}
+              </Badge>
+            </div>
           </div>
         </div>
-      </div>
+      ) : (
+        <div className="text-sm text-gray-500">
+          Gruppe noch nicht zugewiesen
+        </div>
+      )}
     </div>
   );
 }
@@ -212,25 +210,10 @@ function SetupHelperSection({
       <div className="space-y-3">
         <div>
           <div className="text-xs font-medium text-gray-500 uppercase tracking-wide mb-1">
-            Bevorzugter Tag
+            Zugeteilte Spieltage
           </div>
           <Badge className="bg-gray-800 text-white hover:bg-gray-700 font-medium">
-            {matchDays[setupHelper.preferredMatchDay]}
-          </Badge>
-        </div>
-        <div>
-          <div className="text-xs font-medium text-gray-500 uppercase tracking-wide mb-1">
-            Alternative Tage
-          </div>
-          <Badge
-            variant="outline"
-            className="border-gray-300 text-gray-600 font-medium"
-          >
-            {setupHelper.secondaryMatchDays.length > 0
-              ? setupHelper.secondaryMatchDays
-                  .map((day) => matchDays[day])
-                  .join(", ")
-              : "-"}
+            {setupHelper.assignedDaysCount} Tage
           </Badge>
         </div>
       </div>
@@ -247,25 +230,10 @@ function RefereeSection({ referee }: { referee: RefereeWithAssignments }) {
       <div className="space-y-3">
         <div>
           <div className="text-xs font-medium text-gray-500 uppercase tracking-wide mb-1">
-            Bevorzugter Tag
+            Zugeteilte Spieltage
           </div>
           <Badge className="bg-gray-800 text-white hover:bg-gray-700 font-medium">
-            {matchDays[referee.preferredMatchDay]}
-          </Badge>
-        </div>
-        <div>
-          <div className="text-xs font-medium text-gray-500 uppercase tracking-wide mb-1">
-            Alternative Tage
-          </div>
-          <Badge
-            variant="outline"
-            className="border-gray-300 text-gray-600 font-medium"
-          >
-            {referee.secondaryMatchDays.length > 0
-              ? referee.secondaryMatchDays
-                  .map((day) => matchDays[day])
-                  .join(", ")
-              : "-"}
+            {referee.assignedDaysCount} Tage
           </Badge>
         </div>
       </div>
