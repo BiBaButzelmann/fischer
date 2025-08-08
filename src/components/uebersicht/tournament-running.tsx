@@ -56,13 +56,13 @@ export async function TournamentRunning({ tournament }: Props) {
                   Hallo, {playerFirstName}!
                 </CardTitle>
                 <CardDescription className="mt-2">
-                  Das Klubturnier ist gestartet! Hier siehst du deine kommenden
-                  Termine:
+                  Das Klubturnier ist gestartet! Klicke auf die Events für mehr
+                  Infos.
                 </CardDescription>
               </div>
               <Link href="/kalender">
                 <Button variant="outline" className="group w-full sm:w-auto">
-                  Hier geht's zum Kalender
+                  Hier geht&apos;s zum Kalender
                   <ArrowRight className="w-4 h-4 ml-2 transition-transform group-hover:translate-x-1" />
                 </Button>
               </Link>
@@ -79,6 +79,7 @@ export async function TournamentRunning({ tournament }: Props) {
           <RolesSummary
             profileId={profile.id}
             tournamentId={tournament.id}
+            tournamentStage={tournament.stage}
             showEditButton={false}
           />
         </div>

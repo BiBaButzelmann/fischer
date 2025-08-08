@@ -61,6 +61,7 @@ export async function TournamentRegistration({ tournament }: Props) {
           <RolesSummary
             profileId={profile.id}
             tournamentId={tournament.id}
+            tournamentStage={tournament.stage}
             showEditButton={tournament.stage === "registration"}
           />
         </div>

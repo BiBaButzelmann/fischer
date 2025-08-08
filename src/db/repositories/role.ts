@@ -14,7 +14,7 @@ import { Role, RolesData } from "../types/role";
 import { getProfileByUserId } from "./profile";
 import { getJurorByProfileIdAndTournamentId } from "./juror";
 import { getMatchEnteringHelperByProfileIdAndTournamentId } from "./match-entering-helper";
-import { getParticipantByProfileIdAndTournamentId } from "./participant";
+import { getParticipantWithGroupByProfileIdAndTournamentId } from "./participant";
 import { getRefereeByProfileIdAndTournamentId } from "./referee";
 import { getSetupHelperByProfileIdAndTournamentId } from "./setup-helper";
 
@@ -75,7 +75,10 @@ export async function getRolesDataByProfileIdAndTournamentId(
 ): Promise<RolesData> {
   const [participant, referee, matchEnteringHelper, setupHelper, juror] =
     await Promise.all([
-      getParticipantByProfileIdAndTournamentId(profileId, tournamentId),
+      getParticipantWithGroupByProfileIdAndTournamentId(
+        profileId,
+        tournamentId,
+      ),
       getRefereeByProfileIdAndTournamentId(profileId, tournamentId),
       getMatchEnteringHelperByProfileIdAndTournamentId(profileId, tournamentId),
       getSetupHelperByProfileIdAndTournamentId(profileId, tournamentId),

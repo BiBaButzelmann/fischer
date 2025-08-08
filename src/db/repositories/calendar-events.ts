@@ -5,7 +5,7 @@ import {
   getDateTimeFromDefaultTime,
 } from "@/lib/game-time";
 import { getMatchdaysByRefereeId } from "./referee";
-import { getParticipantByProfileIdAndTournamentId } from "./participant";
+import { getParticipantWithGroupByProfileIdAndTournamentId } from "./participant";
 import { getRefereeByProfileIdAndTournamentId } from "./referee";
 
 export async function getCalendarEventsForParticipant(
@@ -58,7 +58,7 @@ export async function getNumberOfEventsByProfileAndTournament(
   limit: number = 3,
 ): Promise<CalendarEvent[]> {
   const [participant, referee] = await Promise.all([
-    getParticipantByProfileIdAndTournamentId(profileId, tournamentId),
+    getParticipantWithGroupByProfileIdAndTournamentId(profileId, tournamentId),
     getRefereeByProfileIdAndTournamentId(profileId, tournamentId),
   ]);
 

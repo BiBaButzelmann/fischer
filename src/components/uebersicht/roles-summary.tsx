@@ -17,22 +17,25 @@ import { matchDays } from "../../constants/constants";
 import { getRolesDataByProfileIdAndTournamentId } from "@/db/repositories/role";
 import { PropsWithChildren } from "react";
 import { Separator } from "../ui/separator";
-import { Participant } from "@/db/types/participant";
+import { ParticipantWithGroup } from "@/db/types/participant";
 import { MatchEnteringHelper } from "@/db/types/match-entering-helper";
+import { type Tournament } from "@/db/types/tournament";
 import { SetupHelper } from "@/db/types/setup-helper";
 import { Referee } from "@/db/types/referee";
 
-type RoleSummaryProps = {
+type Props = {
   profileId: number;
   tournamentId: number;
+  tournamentStage: Tournament["stage"];
   showEditButton?: boolean;
 };
 
 export async function RolesSummary({
   profileId,
   tournamentId,
+  tournamentStage,
   showEditButton = false,
-}: RoleSummaryProps) {
+}: Props) {
   const { participant, juror, referee, matchEnteringHelper, setupHelper } =
     await getRolesDataByProfileIdAndTournamentId(profileId, tournamentId);
 
@@ -65,7 +68,10 @@ export async function RolesSummary({
         <div className="grid grid-cols-1 lg:grid-cols-12 gap-2">
           {participant != null ? (
             <div className="lg:col-span-7 bg-white p-4 md:p-6 rounded-lg border border-gray-200">
-              <PlayerSection participant={participant} />
+              <PlayerSection
+                participant={participant}
+                tournamentStage={tournamentStage}
+              />
             </div>
           ) : null}
 
@@ -106,7 +112,13 @@ function RoleSection({
   );
 }
 
-function PlayerSection({ participant }: { participant: Participant }) {
+function PlayerSection({
+  tournamentStage,
+  participant,
+}: {
+  tournamentStage: Tournament["stage"];
+  participant: ParticipantWithGroup;
+}) {
   return (
     <div className="space-y-4">
       <div className="flex items-center gap-2 mb-4">
@@ -160,43 +172,76 @@ function PlayerSection({ participant }: { participant: Participant }) {
 
       <Separator className="my-4" />
 
-      <div className="space-y-3">
-        <div>
-          <div className="flex items-center gap-2 mb-2">
-            <Calendar className="h-4 w-4 text-gray-500" />
-            <span className="text-sm font-medium text-gray-700">
-              Bevorzugter Spieltag
-            </span>
+      {tournamentStage === "running" && participant.group?.group ? (
+        <div className="space-y-3">
+          <div>
+            <div className="flex items-center gap-2 mb-2">
+              <Users className="h-4 w-4 text-gray-500" />
+              <span className="text-sm font-medium text-gray-700">
+                Meine Gruppe
+              </span>
+            </div>
+            <div className="ml-6">
+              <Badge className="bg-gray-900 text-white hover:bg-gray-800 font-medium">
+                {participant.group.group.groupName}
+              </Badge>
+            </div>
           </div>
-          <div className="ml-6">
-            <Badge className="bg-gray-900 text-white hover:bg-gray-800 font-medium">
-              {matchDays[participant.preferredMatchDay]}
-            </Badge>
-          </div>
-        </div>
-        <div>
-          <div className="flex items-center gap-2 mb-2">
-            <Calendar className="h-4 w-4 text-gray-400" />
-            <span className="text-sm font-medium text-gray-700">
-              Alternative Spieltage
-            </span>
-          </div>
-          <div className="ml-6 flex gap-2 flex-wrap">
-            {participant.secondaryMatchDays.length > 0 ? (
-              participant.secondaryMatchDays.map((day) => (
-                <Badge
-                  key={day}
-                  className="bg-gray-200 text-gray-800 hover:bg-gray-300 font-medium"
-                >
-                  {matchDays[day]}
-                </Badge>
-              ))
-            ) : (
-              <span className="text-sm text-gray-500">Keine</span>
-            )}
+          <div>
+            <div className="flex items-center gap-2 mb-2">
+              <Calendar className="h-4 w-4 text-gray-500" />
+              <span className="text-sm font-medium text-gray-700">
+                Mein Gruppenspieltag
+              </span>
+            </div>
+            <div className="ml-6">
+              <Badge className="bg-gray-900 text-white hover:bg-gray-800 font-medium">
+                {participant.group.group.dayOfWeek
+                  ? matchDays[participant.group.group.dayOfWeek]
+                  : "Noch nicht festgelegt"}
+              </Badge>
+            </div>
           </div>
         </div>
-      </div>
+      ) : (
+        <div className="space-y-3">
+          <div>
+            <div className="flex items-center gap-2 mb-2">
+              <Calendar className="h-4 w-4 text-gray-500" />
+              <span className="text-sm font-medium text-gray-700">
+                Bevorzugter Spieltag
+              </span>
+            </div>
+            <div className="ml-6">
+              <Badge className="bg-gray-900 text-white hover:bg-gray-800 font-medium">
+                {matchDays[participant.preferredMatchDay]}
+              </Badge>
+            </div>
+          </div>
+          <div>
+            <div className="flex items-center gap-2 mb-2">
+              <Calendar className="h-4 w-4 text-gray-400" />
+              <span className="text-sm font-medium text-gray-700">
+                Alternative Spieltage
+              </span>
+            </div>
+            <div className="ml-6 flex gap-2 flex-wrap">
+              {participant.secondaryMatchDays.length > 0 ? (
+                participant.secondaryMatchDays.map((day) => (
+                  <Badge
+                    key={day}
+                    className="bg-gray-200 text-gray-800 hover:bg-gray-300 font-medium"
+                  >
+                    {matchDays[day]}
+                  </Badge>
+                ))
+              ) : (
+                <span className="text-sm text-gray-500">Keine</span>
+              )}
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }
