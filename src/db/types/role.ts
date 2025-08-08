@@ -2,7 +2,7 @@ import { Juror } from "./juror";
 import { MatchEnteringHelper } from "./match-entering-helper";
 import { Participant } from "./participant";
 import { Referee } from "./referee";
-import { SetupHelper } from "./setup-helper";
+import { SetupHelperWithAssignments } from "./setup-helper";
 
 export type Role =
   | "admin"
@@ -16,7 +16,7 @@ export type RolesData = {
   participant: Participant | undefined;
   referee: Referee | undefined;
   matchEnteringHelper: MatchEnteringHelper | undefined;
-  setupHelper: SetupHelper | undefined;
+  setupHelper: SetupHelperWithAssignments | undefined;
   juror: Juror | undefined;
 };
 

@@ -20,7 +20,7 @@ import { Separator } from "../ui/separator";
 import { ParticipantWithGroup } from "@/db/types/participant";
 import { MatchEnteringHelper } from "@/db/types/match-entering-helper";
 import { type Tournament } from "@/db/types/tournament";
-import { SetupHelper } from "@/db/types/setup-helper";
+import { SetupHelperWithAssignments } from "@/db/types/setup-helper";
 import { Referee } from "@/db/types/referee";
 
 type Props = {
@@ -77,7 +77,10 @@ export async function RolesSummary({
 
           <div className="lg:col-span-5 md:space-y-2">
             {setupHelper != null ? (
-              <SetupHelperSection setupHelper={setupHelper} />
+              <SetupHelperSection
+                setupHelper={setupHelper}
+                tournamentStage={tournamentStage}
+              />
             ) : null}
 
             {referee != null ? <RefereeSection referee={referee} /> : null}
@@ -246,37 +249,56 @@ function PlayerSection({
   );
 }
 
-function SetupHelperSection({ setupHelper }: { setupHelper: SetupHelper }) {
+function SetupHelperSection({
+  setupHelper,
+  tournamentStage,
+}: {
+  setupHelper: SetupHelperWithAssignments;
+  tournamentStage: Tournament["stage"];
+}) {
   return (
     <RoleSection
       icon={<Wrench className="h-4 w-4 text-gray-600" />}
       title="Aufbauhelfer"
     >
-      <div className="space-y-3">
-        <div>
-          <div className="text-xs font-medium text-gray-500 uppercase tracking-wide mb-1">
-            Bevorzugter Tag
+      {tournamentStage === "running" ? (
+        <div className="space-y-3">
+          <div>
+            <div className="text-xs font-medium text-gray-500 uppercase tracking-wide mb-1">
+              Zugeteilte Spieltage
+            </div>
+            <Badge className="bg-gray-800 text-white hover:bg-gray-700 font-medium">
+              {setupHelper.assignedDaysCount} Tage
+            </Badge>
           </div>
-          <Badge className="bg-gray-800 text-white hover:bg-gray-700 font-medium">
-            {matchDays[setupHelper.preferredMatchDay]}
-          </Badge>
         </div>
-        <div>
-          <div className="text-xs font-medium text-gray-500 uppercase tracking-wide mb-1">
-            Alternative Tage
+      ) : (
+        <div className="space-y-3">
+          <div>
+            <div className="text-xs font-medium text-gray-500 uppercase tracking-wide mb-1">
+              Bevorzugter Tag
+            </div>
+            <Badge className="bg-gray-800 text-white hover:bg-gray-700 font-medium">
+              {matchDays[setupHelper.preferredMatchDay]}
+            </Badge>
           </div>
-          <Badge
-            variant="outline"
-            className="border-gray-300 text-gray-600 font-medium"
-          >
-            {setupHelper.secondaryMatchDays.length > 0
-              ? setupHelper.secondaryMatchDays
-                  .map((day) => matchDays[day])
-                  .join(", ")
-              : "-"}
-          </Badge>
+          <div>
+            <div className="text-xs font-medium text-gray-500 uppercase tracking-wide mb-1">
+              Alternative Tage
+            </div>
+            <Badge
+              variant="outline"
+              className="border-gray-300 text-gray-600 font-medium"
+            >
+              {setupHelper.secondaryMatchDays.length > 0
+                ? setupHelper.secondaryMatchDays
+                    .map((day) => matchDays[day])
+                    .join(", ")
+                : "-"}
+            </Badge>
+          </div>
         </div>
-      </div>
+      )}
     </RoleSection>
   );
 }
