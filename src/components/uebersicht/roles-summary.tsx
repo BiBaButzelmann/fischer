@@ -51,7 +51,7 @@ export async function RolesSummary({
                 Meine Anmeldungen
               </h2>
               <p className="text-sm text-gray-600 mt-1">
-                Übersicht deiner Anmeldungen für das Turnier.
+                Übersicht deiner Anmeldungen für das Turnier
               </p>
             </div>
           </div>
