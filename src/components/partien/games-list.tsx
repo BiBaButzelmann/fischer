@@ -25,23 +25,31 @@ import { MatchDay } from "@/db/types/match-day";
 import { PostponeGameDialog } from "./postpone-game-dialog";
 import { ReportResultDialog } from "./report-result-dialog";
 import { authClient } from "@/auth-client";
+import { Role } from "@/db/types/role";
 
 type Props = {
   games: GameWithParticipantProfilesAndGroupAndMatchday[];
   onResultChange: (gameId: number, result: GameResult) => Promise<void>;
   availableMatchdays: MatchDay[];
+  userRoles: Role[];
 };
 
 export function GamesList({
   games,
   onResultChange,
   availableMatchdays = [],
+  userRoles = [],
 }: Props) {
   const isMobile = useIsMobile();
   const router = useRouter();
   const { data: session } = authClient.useSession();
   const userId = session?.user?.id;
   const userRole = session?.user?.role;
+
+  const isAdmin = userRole === "admin";
+  const isReferee = userRoles.includes("referee");
+  const isParticipant = userRoles.includes("participant");
+  const isMatchEnteringHelper = userRoles.includes("matchEnteringHelper");
 
   const gameParticipantsMap = useMemo(
     () =>
@@ -56,6 +64,25 @@ export function GamesList({
       ),
     [games],
   );
+
+  const getGameActionPermissions = (gameId: number) => {
+    const isGameParticipant = gameParticipantsMap[gameId]?.includes(
+      userId || "",
+    );
+
+    return {
+      canView: isParticipant || isReferee || isMatchEnteringHelper || isAdmin,
+      canSubmitResult: isGameParticipant || isReferee || isAdmin,
+      canPostpone: isGameParticipant || isAdmin,
+    };
+  };
+
+  const hasAnyActions = games.some((game) => {
+    const { canView, canSubmitResult, canPostpone } = getGameActionPermissions(
+      game.id,
+    );
+    return canView || canSubmitResult || canPostpone;
+  });
 
   const handleNavigate = (gameId: number) => {
     router.push(`/partien/${gameId}`);
@@ -83,7 +110,7 @@ export function GamesList({
             <TableHead className="hidden md:table-cell sticky top-0 bg-card text-center">
               Datum
             </TableHead>
-            {userId && (
+            {hasAnyActions && (
               <TableHead className="hidden md:table-cell sticky top-0 bg-card w-32">
                 Aktionen
               </TableHead>
@@ -130,42 +157,51 @@ export function GamesList({
               <TableCell className="hidden md:table-cell w-24 text-center">
                 {formatGameDate(getGameTimeFromGame(game))}
               </TableCell>
-              {userId && (
+              {hasAnyActions && (
                 <TableCell className="hidden md:flex items-center gap-2 w-32">
-                  <Tooltip>
-                    <TooltipTrigger asChild>
-                      <Link href={`/partien/${game.id}`}>
-                        <Button
-                          aria-label="Partie eingeben"
-                          variant="outline"
-                          size="icon"
-                        >
-                          <NotebookPen className="h-4 w-4" />
-                        </Button>
-                      </Link>
-                    </TooltipTrigger>
-                    <TooltipContent>
-                      <p>Partie anschauen</p>
-                    </TooltipContent>
-                  </Tooltip>
-                  {/* TODO: Schiedsrichter darf Ergebnisse melden (global) */}
-                  {gameParticipantsMap[game.id].includes(userId) ||
-                  userRole === "admin" ? (
-                    <ReportResultDialog
-                      gameId={game.id}
-                      currentResult={game.result}
-                      onResultChange={onResultChange}
-                    />
-                  ) : null}
-                  {gameParticipantsMap[game.id].includes(userId) ||
-                  userRole === "admin" ? (
-                    <PostponeGameDialog
-                      gameId={game.id}
-                      availableMatchdays={availableMatchdays}
-                      currentGameDate={getGameTimeFromGame(game)}
-                      game={game}
-                    />
-                  ) : null}
+                  {(() => {
+                    const { canView, canSubmitResult, canPostpone } =
+                      getGameActionPermissions(game.id);
+
+                    return (
+                      <>
+                        {canView && (
+                          <Tooltip>
+                            <TooltipTrigger asChild>
+                              <Link href={`/partien/${game.id}`}>
+                                <Button
+                                  aria-label="Partie eingeben"
+                                  variant="outline"
+                                  size="icon"
+                                >
+                                  <NotebookPen className="h-4 w-4" />
+                                </Button>
+                              </Link>
+                            </TooltipTrigger>
+                            <TooltipContent>
+                              <p>Partie anschauen</p>
+                            </TooltipContent>
+                          </Tooltip>
+                        )}
+                        {canSubmitResult && (
+                          <ReportResultDialog
+                            gameId={game.id}
+                            currentResult={game.result}
+                            onResultChange={onResultChange}
+                            isReferee={isReferee}
+                          />
+                        )}
+                        {canPostpone && (
+                          <PostponeGameDialog
+                            gameId={game.id}
+                            availableMatchdays={availableMatchdays}
+                            currentGameDate={getGameTimeFromGame(game)}
+                            game={game}
+                          />
+                        )}
+                      </>
+                    );
+                  })()}
                 </TableCell>
               )}
             </TableRow>
