@@ -74,22 +74,6 @@ export function UpcomingEvents({ events }: Props) {
     [router],
   );
 
-  const getEventDisplayData = useCallback((event: CalendarEvent) => {
-    const eventType = event.extendedProps.eventType;
-    let displayType = "Spiel";
-    if (eventType === "referee") {
-      displayType = "Schiedsrichter";
-    } else if (eventType === "setupHelper") {
-      displayType = "Aufbauhelfer";
-    }
-    return {
-      displayType,
-      title: event.title,
-      time: formatEventDateTime(event.start),
-      eventType,
-    };
-  }, []);
-
   return (
     <>
       <div className="mb-4 flex items-center gap-2 text-sm text-muted-foreground">
@@ -98,38 +82,33 @@ export function UpcomingEvents({ events }: Props) {
       {events.length > 0 ? (
         <div className="space-y-4">
           {events.map((event, index) => {
-            const displayData = getEventDisplayData(event);
             const config =
-              eventConfig[displayData.eventType as keyof typeof eventConfig];
+              eventConfig[
+                event.extendedProps.eventType as keyof typeof eventConfig
+              ];
             const Icon = config.icon;
             return (
               <div
                 key={index}
                 onClick={() => {
-                  if (displayData.eventType === "referee") {
-                    if (event.extendedProps.eventType === "referee") {
-                      handleRefereeClick(
-                        event.extendedProps.tournamentId,
-                        event.extendedProps.matchdayId,
-                      );
-                    }
-                  } else if (displayData.eventType === "setupHelper") {
-                    if (event.extendedProps.eventType === "setupHelper") {
-                      handleRefereeClick(
-                        event.extendedProps.tournamentId,
-                        event.extendedProps.matchdayId,
-                      );
-                    }
-                  } else {
-                    if (event.extendedProps.eventType === "game") {
-                      handleGameClick(
-                        event.extendedProps.gameId,
-                        event.extendedProps.participantId,
-                        event.extendedProps.round,
-                        event.extendedProps.tournamentId,
-                        event.extendedProps.groupId,
-                      );
-                    }
+                  if (event.extendedProps.eventType === "referee") {
+                    handleRefereeClick(
+                      event.extendedProps.tournamentId,
+                      event.extendedProps.matchdayId,
+                    );
+                  } else if (event.extendedProps.eventType === "setupHelper") {
+                    handleRefereeClick(
+                      event.extendedProps.tournamentId,
+                      event.extendedProps.matchdayId,
+                    );
+                  } else if (event.extendedProps.eventType === "game") {
+                    handleGameClick(
+                      event.extendedProps.gameId,
+                      event.extendedProps.participantId,
+                      event.extendedProps.round,
+                      event.extendedProps.tournamentId,
+                      event.extendedProps.groupId,
+                    );
                   }
                 }}
                 className="flex items-center gap-4 p-4 bg-white dark:bg-card border border-gray-200 dark:border-card-border rounded-xl shadow-sm transition-all hover:shadow-md cursor-pointer hover:opacity-80"
@@ -141,16 +120,17 @@ export function UpcomingEvents({ events }: Props) {
                 </div>
                 <div className="flex-grow">
                   <p className="font-bold text-gray-800 dark:text-gray-100">
-                    {(displayData.displayType === "Schiedsrichter" &&
-                      displayData.title === "Schiedsrichter") ||
-                    (displayData.displayType === "Aufbauhelfer" &&
-                      displayData.title === "Aufbauhelfer")
-                      ? displayData.displayType
-                      : `${displayData.title}`}
+                    {event.extendedProps.eventType === "referee" &&
+                    event.title === "Schiedsrichter"
+                      ? "Schiedsrichter"
+                      : event.extendedProps.eventType === "setupHelper" &&
+                          event.title === "Aufbauhelfer"
+                        ? "Aufbauhelfer"
+                        : event.title}
                   </p>
                   <div className="flex items-center gap-2 text-sm text-gray-500 dark:text-gray-400 mt-1">
                     <Clock className="w-4 h-4" />
-                    <span>{displayData.time}</span>
+                    <span>{formatEventDateTime(event.start)}</span>
                   </div>
                 </div>
               </div>
