@@ -11,6 +11,7 @@ import type {
   DatesSetArg,
   AllowFunc,
 } from "@fullcalendar/core/index.js";
+import type { DateClickArg } from "@fullcalendar/interaction/index.js";
 import deLocale from "@fullcalendar/core/locales/de.js";
 import interactionPlugin from "@fullcalendar/interaction";
 import { GameEvent } from "./game-event";
@@ -27,6 +28,7 @@ type Props = {
   eventAllow?: AllowFunc;
   initialDate?: Date;
   onDatesSet?: (info: DatesSetArg) => void;
+  onDateClick?: (info: DateClickArg) => void;
 };
 
 export function Calendar({
@@ -40,6 +42,7 @@ export function Calendar({
   eventAllow,
   initialDate,
   onDatesSet,
+  onDateClick,
 }: Props) {
   return (
     <div className={cn("calendar-container", className)}>
@@ -59,6 +62,7 @@ export function Calendar({
         selectable={false}
         eventDrop={onEventDrop}
         eventClick={onEventClick}
+        dateClick={onDateClick}
         height="auto"
         eventClassNames="cursor-pointer hover:opacity-80"
         eventAllow={eventAllow}

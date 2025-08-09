@@ -3,10 +3,12 @@ import { getGamesOfParticipant } from "./game";
 import {
   getGameTimeFromGame,
   getDateTimeFromDefaultTime,
+  getSetupHelperTimeFromDefaultTime,
 } from "@/lib/game-time";
 import { getMatchdaysByRefereeId } from "./referee";
 import { getParticipantWithGroupByProfileIdAndTournamentId } from "./participant";
 import { getRefereeByProfileIdAndTournamentId } from "./referee";
+import { getMatchdaysBySetupHelperId } from "./setup-helper";
 
 export async function getCalendarEventsForParticipant(
   participantId: number,
@@ -86,4 +88,24 @@ export async function getUpcomingEventsByProfileAndTournament(
     .filter((event) => event.start > currentBerlinTime)
     .sort((a, b) => a.start.getTime() - b.start.getTime())
     .slice(0, limit);
+}
+
+export async function getCalendarEventsForSetupHelper(
+  setupHelperId: number,
+): Promise<CalendarEvent[]> {
+  const setupHelperMatchdays = await getMatchdaysBySetupHelperId(setupHelperId);
+
+  return setupHelperMatchdays.map((entry) => {
+    return {
+      id: `setupHelper-${entry.matchday.id}`,
+      title: `Aufbauhelfer`,
+      start: getSetupHelperTimeFromDefaultTime(entry.matchday.date),
+      extendedProps: {
+        eventType: "setupHelper" as const,
+        setupHelperId: entry.setupHelper.id,
+        matchdayId: entry.matchday.id,
+        tournamentId: entry.matchday.tournamentId,
+      },
+    };
+  });
 }
