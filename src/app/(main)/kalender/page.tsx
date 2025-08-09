@@ -91,8 +91,6 @@ export default async function Page() {
                       dich bitte vorher mit deinem Gegner ab.
                     </span>
                   )}{" "}
-                  Klicke auf einen hervorgehobenen Tag, um zu den Partien dieses
-                  Spieltags zu gelangen.
                 </p>
 
                 {(currentParticipant ||
