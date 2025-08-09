@@ -2,6 +2,8 @@
 
 import { db } from "../client";
 import { setupHelper } from "../schema/setupHelper";
+import { profile } from "../schema/profile";
+import { matchday, matchdaySetupHelper } from "../schema/matchday";
 import { and, eq } from "drizzle-orm";
 
 export async function getSetupHelperByProfileIdAndTournamentId(
@@ -28,4 +30,28 @@ export async function getAllSetupHelpersByTournamentId(tournamentId: number) {
       },
     },
   });
+}
+
+export async function getSetupHelperByUserId(userId: string) {
+  const rows = await db
+    .select()
+    .from(setupHelper)
+    .leftJoin(profile, eq(setupHelper.profileId, profile.id))
+    .where(eq(profile.userId, userId));
+  return rows.length > 0 ? rows[0].setup_helper : undefined;
+}
+
+export async function getMatchdaysBySetupHelperId(setupHelperId: number) {
+  return await db
+    .select({
+      setupHelper: setupHelper,
+      matchday: matchday,
+    })
+    .from(setupHelper)
+    .innerJoin(
+      matchdaySetupHelper,
+      eq(matchdaySetupHelper.setupHelperId, setupHelper.id),
+    )
+    .innerJoin(matchday, eq(matchday.id, matchdaySetupHelper.matchdayId))
+    .where(eq(setupHelper.id, setupHelperId));
 }

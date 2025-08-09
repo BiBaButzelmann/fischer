@@ -24,4 +24,16 @@ type RefereeEvent = {
   };
 };
 
-export type CalendarEvent = GameEvent | RefereeEvent;
+type SetupHelperEvent = {
+  id: string;
+  title: string;
+  start: Date;
+  extendedProps: {
+    eventType: "setupHelper";
+    setupHelperId: number;
+    matchdayId: number;
+    tournamentId: number;
+  };
+};
+
+export type CalendarEvent = GameEvent | RefereeEvent | SetupHelperEvent;
