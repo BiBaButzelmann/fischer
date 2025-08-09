@@ -11,7 +11,7 @@ export type ParticipantWithName = Participant & {
   };
 };
 
-export type ParticipantWithGroup = Participant & {
+export type ParticipantAndGroup = Participant & {
   group?: {
     group: {
       groupName: string;

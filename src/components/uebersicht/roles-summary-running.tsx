@@ -13,7 +13,7 @@ import { Badge } from "../ui/badge";
 import { matchDays } from "../../constants/constants";
 import { getRunningRolesDataByProfileIdAndTournamentId } from "@/db/repositories/role";
 import { PropsWithChildren } from "react";
-import { ParticipantWithGroup } from "@/db/types/participant";
+import { ParticipantAndGroup } from "@/db/types/participant";
 import { MatchEnteringHelperWithAssignments } from "@/db/types/match-entering-helper";
 import { SetupHelperWithAssignments } from "@/db/types/setup-helper";
 import { RefereeWithAssignments } from "@/db/types/referee";
@@ -93,7 +93,7 @@ function RoleSection({
   );
 }
 
-function PlayerSection({ participant }: { participant: ParticipantWithGroup }) {
+function PlayerSection({ participant }: { participant: ParticipantAndGroup }) {
   return (
     <div className="space-y-4">
       <div className="flex items-center gap-2 mb-4">

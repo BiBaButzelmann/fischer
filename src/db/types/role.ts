@@ -3,7 +3,7 @@ import {
   MatchEnteringHelper,
   MatchEnteringHelperWithAssignments,
 } from "./match-entering-helper";
-import { Participant, ParticipantWithGroup } from "./participant";
+import { Participant, ParticipantAndGroup } from "./participant";
 import { Referee, RefereeWithAssignments } from "./referee";
 import { SetupHelper, SetupHelperWithAssignments } from "./setup-helper";
 
@@ -24,7 +24,7 @@ export type RolesData = {
 };
 
 export type RunningRolesData = {
-  participant: ParticipantWithGroup | undefined;
+  participant: ParticipantAndGroup | undefined;
   referee: RefereeWithAssignments | undefined;
   matchEnteringHelper: MatchEnteringHelperWithAssignments | undefined;
   setupHelper: SetupHelperWithAssignments | undefined;

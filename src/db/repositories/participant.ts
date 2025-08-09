@@ -3,7 +3,7 @@ import { group } from "../schema/group";
 import { participant, participantGroup } from "../schema/participant";
 import { profile } from "../schema/profile";
 import { and, eq, getTableColumns, isNull } from "drizzle-orm";
-import { type ParticipantWithGroup } from "../types/participant";
+import { type ParticipantAndGroup } from "../types/participant";
 
 export async function getParticipantByProfileIdAndTournamentId(
   profileId: number,
@@ -21,7 +21,7 @@ export async function getParticipantByProfileIdAndTournamentId(
 export async function getParticipantWithGroupByProfileIdAndTournamentId(
   profileId: number,
   tournamentId: number,
-): Promise<ParticipantWithGroup | undefined> {
+): Promise<ParticipantAndGroup | undefined> {
   return await db.query.participant.findFirst({
     where: (participant, { eq, and }) =>
       and(
