@@ -15,7 +15,6 @@ import { Button } from "../ui/button";
 import { matchDays } from "../../constants/constants";
 import { getRunningRolesDataByProfileIdAndTournamentId } from "@/db/repositories/role";
 import { PropsWithChildren } from "react";
-import { Separator } from "../ui/separator";
 import { ParticipantWithGroup } from "@/db/types/participant";
 import { MatchEnteringHelperWithAssignments } from "@/db/types/match-entering-helper";
 import { SetupHelperWithAssignments } from "@/db/types/setup-helper";
@@ -24,14 +23,9 @@ import { RefereeWithAssignments } from "@/db/types/referee";
 type Props = {
   profileId: number;
   tournamentId: number;
-  showEditButton?: boolean;
 };
 
-export async function RolesSummaryRunning({
-  profileId,
-  tournamentId,
-  showEditButton = false,
-}: Props) {
+export async function RolesSummaryRunning({ profileId, tournamentId }: Props) {
   const { participant, juror, referee, matchEnteringHelper, setupHelper } =
     await getRunningRolesDataByProfileIdAndTournamentId(
       profileId,
@@ -53,11 +47,6 @@ export async function RolesSummaryRunning({
               </p>
             </div>
           </div>
-          {showEditButton ? (
-            <Button asChild className="font-medium px-6">
-              <a href="/klubturnier-anmeldung">Anmeldung anpassen</a>
-            </Button>
-          ) : null}
         </div>
       </CardHeader>
 
@@ -115,51 +104,6 @@ function PlayerSection({ participant }: { participant: ParticipantWithGroup }) {
         </div>
         <h3 className="text-lg font-semibold text-gray-900">Spieler</h3>
       </div>
-
-      <div className="grid grid-cols-2 md:grid-cols-3 gap-3 mb-4">
-        <div className="bg-gray-50 rounded-lg p-3 text-center border border-gray-200">
-          <div className="text-xl font-bold text-gray-900">
-            {participant.dwzRating ?? "-"}
-          </div>
-          <div className="text-xs font-medium text-gray-500 uppercase tracking-wide">
-            DWZ
-          </div>
-        </div>
-        <div className="bg-gray-50 rounded-lg p-3 text-center border border-gray-200">
-          <div className="text-xl font-bold text-gray-900">
-            {participant.fideRating ?? "-"}
-          </div>
-          <div className="text-xs font-medium text-gray-500 uppercase tracking-wide">
-            Elo
-          </div>
-        </div>
-        <div className="bg-gray-50 rounded-lg p-3 text-center border border-gray-200 md:col-span-1 col-span-2">
-          <div className="text-xl font-semibold text-gray-900">
-            {participant.fideId ?? "-"}
-          </div>
-          <div className="text-xs font-medium text-gray-500 uppercase tracking-wide">
-            FIDE ID
-          </div>
-        </div>
-      </div>
-
-      <div className="space-y-2">
-        <div className="flex items-center gap-2 mb-2">
-          <Shield className="h-4 w-4 text-gray-500" />
-          <span className="text-sm font-medium text-gray-700">Verein</span>
-        </div>
-        <div className="ml-4">
-          <Badge
-            variant="outline"
-            className="font-medium border-gray-300 text-gray-700"
-          >
-            {participant.chessClub}
-          </Badge>
-        </div>
-      </div>
-
-      <Separator className="my-4" />
-
       {participant.group?.group ? (
         <div className="space-y-3">
           <div>
