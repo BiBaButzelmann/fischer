@@ -115,7 +115,7 @@ export async function getRunningRolesDataByProfileIdAndTournamentId(
   };
 }
 
-export async function getRegistrationRolesDataByProfileIdAndTournamentId(
+export async function getRolesDataByProfileIdAndTournamentId(
   profileId: number,
   tournamentId: number,
 ): Promise<RolesData> {
