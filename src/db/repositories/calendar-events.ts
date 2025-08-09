@@ -8,7 +8,7 @@ import {
 import { getMatchdaysByRefereeId } from "./referee";
 import { getParticipantWithGroupByProfileIdAndTournamentId } from "./participant";
 import { getRefereeByProfileIdAndTournamentId } from "./referee";
-import { getMatchdaysBySetupHelperId } from "./setup-helper";
+import { getMatchdaysBySetupHelperId, getSetupHelperByProfileIdAndTournamentId } from "./setup-helper";
 
 export async function getCalendarEventsForParticipant(
   participantId: number,
@@ -59,9 +59,10 @@ export async function getUpcomingEventsByProfileAndTournament(
   tournamentId: number,
   limit: number = 3,
 ): Promise<CalendarEvent[]> {
-  const [participant, referee] = await Promise.all([
+  const [participant, referee, setupHelper] = await Promise.all([
     getParticipantWithGroupByProfileIdAndTournamentId(profileId, tournamentId),
     getRefereeByProfileIdAndTournamentId(profileId, tournamentId),
+    getSetupHelperByProfileIdAndTournamentId(profileId, tournamentId),
   ]);
 
   const eventPromises: Promise<CalendarEvent[]>[] = [];
@@ -70,6 +71,9 @@ export async function getUpcomingEventsByProfileAndTournament(
   }
   if (referee) {
     eventPromises.push(getCalendarEventsForReferee(referee.id));
+  }
+  if (setupHelper) {
+    eventPromises.push(getCalendarEventsForSetupHelper(setupHelper.id));
   }
 
   if (eventPromises.length === 0) {

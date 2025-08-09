@@ -1,6 +1,6 @@
 "use client";
 
-import { Calendar, Clock, Gamepad2, Gavel } from "lucide-react";
+import { Calendar, Clock, Gamepad2, Gavel, Wrench } from "lucide-react";
 import { CalendarEvent } from "@/db/types/calendar";
 import { formatEventDateTime } from "@/lib/date";
 import { useRouter } from "next/navigation";
@@ -22,6 +22,11 @@ const eventConfig = {
     icon: Gavel,
     bgColor: "bg-red-100 dark:bg-red-900/30",
     iconColor: "text-red-600 dark:text-red-400",
+  },
+  setupHelper: {
+    icon: Wrench,
+    bgColor: "bg-green-100 dark:bg-green-900/30",
+    iconColor: "text-green-600 dark:text-green-400",
   },
 };
 
@@ -71,7 +76,12 @@ export function UpcomingEvents({ events }: Props) {
 
   const getEventDisplayData = useCallback((event: CalendarEvent) => {
     const eventType = event.extendedProps.eventType;
-    const displayType = eventType === "game" ? "Spiel" : "Schiedsrichter";
+    let displayType = "Spiel";
+    if (eventType === "referee") {
+      displayType = "Schiedsrichter";
+    } else if (eventType === "setupHelper") {
+      displayType = "Aufbauhelfer";
+    }
     return {
       displayType,
       title: event.title,
@@ -103,6 +113,13 @@ export function UpcomingEvents({ events }: Props) {
                         event.extendedProps.matchdayId,
                       );
                     }
+                  } else if (displayData.eventType === "setupHelper") {
+                    if (event.extendedProps.eventType === "setupHelper") {
+                      handleRefereeClick(
+                        event.extendedProps.tournamentId,
+                        event.extendedProps.matchdayId,
+                      );
+                    }
                   } else {
                     if (event.extendedProps.eventType === "game") {
                       handleGameClick(
@@ -124,9 +141,11 @@ export function UpcomingEvents({ events }: Props) {
                 </div>
                 <div className="flex-grow">
                   <p className="font-bold text-gray-800 dark:text-gray-100">
-                    {displayData.displayType === "Schiedsrichter" &&
-                    displayData.title === "Schiedsrichter"
-                      ? "Schiedsrichter"
+                    {(displayData.displayType === "Schiedsrichter" &&
+                      displayData.title === "Schiedsrichter") ||
+                    (displayData.displayType === "Aufbauhelfer" &&
+                      displayData.title === "Aufbauhelfer")
+                      ? displayData.displayType
                       : `${displayData.title}`}
                   </p>
                   <div className="flex items-center gap-2 text-sm text-gray-500 dark:text-gray-400 mt-1">
