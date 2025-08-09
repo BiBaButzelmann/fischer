@@ -28,32 +28,31 @@ const eventConfig = {
 export function UpcomingEvents({ events }: Props) {
   const router = useRouter();
 
-  const handleEventClick = useCallback(
-    (event: CalendarEvent) => {
-      if (event.extendedProps.eventType === "referee") {
-        const tournamentId = event.extendedProps.tournamentId;
-        const matchdayId = event.extendedProps.matchdayId;
-
-        if (!tournamentId || !matchdayId) {
-          toast.error("Fehler: Turnier oder Spieltag nicht gefunden.");
-          return;
-        }
-
-        const url = buildGameViewUrl({
-          tournamentId,
-          matchdayId,
-        });
-
-        router.push(url);
+  const handleRefereeClick = useCallback(
+    (tournamentId: number, matchdayId: number) => {
+      if (!tournamentId || !matchdayId) {
+        toast.error("Fehler: Turnier oder Spieltag nicht gefunden.");
         return;
       }
 
-      const gameId = event.extendedProps.gameId;
-      const participantId = event.extendedProps.participantId;
-      const round = event.extendedProps.round;
-      const tournamentId = event.extendedProps.tournamentId;
-      const groupId = event.extendedProps.groupId;
+      const url = buildGameViewUrl({
+        tournamentId,
+        matchdayId,
+      });
 
+      router.push(url);
+    },
+    [router],
+  );
+
+  const handleGameClick = useCallback(
+    (
+      gameId: number,
+      participantId: number,
+      round: number,
+      tournamentId: number,
+      groupId: number,
+    ) => {
       if (!gameId || !participantId || !round || !tournamentId || !groupId) {
         return;
       }
@@ -96,7 +95,26 @@ export function UpcomingEvents({ events }: Props) {
             return (
               <div
                 key={index}
-                onClick={() => handleEventClick(event)}
+                onClick={() => {
+                  if (displayData.eventType === "referee") {
+                    if (event.extendedProps.eventType === "referee") {
+                      handleRefereeClick(
+                        event.extendedProps.tournamentId,
+                        event.extendedProps.matchdayId,
+                      );
+                    }
+                  } else {
+                    if (event.extendedProps.eventType === "game") {
+                      handleGameClick(
+                        event.extendedProps.gameId,
+                        event.extendedProps.participantId,
+                        event.extendedProps.round,
+                        event.extendedProps.tournamentId,
+                        event.extendedProps.groupId,
+                      );
+                    }
+                  }
+                }}
                 className="flex items-center gap-4 p-4 bg-white dark:bg-card border border-gray-200 dark:border-card-border rounded-xl shadow-sm transition-all hover:shadow-md cursor-pointer hover:opacity-80"
               >
                 <div
