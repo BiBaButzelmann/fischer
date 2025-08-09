@@ -2,7 +2,6 @@ import {
   Users,
   User,
   Wrench,
-  Shield,
   Gavel,
   Calendar,
   Hash,
@@ -11,7 +10,6 @@ import {
 } from "lucide-react";
 import { Card, CardContent, CardHeader } from "../ui/card";
 import { Badge } from "../ui/badge";
-import { Button } from "../ui/button";
 import { matchDays } from "../../constants/constants";
 import { getRunningRolesDataByProfileIdAndTournamentId } from "@/db/repositories/role";
 import { PropsWithChildren } from "react";

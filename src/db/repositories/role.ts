@@ -10,7 +10,7 @@ import { matchEnteringHelper } from "../schema/matchEnteringHelper";
 import { setupHelper } from "../schema/setupHelper";
 import { auth } from "@/auth";
 import { headers } from "next/headers";
-import { Role, RegistrationRolesData, RunningRolesData } from "../types/role";
+import { Role, RolesData, RunningRolesData } from "../types/role";
 import { getProfileByUserId } from "./profile";
 import { getJurorByProfileIdAndTournamentId } from "./juror";
 import {
@@ -118,7 +118,7 @@ export async function getRunningRolesDataByProfileIdAndTournamentId(
 export async function getRegistrationRolesDataByProfileIdAndTournamentId(
   profileId: number,
   tournamentId: number,
-): Promise<RegistrationRolesData> {
+): Promise<RolesData> {
   const [participant, referee, matchEnteringHelper, setupHelper, juror] =
     await Promise.all([
       getParticipantByProfileIdAndTournamentId(profileId, tournamentId),
