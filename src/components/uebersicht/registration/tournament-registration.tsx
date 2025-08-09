@@ -5,17 +5,17 @@ import {
   CardDescription,
   CardHeader,
   CardTitle,
-} from "../ui/card";
+} from "../../ui/card";
 import { Clock } from "lucide-react";
 import { CountdownTimer } from "./countdown-timer";
 import { auth } from "@/auth/utils";
 import { getProfileByUserId } from "@/db/repositories/profile";
-import { Participants } from "../participants/participants";
+import { Participants } from "../../participants/participants";
 import { getParticipantsByTournamentId } from "@/db/repositories/participant";
-import { ScrollArea, ScrollBar } from "../ui/scroll-area";
+import { ScrollArea, ScrollBar } from "../../ui/scroll-area";
 import { getTournamentWeeksByTournamentId } from "@/db/repositories/tournamentWeek";
-import { TournamentWeeks } from "./tournament-weeks";
 import { RolesSummary } from "./roles-summary";
+import { TournamentWeeks } from "./tournament-weeks";
 
 type Props = {
   tournament: Tournament;

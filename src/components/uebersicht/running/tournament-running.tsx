@@ -6,20 +6,20 @@ import {
   CardDescription,
   CardHeader,
   CardTitle,
-} from "../ui/card";
-import { Button } from "../ui/button";
+} from "../../ui/card";
+import { Button } from "../../ui/button";
 import Link from "next/link";
 import { auth } from "@/auth/utils";
 import { getProfileByUserId } from "@/db/repositories/profile";
-import { Participants } from "../participants/participants";
+import { Participants } from "../../participants/participants";
 import { getParticipantsByTournamentId } from "@/db/repositories/participant";
-import { ScrollArea, ScrollBar } from "../ui/scroll-area";
+import { ScrollArea, ScrollBar } from "../../ui/scroll-area";
 import { getTournamentWeeksByTournamentId } from "@/db/repositories/tournamentWeek";
-import { TournamentWeeks } from "./tournament-weeks";
 import { getUpcomingEventsByProfileAndTournament } from "@/db/repositories/calendar-events";
 import { UpcomingEvents } from "./upcoming-events";
 import { ArrowRight } from "lucide-react";
 import { RolesSummaryRunning } from "./roles-summary-running";
+import { TournamentWeeks } from "../registration/tournament-weeks";
 
 type Props = {
   tournament: Tournament;

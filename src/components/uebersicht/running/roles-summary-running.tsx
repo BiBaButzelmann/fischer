@@ -7,15 +7,16 @@ import {
   Hash,
   BellIcon,
   CheckCircle2,
+  Badge,
 } from "lucide-react";
-import { Card, CardContent, CardHeader } from "../ui/card";
-import { Badge } from "../ui/badge";
-import { matchDays } from "../../constants/constants";
+
 import { getRunningRolesDataByProfileIdAndTournamentId } from "@/db/repositories/role";
 import { PropsWithChildren } from "react";
 import { ParticipantAndGroup } from "@/db/types/participant";
 import { MatchEnteringHelperWithAssignments } from "@/db/types/match-entering-helper";
-import { RefereeWithAssignments, SetupHelperWithAssignments } from "./types";
+import { Card, CardHeader, CardContent } from "@/components/ui/card";
+import { matchDays } from "@/constants/constants";
+import { SetupHelperWithAssignments, RefereeWithAssignments } from "./types";
 
 type Props = {
   profileId: number;

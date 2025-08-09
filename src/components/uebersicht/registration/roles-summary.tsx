@@ -9,17 +9,17 @@ import {
   BellIcon,
   CheckCircle2,
 } from "lucide-react";
-import { Card, CardContent, CardHeader } from "../ui/card";
-import { Badge } from "../ui/badge";
-import { Button } from "../ui/button";
-import { matchDays } from "../../constants/constants";
 import { getRolesDataByProfileIdAndTournamentId } from "@/db/repositories/role";
 import { PropsWithChildren } from "react";
-import { Separator } from "../ui/separator";
 import { Participant } from "@/db/types/participant";
 import { MatchEnteringHelper } from "@/db/types/match-entering-helper";
 import { SetupHelper } from "@/db/types/setup-helper";
 import { Referee } from "@/db/types/referee";
+import { Card, CardHeader, CardContent } from "@/components/ui/card";
+import { matchDays } from "@/constants/constants";
+import { Separator } from "@radix-ui/react-separator";
+import { Button } from "@/components/ui/button";
+import { Badge } from "@/components/ui/badge";
 
 type Props = {
   profileId: number;

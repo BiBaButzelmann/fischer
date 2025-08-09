@@ -8,7 +8,7 @@ import { Referee } from "./referee";
 import {
   RefereeWithAssignments,
   SetupHelperWithAssignments,
-} from "@/components/uebersicht/types";
+} from "@/components/uebersicht/running/types";
 import { SetupHelper } from "./setup-helper";
 
 export type Role =
