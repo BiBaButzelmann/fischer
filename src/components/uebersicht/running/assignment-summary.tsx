@@ -10,25 +10,47 @@ import {
   Badge,
 } from "lucide-react";
 
-import { getRunningRolesDataByProfileIdAndTournamentId } from "@/db/repositories/role";
 import { PropsWithChildren } from "react";
 import { ParticipantAndGroup } from "@/db/types/participant";
 import { MatchEnteringHelperWithAssignments } from "@/db/types/match-entering-helper";
 import { Card, CardHeader, CardContent } from "@/components/ui/card";
 import { matchDays } from "@/constants/constants";
 import { SetupHelperWithAssignments, RefereeWithAssignments } from "./types";
+import { getParticipantWithGroupByProfileIdAndTournamentId } from "@/db/repositories/participant";
+import { getJurorByProfileIdAndTournamentId } from "@/db/repositories/juror";
+import { getRefereeWithAssignmentsByProfileIdAndTournamentId } from "@/db/repositories/referee";
+import { getMatchEnteringHelperWithAssignmentsByProfileIdAndTournamentId } from "@/db/repositories/match-entering-helper";
+import { getSetupHelperWithAssignmentsByProfileIdAndTournamentId } from "@/db/repositories/setup-helper";
 
 type Props = {
   profileId: number;
   tournamentId: number;
 };
 
-export async function RolesSummaryRunning({ profileId, tournamentId }: Props) {
+async function getAssignmentDataByProfileIdAndTournamentId(
+  profileId: number,
+  tournamentId: number,
+) {
+  const [participant, juror, referee, matchEnteringHelper, setupHelper] = await Promise.all([
+    getParticipantWithGroupByProfileIdAndTournamentId(profileId, tournamentId),
+    getJurorByProfileIdAndTournamentId(profileId, tournamentId),
+    getRefereeWithAssignmentsByProfileIdAndTournamentId(profileId, tournamentId),
+    getMatchEnteringHelperWithAssignmentsByProfileIdAndTournamentId(profileId, tournamentId),
+    getSetupHelperWithAssignmentsByProfileIdAndTournamentId(profileId, tournamentId),
+  ]);
+
+  return {
+    participant,
+    juror,
+    referee,
+    matchEnteringHelper,
+    setupHelper,
+  };
+}
+
+export async function AssignmentSummary({ profileId, tournamentId }: Props) {
   const { participant, juror, referee, matchEnteringHelper, setupHelper } =
-    await getRunningRolesDataByProfileIdAndTournamentId(
-      profileId,
-      tournamentId,
-    );
+    await getAssignmentDataByProfileIdAndTournamentId(profileId, tournamentId);
 
   return (
     <Card>

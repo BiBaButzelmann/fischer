@@ -27,7 +27,7 @@ export type RolesData = {
   juror: Juror | undefined;
 };
 
-export type RunningRolesData = {
+export type AssignmentData = {
   participant: ParticipantAndGroup | undefined;
   referee: RefereeWithAssignments | undefined;
   matchEnteringHelper: MatchEnteringHelperWithAssignments | undefined;
@@ -36,7 +36,7 @@ export type RunningRolesData = {
 };
 
 export function hasSelectedAtLeastOneRole(
-  roles: RolesData | RunningRolesData,
+  roles: RolesData | AssignmentData,
 ): boolean {
   return Object.values(roles).filter((role) => role !== undefined).length > 0;
 }

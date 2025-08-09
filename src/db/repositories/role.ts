@@ -10,25 +10,13 @@ import { matchEnteringHelper } from "../schema/matchEnteringHelper";
 import { setupHelper } from "../schema/setupHelper";
 import { auth } from "@/auth";
 import { headers } from "next/headers";
-import { Role, RolesData, RunningRolesData } from "../types/role";
+import { Role, RolesData, AssignmentData } from "../types/role";
 import { getProfileByUserId } from "./profile";
 import { getJurorByProfileIdAndTournamentId } from "./juror";
-import {
-  getMatchEnteringHelperByProfileIdAndTournamentId,
-  getMatchEnteringHelperWithAssignmentsByProfileIdAndTournamentId,
-} from "./match-entering-helper";
-import {
-  getParticipantByProfileIdAndTournamentId,
-  getParticipantWithGroupByProfileIdAndTournamentId,
-} from "./participant";
-import {
-  getRefereeByProfileIdAndTournamentId,
-  getRefereeWithAssignmentsByProfileIdAndTournamentId,
-} from "./referee";
-import {
-  getSetupHelperByProfileIdAndTournamentId,
-  getSetupHelperWithAssignmentsByProfileIdAndTournamentId,
-} from "./setup-helper";
+import { getMatchEnteringHelperByProfileIdAndTournamentId } from "./match-entering-helper";
+import { getParticipantByProfileIdAndTournamentId } from "./participant";
+import { getRefereeByProfileIdAndTournamentId } from "./referee";
+import { getSetupHelperByProfileIdAndTournamentId } from "./setup-helper";
 
 export async function getRolesByProfileId(profileId: number): Promise<Role[]> {
   const participantQuery = db
@@ -79,40 +67,6 @@ export async function getRolesByUserId(userId: string): Promise<Role[]> {
     return [];
   }
   return getRolesByProfileId(profile.id);
-}
-
-export async function getRunningRolesDataByProfileIdAndTournamentId(
-  profileId: number,
-  tournamentId: number,
-): Promise<RunningRolesData> {
-  const [participant, referee, matchEnteringHelper, setupHelper, juror] =
-    await Promise.all([
-      getParticipantWithGroupByProfileIdAndTournamentId(
-        profileId,
-        tournamentId,
-      ),
-      getRefereeWithAssignmentsByProfileIdAndTournamentId(
-        profileId,
-        tournamentId,
-      ),
-      getMatchEnteringHelperWithAssignmentsByProfileIdAndTournamentId(
-        profileId,
-        tournamentId,
-      ),
-      getSetupHelperWithAssignmentsByProfileIdAndTournamentId(
-        profileId,
-        tournamentId,
-      ),
-      getJurorByProfileIdAndTournamentId(profileId, tournamentId),
-    ]);
-
-  return {
-    participant: participant ?? undefined,
-    referee: referee ?? undefined,
-    matchEnteringHelper: matchEnteringHelper ?? undefined,
-    setupHelper: setupHelper ?? undefined,
-    juror: juror ?? undefined,
-  };
 }
 
 export async function getRolesDataByProfileIdAndTournamentId(

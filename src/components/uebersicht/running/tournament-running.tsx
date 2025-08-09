@@ -18,7 +18,7 @@ import { getTournamentWeeksByTournamentId } from "@/db/repositories/tournamentWe
 import { getUpcomingEventsByProfileAndTournament } from "@/db/repositories/calendar-events";
 import { UpcomingEvents } from "./upcoming-events";
 import { ArrowRight } from "lucide-react";
-import { RolesSummaryRunning } from "./roles-summary-running";
+import { AssignmentSummary } from "./assignment-summary";
 import { TournamentWeeks } from "../registration/tournament-weeks";
 
 type Props = {
@@ -76,7 +76,7 @@ export async function TournamentRunning({ tournament }: Props) {
 
       {profile && (
         <div className="lg:col-span-6">
-          <RolesSummaryRunning
+          <AssignmentSummary
             profileId={profile.id}
             tournamentId={tournament.id}
           />
