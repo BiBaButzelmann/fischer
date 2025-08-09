@@ -20,3 +20,8 @@ export type GroupSummary = {
   id: number;
   groupName: string;
 };
+
+export type GroupNameAndDayOfWeek = {
+  groupName: string;
+  dayOfWeek: DayOfWeek | null;
+};

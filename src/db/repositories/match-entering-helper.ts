@@ -4,7 +4,6 @@ import {
   groupMatchEnteringHelper,
 } from "../schema/matchEnteringHelper";
 import { and, eq, count } from "drizzle-orm";
-import { type MatchEnteringHelperWithAssignments } from "../types/match-entering-helper";
 
 export async function getMatchEnteringHelperByProfileIdAndTournamentId(
   profileId: number,
@@ -18,10 +17,10 @@ export async function getMatchEnteringHelperByProfileIdAndTournamentId(
   });
 }
 
-export async function getMatchEnteringHelperWithAssignmentsByProfileIdAndTournamentId(
+export async function getMatchEnteringHelperAssignmentCountByProfileIdAndTournamentId(
   profileId: number,
   tournamentId: number,
-): Promise<MatchEnteringHelperWithAssignments | undefined> {
+): Promise<number> {
   const matchEnteringHelperData = await db.query.matchEnteringHelper.findFirst({
     where: and(
       eq(matchEnteringHelper.profileId, profileId),
@@ -30,7 +29,7 @@ export async function getMatchEnteringHelperWithAssignmentsByProfileIdAndTournam
   });
 
   if (!matchEnteringHelperData) {
-    return undefined;
+    return 0;
   }
 
   const assignmentCount = await db
@@ -43,8 +42,5 @@ export async function getMatchEnteringHelperWithAssignmentsByProfileIdAndTournam
       ),
     );
 
-  return {
-    ...matchEnteringHelperData,
-    assignedGroupsCount: assignmentCount[0]?.count ?? 0,
-  };
+  return assignmentCount[0]?.count ?? 0;
 }

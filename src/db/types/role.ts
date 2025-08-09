@@ -1,14 +1,7 @@
 import { Juror } from "./juror";
-import {
-  MatchEnteringHelper,
-  MatchEnteringHelperWithAssignments,
-} from "./match-entering-helper";
+import { MatchEnteringHelper } from "./match-entering-helper";
 import { Participant, ParticipantAndGroup } from "./participant";
 import { Referee } from "./referee";
-import {
-  RefereeWithAssignments,
-  SetupHelperWithAssignments,
-} from "@/components/uebersicht/running/types";
 import { SetupHelper } from "./setup-helper";
 
 export type Role =
@@ -27,16 +20,6 @@ export type RolesData = {
   juror: Juror | undefined;
 };
 
-export type AssignmentData = {
-  participant: ParticipantAndGroup | undefined;
-  referee: RefereeWithAssignments | undefined;
-  matchEnteringHelper: MatchEnteringHelperWithAssignments | undefined;
-  setupHelper: SetupHelperWithAssignments | undefined;
-  juror: Juror | undefined;
-};
-
-export function hasSelectedAtLeastOneRole(
-  roles: RolesData | AssignmentData,
-): boolean {
+export function hasSelectedAtLeastOneRole(roles: RolesData): boolean {
   return Object.values(roles).filter((role) => role !== undefined).length > 0;
 }
