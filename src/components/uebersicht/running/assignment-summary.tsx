@@ -20,12 +20,6 @@ import { getRefereeAssignmentCountByProfileIdAndTournamentId } from "@/db/reposi
 import { getMatchEnteringHelperAssignmentCountByProfileIdAndTournamentId } from "@/db/repositories/match-entering-helper";
 import { getSetupHelperAssignmentCountByProfileIdAndTournamentId } from "@/db/repositories/setup-helper";
 
-type AssignmentCounts = {
-  setupHelperDaysCount: number;
-  refereeDaysCount: number;
-  matchEnteringHelperGroupsCount: number;
-};
-
 type Props = {
   profileId: number;
   tournamentId: number;

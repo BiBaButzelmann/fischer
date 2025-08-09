@@ -10,7 +10,7 @@ import { matchEnteringHelper } from "../schema/matchEnteringHelper";
 import { setupHelper } from "../schema/setupHelper";
 import { auth } from "@/auth";
 import { headers } from "next/headers";
-import { Role, RolesData, AssignmentData } from "../types/role";
+import { Role, RolesData } from "../types/role";
 import { getProfileByUserId } from "./profile";
 import { getJurorByProfileIdAndTournamentId } from "./juror";
 import { getMatchEnteringHelperByProfileIdAndTournamentId } from "./match-entering-helper";

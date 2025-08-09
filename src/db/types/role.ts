@@ -1,6 +1,6 @@
 import { Juror } from "./juror";
 import { MatchEnteringHelper } from "./match-entering-helper";
-import { Participant, ParticipantAndGroup } from "./participant";
+import { Participant } from "./participant";
 import { Referee } from "./referee";
 import { SetupHelper } from "./setup-helper";
 
