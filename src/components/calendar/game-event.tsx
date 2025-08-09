@@ -30,6 +30,13 @@ export function GameEvent({
           hover: "hover:bg-red-200 dark:hover:bg-red-700/60",
           border: "border border-red-200 dark:border-red-600/50",
         };
+      case "setupHelper":
+        return {
+          bg: "bg-green-100 dark:bg-green-700/40",
+          text: "text-green-800 dark:text-green-100",
+          hover: "hover:bg-green-200 dark:hover:bg-green-700/60",
+          border: "border border-green-200 dark:border-green-600/50",
+        };
       default:
         return {
           bg: "bg-gray-100 dark:bg-gray-700/40",

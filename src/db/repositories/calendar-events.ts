@@ -3,8 +3,10 @@ import { getGamesOfParticipant } from "./game";
 import {
   getGameTimeFromGame,
   getDateTimeFromDefaultTime,
+  getSetupHelperTimeFromDefaultTime,
 } from "@/lib/game-time";
 import { getMatchdaysByRefereeId } from "./referee";
+import { getMatchdaysBySetupHelperId } from "./setup-helper";
 
 export async function getCalendarEventsForParticipant(
   participantId: number,
@@ -43,6 +45,26 @@ export async function getCalendarEventsForReferee(
       extendedProps: {
         eventType: "referee" as const,
         refereeId: entry.referee.id,
+        matchdayId: entry.matchday.id,
+        tournamentId: entry.matchday.tournamentId,
+      },
+    };
+  });
+}
+
+export async function getCalendarEventsForSetupHelper(
+  setupHelperId: number,
+): Promise<CalendarEvent[]> {
+  const setupHelperMatchdays = await getMatchdaysBySetupHelperId(setupHelperId);
+
+  return setupHelperMatchdays.map((entry) => {
+    return {
+      id: `setupHelper-${entry.matchday.id}`,
+      title: `Aufbauhelfer`,
+      start: getSetupHelperTimeFromDefaultTime(entry.matchday.date),
+      extendedProps: {
+        eventType: "setupHelper" as const,
+        setupHelperId: entry.setupHelper.id,
         matchdayId: entry.matchday.id,
         tournamentId: entry.matchday.tournamentId,
       },
