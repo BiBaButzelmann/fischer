@@ -1,7 +1,7 @@
 "use client";
 
 import { Calendar, Clock, Gamepad2, Gavel } from "lucide-react";
-import { CalendarEvent, FormattedEvent } from "@/db/types/calendar";
+import { CalendarEvent } from "@/db/types/calendar";
 import { formatEventDateTime } from "@/lib/date";
 import { useRouter } from "next/navigation";
 import { useCallback } from "react";
@@ -27,7 +27,6 @@ const eventConfig = {
 
 export function UpcomingEvents({ events }: Props) {
   const router = useRouter();
-  const formattedEvents = formatCalendarEvents(events);
 
   const handleEventClick = useCallback(
     (event: CalendarEvent) => {
@@ -71,22 +70,33 @@ export function UpcomingEvents({ events }: Props) {
     [router],
   );
 
+  const getEventDisplayData = useCallback((event: CalendarEvent) => {
+    const eventType = event.extendedProps.eventType;
+    const displayType = eventType === "game" ? "Spiel" : "Schiedsrichter";
+    return {
+      displayType,
+      title: event.title,
+      time: formatEventDateTime(event.start),
+      eventType,
+    };
+  }, []);
+
   return (
     <>
       <div className="mb-4 flex items-center gap-2 text-sm text-muted-foreground">
         <Calendar className="h-4 w-4" /> Deine nächsten Termine
       </div>
-      {formattedEvents.length > 0 ? (
+      {events.length > 0 ? (
         <div className="space-y-4">
-          {formattedEvents.map((event, index) => {
+          {events.map((event, index) => {
+            const displayData = getEventDisplayData(event);
             const config =
-              eventConfig[event.eventType as keyof typeof eventConfig];
+              eventConfig[displayData.eventType as keyof typeof eventConfig];
             const Icon = config.icon;
-            const originalEvent = events[index];
             return (
               <div
                 key={index}
-                onClick={() => handleEventClick(originalEvent)}
+                onClick={() => handleEventClick(event)}
                 className="flex items-center gap-4 p-4 bg-white dark:bg-card border border-gray-200 dark:border-card-border rounded-xl shadow-sm transition-all hover:shadow-md cursor-pointer hover:opacity-80"
               >
                 <div
@@ -96,14 +106,14 @@ export function UpcomingEvents({ events }: Props) {
                 </div>
                 <div className="flex-grow">
                   <p className="font-bold text-gray-800 dark:text-gray-100">
-                    {event.type === "Schiedsrichter" &&
-                    event.title === "Schiedsrichter"
+                    {displayData.displayType === "Schiedsrichter" &&
+                    displayData.title === "Schiedsrichter"
                       ? "Schiedsrichter"
-                      : `${event.title}`}
+                      : `${displayData.title}`}
                   </p>
                   <div className="flex items-center gap-2 text-sm text-gray-500 dark:text-gray-400 mt-1">
                     <Clock className="w-4 h-4" />
-                    <span>{event.time}</span>
+                    <span>{displayData.time}</span>
                   </div>
                 </div>
               </div>
@@ -118,16 +128,4 @@ export function UpcomingEvents({ events }: Props) {
       )}
     </>
   );
-}
-
-function formatCalendarEvents(events: CalendarEvent[]): FormattedEvent[] {
-  return events.map((event) => {
-    const eventType = event.extendedProps.eventType;
-    return {
-      type: eventType === "game" ? "Spiel" : "Schiedsrichter",
-      title: event.title,
-      time: formatEventDateTime(event.start),
-      eventType,
-    };
-  });
 }

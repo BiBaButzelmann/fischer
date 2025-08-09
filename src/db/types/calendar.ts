@@ -25,10 +25,3 @@ type RefereeEvent = {
 };
 
 export type CalendarEvent = GameEvent | RefereeEvent;
-
-export type FormattedEvent = {
-  type: "Spiel" | "Schiedsrichter";
-  title: string;
-  time: string;
-  eventType: "game" | "referee";
-};
