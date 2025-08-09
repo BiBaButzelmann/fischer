@@ -1,5 +1,5 @@
 import { auth } from "@/auth/utils";
-import { TournamentWeeks } from "@/components/uebersicht/tournament-weeks";
+import { TournamentWeeks } from "@/components/uebersicht/registration/tournament-weeks";
 import { Button } from "@/components/ui/button";
 import {
   Card,
