@@ -8,6 +8,7 @@ import {
   type DayCellMountArg,
   type AllowFunc,
 } from "@fullcalendar/core/index.js";
+import type { DateClickArg } from "@fullcalendar/interaction/index.js";
 import { CalendarEvent } from "@/db/types/calendar";
 import { useTransition, useCallback } from "react";
 import { updateGameMatchdayAndBoardNumber } from "@/actions/game";
@@ -59,10 +60,10 @@ export function MyGamesCalendar({ events, matchdays = [] }: Props) {
       }
 
       const newDate = info.event.start;
-      const isValidDate = validDropDates.some((validDate) =>
+      const isMatchdayDate = validDropDates.some((validDate) =>
         isSameDate(validDate, newDate),
       );
-      if (!isValidDate) {
+      if (!isMatchdayDate) {
         info.revert();
         return;
       }
@@ -158,14 +159,12 @@ export function MyGamesCalendar({ events, matchdays = [] }: Props) {
 
   const handleDayCellDidMount = useCallback(
     (info: DayCellMountArg) => {
-      if (validDropDates.length === 0) return;
-
       const cellDate = new Date(info.date);
-      const isValidDropDate = validDropDates.some((validDate: Date) =>
+      const isMatchdayDate = validDropDates.some((validDate: Date) =>
         isSameDate(validDate, cellDate),
       );
 
-      if (isValidDropDate) {
+      if (isMatchdayDate) {
         info.el.classList.add("drop-zone-valid");
       }
     },
@@ -189,11 +188,11 @@ export function MyGamesCalendar({ events, matchdays = [] }: Props) {
         const dateStr = htmlElement.getAttribute("data-date");
         if (dateStr) {
           const cellDate = new Date(dateStr);
-          const isValidDropDate = validDropDates.some((validDate: Date) =>
+          const isMatchdayDate = validDropDates.some((validDate: Date) =>
             isSameDate(validDate, cellDate),
           );
 
-          if (isValidDropDate) {
+          if (isMatchdayDate) {
             htmlElement.classList.add("drop-zone-valid");
           } else {
             htmlElement.classList.remove("drop-zone-valid");
@@ -202,6 +201,29 @@ export function MyGamesCalendar({ events, matchdays = [] }: Props) {
       });
     }, 0);
   }, [validDropDates]);
+
+  const handleDateClick = useCallback(
+    (info: DateClickArg) => {
+      const clickedDate = new Date(info.date);
+      const isMatchdayDate = validDropDates.some((validDate: Date) =>
+        isSameDate(validDate, clickedDate),
+      );
+
+      if (!isMatchdayDate) return;
+
+      const matchday = matchdays.find((md) => isSameDate(md.date, clickedDate));
+
+      if (matchday) {
+        const url = buildGameViewUrl({
+          tournamentId: matchday.tournamentId,
+          matchdayId: matchday.id,
+        });
+
+        router.push(url);
+      }
+    },
+    [validDropDates, matchdays, router],
+  );
 
   return (
     <div className="space-y-4">
@@ -221,6 +243,7 @@ export function MyGamesCalendar({ events, matchdays = [] }: Props) {
             events={calendarEvents}
             onEventDrop={handleEventDrop}
             onEventClick={handleEventClick}
+            onDateClick={handleDateClick}
             eventAllow={handleEventAllow}
             onDayCellDidMount={handleDayCellDidMount}
             onEventDragStart={handleEventDragStart}

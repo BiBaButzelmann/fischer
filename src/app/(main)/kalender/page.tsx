@@ -1,4 +1,4 @@
-import { authWithRedirect } from "@/auth/utils";
+import { auth } from "@/auth/utils";
 import { MyGamesCalendar } from "@/components/calendar/my-games-calendar";
 import {
   getCalendarEventsForParticipant,
@@ -12,7 +12,7 @@ import { getAllMatchdaysByTournamentId } from "@/db/repositories/match-day";
 import { getActiveTournament } from "@/db/repositories/tournament";
 
 export default async function Page() {
-  const session = await authWithRedirect();
+  const session = await auth();
 
   const [
     currentParticipant,
@@ -20,9 +20,9 @@ export default async function Page() {
     currentSetupHelper,
     activeTournament,
   ] = await Promise.all([
-    getParticipantByUserId(session.user.id),
-    getRefereeByUserId(session.user.id),
-    getSetupHelperByUserId(session.user.id),
+    session ? getParticipantByUserId(session.user.id) : Promise.resolve(null),
+    session ? getRefereeByUserId(session.user.id) : Promise.resolve(null),
+    session ? getSetupHelperByUserId(session.user.id) : Promise.resolve(null),
     getActiveTournament(),
   ]);
 
@@ -68,7 +68,19 @@ export default async function Page() {
         <h1 className="text-3xl font-bold text-gray-900 mb-2">Kalender</h1>
         <div className="bg-blue-50 border border-blue-200 rounded-lg p-4 mb-4">
           <div className="space-y-2">
-            {activeTournament?.stage === "running" ? (
+            {!session ? (
+              <>
+                <p className="text-blue-800 text-sm">
+                  Hier siehst du die Spieltage des Turniers. Klicke auf einen
+                  hervorgehobenen Tag, um zu den Partien dieses Spieltags zu
+                  gelangen.
+                </p>
+                <p className="text-blue-700 text-xs">
+                  <strong>Hinweis:</strong> Melde dich an, um deine persönlichen
+                  Termine und Spiele zu sehen.
+                </p>
+              </>
+            ) : activeTournament?.stage === "running" ? (
               <>
                 <p className="text-blue-800 text-sm">
                   Hier siehst du deine Termine.
@@ -78,7 +90,7 @@ export default async function Page() {
                       Du kannst deine Spiele per Drag & Drop verschieben. Sprich
                       dich bitte vorher mit deinem Gegner ab.
                     </span>
-                  )}
+                  )}{" "}
                 </p>
 
                 {(currentParticipant ||

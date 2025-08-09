@@ -75,14 +75,12 @@ export async function AppSidebar() {
                   <span>Rangliste</span>
                 </Link>
               </SidebarMenuButton>
-              {session != null ? (
-                <SidebarMenuButton asChild>
-                  <Link href="/kalender">
-                    <CalendarIcon />
-                    <span>Kalender</span>
-                  </Link>
-                </SidebarMenuButton>
-              ) : null}
+              <SidebarMenuButton asChild>
+                <Link href="/kalender">
+                  <CalendarIcon />
+                  <span>Kalender</span>
+                </Link>
+              </SidebarMenuButton>
             </SidebarMenu>
           </SidebarGroupContent>
         </SidebarGroup>
