@@ -3,35 +3,64 @@ import { MyGamesCalendar } from "@/components/calendar/my-games-calendar";
 import {
   getCalendarEventsForParticipant,
   getCalendarEventsForReferee,
+  getCalendarEventsForSetupHelper,
 } from "@/db/repositories/calendar-events";
 import { getParticipantByUserId } from "@/db/repositories/participant";
 import { getRefereeByUserId } from "@/db/repositories/referee";
+import { getSetupHelperByUserId } from "@/db/repositories/setup-helper";
 import { getAllMatchdaysByTournamentId } from "@/db/repositories/match-day";
 import { getActiveTournament } from "@/db/repositories/tournament";
 
 export default async function Page() {
   const session = await auth();
 
-  const [currentParticipant, currentReferee, activeTournament] =
-    await Promise.all([
-      session ? getParticipantByUserId(session.user.id) : Promise.resolve(null),
-      session ? getRefereeByUserId(session.user.id) : Promise.resolve(null),
-      getActiveTournament(),
-    ]);
-
-  const [participantEvents, refereeEvents, matchdays] = await Promise.all([
-    currentParticipant
-      ? getCalendarEventsForParticipant(currentParticipant.id)
-      : Promise.resolve([]),
-    currentReferee
-      ? getCalendarEventsForReferee(currentReferee.id)
-      : Promise.resolve([]),
-    activeTournament
-      ? getAllMatchdaysByTournamentId(activeTournament.id)
-      : Promise.resolve([]),
+  const [
+    currentParticipant,
+    currentReferee,
+    currentSetupHelper,
+    activeTournament,
+  ] = await Promise.all([
+    session ? getParticipantByUserId(session.user.id) : Promise.resolve(null),
+    session ? getRefereeByUserId(session.user.id) : Promise.resolve(null),
+    session ? getSetupHelperByUserId(session.user.id) : Promise.resolve(null),
+    getActiveTournament(),
   ]);
 
-  const calendarEvents = [...participantEvents, ...refereeEvents];
+  if (!currentParticipant && !currentReferee && !currentSetupHelper) {
+    return (
+      <div>
+        <h1 className="text-3xl font-bold text-gray-900 mb-2">Kalender</h1>
+        <div className="bg-yellow-50 border border-yellow-200 rounded-lg p-4">
+          <p className="text-yellow-800 text-sm">
+            Du bist weder als Teilnehmer, Schiedsrichter noch als Aufbauhelfer
+            für ein Turnier angemeldet.
+          </p>
+        </div>
+      </div>
+    );
+  }
+
+  const [participantEvents, refereeEvents, setupHelperEvents, matchdays] =
+    await Promise.all([
+      currentParticipant
+        ? getCalendarEventsForParticipant(currentParticipant.id)
+        : Promise.resolve([]),
+      currentReferee
+        ? getCalendarEventsForReferee(currentReferee.id)
+        : Promise.resolve([]),
+      currentSetupHelper
+        ? getCalendarEventsForSetupHelper(currentSetupHelper.id)
+        : Promise.resolve([]),
+      activeTournament
+        ? getAllMatchdaysByTournamentId(activeTournament.id)
+        : Promise.resolve([]),
+    ]);
+
+  const calendarEvents = [
+    ...participantEvents,
+    ...refereeEvents,
+    ...setupHelperEvents,
+  ];
 
   return (
     <div>
@@ -58,14 +87,15 @@ export default async function Page() {
                   {currentParticipant && (
                     <span>
                       {" "}
-                      Du kannst deine Spiele per Drag & Drop verschieben.
+                      Du kannst deine Spiele per Drag & Drop verschieben. Sprich
+                      dich bitte vorher mit deinem Gegner ab.
                     </span>
                   )}{" "}
-                  Klicke auf einen hervorgehobenen Tag, um zu den Partien dieses
-                  Spieltags zu gelangen.
                 </p>
 
-                {(currentParticipant || currentReferee) && (
+                {(currentParticipant ||
+                  currentReferee ||
+                  currentSetupHelper) && (
                   <div className="flex flex-wrap gap-4 text-xs">
                     {currentParticipant && (
                       <div className="flex items-center gap-1">
@@ -78,6 +108,14 @@ export default async function Page() {
                         <div className="w-3 h-3 bg-red-500 rounded"></div>
                         <span className="text-red-700">
                           Schiedsrichter-Termine
+                        </span>
+                      </div>
+                    )}
+                    {currentSetupHelper && (
+                      <div className="flex items-center gap-1">
+                        <div className="w-3 h-3 bg-green-500 rounded"></div>
+                        <span className="text-green-700">
+                          Aufbauhelfer-Termine
                         </span>
                       </div>
                     )}
