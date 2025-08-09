@@ -6,13 +6,10 @@ import {
 import { PartienSelector } from "@/components/partien/partien-selector";
 import { GamesList } from "@/components/partien/games-list";
 import { updateGameResult } from "@/actions/game";
-import {
-  getParticipantsByGroupId,
-  getParticipantByUserId,
-} from "@/db/repositories/participant";
+import { getParticipantsByGroupId } from "@/db/repositories/participant";
+import { getRolesByUserId } from "@/db/repositories/role";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { getAllMatchdaysByTournamentId } from "@/db/repositories/match-day";
-import { getRefereeByUserId } from "@/db/repositories/referee";
 import { auth } from "@/auth/utils";
 
 export default async function Page({
@@ -73,7 +70,7 @@ export default async function Page({
     (_, i) => i + 1,
   );
 
-  const [participants, games, referee, userParticipant] = await Promise.all([
+  const [participants, games, userRoles] = await Promise.all([
     //TODO: proper validation
     selectedGroup
       ? getParticipantsByGroupId(Number(selectedGroup))
@@ -85,18 +82,8 @@ export default async function Page({
       round != null ? Number(round) : undefined,
       participantId != null ? Number(participantId) : undefined,
     ),
-    session?.user.id
-      ? getRefereeByUserId(session.user.id)
-      : Promise.resolve(null),
-    session?.user.id
-      ? getParticipantByUserId(session.user.id)
-      : Promise.resolve(null),
+    session?.user.id ? getRolesByUserId(session.user.id) : Promise.resolve([]),
   ]);
-
-  const isUserReferee = referee?.tournamentId === Number(selectedTournamentId);
-
-  const isUserParticipant =
-    userParticipant?.tournamentId === Number(selectedTournamentId);
 
   return (
     <div>
@@ -120,8 +107,7 @@ export default async function Page({
               games={games}
               onResultChange={updateGameResult}
               availableMatchdays={matchdays}
-              isUserReferee={isUserReferee}
-              isUserParticipant={isUserParticipant}
+              userRoles={userRoles}
             />
           </ScrollArea>
         ) : (

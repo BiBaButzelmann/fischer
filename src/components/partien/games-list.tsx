@@ -25,27 +25,31 @@ import { MatchDay } from "@/db/types/match-day";
 import { PostponeGameDialog } from "./postpone-game-dialog";
 import { ReportResultDialog } from "./report-result-dialog";
 import { authClient } from "@/auth-client";
+import { Role } from "@/db/types/role";
 
 type Props = {
   games: GameWithParticipantProfilesAndGroupAndMatchday[];
   onResultChange: (gameId: number, result: GameResult) => Promise<void>;
   availableMatchdays: MatchDay[];
-  isUserReferee?: boolean;
-  isUserParticipant?: boolean;
+  userRoles: Role[];
 };
 
 export function GamesList({
   games,
   onResultChange,
   availableMatchdays = [],
-  isUserReferee = false,
-  isUserParticipant = false,
+  userRoles = [],
 }: Props) {
   const isMobile = useIsMobile();
   const router = useRouter();
   const { data: session } = authClient.useSession();
   const userId = session?.user?.id;
   const userRole = session?.user?.role;
+
+  const isAdmin = userRole === "admin";
+  const isReferee = userRoles.includes("referee");
+  const isParticipant = userRoles.includes("participant");
+  const isMatchEnteringHelper = userRoles.includes("matchEnteringHelper");
 
   const gameParticipantsMap = useMemo(
     () =>
@@ -67,10 +71,9 @@ export function GamesList({
     );
 
     return {
-      canView: isUserParticipant || isUserReferee || userRole === "admin",
-      canSubmitResult:
-        isGameParticipant || isUserReferee || userRole === "admin",
-      canPostpone: isGameParticipant || userRole === "admin",
+      canView: isParticipant || isReferee || isMatchEnteringHelper || isAdmin,
+      canSubmitResult: isGameParticipant || isReferee || isAdmin,
+      canPostpone: isGameParticipant || isAdmin,
     };
   };
 
@@ -185,7 +188,7 @@ export function GamesList({
                             gameId={game.id}
                             currentResult={game.result}
                             onResultChange={onResultChange}
-                            isReferee={isUserReferee}
+                            isReferee={isReferee}
                           />
                         )}
                         {canPostpone && (
