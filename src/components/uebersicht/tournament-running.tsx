@@ -16,7 +16,7 @@ import { getParticipantsByTournamentId } from "@/db/repositories/participant";
 import { ScrollArea, ScrollBar } from "../ui/scroll-area";
 import { getTournamentWeeksByTournamentId } from "@/db/repositories/tournamentWeek";
 import { TournamentWeeks } from "./tournament-weeks";
-import { getNumberOfEventsByProfileAndTournament } from "@/db/repositories/calendar-events";
+import { getUpcomingEventsByProfileAndTournament } from "@/db/repositories/calendar-events";
 import { UpcomingEvents } from "./upcoming-events";
 import { ArrowRight } from "lucide-react";
 import { RolesSummaryRunning } from "./roles-summary-running";
@@ -32,7 +32,7 @@ export async function TournamentRunning({ tournament }: Props) {
 
   let upcomingEvents: CalendarEvent[] = [];
   if (profile) {
-    upcomingEvents = await getNumberOfEventsByProfileAndTournament(
+    upcomingEvents = await getUpcomingEventsByProfileAndTournament(
       profile.id,
       tournament.id,
     );
@@ -79,7 +79,6 @@ export async function TournamentRunning({ tournament }: Props) {
           <RolesSummaryRunning
             profileId={profile.id}
             tournamentId={tournament.id}
-            showEditButton={false}
           />
         </div>
       )}

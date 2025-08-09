@@ -52,7 +52,7 @@ export async function getCalendarEventsForReferee(
   });
 }
 
-export async function getNumberOfEventsByProfileAndTournament(
+export async function getUpcomingEventsByProfileAndTournament(
   profileId: number,
   tournamentId: number,
   limit: number = 3,
