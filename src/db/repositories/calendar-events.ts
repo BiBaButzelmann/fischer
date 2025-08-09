@@ -8,7 +8,10 @@ import {
 import { getMatchdaysByRefereeId } from "./referee";
 import { getParticipantWithGroupByProfileIdAndTournamentId } from "./participant";
 import { getRefereeByProfileIdAndTournamentId } from "./referee";
-import { getMatchdaysBySetupHelperId, getSetupHelperByProfileIdAndTournamentId } from "./setup-helper";
+import {
+  getMatchdaysBySetupHelperId,
+  getSetupHelperByProfileIdAndTournamentId,
+} from "./setup-helper";
 
 export async function getCalendarEventsForParticipant(
   participantId: number,

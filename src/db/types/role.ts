@@ -5,8 +5,11 @@ import {
 } from "./match-entering-helper";
 import { Participant, ParticipantAndGroup } from "./participant";
 import { Referee } from "./referee";
-import { RefereeWithAssignments } from "@/components/uebersicht/types";
-import { SetupHelper, SetupHelperWithAssignments } from "./setup-helper";
+import {
+  RefereeWithAssignments,
+  SetupHelperWithAssignments,
+} from "@/components/uebersicht/types";
+import { SetupHelper } from "./setup-helper";
 
 export type Role =
   | "admin"
