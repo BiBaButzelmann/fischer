@@ -4,7 +4,7 @@ import { db } from "../client";
 import { setupHelper } from "../schema/setupHelper";
 import { matchdaySetupHelper } from "../schema/matchday";
 import { and, eq, count } from "drizzle-orm";
-import { type SetupHelperWithAssignments } from "../types/setup-helper";
+import { SetupHelperWithAssignments } from "@/components/uebersicht/types";
 
 export async function getSetupHelperByProfileIdAndTournamentId(
   profileId: number,

@@ -9,7 +9,3 @@ export type SetupHelperWithName = SetupHelper & {
     lastName: string;
   };
 };
-
-export type SetupHelperWithAssignments = SetupHelper & {
-  assignedDaysCount: number;
-};

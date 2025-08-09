@@ -4,7 +4,8 @@ import {
   MatchEnteringHelperWithAssignments,
 } from "./match-entering-helper";
 import { Participant, ParticipantAndGroup } from "./participant";
-import { Referee, RefereeWithAssignments } from "./referee";
+import { Referee } from "./referee";
+import { RefereeWithAssignments } from "@/components/uebersicht/types";
 import { SetupHelper, SetupHelperWithAssignments } from "./setup-helper";
 
 export type Role =

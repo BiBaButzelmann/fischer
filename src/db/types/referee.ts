@@ -9,7 +9,3 @@ export type RefereeWithName = Referee & {
     lastName: string;
   };
 };
-
-export type RefereeWithAssignments = Referee & {
-  assignedDaysCount: number;
-};

@@ -3,7 +3,8 @@ import { referee } from "../schema/referee";
 import { profile } from "../schema/profile";
 import { matchday, matchdayReferee } from "../schema/matchday";
 import { and, eq, count } from "drizzle-orm";
-import type { RefereeWithName, RefereeWithAssignments } from "../types/referee";
+import type { RefereeWithName } from "../types/referee";
+import type { RefereeWithAssignments } from "@/components/uebersicht/types";
 
 export async function getRefereeByProfileIdAndTournamentId(
   profileId: number,

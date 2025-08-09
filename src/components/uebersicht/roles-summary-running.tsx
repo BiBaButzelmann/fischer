@@ -15,8 +15,7 @@ import { getRunningRolesDataByProfileIdAndTournamentId } from "@/db/repositories
 import { PropsWithChildren } from "react";
 import { ParticipantAndGroup } from "@/db/types/participant";
 import { MatchEnteringHelperWithAssignments } from "@/db/types/match-entering-helper";
-import { SetupHelperWithAssignments } from "@/db/types/setup-helper";
-import { RefereeWithAssignments } from "@/db/types/referee";
+import { RefereeWithAssignments, SetupHelperWithAssignments } from "./types";
 
 type Props = {
   profileId: number;
