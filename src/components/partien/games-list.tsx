@@ -44,9 +44,7 @@ export function GamesList({
   const router = useRouter();
   const { data: session } = authClient.useSession();
   const userId = session?.user?.id;
-  const userRole = session?.user?.role;
-
-  const isAdmin = userRole === "admin";
+  const isAdmin = session?.user?.role === "admin";
   const isReferee = userRoles.includes("referee");
   const isParticipant = userRoles.includes("participant");
   const isMatchEnteringHelper = userRoles.includes("matchEnteringHelper");
@@ -77,12 +75,13 @@ export function GamesList({
     };
   };
 
-  const hasAnyActions = games.some((game) => {
-    const { canView, canSubmitResult, canPostpone } = getGameActionPermissions(
-      game.id,
-    );
-    return canView || canSubmitResult || canPostpone;
-  });
+  const hasAnyActions = useMemo(() => {
+    return games.some((game) => {
+      const { canView, canSubmitResult, canPostpone } =
+        getGameActionPermissions(game.id);
+      return canView || canSubmitResult || canPostpone;
+    });
+  }, [games, userId, userRoles, isAdmin]);
 
   const handleNavigate = (gameId: number) => {
     router.push(`/partien/${gameId}`);
