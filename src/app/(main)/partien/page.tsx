@@ -70,6 +70,7 @@ export default async function Page({
     (_, i) => i + 1,
   );
 
+  // TODO: Refactor conditional data loading - this should be handled by separate components
   const [participants, games, userRoles] = await Promise.all([
     //TODO: proper validation
     selectedGroup
