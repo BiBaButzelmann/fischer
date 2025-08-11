@@ -10,6 +10,11 @@ import PgnViewer from "@/components/game/chessboard/pgn-viewer";
 import { Suspense } from "react";
 import { DateTime } from "luxon";
 import { getGameTimeFromGame } from "@/lib/game-time";
+import {
+  getMatchEnteringHelperIdByUserId,
+  isMatchEnteringHelperForGroup,
+} from "@/db/repositories/match-entering-helper";
+import { getGroupIdFromGame } from "@/db/repositories/group";
 
 type PageProps = {
   params: Promise<{ partieId: string }>;
@@ -32,7 +37,7 @@ export default async function GamePage({ params }: PageProps) {
 
   if (
     (await gameBelongsToUser(gameId, session.user.id)) ||
-    (await gameBelongsToMatchEnteringHelper()) ||
+    (await gameBelongsToMatchEnteringHelper(gameId, session.user.id)) ||
     session.user.role === "admin"
   ) {
     return <PgnContainer allowEdit={true} gameId={gameId} />;
@@ -90,9 +95,20 @@ async function gameBelongsToUser(gameId: number, userId: string) {
   return await isUserParticipantInGame(gameId, userId);
 }
 
-async function gameBelongsToMatchEnteringHelper() {
-  // TODO: Implement logic to check if the user is a match enterhin helper for the game
-  return false;
+async function gameBelongsToMatchEnteringHelper(
+  gameId: number,
+  userId: string,
+): Promise<boolean> {
+  const [groupId, matchEnteringHelperId] = await Promise.all([
+    getGroupIdFromGame(gameId),
+    getMatchEnteringHelperIdByUserId(userId),
+  ]);
+
+  if (!groupId || !matchEnteringHelperId) {
+    return false;
+  }
+
+  return await isMatchEnteringHelperForGroup(matchEnteringHelperId, groupId);
 }
 
 function formatDisplayName(p: ParticipantWithName) {
