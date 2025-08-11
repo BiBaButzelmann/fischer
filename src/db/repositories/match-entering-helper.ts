@@ -1,8 +1,5 @@
 import { db } from "../client";
-import {
-  matchEnteringHelper,
-  groupMatchEnteringHelper,
-} from "../schema/matchEnteringHelper";
+import { matchEnteringHelper } from "../schema/matchEnteringHelper";
 import { profile } from "../schema/profile";
 import { and, eq } from "drizzle-orm";
 
@@ -26,27 +23,6 @@ export async function getMatchEnteringHelperIdByUserId(
     .limit(1);
 
   return helper.length > 0 ? helper[0].id : null;
-}
-
-export async function isMatchEnteringHelperForGroup(
-  matchEnteringHelperId: number,
-  groupId: number,
-): Promise<boolean> {
-  const assignment = await db
-    .select()
-    .from(groupMatchEnteringHelper)
-    .where(
-      and(
-        eq(groupMatchEnteringHelper.groupId, groupId),
-        eq(
-          groupMatchEnteringHelper.matchEnteringHelperId,
-          matchEnteringHelperId,
-        ),
-      ),
-    )
-    .limit(1);
-
-  return assignment.length > 0;
 }
 
 export async function getMatchEnteringHelperByProfileIdAndTournamentId(

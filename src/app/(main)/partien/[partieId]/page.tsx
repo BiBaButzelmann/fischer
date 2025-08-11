@@ -1,7 +1,11 @@
 import z from "zod";
 import { getParticipantFullName } from "@/lib/participant";
 import { ParticipantWithName } from "@/db/types/participant";
-import { getGameById, isUserParticipantInGame } from "@/db/repositories/game";
+import {
+  getGameById,
+  isUserParticipantInGame,
+  isUserMatchEnteringHelperInGame,
+} from "@/db/repositories/game";
 import { auth } from "@/auth/utils";
 import { redirect } from "next/navigation";
 import { PasswordProtection } from "@/components/game/password-protection";
@@ -10,11 +14,6 @@ import PgnViewer from "@/components/game/chessboard/pgn-viewer";
 import { Suspense } from "react";
 import { DateTime } from "luxon";
 import { getGameTimeFromGame } from "@/lib/game-time";
-import {
-  getMatchEnteringHelperIdByUserId,
-  isMatchEnteringHelperForGroup,
-} from "@/db/repositories/match-entering-helper";
-import { getGroupIdFromGame } from "@/db/repositories/group";
 
 type PageProps = {
   params: Promise<{ partieId: string }>;
@@ -36,8 +35,8 @@ export default async function GamePage({ params }: PageProps) {
   const gameId = parsedGameIdResult.data;
 
   if (
-    (await gameBelongsToUser(gameId, session.user.id)) ||
-    (await gameBelongsToMatchEnteringHelper(gameId, session.user.id)) ||
+    (await isUserParticipantInGame(gameId, session.user.id)) ||
+    (await isUserMatchEnteringHelperInGame(gameId, session.user.id)) ||
     session.user.role === "admin"
   ) {
     return <PgnContainer allowEdit={true} gameId={gameId} />;
@@ -89,26 +88,6 @@ async function PgnContainer({
       <PgnViewer gameId={gameId} initialPGN={pgn} allowEdit={allowEdit} />
     </div>
   );
-}
-
-async function gameBelongsToUser(gameId: number, userId: string) {
-  return await isUserParticipantInGame(gameId, userId);
-}
-
-async function gameBelongsToMatchEnteringHelper(
-  gameId: number,
-  userId: string,
-): Promise<boolean> {
-  const [groupId, matchEnteringHelperId] = await Promise.all([
-    getGroupIdFromGame(gameId),
-    getMatchEnteringHelperIdByUserId(userId),
-  ]);
-
-  if (!groupId || !matchEnteringHelperId) {
-    return false;
-  }
-
-  return await isMatchEnteringHelperForGroup(matchEnteringHelperId, groupId);
 }
 
 function formatDisplayName(p: ParticipantWithName) {
