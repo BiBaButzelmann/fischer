@@ -1,6 +1,4 @@
 import { db } from "../client";
-import { game } from "../schema/game";
-import { eq } from "drizzle-orm";
 
 export async function getGroupById(groupId: number) {
   return await db.query.group.findFirst({
@@ -121,14 +119,4 @@ export async function getGroupsWithParticipantsAndGamesByTournamentId(
     },
     orderBy: (group, { asc }) => [asc(group.groupNumber)],
   });
-}
-
-export async function getGroupIdFromGame(gameId: number) {
-  const gameData = await db
-    .select({ groupId: game.groupId })
-    .from(game)
-    .where(eq(game.id, gameId))
-    .limit(1);
-
-  return gameData.length > 0 ? gameData[0].groupId : null;
 }
