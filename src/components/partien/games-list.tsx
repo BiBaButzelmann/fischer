@@ -9,10 +9,6 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
-import { Button } from "../ui/button";
-import { NotebookPen } from "lucide-react";
-import { Tooltip, TooltipContent, TooltipTrigger } from "../ui/tooltip";
-import Link from "next/link";
 import {
   GameResult,
   GameWithParticipantProfilesAndGroupAndMatchday,
@@ -22,10 +18,9 @@ import { useIsMobile } from "@/hooks/use-mobile";
 import { useRouter } from "next/navigation";
 import { formatGameDate, getGameTimeFromGame } from "@/lib/game-time";
 import { MatchDay } from "@/db/types/match-day";
-import { PostponeGameDialog } from "./postpone-game-dialog";
-import { ReportResultDialog } from "./report-result-dialog";
 import { authClient } from "@/auth-client";
 import { Role } from "@/db/types/role";
+import { GameActions } from "./game-actions";
 
 type Props = {
   games: GameWithParticipantProfilesAndGroupAndMatchday[];
@@ -158,49 +153,16 @@ export function GamesList({
               </TableCell>
               {hasAnyActions && (
                 <TableCell className="hidden md:flex items-center gap-2 w-32">
-                  {(() => {
-                    const { canView, canSubmitResult, canPostpone } =
-                      getGameActionPermissions(game.id);
-
-                    return (
-                      <>
-                        {canView && (
-                          <Tooltip>
-                            <TooltipTrigger asChild>
-                              <Link href={`/partien/${game.id}`}>
-                                <Button
-                                  aria-label="Partie eingeben"
-                                  variant="outline"
-                                  size="icon"
-                                >
-                                  <NotebookPen className="h-4 w-4" />
-                                </Button>
-                              </Link>
-                            </TooltipTrigger>
-                            <TooltipContent>
-                              <p>Partie anschauen</p>
-                            </TooltipContent>
-                          </Tooltip>
-                        )}
-                        {canSubmitResult && (
-                          <ReportResultDialog
-                            gameId={game.id}
-                            currentResult={game.result}
-                            onResultChange={onResultChange}
-                            isReferee={isReferee}
-                          />
-                        )}
-                        {canPostpone && (
-                          <PostponeGameDialog
-                            gameId={game.id}
-                            availableMatchdays={availableMatchdays}
-                            currentGameDate={getGameTimeFromGame(game)}
-                            game={game}
-                          />
-                        )}
-                      </>
-                    );
-                  })()}
+                  <GameActions
+                    gameId={game.id}
+                    currentResult={game.result}
+                    onResultChange={onResultChange}
+                    availableMatchdays={availableMatchdays}
+                    currentGameDate={getGameTimeFromGame(game)}
+                    game={game}
+                    isReferee={isReferee}
+                    {...getGameActionPermissions(game.id)}
+                  />
                 </TableCell>
               )}
             </TableRow>
