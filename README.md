@@ -16,3 +16,5 @@
 - Eingabehelfer: show count of missing submissions
 - Eingabehelfer: improve chess board visuals and error handling
 - postpone: send mail
+- PGN: disable until result is submitted
+- PGN: disable if result implies that game has not been played
