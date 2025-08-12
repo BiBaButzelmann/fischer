@@ -44,7 +44,7 @@ export function GamesList({
   const router = useRouter();
   const { data: session } = authClient.useSession();
   const userId = session?.user?.id;
-  const isAdmin = session?.user?.role === "admin";
+  const isAdmin = userRoles.includes("admin");
   const isReferee = userRoles.includes("referee");
   const isParticipant = userRoles.includes("participant");
   const isMatchEnteringHelper = userRoles.includes("matchEnteringHelper");
@@ -81,7 +81,7 @@ export function GamesList({
         getGameActionPermissions(game.id);
       return canView || canSubmitResult || canPostpone;
     });
-  }, [games, userId, userRoles, isAdmin]);
+  }, [games, userId, userRoles]);
 
   const handleNavigate = (gameId: number) => {
     router.push(`/partien/${gameId}`);
