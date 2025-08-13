@@ -26,21 +26,24 @@ import {
 } from "@/components/ui/tooltip";
 import { GameResult } from "@/db/types/game";
 import { Handshake } from "lucide-react";
-import { useTransition } from "react";
+import { useTransition, useState } from "react";
 import { authClient } from "@/auth-client";
 
 type Props = {
   gameId: number;
   currentResult: string | null;
   onResultChange: (gameId: number, result: GameResult) => Promise<void>;
+  isReferee?: boolean;
 };
 
 export function ReportResultDialog({
   gameId,
   currentResult,
   onResultChange,
+  isReferee,
 }: Props) {
   const [isPending, startTransition] = useTransition();
+  const [isOpen, setIsOpen] = useState(false);
   const { data: session } = authClient.useSession();
 
   const handleResultFormSubmit = async (
@@ -51,11 +54,12 @@ export function ReportResultDialog({
     const result = formData.get("result") as GameResult;
     startTransition(async () => {
       await onResultChange(gameId, result);
+      setIsOpen(false);
     });
   };
 
   return (
-    <Dialog>
+    <Dialog open={isOpen} onOpenChange={setIsOpen}>
       <Tooltip>
         <TooltipTrigger asChild>
           <DialogTrigger asChild>
@@ -94,7 +98,7 @@ export function ReportResultDialog({
                 <SelectItem value="-:-">
                   Beide Spieler nicht angetreten.
                 </SelectItem>
-                {session?.user.role === "admin" && (
+                {(session?.user.role === "admin" || isReferee) && (
                   <>
                     <SelectItem value="0-½">
                       Weiß verliert durch Regelverstoß, aber Schwarz hat
