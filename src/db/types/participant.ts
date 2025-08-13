@@ -29,3 +29,13 @@ export type ParticipantWithRating = Pick<
     lastName: string;
   };
 };
+
+export type ParticipantWithProfile = Participant & {
+  profile: {
+    userId: string;
+    firstName: string;
+    lastName: string;
+    email: string;
+    phoneNumber: string | null;
+  };
+};

@@ -17,6 +17,7 @@ import invariant from "tiny-invariant";
 import { roundRobinPairs } from "@/lib/pairing-utils";
 import { redirect } from "next/navigation";
 import { getDateTimeFromDefaultTime } from "@/lib/game-time";
+import { sendGamePostponementEmails } from "@/actions/email/game-postponement";
 
 export async function removeScheduledGamesForGroup(
   tournamentId: number,
@@ -268,6 +269,20 @@ export async function updateGameMatchdayAndBoardNumber(
       .where(eq(game.id, gameId));
   });
 
+  try {
+    await sendGamePostponementEmails(
+      gameData,
+      postponingParticipant,
+      currentMatchday,
+      newMatchday,
+    );
+  } catch (emailError) {
+    console.error(
+      "Failed to send postponement email notifications:",
+      emailError,
+    );
+  }
+
   revalidatePath("/kalender");
   revalidatePath("/partien");
 }
@@ -301,7 +316,6 @@ export async function verifyPgnPassword(gameId: number, password: string) {
 
 export async function updateGameResult(gameId: number, result: GameResult) {
   const session = await authWithRedirect();
-  // TODO: check match entering helper as well
   const isUserParticipating = await isUserParticipantInGame(
     gameId,
     session.user.id,

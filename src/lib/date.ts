@@ -36,6 +36,20 @@ export function displayShortDateOrHoliday(date: DateTime): string {
 }
 
 /**
+ * Formats a date with weekday, long month, and year in German locale
+ * @param date - The date to format
+ * @returns A formatted date string like "Donnerstag, 15. August 2024"
+ */
+export function displayLongDate(date: Date): string {
+  return date.toLocaleDateString("de-DE", {
+    weekday: "long",
+    year: "numeric",
+    month: "long",
+    day: "numeric",
+  });
+}
+
+/**
  * Formats a date and time for display in event lists (e.g., "Mo 01.08 um 14:30")
  * @param date - The date to format
  * @returns Formatted date and time string
