@@ -6,6 +6,7 @@ import { matchday } from "../schema/matchday";
 import { game } from "../schema/game";
 import { groupMatchEnteringHelper } from "../schema/matchEnteringHelper";
 import { getMatchEnteringHelperIdByUserId } from "./match-entering-helper";
+import invariant from "tiny-invariant";
 
 export async function getGameById(gameId: number) {
   return await db.query.game.findFirst({
@@ -361,7 +362,9 @@ export async function isUserMatchEnteringHelperInGame(
     getMatchEnteringHelperIdByUserId(userId),
   ]);
 
-  const groupId = groupData[0]?.groupId;
+  invariant(groupData && groupData.length > 0, "Group not found");
+
+  const groupId = groupData[0].groupId;
 
   if (!groupId || !matchEnteringHelperId) {
     return false;
