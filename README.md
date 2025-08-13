@@ -22,4 +22,4 @@
 ---
 
 - overview: show own group
-- overview: show on standings
+- overview: show own standings
