@@ -33,12 +33,14 @@ type Props = {
   gameId: number;
   currentResult: string | null;
   onResultChange: (gameId: number, result: GameResult) => Promise<void>;
+  isReferee?: boolean;
 };
 
 export function ReportResultDialog({
   gameId,
   currentResult,
   onResultChange,
+  isReferee,
 }: Props) {
   const [isPending, startTransition] = useTransition();
   const { data: session } = authClient.useSession();
@@ -94,7 +96,7 @@ export function ReportResultDialog({
                 <SelectItem value="-:-">
                   Beide Spieler nicht angetreten.
                 </SelectItem>
-                {session?.user.role === "admin" && (
+                {(session?.user.role === "admin" || isReferee) && (
                   <>
                     <SelectItem value="0-½">
                       Weiß verliert durch Regelverstoß, aber Schwarz hat
