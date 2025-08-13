@@ -46,8 +46,6 @@ export default async function GamePage({ params }: PageProps) {
     return (
       <p className="p-4 text-red-600">
         Diese Partie kann nicht eingegeben werden, da sie nicht gespielt wurde.
-        Nur Partien mit den Ergebnissen "1:0", "0:1", "½-½", "0-½" oder "½-0"
-        können eingegeben werden.
       </p>
     );
   }
