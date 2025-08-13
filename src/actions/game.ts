@@ -18,8 +18,7 @@ import invariant from "tiny-invariant";
 import { roundRobinPairs } from "@/lib/pairing-utils";
 import { redirect } from "next/navigation";
 import { getDateTimeFromDefaultTime } from "@/lib/game-time";
-import { sendGamePostponementNotifications } from "@/email/gamePostponement";
-import { displayLongDate } from "@/lib/date";
+import { sendGamePostponementEmails } from "@/actions/email/game-postponement";
 
 export async function removeScheduledGamesForGroup(
   tournamentId: number,
@@ -270,64 +269,13 @@ export async function updateGameMatchdayAndBoardNumber(
       .set({ boardNumber: nextBoardNumber })
       .where(eq(game.id, gameId));
   });
-  // mail notification
-  try {
-    const groupData = await db.query.group.findFirst({
-      where: eq(group.id, gameData.groupId),
-      columns: { groupName: true },
-    });
 
-    const postponingPlayerName = `${postponingParticipant.profile.firstName} ${postponingParticipant.profile.lastName}`;
-    const whitePlayerName = `${gameData.whiteParticipant.profile.firstName} ${gameData.whiteParticipant.profile.lastName}`;
-    const blackPlayerName = `${gameData.blackParticipant.profile.firstName} ${gameData.blackParticipant.profile.lastName}`;
-
-    const oldDateFormatted = displayLongDate(currentMatchday.date);
-    const newDateFormatted = displayLongDate(newMatchday.date);
-
-    const whitePlayerEmailData = {
-      playerEmail: gameData.whiteParticipant.profile.email,
-      playerName: gameData.whiteParticipant.profile.firstName,
-      opponentName: blackPlayerName,
-      postponingPlayerName,
-      gameDetails: {
-        round: gameData.round,
-        groupName: groupData?.groupName || "Unbekannte Gruppe",
-      },
-      oldDate: oldDateFormatted,
-      newDate: newDateFormatted,
-      contactInfo: {
-        opponentEmail: gameData.blackParticipant.profile.email,
-        opponentPhone: gameData.blackParticipant.profile.phoneNumber,
-      },
-    };
-
-    const blackPlayerEmailData = {
-      playerEmail: gameData.blackParticipant.profile.email,
-      playerName: gameData.blackParticipant.profile.firstName,
-      opponentName: whitePlayerName,
-      postponingPlayerName,
-      gameDetails: {
-        round: gameData.round,
-        groupName: groupData?.groupName || "Unbekannte Gruppe",
-      },
-      oldDate: oldDateFormatted,
-      newDate: newDateFormatted,
-      contactInfo: {
-        opponentEmail: gameData.whiteParticipant.profile.email,
-        opponentPhone: gameData.whiteParticipant.profile.phoneNumber,
-      },
-    };
-
-    await sendGamePostponementNotifications(
-      whitePlayerEmailData,
-      blackPlayerEmailData,
-    );
-  } catch (emailError) {
-    console.error(
-      "Failed to send postponement email notifications:",
-      emailError,
-    );
-  }
+  await sendGamePostponementEmails(
+    gameData,
+    postponingParticipant,
+    currentMatchday,
+    newMatchday,
+  );
 
   revalidatePath("/kalender");
   revalidatePath("/partien");
