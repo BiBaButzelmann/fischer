@@ -269,12 +269,19 @@ export async function updateGameMatchdayAndBoardNumber(
       .where(eq(game.id, gameId));
   });
 
-  await sendGamePostponementEmails(
-    gameData,
-    postponingParticipant,
-    currentMatchday,
-    newMatchday,
-  );
+  try {
+    await sendGamePostponementEmails(
+      gameData,
+      postponingParticipant,
+      currentMatchday,
+      newMatchday,
+    );
+  } catch (emailError) {
+    console.error(
+      "Failed to send postponement email notifications:",
+      emailError,
+    );
+  }
 
   revalidatePath("/kalender");
   revalidatePath("/partien");
@@ -309,7 +316,6 @@ export async function verifyPgnPassword(gameId: number, password: string) {
 
 export async function updateGameResult(gameId: number, result: GameResult) {
   const session = await authWithRedirect();
-  // TODO: check match entering helper as well
   const isUserParticipating = await isUserParticipantInGame(
     gameId,
     session.user.id,

@@ -15,63 +15,56 @@ export async function sendGamePostponementEmails(
   currentMatchday: MatchDay,
   newMatchday: MatchDay,
 ) {
-  try {
-    const groupData = await db.query.group.findFirst({
-      where: eq(group.id, gameData.groupId),
-      columns: { groupName: true },
-    });
+  const groupData = await db.query.group.findFirst({
+    where: eq(group.id, gameData.groupId),
+    columns: { groupName: true },
+  });
 
-    const postponingPlayerName = `${postponingParticipant.profile.firstName} ${postponingParticipant.profile.lastName}`;
-    const whitePlayerName = `${gameData.whiteParticipant.profile.firstName} ${gameData.whiteParticipant.profile.lastName}`;
-    const blackPlayerName = `${gameData.blackParticipant.profile.firstName} ${gameData.blackParticipant.profile.lastName}`;
+  const postponingPlayerName = `${postponingParticipant.profile.firstName} ${postponingParticipant.profile.lastName}`;
+  const whitePlayerName = `${gameData.whiteParticipant.profile.firstName} ${gameData.whiteParticipant.profile.lastName}`;
+  const blackPlayerName = `${gameData.blackParticipant.profile.firstName} ${gameData.blackParticipant.profile.lastName}`;
 
-    const oldDateFormatted = displayLongDate(currentMatchday.date);
-    const newDateFormatted = displayLongDate(newMatchday.date);
+  const oldDateFormatted = displayLongDate(currentMatchday.date);
+  const newDateFormatted = displayLongDate(newMatchday.date);
 
-    const whitePlayerEmailData = {
-      playerEmail: gameData.whiteParticipant.profile.email,
-      playerName: gameData.whiteParticipant.profile.firstName,
-      opponentName: blackPlayerName,
-      postponingPlayerName,
-      gameDetails: {
-        round: gameData.round,
-        groupName: groupData?.groupName || "Unbekannte Gruppe",
-      },
-      oldDate: oldDateFormatted,
-      newDate: newDateFormatted,
-      contactInfo: {
-        opponentEmail: gameData.blackParticipant.profile.email,
-        opponentPhone:
-          gameData.blackParticipant.profile.phoneNumber || "Nicht verfügbar",
-      },
-    };
+  const whitePlayerEmailData = {
+    playerEmail: gameData.whiteParticipant.profile.email,
+    playerName: gameData.whiteParticipant.profile.firstName,
+    opponentName: blackPlayerName,
+    postponingPlayerName,
+    gameDetails: {
+      round: gameData.round,
+      groupName: groupData?.groupName || "Unbekannte Gruppe",
+    },
+    oldDate: oldDateFormatted,
+    newDate: newDateFormatted,
+    contactInfo: {
+      opponentEmail: gameData.blackParticipant.profile.email,
+      opponentPhone:
+        gameData.blackParticipant.profile.phoneNumber || "Nicht verfügbar",
+    },
+  };
 
-    const blackPlayerEmailData = {
-      playerEmail: gameData.blackParticipant.profile.email,
-      playerName: gameData.blackParticipant.profile.firstName,
-      opponentName: whitePlayerName,
-      postponingPlayerName,
-      gameDetails: {
-        round: gameData.round,
-        groupName: groupData?.groupName || "Unbekannte Gruppe",
-      },
-      oldDate: oldDateFormatted,
-      newDate: newDateFormatted,
-      contactInfo: {
-        opponentEmail: gameData.whiteParticipant.profile.email,
-        opponentPhone:
-          gameData.whiteParticipant.profile.phoneNumber || "Nicht verfügbar",
-      },
-    };
+  const blackPlayerEmailData = {
+    playerEmail: gameData.blackParticipant.profile.email,
+    playerName: gameData.blackParticipant.profile.firstName,
+    opponentName: whitePlayerName,
+    postponingPlayerName,
+    gameDetails: {
+      round: gameData.round,
+      groupName: groupData?.groupName || "Unbekannte Gruppe",
+    },
+    oldDate: oldDateFormatted,
+    newDate: newDateFormatted,
+    contactInfo: {
+      opponentEmail: gameData.whiteParticipant.profile.email,
+      opponentPhone:
+        gameData.whiteParticipant.profile.phoneNumber || "Nicht verfügbar",
+    },
+  };
 
-    await sendGamePostponementNotifications(
-      whitePlayerEmailData,
-      blackPlayerEmailData,
-    );
-  } catch (emailError) {
-    console.error(
-      "Failed to send postponement email notifications:",
-      emailError,
-    );
-  }
+  await sendGamePostponementNotifications(
+    whitePlayerEmailData,
+    blackPlayerEmailData,
+  );
 }
