@@ -286,7 +286,7 @@ export async function updateGameMatchdayAndBoardNumber(
 
     const whitePlayerEmailData = {
       playerEmail: gameData.whiteParticipant.profile.email,
-      playerName: whitePlayerName,
+      playerName: gameData.whiteParticipant.profile.firstName,
       opponentName: blackPlayerName,
       postponingPlayerName,
       gameDetails: {
@@ -303,7 +303,7 @@ export async function updateGameMatchdayAndBoardNumber(
 
     const blackPlayerEmailData = {
       playerEmail: gameData.blackParticipant.profile.email,
-      playerName: blackPlayerName,
+      playerName: gameData.blackParticipant.profile.firstName,
       opponentName: whitePlayerName,
       postponingPlayerName,
       gameDetails: {
