@@ -13,7 +13,7 @@ import {
   GameResult,
   GameWithParticipantProfilesAndGroupAndMatchday,
 } from "@/db/types/game";
-import { useMemo } from "react";
+import { useMemo, useCallback } from "react";
 import { useIsMobile } from "@/hooks/use-mobile";
 import { useRouter } from "next/navigation";
 import { formatGameDate, getGameTimeFromGame } from "@/lib/game-time";
@@ -58,17 +58,27 @@ export function GamesList({
     [games],
   );
 
-  const getGameActionPermissions = (gameId: number) => {
-    const isGameParticipant = gameParticipantsMap[gameId]?.includes(
-      userId || "",
-    );
+  const getGameActionPermissions = useCallback(
+    (gameId: number) => {
+      const isGameParticipant = gameParticipantsMap[gameId]?.includes(
+        userId || "",
+      );
 
-    return {
-      canView: isParticipant || isReferee || isMatchEnteringHelper || isAdmin,
-      canSubmitResult: isGameParticipant || isReferee || isAdmin,
-      canPostpone: isGameParticipant || isAdmin,
-    };
-  };
+      return {
+        canView: isParticipant || isReferee || isMatchEnteringHelper || isAdmin,
+        canSubmitResult: isGameParticipant || isReferee || isAdmin,
+        canPostpone: isGameParticipant || isAdmin,
+      };
+    },
+    [
+      gameParticipantsMap,
+      userId,
+      isParticipant,
+      isReferee,
+      isMatchEnteringHelper,
+      isAdmin,
+    ],
+  );
 
   const hasAnyActions = useMemo(() => {
     return games.some((game) => {
@@ -76,7 +86,7 @@ export function GamesList({
         getGameActionPermissions(game.id);
       return canView || canSubmitResult || canPostpone;
     });
-  }, [games, userId, userRoles]);
+  }, [games, getGameActionPermissions]);
 
   const handleNavigate = (gameId: number) => {
     router.push(`/partien/${gameId}`);

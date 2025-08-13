@@ -1,15 +1,12 @@
 import z from "zod";
 import { getParticipantFullName } from "@/lib/participant";
 import { ParticipantWithName } from "@/db/types/participant";
-import {
-  getGameById,
-  isUserParticipantInGame,
-  isUserMatchEnteringHelperInGame,
-} from "@/db/repositories/game";
+import { getGameById } from "@/db/repositories/game";
 import { auth } from "@/auth/utils";
 import { redirect } from "next/navigation";
 import { PasswordProtection } from "@/components/game/password-protection";
 import { verifyPgnPassword } from "@/actions/game";
+import { isUserAuthorizedForPGN } from "@/lib/game-auth";
 import PgnViewer from "@/components/game/chessboard/pgn-viewer";
 import { Suspense } from "react";
 import { DateTime } from "luxon";
@@ -34,11 +31,7 @@ export default async function GamePage({ params }: PageProps) {
 
   const gameId = parsedGameIdResult.data;
 
-  if (
-    (await isUserParticipantInGame(gameId, session.user.id)) ||
-    (await isUserMatchEnteringHelperInGame(gameId, session.user.id)) ||
-    session.user.role === "admin"
-  ) {
+  if (await isUserAuthorizedForPGN(gameId, session.user.id, session.user.role === "admin")) {
     return <PgnContainer allowEdit={true} gameId={gameId} />;
   }
 

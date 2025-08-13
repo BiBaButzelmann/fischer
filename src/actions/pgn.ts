@@ -1,27 +1,16 @@
 "use server";
 
-import { authWithRedirect } from "@/auth/utils";
 import { db } from "@/db/client";
-import {
-  isUserParticipantInGame,
-  isUserMatchEnteringHelperInGame,
-} from "@/db/repositories/game";
 import { pgn } from "@/db/schema/pgn";
+import { isUserAuthorizedForPGN } from "@/lib/game-auth";
+import { authWithRedirect } from "@/auth/utils";
 
 export const savePGN = async (newValue: string, gameId: number) => {
   const session = await authWithRedirect();
+  const isAuthorized = await isUserAuthorizedForPGN(gameId, session.user.id, session.user.role === "admin");
 
-  const [isParticipant, isMatchEnteringHelper] = await Promise.all([
-    isUserParticipantInGame(gameId, session.user.id),
-    isUserMatchEnteringHelperInGame(gameId, session.user.id),
-  ]);
-
-  if (
-    !isParticipant &&
-    !isMatchEnteringHelper &&
-    session.user.role !== "admin"
-  ) {
-    throw new Error("You are not authorized to edit this game.");
+  if (!isAuthorized) {
+    return { error: "You are not authorized to edit this game." };
   }
 
   await db
