@@ -31,7 +31,13 @@ export default async function GamePage({ params }: PageProps) {
 
   const gameId = parsedGameIdResult.data;
 
-  if (await isUserAuthorizedForPGN(gameId, session.user.id, session.user.role === "admin")) {
+  if (
+    await isUserAuthorizedForPGN(
+      gameId,
+      session.user.id,
+      session.user.role === "admin",
+    )
+  ) {
     return <PgnContainer allowEdit={true} gameId={gameId} />;
   }
 

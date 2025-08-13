@@ -7,7 +7,11 @@ import { authWithRedirect } from "@/auth/utils";
 
 export const savePGN = async (newValue: string, gameId: number) => {
   const session = await authWithRedirect();
-  const isAuthorized = await isUserAuthorizedForPGN(gameId, session.user.id, session.user.role === "admin");
+  const isAuthorized = await isUserAuthorizedForPGN(
+    gameId,
+    session.user.id,
+    session.user.role === "admin",
+  );
 
   if (!isAuthorized) {
     return { error: "You are not authorized to edit this game." };

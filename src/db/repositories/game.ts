@@ -352,7 +352,7 @@ export async function isUserMatchEnteringHelperInGame(
   gameId: number,
   userId: string,
 ): Promise<boolean> {
-  const [gameData, matchEnteringHelperId] = await Promise.all([
+  const [groupData, matchEnteringHelperId] = await Promise.all([
     db
       .select({ groupId: game.groupId })
       .from(game)
@@ -361,7 +361,7 @@ export async function isUserMatchEnteringHelperInGame(
     getMatchEnteringHelperIdByUserId(userId),
   ]);
 
-  const groupId = gameData[0]?.groupId;
+  const groupId = groupData[0]?.groupId;
 
   if (!groupId || !matchEnteringHelperId) {
     return false;
