@@ -27,7 +27,7 @@ export function ParticipantEntry({
   return (
     <div className="flex items-center gap-2 py-1">
       <div className="flex-shrink-0">
-        {participant.fideId ? (
+        {participant.fideId && participant.birthYear && participant.nationality ? (
           <Rabbit className="h-4 w-4 text-amber-700" />
         ) : (
           <Turtle className="h-4 w-4 text-green-600" />
