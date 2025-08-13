@@ -119,6 +119,7 @@ export function RolesManager({
 
   const handleSubmitRoleSelection = async () => {
     startTransition(async () => {
+      // TODO: add throttling for mail sending to avoid abuse
       try {
         await sendRolesSelectionSummaryEmail(userId, rolesData);
       } catch (error) {
