@@ -1,11 +1,12 @@
 import z from "zod";
 import { getParticipantFullName } from "@/lib/participant";
 import { ParticipantWithName } from "@/db/types/participant";
-import { getGameById, isUserParticipantInGame } from "@/db/repositories/game";
+import { getGameById } from "@/db/repositories/game";
 import { auth } from "@/auth/utils";
 import { redirect } from "next/navigation";
 import { PasswordProtection } from "@/components/game/password-protection";
 import { verifyPgnPassword } from "@/actions/game";
+import { isUserAuthorizedForPGN, isGameActuallyPlayed } from "@/lib/game-auth";
 import PgnViewer from "@/components/game/chessboard/pgn-viewer";
 import { Suspense } from "react";
 import { DateTime } from "luxon";
@@ -30,11 +31,26 @@ export default async function GamePage({ params }: PageProps) {
 
   const gameId = parsedGameIdResult.data;
 
-  if (
-    (await gameBelongsToUser(gameId, session.user.id)) ||
-    (await gameBelongsToMatchEnteringHelper()) ||
-    session.user.role === "admin"
-  ) {
+  const isAuthorized = await isUserAuthorizedForPGN(
+    gameId,
+    session.user.id,
+    session.user.role === "admin",
+  );
+
+  const game = await getGameById(gameId);
+  if (!game) {
+    return <p className="p-4 text-red-600">Game with ID {gameId} not found.</p>;
+  }
+
+  if (!isGameActuallyPlayed(game.result)) {
+    return (
+      <p className="p-4 text-red-600">
+        Diese Partie kann nicht eingegeben werden, da sie nicht gespielt wurde.
+      </p>
+    );
+  }
+
+  if (isAuthorized) {
     return <PgnContainer allowEdit={true} gameId={gameId} />;
   }
 
@@ -84,15 +100,6 @@ async function PgnContainer({
       <PgnViewer gameId={gameId} initialPGN={pgn} allowEdit={allowEdit} />
     </div>
   );
-}
-
-async function gameBelongsToUser(gameId: number, userId: string) {
-  return await isUserParticipantInGame(gameId, userId);
-}
-
-async function gameBelongsToMatchEnteringHelper() {
-  // TODO: Implement logic to check if the user is a match enterhin helper for the game
-  return false;
 }
 
 function formatDisplayName(p: ParticipantWithName) {

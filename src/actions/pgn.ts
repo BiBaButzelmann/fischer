@@ -1,16 +1,20 @@
 "use server";
 
-import { authWithRedirect } from "@/auth/utils";
 import { db } from "@/db/client";
-import { isUserParticipantInGame } from "@/db/repositories/game";
 import { pgn } from "@/db/schema/pgn";
+import { isUserAuthorizedForPGN } from "@/lib/game-auth";
+import { authWithRedirect } from "@/auth/utils";
 
 export const savePGN = async (newValue: string, gameId: number) => {
   const session = await authWithRedirect();
+  const isAuthorized = await isUserAuthorizedForPGN(
+    gameId,
+    session.user.id,
+    session.user.role === "admin",
+  );
 
-  // TODO: check for match entering helper permissions
-  if ((await isUserParticipantInGame(gameId, session.user.id)) === false) {
-    throw new Error("You are not a participant in this game.");
+  if (!isAuthorized) {
+    return { error: "You are not authorized to edit this game." };
   }
 
   await db

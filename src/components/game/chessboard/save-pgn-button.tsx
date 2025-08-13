@@ -3,6 +3,7 @@
 import { useTransition } from "react";
 import { Button } from "@/components/ui/button";
 import { savePGN } from "@/actions/pgn";
+import { toast } from "sonner";
 
 export default function SavePGNButton({
   newValue,
@@ -15,7 +16,13 @@ export default function SavePGNButton({
 
   const handleClick = () => {
     startTransition(async () => {
-      await savePGN(newValue, gameId);
+      const result = await savePGN(newValue, gameId);
+
+      if (result?.error) {
+        toast.error("Nicht für Speichern autorisiert");
+      } else {
+        toast.success("Partie erfolgreich gespeichert");
+      }
     });
   };
 
