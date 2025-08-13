@@ -14,4 +14,7 @@
 - Eingabehelfer: visual cue for games that have been submitted
 - Eingabehelfer: show count of missing submissions
 - Eingabehelfer: improve chess board visuals and error handling
-- postpone: send mail
+- assignment summary mail: summary of obligations
+- tutorial mail: custom mail for each role
+- drucken: feature to print the pairings
+- drucken: feature to print the Kärtchen
