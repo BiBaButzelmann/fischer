@@ -3,9 +3,7 @@ import { matchEnteringHelper } from "../schema/matchEnteringHelper";
 import { profile } from "../schema/profile";
 import { and, eq } from "drizzle-orm";
 
-export async function getMatchEnteringHelperIdByUserId(
-  userId: string,
-): Promise<number | null> {
+export async function getMatchEnteringHelperIdByUserId(userId: string) {
   const userProfile = await db
     .select({ profileId: profile.id })
     .from(profile)
