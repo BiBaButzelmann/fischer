@@ -25,7 +25,6 @@ import {
 } from "@/actions/match-entering-helper";
 import { createSetupHelper, deleteSetupHelper } from "@/actions/setup-helper";
 import { createJuror, deleteJuror } from "@/actions/juror";
-import Link from "next/link";
 import { sendRolesSelectionSummaryEmail } from "@/actions/email/roles";
 import { Profile } from "@/db/types/profile";
 import { DEFAULT_CLUB_KEY, DEFAULT_CLUB_LABEL } from "@/constants/constants";
@@ -120,7 +119,11 @@ export function RolesManager({
 
   const handleSubmitRoleSelection = async () => {
     startTransition(async () => {
-      await sendRolesSelectionSummaryEmail(userId, rolesData);
+      try {
+        await sendRolesSelectionSummaryEmail(userId, rolesData);
+      } catch (error) {
+        console.error("Failed to send email:", error);
+      }
     });
   };
 
@@ -238,9 +241,8 @@ export function RolesManager({
             onClick={handleSubmitRoleSelection}
             size="lg"
             className="w-full sm:w-auto sm:mx-auto"
-            asChild
           >
-            <Link href="/uebersicht">Anmeldung abschließen</Link>
+            {isPending ? "Wird gesendet..." : "Anmeldung abschließen"}
           </Button>
         </div>
       ) : null}
