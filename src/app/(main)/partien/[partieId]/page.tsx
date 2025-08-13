@@ -6,7 +6,7 @@ import { auth } from "@/auth/utils";
 import { redirect } from "next/navigation";
 import { PasswordProtection } from "@/components/game/password-protection";
 import { verifyPgnPassword } from "@/actions/game";
-import { isUserAuthorizedForPGN } from "@/lib/game-auth";
+import { isUserAuthorizedForPGN, isGameActuallyPlayed } from "@/lib/game-auth";
 import PgnViewer from "@/components/game/chessboard/pgn-viewer";
 import { Suspense } from "react";
 import { DateTime } from "luxon";
@@ -31,13 +31,28 @@ export default async function GamePage({ params }: PageProps) {
 
   const gameId = parsedGameIdResult.data;
 
-  if (
-    await isUserAuthorizedForPGN(
-      gameId,
-      session.user.id,
-      session.user.role === "admin",
-    )
-  ) {
+  const isAuthorized = await isUserAuthorizedForPGN(
+    gameId,
+    session.user.id,
+    session.user.role === "admin",
+  );
+
+  const game = await getGameById(gameId);
+  if (!game) {
+    return <p className="p-4 text-red-600">Game with ID {gameId} not found.</p>;
+  }
+
+  if (!isGameActuallyPlayed(game.result)) {
+    return (
+      <p className="p-4 text-red-600">
+        Diese Partie kann nicht eingegeben werden, da sie nicht gespielt wurde.
+        Nur Partien mit den Ergebnissen "1:0", "0:1", "½-½", "0-½" oder "½-0"
+        können eingegeben werden.
+      </p>
+    );
+  }
+
+  if (isAuthorized) {
     return <PgnContainer allowEdit={true} gameId={gameId} />;
   }
 

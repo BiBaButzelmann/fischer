@@ -9,6 +9,7 @@ import Link from "next/link";
 import { NotebookPen } from "lucide-react";
 import { PostponeGameDialog } from "./postpone-game-dialog";
 import { ReportResultDialog } from "./report-result-dialog";
+import { isGameActuallyPlayed } from "@/lib/game-auth";
 
 type Props = {
   gameId: number;
@@ -37,7 +38,7 @@ export function GameActions({
 }: Props) {
   return (
     <>
-      {canView && (
+      {canView && isGameActuallyPlayed(currentResult) && (
         <Tooltip>
           <TooltipTrigger asChild>
             <Link href={`/partien/${gameId}`}>
