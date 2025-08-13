@@ -38,6 +38,22 @@ export function GameActions({
 }: Props) {
   return (
     <>
+      {canSubmitResult && (
+        <ReportResultDialog
+          gameId={gameId}
+          currentResult={currentResult}
+          onResultChange={onResultChange}
+          isReferee={isReferee}
+        />
+      )}
+      {canPostpone && (
+        <PostponeGameDialog
+          gameId={gameId}
+          availableMatchdays={availableMatchdays}
+          currentGameDate={currentGameDate}
+          game={game}
+        />
+      )}
       {canView && isGameActuallyPlayed(currentResult) && (
         <Tooltip>
           <TooltipTrigger asChild>
@@ -55,22 +71,6 @@ export function GameActions({
             <p>Partie anschauen</p>
           </TooltipContent>
         </Tooltip>
-      )}
-      {canSubmitResult && (
-        <ReportResultDialog
-          gameId={gameId}
-          currentResult={currentResult}
-          onResultChange={onResultChange}
-          isReferee={isReferee}
-        />
-      )}
-      {canPostpone && (
-        <PostponeGameDialog
-          gameId={gameId}
-          availableMatchdays={availableMatchdays}
-          currentGameDate={currentGameDate}
-          game={game}
-        />
       )}
     </>
   );
