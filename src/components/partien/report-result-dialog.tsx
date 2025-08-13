@@ -26,7 +26,7 @@ import {
 } from "@/components/ui/tooltip";
 import { GameResult } from "@/db/types/game";
 import { Handshake } from "lucide-react";
-import { useTransition } from "react";
+import { useTransition, useState } from "react";
 import { authClient } from "@/auth-client";
 
 type Props = {
@@ -43,6 +43,7 @@ export function ReportResultDialog({
   isReferee,
 }: Props) {
   const [isPending, startTransition] = useTransition();
+  const [isOpen, setIsOpen] = useState(false);
   const { data: session } = authClient.useSession();
 
   const handleResultFormSubmit = async (
@@ -53,11 +54,12 @@ export function ReportResultDialog({
     const result = formData.get("result") as GameResult;
     startTransition(async () => {
       await onResultChange(gameId, result);
+      setIsOpen(false);
     });
   };
 
   return (
-    <Dialog>
+    <Dialog open={isOpen} onOpenChange={setIsOpen}>
       <Tooltip>
         <TooltipTrigger asChild>
           <DialogTrigger asChild>

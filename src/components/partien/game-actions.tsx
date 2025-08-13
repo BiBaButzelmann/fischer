@@ -9,6 +9,7 @@ import Link from "next/link";
 import { NotebookPen } from "lucide-react";
 import { PostponeGameDialog } from "./postpone-game-dialog";
 import { ReportResultDialog } from "./report-result-dialog";
+import { isGameActuallyPlayed } from "@/lib/game-auth";
 
 type Props = {
   gameId: number;
@@ -37,7 +38,23 @@ export function GameActions({
 }: Props) {
   return (
     <>
-      {canView && (
+      {canSubmitResult && (
+        <ReportResultDialog
+          gameId={gameId}
+          currentResult={currentResult}
+          onResultChange={onResultChange}
+          isReferee={isReferee}
+        />
+      )}
+      {canPostpone && (
+        <PostponeGameDialog
+          gameId={gameId}
+          availableMatchdays={availableMatchdays}
+          currentGameDate={currentGameDate}
+          game={game}
+        />
+      )}
+      {canView && isGameActuallyPlayed(currentResult) && (
         <Tooltip>
           <TooltipTrigger asChild>
             <Link href={`/partien/${gameId}`}>
@@ -54,22 +71,6 @@ export function GameActions({
             <p>Partie anschauen</p>
           </TooltipContent>
         </Tooltip>
-      )}
-      {canSubmitResult && (
-        <ReportResultDialog
-          gameId={gameId}
-          currentResult={currentResult}
-          onResultChange={onResultChange}
-          isReferee={isReferee}
-        />
-      )}
-      {canPostpone && (
-        <PostponeGameDialog
-          gameId={gameId}
-          availableMatchdays={availableMatchdays}
-          currentGameDate={currentGameDate}
-          game={game}
-        />
       )}
     </>
   );

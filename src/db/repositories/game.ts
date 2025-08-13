@@ -4,6 +4,9 @@ import { group } from "../schema/group";
 import { matchdayGame } from "../schema/matchday";
 import { matchday } from "../schema/matchday";
 import { game } from "../schema/game";
+import { groupMatchEnteringHelper } from "../schema/matchEnteringHelper";
+import { getMatchEnteringHelperIdByUserId } from "./match-entering-helper";
+import invariant from "tiny-invariant";
 
 export async function getGameById(gameId: number) {
   return await db.query.game.findFirst({
@@ -344,4 +347,42 @@ export async function getAllGroupNamesByTournamentId(tournamentId: number) {
     .from(group)
     .where(eq(group.tournamentId, tournamentId))
     .orderBy(group.groupNumber);
+}
+
+export async function isUserMatchEnteringHelperInGame(
+  gameId: number,
+  userId: string,
+): Promise<boolean> {
+  const [groupData, matchEnteringHelperId] = await Promise.all([
+    db
+      .select({ groupId: game.groupId })
+      .from(game)
+      .where(eq(game.id, gameId))
+      .limit(1),
+    getMatchEnteringHelperIdByUserId(userId),
+  ]);
+
+  invariant(groupData && groupData.length > 0, "Group not found");
+
+  const groupId = groupData[0].groupId;
+
+  if (!groupId || !matchEnteringHelperId) {
+    return false;
+  }
+
+  const assignment = await db
+    .select()
+    .from(groupMatchEnteringHelper)
+    .where(
+      and(
+        eq(groupMatchEnteringHelper.groupId, groupId),
+        eq(
+          groupMatchEnteringHelper.matchEnteringHelperId,
+          matchEnteringHelperId,
+        ),
+      ),
+    )
+    .limit(1);
+
+  return assignment.length > 0;
 }
