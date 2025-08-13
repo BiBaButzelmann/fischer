@@ -18,3 +18,8 @@
 - tutorial mail: custom mail for each role
 - drucken: feature to print the pairings
 - drucken: feature to print the Kärtchen
+
+---
+
+- overview: show own group
+- overview: show on standings
