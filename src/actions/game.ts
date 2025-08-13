@@ -10,7 +10,6 @@ import { game } from "@/db/schema/game";
 import { gamePostponement } from "@/db/schema/gamePostponement";
 import { matchday, matchdayGame } from "@/db/schema/matchday";
 import { profile } from "@/db/schema/profile";
-import { group } from "@/db/schema/group";
 import { GameResult } from "@/db/types/game";
 import { and, eq, InferInsertModel, inArray } from "drizzle-orm";
 import { revalidatePath } from "next/cache";
