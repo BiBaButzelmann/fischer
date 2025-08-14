@@ -4,7 +4,6 @@
 
 - Mobile: nach Auswahl in der Sidebar sollte die Sidebar einklappen
 - Spieltage verwalten: show group (batch) of users
-- Gruppeneinteilung: visual cue for eligable players with FIDE ID
 - Juroren verwalten: Einteilung in aktiv und Nachrücker
 - DWZ Bericht
 
