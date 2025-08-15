@@ -50,7 +50,7 @@ export async function closeGapInBoardNumbers(
     );
 }
 
-export async function updateBoardNumberTransaction(
+export async function updateBoardNumbers(
   gameId: number,
   groupId: number,
   currentBoardNumber: number,

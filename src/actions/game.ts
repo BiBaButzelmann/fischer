@@ -18,7 +18,7 @@ import { roundRobinPairs } from "@/lib/pairing-utils";
 import { redirect } from "next/navigation";
 import { getDateTimeFromDefaultTime } from "@/lib/game-time";
 import { sendGamePostponementEmails } from "@/actions/email/game-postponement";
-import { updateBoardNumberTransaction } from "@/actions/board-number";
+import { updateBoardNumbers } from "@/actions/board-number";
 
 export async function removeScheduledGamesForGroup(
   tournamentId: number,
@@ -240,7 +240,7 @@ export async function updateGameMatchdayAndBoardNumber(
       .where(eq(matchdayGame.gameId, gameId));
   });
 
-  await updateBoardNumberTransaction(
+  await updateBoardNumbers(
     gameId,
     gameData.groupId,
     gameData.boardNumber,
