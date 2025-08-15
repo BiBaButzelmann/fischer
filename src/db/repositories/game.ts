@@ -175,8 +175,8 @@ export async function getGamesByTournamentId(
     .orderBy(
       asc(matchday.date),
       asc(group.groupNumber),
-      asc(game.round),
       asc(game.boardNumber),
+      asc(game.round),
     );
   const gameIds = result.map((row) => row.gameId);
 
