@@ -172,12 +172,7 @@ export async function getGamesByTournamentId(
     .leftJoin(matchdayGame, eq(matchdayGame.gameId, game.id))
     .leftJoin(matchday, eq(matchdayGame.matchdayId, matchday.id))
     .where(and(...conditions))
-    .orderBy(
-      asc(matchday.date),
-      asc(group.groupNumber),
-      asc(game.round),
-      asc(game.boardNumber),
-    );
+    .orderBy(asc(group.groupNumber), asc(game.boardNumber), asc(game.round));
   const gameIds = result.map((row) => row.gameId);
 
   if (gameIds.length === 0) {
