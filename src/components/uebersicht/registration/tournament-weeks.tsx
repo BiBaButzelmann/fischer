@@ -1,4 +1,3 @@
-import { TournamentWeek } from "@/db/types/tournamentWeek";
 import {
   Table,
   TableBody,
@@ -6,7 +5,9 @@ import {
   TableHead,
   TableHeader,
   TableRow,
-} from "../ui/table";
+} from "@/components/ui/table";
+import { TournamentWeek } from "@/db/types/tournamentWeek";
+
 import { displayShortDateOrHoliday } from "@/lib/date";
 import { generateTournamentWeeksSchedule } from "@/lib/tournament-schedule";
 

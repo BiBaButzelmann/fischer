@@ -2,7 +2,7 @@ import { db } from "../client";
 import { referee } from "../schema/referee";
 import { profile } from "../schema/profile";
 import { matchday, matchdayReferee } from "../schema/matchday";
-import { and, eq } from "drizzle-orm";
+import { and, eq, count } from "drizzle-orm";
 import type { RefereeWithName } from "../types/referee";
 
 export async function getRefereeByProfileIdAndTournamentId(
@@ -15,6 +15,29 @@ export async function getRefereeByProfileIdAndTournamentId(
       eq(referee.tournamentId, tournamentId),
     ),
   });
+}
+
+export async function getRefereeAssignmentCountByProfileIdAndTournamentId(
+  profileId: number,
+  tournamentId: number,
+): Promise<number> {
+  const refereeData = await db.query.referee.findFirst({
+    where: and(
+      eq(referee.profileId, profileId),
+      eq(referee.tournamentId, tournamentId),
+    ),
+  });
+
+  if (!refereeData) {
+    return 0;
+  }
+
+  const assignmentCount = await db
+    .select({ count: count() })
+    .from(matchdayReferee)
+    .where(eq(matchdayReferee.refereeId, refereeData.id));
+
+  return assignmentCount[0]?.count ?? 0;
 }
 
 export async function getRefereesByTournamentId(

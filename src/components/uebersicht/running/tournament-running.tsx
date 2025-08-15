@@ -1,67 +1,84 @@
 import { Tournament } from "@/db/types/tournament";
+import { CalendarEvent } from "@/db/types/calendar";
 import {
   Card,
   CardContent,
   CardDescription,
   CardHeader,
   CardTitle,
-} from "../ui/card";
-import { Clock } from "lucide-react";
-import { CountdownTimer } from "./countdown-timer";
+} from "../../ui/card";
+import { Button } from "../../ui/button";
+import Link from "next/link";
 import { auth } from "@/auth/utils";
 import { getProfileByUserId } from "@/db/repositories/profile";
-import { Participants } from "../participants/participants";
+import { Participants } from "../../participants/participants";
 import { getParticipantsByTournamentId } from "@/db/repositories/participant";
-import { ScrollArea, ScrollBar } from "../ui/scroll-area";
+import { ScrollArea, ScrollBar } from "../../ui/scroll-area";
 import { getTournamentWeeksByTournamentId } from "@/db/repositories/tournamentWeek";
-import { TournamentWeeks } from "./tournament-weeks";
-import { RolesSummary } from "./roles-summary";
+import { getUpcomingEventsByProfileAndTournament } from "@/db/repositories/calendar-events";
+import { UpcomingEvents } from "./upcoming-events";
+import { ArrowRight } from "lucide-react";
+import { AssignmentSummary } from "./assignment-summary";
+import { TournamentWeeks } from "../registration/tournament-weeks";
 
 type Props = {
   tournament: Tournament;
 };
 
-export async function TournamentRegistration({ tournament }: Props) {
+export async function TournamentRunning({ tournament }: Props) {
   const session = await auth();
-  const [participants, profile, tournamentWeeks] = await Promise.all([
+  const profile =
+    session != null ? await getProfileByUserId(session.user.id) : null;
+
+  let upcomingEvents: CalendarEvent[] = [];
+  if (profile) {
+    upcomingEvents = await getUpcomingEventsByProfileAndTournament(
+      profile.id,
+      tournament.id,
+    );
+  }
+
+  const playerFirstName = profile != null ? profile.firstName : "Gast";
+
+  const [participants, tournamentWeeks] = await Promise.all([
     getParticipantsByTournamentId(tournament.id),
-    session != null
-      ? getProfileByUserId(session.user.id)
-      : Promise.resolve(null),
     getTournamentWeeksByTournamentId(tournament.id),
   ]);
-
-  const playerFirstName = profile != null ? `${profile.firstName}` : "Gast";
 
   return (
     <div className="grid grid-cols-1 items-stretch gap-4 md:gap-8 lg:grid-cols-6">
       <div className="lg:col-span-6">
         <Card>
           <CardHeader>
-            <CardTitle className="text-4xl font-bold">
-              Hallo, {playerFirstName}!
-            </CardTitle>
-            {session ? (
-              <CardDescription>
-                Vielen Dank für deine Anmeldung!
-              </CardDescription>
-            ) : null}
+            <div className="flex items-center justify-between">
+              <div>
+                <CardTitle className="text-4xl font-bold">
+                  Hallo, {playerFirstName}!
+                </CardTitle>
+                <CardDescription className="mt-2">
+                  Das Klubturnier ist gestartet! Klicke auf die Events für mehr
+                  Infos.
+                </CardDescription>
+              </div>
+              <Link href="/kalender">
+                <Button variant="outline" className="group w-full sm:w-auto">
+                  Hier geht&apos;s zum Kalender
+                  <ArrowRight className="w-4 h-4 ml-2 transition-transform group-hover:translate-x-1" />
+                </Button>
+              </Link>
+            </div>
           </CardHeader>
           <CardContent>
-            <div className="mb-4 flex items-center gap-2 text-sm text-muted-foreground">
-              <Clock className="h-4 w-4" /> Anmeldefrist endet in...
-            </div>
-            <CountdownTimer date={tournament.endRegistrationDate} />
+            <UpcomingEvents events={upcomingEvents} />
           </CardContent>
         </Card>
       </div>
 
       {profile && (
         <div className="lg:col-span-6">
-          <RolesSummary
+          <AssignmentSummary
             profileId={profile.id}
             tournamentId={tournament.id}
-            showEditButton={tournament.stage === "registration"}
           />
         </div>
       )}
