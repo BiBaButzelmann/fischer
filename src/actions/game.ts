@@ -51,10 +51,6 @@ async function closeGapInBoardNumbers(
   groupId: number,
   removedBoardNumber: number,
 ) {
-  if (removedBoardNumber === null) {
-    return;
-  }
-
   await db
     .update(game)
     .set({ boardNumber: sql`${game.boardNumber} - 1` })
