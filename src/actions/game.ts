@@ -11,67 +11,14 @@ import { gamePostponement } from "@/db/schema/gamePostponement";
 import { matchday, matchdayGame } from "@/db/schema/matchday";
 import { profile } from "@/db/schema/profile";
 import { GameResult } from "@/db/types/game";
-import {
-  and,
-  eq,
-  InferInsertModel,
-  inArray,
-  desc,
-  sql,
-  gt,
-  exists,
-} from "drizzle-orm";
+import { and, eq, InferInsertModel, inArray } from "drizzle-orm";
 import { revalidatePath } from "next/cache";
 import invariant from "tiny-invariant";
 import { roundRobinPairs } from "@/lib/pairing-utils";
 import { redirect } from "next/navigation";
 import { getDateTimeFromDefaultTime } from "@/lib/game-time";
 import { sendGamePostponementEmails } from "@/actions/email/game-postponement";
-
-async function getNextAvailableBoardNumber(
-  matchdayId: number,
-  groupId: number,
-) {
-  const gameWithHighestBoardNumber = await db
-    .select({ boardNumber: game.boardNumber })
-    .from(matchdayGame)
-    .innerJoin(game, eq(matchdayGame.gameId, game.id))
-    .where(
-      and(eq(matchdayGame.matchdayId, matchdayId), eq(game.groupId, groupId)),
-    )
-    .orderBy(desc(game.boardNumber))
-    .limit(1);
-
-  const highestBoardNumber = gameWithHighestBoardNumber[0]?.boardNumber ?? 0;
-  return highestBoardNumber + 1;
-}
-
-async function closeGapInBoardNumbers(
-  matchdayId: number,
-  groupId: number,
-  removedBoardNumber: number,
-) {
-  await db
-    .update(game)
-    .set({ boardNumber: sql`${game.boardNumber} - 1` })
-    .where(
-      and(
-        eq(game.groupId, groupId),
-        gt(game.boardNumber, removedBoardNumber),
-        exists(
-          db
-            .select()
-            .from(matchdayGame)
-            .where(
-              and(
-                eq(matchdayGame.gameId, game.id),
-                eq(matchdayGame.matchdayId, matchdayId),
-              ),
-            ),
-        ),
-      ),
-    );
-}
+import { updateBoardNumberTransaction } from "@/actions/board-number";
 
 export async function removeScheduledGamesForGroup(
   tournamentId: number,
@@ -279,13 +226,6 @@ export async function updateGameMatchdayAndBoardNumber(
   const toTimestamp = getDateTimeFromDefaultTime(newMatchday.date);
 
   await db.transaction(async (tx) => {
-    const currentBoardNumber = gameData.boardNumber;
-
-    const newBoardNumber = await getNextAvailableBoardNumber(
-      newMatchdayId,
-      gameData.groupId,
-    );
-
     await tx.insert(gamePostponement).values({
       gameId,
       postponingParticipantId: postponingParticipant.id,
@@ -298,18 +238,15 @@ export async function updateGameMatchdayAndBoardNumber(
       .update(matchdayGame)
       .set({ matchdayId: newMatchdayId })
       .where(eq(matchdayGame.gameId, gameId));
-
-    await tx
-      .update(game)
-      .set({ boardNumber: newBoardNumber })
-      .where(eq(game.id, gameId));
-
-    await closeGapInBoardNumbers(
-      currentMatchday.id,
-      gameData.groupId,
-      currentBoardNumber,
-    );
   });
+
+  await updateBoardNumberTransaction(
+    gameId,
+    gameData.groupId,
+    gameData.boardNumber,
+    currentMatchday.id,
+    newMatchdayId,
+  );
 
   try {
     await sendGamePostponementEmails(
