@@ -57,6 +57,26 @@ export async function getCalendarEventsForReferee(
   });
 }
 
+export async function getCalendarEventsForSetupHelper(
+  setupHelperId: number,
+): Promise<CalendarEvent[]> {
+  const setupHelperMatchdays = await getMatchdaysBySetupHelperId(setupHelperId);
+
+  return setupHelperMatchdays.map((entry) => {
+    return {
+      id: `setupHelper-${entry.matchday.id}`,
+      title: `Aufbauhelfer`,
+      start: getSetupHelperTimeFromDefaultTime(entry.matchday.date),
+      extendedProps: {
+        eventType: "setupHelper" as const,
+        setupHelperId: entry.setupHelper.id,
+        matchdayId: entry.matchday.id,
+        tournamentId: entry.matchday.tournamentId,
+      },
+    };
+  });
+}
+
 export async function getUpcomingEventsByProfileAndTournament(
   profileId: number,
   tournamentId: number,
@@ -95,24 +115,4 @@ export async function getUpcomingEventsByProfileAndTournament(
     .filter((event) => event.start > currentBerlinTime)
     .sort((a, b) => a.start.getTime() - b.start.getTime())
     .slice(0, limit);
-}
-
-export async function getCalendarEventsForSetupHelper(
-  setupHelperId: number,
-): Promise<CalendarEvent[]> {
-  const setupHelperMatchdays = await getMatchdaysBySetupHelperId(setupHelperId);
-
-  return setupHelperMatchdays.map((entry) => {
-    return {
-      id: `setupHelper-${entry.matchday.id}`,
-      title: `Aufbauhelfer`,
-      start: getSetupHelperTimeFromDefaultTime(entry.matchday.date),
-      extendedProps: {
-        eventType: "setupHelper" as const,
-        setupHelperId: entry.setupHelper.id,
-        matchdayId: entry.matchday.id,
-        tournamentId: entry.matchday.tournamentId,
-      },
-    };
-  });
 }
