@@ -10,7 +10,7 @@ import Link from "next/link";
 import { auth } from "@/auth/utils";
 import { getProfileByUserId } from "@/db/repositories/profile";
 import { getUpcomingEventsByProfileAndTournament } from "@/db/repositories/calendar-events";
-import { UpcomingEvents } from "./upcoming-events";
+import { UpcomingEventsList } from "./upcoming-events-list";
 import { ArrowRight, CalendarIcon } from "lucide-react";
 import { AssignmentSummary } from "./assignment-summary";
 import { ProfileWithName } from "@/db/types/profile";
@@ -127,7 +127,7 @@ async function AuthedGreetingSection({
             <p className="text-lg">Keine anstehenden Termine</p>
           </div>
         ) : (
-          <UpcomingEvents events={upcomingEvents} />
+          <UpcomingEventsList events={upcomingEvents} />
         )}
       </CardContent>
     </Card>
