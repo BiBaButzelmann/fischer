@@ -1,4 +1,3 @@
-import { Tournament } from "@/db/types/tournament";
 import {
   Card,
   CardContent,
@@ -22,10 +21,10 @@ import { TournamentWeeks } from "../registration/tournament-weeks";
 import { ProfileWithName } from "@/db/types/profile";
 
 type Props = {
-  tournament: Tournament;
+  tournamentId: number;
 };
 
-export async function TournamentRunning({ tournament }: Props) {
+export async function TournamentRunning({ tournamentId }: Props) {
   const session = await auth();
   const profile =
     session != null ? await getProfileByUserId(session.user.id) : null;
@@ -36,7 +35,7 @@ export async function TournamentRunning({ tournament }: Props) {
         {profile != null ? (
           <AuthedGreetingSection
             profile={profile}
-            tournamentId={tournament.id}
+            tournamentId={tournamentId}
           />
         ) : (
           <GuestGreetingSection />
@@ -47,18 +46,18 @@ export async function TournamentRunning({ tournament }: Props) {
         <div className="lg:col-span-6">
           <AssignmentSummary
             profileId={profile.id}
-            tournamentId={tournament.id}
+            tournamentId={tournamentId}
           />
         </div>
       ) : null}
 
       <div className="lg:col-span-3">
-        <TournamentWeeksSection tournamentId={tournament.id} />
+        <TournamentWeeksSection tournamentId={tournamentId} />
       </div>
 
       <div className="lg:col-span-3">
         <ParticipantsSection
-          tournamentId={tournament.id}
+          tournamentId={tournamentId}
           profileId={profile?.id}
         />
       </div>
@@ -159,14 +158,6 @@ async function AuthedGreetingSection({
     tournamentId,
   );
 
-  if (upcomingEvents.length === 0) {
-    return (
-      <div className="text-center py-12 text-gray-500 dark:text-gray-400">
-        <CalendarIcon className="h-16 w-16 mx-auto mb-4 opacity-50" />
-        <p className="text-lg">Keine anstehenden Termine</p>
-      </div>
-    );
-  }
   return (
     <Card>
       <CardHeader>
@@ -189,7 +180,14 @@ async function AuthedGreetingSection({
         </div>
       </CardHeader>
       <CardContent>
-        <UpcomingEvents events={upcomingEvents} />
+        {upcomingEvents.length === 0 ? (
+          <div className="text-center py-12 text-gray-500 dark:text-gray-400">
+            <CalendarIcon className="h-16 w-16 mx-auto mb-4 opacity-50" />
+            <p className="text-lg">Keine anstehenden Termine</p>
+          </div>
+        ) : (
+          <UpcomingEvents events={upcomingEvents} />
+        )}
       </CardContent>
     </Card>
   );

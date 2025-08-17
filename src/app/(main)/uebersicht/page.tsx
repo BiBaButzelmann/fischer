@@ -32,7 +32,7 @@ export default async function Page() {
   }
 
   if (tournament.stage === "running") {
-    return <TournamentRunning tournament={tournament} />;
+    return <TournamentRunning tournamentId={tournament.id} />;
   }
 
   if (tournament.stage === "done") {
