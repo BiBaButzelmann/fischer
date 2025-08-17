@@ -1,4 +1,7 @@
 import { db } from "../client";
+import { participant, participantGroup } from "../schema/participant";
+import { group } from "../schema/group";
+import { and, eq } from "drizzle-orm";
 
 export async function getGroupById(groupId: number) {
   return await db.query.group.findFirst({
@@ -21,6 +24,31 @@ export async function getGroupById(groupId: number) {
       },
     },
   });
+}
+
+export async function getGroupNameAndDayOfWeekByProfileIdAndTournamentId(
+  profileId: number,
+  tournamentId: number,
+) {
+  const result = await db
+    .select({
+      groupName: group.groupName,
+      dayOfWeek: group.dayOfWeek,
+    })
+    .from(participant)
+    .innerJoin(
+      participantGroup,
+      eq(participant.id, participantGroup.participantId),
+    )
+    .innerJoin(group, eq(participantGroup.groupId, group.id))
+    .where(
+      and(
+        eq(participant.profileId, profileId),
+        eq(participant.tournamentId, tournamentId),
+      ),
+    );
+
+  return result[0] ?? null;
 }
 
 export async function getGroupsByTournamentId(tournamentId: number) {

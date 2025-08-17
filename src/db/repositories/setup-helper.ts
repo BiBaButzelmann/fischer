@@ -4,7 +4,7 @@ import { db } from "../client";
 import { setupHelper } from "../schema/setupHelper";
 import { profile } from "../schema/profile";
 import { matchday, matchdaySetupHelper } from "../schema/matchday";
-import { and, eq } from "drizzle-orm";
+import { and, eq, count } from "drizzle-orm";
 
 export async function getSetupHelperByProfileIdAndTournamentId(
   profileId: number,
@@ -16,6 +16,29 @@ export async function getSetupHelperByProfileIdAndTournamentId(
       eq(setupHelper.tournamentId, tournamentId),
     ),
   });
+}
+
+export async function getSetupHelperAssignmentCountByProfileIdAndTournamentId(
+  profileId: number,
+  tournamentId: number,
+): Promise<number> {
+  const setupHelperData = await db.query.setupHelper.findFirst({
+    where: and(
+      eq(setupHelper.profileId, profileId),
+      eq(setupHelper.tournamentId, tournamentId),
+    ),
+  });
+
+  if (!setupHelperData) {
+    return 0;
+  }
+
+  const assignmentCount = await db
+    .select({ count: count() })
+    .from(matchdaySetupHelper)
+    .where(eq(matchdaySetupHelper.setupHelperId, setupHelperData.id));
+
+  return assignmentCount[0]?.count ?? 0;
 }
 
 export async function getAllSetupHelpersByTournamentId(tournamentId: number) {

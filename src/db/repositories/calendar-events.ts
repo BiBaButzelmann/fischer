@@ -6,7 +6,12 @@ import {
   getSetupHelperTimeFromDefaultTime,
 } from "@/lib/game-time";
 import { getMatchdaysByRefereeId } from "./referee";
-import { getMatchdaysBySetupHelperId } from "./setup-helper";
+import { getParticipantWithGroupByProfileIdAndTournamentId } from "./participant";
+import { getRefereeByProfileIdAndTournamentId } from "./referee";
+import {
+  getMatchdaysBySetupHelperId,
+  getSetupHelperByProfileIdAndTournamentId,
+} from "./setup-helper";
 
 export async function getCalendarEventsForParticipant(
   participantId: number,
@@ -70,4 +75,44 @@ export async function getCalendarEventsForSetupHelper(
       },
     };
   });
+}
+
+export async function getUpcomingEventsByProfileAndTournament(
+  profileId: number,
+  tournamentId: number,
+  limit: number = 3,
+): Promise<CalendarEvent[]> {
+  const [participant, referee, setupHelper] = await Promise.all([
+    getParticipantWithGroupByProfileIdAndTournamentId(profileId, tournamentId),
+    getRefereeByProfileIdAndTournamentId(profileId, tournamentId),
+    getSetupHelperByProfileIdAndTournamentId(profileId, tournamentId),
+  ]);
+
+  const eventPromises: Promise<CalendarEvent[]>[] = [];
+  if (participant) {
+    eventPromises.push(getCalendarEventsForParticipant(participant.id));
+  }
+  if (referee) {
+    eventPromises.push(getCalendarEventsForReferee(referee.id));
+  }
+  if (setupHelper) {
+    eventPromises.push(getCalendarEventsForSetupHelper(setupHelper.id));
+  }
+
+  if (eventPromises.length === 0) {
+    return [];
+  }
+
+  const allEvents = await Promise.all(eventPromises);
+
+  const berlinNow = new Date().toLocaleString("en-US", {
+    timeZone: "Europe/Berlin",
+  });
+  const currentBerlinTime = new Date(berlinNow);
+
+  return allEvents
+    .flat()
+    .filter((event) => event.start > currentBerlinTime)
+    .sort((a, b) => a.start.getTime() - b.start.getTime())
+    .slice(0, limit);
 }

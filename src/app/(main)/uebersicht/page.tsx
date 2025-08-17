@@ -1,7 +1,7 @@
 import { auth } from "@/auth/utils";
 import { TournamentDone } from "@/components/uebersicht/tournament-done";
-import { TournamentRegistration } from "@/components/uebersicht/tournament-registration";
-import { TournamentRunning } from "@/components/uebersicht/tournament-running";
+import { TournamentRegistration } from "@/components/uebersicht/registration/tournament-registration";
+import { TournamentRunning } from "@/components/uebersicht/running/tournament-running";
 import { getRolesByUserId } from "@/db/repositories/role";
 import { getLatestTournament } from "@/db/repositories/tournament";
 import React from "react";
@@ -32,7 +32,7 @@ export default async function Page() {
   }
 
   if (tournament.stage === "running") {
-    return <TournamentRunning tournament={tournament} />;
+    return <TournamentRunning tournamentId={tournament.id} />;
   }
 
   if (tournament.stage === "done") {

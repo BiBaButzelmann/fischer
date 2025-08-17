@@ -4,25 +4,24 @@ import {
   Wrench,
   Shield,
   Gavel,
-  Trophy,
   Calendar,
   Hash,
   BellIcon,
   CheckCircle2,
 } from "lucide-react";
-import { Card, CardContent, CardHeader } from "../ui/card";
-import { Badge } from "../ui/badge";
-import { Button } from "../ui/button";
-import { matchDays } from "../../constants/constants";
 import { getRolesDataByProfileIdAndTournamentId } from "@/db/repositories/role";
 import { PropsWithChildren } from "react";
-import { Separator } from "../ui/separator";
 import { Participant } from "@/db/types/participant";
 import { MatchEnteringHelper } from "@/db/types/match-entering-helper";
 import { SetupHelper } from "@/db/types/setup-helper";
 import { Referee } from "@/db/types/referee";
+import { Card, CardHeader, CardContent } from "@/components/ui/card";
+import { matchDays } from "@/constants/constants";
+import { Separator } from "@radix-ui/react-separator";
+import { Button } from "@/components/ui/button";
+import { Badge } from "@/components/ui/badge";
 
-type RoleSummaryProps = {
+type Props = {
   profileId: number;
   tournamentId: number;
   showEditButton?: boolean;
@@ -32,7 +31,7 @@ export async function RolesSummary({
   profileId,
   tournamentId,
   showEditButton = false,
-}: RoleSummaryProps) {
+}: Props) {
   const { participant, juror, referee, matchEnteringHelper, setupHelper } =
     await getRolesDataByProfileIdAndTournamentId(profileId, tournamentId);
 
@@ -42,7 +41,7 @@ export async function RolesSummary({
         <div className="flex flex-wrap items-center justify-between gap-4">
           <div className="flex items-center gap-3">
             <div className="p-2 bg-gray-100 border border-gray-200 rounded-lg">
-              <Trophy className="h-5 w-5 text-gray-600" />
+              <User className="h-5 w-5 text-gray-600" />
             </div>
             <div>
               <h2 className="text-xl font-bold text-gray-900">
