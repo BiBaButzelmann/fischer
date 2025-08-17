@@ -30,7 +30,7 @@ const eventConfig = {
   },
 };
 
-export function UpcomingEvents({ events }: Props) {
+export function UpcomingEventsList({ events }: Props) {
   const router = useRouter();
 
   const handleRefereeClick = useCallback(

@@ -2,7 +2,6 @@ import { db } from "../client";
 import { participant, participantGroup } from "../schema/participant";
 import { group } from "../schema/group";
 import { and, eq } from "drizzle-orm";
-import { type GroupNameAndDayOfWeek } from "../types/group";
 
 export async function getGroupById(groupId: number) {
   return await db.query.group.findFirst({
@@ -30,7 +29,7 @@ export async function getGroupById(groupId: number) {
 export async function getGroupNameAndDayOfWeekByProfileIdAndTournamentId(
   profileId: number,
   tournamentId: number,
-): Promise<GroupNameAndDayOfWeek | null> {
+) {
   const result = await db
     .select({
       groupName: group.groupName,
