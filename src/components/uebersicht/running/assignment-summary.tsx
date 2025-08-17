@@ -13,7 +13,6 @@ import {
 import { PropsWithChildren } from "react";
 import { Card, CardHeader, CardContent } from "@/components/ui/card";
 import { matchDays } from "@/constants/constants";
-import { GroupNameAndDayOfWeek } from "@/db/types/group";
 import { getGroupNameAndDayOfWeekByProfileIdAndTournamentId } from "@/db/repositories/group";
 import { getJurorByProfileIdAndTournamentId } from "@/db/repositories/juror";
 import { getRefereeAssignmentCountByProfileIdAndTournamentId } from "@/db/repositories/referee";
@@ -25,48 +24,7 @@ type Props = {
   tournamentId: number;
 };
 
-async function getAssignmentDataByProfileIdAndTournamentId(
-  profileId: number,
-  tournamentId: number,
-) {
-  const [
-    playerGroup,
-    setupHelperDaysCount,
-    refereeDaysCount,
-    matchEnteringHelperGroupsCount,
-    juror,
-  ] = await Promise.all([
-    getGroupNameAndDayOfWeekByProfileIdAndTournamentId(profileId, tournamentId),
-    getSetupHelperAssignmentCountByProfileIdAndTournamentId(
-      profileId,
-      tournamentId,
-    ),
-    getRefereeAssignmentCountByProfileIdAndTournamentId(
-      profileId,
-      tournamentId,
-    ),
-    getMatchEnteringHelperAssignmentCountByProfileIdAndTournamentId(
-      profileId,
-      tournamentId,
-    ),
-    getJurorByProfileIdAndTournamentId(profileId, tournamentId),
-  ]);
-
-  return {
-    playerGroup,
-    juror,
-    assignmentCounts: {
-      setupHelperDaysCount,
-      refereeDaysCount,
-      matchEnteringHelperGroupsCount,
-    },
-  };
-}
-
 export async function AssignmentSummary({ profileId, tournamentId }: Props) {
-  const { playerGroup, juror, assignmentCounts } =
-    await getAssignmentDataByProfileIdAndTournamentId(profileId, tournamentId);
-
   return (
     <Card>
       <CardHeader className="bg-white border-b rounded-t-xl">
@@ -87,34 +45,19 @@ export async function AssignmentSummary({ profileId, tournamentId }: Props) {
 
       <CardContent className="p-4 md:p-6">
         <div className="grid grid-cols-1 lg:grid-cols-12 gap-2">
-          {playerGroup != null ? (
-            <div className="lg:col-span-7 bg-white p-4 md:p-6 rounded-lg border border-gray-200">
-              <PlayerSection playerGroup={playerGroup} />
-            </div>
-          ) : null}
+          <PlayerSection profileId={profileId} tournamentId={tournamentId} />
 
           <div className="lg:col-span-5 md:space-y-2">
-            {assignmentCounts.setupHelperDaysCount > 0 ? (
-              <SetupHelperSection
-                assignedDaysCount={assignmentCounts.setupHelperDaysCount}
-              />
-            ) : null}
-
-            {assignmentCounts.refereeDaysCount > 0 ? (
-              <RefereeSection
-                assignedDaysCount={assignmentCounts.refereeDaysCount}
-              />
-            ) : null}
-
-            {assignmentCounts.matchEnteringHelperGroupsCount > 0 ? (
-              <MatchEnteringHelperSection
-                assignedGroupsCount={
-                  assignmentCounts.matchEnteringHelperGroupsCount
-                }
-              />
-            ) : null}
-
-            {juror != null ? <JurorSection /> : null}
+            <SetupHelperSection
+              profileId={profileId}
+              tournamentId={tournamentId}
+            />
+            <RefereeSection profileId={profileId} tournamentId={tournamentId} />
+            <MatchEnteringHelperSection
+              profileId={profileId}
+              tournamentId={tournamentId}
+            />
+            <JurorSection profileId={profileId} tournamentId={tournamentId} />
           </div>
         </div>
       </CardContent>
@@ -138,46 +81,59 @@ function RoleSection({
   );
 }
 
-function PlayerSection({
-  playerGroup,
+async function PlayerSection({
+  profileId,
+  tournamentId,
 }: {
-  playerGroup: GroupNameAndDayOfWeek;
+  profileId: number;
+  tournamentId: number;
 }) {
+  const playerGroup = await getGroupNameAndDayOfWeekByProfileIdAndTournamentId(
+    profileId,
+    tournamentId,
+  );
+
+  if (playerGroup == null) {
+    return null;
+  }
+
   return (
-    <div className="space-y-4">
-      <div className="flex items-center gap-2 mb-4">
-        <div className="p-1.5 bg-gray-100 rounded-md">
-          <User className="h-4 w-4 text-gray-600" />
+    <div className="lg:col-span-7 bg-white p-4 md:p-6 rounded-lg border border-gray-200">
+      <div className="space-y-4">
+        <div className="flex items-center gap-2 mb-4">
+          <div className="p-1.5 bg-gray-100 rounded-md">
+            <User className="h-4 w-4 text-gray-600" />
+          </div>
+          <h3 className="text-lg font-semibold text-gray-900">Spieler</h3>
         </div>
-        <h3 className="text-lg font-semibold text-gray-900">Spieler</h3>
-      </div>
-      <div className="space-y-3">
-        <div>
-          <div className="flex items-center gap-2 mb-2">
-            <Users className="h-4 w-4 text-gray-500" />
-            <span className="text-sm font-medium text-gray-700">
-              Meine Gruppe
-            </span>
+        <div className="space-y-3">
+          <div>
+            <div className="flex items-center gap-2 mb-2">
+              <Users className="h-4 w-4 text-gray-500" />
+              <span className="text-sm font-medium text-gray-700">
+                Meine Gruppe
+              </span>
+            </div>
+            <div className="ml-6">
+              <Badge className="bg-gray-900 text-white hover:bg-gray-800 font-medium">
+                {playerGroup.groupName}
+              </Badge>
+            </div>
           </div>
-          <div className="ml-6">
-            <Badge className="bg-gray-900 text-white hover:bg-gray-800 font-medium">
-              {playerGroup.groupName}
-            </Badge>
-          </div>
-        </div>
-        <div>
-          <div className="flex items-center gap-2 mb-2">
-            <Calendar className="h-4 w-4 text-gray-500" />
-            <span className="text-sm font-medium text-gray-700">
-              Mein Gruppenspieltag
-            </span>
-          </div>
-          <div className="ml-6">
-            <Badge className="bg-gray-900 text-white hover:bg-gray-800 font-medium">
-              {playerGroup.dayOfWeek
-                ? matchDays[playerGroup.dayOfWeek]
-                : "Wochentag noch nicht zugewiesen"}
-            </Badge>
+          <div>
+            <div className="flex items-center gap-2 mb-2">
+              <Calendar className="h-4 w-4 text-gray-500" />
+              <span className="text-sm font-medium text-gray-700">
+                Mein Gruppenspieltag
+              </span>
+            </div>
+            <div className="ml-6">
+              <Badge className="bg-gray-900 text-white hover:bg-gray-800 font-medium">
+                {playerGroup.dayOfWeek
+                  ? matchDays[playerGroup.dayOfWeek]
+                  : "Wochentag noch nicht zugewiesen"}
+              </Badge>
+            </div>
           </div>
         </div>
       </div>
@@ -185,11 +141,23 @@ function PlayerSection({
   );
 }
 
-function SetupHelperSection({
-  assignedDaysCount,
+async function SetupHelperSection({
+  profileId,
+  tournamentId,
 }: {
-  assignedDaysCount: number;
+  profileId: number;
+  tournamentId: number;
 }) {
+  const assignedDaysCount =
+    await getSetupHelperAssignmentCountByProfileIdAndTournamentId(
+      profileId,
+      tournamentId,
+    );
+
+  if (assignedDaysCount === 0) {
+    return null;
+  }
+
   return (
     <RoleSection
       icon={<Wrench className="h-4 w-4 text-gray-600" />}
@@ -209,7 +177,23 @@ function SetupHelperSection({
   );
 }
 
-function RefereeSection({ assignedDaysCount }: { assignedDaysCount: number }) {
+async function RefereeSection({
+  profileId,
+  tournamentId,
+}: {
+  profileId: number;
+  tournamentId: number;
+}) {
+  const assignedDaysCount =
+    await getRefereeAssignmentCountByProfileIdAndTournamentId(
+      profileId,
+      tournamentId,
+    );
+
+  if (assignedDaysCount === 0) {
+    return null;
+  }
+
   return (
     <RoleSection
       icon={<BellIcon className="h-4 w-4 text-gray-600" />}
@@ -229,7 +213,22 @@ function RefereeSection({ assignedDaysCount }: { assignedDaysCount: number }) {
   );
 }
 
-function JurorSection() {
+async function JurorSection({
+  profileId,
+  tournamentId,
+}: {
+  profileId: number;
+  tournamentId: number;
+}) {
+  const juror = await getJurorByProfileIdAndTournamentId(
+    profileId,
+    tournamentId,
+  );
+
+  if (juror == null) {
+    return null;
+  }
+
   return (
     <RoleSection
       icon={<Gavel className="h-4 w-4 text-gray-600" />}
@@ -243,11 +242,23 @@ function JurorSection() {
   );
 }
 
-function MatchEnteringHelperSection({
-  assignedGroupsCount,
+async function MatchEnteringHelperSection({
+  profileId,
+  tournamentId,
 }: {
-  assignedGroupsCount: number;
+  profileId: number;
+  tournamentId: number;
 }) {
+  const assignedGroupsCount =
+    await getMatchEnteringHelperAssignmentCountByProfileIdAndTournamentId(
+      profileId,
+      tournamentId,
+    );
+
+  if (assignedGroupsCount === 0) {
+    return null;
+  }
+
   return (
     <RoleSection
       icon={<Hash className="h-4 w-4 text-gray-600" />}
