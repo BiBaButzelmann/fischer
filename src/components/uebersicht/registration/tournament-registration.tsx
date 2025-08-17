@@ -10,12 +10,9 @@ import { Clock } from "lucide-react";
 import { CountdownTimer } from "./countdown-timer";
 import { auth } from "@/auth/utils";
 import { getProfileByUserId } from "@/db/repositories/profile";
-import { Participants } from "../../participants/participants";
-import { getParticipantsByTournamentId } from "@/db/repositories/participant";
-import { ScrollArea, ScrollBar } from "../../ui/scroll-area";
-import { getTournamentWeeksByTournamentId } from "@/db/repositories/tournamentWeek";
 import { RolesSummary } from "./roles-summary";
-import { TournamentWeeks } from "./tournament-weeks";
+import { TournamentWeeksSection } from "../tournament-weeks-section";
+import { ParticipantsSection } from "../participants-section";
 
 type Props = {
   tournament: Tournament;
@@ -23,15 +20,8 @@ type Props = {
 
 export async function TournamentRegistration({ tournament }: Props) {
   const session = await auth();
-  const [participants, profile, tournamentWeeks] = await Promise.all([
-    getParticipantsByTournamentId(tournament.id),
-    session != null
-      ? getProfileByUserId(session.user.id)
-      : Promise.resolve(null),
-    getTournamentWeeksByTournamentId(tournament.id),
-  ]);
-
-  const playerFirstName = profile != null ? `${profile.firstName}` : "Gast";
+  const profile =
+    session != null ? await getProfileByUserId(session.user.id) : null;
 
   return (
     <div className="grid grid-cols-1 items-stretch gap-4 md:gap-8 lg:grid-cols-6">
@@ -39,7 +29,7 @@ export async function TournamentRegistration({ tournament }: Props) {
         <Card>
           <CardHeader>
             <CardTitle className="text-4xl font-bold">
-              Hallo, {playerFirstName}!
+              Hallo, {profile != null ? `${profile.firstName}` : "Gast"}!
             </CardTitle>
             {session ? (
               <CardDescription>
@@ -66,46 +56,12 @@ export async function TournamentRegistration({ tournament }: Props) {
         </div>
       )}
 
-      <div className="lg:col-span-3">
-        <Card className="flex h-full flex-col">
-          <CardHeader>
-            <CardTitle>Zeitplan</CardTitle>
-            <CardDescription>
-              Gesamtübersicht der Spieltermine. An Feiertagen kann nicht
-              gespielt werden.
-            </CardDescription>
-          </CardHeader>
-          <CardContent className="flex-1">
-            <ScrollArea className="w-full pb-3">
-              <TournamentWeeks tournamentWeeks={tournamentWeeks} />
-              <ScrollBar orientation="horizontal" />
-            </ScrollArea>
-          </CardContent>
-        </Card>
-      </div>
+      <TournamentWeeksSection tournamentId={tournament.id} />
 
-      <div className="lg:col-span-3">
-        <Card className="flex h-full flex-col">
-          <CardHeader>
-            <CardTitle>Teilnehmerliste</CardTitle>
-            <CardDescription>
-              Aktuelle Liste der{" "}
-              <strong className="text-base font-bold text-foreground">
-                {participants.length}
-              </strong>{" "}
-              angemeldeten Spieler.
-            </CardDescription>
-          </CardHeader>
-          <CardContent className="flex-1">
-            <ScrollArea className="h-[510px] w-full pr-3">
-              <Participants
-                profileId={profile?.id}
-                participants={participants}
-              />
-            </ScrollArea>
-          </CardContent>
-        </Card>
-      </div>
+      <ParticipantsSection
+        tournamentId={tournament.id}
+        profileId={profile?.id}
+      />
     </div>
   );
 }
