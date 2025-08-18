@@ -1,6 +1,9 @@
 import { auth } from "@/auth/utils";
 import { GenerateFideReport } from "@/components/admin/fide-report/generate-fide-report";
-import { getAllGroupNamesByTournamentId } from "@/db/repositories/game";
+import {
+  getAllGroupNamesByTournamentId,
+  getGamesInMonth,
+} from "@/db/repositories/game";
 import { getLatestTournament } from "@/db/repositories/tournament";
 import { redirect } from "next/navigation";
 
@@ -26,13 +29,30 @@ export default async function Page({
     );
   }
 
-  const groups = await getAllGroupNamesByTournamentId(tournament.id);
+  const [groups, isDisabled] = await Promise.all([
+    getAllGroupNamesByTournamentId(tournament.id),
+    isGenerationDisabled(groupId, month),
+  ]);
 
   return (
     <GenerateFideReport
       groups={groups}
       selectedGroupId={groupId}
       selectedMonth={month}
+      isDisabled={isDisabled}
     />
   );
+}
+
+async function isGenerationDisabled(
+  groupIdParam: string | undefined,
+  monthParam: string | undefined,
+) {
+  if (!groupIdParam || !monthParam) return true;
+
+  const groupId = parseInt(groupIdParam);
+  const month = parseInt(monthParam);
+
+  const games = await getGamesInMonth(groupId, month);
+  return games.some((game) => game.result == null);
 }

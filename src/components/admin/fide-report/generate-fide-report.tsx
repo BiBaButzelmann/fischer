@@ -30,12 +30,14 @@ type Props = {
   groups: GroupSummary[];
   selectedGroupId?: string;
   selectedMonth?: string;
+  isDisabled?: boolean;
 };
 
 export function GenerateFideReport({
   groups,
   selectedGroupId,
   selectedMonth,
+  isDisabled,
 }: Props) {
   const router = useRouter();
   const [isPending, startTransition] = useTransition();
@@ -150,7 +152,9 @@ export function GenerateFideReport({
           <Button
             className="w-full gap-2"
             onClick={handleDownload}
-            disabled={!selectedGroupId || !selectedMonth || isPending}
+            disabled={
+              !selectedGroupId || !selectedMonth || isPending || isDisabled
+            }
           >
             <Download className="h-4 w-4" />
             Elo-Auswertung generieren
