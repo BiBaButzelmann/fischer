@@ -20,9 +20,11 @@ import {
 } from "@/components/ui/select";
 import { monthLabels } from "@/constants/constants";
 import { GroupSummary } from "@/db/types/group";
+import { isError } from "@/lib/actions";
 import { Download } from "lucide-react";
 import { useRouter } from "next/navigation";
 import { useMemo, useTransition } from "react";
+import { toast } from "sonner";
 
 type Props = {
   groups: GroupSummary[];
@@ -82,6 +84,11 @@ export function GenerateFideReport({
         parseInt(selectedGroupId),
         parseInt(selectedMonth),
       );
+      if (isError(result)) {
+        toast.error(result.error);
+        return;
+      }
+
       const element = document.createElement("a");
       element.setAttribute(
         "href",
