@@ -70,19 +70,11 @@ function GuestGreetingSection() {
           <div>
             <CardTitle className="text-4xl font-bold">Hallo, Gast!</CardTitle>
             <CardDescription className="mt-2">
-              Das Klubturnier ist gestartet! Klicke auf die Events für mehr
-              Infos.
+              Das Klubturnier ist gestartet!
             </CardDescription>
           </div>
-          <Link href="/kalender">
-            <Button variant="outline" className="group w-full sm:w-auto">
-              Hier geht&apos;s zum Kalender
-              <ArrowRight className="w-4 h-4 ml-2 transition-transform group-hover:translate-x-1" />
-            </Button>
-          </Link>
         </div>
       </CardHeader>
-      <CardContent>bla bla bla</CardContent>
     </Card>
   );
 }
