@@ -1,9 +1,14 @@
+import { ParticipantWithRating } from "./participant";
+
 export type PlayerStanding = {
+  participant: ParticipantWithRating;
+  points: number;
+  gamesPlayed: number;
+  sonnebornBerger: number;
+};
+
+export type PlayerStats = {
   participantId: number;
-  name: string;
-  title: string | null;
-  dwz: number | null;
-  elo: number | null;
   points: number;
   gamesPlayed: number;
   sonnebornBerger: number;

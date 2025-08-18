@@ -1,5 +1,5 @@
 import { db } from "../client";
-import { eq, and, asc, or } from "drizzle-orm";
+import { eq, and, asc, or, sql, getTableColumns } from "drizzle-orm";
 import { group } from "../schema/group";
 import { matchdayGame } from "../schema/matchday";
 import { matchday } from "../schema/matchday";
@@ -253,56 +253,6 @@ export async function getCompletedGames(groupId: number, maxRound?: number) {
 
       return and(...conditions);
     },
-    columns: {
-      id: true,
-      whiteParticipantId: true,
-      blackParticipantId: true,
-      result: true,
-      round: true,
-    },
-    with: {
-      whiteParticipant: {
-        columns: {
-          id: true,
-          dwzRating: true,
-          fideRating: true,
-          title: true,
-        },
-        with: {
-          profile: {
-            columns: {
-              firstName: true,
-              lastName: true,
-            },
-          },
-        },
-      },
-      blackParticipant: {
-        columns: {
-          id: true,
-          dwzRating: true,
-          fideRating: true,
-          title: true,
-        },
-        with: {
-          profile: {
-            columns: {
-              firstName: true,
-              lastName: true,
-            },
-          },
-        },
-      },
-      matchdayGame: {
-        with: {
-          matchday: {
-            columns: {
-              date: true,
-            },
-          },
-        },
-      },
-    },
     orderBy: (game, { asc }) => [
       asc(game.groupId),
       asc(game.round),
@@ -310,6 +260,24 @@ export async function getCompletedGames(groupId: number, maxRound?: number) {
     ],
   });
   return result;
+}
+
+export async function getGamesInMonth(groupId: number, month: number) {
+  return await db
+    .select({
+      ...getTableColumns(game),
+      matchday: getTableColumns(matchday),
+    })
+    .from(game)
+    .innerJoin(matchdayGame, eq(game.id, matchdayGame.gameId))
+    .innerJoin(matchday, eq(matchdayGame.matchdayId, matchday.id))
+    .where(
+      and(
+        eq(game.groupId, groupId),
+        sql`EXTRACT(MONTH FROM ${matchday.date}) = ${month}`,
+      ),
+    )
+    .orderBy(asc(matchday.date));
 }
 
 export async function getParticipantsInGroup(groupId: number) {
