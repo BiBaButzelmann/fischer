@@ -47,8 +47,8 @@ export default async function Page({
         <CardHeader>
           <CardTitle>Elo-Auswertung</CardTitle>
           <CardDescription>
-            Wählen Sie eine Gruppe und einen Monat aus, um die Elo-Auswertung
-            als .txt-Datei zu generieren und herunterzuladen.
+            Wähle eine Gruppe und einen Monat aus, um die Elo-Auswertung als
+            .txt-Datei zu generieren und herunterzuladen.
           </CardDescription>
         </CardHeader>
         <CardContent>
