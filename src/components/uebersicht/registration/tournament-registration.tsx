@@ -56,12 +56,16 @@ export async function TournamentRegistration({ tournament }: Props) {
         </div>
       )}
 
-      <TournamentWeeksSection tournamentId={tournament.id} />
+      <div className="lg:col-span-3">
+        <TournamentWeeksSection tournamentId={tournament.id} />
+      </div>
 
-      <ParticipantsSection
-        tournamentId={tournament.id}
-        profileId={profile?.id}
-      />
+      <div className="lg:col-span-3">
+        <ParticipantsSection
+          tournamentId={tournament.id}
+          profileId={profile?.id}
+        />
+      </div>
     </div>
   );
 }
