@@ -302,6 +302,82 @@ export async function getUncompletedGamesInMonth(
     .orderBy(asc(matchday.date));
 }
 
+export async function getUncompletedGamesByParticipantId(
+  participantId: number,
+) {
+  // TODO: remove this later
+  const referenceDate =
+    process.env.NODE_ENV === "development"
+      ? new Date("2025-09-30")
+      : new Date();
+
+  const gamesWithMatchdays = await db
+    .select({
+      ...getTableColumns(game),
+      matchday: getTableColumns(matchday),
+    })
+    .from(game)
+    .innerJoin(matchdayGame, eq(game.id, matchdayGame.gameId))
+    .innerJoin(matchday, eq(matchdayGame.matchdayId, matchday.id))
+    .where(
+      and(
+        or(
+          eq(game.whiteParticipantId, participantId),
+          eq(game.blackParticipantId, participantId),
+        ),
+        isNull(game.result),
+        sql`${matchday.date} < ${referenceDate}`,
+      ),
+    )
+    .orderBy(asc(matchday.date));
+
+  const gameIds = gamesWithMatchdays.map((row) => row.id);
+
+  if (gameIds.length === 0) {
+    return [];
+  }
+
+  return await db.query.game
+    .findMany({
+      where: (game, { inArray }) => inArray(game.id, gameIds),
+      with: {
+        whiteParticipant: {
+          with: {
+            profile: {
+              columns: {
+                firstName: true,
+                lastName: true,
+              },
+            },
+          },
+        },
+        blackParticipant: {
+          with: {
+            profile: {
+              columns: {
+                firstName: true,
+                lastName: true,
+              },
+            },
+          },
+        },
+        matchdayGame: {
+          with: {
+            matchday: {
+              columns: {
+                date: true,
+              },
+            },
+          },
+        },
+      },
+    })
+    .then((games) => {
+      const gameMap = new Map(games.map((game) => [game.id, game]));
+      return gameIds.map((id) => gameMap.get(id)).filter(Boolean);
+    });
+}
+
 export async function getParticipantsInGroup(groupId: number) {
   const participantsInGroup = await db.query.participantGroup.findMany({
     where: (participantGroup, { eq }) => eq(participantGroup.groupId, groupId),

@@ -1,6 +1,7 @@
 import { AppSidebar } from "@/components/sidebar";
 import { Separator } from "@/components/ui/separator";
 import { SidebarTrigger } from "@/components/ui/sidebar";
+import { NotificationCenter } from "@/components/notification/notification-center";
 
 export default function RootLayout({
   children,
@@ -11,8 +12,11 @@ export default function RootLayout({
     <>
       <AppSidebar />
       <main className="w-full">
-        <SidebarTrigger className="mt-4 ml-2 hover:bg-secondary hover:text-current" />
-        <div className="min-h-[calc(100vh-46px)] px-4 md:px-10 py-4 max-w-6xl mx-auto">
+        <div className="flex items-center justify-between px-4 md:px-10 py-4">
+          <SidebarTrigger className="hover:bg-secondary hover:text-current" />
+          <NotificationCenter />
+        </div>
+        <div className="min-h-[calc(100vh-92px)] px-4 md:px-10 pb-4 max-w-6xl mx-auto">
           {children}
         </div>
         <footer>

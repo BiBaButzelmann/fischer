@@ -1,6 +1,10 @@
 import { InferEnum, InferSelectModel } from "drizzle-orm";
 import { game } from "../schema/game";
-import { ParticipantWithName, ParticipantWithRating, ParticipantWithProfile } from "./participant";
+import {
+  ParticipantWithName,
+  ParticipantWithRating,
+  ParticipantWithProfile,
+} from "./participant";
 
 export type Game = InferSelectModel<typeof game>;
 
@@ -61,6 +65,14 @@ export type GameWithMatchday = Game & {
 export type GameWithParticipantProfilesAndMatchday = Game & {
   whiteParticipant: ParticipantWithProfile;
   blackParticipant: ParticipantWithProfile;
+  matchdayGame: {
+    matchday: {
+      date: Date;
+    };
+  };
+};
+
+export type GameWithParticipantsAndDate = GameWithParticipants & {
   matchdayGame: {
     matchday: {
       date: Date;

@@ -66,3 +66,16 @@ export function formatEventDateTime(date: Date): string {
   });
   return `${dateStr} um ${timeStr}`;
 }
+
+/**
+ * Formats a date in German format (dd.MM.yyyy)
+ * @param date - The date to format
+ * @returns Formatted date string
+ */
+export function formatSimpleDate(date: Date): string {
+  return date.toLocaleDateString("de-DE", {
+    day: "2-digit",
+    month: "2-digit",
+    year: "numeric",
+  });
+}
