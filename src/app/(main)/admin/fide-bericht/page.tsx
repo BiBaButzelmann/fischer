@@ -1,8 +1,18 @@
 import { auth } from "@/auth/utils";
-import { GenerateFideReport } from "@/components/admin/fide-report/generate-fide-report";
+import { GenerateFideReportButton } from "@/components/admin/fide-report/generate-fide-report-button";
+import { GenerateFideReportSelector } from "@/components/admin/fide-report/generate-fide-report-selector";
+import { UncompletedGames } from "@/components/admin/fide-report/uncompleted-games";
+import {
+  Card,
+  CardHeader,
+  CardTitle,
+  CardDescription,
+  CardContent,
+  CardFooter,
+} from "@/components/ui/card";
 import {
   getAllGroupNamesByTournamentId,
-  getGamesInMonth,
+  getUncompletedGamesInMonth,
 } from "@/db/repositories/game";
 import { getLatestTournament } from "@/db/repositories/tournament";
 import { redirect } from "next/navigation";
@@ -29,30 +39,74 @@ export default async function Page({
     );
   }
 
-  const [groups, isDisabled] = await Promise.all([
-    getAllGroupNamesByTournamentId(tournament.id),
-    isGenerationDisabled(groupId, month),
-  ]);
+  const groups = await getAllGroupNamesByTournamentId(tournament.id);
 
   return (
-    <GenerateFideReport
-      groups={groups}
-      selectedGroupId={groupId}
-      selectedMonth={month}
-      isDisabled={isDisabled}
-    />
+    <div className="flex h-full w-full items-center justify-center bg-muted/40 p-4">
+      <Card className="w-full max-w-lg">
+        <CardHeader>
+          <CardTitle>Elo-Auswertung</CardTitle>
+          <CardDescription>
+            Wählen Sie eine Gruppe und einen Monat aus, um die Elo-Auswertung
+            als .txt-Datei zu generieren und herunterzuladen.
+          </CardDescription>
+        </CardHeader>
+        <CardContent>
+          <GenerateFideReportSelector
+            groups={groups}
+            selectedGroupId={groupId}
+            selectedMonth={month}
+          />
+        </CardContent>
+        <CardFooter>
+          <ButtonSection
+            tournamentId={tournament.id}
+            selectedGroupId={groupId}
+            selectedMonth={month}
+          />
+        </CardFooter>
+      </Card>
+    </div>
   );
 }
 
-async function isGenerationDisabled(
-  groupIdParam: string | undefined,
-  monthParam: string | undefined,
-) {
-  if (!groupIdParam || !monthParam) return true;
+type ButtonSectionProps = {
+  tournamentId: number;
+  selectedGroupId: string | undefined;
+  selectedMonth: string | undefined;
+};
+async function ButtonSection({
+  tournamentId,
+  selectedGroupId,
+  selectedMonth,
+}: ButtonSectionProps) {
+  if (selectedGroupId == null || selectedMonth == null) {
+    return (
+      <GenerateFideReportButton
+        isDisabled
+        selectedGroupId={selectedGroupId}
+        selectedMonth={selectedMonth}
+      />
+    );
+  }
 
-  const groupId = parseInt(groupIdParam);
-  const month = parseInt(monthParam);
+  const groupId = parseInt(selectedGroupId);
+  const month = parseInt(selectedMonth);
 
-  const games = await getGamesInMonth(groupId, month);
-  return games.some((game) => game.result == null);
+  const uncompletedGames = await getUncompletedGamesInMonth(groupId, month);
+
+  return (
+    <div className="flex flex-col gap-2 flex-1">
+      <UncompletedGames
+        tournamentId={tournamentId}
+        groupId={groupId}
+        games={uncompletedGames}
+      />
+      <GenerateFideReportButton
+        selectedGroupId={selectedGroupId}
+        selectedMonth={selectedMonth}
+        isDisabled={uncompletedGames.length > 0}
+      />
+    </div>
+  );
 }

@@ -1,5 +1,5 @@
 import { db } from "../client";
-import { eq, and, asc, or, sql, getTableColumns } from "drizzle-orm";
+import { eq, and, asc, or, sql, getTableColumns, isNull } from "drizzle-orm";
 import { group } from "../schema/group";
 import { matchdayGame } from "../schema/matchday";
 import { matchday } from "../schema/matchday";
@@ -275,6 +275,28 @@ export async function getGamesInMonth(groupId: number, month: number) {
       and(
         eq(game.groupId, groupId),
         sql`EXTRACT(MONTH FROM ${matchday.date}) = ${month}`,
+      ),
+    )
+    .orderBy(asc(matchday.date));
+}
+
+export async function getUncompletedGamesInMonth(
+  groupId: number,
+  month: number,
+) {
+  return await db
+    .select({
+      ...getTableColumns(game),
+      matchday: getTableColumns(matchday),
+    })
+    .from(game)
+    .innerJoin(matchdayGame, eq(game.id, matchdayGame.gameId))
+    .innerJoin(matchday, eq(matchdayGame.matchdayId, matchday.id))
+    .where(
+      and(
+        eq(game.groupId, groupId),
+        sql`EXTRACT(MONTH FROM ${matchday.date}) = ${month}`,
+        isNull(game.result),
       ),
     )
     .orderBy(asc(matchday.date));
