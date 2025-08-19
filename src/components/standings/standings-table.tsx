@@ -72,10 +72,10 @@ export function StandingsTable({
               </TableRow>
             ) : (
               standings.map((player, index) => (
-                <TableRow 
-                  key={player.participantId}
+                <TableRow
+                  key={player.participant.id}
                   className="cursor-pointer hover:bg-muted/50 transition-colors"
-                  onClick={() => handlePlayerClick(player.participantId)}
+                  onClick={() => handlePlayerClick(player.participant.id)}
                 >
                   <TableCell className="py-2">
                     <div
@@ -90,14 +90,17 @@ export function StandingsTable({
                     </div>
                   </TableCell>
                   <TableCell>
-                    {player.title ? `${player.title} ` : ""}
-                    {player.name}
+                    {player.participant.title
+                      ? `${player.participant.title} `
+                      : ""}
+                    {player.participant.profile.firstName}{" "}
+                    {player.participant.profile.lastName}
                   </TableCell>
                   <TableCell className="text-right">
-                    {player.dwz || "-"}
+                    {player.participant.dwzRating || "-"}
                   </TableCell>
                   <TableCell className="text-right">
-                    {player.elo || "-"}
+                    {player.participant.fideRating || "-"}
                   </TableCell>
                   <TableCell className="text-right">
                     {player.points.toFixed(1)}

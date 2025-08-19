@@ -1,7 +1,8 @@
 import type { gameResults } from "@/db/schema/columns.helpers";
-import type { PlayerStanding } from "@/db/types/standings";
+import type { PlayerStanding, PlayerStats } from "@/db/types/standings";
 import type { ParticipantWithRating } from "@/db/types/participant";
-import type { GameWithParticipantRatings } from "@/db/types/game";
+import type { Game } from "@/db/types/game";
+import invariant from "tiny-invariant";
 
 function calculatePointsFromResult(
   result: (typeof gameResults)[number],
@@ -30,34 +31,28 @@ function calculatePointsFromResult(
 }
 
 export function calculateStandings(
-  games: GameWithParticipantRatings[],
-  participants?: ParticipantWithRating[],
+  games: Game[],
+  participants: ParticipantWithRating[],
 ): PlayerStanding[] {
-  const playerStats = new Map<number, PlayerStanding>();
+  const participantsMap = new Map<number, ParticipantWithRating>();
+  participants.forEach((participant) => {
+    participantsMap.set(participant.id, participant);
+  });
 
-  if (participants) {
-    participants.forEach((participant) => {
-      playerStats.set(participant.id, {
-        participantId: participant.id,
-        name: `${participant.profile.firstName} ${participant.profile.lastName}`,
-        title: participant.title,
-        dwz: participant.dwzRating,
-        elo: participant.fideRating,
-        points: 0,
-        gamesPlayed: 0,
-        sonnebornBerger: 0,
-      });
+  const playerStats = new Map<number, PlayerStats>();
+  participants.forEach((participant) => {
+    playerStats.set(participant.id, {
+      participantId: participant.id,
+      points: 0,
+      gamesPlayed: 0,
+      sonnebornBerger: 0,
     });
-  }
+  });
 
   games.forEach((game) => {
     if (!playerStats.has(game.whiteParticipantId)) {
       playerStats.set(game.whiteParticipantId, {
         participantId: game.whiteParticipantId,
-        name: `${game.whiteParticipant.profile.firstName} ${game.whiteParticipant.profile.lastName}`,
-        title: game.whiteParticipant.title,
-        dwz: game.whiteParticipant.dwzRating,
-        elo: game.whiteParticipant.fideRating,
         points: 0,
         gamesPlayed: 0,
         sonnebornBerger: 0,
@@ -67,10 +62,6 @@ export function calculateStandings(
     if (!playerStats.has(game.blackParticipantId)) {
       playerStats.set(game.blackParticipantId, {
         participantId: game.blackParticipantId,
-        name: `${game.blackParticipant.profile.firstName} ${game.blackParticipant.profile.lastName}`,
-        title: game.blackParticipant.title,
-        dwz: game.blackParticipant.dwzRating,
-        elo: game.blackParticipant.fideRating,
         points: 0,
         gamesPlayed: 0,
         sonnebornBerger: 0,
@@ -115,19 +106,39 @@ export function calculateStandings(
     }
   });
 
-  return Array.from(playerStats.values()).sort((a, b) => {
-    if (b.points !== a.points) {
-      return b.points - a.points;
-    }
-    if (b.sonnebornBerger !== a.sonnebornBerger) {
-      return b.sonnebornBerger - a.sonnebornBerger;
-    }
-    if ((b.dwz || 0) !== (a.dwz || 0)) {
-      return (b.dwz || 0) - (a.dwz || 0);
-    }
-    if ((b.elo || 0) !== (a.elo || 0)) {
-      return (b.elo || 0) - (a.elo || 0);
-    }
-    return a.name.localeCompare(b.name);
-  });
+  return Array.from(playerStats.values())
+    .sort((a, b) => comparePlayerStats(a, b, participantsMap))
+    .map((stats) => ({
+      participant: participantsMap.get(stats.participantId)!,
+      points: stats.points,
+      gamesPlayed: stats.gamesPlayed,
+      sonnebornBerger: stats.sonnebornBerger,
+    }));
+}
+
+function comparePlayerStats(
+  a: PlayerStats,
+  b: PlayerStats,
+  participantsMap: Map<number, ParticipantWithRating>,
+): number {
+  if (b.points !== a.points) {
+    return b.points - a.points;
+  }
+  if (b.sonnebornBerger !== a.sonnebornBerger) {
+    return b.sonnebornBerger - a.sonnebornBerger;
+  }
+  const participantA = participantsMap.get(a.participantId);
+  const participantB = participantsMap.get(b.participantId);
+  invariant(participantA && participantB);
+
+  if ((participantB.dwzRating || 0) !== (participantA.dwzRating || 0)) {
+    return (participantB.dwzRating || 0) - (participantA.dwzRating || 0);
+  }
+  if ((participantB.fideRating || 0) !== (participantA.fideRating || 0)) {
+    return (participantB.fideRating || 0) - (participantA.fideRating || 0);
+  }
+
+  const fullNameA = `${participantA.profile.firstName} ${participantA.profile.lastName}`;
+  const fullNameB = `${participantB.profile.firstName} ${participantB.profile.lastName}`;
+  return fullNameA.localeCompare(fullNameB);
 }
