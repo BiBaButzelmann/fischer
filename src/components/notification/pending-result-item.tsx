@@ -3,36 +3,20 @@
 import Link from "next/link";
 import { formatSimpleDate } from "@/lib/date";
 import { buildGameViewUrl } from "@/lib/navigation";
-import { isParticipantInGame } from "@/lib/game-auth";
+import { ParticipatingPlayerDisplay } from "./participating-player-display";
 import type { GameWithParticipantsAndDate } from "@/db/types/game";
 
 type Props = {
   game: GameWithParticipantsAndDate;
   participantId?: number;
-  onClose?: () => void;
+  onClick?: () => void;
 };
 
 export function PendingResultItem({
   game,
   participantId: currentParticipantId,
-  onClose,
+  onClick,
 }: Props) {
-  const getDisplayText = () => {
-    const participantInfo = currentParticipantId
-      ? isParticipantInGame(game, currentParticipantId)
-      : { isInGame: false, isWhite: null };
-
-    if (!participantInfo.isInGame) {
-      return `${game.whiteParticipant.profile.firstName} ${game.whiteParticipant.profile.lastName} vs. ${game.blackParticipant.profile.firstName} ${game.blackParticipant.profile.lastName}`;
-    }
-
-    const opponentParticipant = participantInfo.isWhite
-      ? game.blackParticipant
-      : game.whiteParticipant;
-
-    return `gegen ${opponentParticipant.profile.firstName} ${opponentParticipant.profile.lastName}`;
-  };
-
   return (
     <Link
       href={buildGameViewUrl({
@@ -41,7 +25,7 @@ export function PendingResultItem({
         round: game.round,
         participantId: game.whiteParticipant.id,
       })}
-      onClick={onClose}
+      onClick={onClick}
       className="block p-4 border-b border-gray-100 dark:border-card-border last:border-b-0 hover:bg-gray-50 dark:hover:bg-card/50 transition-colors"
     >
       <div className="flex items-start justify-between gap-3">
@@ -50,7 +34,10 @@ export function PendingResultItem({
             Runde {game.round}
             <span className="text-gray-500 dark:text-gray-400 font-normal">
               {" "}
-              {getDisplayText()}
+              <ParticipatingPlayerDisplay
+                game={game}
+                participantId={currentParticipantId}
+              />
             </span>
           </h4>
           <p className="text-xs text-gray-500 dark:text-gray-400 mt-1">
