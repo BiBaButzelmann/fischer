@@ -16,3 +16,6 @@
 - DWZ Bericht (Paul)
 - overview: show own group
 - overview: show own standings
+- add feature to disable players from the tournament after start
+- add pairing logic for uneven groups
+- disable registration when tournament running
