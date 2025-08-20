@@ -3,6 +3,7 @@ import { formatSimpleDate } from "@/lib/date";
 import { buildGameViewUrl } from "@/lib/navigation";
 import { ParticipatingPlayerDisplay } from "./participating-player-display";
 import { getGameWithParticipantsAndMatchday } from "@/db/repositories/game";
+import type { GameWithParticipantsAndDate } from "@/db/types/game";
 
 type Props = {
   gameId: number;
@@ -18,6 +19,10 @@ export async function PendingResultItem({
   const game = await getGameWithParticipantsAndMatchday(gameId);
 
   if (!game || !game.matchdayGame?.matchday?.date) {
+    return null;
+  }
+
+  if (!game.whiteParticipant || !game.blackParticipant) {
     return null;
   }
 
@@ -39,7 +44,7 @@ export async function PendingResultItem({
             <span className="text-gray-500 dark:text-gray-400 font-normal">
               {" "}
               <ParticipatingPlayerDisplay
-                game={game}
+                game={game as GameWithParticipantsAndDate}
                 participantId={currentParticipantId}
               />
             </span>

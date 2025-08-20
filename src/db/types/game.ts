@@ -9,8 +9,8 @@ import {
 export type Game = InferSelectModel<typeof game>;
 
 export type GameWithParticipants = Game & {
-  whiteParticipant: ParticipantWithName;
-  blackParticipant: ParticipantWithName;
+  whiteParticipant?: ParticipantWithName;
+  blackParticipant?: ParticipantWithName;
 };
 
 export type GameWithParticipantRatings = Pick<
