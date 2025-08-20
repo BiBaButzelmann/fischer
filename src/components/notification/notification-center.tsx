@@ -14,21 +14,19 @@ export async function NotificationCenter() {
   }
 
   const participant = await getParticipantByUserId(session.user.id);
-  const referee = await getRefereeByUserId(session.user.id);
-
-  if (!participant && !referee) {
-    return null;
-  }
-
   const participantGameIds = participant
     ? await getPendingGamesByParticipantId(participant.id)
     : [];
 
+  const referee = await getRefereeByUserId(session.user.id);
   const refereeGameIds = referee
     ? await getPendingGamesByRefereeId(referee.id)
     : [];
 
   const gameIds = [...new Set([...participantGameIds, ...refereeGameIds])];
+  if (gameIds.length === 0) {
+    return null;
+  }
 
   return <NotificationBell gameIds={gameIds} participantId={participant?.id} />;
 }
