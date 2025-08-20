@@ -38,7 +38,7 @@ export function NotificationBell({ games, participantId }: Props) {
       {/* Pending Results */}
       {isOpen && (
         <>
-          <NotificationPopup games={games} participantId={participantId} />
+          <NotificationPopup games={games} participantId={participantId} onClose={close} />
           <div className="fixed inset-0 z-40" onClick={close} />
         </>
       )}

@@ -9,11 +9,13 @@ import type { GameWithParticipantsAndDate } from "@/db/types/game";
 type Props = {
   game: GameWithParticipantsAndDate;
   participantId?: number;
+  onClose?: () => void;
 };
 
 export function PendingResultItem({
   game,
   participantId: currentParticipantId,
+  onClose,
 }: Props) {
   const getDisplayText = () => {
     const participantInfo = currentParticipantId
@@ -51,6 +53,7 @@ export function PendingResultItem({
         round: game.round,
         participantId: currentParticipantId,
       })}
+      onClick={onClose}
       className="block p-4 border-b border-gray-100 dark:border-card-border last:border-b-0 hover:bg-gray-50 dark:hover:bg-card/50 transition-colors"
     >
       <div className="flex items-start justify-between gap-3">
