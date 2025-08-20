@@ -43,6 +43,10 @@ export function PostponeGameDialog({
   const [selectedDate, setSelectedDate] = useState<Date | undefined>();
   const [isOpen, setIsOpen] = useState(false);
 
+  if (!game.whiteParticipant || !game.blackParticipant) {
+    return null;
+  }
+
   const handlePostponeFormSubmit = async (
     event: React.FormEvent<HTMLFormElement>,
   ) => {
