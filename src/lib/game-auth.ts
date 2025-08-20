@@ -14,15 +14,18 @@ export const isGameActuallyPlayed = (result: GameResult | null): boolean => {
 export const isParticipantInGame = (
   game: GameWithParticipants,
   participantId: number,
-): { isInGame: boolean; isWhite: boolean | null } => {
-  const isWhite = game.whiteParticipant.id === participantId;
-  const isBlack = game.blackParticipant.id === participantId;
-  const isInGame = isWhite || isBlack;
+): boolean => {
+  return (
+    game.whiteParticipant.id === participantId ||
+    game.blackParticipant.id === participantId
+  );
+};
 
-  return {
-    isInGame,
-    isWhite: isInGame ? isWhite : null,
-  };
+export const isWhite = (
+  game: GameWithParticipants,
+  participantId: number,
+): boolean => {
+  return game.whiteParticipant.id === participantId;
 };
 
 export const isUserAuthorizedForPGN = async (

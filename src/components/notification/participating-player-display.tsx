@@ -1,4 +1,4 @@
-import { isParticipantInGame } from "@/lib/game-auth";
+import { isParticipantInGame, isWhite } from "@/lib/game-auth";
 import type { GameWithParticipantsAndDate } from "@/db/types/game";
 
 type Props = {
@@ -7,15 +7,11 @@ type Props = {
 };
 
 export function ParticipatingPlayerDisplay({ game, participantId }: Props) {
-  const participantInfo = participantId
-    ? isParticipantInGame(game, participantId)
-    : { isInGame: false, isWhite: null };
-
-  if (!participantInfo.isInGame) {
+  if (!participantId || !isParticipantInGame(game, participantId)) {
     return `${game.whiteParticipant.profile.firstName} ${game.whiteParticipant.profile.lastName} vs. ${game.blackParticipant.profile.firstName} ${game.blackParticipant.profile.lastName}`;
   }
 
-  const opponentParticipant = participantInfo.isWhite
+  const opponentParticipant = isWhite(game, participantId)
     ? game.blackParticipant
     : game.whiteParticipant;
 
