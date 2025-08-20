@@ -93,8 +93,8 @@ export async function scheduleGamesForGroup(
     orderBy: (week, { asc }) => asc(week.weekNumber),
   });
 
-  const effectivePlayerCount = nextEvenNumber(n);
-  const pairings = bergerFide(effectivePlayerCount); // array[round][pair] -> [white#, black#]
+  const nextEvenPlayerCount = nextEvenNumber(n);
+  const pairings = bergerFide(nextEvenPlayerCount); // array[round][pair] -> [white#, black#]
 
   if (pairings.length > regularWeeks.length) {
     return {
@@ -135,13 +135,22 @@ export async function scheduleGamesForGroup(
         const whitePlayer = players[whiteNo - 1];
         const blackPlayer = players[blackNo - 1];
 
+        invariant(
+          whitePlayer || blackPlayer,
+          `Invalid pairing: both players are null for pairing [${whiteNo}, ${blackNo}] in round ${roundIdx + 1}`,
+        );
+
+        const isByeGame = !whitePlayer || !blackPlayer;
+
+        const boardNumber = isByeGame ? pairsInRound.length : boardIdx + 1;
+
         gamesToInsert.push({
           whiteParticipantId: whitePlayer?.participant.id ?? null,
           blackParticipantId: blackPlayer?.participant.id ?? null,
           tournamentId,
           groupId: group.id,
           round: roundIdx + 1,
-          boardNumber: boardIdx + 1,
+          boardNumber,
         });
       });
     }
