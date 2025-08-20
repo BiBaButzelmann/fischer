@@ -66,6 +66,12 @@ export const generateFideReportFile = action(
 
     const gamesAsWhiteParticipant = completedGamesInMonth.reduce(
       (acc, game) => {
+        if (
+          game.whiteParticipantId === null ||
+          game.blackParticipantId === null
+        ) {
+          return acc;
+        }
         acc[game.whiteParticipantId] ??= [];
         acc[game.whiteParticipantId].push(game.id);
         return acc;
@@ -75,6 +81,12 @@ export const generateFideReportFile = action(
 
     const gamesAsBlackParticipant = completedGamesInMonth.reduce(
       (acc, game) => {
+        if (
+          game.whiteParticipantId === null ||
+          game.blackParticipantId === null
+        ) {
+          return acc;
+        }
         acc[game.blackParticipantId] ??= [];
         acc[game.blackParticipantId].push(game.id);
         return acc;
@@ -160,19 +172,25 @@ export const generateFideReportFile = action(
         birthYear: DateTime.local(participant.birthYear),
         currentPoints,
         currentGroupPosition,
-        results: participantGames.map((game) => {
-          invariant(game.result, `Game ${game.id} does not have a result`);
-          const isWhite = whiteGameIds.includes(game.id);
+        results: participantGames
+          .filter(
+            (game) =>
+              game.whiteParticipantId !== null &&
+              game.blackParticipantId !== null,
+          )
+          .map((game) => {
+            invariant(game.result, `Game ${game.id} does not have a result`);
+            const isWhite = whiteGameIds.includes(game.id);
 
-          return {
-            scheduled: DateTime.fromJSDate(game.matchday.date),
-            opponentGroupPosition: getInitialGroupPositionOfPlayer(
-              isWhite ? game.blackParticipantId : game.whiteParticipantId,
-            ),
-            pieceColor: isWhite ? "w" : "b",
-            result: mapResult(game.result, isWhite),
-          };
-        }),
+            return {
+              scheduled: DateTime.fromJSDate(game.matchday.date),
+              opponentGroupPosition: getInitialGroupPositionOfPlayer(
+                isWhite ? game.blackParticipantId! : game.whiteParticipantId!,
+              ),
+              pieceColor: isWhite ? "w" : "b",
+              result: mapResult(game.result, isWhite),
+            };
+          }),
       } as PlayerEntry;
     });
 
