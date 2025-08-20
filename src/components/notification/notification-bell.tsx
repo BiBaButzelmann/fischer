@@ -20,7 +20,6 @@ export function NotificationBell({ games, participantId }: Props) {
 
   return (
     <div className="relative">
-      {/* Bell Button */}
       <Button
         variant="outline"
         size="icon"
@@ -35,7 +34,6 @@ export function NotificationBell({ games, participantId }: Props) {
         )}
       </Button>
 
-      {/* Pending Results */}
       {isOpen && (
         <>
           <NotificationPopup
