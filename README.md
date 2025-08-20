@@ -5,7 +5,6 @@
 - Mobile: nach Auswahl in der Sidebar sollte die Sidebar einklappen (Arne)
 - Spieltage verwalten: show group (badge) of users (Arne)
 - Juroren verwalten: Einteilung in aktiv und Nachrücker (Arne)
-- Referee: ausstehende Ergebnismeldung (urgent) (Arne)
 - Eingabehelfer: Seite v0 mit ausstehenden Partien zum abarbeiten (Arne)
 - Eingabehelfer: Seite implementieren (Paul)
   - Eingabehelfer: show count of missing submissions
