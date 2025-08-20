@@ -123,8 +123,8 @@ export async function isUserParticipantInGame(
   if (!game) return false;
 
   return (
-    game.whiteParticipant.profile.userId === userId ||
-    game.blackParticipant.profile.userId === userId
+    game.whiteParticipant?.profile.userId === userId ||
+    game.blackParticipant?.profile.userId === userId
   );
 }
 

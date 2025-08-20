@@ -50,26 +50,6 @@ export function calculateStandings(
   });
 
   games.forEach((game) => {
-    if (!playerStats.has(game.whiteParticipantId)) {
-      playerStats.set(game.whiteParticipantId, {
-        participantId: game.whiteParticipantId,
-        points: 0,
-        gamesPlayed: 0,
-        sonnebornBerger: 0,
-      });
-    }
-
-    if (!playerStats.has(game.blackParticipantId)) {
-      playerStats.set(game.blackParticipantId, {
-        participantId: game.blackParticipantId,
-        points: 0,
-        gamesPlayed: 0,
-        sonnebornBerger: 0,
-      });
-    }
-  });
-
-  games.forEach((game) => {
     if (!game.result) return;
 
     const whitePlayer = playerStats.get(game.whiteParticipantId)!;

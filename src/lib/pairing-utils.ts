@@ -73,18 +73,8 @@ export function bergerFide(n: number): Array<Array<[number, number]>> {
   return rounds;
 }
 
-/** Berger algorithm for round-robin tournaments */
-export function roundRobinPairs(n: number): Array<Array<[number, number]>> {
-  const isOdd = n % 2 === 1;
-  // TODO: for odd player counts, there must be a player called "spielfrei", that triggers results, has certain logic for the fide .txt and notifies other players
-  if (isOdd) {
-    const extended = bergerFide(n + 1); // add a "bye" for odd n
-    return extended.map((round) =>
-      round.filter(([white, black]) => white <= n && black <= n),
-    );
-  } else {
-    return bergerFide(n);
-  }
+export function nextEvenNumber(n: number): number {
+  return n + (n % 2);
 }
 
 export type WeekdayKey = keyof typeof weekdayToIndex;
