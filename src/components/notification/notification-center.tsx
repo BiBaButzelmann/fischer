@@ -15,7 +15,7 @@ export async function NotificationCenter() {
   if (!participant) {
     return null;
   }
-
+  // TODO: consider referees as well (for next PR)
   const uncompletedGames = await getUncompletedGamesByParticipantId(
     participant.id,
   );
