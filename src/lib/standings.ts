@@ -52,6 +52,27 @@ export function calculateStandings(
   games.forEach((game) => {
     if (!game.result) return;
 
+    if (game.whiteParticipantId === null) {
+      invariant(
+        game.blackParticipantId !== null,
+        "Black participant is required",
+      );
+      const blackPlayer = playerStats.get(game.blackParticipantId)!;
+      blackPlayer.points += 1;
+      blackPlayer.gamesPlayed += 1;
+      return;
+    }
+    if (game.blackParticipantId === null) {
+      invariant(
+        game.whiteParticipantId !== null,
+        "White participant is required",
+      );
+      const whitePlayer = playerStats.get(game.whiteParticipantId)!;
+      whitePlayer.points += 1;
+      whitePlayer.gamesPlayed += 1;
+      return;
+    }
+
     const whitePlayer = playerStats.get(game.whiteParticipantId)!;
     const blackPlayer = playerStats.get(game.blackParticipantId)!;
 
@@ -66,6 +87,10 @@ export function calculateStandings(
 
   games.forEach((game) => {
     if (!game.result) return;
+
+    if (game.whiteParticipantId === null || game.blackParticipantId === null) {
+      return;
+    }
 
     const whitePlayer = playerStats.get(game.whiteParticipantId)!;
     const blackPlayer = playerStats.get(game.blackParticipantId)!;
