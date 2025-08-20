@@ -3,6 +3,7 @@
 import Link from "next/link";
 import { formatSimpleDate } from "@/lib/date";
 import { buildGameViewUrl } from "@/lib/navigation";
+import { isParticipantInGame } from "@/lib/game-auth";
 import type { GameWithParticipantsAndDate } from "@/db/types/game";
 
 type Props = {
@@ -15,34 +16,31 @@ export function PendingResultItem({
   participantId: currentParticipantId,
 }: Props) {
   const getDisplayText = () => {
-    if (!currentParticipantId) {
-      const whiteFirstName =
-        game.whiteParticipant?.profile?.firstName || "Unbekannt";
-      const whiteLastName = game.whiteParticipant?.profile?.lastName || "";
-      const whiteName = whiteLastName
-        ? `${whiteFirstName} ${whiteLastName}`
-        : whiteFirstName;
+    const participantInfo = currentParticipantId
+      ? isParticipantInGame(game, currentParticipantId)
+      : { isInGame: false, isWhite: null };
 
-      const blackFirstName =
-        game.blackParticipant?.profile?.firstName || "Unbekannt";
-      const blackLastName = game.blackParticipant?.profile?.lastName || "";
-      const blackName = blackLastName
-        ? `${blackFirstName} ${blackLastName}`
-        : blackFirstName;
-
-      return `${whiteName} vs. ${blackName}`;
+    if (!currentParticipantId || !participantInfo.isInGame) {
+      return `${
+        game.whiteParticipant.profile.lastName
+          ? `${game.whiteParticipant.profile.firstName} ${game.whiteParticipant.profile.lastName}`
+          : game.whiteParticipant.profile.firstName
+      } vs. ${
+        game.blackParticipant.profile.lastName
+          ? `${game.blackParticipant.profile.firstName} ${game.blackParticipant.profile.lastName}`
+          : game.blackParticipant.profile.firstName
+      }`;
     }
 
-    const isUserWhite = game.whiteParticipant.id === currentParticipantId;
-    const opponentParticipant = isUserWhite
+    const opponentParticipant = participantInfo.isWhite
       ? game.blackParticipant
       : game.whiteParticipant;
 
-    const firstName = opponentParticipant?.profile?.firstName || "Unbekannt";
-    const lastName = opponentParticipant?.profile?.lastName || "";
-    const opponentName = lastName ? `${firstName} ${lastName}` : firstName;
-
-    return `gegen ${opponentName}`;
+    return `gegen ${
+      opponentParticipant.profile.lastName
+        ? `${opponentParticipant.profile.firstName} ${opponentParticipant.profile.lastName}`
+        : opponentParticipant.profile.firstName
+    }`;
   };
 
   return (
