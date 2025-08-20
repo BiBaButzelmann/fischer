@@ -22,7 +22,7 @@ export function PendingResultItem({
       ? isParticipantInGame(game, currentParticipantId)
       : { isInGame: false, isWhite: null };
 
-    if (!currentParticipantId || !participantInfo.isInGame) {
+    if (!participantInfo.isInGame) {
       return `${game.whiteParticipant.profile.firstName} ${game.whiteParticipant.profile.lastName} vs. ${game.blackParticipant.profile.firstName} ${game.blackParticipant.profile.lastName}`;
     }
 
