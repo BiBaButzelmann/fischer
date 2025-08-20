@@ -23,26 +23,14 @@ export function PendingResultItem({
       : { isInGame: false, isWhite: null };
 
     if (!currentParticipantId || !participantInfo.isInGame) {
-      return `${
-        game.whiteParticipant.profile.lastName
-          ? `${game.whiteParticipant.profile.firstName} ${game.whiteParticipant.profile.lastName}`
-          : game.whiteParticipant.profile.firstName
-      } vs. ${
-        game.blackParticipant.profile.lastName
-          ? `${game.blackParticipant.profile.firstName} ${game.blackParticipant.profile.lastName}`
-          : game.blackParticipant.profile.firstName
-      }`;
+      return `${game.whiteParticipant.profile.firstName} ${game.whiteParticipant.profile.lastName} vs. ${game.blackParticipant.profile.firstName} ${game.blackParticipant.profile.lastName}`;
     }
 
     const opponentParticipant = participantInfo.isWhite
       ? game.blackParticipant
       : game.whiteParticipant;
 
-    return `gegen ${
-      opponentParticipant.profile.lastName
-        ? `${opponentParticipant.profile.firstName} ${opponentParticipant.profile.lastName}`
-        : opponentParticipant.profile.firstName
-    }`;
+    return `gegen ${opponentParticipant.profile.firstName} ${opponentParticipant.profile.lastName}`;
   };
 
   return (
