@@ -14,7 +14,6 @@ export async function NotificationCenter() {
   }
 
   const participant = await getParticipantByUserId(session.user.id);
-  console.log("NotificationCenter - Participant:", participant);
   const participantGameIds = participant
     ? await getPendingGamesByParticipantId(participant.id)
     : [];

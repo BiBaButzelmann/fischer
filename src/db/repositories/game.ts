@@ -319,14 +319,7 @@ export async function getPendingGamesByParticipantId(participantId: number) {
           eq(game.blackParticipantId, participantId),
         ),
         isNull(game.result),
-        (() => {
-          const currentDate = new Date();
-          console.log(
-            "getPendingGamesByParticipantId - Current date:",
-            currentDate,
-          );
-          return sql`${matchday.date} < ${currentDate}`;
-        })(),
+        sql`${matchday.date} < ${new Date()}`,
       ),
     )
     .orderBy(asc(matchday.date))
