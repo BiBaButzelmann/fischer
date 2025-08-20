@@ -163,7 +163,7 @@ export const generateFideReportFile = action(
       return {
         index: 1,
         startingGroupPosition: groupPosition,
-        gender: "m", // TODO,
+        gender: participant.gender,
         title: participant.title ?? "",
         name: `${participant.profile.firstName} ${participant.profile.lastName}`,
         fideRating: participant.fideRating!,
