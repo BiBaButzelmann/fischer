@@ -1,7 +1,7 @@
 import { auth } from "@/auth/utils";
 import { GenerateFideReportButton } from "@/components/admin/fide-report/generate-fide-report-button";
 import { GenerateFideReportSelector } from "@/components/admin/fide-report/generate-fide-report-selector";
-import { UncompletedGames } from "@/components/admin/fide-report/uncompleted-games";
+import { PendingResultsList } from "@/components/notification/pending-results-list";
 import {
   Card,
   CardHeader,
@@ -59,54 +59,62 @@ export default async function Page({
           />
         </CardContent>
         <CardFooter>
-          <ButtonSection
-            tournamentId={tournament.id}
-            selectedGroupId={groupId}
-            selectedMonth={month}
-          />
+          <ButtonSection selectedGroupId={groupId} selectedMonth={month} />
         </CardFooter>
       </Card>
     </div>
   );
 }
 
-type ButtonSectionProps = {
-  tournamentId: number;
+type Props = {
   selectedGroupId: string | undefined;
   selectedMonth: string | undefined;
 };
-async function ButtonSection({
-  tournamentId,
-  selectedGroupId,
-  selectedMonth,
-}: ButtonSectionProps) {
+async function ButtonSection({ selectedGroupId, selectedMonth }: Props) {
   if (selectedGroupId == null || selectedMonth == null) {
     return (
-      <GenerateFideReportButton
-        isDisabled
-        selectedGroupId={selectedGroupId}
-        selectedMonth={selectedMonth}
-      />
+      <div className="flex justify-center">
+        <GenerateFideReportButton
+          isDisabled
+          selectedGroupId={selectedGroupId}
+          selectedMonth={selectedMonth}
+        />
+      </div>
     );
   }
 
   const groupId = parseInt(selectedGroupId);
   const month = parseInt(selectedMonth);
 
-  const uncompletedGames = await getUncompletedGamesInMonth(groupId, month);
+  const uncompletedGameIds = await getUncompletedGamesInMonth(groupId, month);
 
   return (
-    <div className="flex flex-col gap-2 flex-1">
-      <UncompletedGames
-        tournamentId={tournamentId}
-        groupId={groupId}
-        games={uncompletedGames}
-      />
-      <GenerateFideReportButton
-        selectedGroupId={selectedGroupId}
-        selectedMonth={selectedMonth}
-        isDisabled={uncompletedGames.length > 0}
-      />
+    <div className="flex flex-col gap-4 w-full">
+      <div className="flex justify-center">
+        <GenerateFideReportButton
+          selectedGroupId={selectedGroupId}
+          selectedMonth={selectedMonth}
+          isDisabled={uncompletedGameIds.length > 0}
+        />
+      </div>
+      {uncompletedGameIds.length > 0 && (
+        <div className="w-full">
+          <div className="text-center mb-3">
+            <h3 className="text-sm font-medium text-gray-900 dark:text-gray-100">
+              Ausstehende Ergebnisse
+            </h3>
+            <p className="text-xs text-gray-500 dark:text-gray-400">
+              Diese Partien müssen abgeschlossen werden, bevor der Bericht
+              generiert werden kann.
+            </p>
+          </div>
+          <div className="bg-white dark:bg-card border border-gray-200 dark:border-card-border rounded-lg">
+            <div className="max-h-64 overflow-y-auto">
+              <PendingResultsList gameIds={uncompletedGameIds} />
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }

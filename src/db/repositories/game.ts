@@ -1,7 +1,7 @@
 import { db } from "../client";
 import { eq, and, asc, or, sql, getTableColumns, isNull } from "drizzle-orm";
 import { group } from "../schema/group";
-import { matchdayGame } from "../schema/matchday";
+import { matchdayGame, matchdayReferee } from "../schema/matchday";
 import { matchday } from "../schema/matchday";
 import { game } from "../schema/game";
 import { groupMatchEnteringHelper } from "../schema/matchEnteringHelper";
@@ -286,8 +286,8 @@ export async function getUncompletedGamesInMonth(
 ) {
   return await db
     .select({
-      ...getTableColumns(game),
-      matchday: getTableColumns(matchday),
+      id: game.id,
+      date: matchday.date,
     })
     .from(game)
     .innerJoin(matchdayGame, eq(game.id, matchdayGame.gameId))
@@ -299,7 +299,89 @@ export async function getUncompletedGamesInMonth(
         isNull(game.result),
       ),
     )
-    .orderBy(asc(matchday.date));
+    .orderBy(asc(matchday.date))
+    .then((games) => games.map((row) => row.id));
+}
+
+export async function getPendingGamesByParticipantId(participantId: number) {
+  return await db
+    .select({
+      id: game.id,
+      date: matchday.date,
+    })
+    .from(game)
+    .innerJoin(matchdayGame, eq(game.id, matchdayGame.gameId))
+    .innerJoin(matchday, eq(matchdayGame.matchdayId, matchday.id))
+    .where(
+      and(
+        or(
+          eq(game.whiteParticipantId, participantId),
+          eq(game.blackParticipantId, participantId),
+        ),
+        isNull(game.result),
+        sql`${matchday.date} < ${new Date()}`,
+      ),
+    )
+    .orderBy(asc(matchday.date))
+    .then((participantGames) => participantGames.map((row) => row.id));
+}
+
+export async function getPendingGamesByRefereeId(refereeId: number) {
+  return await db
+    .select({
+      id: game.id,
+      date: matchday.date,
+    })
+    .from(game)
+    .innerJoin(matchdayGame, eq(game.id, matchdayGame.gameId))
+    .innerJoin(matchday, eq(matchdayGame.matchdayId, matchday.id))
+    .innerJoin(matchdayReferee, eq(matchday.id, matchdayReferee.matchdayId))
+    .where(
+      and(
+        eq(matchdayReferee.refereeId, refereeId),
+        isNull(game.result),
+        sql`${matchday.date} < ${new Date()}`,
+      ),
+    )
+    .orderBy(asc(matchday.date))
+    .then((refereeGames) => refereeGames.map((row) => row.id));
+}
+
+export async function getGameWithParticipantsAndMatchday(gameId: number) {
+  return await db.query.game.findFirst({
+    where: (game, { eq }) => eq(game.id, gameId),
+    with: {
+      whiteParticipant: {
+        with: {
+          profile: {
+            columns: {
+              firstName: true,
+              lastName: true,
+            },
+          },
+        },
+      },
+      blackParticipant: {
+        with: {
+          profile: {
+            columns: {
+              firstName: true,
+              lastName: true,
+            },
+          },
+        },
+      },
+      matchdayGame: {
+        with: {
+          matchday: {
+            columns: {
+              date: true,
+            },
+          },
+        },
+      },
+    },
+  });
 }
 
 export async function getParticipantsInGroup(groupId: number) {
