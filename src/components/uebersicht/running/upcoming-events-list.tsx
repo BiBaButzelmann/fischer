@@ -1,79 +1,25 @@
 "use client";
 
-import { Calendar, Clock, Gamepad2, Gavel, Wrench } from "lucide-react";
+import {
+  Calendar,
+  Clock,
+  Gamepad2,
+  Gavel,
+  LucideIcon,
+  Wrench,
+} from "lucide-react";
 import { CalendarEvent } from "@/db/types/calendar";
 import { formatEventDateTime } from "@/lib/date";
 import { useRouter } from "next/navigation";
-import { useCallback } from "react";
+import { ReactNode } from "react";
 import { buildGameViewUrl } from "@/lib/navigation";
-import { toast } from "sonner";
+import { match } from "ts-pattern";
 
 type Props = {
   events: CalendarEvent[];
 };
 
-const eventConfig = {
-  game: {
-    icon: Gamepad2,
-    bgColor: "bg-blue-100 dark:bg-blue-900/30",
-    iconColor: "text-blue-600 dark:text-blue-400",
-  },
-  referee: {
-    icon: Gavel,
-    bgColor: "bg-red-100 dark:bg-red-900/30",
-    iconColor: "text-red-600 dark:text-red-400",
-  },
-  setupHelper: {
-    icon: Wrench,
-    bgColor: "bg-green-100 dark:bg-green-900/30",
-    iconColor: "text-green-600 dark:text-green-400",
-  },
-};
-
 export function UpcomingEventsList({ events }: Props) {
-  const router = useRouter();
-
-  const handleRefereeClick = useCallback(
-    (tournamentId: number, matchdayId: number) => {
-      if (!tournamentId || !matchdayId) {
-        toast.error("Fehler: Turnier oder Spieltag nicht gefunden.");
-        return;
-      }
-
-      const url = buildGameViewUrl({
-        tournamentId,
-        matchdayId,
-      });
-
-      router.push(url);
-    },
-    [router],
-  );
-
-  const handleGameClick = useCallback(
-    (
-      gameId: number,
-      participantId: number,
-      round: number,
-      tournamentId: number,
-      groupId: number,
-    ) => {
-      if (!gameId || !participantId || !round || !tournamentId || !groupId) {
-        return;
-      }
-
-      const url = buildGameViewUrl({
-        tournamentId,
-        groupId,
-        round,
-        participantId,
-      });
-
-      router.push(url);
-    },
-    [router],
-  );
-
   return (
     <>
       <div className="mb-4 flex items-center gap-2 text-sm text-muted-foreground">
@@ -81,61 +27,36 @@ export function UpcomingEventsList({ events }: Props) {
       </div>
       {events.length > 0 ? (
         <div className="space-y-4">
-          {events.map((event, index) => {
-            const config =
-              eventConfig[
-                event.extendedProps.eventType as keyof typeof eventConfig
-              ];
-            const Icon = config.icon;
-            return (
-              <div
-                key={index}
-                onClick={() => {
-                  if (event.extendedProps.eventType === "referee") {
-                    handleRefereeClick(
-                      event.extendedProps.tournamentId,
-                      event.extendedProps.matchdayId,
-                    );
-                  } else if (event.extendedProps.eventType === "setupHelper") {
-                    handleRefereeClick(
-                      event.extendedProps.tournamentId,
-                      event.extendedProps.matchdayId,
-                    );
-                  } else if (event.extendedProps.eventType === "game") {
-                    handleGameClick(
-                      event.extendedProps.gameId,
-                      event.extendedProps.participantId,
-                      event.extendedProps.round,
-                      event.extendedProps.tournamentId,
-                      event.extendedProps.groupId,
-                    );
-                  }
-                }}
-                className="flex items-center gap-4 p-4 bg-white dark:bg-card border border-gray-200 dark:border-card-border rounded-xl shadow-sm transition-all hover:shadow-md cursor-pointer hover:opacity-80"
-              >
-                <div
-                  className={`flex-shrink-0 p-3 rounded-full ${config.bgColor}`}
-                >
-                  <Icon className={`w-6 h-6 ${config.iconColor}`} />
-                </div>
-                <div className="flex-grow">
-                  <p className="font-bold text-gray-800 dark:text-gray-100">
-                    {event.extendedProps.eventType === "referee" &&
-                    event.title === "Schiedsrichter"
-                      ? "Schiedsrichter"
-                      : event.extendedProps.eventType === "setupHelper" &&
-                          event.title === "Aufbauhelfer"
-                        ? "Aufbauhelfer"
-                        : event.title}
-                  </p>
-                  <div className="flex items-center gap-2 text-sm text-gray-500 dark:text-gray-400 mt-1">
-                    <Clock className="w-4 h-4" />
-                    <span>{formatEventDateTime(event.start)}</span>
-                  </div>
-                </div>
-              </div>
-            );
-          })}
+          {events.map((event, index) =>
+            match(event.extendedProps)
+              .with({ eventType: "referee" }, (data) => (
+                <UpcomingRefereeEvent
+                  key={index}
+                  start={event.start}
+                  tournamentId={data.tournamentId}
+                  matchdayId={data.matchdayId}
+                />
+              ))
+              .with({ eventType: "game" }, (data) => (
+                <UpcomingGameEvent
+                  key={index}
+                  start={event.start}
+                  tournamentId={data.tournamentId}
+                  groupId={data.groupId}
+                  round={data.round}
+                  participantId={data.participantId}
+                />
+              ))
+              .with({ eventType: "setupHelper" }, (data) => (
+                <UpcomingSetupHelperEvent
+                  key={index}
+                  start={event.start}
+                  tournamentId={data.tournamentId}
+                  matchdayId={data.matchdayId}
+                />
+              ))
+              .exhaustive(),
+          )}
         </div>
       ) : (
         <div className="text-center py-12 text-gray-500 dark:text-gray-400">
@@ -144,5 +65,156 @@ export function UpcomingEventsList({ events }: Props) {
         </div>
       )}
     </>
+  );
+}
+
+type UpcomingRefereeEvent = {
+  tournamentId: number;
+  matchdayId: number;
+  start: Date;
+};
+function UpcomingRefereeEvent({
+  tournamentId,
+  matchdayId,
+  start,
+}: UpcomingRefereeEvent) {
+  const router = useRouter();
+
+  const handleClick = () => {
+    const url = buildGameViewUrl({
+      tournamentId,
+      matchdayId,
+    });
+    router.push(url);
+  };
+
+  return (
+    <UpcomingEvent
+      title="Schiedsrichter"
+      start={start}
+      onClick={handleClick}
+      icon={
+        <EventIcon
+          icon={Gavel}
+          backgroundColor="bg-red-100"
+          iconColor="bg-red-600"
+        />
+      }
+    />
+  );
+}
+
+type UpcomingGameEvent = {
+  tournamentId: number;
+  groupId: number;
+  round: number;
+  participantId: number;
+  start: Date;
+};
+function UpcomingGameEvent({
+  tournamentId,
+  groupId,
+  round,
+  participantId,
+  start,
+}: UpcomingGameEvent) {
+  const router = useRouter();
+
+  const handleClick = () => {
+    const url = buildGameViewUrl({
+      tournamentId,
+      groupId,
+      round,
+      participantId,
+    });
+    router.push(url);
+  };
+
+  return (
+    <UpcomingEvent
+      title="Spiel"
+      start={start}
+      onClick={handleClick}
+      icon={
+        <EventIcon
+          icon={Gamepad2}
+          backgroundColor="bg-blue-100"
+          iconColor="bg-blue-600"
+        />
+      }
+    />
+  );
+}
+
+type UpcomingSetupHelperEventProps = {
+  tournamentId: number;
+  matchdayId: number;
+  start: Date;
+};
+function UpcomingSetupHelperEvent({
+  tournamentId,
+  matchdayId,
+  start,
+}: UpcomingSetupHelperEventProps) {
+  const router = useRouter();
+
+  const handleClick = () => {
+    const url = buildGameViewUrl({
+      tournamentId,
+      matchdayId,
+    });
+    router.push(url);
+  };
+
+  return (
+    <UpcomingEvent
+      title="Setup-Helfer"
+      start={start}
+      onClick={handleClick}
+      icon={
+        <EventIcon
+          icon={Wrench}
+          backgroundColor="bg-green-100"
+          iconColor="bg-green-600"
+        />
+      }
+    />
+  );
+}
+
+type UpcomingEventProps = {
+  title: string;
+  start: Date;
+  onClick: () => void;
+  icon: ReactNode;
+};
+function UpcomingEvent({ title, start, onClick, icon }: UpcomingEventProps) {
+  return (
+    <div
+      onClick={onClick}
+      className="flex items-center gap-4 p-4 bg-white dark:bg-card border border-gray-200 dark:border-card-border rounded-xl shadow-sm transition-all hover:shadow-md cursor-pointer hover:opacity-80"
+    >
+      {icon}
+      <div className="flex-grow">
+        <p className="font-bold text-gray-800 dark:text-gray-100">{title}</p>
+        <div className="flex items-center gap-2 text-sm text-gray-500 dark:text-gray-400 mt-1">
+          <Clock className="w-4 h-4" />
+          <span>{formatEventDateTime(start)}</span>
+        </div>
+      </div>
+    </div>
+  );
+}
+
+type EventIconProps = {
+  icon: LucideIcon;
+  backgroundColor: string;
+  iconColor: string;
+};
+function EventIcon({ icon: Icon, backgroundColor, iconColor }: EventIconProps) {
+  return (
+    <div className={`flex-shrink-0 p-3 rounded-full ${backgroundColor}`}>
+      <Icon className={`w-6 h-6 ${iconColor}`} />
+    </div>
   );
 }
