@@ -8,7 +8,7 @@ import type { GameWithParticipantsAndDate } from "@/db/types/game";
 
 type Props = {
   games: GameWithParticipantsAndDate[];
-  participantId: number;
+  participantId?: number;
 };
 
 export function NotificationBell({ games, participantId }: Props) {

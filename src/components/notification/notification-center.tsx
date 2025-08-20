@@ -1,7 +1,8 @@
 import { auth } from "@/auth/utils";
 import { getParticipantByUserId } from "@/db/repositories/participant";
-import { getUncompletedGamesByParticipantId } from "@/db/repositories/game";
+import { getGamesWithPendingResultByParticipantIdAndRefereeId } from "@/db/repositories/game";
 import { NotificationBell } from "./notification-bell";
+import { getRefereeByUserId } from "@/db/repositories/referee";
 
 export async function NotificationCenter() {
   const session = await auth();
@@ -12,15 +13,22 @@ export async function NotificationCenter() {
 
   const participant = await getParticipantByUserId(session.user.id);
 
-  if (!participant) {
+  const referee = await getRefereeByUserId(session.user.id);
+
+  if (!participant && !referee) {
     return null;
   }
-  // TODO: consider referees as well (for next PR)
-  const uncompletedGames = await getUncompletedGamesByParticipantId(
-    participant.id,
-  );
+
+  const uncompletedGames =
+    await getGamesWithPendingResultByParticipantIdAndRefereeId(
+      participant?.id,
+      referee?.id,
+    );
 
   return (
-    <NotificationBell games={uncompletedGames} participantId={participant.id} />
+    <NotificationBell
+      games={uncompletedGames}
+      participantId={participant?.id}
+    />
   );
 }
