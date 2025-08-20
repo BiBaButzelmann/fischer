@@ -1,22 +1,26 @@
-"use client";
-
 import Link from "next/link";
 import { formatSimpleDate } from "@/lib/date";
 import { buildGameViewUrl } from "@/lib/navigation";
 import { ParticipatingPlayerDisplay } from "./participating-player-display";
-import type { GameWithParticipantsAndDate } from "@/db/types/game";
+import { getGameWithParticipantsAndMatchday } from "@/db/repositories/game";
 
 type Props = {
-  game: GameWithParticipantsAndDate;
+  gameId: number;
   participantId?: number;
   onClick?: () => void;
 };
 
-export function PendingResultItem({
-  game,
+export async function PendingResultItem({
+  gameId,
   participantId: currentParticipantId,
   onClick,
 }: Props) {
+  const game = await getGameWithParticipantsAndMatchday(gameId);
+
+  if (!game || !game.matchdayGame?.matchday?.date) {
+    return null;
+  }
+
   return (
     <Link
       href={buildGameViewUrl({
