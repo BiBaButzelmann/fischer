@@ -2,6 +2,7 @@
 
 import Link from "next/link";
 import { formatSimpleDate } from "@/lib/date";
+import { buildGameViewUrl } from "@/lib/navigation";
 import type { GameWithParticipantsAndDate } from "@/db/types/game";
 
 type Props = {
@@ -24,7 +25,12 @@ export function PendingResultItem({ game, currentParticipantId }: Props) {
 
   return (
     <Link
-      href={`/submit-result?gameId=${game.id}`}
+      href={buildGameViewUrl({
+        tournamentId: game.tournamentId,
+        groupId: game.groupId,
+        round: game.round,
+        participantId: currentParticipantId,
+      })}
       className="block p-4 border-b border-gray-100 dark:border-card-border last:border-b-0 hover:bg-gray-50 dark:hover:bg-card/50 transition-colors"
     >
       <div className="flex items-start justify-between gap-3">
