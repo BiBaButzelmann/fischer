@@ -26,7 +26,7 @@ export function PendingResultsList({ games, currentParticipantId }: Props) {
           <PendingResultItem
             key={game.id}
             game={game}
-            currentParticipantId={currentParticipantId}
+            participantId={currentParticipantId}
           />
         ))}
       </div>

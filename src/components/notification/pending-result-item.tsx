@@ -7,11 +7,32 @@ import type { GameWithParticipantsAndDate } from "@/db/types/game";
 
 type Props = {
   game: GameWithParticipantsAndDate;
-  currentParticipantId: number;
+  participantId?: number;
 };
 
-export function PendingResultItem({ game, currentParticipantId }: Props) {
-  const getOpponent = () => {
+export function PendingResultItem({
+  game,
+  participantId: currentParticipantId,
+}: Props) {
+  const getDisplayText = () => {
+    if (!currentParticipantId) {
+      const whiteFirstName =
+        game.whiteParticipant?.profile?.firstName || "Unbekannt";
+      const whiteLastName = game.whiteParticipant?.profile?.lastName || "";
+      const whiteName = whiteLastName
+        ? `${whiteFirstName} ${whiteLastName}`
+        : whiteFirstName;
+
+      const blackFirstName =
+        game.blackParticipant?.profile?.firstName || "Unbekannt";
+      const blackLastName = game.blackParticipant?.profile?.lastName || "";
+      const blackName = blackLastName
+        ? `${blackFirstName} ${blackLastName}`
+        : blackFirstName;
+
+      return `${whiteName} vs. ${blackName}`;
+    }
+
     const isUserWhite = game.whiteParticipant.id === currentParticipantId;
     const opponentParticipant = isUserWhite
       ? game.blackParticipant
@@ -19,8 +40,9 @@ export function PendingResultItem({ game, currentParticipantId }: Props) {
 
     const firstName = opponentParticipant?.profile?.firstName || "Unbekannt";
     const lastName = opponentParticipant?.profile?.lastName || "";
+    const opponentName = lastName ? `${firstName} ${lastName}` : firstName;
 
-    return lastName ? `${firstName} ${lastName}` : firstName;
+    return `gegen ${opponentName}`;
   };
 
   return (
@@ -39,7 +61,7 @@ export function PendingResultItem({ game, currentParticipantId }: Props) {
             Runde {game.round}
             <span className="text-gray-500 dark:text-gray-400 font-normal">
               {" "}
-              gegen {getOpponent()}
+              {getDisplayText()}
             </span>
           </h4>
           <p className="text-xs text-gray-500 dark:text-gray-400 mt-1">

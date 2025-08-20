@@ -35,7 +35,7 @@ export function NotificationBell({ games, currentParticipantId }: Props) {
         )}
       </Button>
 
-      {/* Dropdown */}
+      {/* Pending Results */}
       {isOpen && (
         <>
           <PendingResultsList
