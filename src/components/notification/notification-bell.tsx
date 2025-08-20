@@ -4,17 +4,16 @@ import { useState } from "react";
 import { Bell } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { NotificationPopup } from "@/components/notification/notification-popup";
-import type { GameWithParticipantsAndDate } from "@/db/types/game";
 
 type Props = {
-  games: GameWithParticipantsAndDate[];
-  participantId: number;
+  gameIds: number[];
+  participantId?: number;
 };
 
-export function NotificationBell({ games, participantId }: Props) {
+export function NotificationBell({ gameIds, participantId }: Props) {
   const [isOpen, setIsOpen] = useState(false);
 
-  const pendingCount = games.length;
+  const pendingCount = gameIds.length;
   const toggleOpen = () => setIsOpen(!isOpen);
   const close = () => setIsOpen(false);
 
@@ -36,7 +35,11 @@ export function NotificationBell({ games, participantId }: Props) {
 
       {isOpen && (
         <>
-          <NotificationPopup games={games} participantId={participantId} />
+          <NotificationPopup
+            gameIds={gameIds}
+            participantId={participantId}
+            onClick={close}
+          />
           <div className="fixed inset-0 z-40" onClick={close} />
         </>
       )}

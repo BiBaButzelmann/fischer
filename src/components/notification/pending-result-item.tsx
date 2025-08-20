@@ -1,49 +1,25 @@
-"use client";
-
 import Link from "next/link";
 import { formatSimpleDate } from "@/lib/date";
 import { buildGameViewUrl } from "@/lib/navigation";
-import type { GameWithParticipantsAndDate } from "@/db/types/game";
+import { ParticipatingPlayerDisplay } from "./participating-player-display";
+import { getGameWithParticipantsAndMatchday } from "@/db/repositories/game";
 
 type Props = {
-  game: GameWithParticipantsAndDate;
+  gameId: number;
   participantId?: number;
+  onClick?: () => void;
 };
 
-export function PendingResultItem({
-  game,
+export async function PendingResultItem({
+  gameId,
   participantId: currentParticipantId,
+  onClick,
 }: Props) {
-  const getDisplayText = () => {
-    if (!currentParticipantId) {
-      const whiteFirstName =
-        game.whiteParticipant?.profile?.firstName || "Unbekannt";
-      const whiteLastName = game.whiteParticipant?.profile?.lastName || "";
-      const whiteName = whiteLastName
-        ? `${whiteFirstName} ${whiteLastName}`
-        : whiteFirstName;
+  const game = await getGameWithParticipantsAndMatchday(gameId);
 
-      const blackFirstName =
-        game.blackParticipant?.profile?.firstName || "Unbekannt";
-      const blackLastName = game.blackParticipant?.profile?.lastName || "";
-      const blackName = blackLastName
-        ? `${blackFirstName} ${blackLastName}`
-        : blackFirstName;
-
-      return `${whiteName} vs. ${blackName}`;
-    }
-
-    const isUserWhite = game.whiteParticipant.id === currentParticipantId;
-    const opponentParticipant = isUserWhite
-      ? game.blackParticipant
-      : game.whiteParticipant;
-
-    const firstName = opponentParticipant?.profile?.firstName || "Unbekannt";
-    const lastName = opponentParticipant?.profile?.lastName || "";
-    const opponentName = lastName ? `${firstName} ${lastName}` : firstName;
-
-    return `gegen ${opponentName}`;
-  };
+  if (!game || !game.matchdayGame?.matchday?.date) {
+    return null;
+  }
 
   return (
     <Link
@@ -51,8 +27,9 @@ export function PendingResultItem({
         tournamentId: game.tournamentId,
         groupId: game.groupId,
         round: game.round,
-        participantId: currentParticipantId,
+        participantId: game.whiteParticipant.id,
       })}
+      onClick={onClick}
       className="block p-4 border-b border-gray-100 dark:border-card-border last:border-b-0 hover:bg-gray-50 dark:hover:bg-card/50 transition-colors"
     >
       <div className="flex items-start justify-between gap-3">
@@ -61,12 +38,14 @@ export function PendingResultItem({
             Runde {game.round}
             <span className="text-gray-500 dark:text-gray-400 font-normal">
               {" "}
-              {getDisplayText()}
+              <ParticipatingPlayerDisplay
+                game={game}
+                participantId={currentParticipantId}
+              />
             </span>
           </h4>
           <p className="text-xs text-gray-500 dark:text-gray-400 mt-1">
-            Gespielt am{" "}
-            {formatSimpleDate(game.matchdayGame?.matchday?.date || new Date())}
+            Gespielt am {formatSimpleDate(game.matchdayGame.matchday.date)}
           </p>
         </div>
       </div>

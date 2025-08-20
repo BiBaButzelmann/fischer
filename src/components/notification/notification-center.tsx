@@ -1,26 +1,34 @@
 import { auth } from "@/auth/utils";
 import { getParticipantByUserId } from "@/db/repositories/participant";
-import { getUncompletedGamesByParticipantId } from "@/db/repositories/game";
+import {
+  getPendingGamesByParticipantId,
+  getPendingGamesByRefereeId,
+} from "@/db/repositories/game";
 import { NotificationBell } from "./notification-bell";
+import { getRefereeByUserId } from "@/db/repositories/referee";
 
 export async function NotificationCenter() {
   const session = await auth();
-
   if (!session?.user?.id) {
     return null;
   }
 
   const participant = await getParticipantByUserId(session.user.id);
+  console.log("NotificationCenter - Participant:", participant);
+  const participantGameIds = participant
+    ? await getPendingGamesByParticipantId(participant.id)
+    : [];
 
-  if (!participant) {
+  const referee = await getRefereeByUserId(session.user.id);
+  const refereeGameIds = referee
+    ? await getPendingGamesByRefereeId(referee.id)
+    : [];
+
+  if (!participant && !referee) {
     return null;
   }
-  // TODO: consider referees as well (for next PR)
-  const uncompletedGames = await getUncompletedGamesByParticipantId(
-    participant.id,
-  );
 
-  return (
-    <NotificationBell games={uncompletedGames} participantId={participant.id} />
-  );
+  const gameIds = [...new Set([...participantGameIds, ...refereeGameIds])];
+
+  return <NotificationBell gameIds={gameIds} participantId={participant?.id} />;
 }

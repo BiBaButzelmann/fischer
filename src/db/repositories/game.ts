@@ -1,7 +1,7 @@
 import { db } from "../client";
 import { eq, and, asc, or, sql, getTableColumns, isNull } from "drizzle-orm";
 import { group } from "../schema/group";
-import { matchdayGame } from "../schema/matchday";
+import { matchdayGame, matchdayReferee } from "../schema/matchday";
 import { matchday } from "../schema/matchday";
 import { game } from "../schema/game";
 import { groupMatchEnteringHelper } from "../schema/matchEnteringHelper";
@@ -284,10 +284,10 @@ export async function getUncompletedGamesInMonth(
   groupId: number,
   month: number,
 ) {
-  const gamesWithMatchdays = await db
+  return await db
     .select({
-      ...getTableColumns(game),
-      matchday: getTableColumns(matchday),
+      id: game.id,
+      date: matchday.date,
     })
     .from(game)
     .innerJoin(matchdayGame, eq(game.id, matchdayGame.gameId))
@@ -299,68 +299,15 @@ export async function getUncompletedGamesInMonth(
         isNull(game.result),
       ),
     )
-    .orderBy(asc(matchday.date));
-
-  const gameIds = gamesWithMatchdays.map((row) => row.id);
-
-  if (gameIds.length === 0) {
-    return [];
-  }
-
-  return await db.query.game
-    .findMany({
-      where: (game, { inArray }) => inArray(game.id, gameIds),
-      with: {
-        whiteParticipant: {
-          with: {
-            profile: {
-              columns: {
-                firstName: true,
-                lastName: true,
-              },
-            },
-          },
-        },
-        blackParticipant: {
-          with: {
-            profile: {
-              columns: {
-                firstName: true,
-                lastName: true,
-              },
-            },
-          },
-        },
-        matchdayGame: {
-          with: {
-            matchday: {
-              columns: {
-                date: true,
-              },
-            },
-          },
-        },
-      },
-    })
-    .then((games) => {
-      const gameMap = new Map(games.map((game) => [game.id, game]));
-      return gameIds.map((id) => gameMap.get(id)).filter(Boolean);
-    });
+    .orderBy(asc(matchday.date))
+    .then((games) => games.map((row) => row.id));
 }
 
-export async function getUncompletedGamesByParticipantId(
-  participantId: number,
-) {
-  // TODO: remove this later
-  const referenceDate =
-    process.env.NODE_ENV === "development"
-      ? new Date("2025-09-30")
-      : new Date();
-
-  const gamesWithMatchdays = await db
+export async function getPendingGamesByParticipantId(participantId: number) {
+  return await db
     .select({
-      ...getTableColumns(game),
-      matchday: getTableColumns(matchday),
+      id: game.id,
+      date: matchday.date,
     })
     .from(game)
     .innerJoin(matchdayGame, eq(game.id, matchdayGame.gameId))
@@ -372,56 +319,194 @@ export async function getUncompletedGamesByParticipantId(
           eq(game.blackParticipantId, participantId),
         ),
         isNull(game.result),
-        sql`${matchday.date} < ${referenceDate}`,
+        (() => {
+          const currentDate = new Date();
+          console.log(
+            "getPendingGamesByParticipantId - Current date:",
+            currentDate,
+          );
+          return sql`${matchday.date} < ${currentDate}`;
+        })(),
       ),
     )
-    .orderBy(asc(matchday.date));
+    .orderBy(asc(matchday.date))
+    .then((participantGames) => participantGames.map((row) => row.id));
+}
 
-  const gameIds = gamesWithMatchdays.map((row) => row.id);
+export async function getPendingGamesByRefereeId(refereeId: number) {
+  return await db
+    .select({
+      id: game.id,
+      date: matchday.date,
+    })
+    .from(game)
+    .innerJoin(matchdayGame, eq(game.id, matchdayGame.gameId))
+    .innerJoin(matchday, eq(matchdayGame.matchdayId, matchday.id))
+    .innerJoin(matchdayReferee, eq(matchday.id, matchdayReferee.matchdayId))
+    .where(
+      and(
+        eq(matchdayReferee.refereeId, refereeId),
+        isNull(game.result),
+        sql`${matchday.date} < ${new Date()}`,
+      ),
+    )
+    .orderBy(asc(matchday.date))
+    .then((refereeGames) => refereeGames.map((row) => row.id));
+}
 
-  if (gameIds.length === 0) {
-    return [];
-  }
-
-  return await db.query.game
-    .findMany({
-      where: (game, { inArray }) => inArray(game.id, gameIds),
-      with: {
-        whiteParticipant: {
-          with: {
-            profile: {
-              columns: {
-                firstName: true,
-                lastName: true,
-              },
-            },
-          },
-        },
-        blackParticipant: {
-          with: {
-            profile: {
-              columns: {
-                firstName: true,
-                lastName: true,
-              },
-            },
-          },
-        },
-        matchdayGame: {
-          with: {
-            matchday: {
-              columns: {
-                date: true,
-              },
+export async function getGameWithParticipantsAndMatchday(gameId: number) {
+  return await db.query.game.findFirst({
+    where: (game, { eq }) => eq(game.id, gameId),
+    with: {
+      whiteParticipant: {
+        with: {
+          profile: {
+            columns: {
+              firstName: true,
+              lastName: true,
             },
           },
         },
       },
-    })
-    .then((games) => {
-      const gameMap = new Map(games.map((game) => [game.id, game]));
-      return gameIds.map((id) => gameMap.get(id)).filter(Boolean);
-    });
+      blackParticipant: {
+        with: {
+          profile: {
+            columns: {
+              firstName: true,
+              lastName: true,
+            },
+          },
+        },
+      },
+      matchdayGame: {
+        with: {
+          matchday: {
+            columns: {
+              date: true,
+            },
+          },
+        },
+      },
+    },
+  });
+}
+
+export async function getGamesWithPendingResultByParticipantIdAndRefereeId(
+  participantId?: number,
+  refereeId?: number,
+) {
+  if (!participantId && !refereeId) {
+    return [];
+  }
+
+  // TODO: remove this later
+  const referenceDate =
+    process.env.NODE_ENV === "development"
+      ? new Date("2025-09-30")
+      : new Date();
+
+  const participantConditions = participantId
+    ? [
+        eq(game.whiteParticipantId, participantId),
+        eq(game.blackParticipantId, participantId),
+      ]
+    : [];
+
+  let participantGameIds: number[] = [];
+  if (participantId) {
+    const participantGames = await db
+      .select({
+        ...getTableColumns(game),
+        matchday: getTableColumns(matchday),
+      })
+      .from(game)
+      .innerJoin(matchdayGame, eq(game.id, matchdayGame.gameId))
+      .innerJoin(matchday, eq(matchdayGame.matchdayId, matchday.id))
+      .where(
+        and(
+          or(...participantConditions),
+          isNull(game.result),
+          sql`${matchday.date} < ${referenceDate}`,
+        ),
+      );
+
+    participantGameIds = participantGames.map((row) => row.id);
+  }
+
+  let refereeGameIds: number[] = [];
+  if (refereeId) {
+    const refereeGames = await db
+      .select({
+        ...getTableColumns(game),
+        matchday: getTableColumns(matchday),
+      })
+      .from(game)
+      .innerJoin(matchdayGame, eq(game.id, matchdayGame.gameId))
+      .innerJoin(matchday, eq(matchdayGame.matchdayId, matchday.id))
+      .innerJoin(matchdayReferee, eq(matchday.id, matchdayReferee.matchdayId))
+      .where(
+        and(
+          eq(matchdayReferee.refereeId, refereeId),
+          isNull(game.result),
+          sql`${matchday.date} < ${referenceDate}`,
+        ),
+      );
+
+    refereeGameIds = refereeGames.map((row) => row.id);
+  }
+
+  const allGameIds = Array.from(
+    new Set([...participantGameIds, ...refereeGameIds]),
+  );
+
+  if (allGameIds.length === 0) {
+    return [];
+  }
+
+  const games = await db.query.game.findMany({
+    where: (game, { inArray }) => inArray(game.id, allGameIds),
+    with: {
+      whiteParticipant: {
+        with: {
+          profile: {
+            columns: {
+              firstName: true,
+              lastName: true,
+            },
+          },
+        },
+      },
+      blackParticipant: {
+        with: {
+          profile: {
+            columns: {
+              firstName: true,
+              lastName: true,
+            },
+          },
+        },
+      },
+      matchdayGame: {
+        with: {
+          matchday: {
+            columns: {
+              date: true,
+            },
+          },
+        },
+      },
+    },
+  });
+
+  const gamesWithMatchday = games.filter(
+    (game) => game.matchdayGame?.matchday?.date,
+  );
+
+  return gamesWithMatchday.sort((a, b) => {
+    const dateA = a.matchdayGame!.matchday!.date;
+    const dateB = b.matchdayGame!.matchday!.date;
+    return dateA.getTime() - dateB.getTime();
+  });
 }
 
 export async function getParticipantsInGroup(groupId: number) {
