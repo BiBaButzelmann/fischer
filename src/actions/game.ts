@@ -131,7 +131,9 @@ export async function scheduleGamesForGroup(
       }
 
       const pairsInRound = pairings[roundIdx];
-      pairsInRound.forEach(([whiteNo, blackNo], boardIdx) => {
+      let startingBoardNumber = 1;
+
+      pairsInRound.forEach(([whiteNo, blackNo]) => {
         const whitePlayer = players[whiteNo - 1];
         const blackPlayer = players[blackNo - 1];
 
@@ -142,7 +144,9 @@ export async function scheduleGamesForGroup(
 
         const isByeGame = !whitePlayer || !blackPlayer;
 
-        const boardNumber = isByeGame ? pairsInRound.length : boardIdx + 1;
+        const boardNumber = isByeGame
+          ? pairsInRound.length
+          : startingBoardNumber++;
 
         gamesToInsert.push({
           whiteParticipantId: whitePlayer?.participant.id ?? null,
