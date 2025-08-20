@@ -455,9 +455,13 @@ export async function getGamesWithPendingResultByParticipantIdAndRefereeId(
     },
   });
 
-  return games.sort((a, b) => {
-    const dateA = a.matchdayGame?.matchday?.date || new Date(0);
-    const dateB = b.matchdayGame?.matchday?.date || new Date(0);
+  const gamesWithMatchday = games.filter(
+    (game) => game.matchdayGame?.matchday?.date,
+  );
+
+  return gamesWithMatchday.sort((a, b) => {
+    const dateA = a.matchdayGame!.matchday!.date;
+    const dateB = b.matchdayGame!.matchday!.date;
     return dateA.getTime() - dateB.getTime();
   });
 }

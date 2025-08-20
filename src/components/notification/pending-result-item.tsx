@@ -42,7 +42,7 @@ export function PendingResultItem({
           </h4>
           <p className="text-xs text-gray-500 dark:text-gray-400 mt-1">
             Gespielt am{" "}
-            {formatSimpleDate(game.matchdayGame?.matchday?.date || new Date())}
+            {formatSimpleDate(game.matchdayGame.matchday.date)}
           </p>
         </div>
       </div>
