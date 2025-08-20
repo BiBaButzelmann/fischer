@@ -59,27 +59,18 @@ export default async function Page({
           />
         </CardContent>
         <CardFooter>
-          <ButtonSection
-            tournamentId={tournament.id}
-            selectedGroupId={groupId}
-            selectedMonth={month}
-          />
+          <ButtonSection selectedGroupId={groupId} selectedMonth={month} />
         </CardFooter>
       </Card>
     </div>
   );
 }
 
-type ButtonSectionProps = {
-  tournamentId: number;
+type Props = {
   selectedGroupId: string | undefined;
   selectedMonth: string | undefined;
 };
-async function ButtonSection({
-  tournamentId,
-  selectedGroupId,
-  selectedMonth,
-}: ButtonSectionProps) {
+async function ButtonSection({ selectedGroupId, selectedMonth }: Props) {
   if (selectedGroupId == null || selectedMonth == null) {
     return (
       <div className="flex justify-center">
