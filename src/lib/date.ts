@@ -55,11 +55,7 @@ export function displayLongDate(date: Date): string {
  * @returns Formatted date and time string
  */
 export function formatEventDateTime(date: Date): string {
-  const dateStr = date.toLocaleDateString("de-DE", {
-    weekday: "short",
-    day: "2-digit",
-    month: "2-digit",
-  });
+  const dateStr = formatSimpleDate(date);
   const timeStr = date.toLocaleTimeString("de-DE", {
     hour: "2-digit",
     minute: "2-digit",
