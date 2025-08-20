@@ -51,7 +51,7 @@ export function PendingResultItem({
         tournamentId: game.tournamentId,
         groupId: game.groupId,
         round: game.round,
-        participantId: currentParticipantId,
+        participantId: game.whiteParticipant.id,
       })}
       onClick={onClose}
       className="block p-4 border-b border-gray-100 dark:border-card-border last:border-b-0 hover:bg-gray-50 dark:hover:bg-card/50 transition-colors"
