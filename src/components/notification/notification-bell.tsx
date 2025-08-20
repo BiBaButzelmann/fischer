@@ -3,7 +3,7 @@
 import { useState } from "react";
 import { Bell } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import { NotificationDropdown } from "@/components/notification/notification-dropdown";
+import { PendingResultsList } from "@/components/notification/pending-results-list";
 import type { GameWithParticipantsAndDate } from "@/db/types/game";
 
 type Props = {
@@ -38,7 +38,7 @@ export function NotificationBell({ games, currentParticipantId }: Props) {
       {/* Dropdown */}
       {isOpen && (
         <>
-          <NotificationDropdown
+          <PendingResultsList
             games={games}
             currentParticipantId={currentParticipantId}
           />
