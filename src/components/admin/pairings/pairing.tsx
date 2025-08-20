@@ -26,12 +26,10 @@ export function Pairing({ group }: { group: GroupWithParticipantsAndGames }) {
   };
 
   const gamesByRound = group.games.reduce((acc, game) => {
-    if (game.whiteParticipantId != null && game.blackParticipantId != null) {
-      if (!acc.has(game.round)) {
-        acc.set(game.round, []);
-      }
-      acc.get(game.round)!.push(game);
+    if (!acc.has(game.round)) {
+      acc.set(game.round, []);
     }
+    acc.get(game.round)!.push(game);
     return acc;
   }, new Map<number, GameWithMatchday[]>());
 
