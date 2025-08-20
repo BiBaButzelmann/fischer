@@ -321,7 +321,10 @@ export async function getPendingGamesByParticipantId(participantId: number) {
         isNull(game.result),
         (() => {
           const currentDate = new Date();
-          console.log('getPendingGamesByParticipantId - Current date:', currentDate);
+          console.log(
+            "getPendingGamesByParticipantId - Current date:",
+            currentDate,
+          );
           return sql`${matchday.date} < ${currentDate}`;
         })(),
       ),
