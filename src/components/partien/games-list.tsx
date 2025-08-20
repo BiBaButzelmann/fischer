@@ -44,7 +44,6 @@ export function GamesList({
   const isParticipant = userRoles.includes("participant");
   const isMatchEnteringHelper = userRoles.includes("matchEnteringHelper");
 
-  // Filter out games without both participants
   const validGames = useMemo(
     () =>
       games.filter((game) => game.whiteParticipant && game.blackParticipant),

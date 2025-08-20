@@ -26,10 +26,12 @@ export function Pairing({ group }: { group: GroupWithParticipantsAndGames }) {
   };
 
   const gamesByRound = group.games.reduce((acc, game) => {
-    if (!acc.has(game.round)) {
-      acc.set(game.round, []);
+    if (game.whiteParticipantId != null && game.blackParticipantId != null) {
+      if (!acc.has(game.round)) {
+        acc.set(game.round, []);
+      }
+      acc.get(game.round)!.push(game);
     }
-    acc.get(game.round)!.push(game);
     return acc;
   }, new Map<number, GameWithMatchday[]>());
 
@@ -104,7 +106,7 @@ export function Pairing({ group }: { group: GroupWithParticipantsAndGames }) {
                         <div>
                           <ParticipantEntry
                             participant={
-                              findParticipant(game.whiteParticipantId)!
+                              findParticipant(game.whiteParticipantId!)!
                             }
                             showMatchDays={false}
                             showFideRating={false}
@@ -114,7 +116,7 @@ export function Pairing({ group }: { group: GroupWithParticipantsAndGames }) {
                         <div>
                           <ParticipantEntry
                             participant={
-                              findParticipant(game.blackParticipantId)!
+                              findParticipant(game.blackParticipantId!)!
                             }
                             showMatchDays={false}
                             showFideRating={false}
