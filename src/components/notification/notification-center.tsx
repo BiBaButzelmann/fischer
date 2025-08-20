@@ -27,7 +27,7 @@ export async function NotificationCenter() {
     return null;
   }
 
-  const gameIds = [...new Set([...participantGameIds, ...refereeGameIds])];
+  const gameIds = new Set([...participantGameIds, ...refereeGameIds]);
 
-  return <NotificationBell gameIds={gameIds} participantId={participant?.id} />;
+  return <NotificationBell gameIds={Array.from(gameIds)} participantId={participant?.id} />;
 }
