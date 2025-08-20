@@ -16,8 +16,8 @@ export const isParticipantInGame = (
   participantId: number,
 ): boolean => {
   return (
-    (game.whiteParticipant?.id === participantId) ||
-    (game.blackParticipant?.id === participantId)
+    game.whiteParticipant?.id === participantId ||
+    game.blackParticipant?.id === participantId
   );
 };
 
