@@ -21,9 +21,6 @@ export async function NotificationCenter() {
   );
 
   return (
-    <NotificationBell
-      games={uncompletedGames}
-      currentParticipantId={participant.id}
-    />
+    <NotificationBell games={uncompletedGames} participantId={participant.id} />
   );
 }

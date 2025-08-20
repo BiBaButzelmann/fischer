@@ -284,7 +284,7 @@ export async function getUncompletedGamesInMonth(
   groupId: number,
   month: number,
 ) {
-  return await db
+  const gamesWithMatchdays = await db
     .select({
       ...getTableColumns(game),
       matchday: getTableColumns(matchday),
@@ -300,6 +300,52 @@ export async function getUncompletedGamesInMonth(
       ),
     )
     .orderBy(asc(matchday.date));
+
+  const gameIds = gamesWithMatchdays.map((row) => row.id);
+
+  if (gameIds.length === 0) {
+    return [];
+  }
+
+  return await db.query.game
+    .findMany({
+      where: (game, { inArray }) => inArray(game.id, gameIds),
+      with: {
+        whiteParticipant: {
+          with: {
+            profile: {
+              columns: {
+                firstName: true,
+                lastName: true,
+              },
+            },
+          },
+        },
+        blackParticipant: {
+          with: {
+            profile: {
+              columns: {
+                firstName: true,
+                lastName: true,
+              },
+            },
+          },
+        },
+        matchdayGame: {
+          with: {
+            matchday: {
+              columns: {
+                date: true,
+              },
+            },
+          },
+        },
+      },
+    })
+    .then((games) => {
+      const gameMap = new Map(games.map((game) => [game.id, game]));
+      return gameIds.map((id) => gameMap.get(id)).filter(Boolean);
+    });
 }
 
 export async function getUncompletedGamesByParticipantId(
