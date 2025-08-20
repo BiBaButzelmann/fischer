@@ -86,7 +86,7 @@ async function ButtonSection({ selectedGroupId, selectedMonth }: Props) {
   const groupId = parseInt(selectedGroupId);
   const month = parseInt(selectedMonth);
 
-  const uncompletedGames = await getUncompletedGamesInMonth(groupId, month);
+  const uncompletedGameIds = await getUncompletedGamesInMonth(groupId, month);
 
   return (
     <div className="flex flex-col gap-4 w-full">
@@ -94,10 +94,10 @@ async function ButtonSection({ selectedGroupId, selectedMonth }: Props) {
         <GenerateFideReportButton
           selectedGroupId={selectedGroupId}
           selectedMonth={selectedMonth}
-          isDisabled={uncompletedGames.length > 0}
+          isDisabled={uncompletedGameIds.length > 0}
         />
       </div>
-      {uncompletedGames.length > 0 && (
+      {uncompletedGameIds.length > 0 && (
         <div className="w-full">
           <div className="text-center mb-3">
             <h3 className="text-sm font-medium text-gray-900 dark:text-gray-100">
@@ -110,7 +110,7 @@ async function ButtonSection({ selectedGroupId, selectedMonth }: Props) {
           </div>
           <div className="bg-white dark:bg-card border border-gray-200 dark:border-card-border rounded-lg">
             <div className="max-h-64 overflow-y-auto">
-              <PendingResultsList games={uncompletedGames} />
+              <PendingResultsList gameIds={uncompletedGameIds} />
             </div>
           </div>
         </div>

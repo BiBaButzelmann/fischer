@@ -23,10 +23,11 @@ export async function NotificationCenter() {
     ? await getPendingGamesByRefereeId(referee.id)
     : [];
 
-  const gameIds = [...new Set([...participantGameIds, ...refereeGameIds])];
-  if (gameIds.length === 0) {
+  if (!participant && !referee) {
     return null;
   }
+
+  const gameIds = [...new Set([...participantGameIds, ...refereeGameIds])];
 
   return <NotificationBell gameIds={gameIds} participantId={participant?.id} />;
 }
