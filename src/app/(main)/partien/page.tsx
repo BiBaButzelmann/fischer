@@ -71,7 +71,7 @@ export default async function Page({
   );
 
   // TODO: Refactor conditional data loading - this should be handled by separate components
-  const [participants, games, userRoles] = await Promise.all([
+  const [participants, allGames, userRoles] = await Promise.all([
     //TODO: proper validation
     selectedGroup
       ? getParticipantsByGroupId(Number(selectedGroup))
@@ -85,6 +85,10 @@ export default async function Page({
     ),
     session?.user.id ? getRolesByUserId(session.user.id) : Promise.resolve([]),
   ]);
+
+  const games = allGames.filter(
+    (game) => game.whiteParticipant != null && game.blackParticipant != null,
+  );
 
   return (
     <div>
