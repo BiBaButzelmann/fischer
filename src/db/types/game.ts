@@ -63,8 +63,8 @@ export type GameWithMatchday = Game & {
 };
 
 export type GameWithParticipantProfilesAndMatchday = Game & {
-  whiteParticipant: ParticipantWithProfile;
-  blackParticipant: ParticipantWithProfile;
+  whiteParticipant: ParticipantWithProfile | null;
+  blackParticipant: ParticipantWithProfile | null;
   matchdayGame: {
     matchday: {
       date: Date;
