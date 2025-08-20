@@ -22,7 +22,7 @@ export function PendingResultsList({ games, participantId, onClick }: Props) {
           key={game.id}
           game={game}
           participantId={participantId}
-          onClick={onClick}
+          onClose={onClick}
         />
       ))}
     </>

@@ -6,10 +6,10 @@ import type { GameWithParticipantsAndDate } from "@/db/types/game";
 type Props = {
   games: GameWithParticipantsAndDate[];
   participantId?: number;
-  onClose: () => void;
+  onClick: () => void;
 };
 
-export function NotificationPopup({ games, participantId, onClose }: Props) {
+export function NotificationPopup({ games, participantId, onClick }: Props) {
   if (games.length === 0) {
     return (
       <div className="absolute right-0 top-12 w-96 bg-white dark:bg-card border border-gray-200 dark:border-card-border rounded-lg shadow-lg z-50">
@@ -26,7 +26,7 @@ export function NotificationPopup({ games, participantId, onClose }: Props) {
         <PendingResultsList
           games={games}
           participantId={participantId}
-          onClose={onClose}
+          onClick={onClick}
         />
       </div>
     </div>

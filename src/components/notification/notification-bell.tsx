@@ -41,7 +41,7 @@ export function NotificationBell({ games, participantId }: Props) {
           <NotificationPopup
             games={games}
             participantId={participantId}
-            onClose={close}
+            onClick={close}
           />
           <div className="fixed inset-0 z-40" onClick={close} />
         </>
