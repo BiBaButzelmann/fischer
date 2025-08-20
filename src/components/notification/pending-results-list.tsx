@@ -6,10 +6,10 @@ import type { GameWithParticipantsAndDate } from "@/db/types/game";
 type Props = {
   games: GameWithParticipantsAndDate[];
   participantId?: number;
-  onClose?: () => void;
+  onClick?: () => void;
 };
 
-export function PendingResultsList({ games, participantId, onClose }: Props) {
+export function PendingResultsList({ games, participantId, onClick }: Props) {
   return (
     <>
       <div className="px-4 py-3 border-b border-gray-200 dark:border-card-border">
@@ -22,7 +22,7 @@ export function PendingResultsList({ games, participantId, onClose }: Props) {
           key={game.id}
           game={game}
           participantId={participantId}
-          onClose={onClose}
+          onClick={onClick}
         />
       ))}
     </>
