@@ -373,7 +373,12 @@ export async function getPendingGamesByRefereeId(refereeId: number) {
 
 export async function getGameWithParticipantsAndMatchday(gameId: number) {
   return await db.query.game.findFirst({
-    where: (game, { eq }) => eq(game.id, gameId),
+    where: (game, { eq, and, isNotNull }) =>
+      and(
+        eq(game.id, gameId),
+        isNotNull(game.whiteParticipantId),
+        isNotNull(game.blackParticipantId),
+      ),
     with: {
       whiteParticipant: {
         with: {
