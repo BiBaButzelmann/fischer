@@ -257,8 +257,15 @@ export async function getGamesByTournamentId(
 
 export async function getCompletedGames(groupId: number, maxRound?: number) {
   const result = await db.query.game.findMany({
-    where: (game, { and, eq, lte, isNotNull }) => {
-      const conditions = [eq(game.groupId, groupId), isNotNull(game.result)];
+    where: (game, { and, eq, lte, isNotNull, or, isNull }) => {
+      const conditions = [
+        eq(game.groupId, groupId),
+        or(
+          isNotNull(game.result),
+          isNull(game.whiteParticipantId),
+          isNull(game.blackParticipantId),
+        ),
+      ];
 
       if (maxRound !== undefined) {
         conditions.push(lte(game.round, maxRound));
