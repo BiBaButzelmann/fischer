@@ -26,3 +26,5 @@ export const gameResults = [
 ] as const;
 
 export const gameResult = pgEnum("result", gameResults);
+
+export const gender = pgEnum("gender", ["m", "f"]);

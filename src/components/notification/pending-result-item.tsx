@@ -3,6 +3,7 @@ import { formatSimpleDate } from "@/lib/date";
 import { buildGameViewUrl } from "@/lib/navigation";
 import { ParticipatingPlayerDisplay } from "./participating-player-display";
 import { getGameWithParticipantsAndMatchday } from "@/db/repositories/game";
+import invariant from "tiny-invariant";
 
 type Props = {
   gameId: number;
@@ -17,9 +18,15 @@ export async function PendingResultItem({
 }: Props) {
   const game = await getGameWithParticipantsAndMatchday(gameId);
 
-  if (!game || !game.matchdayGame?.matchday?.date) {
-    return null;
-  }
+  invariant(game, "Game not found");
+  invariant(
+    game.whiteParticipant && game.blackParticipant,
+    "Game should have both participants for pending results",
+  );
+  invariant(
+    game.matchdayGame?.matchday?.date,
+    "Game should have matchday date for pending results",
+  );
 
   return (
     <Link

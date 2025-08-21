@@ -12,11 +12,11 @@ import { Suspense } from "react";
 import { DateTime } from "luxon";
 import { getGameTimeFromGame } from "@/lib/game-time";
 
-type PageProps = {
+type Props = {
   params: Promise<{ partieId: string }>;
 };
 
-export default async function GamePage({ params }: PageProps) {
+export default async function GamePage({ params }: Props) {
   const { partieId: gameIdParam } = await params;
 
   const session = await auth();
@@ -73,6 +73,14 @@ async function PgnContainer({
   const game = await getGameById(gameId);
   if (!game) {
     return <p className="p-4 text-red-600">Game with ID {gameId} not found.</p>;
+  }
+
+  if (!game.whiteParticipant || !game.blackParticipant) {
+    return (
+      <p className="p-4 text-red-600">
+        Bye Runden können nicht eingegeben werden.
+      </p>
+    );
   }
 
   const whiteDisplay = formatDisplayName(game.whiteParticipant);

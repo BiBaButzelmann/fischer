@@ -25,6 +25,7 @@ import { cn } from "@/lib/utils";
 import { Card, CardContent } from "../ui/card";
 import { Mail, Phone } from "lucide-react";
 import { isSameDate } from "@/lib/date";
+import invariant from "tiny-invariant";
 
 type Props = {
   gameId: number;
@@ -42,6 +43,11 @@ export function PostponeGameDialog({
   const [isPending, startTransition] = useTransition();
   const [selectedDate, setSelectedDate] = useState<Date | undefined>();
   const [isOpen, setIsOpen] = useState(false);
+
+  invariant(
+    game.whiteParticipant && game.blackParticipant,
+    "PostponeGameDialog should only be called with games that have both participants",
+  );
 
   const handlePostponeFormSubmit = async (
     event: React.FormEvent<HTMLFormElement>,

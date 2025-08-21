@@ -7,6 +7,10 @@ type Props = {
 };
 
 export function ParticipatingPlayerDisplay({ game, participantId }: Props) {
+  if (!game.whiteParticipant || !game.blackParticipant) {
+    return "Partie nicht verfügbar";
+  }
+
   if (!participantId || !isParticipantInGame(game, participantId)) {
     return `${game.whiteParticipant.profile.firstName} ${game.whiteParticipant.profile.lastName} vs. ${game.blackParticipant.profile.firstName} ${game.blackParticipant.profile.lastName}`;
   }

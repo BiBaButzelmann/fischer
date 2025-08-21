@@ -14,7 +14,7 @@ import { GameResult } from "@/db/types/game";
 import { and, eq, InferInsertModel, inArray } from "drizzle-orm";
 import { revalidatePath } from "next/cache";
 import invariant from "tiny-invariant";
-import { roundRobinPairs } from "@/lib/pairing-utils";
+import { bergerFide, nextEvenNumber } from "@/lib/pairing-utils";
 import { redirect } from "next/navigation";
 import { getDateTimeFromDefaultTime } from "@/lib/game-time";
 import { sendGamePostponementEmails } from "@/actions/email/game-postponement";
@@ -93,7 +93,8 @@ export async function scheduleGamesForGroup(
     orderBy: (week, { asc }) => asc(week.weekNumber),
   });
 
-  const pairings = roundRobinPairs(n); // array[round][pair] -> [white#, black#]
+  const nextEvenPlayerCount = nextEvenNumber(n);
+  const pairings = bergerFide(nextEvenPlayerCount); // array[round][pair] -> [white#, black#]
 
   if (pairings.length > regularWeeks.length) {
     return {
@@ -130,14 +131,28 @@ export async function scheduleGamesForGroup(
       }
 
       const pairsInRound = pairings[roundIdx];
-      pairsInRound.forEach(([whiteNo, blackNo], boardIdx) => {
+      let startingBoardNumber = 1;
+
+      pairsInRound.forEach(([whiteNo, blackNo]) => {
+        const whitePlayer = players[whiteNo - 1];
+        const blackPlayer = players[blackNo - 1];
+
+        invariant(
+          whitePlayer || blackPlayer,
+          `Invalid pairing: both players are null for pairing [${whiteNo}, ${blackNo}] in round ${roundIdx + 1}`,
+        );
+
+        const isByeGame = !whitePlayer || !blackPlayer;
+
+        const boardNumber = isByeGame ? null : startingBoardNumber++;
+
         gamesToInsert.push({
-          whiteParticipantId: players[whiteNo - 1].participant.id,
-          blackParticipantId: players[blackNo - 1].participant.id,
+          whiteParticipantId: whitePlayer?.participant.id ?? null,
+          blackParticipantId: blackPlayer?.participant.id ?? null,
           tournamentId,
           groupId: group.id,
           round: roundIdx + 1,
-          boardNumber: boardIdx + 1,
+          boardNumber,
         });
       });
     }
@@ -195,6 +210,15 @@ export async function updateGameMatchdayAndBoardNumber(
     },
   });
   invariant(gameData, "Game not found");
+
+  invariant(
+    gameData.whiteParticipant,
+    "White participant not found - cannot postpone bye games",
+  );
+  invariant(
+    gameData.blackParticipant,
+    "Black participant not found - cannot postpone bye games",
+  );
 
   const isUserInGame =
     gameData.whiteParticipant.profile.userId === session.user.id ||

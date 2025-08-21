@@ -9,13 +9,13 @@ import { matchdayGame } from "./matchday";
 
 export const game = pgTable("game", {
   id: integer("id").generatedAlwaysAsIdentity().primaryKey(),
-  whiteParticipantId: integer("white_player_id").notNull(),
-  blackParticipantId: integer("black_player_id").notNull(),
+  whiteParticipantId: integer("white_player_id"),
+  blackParticipantId: integer("black_player_id"),
   tournamentId: integer("tournament_id").notNull(),
   groupId: integer("group_id").notNull(),
   pgnId: integer("pgn_id"),
   round: integer("round").notNull(),
-  boardNumber: integer("board_number").notNull(),
+  boardNumber: integer("board_number"),
 
   result: gameResult(),
 

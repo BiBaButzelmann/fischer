@@ -78,6 +78,20 @@
       "when": 1754512018623,
       "tag": "0010_big_bullseye",
       "breakpoints": true
+    },
+    {
+      "idx": 11,
+      "version": "7",
+      "when": 1755718778265,
+      "tag": "0011_worthless_firestar",
+      "breakpoints": true
+    },
+    {
+      "idx": 12,
+      "version": "7",
+      "when": 1755758526942,
+      "tag": "0012_careful_calypso",
+      "breakpoints": true
     }
   ]
 }
