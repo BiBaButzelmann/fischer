@@ -5,7 +5,6 @@
 ### Tier 1
 
 - add feature to disable players from the tournament after start (Paul)
-- Eingabehelfer: Seite v0 mit ausstehenden Partien zum abarbeiten (Arne)
 - drucken: feature to print the Kärtchen (Paul)
 
   - Eingabehelfer: Seite implementieren (Paul)
