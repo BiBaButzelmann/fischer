@@ -50,8 +50,6 @@ export function calculateStandings(
   });
 
   games.forEach((game) => {
-    if (!game.result) return;
-
     if (game.whiteParticipantId === null) {
       invariant(
         game.blackParticipantId !== null,
@@ -72,6 +70,8 @@ export function calculateStandings(
       whitePlayer.gamesPlayed += 1;
       return;
     }
+
+    if (!game.result) return;
 
     const whitePlayer = playerStats.get(game.whiteParticipantId)!;
     const blackPlayer = playerStats.get(game.blackParticipantId)!;
