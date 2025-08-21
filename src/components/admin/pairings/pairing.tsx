@@ -26,6 +26,25 @@ export function Pairing({ group }: { group: GroupWithParticipantsAndGames }) {
     return group.participants.find((p) => p.id === participantId);
   };
 
+  const ParticipantCell = ({ participantId }: { participantId: number }) => {
+    const participant = findParticipant(participantId);
+    return participant ? (
+      <ParticipantEntry
+        participant={participant}
+        showMatchDays={false}
+        showFideRating={false}
+        showDwzRating={false}
+      />
+    ) : (
+      <div className="flex items-center gap-2 py-1">
+        <Bird className="h-4 w-4 text-amber-700" />
+        <p className="font-semibold flex-grow truncate text-red-700">
+          spielfrei
+        </p>
+      </div>
+    );
+  };
+
   const gamesByRound = group.games.reduce((acc, game) => {
     if (!acc.has(game.round)) {
       acc.set(game.round, []);
@@ -103,42 +122,14 @@ export function Pairing({ group }: { group: GroupWithParticipantsAndGames }) {
                         </div>
                         {/* TODO: add color coding for players that dont have time on that date */}
                         <div>
-                          {findParticipant(game.whiteParticipantId!) ? (
-                            <ParticipantEntry
-                              participant={
-                                findParticipant(game.whiteParticipantId!)!
-                              }
-                              showMatchDays={false}
-                              showFideRating={false}
-                              showDwzRating={false}
-                            />
-                          ) : (
-                            <div className="flex items-center gap-2 py-1">
-                              <Bird className="h-4 w-4 text-amber-700" />
-                              <p className="font-semibold flex-grow truncate text-red-700">
-                                spielfrei
-                              </p>
-                            </div>
-                          )}
+                          <ParticipantCell
+                            participantId={game.whiteParticipantId!}
+                          />
                         </div>
                         <div>
-                          {findParticipant(game.blackParticipantId!) ? (
-                            <ParticipantEntry
-                              participant={
-                                findParticipant(game.blackParticipantId!)!
-                              }
-                              showMatchDays={false}
-                              showFideRating={false}
-                              showDwzRating={false}
-                            />
-                          ) : (
-                            <div className="flex items-center gap-2 py-1">
-                              <Bird className="h-4 w-4 text-amber-700" />
-                              <p className="font-semibold flex-grow truncate text-red-700">
-                                spielfrei
-                              </p>
-                            </div>
-                          )}
+                          <ParticipantCell
+                            participantId={game.blackParticipantId!}
+                          />
                         </div>
                       </div>
                     ))}
