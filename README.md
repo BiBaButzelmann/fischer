@@ -4,8 +4,7 @@
 
 ### Tier 1
 
-- add pairing logic for uneven groups (Arne)
-- add feature to disable players from the tournament after start (Arne)
+- add feature to disable players from the tournament after start (Paul)
 - Eingabehelfer: Seite v0 mit ausstehenden Partien zum abarbeiten (Arne)
 - drucken: feature to print the Kärtchen (Paul)
 
