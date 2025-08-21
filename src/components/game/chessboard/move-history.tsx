@@ -68,8 +68,8 @@ function MoveHistory({
 
   return (
     <div className="h-full w-full">
-      <div className="h-full flex flex-col">
-        <div className="flex flex-col space-y-1.5 pb-3">
+      <div className="h-full rounded-xl border bg-card text-card-foreground shadow flex flex-col">
+        <div className="flex flex-col space-y-1.5 p-4 pb-3">
           <div className="font-semibold leading-none tracking-tight flex items-center justify-between">
             <div className="flex items-center gap-2">
               <div className="w-2 h-2 bg-primary rounded-full"></div>
@@ -88,7 +88,7 @@ function MoveHistory({
             )}
           </div>
         </div>
-        <div className="flex-1 overflow-hidden">
+        <div className="flex-1 px-4 pb-4 overflow-hidden">
           <div className="h-full overflow-y-auto rounded-md border bg-background/50">
             <table className="w-full">
               <tbody className="divide-y divide-border/30">
