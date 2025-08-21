@@ -24,6 +24,7 @@
   - tutorial mail: custom mail for each role (Arne)
   - assigned matchdays in mail
 - Eingabehelfer: improve chess board visuals and error handling (?)
+- PGN Viewer Passwort mitteilen
 
 ### Tier 3
 

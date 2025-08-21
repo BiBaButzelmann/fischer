@@ -1,10 +1,17 @@
 "use client";
 
-import { useState, useEffect, useCallback, useMemo } from "react";
+import {
+  useState,
+  useEffect,
+  useCallback,
+  useMemo,
+  useTransition,
+} from "react";
 import { Chess, Move } from "chess.js";
 import { Chessboard } from "react-chessboard";
 import MoveHistory from "./move-history";
-import SavePGNButton from "./save-pgn-button";
+import { savePGN } from "@/actions/pgn";
+import { toast } from "sonner";
 
 export type Props = {
   gameId: number;
@@ -19,6 +26,7 @@ export default function PgnViewer({
 }: Props) {
   const [moves, setMoves] = useState(() => movesFromPGN(initialPGN));
   const [currentIndex, setCurrentIndex] = useState(moves.length - 1);
+  const [isPending, startTransition] = useTransition();
 
   useChessboardControls({
     onArrowLeft: () => setCurrentIndex((i) => Math.max(-1, i - 1)),
@@ -32,6 +40,18 @@ export default function PgnViewer({
   );
 
   const fullPGN = useMemo(() => computePGNFromMoves(moves), [moves]);
+
+  const handleSave = useCallback(() => {
+    startTransition(async () => {
+      const result = await savePGN(fullPGN, gameId);
+
+      if (result?.error) {
+        toast.error("Nicht für Speichern autorisiert");
+      } else {
+        toast.success("Partie erfolgreich gespeichert");
+      }
+    });
+  }, [fullPGN, gameId]);
 
   const handleDrop = useCallback(
     (sourceSquare: string, targetSquare: string): boolean => {
@@ -53,25 +73,28 @@ export default function PgnViewer({
   );
 
   return (
-    <div className="flex gap-4 items-start flex-nowrap">
-      <Chessboard
-        position={fen}
-        arePiecesDraggable={allowEdit}
-        onPieceDrop={handleDrop}
-      />
-
-      <div>
-        <MoveHistory
-          history={moves}
-          currentMoveIndex={currentIndex}
-          goToMove={setCurrentIndex}
-        />
-
-        {allowEdit ? (
-          <div className="w-full md:ml-8 md:w-auto">
-            <SavePGNButton newValue={fullPGN} gameId={gameId} />
+    <div className="rounded-xl border bg-card shadow p-6 w-full">
+      <div className="flex flex-col lg:flex-row gap-6 w-full">
+        <div className="flex-shrink-0 w-full max-w-lg mx-auto lg:mx-0">
+          <div className="aspect-square w-full">
+            <Chessboard
+              position={fen}
+              arePiecesDraggable={allowEdit}
+              onPieceDrop={handleDrop}
+            />
           </div>
-        ) : null}
+        </div>
+
+        <div className="flex-1 min-w-0 lg:max-w-xs">
+          <MoveHistory
+            history={moves}
+            currentMoveIndex={currentIndex}
+            goToMove={setCurrentIndex}
+            onSave={allowEdit ? handleSave : undefined}
+            isSaving={isPending}
+            showSave={allowEdit}
+          />
+        </div>
       </div>
     </div>
   );
