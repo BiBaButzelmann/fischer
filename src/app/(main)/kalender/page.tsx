@@ -48,13 +48,13 @@ export default async function Page() {
     ...setupHelperEvents,
   ];
 
-  const hasAnyRole = !!(
+  const hasAnyRoleWithEvents = !!(
     currentParticipant ||
     currentReferee ||
     currentSetupHelper
   );
   const isRunning = activeTournament?.stage === "running";
-  const shouldShowInfoBox = session && (!isRunning || hasAnyRole);
+  const shouldShowInfoBox = session && (!isRunning || hasAnyRoleWithEvents);
 
   return (
     <div>
@@ -77,7 +77,7 @@ export default async function Page() {
                 </>
               ) : isRunning ? (
                 <>
-                  {hasAnyRole && (
+                  {hasAnyRoleWithEvents && (
                     <>
                       <p className="text-blue-800 text-sm">
                         Hier siehst du deine Termine.
@@ -92,7 +92,7 @@ export default async function Page() {
                     </>
                   )}
 
-                  {hasAnyRole && (
+                  {hasAnyRoleWithEvents && (
                     <div className="flex flex-wrap gap-4 text-xs">
                       {currentParticipant && (
                         <div className="flex items-center gap-1">
