@@ -1,5 +1,14 @@
 import { db } from "../client";
-import { eq, and, asc, or, sql, getTableColumns, isNull } from "drizzle-orm";
+import {
+  eq,
+  and,
+  asc,
+  or,
+  sql,
+  getTableColumns,
+  isNull,
+  isNotNull,
+} from "drizzle-orm";
 import { group } from "../schema/group";
 import { matchdayGame, matchdayReferee } from "../schema/matchday";
 import { matchday } from "../schema/matchday";
@@ -51,12 +60,16 @@ export async function getGameById(gameId: number) {
   });
 }
 
-export async function getGamesOfParticipant(participantId: number) {
+export async function getRealGamesOfParticipant(participantId: number) {
   return await db.query.game.findMany({
-    where: (game, { or, eq }) =>
-      or(
-        eq(game.whiteParticipantId, participantId),
-        eq(game.blackParticipantId, participantId),
+    where: (game, { and, or, eq, isNotNull }) =>
+      and(
+        or(
+          eq(game.whiteParticipantId, participantId),
+          eq(game.blackParticipantId, participantId),
+        ),
+        isNotNull(game.whiteParticipantId),
+        isNotNull(game.blackParticipantId),
       ),
     with: {
       whiteParticipant: {
