@@ -26,20 +26,6 @@ export default async function Page() {
     getActiveTournament(),
   ]);
 
-  if (!currentParticipant && !currentReferee && !currentSetupHelper) {
-    return (
-      <div>
-        <h1 className="text-3xl font-bold text-gray-900 mb-2">Kalender</h1>
-        <div className="bg-yellow-50 border border-yellow-200 rounded-lg p-4">
-          <p className="text-yellow-800 text-sm">
-            Du bist weder als Teilnehmer, Schiedsrichter noch als Aufbauhelfer
-            für ein Turnier angemeldet.
-          </p>
-        </div>
-      </div>
-    );
-  }
-
   const [participantEvents, refereeEvents, setupHelperEvents, matchdays] =
     await Promise.all([
       currentParticipant
@@ -62,74 +48,86 @@ export default async function Page() {
     ...setupHelperEvents,
   ];
 
+  const hasAnyRole = !!(
+    currentParticipant ||
+    currentReferee ||
+    currentSetupHelper
+  );
+  const isRunning = activeTournament?.stage === "running";
+  const shouldShowInfoBox = session && (!isRunning || hasAnyRole);
+
   return (
     <div>
       <div className="mb-4">
         <h1 className="text-3xl font-bold text-gray-900 mb-2">Kalender</h1>
-        <div className="bg-blue-50 border border-blue-200 rounded-lg p-4 mb-4">
-          <div className="space-y-2">
-            {!session ? (
-              <>
-                <p className="text-blue-800 text-sm">
-                  Hier siehst du die Spieltage des Turniers. Klicke auf einen
-                  hervorgehobenen Tag, um zu den Partien dieses Spieltags zu
-                  gelangen.
-                </p>
-                <p className="text-blue-700 text-xs">
-                  <strong>Hinweis:</strong> Melde dich an, um deine persönlichen
-                  Termine und Spiele zu sehen.
-                </p>
-              </>
-            ) : activeTournament?.stage === "running" ? (
-              <>
-                <p className="text-blue-800 text-sm">
-                  Hier siehst du deine Termine.
-                  {currentParticipant && (
-                    <span>
-                      {" "}
-                      Du kannst deine Spiele per Drag & Drop verschieben. Sprich
-                      dich bitte vorher mit deinem Gegner ab.
-                    </span>
-                  )}{" "}
-                </p>
+        {shouldShowInfoBox && (
+          <div className="bg-blue-50 border border-blue-200 rounded-lg p-4 mb-4">
+            <div className="space-y-2">
+              {!session ? (
+                <>
+                  <p className="text-blue-800 text-sm">
+                    Hier siehst du die Spieltage des Turniers. Klicke auf einen
+                    hervorgehobenen Tag, um zu den Partien dieses Spieltags zu
+                    gelangen.
+                  </p>
+                  <p className="text-blue-700 text-xs">
+                    <strong>Hinweis:</strong> Melde dich an, um deine
+                    persönlichen Termine und Spiele zu sehen.
+                  </p>
+                </>
+              ) : isRunning ? (
+                <>
+                  {hasAnyRole && (
+                    <>
+                      <p className="text-blue-800 text-sm">
+                        Hier siehst du deine Termine.
+                        {currentParticipant && (
+                          <span>
+                            {" "}
+                            Du kannst deine Spiele per Drag & Drop verschieben.
+                            Sprich dich bitte vorher mit deinem Gegner ab.
+                          </span>
+                        )}{" "}
+                      </p>
+                    </>
+                  )}
 
-                {(currentParticipant ||
-                  currentReferee ||
-                  currentSetupHelper) && (
-                  <div className="flex flex-wrap gap-4 text-xs">
-                    {currentParticipant && (
-                      <div className="flex items-center gap-1">
-                        <div className="w-3 h-3 bg-blue-500 rounded"></div>
-                        <span className="text-blue-700">Deine Spiele</span>
-                      </div>
-                    )}
-                    {currentReferee && (
-                      <div className="flex items-center gap-1">
-                        <div className="w-3 h-3 bg-red-500 rounded"></div>
-                        <span className="text-red-700">
-                          Schiedsrichter-Termine
-                        </span>
-                      </div>
-                    )}
-                    {currentSetupHelper && (
-                      <div className="flex items-center gap-1">
-                        <div className="w-3 h-3 bg-green-500 rounded"></div>
-                        <span className="text-green-700">
-                          Aufbauhelfer-Termine
-                        </span>
-                      </div>
-                    )}
-                  </div>
-                )}
-              </>
-            ) : (
-              <p className="text-blue-800 text-sm">
-                Deine Termine werden hier ab dem <strong>02.09.2025</strong>{" "}
-                angezeigt.
-              </p>
-            )}
+                  {hasAnyRole && (
+                    <div className="flex flex-wrap gap-4 text-xs">
+                      {currentParticipant && (
+                        <div className="flex items-center gap-1">
+                          <div className="w-3 h-3 bg-blue-500 rounded"></div>
+                          <span className="text-blue-700">Deine Spiele</span>
+                        </div>
+                      )}
+                      {currentReferee && (
+                        <div className="flex items-center gap-1">
+                          <div className="w-3 h-3 bg-red-500 rounded"></div>
+                          <span className="text-red-700">
+                            Schiedsrichter-Termine
+                          </span>
+                        </div>
+                      )}
+                      {currentSetupHelper && (
+                        <div className="flex items-center gap-1">
+                          <div className="w-3 h-3 bg-green-500 rounded"></div>
+                          <span className="text-green-700">
+                            Aufbauhelfer-Termine
+                          </span>
+                        </div>
+                      )}
+                    </div>
+                  )}
+                </>
+              ) : (
+                <p className="text-blue-800 text-sm">
+                  Deine Termine werden hier ab dem <strong>02.09.2025</strong>{" "}
+                  angezeigt.
+                </p>
+              )}
+            </div>
           </div>
-        </div>
+        )}
       </div>
       <MyGamesCalendar events={calendarEvents} matchdays={matchdays} />
     </div>
