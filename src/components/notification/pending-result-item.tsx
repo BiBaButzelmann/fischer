@@ -3,7 +3,6 @@ import { formatSimpleDate } from "@/lib/date";
 import { buildGameViewUrl } from "@/lib/navigation";
 import { ParticipatingPlayerDisplay } from "./participating-player-display";
 import { getGameWithParticipantsAndMatchday } from "@/db/repositories/game";
-import type { GameWithParticipantsAndDate } from "@/db/types/game";
 import invariant from "tiny-invariant";
 
 type Props = {

@@ -11,12 +11,12 @@ import {
   getMatchdaysBySetupHelperId,
   getSetupHelperByProfileIdAndTournamentId,
 } from "./setup-helper";
-import { getContestedGamesOfParticipant } from "./game";
+import { getRealGamesOfParticipant } from "./game";
 
 export async function getCalendarEventsForParticipant(
   participantId: number,
 ): Promise<CalendarEvent[]> {
-  const games = await getContestedGamesOfParticipant(participantId);
+  const games = await getRealGamesOfParticipant(participantId);
 
   return games.map((game) => {
     const gameDateTime = getGameTimeFromGame(game);

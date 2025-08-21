@@ -60,7 +60,7 @@ export async function getGameById(gameId: number) {
   });
 }
 
-export async function getContestedGamesOfParticipant(participantId: number) {
+export async function getRealGamesOfParticipant(participantId: number) {
   return await db.query.game.findMany({
     where: (game, { and, or, eq, isNotNull }) =>
       and(
