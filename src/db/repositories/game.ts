@@ -1,5 +1,14 @@
 import { db } from "../client";
-import { eq, and, asc, or, sql, getTableColumns, isNull } from "drizzle-orm";
+import {
+  eq,
+  and,
+  asc,
+  or,
+  sql,
+  getTableColumns,
+  isNull,
+  isNotNull,
+} from "drizzle-orm";
 import { group } from "../schema/group";
 import { matchdayGame, matchdayReferee } from "../schema/matchday";
 import { matchday } from "../schema/matchday";
@@ -139,7 +148,11 @@ export async function getGamesByTournamentId(
   round?: number,
   participantId?: number,
 ) {
-  const conditions = [eq(game.tournamentId, tournamentId)];
+  const conditions = [
+    eq(game.tournamentId, tournamentId),
+    isNotNull(game.whiteParticipantId),
+    isNotNull(game.blackParticipantId),
+  ];
 
   if (groupId !== undefined) {
     conditions.push(eq(game.groupId, groupId));
