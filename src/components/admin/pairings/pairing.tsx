@@ -4,6 +4,7 @@ import { GroupWithParticipantsAndGames } from "@/db/types/group";
 import { GameWithMatchday } from "@/db/types/game";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { ParticipantEntry } from "../groups/participant-entry";
+import { Bird } from "lucide-react";
 import { getDateTimeFromDefaultTime, formatGameDate } from "@/lib/game-time";
 
 export function Pairing({ group }: { group: GroupWithParticipantsAndGames }) {
@@ -102,24 +103,42 @@ export function Pairing({ group }: { group: GroupWithParticipantsAndGames }) {
                         </div>
                         {/* TODO: add color coding for players that dont have time on that date */}
                         <div>
-                          <ParticipantEntry
-                            participant={
-                              findParticipant(game.whiteParticipantId!)!
-                            }
-                            showMatchDays={false}
-                            showFideRating={false}
-                            showDwzRating={false}
-                          />
+                          {findParticipant(game.whiteParticipantId!) ? (
+                            <ParticipantEntry
+                              participant={
+                                findParticipant(game.whiteParticipantId!)!
+                              }
+                              showMatchDays={false}
+                              showFideRating={false}
+                              showDwzRating={false}
+                            />
+                          ) : (
+                            <div className="flex items-center gap-2 py-1">
+                              <Bird className="h-4 w-4 text-amber-700" />
+                              <p className="font-semibold flex-grow truncate text-red-700">
+                                spielfrei
+                              </p>
+                            </div>
+                          )}
                         </div>
                         <div>
-                          <ParticipantEntry
-                            participant={
-                              findParticipant(game.blackParticipantId!)!
-                            }
-                            showMatchDays={false}
-                            showFideRating={false}
-                            showDwzRating={false}
-                          />
+                          {findParticipant(game.blackParticipantId!) ? (
+                            <ParticipantEntry
+                              participant={
+                                findParticipant(game.blackParticipantId!)!
+                              }
+                              showMatchDays={false}
+                              showFideRating={false}
+                              showDwzRating={false}
+                            />
+                          ) : (
+                            <div className="flex items-center gap-2 py-1">
+                              <Bird className="h-4 w-4 text-amber-700" />
+                              <p className="font-semibold flex-grow truncate text-red-700">
+                                spielfrei
+                              </p>
+                            </div>
+                          )}
                         </div>
                       </div>
                     ))}

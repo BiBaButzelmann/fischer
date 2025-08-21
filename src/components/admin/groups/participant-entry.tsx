@@ -1,7 +1,7 @@
 import { Badge } from "@/components/ui/badge";
 import { ParticipantWithName } from "@/db/types/participant";
 import { UserWeekdayDisplay } from "../user-weekday-display";
-import { Bird, Rabbit, Turtle } from "lucide-react";
+import { Rabbit, Turtle } from "lucide-react";
 
 export function ParticipantEntry({
   participant,
@@ -9,22 +9,11 @@ export function ParticipantEntry({
   showFideRating = true,
   showDwzRating = true,
 }: {
-  participant: ParticipantWithName | undefined;
+  participant: ParticipantWithName;
   showMatchDays?: boolean;
   showFideRating?: boolean;
   showDwzRating?: boolean;
 }) {
-  if (!participant) {
-    return (
-      <div className="flex items-center gap-2 py-1">
-        <Bird className="h-4 w-4 text-amber-700" />
-        <p className="font-semibold flex-grow truncate text-red-700">
-          spielfrei
-        </p>
-      </div>
-    );
-  }
-
   return (
     <div className="flex items-center gap-2 py-1">
       <div className="flex-shrink-0">
