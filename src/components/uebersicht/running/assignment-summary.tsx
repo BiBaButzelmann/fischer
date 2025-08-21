@@ -7,11 +7,11 @@ import {
   Hash,
   BellIcon,
   CheckCircle2,
-  Badge,
 } from "lucide-react";
 
 import { PropsWithChildren } from "react";
 import { Card, CardHeader, CardContent } from "@/components/ui/card";
+import { Badge } from "@/components/ui/badge";
 import { matchDays } from "@/constants/constants";
 import { getGroupNameAndDayOfWeekByProfileIdAndTournamentId } from "@/db/repositories/group";
 import { getJurorByProfileIdAndTournamentId } from "@/db/repositories/juror";
