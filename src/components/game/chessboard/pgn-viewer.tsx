@@ -27,6 +27,7 @@ export default function PgnViewer({
   const [moves, setMoves] = useState(() => movesFromPGN(initialPGN));
   const [currentIndex, setCurrentIndex] = useState(moves.length - 1);
   const [isPending, startTransition] = useTransition();
+  const [selectedSquare, setSelectedSquare] = useState<string | null>(null);
 
   useChessboardControls({
     onArrowLeft: () => setCurrentIndex((i) => Math.max(-1, i - 1)),
@@ -53,23 +54,57 @@ export default function PgnViewer({
     });
   }, [fullPGN, gameId]);
 
-  const handleDrop = useCallback(
-    (sourceSquare: string, targetSquare: string): boolean => {
+  const makeMove = useCallback(
+    (from: string, to: string): boolean => {
       const boardState = currentBoardState(moves, currentIndex);
 
-      const move = boardState.move({
-        from: sourceSquare,
-        to: targetSquare,
-        promotion: "q",
-      });
-      if (!move) return false;
+      try {
+        const move = boardState.move({
+          from,
+          to,
+          promotion: "q",
+        });
+        if (!move) return false;
 
-      const updatedMoves = moves.slice(0, currentIndex + 1).concat(move);
-      setMoves(updatedMoves);
-      setCurrentIndex(updatedMoves.length - 1);
-      return true;
+        const updatedMoves = moves.slice(0, currentIndex + 1).concat(move);
+        setMoves(updatedMoves);
+        setCurrentIndex(updatedMoves.length - 1);
+        return true;
+      } catch (error) {
+        return false;
+      }
     },
     [moves, currentIndex],
+  );
+
+  const handleDrop = useCallback(
+    (sourceSquare: string, targetSquare: string): boolean => {
+      return makeMove(sourceSquare, targetSquare);
+    },
+    [makeMove],
+  );
+
+  const handleSquareClick = useCallback(
+    (square: string) => {
+      if (!allowEdit) return;
+
+      const boardState = currentBoardState(moves, currentIndex);
+      const piece = boardState.get(square as any);
+
+      if (selectedSquare) {
+        if (selectedSquare === square) {
+          setSelectedSquare(null);
+        } else {
+          const moveSuccessful = makeMove(selectedSquare, square);
+          setSelectedSquare(null);
+        }
+      } else {
+        if (piece) {
+          setSelectedSquare(square);
+        }
+      }
+    },
+    [allowEdit, moves, currentIndex, selectedSquare, makeMove],
   );
 
   return (
@@ -81,6 +116,15 @@ export default function PgnViewer({
               position={fen}
               arePiecesDraggable={allowEdit}
               onPieceDrop={handleDrop}
+              onSquareClick={handleSquareClick}
+              animationDuration={0}
+              customSquareStyles={{
+                ...(selectedSquare && {
+                  [selectedSquare]: {
+                    boxShadow: "inset 0 0 1px 6px rgba(255,255,255,0.75)",
+                  },
+                }),
+              }}
             />
           </div>
         </div>
