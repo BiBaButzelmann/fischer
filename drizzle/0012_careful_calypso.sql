@@ -1,0 +1,1 @@
+ALTER TABLE "game" ALTER COLUMN "board_number" DROP NOT NULL;
