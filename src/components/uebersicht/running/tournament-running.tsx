@@ -64,18 +64,32 @@ export async function TournamentRunning({ tournamentId }: Props) {
 
 function GuestGreetingSection() {
   return (
-    <Card>
-      <CardHeader>
-        <div className="flex items-center justify-between">
-          <div>
-            <CardTitle className="text-4xl font-bold">Hallo, Gast!</CardTitle>
-            <CardDescription className="mt-2">
-              Das Klubturnier ist gestartet!
-            </CardDescription>
+    <div className="space-y-4">
+      <Card>
+        <CardHeader>
+          <div className="flex items-center justify-between">
+            <div>
+              <CardTitle className="text-4xl font-bold">Hallo, Gast!</CardTitle>
+            </div>
           </div>
-        </div>
-      </CardHeader>
-    </Card>
+        </CardHeader>
+      </Card>
+
+      <Card>
+        <CardContent className="pt-6">
+          <p className="text-base text-muted-foreground">
+            Das Klubturnier ist bereits gestartet! Wenn du dich dennoch noch für
+            das Turnier anmelden möchtest, wende dich bitte an{" "}
+            <a
+              href="mailto:klubturnier@hsk1830.de"
+              className="text-primary hover:underline"
+            >
+              klubturnier@hsk1830.de
+            </a>
+          </p>
+        </CardContent>
+      </Card>
+    </div>
   );
 }
 
