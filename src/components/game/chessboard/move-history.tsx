@@ -1,7 +1,6 @@
 "use client";
 
 import clsx from "clsx";
-import { Save } from "lucide-react";
 import { Button } from "@/components/ui/button";
 
 type Props = {
@@ -67,47 +66,50 @@ function MoveHistory({
   }
 
   return (
-    <div className="h-full w-full">
+    <div className="w-full flex flex-col h-[512px]">
       <div className="h-full rounded-xl border bg-card text-card-foreground shadow flex flex-col">
-        <div className="flex flex-col space-y-1.5 p-4 pb-3">
-          <div className="font-semibold leading-none tracking-tight flex items-center justify-between">
+        <div className="flex flex-col space-y-1.5 p-4 pb-3 flex-shrink-0">
+          <div className="font-semibold leading-none tracking-tight flex items-center">
             <div className="flex items-center gap-2">
               <div className="w-2 h-2 bg-primary rounded-full"></div>
               Notation
             </div>
-            {showSave && onSave && (
-              <Button
-                size="icon"
-                variant="outline"
-                className="h-6 w-6 text-blue-600 border-blue-600 hover:bg-blue-50"
-                onClick={onSave}
-                disabled={isSaving}
-              >
-                <Save className="h-3 w-3" />
-              </Button>
-            )}
           </div>
         </div>
-        <div className="flex-1 px-4 pb-4 overflow-hidden">
-          <div className="h-full overflow-y-auto rounded-md border bg-background/50">
-            <table className="w-full">
-              <tbody className="divide-y divide-border/30">
-                {rows.length > 0 ? (
-                  rows
-                ) : (
-                  <tr>
-                    <td
-                      colSpan={3}
-                      className="py-8 text-center text-muted-foreground text-sm"
-                    >
-                      Noch keine Züge
-                    </td>
-                  </tr>
-                )}
-              </tbody>
-            </table>
+        <div className="flex-1 overflow-hidden">
+          <div className="h-full px-4 pb-4">
+            <div className="h-full overflow-y-auto rounded-md border bg-background/50 scrollbar-thin scrollbar-thumb-gray-400 scrollbar-track-gray-100">
+              <table className="w-full">
+                <tbody className="divide-y divide-border/30">
+                  {rows.length > 0 ? (
+                    rows
+                  ) : (
+                    <tr>
+                      <td
+                        colSpan={3}
+                        className="py-8 text-center text-muted-foreground text-sm"
+                      >
+                        Noch keine Züge
+                      </td>
+                    </tr>
+                  )}
+                </tbody>
+              </table>
+            </div>
           </div>
         </div>
+        {showSave && onSave && (
+          <div className="px-4 pb-4 border-t flex-shrink-0">
+            <Button
+              variant="outline"
+              className="w-full mt-4"
+              onClick={onSave}
+              disabled={isSaving}
+            >
+              {isSaving ? "Speichern..." : "Speichern"}
+            </Button>
+          </div>
+        )}
       </div>
     </div>
   );

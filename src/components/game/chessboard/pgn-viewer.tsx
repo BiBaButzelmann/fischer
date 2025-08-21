@@ -73,7 +73,7 @@ export default function PgnViewer({
   );
 
   return (
-    <div className="rounded-xl border bg-card shadow p-6 w-full">
+    <div className="rounded-xl border bg-card shadow p-6 w-fit">
       <div className="flex flex-col lg:flex-row gap-6 w-full">
         <div className="flex-shrink-0 w-full max-w-lg mx-auto lg:mx-0">
           <div className="aspect-square w-full">
@@ -85,7 +85,7 @@ export default function PgnViewer({
           </div>
         </div>
 
-        <div className="flex-1 min-w-0 lg:max-w-xs">
+        <div className="w-80 flex-shrink-0">
           <MoveHistory
             history={moves}
             currentMoveIndex={currentIndex}
