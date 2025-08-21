@@ -15,7 +15,7 @@ export const game = pgTable("game", {
   groupId: integer("group_id").notNull(),
   pgnId: integer("pgn_id"),
   round: integer("round").notNull(),
-  boardNumber: integer("board_number").notNull(),
+  boardNumber: integer("board_number"),
 
   result: gameResult(),
 

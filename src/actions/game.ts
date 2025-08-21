@@ -144,9 +144,7 @@ export async function scheduleGamesForGroup(
 
         const isByeGame = !whitePlayer || !blackPlayer;
 
-        const boardNumber = isByeGame
-          ? pairsInRound.length
-          : startingBoardNumber++;
+        const boardNumber = isByeGame ? null : startingBoardNumber++;
 
         gamesToInsert.push({
           whiteParticipantId: whitePlayer?.participant.id ?? null,
