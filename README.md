@@ -19,9 +19,8 @@
   - reuse upcoming events component and show all setup helper events
   - that aren´t in the past on own page
   - PDF contains: Group, boardnumber, participants
-- assignment summary mail: summary of obligations as manual tigger (Arne)
-  - tutorial mail: custom mail for each role (Arne)
-  - assigned matchdays in mail
+- tutorial mail: custom mail for each role (Kai -> Arne)
+- assigned matchdays in mail (Kai -> Arne)
 - Eingabehelfer: improve chess board visuals and error handling (?)
 
 ### Tier 3
