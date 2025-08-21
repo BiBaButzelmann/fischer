@@ -381,6 +381,9 @@ export async function getGameWithParticipantsAndMatchday(gameId: number) {
       ),
     with: {
       whiteParticipant: {
+        columns: {
+          id: true,
+        },
         with: {
           profile: {
             columns: {
@@ -391,6 +394,9 @@ export async function getGameWithParticipantsAndMatchday(gameId: number) {
         },
       },
       blackParticipant: {
+        columns: {
+          id: true,
+        },
         with: {
           profile: {
             columns: {

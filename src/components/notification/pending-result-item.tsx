@@ -47,7 +47,7 @@ export async function PendingResultItem({
             <span className="text-gray-500 dark:text-gray-400 font-normal">
               {" "}
               <ParticipatingPlayerDisplay
-                game={game as GameWithParticipantsAndDate}
+                game={game}
                 participantId={currentParticipantId}
               />
             </span>
