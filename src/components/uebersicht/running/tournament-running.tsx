@@ -28,12 +28,6 @@ export async function TournamentRunning({ tournamentId }: Props) {
   const profile =
     session != null ? await getProfileByUserId(session.user.id) : null;
 
-  const rolesData = profile
-    ? await getRolesDataByProfileIdAndTournamentId(profile.id, tournamentId)
-    : null;
-
-  const isRegistered = rolesData ? hasAnyRole(rolesData) : false;
-
   return (
     <div className="grid grid-cols-1 items-stretch gap-4 md:gap-8 lg:grid-cols-6">
       <div className="lg:col-span-6">
@@ -171,7 +165,11 @@ async function AuthedGreetingSection({
         </CardContent>
       </Card>
 
-      <AssignmentSummary profileId={profile.id} tournamentId={tournamentId} />
+      <AssignmentSummary
+        profileId={profile.id}
+        tournamentId={tournamentId}
+        rolesData={rolesData}
+      />
     </div>
   );
 }

@@ -1,87 +1,75 @@
-import {
-  Users,
-  User,
-  Wrench,
-  Gavel,
-  Calendar,
-  Hash,
-  BellIcon,
-  CheckCircle2,
-} from "lucide-react";
+import { Users, User, Wrench, Gavel, Hash, Scale, Check } from "lucide-react";
 
-import { PropsWithChildren } from "react";
-import { Card, CardHeader, CardContent } from "@/components/ui/card";
+import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { matchDays } from "@/constants/constants";
 import { getGroupNameAndDayOfWeekByProfileIdAndTournamentId } from "@/db/repositories/group";
-import { getJurorByProfileIdAndTournamentId } from "@/db/repositories/juror";
 import { getRefereeAssignmentCountByProfileIdAndTournamentId } from "@/db/repositories/referee";
 import { getMatchEnteringHelperAssignmentCountByProfileIdAndTournamentId } from "@/db/repositories/match-entering-helper";
 import { getSetupHelperAssignmentCountByProfileIdAndTournamentId } from "@/db/repositories/setup-helper";
+import { RolesData } from "@/db/types/role";
 
 type Props = {
   profileId: number;
   tournamentId: number;
+  rolesData: RolesData;
 };
 
-export async function AssignmentSummary({ profileId, tournamentId }: Props) {
+export async function AssignmentSummary({
+  profileId,
+  tournamentId,
+  rolesData,
+}: Props) {
   return (
-    <Card>
-      <CardHeader className="bg-white border-b rounded-t-xl">
-        <div className="flex flex-wrap items-center justify-between gap-4">
-          <div className="flex items-center gap-3">
-            <div className="p-2 bg-gray-100 border border-gray-200 rounded-lg">
-              <User className="h-5 w-5 text-gray-600" />
-            </div>
-            <div>
-              <h2 className="text-xl font-bold text-gray-900">Meine Daten</h2>
-              <p className="text-sm text-gray-600 mt-1">
-                Übersicht deiner Daten für das Turnier.
-              </p>
-            </div>
-          </div>
-        </div>
-      </CardHeader>
-
-      <CardContent className="p-4 md:p-6">
-        <div className="grid grid-cols-1 lg:grid-cols-12 gap-2">
-          <PlayerSection profileId={profileId} tournamentId={tournamentId} />
-
-          <div className="lg:col-span-5 md:space-y-2">
-            <SetupHelperSection
-              profileId={profileId}
-              tournamentId={tournamentId}
-            />
-            <RefereeSection profileId={profileId} tournamentId={tournamentId} />
-            <MatchEnteringHelperSection
-              profileId={profileId}
-              tournamentId={tournamentId}
-            />
-            <JurorSection profileId={profileId} tournamentId={tournamentId} />
-          </div>
-        </div>
-      </CardContent>
-    </Card>
-  );
-}
-
-function RoleSection({
-  icon,
-  title,
-  children,
-}: PropsWithChildren<{ icon: React.ReactNode; title: string }>) {
-  return (
-    <div className="bg-white rounded-lg p-4 border border-gray-200">
-      <div className="flex items-center gap-2 mb-3">
-        <div className="p-1.5 bg-gray-100 rounded-md">{icon}</div>
-        <h3 className="text-base font-semibold text-gray-900">{title}</h3>
+    <div className="border border-border rounded-lg bg-card shadow-sm p-6">
+      <div className="text-center space-y-2 mb-6">
+        <h1 className="font-heading font-black text-2xl md:text-3xl text-foreground">
+          Meine Daten
+        </h1>
+        <p className="text-muted-foreground font-medium">
+          Übersicht deiner Daten für das Turnier
+        </p>
       </div>
-      {children}
+
+      <div className="flex flex-col lg:flex-row gap-6">
+        <div className="lg:w-80 flex-shrink-0">
+          {rolesData.participant && (
+            <ParticipantSection
+              profileId={profileId}
+              tournamentId={tournamentId}
+            />
+          )}
+        </div>
+
+        <div className="flex-1">
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            {rolesData.setupHelper && (
+              <SetupHelperSection
+                profileId={profileId}
+                tournamentId={tournamentId}
+              />
+            )}
+            {rolesData.referee && (
+              <RefereeSection
+                profileId={profileId}
+                tournamentId={tournamentId}
+              />
+            )}
+            {rolesData.matchEnteringHelper && (
+              <MatchEnteringHelperSection
+                profileId={profileId}
+                tournamentId={tournamentId}
+              />
+            )}
+            {rolesData.juror && <JurorSection />}
+          </div>
+        </div>
+      </div>
     </div>
   );
 }
 
-async function PlayerSection({
+async function ParticipantSection({
   profileId,
   tournamentId,
 }: {
@@ -93,51 +81,50 @@ async function PlayerSection({
     tournamentId,
   );
 
-  if (playerGroup == null) {
-    return null;
+  if (!playerGroup) {
+    return (
+      <Card className="shadow-lg hover:shadow-xl transition-shadow duration-300 h-24">
+        <CardContent className="p-4 h-full flex items-center justify-between">
+          <div className="flex items-center gap-3">
+            <User className="h-8 w-8 text-primary" />
+            <span className="font-heading font-bold text-lg">Spieler</span>
+          </div>
+          <Badge
+            variant="outline"
+            className="border-muted-foreground text-muted-foreground font-bold text-lg px-4 py-2"
+          >
+            Gruppe noch nicht zugeteilt
+          </Badge>
+        </CardContent>
+      </Card>
+    );
   }
 
   return (
-    <div className="lg:col-span-7 bg-white p-4 md:p-6 rounded-lg border border-gray-200">
-      <div className="space-y-4">
-        <div className="flex items-center gap-2 mb-4">
-          <div className="p-1.5 bg-gray-100 rounded-md">
-            <User className="h-4 w-4 text-gray-600" />
-          </div>
-          <h3 className="text-lg font-semibold text-gray-900">Spieler</h3>
+    <Card className="shadow-lg hover:shadow-xl transition-shadow duration-300 h-24">
+      <CardContent className="p-4 h-full flex items-center justify-between">
+        <div className="flex items-center gap-3">
+          <User className="h-8 w-8 text-primary" />
+          <span className="font-heading font-bold text-lg">Spieler</span>
         </div>
-        <div className="space-y-3">
-          <div>
-            <div className="flex items-center gap-2 mb-2">
-              <Users className="h-4 w-4 text-gray-500" />
-              <span className="text-sm font-medium text-gray-700">
-                Meine Gruppe
-              </span>
-            </div>
-            <div className="ml-6">
-              <Badge className="bg-gray-900 text-white hover:bg-gray-800 font-medium">
-                {playerGroup.groupName}
-              </Badge>
-            </div>
-          </div>
-          <div>
-            <div className="flex items-center gap-2 mb-2">
-              <Calendar className="h-4 w-4 text-gray-500" />
-              <span className="text-sm font-medium text-gray-700">
-                Mein Gruppenspieltag
-              </span>
-            </div>
-            <div className="ml-6">
-              <Badge className="bg-gray-900 text-white hover:bg-gray-800 font-medium">
-                {playerGroup.dayOfWeek
-                  ? matchDays[playerGroup.dayOfWeek]
-                  : "Wochentag noch nicht zugewiesen"}
-              </Badge>
-            </div>
-          </div>
+        <div className="flex items-center gap-2">
+          <Badge
+            variant="outline"
+            className="border-accent text-accent font-bold text-lg px-4 py-2"
+          >
+            {playerGroup.groupName}
+          </Badge>
+          <Badge
+            variant="outline"
+            className="border-accent text-accent font-bold text-lg px-4 py-2"
+          >
+            {playerGroup.dayOfWeek
+              ? matchDays[playerGroup.dayOfWeek]
+              : "Spieltag noch nicht zugeteilt"}
+          </Badge>
         </div>
-      </div>
-    </div>
+      </CardContent>
+    </Card>
   );
 }
 
@@ -159,21 +146,20 @@ async function SetupHelperSection({
   }
 
   return (
-    <RoleSection
-      icon={<Wrench className="h-4 w-4 text-gray-600" />}
-      title="Aufbauhelfer"
-    >
-      <div className="space-y-3">
-        <div>
-          <div className="text-xs font-medium text-gray-500 uppercase tracking-wide mb-1">
-            Zugeteilte Spieltage
-          </div>
-          <Badge className="bg-gray-800 text-white hover:bg-gray-700 font-medium">
-            {assignedDaysCount} Tage
-          </Badge>
+    <Card className="shadow-lg hover:shadow-xl transition-shadow duration-300 h-24">
+      <CardContent className="p-4 h-full flex items-center justify-between">
+        <div className="flex items-center gap-3">
+          <Wrench className="h-8 w-8 text-primary" />
+          <span className="font-heading font-bold text-lg">Aufbauhelfer</span>
         </div>
-      </div>
-    </RoleSection>
+        <Badge
+          variant="outline"
+          className="border-accent text-accent font-bold text-lg px-4 py-2"
+        >
+          {assignedDaysCount} Tage
+        </Badge>
+      </CardContent>
+    </Card>
   );
 }
 
@@ -195,50 +181,20 @@ async function RefereeSection({
   }
 
   return (
-    <RoleSection
-      icon={<BellIcon className="h-4 w-4 text-gray-600" />}
-      title="Schiedsrichter"
-    >
-      <div className="space-y-3">
-        <div>
-          <div className="text-xs font-medium text-gray-500 uppercase tracking-wide mb-1">
-            Zugeteilte Spieltage
-          </div>
-          <Badge className="bg-gray-800 text-white hover:bg-gray-700 font-medium">
-            {assignedDaysCount} Tage
-          </Badge>
+    <Card className="shadow-lg hover:shadow-xl transition-shadow duration-300 h-24">
+      <CardContent className="p-4 h-full flex items-center justify-between">
+        <div className="flex items-center gap-3">
+          <Gavel className="h-8 w-8 text-primary" />
+          <span className="font-heading font-bold text-lg">Schiedsrichter</span>
         </div>
-      </div>
-    </RoleSection>
-  );
-}
-
-async function JurorSection({
-  profileId,
-  tournamentId,
-}: {
-  profileId: number;
-  tournamentId: number;
-}) {
-  const juror = await getJurorByProfileIdAndTournamentId(
-    profileId,
-    tournamentId,
-  );
-
-  if (juror == null) {
-    return null;
-  }
-
-  return (
-    <RoleSection
-      icon={<Gavel className="h-4 w-4 text-gray-600" />}
-      title="Turniergericht"
-    >
-      <div className="flex items-center gap-2 text-sm text-gray-700">
-        <CheckCircle2 className="h-4 w-4 text-green-600" />
-        <span>Als Mitglied im Turniergericht angemeldet</span>
-      </div>
-    </RoleSection>
+        <Badge
+          variant="outline"
+          className="border-accent text-accent font-bold text-lg px-4 py-2"
+        >
+          {assignedDaysCount} Tage
+        </Badge>
+      </CardContent>
+    </Card>
   );
 }
 
@@ -260,17 +216,35 @@ async function MatchEnteringHelperSection({
   }
 
   return (
-    <RoleSection
-      icon={<Hash className="h-4 w-4 text-gray-600" />}
-      title="Eingabehelfer"
-    >
-      <div className="flex items-center gap-2">
-        <Users className="h-5 w-5 text-gray-600" />
-        <span className="text-gray-700">Anzahl Gruppen:</span>
-        <span className="text-lg font-bold text-gray-900">
-          {assignedGroupsCount}
-        </span>
-      </div>
-    </RoleSection>
+    <Card className="shadow-lg hover:shadow-xl transition-shadow duration-300 h-24">
+      <CardContent className="p-4 h-full flex items-center justify-between">
+        <div className="flex items-center gap-3">
+          <Hash className="h-8 w-8 text-primary" />
+          <span className="font-heading font-bold text-lg">Eingabehelfer</span>
+        </div>
+        <div className="flex items-center gap-2">
+          <span className="font-bold text-lg text-accent">
+            {assignedGroupsCount}
+          </span>
+          <Users className="h-6 w-6 text-accent" />
+        </div>
+      </CardContent>
+    </Card>
+  );
+}
+
+function JurorSection() {
+  return (
+    <Card className="shadow-lg hover:shadow-xl transition-shadow duration-300 h-24">
+      <CardContent className="p-4 h-full flex items-center justify-between">
+        <div className="flex items-center gap-3">
+          <Scale className="h-8 w-8 text-primary" />
+          <span className="font-heading font-bold text-lg mr-4">
+            Turniergericht
+          </span>
+        </div>
+        <Check className="h-8 w-8 text-accent" />
+      </CardContent>
+    </Card>
   );
 }
