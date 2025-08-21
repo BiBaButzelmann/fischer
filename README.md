@@ -15,7 +15,6 @@
 
 ### Tier 2
 
-- disable registration when tournament running
 - drucken: feature to print the pairings for setupHelper (Paul)
   - reuse upcoming events component and show all setup helper events
   - that aren´t in the past on own page
