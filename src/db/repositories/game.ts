@@ -1,5 +1,14 @@
 import { db } from "../client";
-import { eq, and, asc, or, sql, getTableColumns, isNull } from "drizzle-orm";
+import {
+  eq,
+  and,
+  asc,
+  or,
+  sql,
+  getTableColumns,
+  isNull,
+  isNotNull,
+} from "drizzle-orm";
 import { group } from "../schema/group";
 import { matchdayGame, matchdayReferee } from "../schema/matchday";
 import { matchday } from "../schema/matchday";
@@ -51,7 +60,7 @@ export async function getGameById(gameId: number) {
   });
 }
 
-export async function getRealGamesOfParticipant(participantId: number) {
+export async function getParticipantGames(participantId: number) {
   return await db.query.game.findMany({
     where: (game, { and, or, eq, isNotNull }) =>
       and(
@@ -139,7 +148,11 @@ export async function getGamesByTournamentId(
   round?: number,
   participantId?: number,
 ) {
-  const conditions = [eq(game.tournamentId, tournamentId)];
+  const conditions = [
+    eq(game.tournamentId, tournamentId),
+    isNotNull(game.whiteParticipantId),
+    isNotNull(game.blackParticipantId),
+  ];
 
   if (groupId !== undefined) {
     conditions.push(eq(game.groupId, groupId));
@@ -360,9 +373,17 @@ export async function getPendingGamesByRefereeId(refereeId: number) {
 
 export async function getGameWithParticipantsAndMatchday(gameId: number) {
   return await db.query.game.findFirst({
-    where: (game, { eq }) => eq(game.id, gameId),
+    where: (game, { eq, and, isNotNull }) =>
+      and(
+        eq(game.id, gameId),
+        isNotNull(game.whiteParticipantId),
+        isNotNull(game.blackParticipantId),
+      ),
     with: {
       whiteParticipant: {
+        columns: {
+          id: true,
+        },
         with: {
           profile: {
             columns: {
@@ -373,6 +394,9 @@ export async function getGameWithParticipantsAndMatchday(gameId: number) {
         },
       },
       blackParticipant: {
+        columns: {
+          id: true,
+        },
         with: {
           profile: {
             columns: {

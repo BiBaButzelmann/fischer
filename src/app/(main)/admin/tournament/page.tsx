@@ -1,6 +1,7 @@
 import { authWithRedirect } from "@/auth/utils";
 import { TournamentStageManager } from "@/components/admin/tournament/tournament-stage-manager";
 import TournamentDetailsManager from "@/components/admin/tournament/tournament-details-manager";
+import { AssignmentMailButton } from "@/components/admin/tournament/assignment-mail-button";
 import {
   Collapsible,
   CollapsibleContent,
@@ -66,7 +67,10 @@ async function ManageTournament({ tournament }: { tournament?: Tournament }) {
       </Collapsible>
 
       <div className="border border-primary rounded-md p-4">
-        <h2 className="text-lg font-semibold mb-4">Turnierphase verwalten</h2>
+        <div className="flex items-center justify-between mb-4">
+          <h2 className="text-lg font-semibold">Turnierphase verwalten</h2>
+          {tournament && <AssignmentMailButton tournament={tournament} />}
+        </div>
         {tournament ? (
           <TournamentStageManager tournament={tournament} />
         ) : (

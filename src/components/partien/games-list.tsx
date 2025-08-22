@@ -44,16 +44,10 @@ export function GamesList({
   const isParticipant = userRoles.includes("participant");
   const isMatchEnteringHelper = userRoles.includes("matchEnteringHelper");
 
-  const validGames = useMemo(
-    () =>
-      games.filter((game) => game.whiteParticipant && game.blackParticipant),
-    [games],
-  );
-
   const gameParticipantsMap = useMemo(
     () =>
       Object.fromEntries(
-        validGames.map((game) => [
+        games.map((game) => [
           game.id,
           [
             game.whiteParticipant!.profile.userId,
@@ -61,7 +55,7 @@ export function GamesList({
           ],
         ]),
       ),
-    [validGames],
+    [games],
   );
 
   const getGameActionPermissions = useCallback(
@@ -87,12 +81,12 @@ export function GamesList({
   );
 
   const hasAnyActions = useMemo(() => {
-    return validGames.some((game) => {
+    return games.some((game) => {
       const { canView, canSubmitResult, canPostpone } =
         getGameActionPermissions(game.id);
       return canView || canSubmitResult || canPostpone;
     });
-  }, [validGames, getGameActionPermissions]);
+  }, [games, getGameActionPermissions]);
 
   const handleNavigate = (gameId: number) => {
     router.push(`/partien/${gameId}`);
@@ -128,7 +122,7 @@ export function GamesList({
           </TableRow>
         </TableHeader>
         <TableBody>
-          {validGames.map((game) => (
+          {games.map((game) => (
             <TableRow
               key={game.id}
               onClick={isMobile ? () => handleNavigate(game.id) : undefined}
