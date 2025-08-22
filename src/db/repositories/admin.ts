@@ -151,3 +151,115 @@ export async function getAllDisabledProfiles() {
     ],
   });
 }
+
+export async function getContributorsWithEmailByTournamentId(
+  tournamentId: number,
+) {
+  const [participants, referees, jurors, matchEnteringHelpers, setupHelpers] =
+    await Promise.all([
+      db.query.participant.findMany({
+        where: (participant, { eq, and }) =>
+          and(
+            eq(participant.tournamentId, tournamentId),
+            isNull(participant.deletedAt),
+          ),
+        with: {
+          profile: {
+            columns: {
+              firstName: true,
+              lastName: true,
+              email: true,
+            },
+          },
+        },
+      }),
+      db.query.referee.findMany({
+        where: (referee, { eq, and }) =>
+          and(
+            eq(referee.tournamentId, tournamentId),
+            isNull(referee.deletedAt),
+          ),
+        with: {
+          profile: {
+            columns: {
+              firstName: true,
+              lastName: true,
+              email: true,
+            },
+          },
+        },
+      }),
+      db.query.juror.findMany({
+        where: (juror, { eq, and }) =>
+          and(eq(juror.tournamentId, tournamentId), isNull(juror.deletedAt)),
+        with: {
+          profile: {
+            columns: {
+              firstName: true,
+              lastName: true,
+              email: true,
+            },
+          },
+        },
+      }),
+      db.query.matchEnteringHelper.findMany({
+        where: (matchEnteringHelper, { eq, and }) =>
+          and(
+            eq(matchEnteringHelper.tournamentId, tournamentId),
+            isNull(matchEnteringHelper.deletedAt),
+          ),
+        with: {
+          profile: {
+            columns: {
+              firstName: true,
+              lastName: true,
+              email: true,
+            },
+          },
+        },
+      }),
+      db.query.setupHelper.findMany({
+        where: (setupHelper, { eq, and }) =>
+          and(
+            eq(setupHelper.tournamentId, tournamentId),
+            isNull(setupHelper.deletedAt),
+          ),
+        with: {
+          profile: {
+            columns: {
+              firstName: true,
+              lastName: true,
+              email: true,
+            },
+          },
+        },
+      }),
+    ]);
+
+  const allContributors = [
+    ...participants.map((p) => ({
+      ...p.profile,
+      role: "participant" as const,
+    })),
+    ...referees.map((r) => ({ ...r.profile, role: "referee" as const })),
+    ...jurors.map((j) => ({ ...j.profile, role: "juror" as const })),
+    ...matchEnteringHelpers.map((m) => ({
+      ...m.profile,
+      role: "matchEnteringHelper" as const,
+    })),
+    ...setupHelpers.map((s) => ({
+      ...s.profile,
+      role: "setupHelper" as const,
+    })),
+  ];
+
+  return allContributors.reduce(
+    (acc, person) => {
+      if (!acc.some((p) => p.email === person.email)) {
+        acc.push(person);
+      }
+      return acc;
+    },
+    [] as typeof allContributors,
+  );
+}
