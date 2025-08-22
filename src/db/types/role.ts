@@ -20,6 +20,6 @@ export type RolesData = {
   juror: Juror | undefined;
 };
 
-export function hasSelectedAtLeastOneRole(roles: RolesData): boolean {
+export function hasAnyRole(roles: RolesData): boolean {
   return Object.values(roles).filter((role) => role !== undefined).length > 0;
 }
