@@ -2,12 +2,12 @@
 
 import { db } from "@/db/client";
 import { pgn } from "@/db/schema/pgn";
-import { isUserAuthorizedForPGN } from "@/lib/game-auth";
+import { canUserEditGame } from "@/lib/game-auth";
 import { authWithRedirect } from "@/auth/utils";
 
 export const savePGN = async (newValue: string, gameId: number) => {
   const session = await authWithRedirect();
-  const isAuthorized = await isUserAuthorizedForPGN(
+  const isAuthorized = await canUserEditGame(
     gameId,
     session.user.id,
     session.user.role === "admin",

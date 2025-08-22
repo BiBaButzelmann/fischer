@@ -4,9 +4,11 @@ import { ParticipantWithName } from "@/db/types/participant";
 import { getGameById } from "@/db/repositories/game";
 import { auth } from "@/auth/utils";
 import { redirect } from "next/navigation";
-import { PasswordProtection } from "@/components/game/password-protection";
-import { verifyPgnPassword } from "@/actions/game";
-import { isUserAuthorizedForPGN, isGameActuallyPlayed } from "@/lib/game-auth";
+import {
+  canUserViewGame,
+  canUserEditGame,
+  isGameActuallyPlayed,
+} from "@/lib/game-auth";
 import PgnViewer from "@/components/game/chessboard/pgn-viewer";
 import { Suspense } from "react";
 import { DateTime } from "luxon";
@@ -31,15 +33,28 @@ export default async function GamePage({ params }: Props) {
 
   const gameId = parsedGameIdResult.data;
 
-  const isAuthorized = await isUserAuthorizedForPGN(
-    gameId,
-    session.user.id,
-    session.user.role === "admin",
-  );
-
   const game = await getGameById(gameId);
   if (!game) {
-    return <p className="p-4 text-red-600">Game with ID {gameId} not found.</p>;
+    return (
+      <p className="p-4 text-red-600">
+        Die Partie mit der ID {gameId} wurde nicht gefunden.
+      </p>
+    );
+  }
+
+  const isAdmin = session.user.role === "admin";
+
+  // Check viewing permissions first
+  const canView = await canUserViewGame(gameId, session.user.id, isAdmin);
+
+  if (!canView) {
+    return (
+      <div className="p-4">
+        <p className="text-red-600">
+          Sie sind nicht berechtigt, diese Partie anzuzeigen.
+        </p>
+      </div>
+    );
   }
 
   if (!isGameActuallyPlayed(game.result)) {
@@ -50,16 +65,12 @@ export default async function GamePage({ params }: Props) {
     );
   }
 
-  if (isAuthorized) {
-    return <PgnContainer allowEdit={true} gameId={gameId} />;
-  }
+  const canEdit = await canUserEditGame(gameId, session.user.id, isAdmin);
 
   return (
-    <PasswordProtection gameId={gameId} onVerify={verifyPgnPassword}>
-      <Suspense fallback={<p className="p-4">Loading game...</p>}>
-        <PgnContainer allowEdit={false} gameId={gameId} />
-      </Suspense>
-    </PasswordProtection>
+    <Suspense fallback={<p className="p-4">Loading game...</p>}>
+      <PgnContainer allowEdit={canEdit} gameId={gameId} />
+    </Suspense>
   );
 }
 
@@ -72,7 +83,11 @@ async function PgnContainer({
 }) {
   const game = await getGameById(gameId);
   if (!game) {
-    return <p className="p-4 text-red-600">Game with ID {gameId} not found.</p>;
+    return (
+      <p className="p-4 text-red-600">
+        Die Partie mit der ID {gameId} wurde nicht gefunden.
+      </p>
+    );
   }
 
   if (!game.whiteParticipant || !game.blackParticipant) {

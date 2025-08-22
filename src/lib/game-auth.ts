@@ -1,8 +1,10 @@
 import {
   isUserParticipantInGame,
   isUserMatchEnteringHelperInGame,
+  isUserRefereeInGame,
 } from "@/db/repositories/game";
 import { GameResult, GameWithParticipants } from "@/db/types/game";
+import { getRolesByUserId } from "@/db/repositories/role";
 
 export const isGameActuallyPlayed = (result: GameResult | null): boolean => {
   if (!result) return false;
@@ -28,15 +30,31 @@ export const isWhite = (
   return game.whiteParticipant?.id === participantId;
 };
 
-export const isUserAuthorizedForPGN = async (
+export const canUserViewGame = async (
   gameId: number,
   userId: string,
   isAdmin: boolean,
 ) => {
-  const [isParticipant, isMatchEnteringHelper] = await Promise.all([
+  const [userRoles, isMatchEnteringHelper, isReferee] = await Promise.all([
+    getRolesByUserId(userId),
+    isUserMatchEnteringHelperInGame(gameId, userId),
+    isUserRefereeInGame(gameId, userId),
+  ]);
+
+  const isParticipant = userRoles.includes("participant");
+
+  return isParticipant || isReferee || isMatchEnteringHelper || isAdmin;
+};
+
+export const canUserEditGame = async (
+  gameId: number,
+  userId: string,
+  isAdmin: boolean,
+) => {
+  const [isGameParticipant, isMatchEnteringHelper] = await Promise.all([
     isUserParticipantInGame(gameId, userId),
     isUserMatchEnteringHelperInGame(gameId, userId),
   ]);
 
-  return isParticipant || isMatchEnteringHelper || isAdmin;
+  return isGameParticipant || isMatchEnteringHelper || isAdmin;
 };

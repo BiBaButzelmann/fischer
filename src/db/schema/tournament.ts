@@ -39,7 +39,6 @@ export const tournament = pgTable("tournament", {
   phone: text("phone").notNull(),
   email: text("email").notNull(),
   stage: tournamentStage("stage").default("registration").notNull(),
-  pgnViewerPassword: text("pgn_viewer_password").notNull(),
 
   organizerProfileId: integer("organizer_profile_id"),
 

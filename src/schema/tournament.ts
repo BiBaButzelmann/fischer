@@ -1,8 +1,6 @@
 import z from "zod";
 
-// Base schema for tournament fields
-const baseTournamentSchema = z.object({
-  // Turnierinformationen
+export const createTournamentFormSchema = z.object({
   clubName: z.string().min(1, "Vereinsname ist erforderlich"),
   tournamentType: z.string().min(1, "Turnierart ist erforderlich"),
   numberOfRounds: z.coerce.number().min(1, "Mindestens 1 Runde erforderlich"),
@@ -21,11 +19,7 @@ const baseTournamentSchema = z.object({
     .string()
     .email("Ungültige E-Mail-Adresse")
     .min(1, "E-Mail ist erforderlich"),
-
-  // Organisatorauswahl
   organizerProfileId: z.string().min(1, "Organisator ist erforderlich"),
-
-  // Spielwochen
   selectedCalendarWeeks: z
     .array(
       z.object({
@@ -44,20 +38,4 @@ const baseTournamentSchema = z.object({
       }),
     )
     .min(1, "Mindestens eine Spielwoche ist erforderlich"),
-});
-
-export const createTournamentFormSchema = baseTournamentSchema.extend({
-  pgnViewerPassword: z
-    .string()
-    .min(6, "PGN Viewer Passwort muss mindestens 6 Zeichen lang sein"),
-});
-
-export const updateTournamentFormSchema = baseTournamentSchema.extend({
-  pgnViewerPassword: z
-    .string()
-    //optional because it might not be updated
-    .optional()
-    .refine((val) => !val || val.length >= 6, {
-      message: "PGN Viewer Passwort muss mindestens 6 Zeichen lang sein",
-    }),
 });

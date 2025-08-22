@@ -5,13 +5,9 @@ import { tournament } from "@/db/schema/tournament";
 import { revalidatePath } from "next/cache";
 import { tournamentWeek } from "@/db/schema/tournamentWeek";
 import { z } from "zod";
-import {
-  createTournamentFormSchema,
-  updateTournamentFormSchema,
-} from "@/schema/tournament";
+import { createTournamentFormSchema } from "@/schema/tournament";
 import { authWithRedirect } from "@/auth/utils";
 import invariant from "tiny-invariant";
-import { auth } from "@/auth";
 import { eq } from "drizzle-orm";
 import { TournamentStage } from "@/db/types/tournament";
 import { DateTime } from "luxon";
@@ -25,13 +21,6 @@ export async function createTournament(
   invariant(session?.user.role === "admin", "Unauthorized");
 
   const data = createTournamentFormSchema.parse(formData);
-
-  if (!data.pgnViewerPassword || data.pgnViewerPassword.length === 0) {
-    throw new Error("PGN Viewer Passwort ist für neue Turniere erforderlich");
-  }
-
-  const context = await auth.$context;
-  const hashedPassword = await context.password.hash(data.pgnViewerPassword);
 
   await db.transaction(async (tx) => {
     const newTournament: typeof tournament.$inferInsert = {
@@ -50,7 +39,6 @@ export async function createTournament(
       tieBreakMethod: data.tieBreakMethod,
       type: data.tournamentType,
       organizerProfileId: parseInt(data.organizerProfileId),
-      pgnViewerPassword: hashedPassword,
     };
     const inserted = await tx
       .insert(tournament)
@@ -86,12 +74,12 @@ export async function createTournament(
 
 export async function updateTournament(
   tournamentId: number,
-  formData: z.infer<typeof updateTournamentFormSchema>,
+  formData: z.infer<typeof createTournamentFormSchema>,
 ) {
   const session = await authWithRedirect();
   invariant(session?.user.role === "admin", "Unauthorized");
 
-  const data = updateTournamentFormSchema.parse(formData);
+  const data = createTournamentFormSchema.parse(formData);
 
   const updateData: Partial<typeof tournament.$inferInsert> = {
     club: data.clubName,
@@ -109,13 +97,6 @@ export async function updateTournament(
     organizerProfileId: parseInt(data.organizerProfileId),
     allClocksDigital: data.allClocksDigital,
   };
-
-  // Only update password if a new one is provided
-  if (data.pgnViewerPassword && data.pgnViewerPassword.length > 0) {
-    const context = await auth.$context;
-    const hashedPassword = await context.password.hash(data.pgnViewerPassword);
-    updateData.pgnViewerPassword = hashedPassword;
-  }
 
   await db.transaction(async (tx) => {
     await tx
