@@ -1,6 +1,7 @@
 import z from "zod";
 import { getParticipantFullName } from "@/lib/participant";
 import { ParticipantWithName } from "@/db/types/participant";
+import { GameWithPGN } from "@/db/types/game";
 import { getGameById } from "@/db/repositories/game";
 import { auth } from "@/auth/utils";
 import { redirect } from "next/navigation";
@@ -72,27 +73,18 @@ export default async function GamePage({ params }: Props) {
 
   return (
     <Suspense fallback={<p className="p-4">Loading game...</p>}>
-      <PgnContainer allowEdit={canEdit} gameId={gameId} />
+      <PgnContainer allowEdit={canEdit} game={game} />
     </Suspense>
   );
 }
 
 async function PgnContainer({
-  gameId,
+  game,
   allowEdit,
 }: {
-  gameId: number;
+  game: GameWithPGN;
   allowEdit: boolean;
 }) {
-  const game = await getGameById(gameId);
-  if (!game) {
-    return (
-      <p className="p-4 text-red-600">
-        Die Partie mit der ID {gameId} wurde nicht gefunden.
-      </p>
-    );
-  }
-
   if (!game.whiteParticipant || !game.blackParticipant) {
     return (
       <p className="p-4 text-red-600">
@@ -123,7 +115,7 @@ async function PgnContainer({
         {whiteDisplay} vs {blackDisplay}
       </h1>
 
-      <PgnViewer gameId={gameId} initialPGN={pgn} allowEdit={allowEdit} />
+      <PgnViewer gameId={game.id} initialPGN={pgn} allowEdit={allowEdit} />
     </div>
   );
 }
