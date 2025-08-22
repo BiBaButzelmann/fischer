@@ -26,6 +26,7 @@ import {
 } from "lucide-react";
 import { Button } from "../ui/button";
 import Image from "next/image";
+import { getRolesByUserId } from "@/db/repositories/role";
 
 export async function AppSidebar() {
   const session = await auth();
@@ -84,19 +85,6 @@ export async function AppSidebar() {
             </SidebarMenu>
           </SidebarGroupContent>
         </SidebarGroup>
-        <SidebarGroup>
-          <SidebarGroupLabel>Aufbauhelfer</SidebarGroupLabel>
-          <SidebarGroupContent>
-            <SidebarMenu>
-              <SidebarMenuButton asChild>
-                <Link href="/aufbauhelfer">
-                  <LayoutDashboard />
-                  <p className="mt-1">Spieler Karten</p>
-                </Link>
-              </SidebarMenuButton>
-            </SidebarMenu>
-          </SidebarGroupContent>
-        </SidebarGroup>
         {isActive ? (
           <SidebarGroup>
             <SidebarGroupLabel>Dokumente</SidebarGroupLabel>
@@ -117,6 +105,9 @@ export async function AppSidebar() {
               </SidebarMenu>
             </SidebarGroupContent>
           </SidebarGroup>
+        ) : null}
+        {isRunning && session ? (
+          <SetupHelperMenuGroup userId={session.user.id} />
         ) : null}
         {isAdmin ? (
           <SidebarGroup>
@@ -182,5 +173,28 @@ export async function AppSidebar() {
         {session ? <SidebarUserMenu session={session} /> : null}
       </SidebarFooter>
     </Sidebar>
+  );
+}
+
+async function SetupHelperMenuGroup({ userId }: { userId: string }) {
+  const roles = await getRolesByUserId(userId);
+  if (!roles.includes("setupHelper")) {
+    return null;
+  }
+
+  return (
+    <SidebarGroup>
+      <SidebarGroupLabel>Aufbauhelfer</SidebarGroupLabel>
+      <SidebarGroupContent>
+        <SidebarMenu>
+          <SidebarMenuButton asChild>
+            <Link href="/aufbauhelfer">
+              <LayoutDashboard />
+              <p className="mt-1">Spieler Karten</p>
+            </Link>
+          </SidebarMenuButton>
+        </SidebarMenu>
+      </SidebarGroupContent>
+    </SidebarGroup>
   );
 }
