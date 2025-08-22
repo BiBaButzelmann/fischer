@@ -207,6 +207,7 @@ export async function getGamesByTournamentId(
       whiteParticipant: {
         columns: {
           fideRating: true,
+          dwzRating: true,
         },
         with: {
           profile: {
@@ -223,6 +224,7 @@ export async function getGamesByTournamentId(
       blackParticipant: {
         columns: {
           fideRating: true,
+          dwzRating: true,
         },
         with: {
           profile: {
@@ -429,6 +431,7 @@ export async function getParticipantsInGroup(groupId: number) {
           dwzRating: true,
           fideRating: true,
           title: true,
+          chessClub: true,
         },
         with: {
           profile: {
