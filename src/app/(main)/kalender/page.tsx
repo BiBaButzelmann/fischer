@@ -48,11 +48,10 @@ export default async function Page() {
     ...setupHelperEvents,
   ];
 
-  const hasAnyRoleWithEvents = !!(
-    currentParticipant ||
-    currentReferee ||
-    currentSetupHelper
-  );
+  const hasAnyRoleWithEvents =
+    currentParticipant != null ||
+    currentReferee != null ||
+    currentSetupHelper != null;
   const isRunning = activeTournament?.stage === "running";
   const shouldShowInfoBox = session && (!isRunning || hasAnyRoleWithEvents);
 
