@@ -1,12 +1,16 @@
 import { InferEnum, InferSelectModel } from "drizzle-orm";
 import { game } from "../schema/game";
-import { ParticipantWithName, ParticipantWithRating, ParticipantWithProfile } from "./participant";
+import {
+  ParticipantWithName,
+  ParticipantWithRating,
+  ParticipantWithProfile,
+} from "./participant";
 
 export type Game = InferSelectModel<typeof game>;
 
 export type GameWithParticipants = Game & {
-  whiteParticipant: ParticipantWithName;
-  blackParticipant: ParticipantWithName;
+  whiteParticipant: Pick<ParticipantWithName, "id" | "profile"> | null;
+  blackParticipant: Pick<ParticipantWithName, "id" | "profile"> | null;
 };
 
 export type GameWithParticipantRatings = Pick<
@@ -27,7 +31,7 @@ export type GameWithParticipantProfilesAndGroupAndMatchday = Game & {
       phoneNumber: string;
     };
     fideRating: number | null;
-  };
+  } | null;
   blackParticipant: {
     profile: {
       userId: string;
@@ -37,7 +41,7 @@ export type GameWithParticipantProfilesAndGroupAndMatchday = Game & {
       phoneNumber: string;
     };
     fideRating: number | null;
-  };
+  } | null;
   group: {
     id: number;
     groupName: string;
@@ -59,8 +63,16 @@ export type GameWithMatchday = Game & {
 };
 
 export type GameWithParticipantProfilesAndMatchday = Game & {
-  whiteParticipant: ParticipantWithProfile;
-  blackParticipant: ParticipantWithProfile;
+  whiteParticipant: ParticipantWithProfile | null;
+  blackParticipant: ParticipantWithProfile | null;
+  matchdayGame: {
+    matchday: {
+      date: Date;
+    };
+  };
+};
+
+export type GameWithParticipantsAndDate = GameWithParticipants & {
   matchdayGame: {
     matchday: {
       date: Date;

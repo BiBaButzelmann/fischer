@@ -8,6 +8,7 @@ import { eq } from "drizzle-orm";
 import type { GameWithParticipantProfilesAndMatchday } from "@/db/types/game";
 import type { ParticipantWithName } from "@/db/types/participant";
 import type { MatchDay } from "@/db/types/match-day";
+import invariant from "tiny-invariant";
 
 export async function sendGamePostponementEmails(
   gameData: GameWithParticipantProfilesAndMatchday,
@@ -15,6 +16,8 @@ export async function sendGamePostponementEmails(
   currentMatchday: MatchDay,
   newMatchday: MatchDay,
 ) {
+  invariant(gameData.whiteParticipant, "White participant is required");
+  invariant(gameData.blackParticipant, "Black participant is required");
   const groupData = await db.query.group.findFirst({
     where: eq(group.id, gameData.groupId),
     columns: { groupName: true },

@@ -50,26 +50,27 @@ export function calculateStandings(
   });
 
   games.forEach((game) => {
-    if (!playerStats.has(game.whiteParticipantId)) {
-      playerStats.set(game.whiteParticipantId, {
-        participantId: game.whiteParticipantId,
-        points: 0,
-        gamesPlayed: 0,
-        sonnebornBerger: 0,
-      });
+    if (game.whiteParticipantId === null) {
+      invariant(
+        game.blackParticipantId !== null,
+        "Black participant is required",
+      );
+      const blackPlayer = playerStats.get(game.blackParticipantId)!;
+      blackPlayer.points += 1;
+      blackPlayer.gamesPlayed += 1;
+      return;
+    }
+    if (game.blackParticipantId === null) {
+      invariant(
+        game.whiteParticipantId !== null,
+        "White participant is required",
+      );
+      const whitePlayer = playerStats.get(game.whiteParticipantId)!;
+      whitePlayer.points += 1;
+      whitePlayer.gamesPlayed += 1;
+      return;
     }
 
-    if (!playerStats.has(game.blackParticipantId)) {
-      playerStats.set(game.blackParticipantId, {
-        participantId: game.blackParticipantId,
-        points: 0,
-        gamesPlayed: 0,
-        sonnebornBerger: 0,
-      });
-    }
-  });
-
-  games.forEach((game) => {
     if (!game.result) return;
 
     const whitePlayer = playerStats.get(game.whiteParticipantId)!;
@@ -86,6 +87,10 @@ export function calculateStandings(
 
   games.forEach((game) => {
     if (!game.result) return;
+
+    if (game.whiteParticipantId === null || game.blackParticipantId === null) {
+      return;
+    }
 
     const whitePlayer = playerStats.get(game.whiteParticipantId)!;
     const blackPlayer = playerStats.get(game.blackParticipantId)!;

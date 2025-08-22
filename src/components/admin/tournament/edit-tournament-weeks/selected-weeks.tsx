@@ -17,7 +17,6 @@ export function SelectedWeeks({
   selectedWeeks: Week[];
   onWeekChange: (index: number, newCalendarWeek: number) => void;
 }) {
-  // Count the week number based on status
   const getWeekNumber = (currentIndex: number, allWeeks: Week[]) => {
     const currentWeek = allWeeks[currentIndex];
     const weeksOfSameType = allWeeks

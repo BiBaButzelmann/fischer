@@ -2,6 +2,10 @@ import { GameWithParticipants } from "@/db/types/game";
 import { formatGameTime } from "@/lib/game-time";
 
 export function GameEntry({ game }: { game: GameWithParticipants }) {
+  if (!game.whiteParticipant || !game.blackParticipant) {
+    return null;
+  }
+
   const timeDisplay = formatGameTime();
 
   return (

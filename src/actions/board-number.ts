@@ -3,7 +3,8 @@
 import { db } from "@/db/client";
 import { game } from "@/db/schema/game";
 import { matchdayGame } from "@/db/schema/matchday";
-import { and, eq, desc, sql, gt, exists } from "drizzle-orm";
+import { and, eq, desc, sql, gt, exists, isNotNull } from "drizzle-orm";
+import invariant from "tiny-invariant";
 
 export async function getNextAvailableBoardNumber(
   matchdayId: number,
@@ -14,7 +15,11 @@ export async function getNextAvailableBoardNumber(
     .from(matchdayGame)
     .innerJoin(game, eq(matchdayGame.gameId, game.id))
     .where(
-      and(eq(matchdayGame.matchdayId, matchdayId), eq(game.groupId, groupId)),
+      and(
+        eq(matchdayGame.matchdayId, matchdayId),
+        eq(game.groupId, groupId),
+        isNotNull(game.boardNumber),
+      ),
     )
     .orderBy(desc(game.boardNumber))
     .limit(1);
@@ -53,10 +58,11 @@ export async function closeGapInBoardNumbers(
 export async function updateBoardNumbers(
   gameId: number,
   groupId: number,
-  currentBoardNumber: number,
+  currentBoardNumber: number | null,
   currentMatchdayId: number,
   newMatchdayId: number,
 ) {
+  invariant(currentBoardNumber !== null, "Current board number cannot be null");
   await db.transaction(async (tx) => {
     const newBoardNumber = await getNextAvailableBoardNumber(
       newMatchdayId,

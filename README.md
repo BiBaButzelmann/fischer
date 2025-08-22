@@ -2,18 +2,31 @@
 
 ## TODOs
 
+### Tier 1
+
+- add feature to disable players from the tournament after start (Paul)
+- drucken: feature to print the Kärtchen (Paul)
+
+  - Eingabehelfer: Seite implementieren (Paul)
+  - Eingabehelfer: show count of missing submissions
+
+- DWZ Bericht (Paul) deadline November
+
+### Tier 2
+
+- disable registration when tournament running
+- drucken: feature to print the pairings for setupHelper (Paul)
+  - reuse upcoming events component and show all setup helper events
+  - that aren´t in the past on own page
+  - PDF contains: Group, boardnumber, participants
+- tutorial mail: custom mail for each role (Kai -> Arne)
+- assigned matchdays in mail (Kai -> Arne)
+- Eingabehelfer: improve chess board visuals and error handling (?)
+
+### Tier 3
+
 - Mobile: nach Auswahl in der Sidebar sollte die Sidebar einklappen (Arne)
 - Spieltage verwalten: show group (badge) of users (Arne)
 - Juroren verwalten: Einteilung in aktiv und Nachrücker (Arne)
-- Spieler & Referee: ausstehende Ergebnismeldung (urgent) (Arne)
-- Eingabehelfer: Seite v0 mit ausstehenden Partien zum abarbeiten (Arne)
-- Eingabehelfer: Seite implementieren (Paul)
-  - Eingabehelfer: show count of missing submissions
-- assignment summary mail: summary of obligations (Arne)
-- tutorial mail: custom mail for each role (Arne)
-- drucken: feature to print the pairings (Paul)
-- drucken: feature to print the Kärtchen (Paul)
-- Eingabehelfer: improve chess board visuals and error handling (?)
-- DWZ Bericht (Paul)
 - overview: show own group
 - overview: show own standings

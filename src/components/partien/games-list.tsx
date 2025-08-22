@@ -50,8 +50,8 @@ export function GamesList({
         games.map((game) => [
           game.id,
           [
-            game.whiteParticipant.profile.userId,
-            game.blackParticipant.profile.userId,
+            game.whiteParticipant!.profile.userId,
+            game.blackParticipant!.profile.userId,
           ],
         ]),
       ),
@@ -138,11 +138,11 @@ export function GamesList({
                 {game.round}
               </TableCell>
               <TableCell className="w-40 truncate">
-                {game.whiteParticipant.profile.firstName}{" "}
-                {game.whiteParticipant.profile.lastName}
-                {game.whiteParticipant.fideRating && (
+                {game.whiteParticipant!.profile.firstName}{" "}
+                {game.whiteParticipant!.profile.lastName}
+                {game.whiteParticipant!.fideRating && (
                   <span className="ml-2 text-muted-foreground text-sm">
-                    ({game.whiteParticipant.fideRating})
+                    ({game.whiteParticipant!.fideRating})
                   </span>
                 )}
               </TableCell>
@@ -150,11 +150,11 @@ export function GamesList({
                 {game.result ? game.result.replace(":", " : ") : "-"}
               </TableCell>
               <TableCell className="w-40 truncate">
-                {game.blackParticipant.profile.firstName}{" "}
-                {game.blackParticipant.profile.lastName}
-                {game.blackParticipant.fideRating && (
+                {game.blackParticipant!.profile.firstName}{" "}
+                {game.blackParticipant!.profile.lastName}
+                {game.blackParticipant!.fideRating && (
                   <span className="ml-2 text-muted-foreground text-sm">
-                    ({game.blackParticipant.fideRating})
+                    ({game.blackParticipant!.fideRating})
                   </span>
                 )}
               </TableCell>
