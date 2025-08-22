@@ -32,7 +32,6 @@ export default async function GamePage({ params }: Props) {
   }
 
   const gameId = parsedGameIdResult.data;
-
   const game = await getGameById(gameId);
   if (!game) {
     return (
@@ -42,10 +41,16 @@ export default async function GamePage({ params }: Props) {
     );
   }
 
-  const isAdmin = session.user.role === "admin";
-
-  // Check viewing permissions first
-  const canView = await canUserViewGame(gameId, session.user.id, isAdmin);
+  const canView = await canUserViewGame(
+    gameId,
+    session.user.id,
+    session.user.role === "admin",
+  );
+  const canEdit = await canUserEditGame(
+    gameId,
+    session.user.id,
+    session.user.role === "admin",
+  );
 
   if (!canView) {
     return (
@@ -64,8 +69,6 @@ export default async function GamePage({ params }: Props) {
       </p>
     );
   }
-
-  const canEdit = await canUserEditGame(gameId, session.user.id, isAdmin);
 
   return (
     <Suspense fallback={<p className="p-4">Loading game...</p>}>
