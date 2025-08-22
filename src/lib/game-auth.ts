@@ -30,31 +30,28 @@ export const isWhite = (
   return game.whiteParticipant?.id === participantId;
 };
 
-export const canUserViewGame = async (
+export const getUserGameRights = async (
   gameId: number,
   userId: string,
   isAdmin: boolean,
 ) => {
-  const [userRoles, isMatchEnteringHelper, isReferee] = await Promise.all([
-    getRolesByUserId(userId),
-    isUserMatchEnteringHelperInGame(gameId, userId),
-    isUserRefereeInGame(gameId, userId),
-  ]);
+  const [userRoles, isGameParticipant, isMatchEnteringHelper, isReferee] =
+    await Promise.all([
+      getRolesByUserId(userId),
+      isUserParticipantInGame(gameId, userId),
+      isUserMatchEnteringHelperInGame(gameId, userId),
+      isUserRefereeInGame(gameId, userId),
+    ]);
 
   const isParticipant = userRoles.includes("participant");
 
-  return isParticipant || isReferee || isMatchEnteringHelper || isAdmin;
-};
+  if (isGameParticipant || isMatchEnteringHelper || isAdmin) {
+    return "edit";
+  }
 
-export const canUserEditGame = async (
-  gameId: number,
-  userId: string,
-  isAdmin: boolean,
-) => {
-  const [isGameParticipant, isMatchEnteringHelper] = await Promise.all([
-    isUserParticipantInGame(gameId, userId),
-    isUserMatchEnteringHelperInGame(gameId, userId),
-  ]);
+  if (isParticipant || isReferee) {
+    return "view";
+  }
 
-  return isGameParticipant || isMatchEnteringHelper || isAdmin;
+  return null;
 };

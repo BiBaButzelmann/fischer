@@ -5,11 +5,7 @@ import { GameWithPGN } from "@/db/types/game";
 import { getGameById } from "@/db/repositories/game";
 import { auth } from "@/auth/utils";
 import { redirect } from "next/navigation";
-import {
-  canUserViewGame,
-  canUserEditGame,
-  isGameActuallyPlayed,
-} from "@/lib/game-auth";
+import { getUserGameRights, isGameActuallyPlayed } from "@/lib/game-auth";
 import PgnViewer from "@/components/game/chessboard/pgn-viewer";
 import { Suspense } from "react";
 import { DateTime } from "luxon";
@@ -42,18 +38,13 @@ export default async function GamePage({ params }: Props) {
     );
   }
 
-  const canView = await canUserViewGame(
-    gameId,
-    session.user.id,
-    session.user.role === "admin",
-  );
-  const canEdit = await canUserEditGame(
+  const userRights = await getUserGameRights(
     gameId,
     session.user.id,
     session.user.role === "admin",
   );
 
-  if (!canView) {
+  if (!userRights) {
     return (
       <div className="p-4">
         <p className="text-red-600">
@@ -73,7 +64,7 @@ export default async function GamePage({ params }: Props) {
 
   return (
     <Suspense fallback={<p className="p-4">Loading game...</p>}>
-      <PgnContainer allowEdit={canEdit} game={game} />
+      <PgnContainer allowEdit={userRights === "edit"} game={game} />
     </Suspense>
   );
 }

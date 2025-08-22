@@ -2,18 +2,18 @@
 
 import { db } from "@/db/client";
 import { pgn } from "@/db/schema/pgn";
-import { canUserEditGame } from "@/lib/game-auth";
+import { getUserGameRights } from "@/lib/game-auth";
 import { authWithRedirect } from "@/auth/utils";
 
 export const savePGN = async (newValue: string, gameId: number) => {
   const session = await authWithRedirect();
-  const canEdit = await canUserEditGame(
+  const userRights = await getUserGameRights(
     gameId,
     session.user.id,
     session.user.role === "admin",
   );
 
-  if (!canEdit) {
+  if (userRights !== "edit") {
     return { error: "You are not authorized to edit this game." };
   }
 
