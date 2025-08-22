@@ -14,6 +14,8 @@ import { matchdayGame, matchdayReferee } from "../schema/matchday";
 import { matchday } from "../schema/matchday";
 import { game } from "../schema/game";
 import { groupMatchEnteringHelper } from "../schema/matchEnteringHelper";
+import { referee } from "../schema/referee";
+import { profile } from "../schema/profile";
 import { getMatchEnteringHelperIdByUserId } from "./match-entering-helper";
 import invariant from "tiny-invariant";
 
@@ -495,4 +497,23 @@ export async function isUserMatchEnteringHelperInGame(
     .limit(1);
 
   return assignment.length > 0;
+}
+
+export async function isUserRefereeInGame(gameId: number, userId: string) {
+  const refereeAssignment = await db
+    .select({
+      refereeId: matchdayReferee.refereeId,
+    })
+    .from(game)
+    .innerJoin(matchdayGame, eq(game.id, matchdayGame.gameId))
+    .innerJoin(
+      matchdayReferee,
+      eq(matchdayGame.matchdayId, matchdayReferee.matchdayId),
+    )
+    .innerJoin(referee, eq(matchdayReferee.refereeId, referee.id))
+    .innerJoin(profile, eq(referee.profileId, profile.id))
+    .where(and(eq(game.id, gameId), eq(profile.userId, userId)))
+    .limit(1);
+
+  return refereeAssignment.length > 0;
 }

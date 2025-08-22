@@ -1,87 +1,60 @@
-import {
-  Users,
-  User,
-  Wrench,
-  Gavel,
-  Calendar,
-  Hash,
-  BellIcon,
-  CheckCircle2,
-  Badge,
-} from "lucide-react";
+import { Wrench, Gavel, Hash, Scale, Check, ClipboardList } from "lucide-react";
 
-import { PropsWithChildren } from "react";
-import { Card, CardHeader, CardContent } from "@/components/ui/card";
 import { matchDays } from "@/constants/constants";
 import { getGroupNameAndDayOfWeekByProfileIdAndTournamentId } from "@/db/repositories/group";
-import { getJurorByProfileIdAndTournamentId } from "@/db/repositories/juror";
 import { getRefereeAssignmentCountByProfileIdAndTournamentId } from "@/db/repositories/referee";
 import { getMatchEnteringHelperAssignmentCountByProfileIdAndTournamentId } from "@/db/repositories/match-entering-helper";
 import { getSetupHelperAssignmentCountByProfileIdAndTournamentId } from "@/db/repositories/setup-helper";
+import { RolesData } from "@/db/types/role";
 
 type Props = {
   profileId: number;
   tournamentId: number;
+  rolesData: RolesData;
 };
 
-export async function AssignmentSummary({ profileId, tournamentId }: Props) {
+export async function AssignmentSummary({
+  profileId,
+  tournamentId,
+  rolesData,
+}: Props) {
   return (
-    <Card>
-      <CardHeader className="bg-white border-b rounded-t-xl">
-        <div className="flex flex-wrap items-center justify-between gap-4">
-          <div className="flex items-center gap-3">
-            <div className="p-2 bg-gray-100 border border-gray-200 rounded-lg">
-              <User className="h-5 w-5 text-gray-600" />
-            </div>
-            <div>
-              <h2 className="text-xl font-bold text-gray-900">Meine Daten</h2>
-              <p className="text-sm text-gray-600 mt-1">
-                Übersicht deiner Daten für das Turnier.
-              </p>
-            </div>
-          </div>
-        </div>
-      </CardHeader>
+    <div className="bg-white dark:bg-card border border-gray-200 dark:border-card-border rounded-xl shadow-sm p-6">
+      <div className="mb-4 flex items-center gap-2 text-sm text-muted-foreground">
+        <ClipboardList className="h-4 w-4" /> Meine Daten
+      </div>
 
-      <CardContent className="p-4 md:p-6">
-        <div className="grid grid-cols-1 lg:grid-cols-12 gap-2">
-          <PlayerSection profileId={profileId} tournamentId={tournamentId} />
-
-          <div className="lg:col-span-5 md:space-y-2">
+      <div className="space-y-4">
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+          {rolesData.participant && (
+            <ParticipantSection
+              profileId={profileId}
+              tournamentId={tournamentId}
+            />
+          )}
+          {rolesData.setupHelper && (
             <SetupHelperSection
               profileId={profileId}
               tournamentId={tournamentId}
             />
+          )}
+          {rolesData.referee && (
             <RefereeSection profileId={profileId} tournamentId={tournamentId} />
+          )}
+          {rolesData.matchEnteringHelper && (
             <MatchEnteringHelperSection
               profileId={profileId}
               tournamentId={tournamentId}
             />
-            <JurorSection profileId={profileId} tournamentId={tournamentId} />
-          </div>
+          )}
+          {rolesData.juror && <JurorSection />}
         </div>
-      </CardContent>
-    </Card>
-  );
-}
-
-function RoleSection({
-  icon,
-  title,
-  children,
-}: PropsWithChildren<{ icon: React.ReactNode; title: string }>) {
-  return (
-    <div className="bg-white rounded-lg p-4 border border-gray-200">
-      <div className="flex items-center gap-2 mb-3">
-        <div className="p-1.5 bg-gray-100 rounded-md">{icon}</div>
-        <h3 className="text-base font-semibold text-gray-900">{title}</h3>
       </div>
-      {children}
     </div>
   );
 }
 
-async function PlayerSection({
+async function ParticipantSection({
   profileId,
   tournamentId,
 }: {
@@ -93,48 +66,39 @@ async function PlayerSection({
     tournamentId,
   );
 
-  if (playerGroup == null) {
-    return null;
+  if (!playerGroup) {
+    return (
+      <div className="flex items-center gap-4 p-4 bg-white dark:bg-card border border-gray-200 dark:border-card-border rounded-xl shadow-sm transition-all hover:shadow-md">
+        <div className="flex-shrink-0 p-3 rounded-full bg-blue-100 dark:bg-blue-900/30 flex items-center justify-center w-12 h-12">
+          <span className="font-bold text-blue-600 dark:text-blue-400 text-sm">
+            ?
+          </span>
+        </div>
+        <div className="flex-grow">
+          <p className="font-bold text-gray-800 dark:text-gray-100">Spieler</p>
+          <p className="text-sm text-gray-500 dark:text-gray-400 mt-1">
+            Gruppe noch nicht zugeteilt
+          </p>
+        </div>
+      </div>
+    );
   }
 
   return (
-    <div className="lg:col-span-7 bg-white p-4 md:p-6 rounded-lg border border-gray-200">
-      <div className="space-y-4">
-        <div className="flex items-center gap-2 mb-4">
-          <div className="p-1.5 bg-gray-100 rounded-md">
-            <User className="h-4 w-4 text-gray-600" />
-          </div>
-          <h3 className="text-lg font-semibold text-gray-900">Spieler</h3>
-        </div>
-        <div className="space-y-3">
-          <div>
-            <div className="flex items-center gap-2 mb-2">
-              <Users className="h-4 w-4 text-gray-500" />
-              <span className="text-sm font-medium text-gray-700">
-                Meine Gruppe
-              </span>
-            </div>
-            <div className="ml-6">
-              <Badge className="bg-gray-900 text-white hover:bg-gray-800 font-medium">
-                {playerGroup.groupName}
-              </Badge>
-            </div>
-          </div>
-          <div>
-            <div className="flex items-center gap-2 mb-2">
-              <Calendar className="h-4 w-4 text-gray-500" />
-              <span className="text-sm font-medium text-gray-700">
-                Mein Gruppenspieltag
-              </span>
-            </div>
-            <div className="ml-6">
-              <Badge className="bg-gray-900 text-white hover:bg-gray-800 font-medium">
-                {playerGroup.dayOfWeek
-                  ? matchDays[playerGroup.dayOfWeek]
-                  : "Wochentag noch nicht zugewiesen"}
-              </Badge>
-            </div>
-          </div>
+    <div className="flex items-center gap-4 p-4 bg-white dark:bg-card border border-gray-200 dark:border-card-border rounded-xl shadow-sm transition-all hover:shadow-md">
+      <div className="flex-shrink-0 p-3 rounded-full bg-blue-100 dark:bg-blue-900/30 flex items-center justify-center w-12 h-12">
+        <span className="font-bold text-blue-600 dark:text-blue-400 text-xl">
+          {playerGroup.groupName}
+        </span>
+      </div>
+      <div className="flex-grow">
+        <p className="font-bold text-gray-800 dark:text-gray-100">Spieler</p>
+        <div className="flex items-center gap-2 text-sm text-gray-500 dark:text-gray-400 mt-1">
+          <span>
+            {playerGroup.dayOfWeek
+              ? matchDays[playerGroup.dayOfWeek]
+              : "Spieltag noch nicht zugeteilt"}
+          </span>
         </div>
       </div>
     </div>
@@ -159,21 +123,19 @@ async function SetupHelperSection({
   }
 
   return (
-    <RoleSection
-      icon={<Wrench className="h-4 w-4 text-gray-600" />}
-      title="Aufbauhelfer"
-    >
-      <div className="space-y-3">
-        <div>
-          <div className="text-xs font-medium text-gray-500 uppercase tracking-wide mb-1">
-            Zugeteilte Spieltage
-          </div>
-          <Badge className="bg-gray-800 text-white hover:bg-gray-700 font-medium">
-            {assignedDaysCount} Tage
-          </Badge>
-        </div>
+    <div className="flex items-center gap-4 p-4 bg-white dark:bg-card border border-gray-200 dark:border-card-border rounded-xl shadow-sm transition-all hover:shadow-md">
+      <div className="flex-shrink-0 p-3 rounded-full bg-green-100 dark:bg-green-900/30">
+        <Wrench className="w-6 h-6 text-green-600 dark:text-green-400" />
       </div>
-    </RoleSection>
+      <div className="flex-grow">
+        <p className="font-bold text-gray-800 dark:text-gray-100">
+          Aufbauhelfer
+        </p>
+        <p className="text-sm text-gray-500 dark:text-gray-400 mt-1">
+          {assignedDaysCount} Tage zugeteilt
+        </p>
+      </div>
+    </div>
   );
 }
 
@@ -195,50 +157,19 @@ async function RefereeSection({
   }
 
   return (
-    <RoleSection
-      icon={<BellIcon className="h-4 w-4 text-gray-600" />}
-      title="Schiedsrichter"
-    >
-      <div className="space-y-3">
-        <div>
-          <div className="text-xs font-medium text-gray-500 uppercase tracking-wide mb-1">
-            Zugeteilte Spieltage
-          </div>
-          <Badge className="bg-gray-800 text-white hover:bg-gray-700 font-medium">
-            {assignedDaysCount} Tage
-          </Badge>
-        </div>
+    <div className="flex items-center gap-4 p-4 bg-white dark:bg-card border border-gray-200 dark:border-card-border rounded-xl shadow-sm transition-all hover:shadow-md">
+      <div className="flex-shrink-0 p-3 rounded-full bg-red-100 dark:bg-red-900/30">
+        <Gavel className="w-6 h-6 text-red-600 dark:text-red-400" />
       </div>
-    </RoleSection>
-  );
-}
-
-async function JurorSection({
-  profileId,
-  tournamentId,
-}: {
-  profileId: number;
-  tournamentId: number;
-}) {
-  const juror = await getJurorByProfileIdAndTournamentId(
-    profileId,
-    tournamentId,
-  );
-
-  if (juror == null) {
-    return null;
-  }
-
-  return (
-    <RoleSection
-      icon={<Gavel className="h-4 w-4 text-gray-600" />}
-      title="Turniergericht"
-    >
-      <div className="flex items-center gap-2 text-sm text-gray-700">
-        <CheckCircle2 className="h-4 w-4 text-green-600" />
-        <span>Als Mitglied im Turniergericht angemeldet</span>
+      <div className="flex-grow">
+        <p className="font-bold text-gray-800 dark:text-gray-100">
+          Schiedsrichter
+        </p>
+        <p className="text-sm text-gray-500 dark:text-gray-400 mt-1">
+          {assignedDaysCount} Tage zugeteilt
+        </p>
       </div>
-    </RoleSection>
+    </div>
   );
 }
 
@@ -260,17 +191,37 @@ async function MatchEnteringHelperSection({
   }
 
   return (
-    <RoleSection
-      icon={<Hash className="h-4 w-4 text-gray-600" />}
-      title="Eingabehelfer"
-    >
-      <div className="flex items-center gap-2">
-        <Users className="h-5 w-5 text-gray-600" />
-        <span className="text-gray-700">Anzahl Gruppen:</span>
-        <span className="text-lg font-bold text-gray-900">
-          {assignedGroupsCount}
-        </span>
+    <div className="flex items-center gap-4 p-4 bg-white dark:bg-card border border-gray-200 dark:border-card-border rounded-xl shadow-sm transition-all hover:shadow-md">
+      <div className="flex-shrink-0 p-3 rounded-full bg-purple-100 dark:bg-purple-900/30">
+        <Hash className="w-6 h-6 text-purple-600 dark:text-purple-400" />
       </div>
-    </RoleSection>
+      <div className="flex-grow">
+        <p className="font-bold text-gray-800 dark:text-gray-100">
+          Eingabehelfer
+        </p>
+        <div className="flex items-center gap-2 text-sm text-gray-500 dark:text-gray-400 mt-1">
+          <span>{assignedGroupsCount} Gruppen zugeteilt</span>
+        </div>
+      </div>
+    </div>
+  );
+}
+
+function JurorSection() {
+  return (
+    <div className="flex items-center gap-4 p-4 bg-white dark:bg-card border border-gray-200 dark:border-card-border rounded-xl shadow-sm transition-all hover:shadow-md">
+      <div className="flex-shrink-0 p-3 rounded-full bg-yellow-100 dark:bg-yellow-900/30">
+        <Scale className="w-6 h-6 text-yellow-600 dark:text-yellow-400" />
+      </div>
+      <div className="flex-grow">
+        <p className="font-bold text-gray-800 dark:text-gray-100">
+          Turniergericht
+        </p>
+        <div className="flex items-center gap-2 text-sm text-gray-500 dark:text-gray-400 mt-1">
+          <Check className="w-4 h-4 text-green-600 dark:text-green-400" />
+          <span>Mitglied</span>
+        </div>
+      </div>
+    </div>
   );
 }

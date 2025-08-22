@@ -80,4 +80,20 @@ export type GameWithParticipantsAndDate = GameWithParticipants & {
   };
 };
 
+export type GameWithPGN = Game & {
+  whiteParticipant: ParticipantWithName | null;
+  blackParticipant: ParticipantWithName | null;
+  pgn: {
+    value: string;
+  } | null;
+  tournament: {
+    name: string;
+  };
+  matchdayGame: {
+    matchday: {
+      date: Date;
+    };
+  };
+};
+
 export type GameResult = InferEnum<typeof game.result>;
