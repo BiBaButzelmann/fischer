@@ -48,7 +48,7 @@ export default function PgnViewer({
       const result = await savePGN(fullPGN, gameId);
 
       if (result?.error) {
-        toast.error("Nicht für Speichern autorisiert");
+        toast.error("Fehler beim Speichern der Partie");
       } else {
         toast.success("Partie erfolgreich gespeichert");
       }
