@@ -9,6 +9,7 @@ import {
 } from "react";
 import { Chess, Move } from "chess.js";
 import { Chessboard } from "react-chessboard";
+import type { Square } from "react-chessboard/dist/chessboard/types";
 import { savePGN } from "@/actions/pgn";
 import { toast } from "sonner";
 import { MoveHistory } from "./move-history";
@@ -88,7 +89,7 @@ export default function PgnViewer({
       if (!allowEdit) return;
 
       const boardState = currentBoardState(moves, currentIndex);
-      const piece = boardState.get(square as any);
+      const piece = boardState.get(square as Square);
 
       if (selectedSquare) {
         if (selectedSquare === square) {

@@ -6,7 +6,6 @@ import { Switch } from "@/components/ui/switch";
 import {
   Form,
   FormControl,
-  FormDescription,
   FormField,
   FormItem,
   FormLabel,
@@ -37,7 +36,7 @@ type Props = {
 export default function CreateTournament({ profiles, onCancel }: Props) {
   const [loading, startTransition] = useTransition();
 
-  const form = useForm({
+  const form = useForm<z.infer<typeof createTournamentFormSchema>>({
     resolver: zodResolver(createTournamentFormSchema),
     defaultValues: {
       clubName: DEFAULT_CLUB_LABEL,
@@ -56,7 +55,6 @@ export default function CreateTournament({ profiles, onCancel }: Props) {
       endRegistrationDate: "",
       organizerProfileId: "",
       selectedCalendarWeeks: [],
-      pgnViewerPassword: "",
     },
   });
 
@@ -357,34 +355,6 @@ export default function CreateTournament({ profiles, onCancel }: Props) {
                   weeks={field.value}
                   onChange={field.onChange}
                 />
-              )}
-            />
-          </div>
-
-          {/* Teil 4: PGN Viewer */}
-          <span className="inline-block text-xl font-semibold text-gray-800">
-            Passwort für den PGN Viewer
-          </span>
-          <div>
-            <FormField
-              control={form.control}
-              name="pgnViewerPassword"
-              render={({ field }) => (
-                <FormItem>
-                  <FormLabel required>PGN Viewer Passwort</FormLabel>
-                  <FormControl>
-                    <Input
-                      type="password"
-                      placeholder="Mindestens 6 Zeichen lang"
-                      {...field}
-                    />
-                  </FormControl>
-                  <FormDescription>
-                    Nur Spieler mit diesem Passwort können alle Partien
-                    anschauen.
-                  </FormDescription>
-                  <FormMessage />
-                </FormItem>
               )}
             />
           </div>

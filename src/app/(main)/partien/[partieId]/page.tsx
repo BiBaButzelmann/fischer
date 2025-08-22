@@ -4,8 +4,6 @@ import { ParticipantWithName } from "@/db/types/participant";
 import { getGameById } from "@/db/repositories/game";
 import { auth } from "@/auth/utils";
 import { redirect } from "next/navigation";
-import { PasswordProtection } from "@/components/game/password-protection";
-import { verifyPgnPassword } from "@/actions/game";
 import { isUserAuthorizedForPGN, isGameActuallyPlayed } from "@/lib/game-auth";
 import PgnViewer from "@/components/game/chessboard/pgn-viewer";
 import { Suspense } from "react";
@@ -55,11 +53,9 @@ export default async function GamePage({ params }: Props) {
   }
 
   return (
-    <PasswordProtection gameId={gameId} onVerify={verifyPgnPassword}>
-      <Suspense fallback={<p className="p-4">Loading game...</p>}>
-        <PgnContainer allowEdit={false} gameId={gameId} />
-      </Suspense>
-    </PasswordProtection>
+    <Suspense fallback={<p className="p-4">Loading game...</p>}>
+      <PgnContainer allowEdit={false} gameId={gameId} />
+    </Suspense>
   );
 }
 
