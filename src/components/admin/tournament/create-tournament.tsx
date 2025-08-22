@@ -36,7 +36,7 @@ type Props = {
 export default function CreateTournament({ profiles, onCancel }: Props) {
   const [loading, startTransition] = useTransition();
 
-  const form = useForm<z.infer<typeof createTournamentFormSchema>>({
+  const form = useForm({
     resolver: zodResolver(createTournamentFormSchema),
     defaultValues: {
       clubName: DEFAULT_CLUB_LABEL,
