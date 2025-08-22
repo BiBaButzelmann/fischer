@@ -497,32 +497,19 @@ export async function isUserMatchEnteringHelperInGame(
 }
 
 export async function isUserRefereeInGame(gameId: number, userId: string) {
-  const gameWithMatchday = await db
+  const refereeAssignment = await db
     .select({
-      matchdayId: matchdayGame.matchdayId,
+      refereeId: matchdayReferee.refereeId,
     })
     .from(game)
     .innerJoin(matchdayGame, eq(game.id, matchdayGame.gameId))
-    .where(eq(game.id, gameId))
-    .limit(1);
-
-  if (!gameWithMatchday || gameWithMatchday.length === 0) {
-    return false;
-  }
-
-  const matchdayId = gameWithMatchday[0].matchdayId;
-
-  const refereeAssignment = await db
-    .select()
-    .from(matchdayReferee)
+    .innerJoin(
+      matchdayReferee,
+      eq(matchdayGame.matchdayId, matchdayReferee.matchdayId),
+    )
     .innerJoin(referee, eq(matchdayReferee.refereeId, referee.id))
     .innerJoin(profile, eq(referee.profileId, profile.id))
-    .where(
-      and(
-        eq(matchdayReferee.matchdayId, matchdayId),
-        eq(profile.userId, userId),
-      ),
-    )
+    .where(and(eq(game.id, gameId), eq(profile.userId, userId)))
     .limit(1);
 
   return refereeAssignment.length > 0;
