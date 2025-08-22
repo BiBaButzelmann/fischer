@@ -84,6 +84,19 @@ export async function AppSidebar() {
             </SidebarMenu>
           </SidebarGroupContent>
         </SidebarGroup>
+        <SidebarGroup>
+          <SidebarGroupLabel>Aufbauhelfer</SidebarGroupLabel>
+          <SidebarGroupContent>
+            <SidebarMenu>
+              <SidebarMenuButton asChild>
+                <Link href="/aufbauhelfer">
+                  <LayoutDashboard />
+                  <p className="mt-1">Spieler Karten</p>
+                </Link>
+              </SidebarMenuButton>
+            </SidebarMenu>
+          </SidebarGroupContent>
+        </SidebarGroup>
         {isActive ? (
           <SidebarGroup>
             <SidebarGroupLabel>Dokumente</SidebarGroupLabel>

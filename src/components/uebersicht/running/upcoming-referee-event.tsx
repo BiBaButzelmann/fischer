@@ -1,4 +1,3 @@
-import { useRouter } from "next/navigation";
 import { buildGameViewUrl } from "@/lib/navigation";
 import { Gavel } from "lucide-react";
 import { UpcomingEvent, EventIcon } from "./upcoming-event";
@@ -14,21 +13,11 @@ export function UpcomingRefereeEvent({
   matchdayId,
   start,
 }: UpcomingRefereeEventProps) {
-  const router = useRouter();
-
-  const handleClick = () => {
-    const url = buildGameViewUrl({
-      tournamentId,
-      matchdayId,
-    });
-    router.push(url);
-  };
-
   return (
     <UpcomingEvent
       title="Schiedsrichter"
       start={start}
-      onClick={handleClick}
+      url={buildGameViewUrl({ tournamentId, matchdayId })}
       icon={
         <EventIcon
           icon={Gavel}

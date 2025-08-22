@@ -1,4 +1,3 @@
-import { useRouter } from "next/navigation";
 import { buildGameViewUrl } from "@/lib/navigation";
 import { Gamepad2 } from "lucide-react";
 import { EventIcon, UpcomingEvent } from "./upcoming-event";
@@ -18,23 +17,16 @@ export function UpcomingGameEvent({
   participantId,
   start,
 }: UpcomingGameEventProps) {
-  const router = useRouter();
-
-  const handleClick = () => {
-    const url = buildGameViewUrl({
-      tournamentId,
-      groupId,
-      round,
-      participantId,
-    });
-    router.push(url);
-  };
-
   return (
     <UpcomingEvent
       title="Spiel"
       start={start}
-      onClick={handleClick}
+      url={buildGameViewUrl({
+        tournamentId,
+        groupId,
+        round,
+        participantId,
+      })}
       icon={
         <EventIcon
           icon={Gamepad2}
