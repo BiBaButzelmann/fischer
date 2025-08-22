@@ -9,9 +9,9 @@ import {
 } from "react";
 import { Chess, Move } from "chess.js";
 import { Chessboard } from "react-chessboard";
-import MoveHistory from "./move-history";
 import { savePGN } from "@/actions/pgn";
 import { toast } from "sonner";
+import { MoveHistory } from "./move-history";
 
 export type Props = {
   gameId: number;
@@ -62,7 +62,6 @@ export default function PgnViewer({
         const move = boardState.move({
           from,
           to,
-          promotion: "q",
         });
         if (!move) return false;
 
@@ -70,7 +69,7 @@ export default function PgnViewer({
         setMoves(updatedMoves);
         setCurrentIndex(updatedMoves.length - 1);
         return true;
-      } catch (error) {
+      } catch {
         return false;
       }
     },
@@ -95,7 +94,7 @@ export default function PgnViewer({
         if (selectedSquare === square) {
           setSelectedSquare(null);
         } else {
-          const moveSuccessful = makeMove(selectedSquare, square);
+          makeMove(selectedSquare, square);
           setSelectedSquare(null);
         }
       } else {

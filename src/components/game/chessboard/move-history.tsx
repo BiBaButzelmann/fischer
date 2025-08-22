@@ -12,11 +12,7 @@ type Props = {
   showSave?: boolean;
 };
 
-/**
- * Renders the moves in two columns (white / black) and highlights the cell
- * whose ply index equals `currentMoveIndex`.
- */
-function MoveHistory({
+export function MoveHistory({
   history,
   currentMoveIndex,
   goToMove,
@@ -114,5 +110,3 @@ function MoveHistory({
     </div>
   );
 }
-
-export default MoveHistory;
