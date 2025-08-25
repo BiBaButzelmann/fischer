@@ -14,6 +14,7 @@ export type ParticipantWithName = Participant & {
 export type ParticipantAndGroup = Participant & {
   group?: {
     group: {
+      id: number;
       groupName: string;
       dayOfWeek: DayOfWeek | null;
     };
