@@ -1,11 +1,6 @@
 import * as React from "react";
-import { buildGameViewUrl } from "@/lib/navigation";
-
-type Props = {
-  tournamentId: number;
-};
-
-export function MatchEnteringHelperContent({ tournamentId }: Props) {
+// TODO: add page URL
+export function MatchEnteringHelperContent() {
   return (
     <div style={{ marginBottom: "20px" }}>
       <h2 style={{ color: "#2c3e50", fontSize: "18px", marginBottom: "10px" }}>

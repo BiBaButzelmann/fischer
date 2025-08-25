@@ -71,9 +71,7 @@ export function TournamentStartedMail({
 
       {roles.referee && <RefereeContent tournamentId={tournamentId} />}
 
-      {roles.matchEnteringHelper && (
-        <MatchEnteringHelperContent tournamentId={tournamentId} />
-      )}
+      {roles.matchEnteringHelper && <MatchEnteringHelperContent />}
 
       {roles.juror && <JurorContent />}
 
