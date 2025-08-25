@@ -48,3 +48,17 @@ export async function getMatchdaysWithRefereeAndSetupHelpersByTournamentId(
     orderBy: (matchday, { asc }) => [asc(matchday.date)],
   });
 }
+
+export async function getGroupIdsByMatchdayId(matchdayId: number) {
+  const data = await db.query.matchdayGame.findMany({
+    where: (matchdayGame, { eq }) => eq(matchdayGame.matchdayId, matchdayId),
+    with: {
+      game: {
+        columns: {
+          groupId: true,
+        },
+      },
+    },
+  });
+  return Array.from(new Set(data.map((item) => item.game.groupId)));
+}
