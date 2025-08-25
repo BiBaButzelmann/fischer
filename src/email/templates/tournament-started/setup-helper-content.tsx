@@ -19,7 +19,7 @@ export function SetupHelperContent({ tournamentId }: Props) {
       </p>
       <p>
         Sei bitte möglichst so rechtzeitig da, dass die Vorbereitung 10 Minuten
-        vor Rundenbeginn abgeschlossen sind.
+        vor Rundenbeginn abgeschlossen ist.
       </p>
       <p>
         Eine Liste der Paarungen des jeweiligen Spieltages einschließlich der
