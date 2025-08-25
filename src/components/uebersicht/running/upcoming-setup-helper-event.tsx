@@ -22,7 +22,7 @@ export function UpcomingSetupHelperEvent({
         <EventIcon
           icon={Wrench}
           backgroundColor="bg-green-100"
-          iconColor="bg-green-600"
+          iconColor="text-green-600"
         />
       }
     />
