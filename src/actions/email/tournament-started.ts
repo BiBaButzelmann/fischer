@@ -49,19 +49,19 @@ export async function sendTournamentStartedEmails(tournamentId: number) {
               participantWithGroup.group.group,
               `Group not found for participant ${profile.firstName} ${profile.lastName}`,
             );
+            const groupInfo = participantWithGroup.group.group;
             invariant(
-              participantWithGroup.group.group.dayOfWeek,
-              `Group ${participantWithGroup.group.group.groupName} has no matchday assigned`,
+              groupInfo.dayOfWeek,
+              `Group ${groupInfo.groupName} has no matchday assigned`,
             );
 
-            const groupInfo = participantWithGroup.group.group;
             const groupParticipants = await getParticipantsWithProfileByGroupId(
               groupInfo.id,
             );
 
             return {
               groupName: groupInfo.groupName,
-              dayOfWeek: groupInfo.dayOfWeek!,
+              dayOfWeek: groupInfo.dayOfWeek,
               groupId: groupInfo.id,
               participants: groupParticipants,
             };
