@@ -64,8 +64,6 @@ export default function PgnViewer({
           from,
           to,
         });
-        if (!move) return false;
-
         const updatedMoves = moves.slice(0, currentIndex + 1).concat(move);
         setMoves(updatedMoves);
         setCurrentIndex(updatedMoves.length - 1);
