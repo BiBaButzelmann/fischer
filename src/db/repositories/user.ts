@@ -14,6 +14,7 @@ import { tournament } from "../schema/tournament";
 import { profile } from "../schema/profile";
 import { getProfileByUserId } from "./profile";
 import { user } from "../schema/auth";
+import { getBerlinTime } from "@/lib/date";
 
 export async function softDeleteUser(userId: string) {
   const session = await authWithRedirect();
@@ -31,7 +32,7 @@ export async function softDeleteUser(userId: string) {
     };
   }
   const { id: profileId } = profileData;
-  const deletedAt = new Date();
+  const deletedAt = getBerlinTime();
 
   return await db.transaction(async (tx) => {
     await tx
@@ -149,7 +150,7 @@ export async function hardDeleteUser(userId: string) {
     await tx.delete(participant).where(eq(participant.profileId, profileId));
     await tx.delete(profile).where(eq(profile.id, profileId));
     await tx.delete(user).where(eq(user.id, userId));
-    return { success: true, deletedAt: new Date() };
+    return { success: true, deletedAt: getBerlinTime() };
   });
 }
 
@@ -212,6 +213,6 @@ export async function restoreUser(userId: string) {
       .set({ deletedAt: null })
       .where(eq(tournament.organizerProfileId, profileId));
 
-    return { success: true, restoredAt: new Date() };
+    return { success: true, restoredAt: getBerlinTime() };
   });
 }

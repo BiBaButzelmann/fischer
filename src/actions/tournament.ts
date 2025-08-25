@@ -10,9 +10,9 @@ import { authWithRedirect } from "@/auth/utils";
 import invariant from "tiny-invariant";
 import { eq } from "drizzle-orm";
 import { TournamentStage } from "@/db/types/tournament";
-import { DateTime } from "luxon";
 import { matchday } from "@/db/schema/matchday";
 import { isHoliday } from "@/lib/holidays";
+import { getBerlinDateTime } from "@/lib/date";
 
 export async function createTournament(
   formData: z.infer<typeof createTournamentFormSchema>,
@@ -158,19 +158,19 @@ function getMatchDays(
   >["selectedCalendarWeeks"],
 ) {
   return insertedTournamentWeeks.flatMap((week, index) => {
-    const tuesday = DateTime.now()
+    const tuesday = getBerlinDateTime()
       .set({
         weekNumber: week.weekNumber,
         weekday: 2,
       })
       .toJSDate();
-    const thursday = DateTime.now()
+    const thursday = getBerlinDateTime()
       .set({
         weekNumber: week.weekNumber,
         weekday: 4,
       })
       .toJSDate();
-    const friday = DateTime.now()
+    const friday = getBerlinDateTime()
       .set({
         weekNumber: week.weekNumber,
         weekday: 5,
@@ -183,7 +183,7 @@ function getMatchDays(
         tournamentId,
         tournamentWeekId: week.id,
         dayOfWeek: "tuesday",
-        date: DateTime.now()
+        date: getBerlinDateTime()
           .set({
             weekNumber: week.weekNumber,
             weekday: 2,
@@ -197,7 +197,7 @@ function getMatchDays(
         tournamentId,
         tournamentWeekId: week.id,
         dayOfWeek: "thursday",
-        date: DateTime.now()
+        date: getBerlinDateTime()
           .set({
             weekNumber: week.weekNumber,
             weekday: 4,
@@ -211,7 +211,7 @@ function getMatchDays(
         tournamentId,
         tournamentWeekId: week.id,
         dayOfWeek: "friday",
-        date: DateTime.now()
+        date: getBerlinDateTime()
           .set({
             weekNumber: week.weekNumber,
             weekday: 5,
