@@ -76,8 +76,7 @@ export function TournamentStartedMail({
       {roles.juror && <JurorContent />}
 
       <p>
-        Bei Fragen stehe bitte zur Verfügung und wende dich bei Problemen an die
-        Turnierleitung unter{" "}
+        Bei Fragen oder Problemen wende Dich gerne an die Turnierleitung unter{" "}
         <a href="mailto:klubturnier@hsk1830.de" style={{ color: "#2980b9" }}>
           klubturnier@hsk1830.de
         </a>

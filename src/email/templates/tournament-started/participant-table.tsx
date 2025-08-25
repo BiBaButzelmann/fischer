@@ -33,6 +33,24 @@ export function ParticipantTable({ participants }: Props) {
               textAlign: "left",
             }}
           >
+            DWZ
+          </th>
+          <th
+            style={{
+              border: "1px solid #dee2e6",
+              padding: "8px",
+              textAlign: "left",
+            }}
+          >
+            Elo
+          </th>
+          <th
+            style={{
+              border: "1px solid #dee2e6",
+              padding: "8px",
+              textAlign: "left",
+            }}
+          >
             Telefon
           </th>
           <th
@@ -56,6 +74,22 @@ export function ParticipantTable({ participants }: Props) {
               }}
             >
               {participant.profile.firstName} {participant.profile.lastName}
+            </td>
+            <td
+              style={{
+                border: "1px solid #dee2e6",
+                padding: "8px",
+              }}
+            >
+              {participant.dwzRating || "-"}
+            </td>
+            <td
+              style={{
+                border: "1px solid #dee2e6",
+                padding: "8px",
+              }}
+            >
+              {participant.fideRating || "-"}
             </td>
             <td
               style={{

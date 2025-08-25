@@ -2,7 +2,7 @@ import * as React from "react";
 import { DayOfWeek } from "@/db/types/group";
 import { ParticipantWithProfile } from "@/db/types/participant";
 import { matchDays } from "@/constants/constants";
-import { buildGameViewUrl } from "@/lib/navigation";
+import { buildGameViewUrl, buildResultsViewUrl } from "@/lib/navigation";
 import { ParticipantTable } from "./participant-table";
 
 type Props = {
@@ -19,6 +19,11 @@ export function ParticipantContent({ tournamentId, participantGroup }: Props) {
   const gameUrl = buildGameViewUrl({
     tournamentId,
     groupId: participantGroup.groupId,
+  });
+
+  const standingsUrl = buildResultsViewUrl({
+    tournamentId: tournamentId.toString(),
+    groupId: participantGroup.groupId.toString(),
   });
 
   return (
@@ -44,6 +49,16 @@ export function ParticipantContent({ tournamentId, participantGroup }: Props) {
           style={{ color: "#2980b9", fontWeight: "bold" }}
         >
           klubturnier.hsk1830.de{gameUrl}
+        </a>
+      </p>
+      <p>
+        Die Rangliste deiner Gruppe findest du unter folgendem Link:
+        <br />{" "}
+        <a
+          href={`https://klubturnier.hsk1830.de${standingsUrl}`}
+          style={{ color: "#2980b9", fontWeight: "bold" }}
+        >
+          klubturnier.hsk1830.de{standingsUrl}
         </a>
       </p>
       <p>
