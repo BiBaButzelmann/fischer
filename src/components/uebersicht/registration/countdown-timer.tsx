@@ -2,6 +2,7 @@
 
 import { match } from "ts-pattern";
 import { useEffect, useState } from "react";
+import { getBerlinTime, toBerlinTime } from "@/lib/date";
 
 type Props = {
   date: Date;
@@ -58,7 +59,13 @@ function Timers({ timeLeft }: { timeLeft: TimeLeft }) {
 }
 
 function calculateTimeLeft(date: Date) {
-  const difference = date.getTime() - new Date().getTime();
+  const currentBerlinTime = getBerlinTime();
+
+  const endOfRegistrationDate = new Date(date);
+  endOfRegistrationDate.setHours(23, 59, 59, 999);
+  const berlinTargetTime = toBerlinTime(endOfRegistrationDate);
+
+  const difference = berlinTargetTime.getTime() - currentBerlinTime.getTime();
 
   return difference > 0
     ? {
