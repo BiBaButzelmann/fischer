@@ -1,4 +1,5 @@
 import { DateTime } from "luxon";
+import { getBerlinDateTime } from "./date";
 
 export function generateTournamentWeeksSchedule(
   tournamentWeeks: Array<{
@@ -16,7 +17,7 @@ export function generateTournamentWeeksSchedule(
         ? `Woche ${++regularWeekCount}`
         : `Verlegungswoche ${++catchUpWeekCount}`;
 
-    const weekStart = DateTime.now()
+    const weekStart = getBerlinDateTime()
       .set({ weekNumber: week.weekNumber })
       .startOf("week");
 
