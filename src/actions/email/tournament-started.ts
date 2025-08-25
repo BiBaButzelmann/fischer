@@ -7,7 +7,6 @@ import { getParticipantWithGroupByProfileIdAndTournamentId } from "@/db/reposito
 import { sendTournamentStartedMail } from "@/email/tournament-started";
 import { authWithRedirect } from "@/auth/utils";
 import { getTournamentById } from "@/db/repositories/tournament";
-import { DayOfWeek } from "@/db/types/group";
 import invariant from "tiny-invariant";
 
 export async function sendTournamentStartedEmails(tournamentId: number) {
@@ -62,7 +61,7 @@ export async function sendTournamentStartedEmails(tournamentId: number) {
 
             return {
               groupName: groupInfo.groupName,
-              dayOfWeek: groupInfo.dayOfWeek as DayOfWeek,
+              dayOfWeek: groupInfo.dayOfWeek!,
               groupId: groupInfo.id,
               participants: groupParticipants,
             };
