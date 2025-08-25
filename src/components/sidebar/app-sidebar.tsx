@@ -146,9 +146,9 @@ export async function AppSidebar() {
                 </Link>
               </SidebarMenuButton>
               <SidebarMenuButton asChild>
-                <Link href="/admin/spieler-karten">
+                <Link href="/admin/namensschilder">
                   <LayoutDashboard />
-                  <p className="mt-1">Spieler Karten</p>
+                  <p className="mt-1">Namensschilder</p>
                 </Link>
               </SidebarMenuButton>
             </SidebarGroupContent>
