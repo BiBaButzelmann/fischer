@@ -1,10 +1,18 @@
 "use client";
 
-import { useState, useEffect, useCallback, useMemo } from "react";
+import {
+  useState,
+  useEffect,
+  useCallback,
+  useMemo,
+  useTransition,
+} from "react";
 import { Chess, Move } from "chess.js";
 import { Chessboard } from "react-chessboard";
-import MoveHistory from "./move-history";
-import SavePGNButton from "./save-pgn-button";
+import type { Square } from "react-chessboard/dist/chessboard/types";
+import { savePGN } from "@/actions/pgn";
+import { toast } from "sonner";
+import { MoveHistory } from "./move-history";
 
 export type Props = {
   gameId: number;
@@ -19,6 +27,8 @@ export default function PgnViewer({
 }: Props) {
   const [moves, setMoves] = useState(() => movesFromPGN(initialPGN));
   const [currentIndex, setCurrentIndex] = useState(moves.length - 1);
+  const [isPending, startTransition] = useTransition();
+  const [selectedSquare, setSelectedSquare] = useState<string | null>(null);
 
   useChessboardControls({
     onArrowLeft: () => setCurrentIndex((i) => Math.max(-1, i - 1)),
@@ -33,45 +43,100 @@ export default function PgnViewer({
 
   const fullPGN = useMemo(() => computePGNFromMoves(moves), [moves]);
 
-  const handleDrop = useCallback(
-    (sourceSquare: string, targetSquare: string): boolean => {
+  const handleSave = useCallback(() => {
+    startTransition(async () => {
+      const result = await savePGN(fullPGN, gameId);
+
+      if (result?.error) {
+        toast.error("Fehler beim Speichern der Partie");
+      } else {
+        toast.success("Partie erfolgreich gespeichert");
+      }
+    });
+  }, [fullPGN, gameId]);
+
+  const makeMove = useCallback(
+    (from: string, to: string): boolean => {
       const boardState = currentBoardState(moves, currentIndex);
 
-      const move = boardState.move({
-        from: sourceSquare,
-        to: targetSquare,
-        promotion: "q",
-      });
-      if (!move) return false;
-
-      const updatedMoves = moves.slice(0, currentIndex + 1).concat(move);
-      setMoves(updatedMoves);
-      setCurrentIndex(updatedMoves.length - 1);
-      return true;
+      try {
+        const move = boardState.move({
+          from,
+          to,
+        });
+        const updatedMoves = moves.slice(0, currentIndex + 1).concat(move);
+        setMoves(updatedMoves);
+        setCurrentIndex(updatedMoves.length - 1);
+        return true;
+      } catch {
+        return false;
+      }
     },
     [moves, currentIndex],
   );
 
+  const handleDrop = useCallback(
+    (sourceSquare: string, targetSquare: string): boolean => {
+      return makeMove(sourceSquare, targetSquare);
+    },
+    [makeMove],
+  );
+
+  const handleSquareClick = useCallback(
+    (square: string) => {
+      if (!allowEdit) return;
+
+      const boardState = currentBoardState(moves, currentIndex);
+      const piece = boardState.get(square as Square);
+
+      if (selectedSquare) {
+        if (selectedSquare === square) {
+          setSelectedSquare(null);
+        } else {
+          makeMove(selectedSquare, square);
+          setSelectedSquare(null);
+        }
+      } else {
+        if (piece) {
+          setSelectedSquare(square);
+        }
+      }
+    },
+    [allowEdit, moves, currentIndex, selectedSquare, makeMove],
+  );
+
   return (
-    <div className="flex gap-4 items-start flex-nowrap">
-      <Chessboard
-        position={fen}
-        arePiecesDraggable={allowEdit}
-        onPieceDrop={handleDrop}
-      />
-
-      <div>
-        <MoveHistory
-          history={moves}
-          currentMoveIndex={currentIndex}
-          goToMove={setCurrentIndex}
-        />
-
-        {allowEdit ? (
-          <div className="w-full md:ml-8 md:w-auto">
-            <SavePGNButton newValue={fullPGN} gameId={gameId} />
+    <div className="rounded-xl border bg-card shadow p-6 w-fit">
+      <div className="flex flex-col lg:flex-row gap-6 w-full">
+        <div className="flex-shrink-0 w-full max-w-lg mx-auto lg:mx-0">
+          <div className="aspect-square w-full">
+            <Chessboard
+              position={fen}
+              arePiecesDraggable={allowEdit}
+              onPieceDrop={handleDrop}
+              onSquareClick={handleSquareClick}
+              animationDuration={0}
+              customSquareStyles={{
+                ...(selectedSquare && {
+                  [selectedSquare]: {
+                    boxShadow: "inset 0 0 1px 6px rgba(255,255,255,0.75)",
+                  },
+                }),
+              }}
+            />
           </div>
-        ) : null}
+        </div>
+
+        <div className="w-80 flex-shrink-0">
+          <MoveHistory
+            history={moves}
+            currentMoveIndex={currentIndex}
+            goToMove={setCurrentIndex}
+            onSave={allowEdit ? handleSave : undefined}
+            isSaving={isPending}
+            showSave={allowEdit}
+          />
+        </div>
       </div>
     </div>
   );

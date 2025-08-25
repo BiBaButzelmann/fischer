@@ -6,7 +6,6 @@ import { Switch } from "@/components/ui/switch";
 import {
   Form,
   FormControl,
-  FormDescription,
   FormField,
   FormItem,
   FormLabel,
@@ -26,7 +25,7 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import { useTransition } from "react";
 import { Button } from "@/components/ui/button";
 import { EditTournamentWeeks } from "./edit-tournament-weeks/edit-tournament-weeks";
-import { updateTournamentFormSchema } from "@/schema/tournament";
+import { createTournamentFormSchema } from "@/schema/tournament";
 import { z } from "zod";
 import { DEFAULT_CLUB_LABEL } from "@/constants/constants";
 import { updateTournament } from "@/actions/tournament";
@@ -59,7 +58,7 @@ export default function EditTournamentDetails({
   }));
 
   const form = useForm({
-    resolver: zodResolver(updateTournamentFormSchema),
+    resolver: zodResolver(createTournamentFormSchema),
     defaultValues: {
       clubName: tournament?.club ?? DEFAULT_CLUB_LABEL,
       tournamentType: tournament?.type ?? "Rundenturnier",
@@ -84,12 +83,11 @@ export default function EditTournamentDetails({
         : "",
       organizerProfileId: tournament?.organizerProfileId?.toString() ?? "",
       selectedCalendarWeeks,
-      pgnViewerPassword: "",
     },
   });
 
   const handleSubmit = async (
-    data: z.infer<typeof updateTournamentFormSchema>,
+    data: z.infer<typeof createTournamentFormSchema>,
   ) => {
     if (!tournament?.id) {
       console.error("No tournament ID available for update");
@@ -380,40 +378,6 @@ export default function EditTournamentDetails({
                   weeks={field.value}
                   onChange={field.onChange}
                 />
-              )}
-            />
-          </div>
-
-          {/* Teil 4: PGN Viewer */}
-          <span className="inline-block text-xl font-semibold text-gray-800">
-            Passwort für den PGN Viewer
-          </span>
-          <div>
-            <FormField
-              control={form.control}
-              name="pgnViewerPassword"
-              render={({ field }) => (
-                <FormItem>
-                  <FormLabel required={!tournament}>
-                    PGN Viewer Passwort {tournament ? "(optional)" : ""}
-                  </FormLabel>
-                  <FormControl>
-                    <Input
-                      type="password"
-                      placeholder={
-                        tournament
-                          ? "Leer lassen, um das bestehende Passwort zu behalten"
-                          : "Mindestens 6 Zeichen lang"
-                      }
-                      {...field}
-                    />
-                  </FormControl>
-                  <FormDescription>
-                    Nur Spieler mit diesem Passwort können alle Partien
-                    anschauen.
-                  </FormDescription>
-                  <FormMessage />
-                </FormItem>
               )}
             />
           </div>
