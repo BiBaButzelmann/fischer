@@ -104,13 +104,13 @@ export async function AppSidebar() {
                 <SidebarMenuButton asChild>
                   <Link href="/anleitung" target="_blank">
                     <BookTextIcon />
-                    <span>Anleitung</span>
+                    <span>Anleitung Webseite</span>
                   </Link>
                 </SidebarMenuButton>
                 <SidebarMenuButton asChild>
                   <Link href="/uhren" target="_blank">
                     <BookTextIcon />
-                    <span>Schachuhren Anleitung</span>
+                    <span>Anleitung Schachuhren</span>
                   </Link>
                 </SidebarMenuButton>
               </SidebarMenu>
