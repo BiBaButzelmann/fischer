@@ -2,7 +2,7 @@ import { buildGameViewUrl } from "@/lib/navigation";
 import { Gamepad2 } from "lucide-react";
 import { EventIcon, UpcomingEvent } from "./upcoming-event";
 
-type UpcomingGameEventProps = {
+type Props = {
   tournamentId: number;
   groupId: number;
   round: number;
@@ -16,7 +16,7 @@ export function UpcomingGameEvent({
   round,
   participantId,
   start,
-}: UpcomingGameEventProps) {
+}: Props) {
   return (
     <UpcomingEvent
       title="Spiel"

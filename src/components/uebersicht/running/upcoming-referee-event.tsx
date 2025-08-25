@@ -2,7 +2,7 @@ import { buildGameViewUrl } from "@/lib/navigation";
 import { Gavel } from "lucide-react";
 import { UpcomingEvent, EventIcon } from "./upcoming-event";
 
-type UpcomingRefereeEventProps = {
+type Props = {
   tournamentId: number;
   matchdayId: number;
   start: Date;
@@ -12,7 +12,7 @@ export function UpcomingRefereeEvent({
   tournamentId,
   matchdayId,
   start,
-}: UpcomingRefereeEventProps) {
+}: Props) {
   return (
     <UpcomingEvent
       title="Schiedsrichter"

@@ -3,13 +3,13 @@ import { Clock, LucideIcon } from "lucide-react";
 import Link from "next/link";
 import { ReactNode } from "react";
 
-type UpcomingEventProps = {
+type Props = {
   title: string;
   start: Date;
   url: string;
   icon: ReactNode;
 };
-export function UpcomingEvent({ title, start, url, icon }: UpcomingEventProps) {
+export function UpcomingEvent({ title, start, url, icon }: Props) {
   return (
     <Link href={url} className="block">
       <div className="flex items-center gap-4 p-4 bg-white dark:bg-card border border-gray-200 dark:border-card-border rounded-xl shadow-sm transition-all hover:shadow-md cursor-pointer hover:opacity-80">
