@@ -101,6 +101,18 @@ export async function AppSidebar() {
                     <span>Turnierordnung</span>
                   </Link>
                 </SidebarMenuButton>
+                <SidebarMenuButton asChild>
+                  <Link href="/anleitung" target="_blank">
+                    <BookTextIcon />
+                    <span>Anleitung</span>
+                  </Link>
+                </SidebarMenuButton>
+                <SidebarMenuButton asChild>
+                  <Link href="/uhren" target="_blank">
+                    <BookTextIcon />
+                    <span>Schachuhren Anleitung</span>
+                  </Link>
+                </SidebarMenuButton>
               </SidebarMenu>
             </SidebarGroupContent>
           </SidebarGroup>
