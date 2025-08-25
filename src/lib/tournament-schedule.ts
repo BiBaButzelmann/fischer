@@ -1,4 +1,3 @@
-import { DateTime } from "luxon";
 import { getBerlinDateTime } from "./date";
 
 export function generateTournamentWeeksSchedule(

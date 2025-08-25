@@ -1,5 +1,4 @@
 import { CalendarIcon } from "lucide-react";
-import { DateTime } from "luxon";
 import { type Week } from "./types";
 import { WeekCalendar } from "./week-calendar";
 import { Label } from "@/components/ui/label";
