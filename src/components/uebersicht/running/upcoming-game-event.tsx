@@ -31,7 +31,7 @@ export function UpcomingGameEvent({
         <EventIcon
           icon={Gamepad2}
           backgroundColor="bg-blue-100"
-          iconColor="bg-blue-600"
+          iconColor="text-blue-600"
         />
       }
     />

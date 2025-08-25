@@ -22,7 +22,7 @@ export function UpcomingRefereeEvent({
         <EventIcon
           icon={Gavel}
           backgroundColor="bg-red-100"
-          iconColor="bg-red-600"
+          iconColor="text-red-600"
         />
       }
     />
