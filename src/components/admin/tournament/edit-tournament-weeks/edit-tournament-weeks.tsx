@@ -1,9 +1,9 @@
 "use client";
 
-import { DateTime } from "luxon";
 import { WeekContainer } from "./week-container";
 import { SelectedCalendarWeeksContainer } from "./selected-weeks-container";
 import { type Week, type WeekDay } from "./types";
+import { getBerlinDateTime } from "@/lib/date";
 
 export function EditTournamentWeeks({
   weeks,
@@ -13,7 +13,7 @@ export function EditTournamentWeeks({
   onChange: (weeks: Week[]) => void;
 }) {
   const handleAddWeek = () => {
-    const currentDate = DateTime.now();
+    const currentDate = getBerlinDateTime();
 
     let newWeekNumber = currentDate.weekNumber;
     if (weeks.length > 0) {
