@@ -24,7 +24,11 @@ export function AssignmentMailButton({ tournament }: Props) {
         toast.success(`E-Mails an ${result.sent} Personen versendet`);
       } catch (error) {
         console.error("Error sending emails:", error);
-        toast.error("Fehler beim Versenden der E-Mails");
+        const errorMessage =
+          error instanceof Error
+            ? error.message
+            : "Fehler beim Versenden der E-Mails";
+        toast.error(errorMessage);
       }
     });
   };
