@@ -144,6 +144,7 @@ export async function isUserParticipantInGame(
   );
 }
 
+// TODO: filter out games with deleted participants
 export async function getGamesByTournamentId(
   tournamentId: number,
   groupId?: number,
@@ -264,6 +265,7 @@ export async function getGamesByTournamentId(
   return gameIds.map((id) => gameMap.get(id)).filter(Boolean);
 }
 
+// TODO: check wether deleted participants should be filtered out
 export async function getCompletedGames(groupId: number, maxRound?: number) {
   const result = await db.query.game.findMany({
     where: (game, { and, eq, lte, isNotNull, or, isNull }) => {
@@ -429,13 +431,6 @@ export async function getParticipantsInGroup(groupId: number) {
     where: (participantGroup, { eq }) => eq(participantGroup.groupId, groupId),
     with: {
       participant: {
-        columns: {
-          id: true,
-          dwzRating: true,
-          fideRating: true,
-          title: true,
-          chessClub: true,
-        },
         with: {
           profile: {
             columns: {

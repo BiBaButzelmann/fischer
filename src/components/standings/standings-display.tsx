@@ -47,6 +47,7 @@ export async function StandingsDisplay({
 
       <StandingsTable
         standings={standings}
+        participants={participants}
         selectedGroup={selectedGroup}
         selectedGroupId={selectedGroupId}
         selectedTournamentId={selectedTournamentId}
