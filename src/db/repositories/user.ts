@@ -1,7 +1,7 @@
 "use server";
 
 import { authWithRedirect } from "@/auth/utils";
-import { count, eq, or } from "drizzle-orm";
+import { and, count, eq, isNull, or } from "drizzle-orm";
 import { db } from "../client";
 import { game } from "../schema/game";
 import { gamePostponement } from "../schema/gamePostponement";
@@ -16,8 +16,6 @@ import { getProfileByUserId } from "./profile";
 import { user } from "../schema/auth";
 import { getBerlinTime } from "@/lib/date";
 
-// TODO: if user is participant -> set all upcoming games to defeat
-// TODO: if user is participant and has "won" a bye game in the future -> update bye game result
 export async function softDeleteUser(userId: string) {
   const session = await authWithRedirect();
   if (session.user.role !== "admin") {
@@ -43,10 +41,11 @@ export async function softDeleteUser(userId: string) {
       .set({ deletedAt })
       .where(eq(profile.id, profileId));
 
-    await tx
+    const participantData = await tx
       .update(participant)
       .set({ deletedAt })
-      .where(eq(participant.profileId, profileId));
+      .where(eq(participant.profileId, profileId))
+      .returning();
 
     await tx
       .update(juror)
@@ -77,6 +76,23 @@ export async function softDeleteUser(userId: string) {
       .update(tournament)
       .set({ deletedAt })
       .where(eq(tournament.organizerProfileId, profileId));
+
+    if (participantData.length > 0) {
+      const participantId = participantData[0].id;
+
+      await tx
+        .update(game)
+        .set({ result: "-:+" })
+        .where(
+          and(eq(game.whiteParticipantId, participantId), isNull(game.result)),
+        );
+      await tx
+        .update(game)
+        .set({ result: "+:-" })
+        .where(
+          and(eq(game.blackParticipantId, participantId), isNull(game.result)),
+        );
+    }
 
     return { success: true, deletedAt };
   });
