@@ -16,6 +16,7 @@ import { getProfileByUserId } from "./profile";
 import { user } from "../schema/auth";
 import { getBerlinTime } from "@/lib/date";
 
+// TODO: if user is participant -> set all upcoming games to defeat
 export async function softDeleteUser(userId: string) {
   const session = await authWithRedirect();
   if (session.user.role !== "admin") {
