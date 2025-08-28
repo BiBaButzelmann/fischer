@@ -7,6 +7,7 @@ import {
 import { calculateStandings } from "@/lib/standings";
 import type { TournamentNames } from "@/db/types/tournament";
 import type { GroupSummary } from "@/db/types/group";
+import { Game, GameWithMatchday } from "@/db/types/game";
 
 type Props = {
   tournamentNames: TournamentNames[];
@@ -30,7 +31,77 @@ export async function StandingsDisplay({
     Number(selectedGroupId),
     selectedRound ? Number(selectedRound) : undefined,
   );
-  const standings = calculateStandings(games, participants);
+
+  const gamesPlayedPerParticipant = games.reduce(
+    (acc, game) => {
+      const { whiteParticipantId, blackParticipantId } = game;
+
+      if (whiteParticipantId != null) {
+        acc[whiteParticipantId] = acc[whiteParticipantId] || [];
+        acc[whiteParticipantId].push(game);
+      }
+      if (blackParticipantId != null) {
+        acc[blackParticipantId] = acc[blackParticipantId] || [];
+        acc[blackParticipantId].push(game);
+      }
+      return acc;
+    },
+    {} as Record<number, GameWithMatchday[]>,
+  );
+
+  // participants that are relevant for the standings calculation
+  // participant is relevant if they are active
+  // or when they are deactivated but have played at least 50% of their games
+  const relevantParticipantIds: Set<number> = new Set();
+  const irrelevantParticipantIds: Set<number> = new Set();
+
+  for (const participant of participants) {
+    const { deletedAt } = participant;
+
+    if (deletedAt == null) {
+      relevantParticipantIds.add(participant.id);
+      continue;
+    }
+
+    const totalGamesToPlay = rounds.length;
+    const gamesPlayed = gamesPlayedPerParticipant[participant.id] || [];
+    const gamesPlayedBeforeDisabling = gamesPlayed.filter((g) => {
+      return g.matchdayGame.matchday.date < participant.deletedAt!;
+    });
+    const gamesPlayedCount = gamesPlayedBeforeDisabling.length;
+
+    if (gamesPlayedCount / totalGamesToPlay >= 0.5) {
+      relevantParticipantIds.add(participant.id);
+      continue;
+    }
+    irrelevantParticipantIds.add(participant.id);
+  }
+
+  // game is relevant if neither participant is "irrelevant"
+  const relevantGames: Set<Game> = new Set();
+
+  for (const game of games) {
+    const { whiteParticipantId, blackParticipantId } = game;
+
+    const isRelevantWhiteParticipant =
+      whiteParticipantId == null ||
+      relevantParticipantIds.has(whiteParticipantId);
+    const isRelevantBlackParticipant =
+      blackParticipantId == null ||
+      relevantParticipantIds.has(blackParticipantId);
+
+    if (isRelevantWhiteParticipant && isRelevantBlackParticipant) {
+      relevantGames.add(game);
+    }
+  }
+
+  const relevantParticipants = participants.filter((p) =>
+    relevantParticipantIds.has(p.id),
+  );
+  const standings = calculateStandings(
+    Array.from(relevantGames),
+    relevantParticipants,
+  );
 
   const selectedGroup = groups.find((g) => g.id.toString() === selectedGroupId);
 

@@ -1,6 +1,9 @@
 import type { gameResults } from "@/db/schema/columns.helpers";
 import type { PlayerStats } from "@/db/types/standings";
-import type { ParticipantWithRating } from "@/db/types/participant";
+import type {
+  ParticipantWithName,
+  ParticipantWithRating,
+} from "@/db/types/participant";
 import type { Game } from "@/db/types/game";
 import invariant from "tiny-invariant";
 
@@ -32,14 +35,14 @@ function calculatePointsFromResult(
 
 export function calculateStandings(
   games: Game[],
-  participants: ParticipantWithRating[],
+  participants: ParticipantWithName[],
 ): PlayerStats[] {
   /**
    * TODO: checken ob participant deaktiviert wurde
    * - Checken ob participant deletedAt != null ist
    */
 
-  const participantsMap = new Map<number, ParticipantWithRating>();
+  const participantsMap = new Map<number, ParticipantWithName>();
   participants.forEach((participant) => {
     participantsMap.set(participant.id, participant);
   });

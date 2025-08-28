@@ -295,6 +295,13 @@ export async function getCompletedGames(groupId: number, maxRound?: number) {
       asc(game.round),
       asc(game.boardNumber),
     ],
+    with: {
+      matchdayGame: {
+        with: {
+          matchday: true,
+        },
+      },
+    },
   });
   return result;
 }
