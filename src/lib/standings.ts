@@ -55,41 +55,25 @@ export function calculateStandings(
   });
 
   games.forEach((game) => {
-    if (game.whiteParticipantId === null) {
-      invariant(
-        game.blackParticipantId !== null,
-        "Black participant is required",
-      );
-      const blackPlayer = playerStats.get(game.blackParticipantId)!;
-      blackPlayer.points += 1;
-      blackPlayer.gamesPlayed += 1;
-      return;
-    }
-    if (game.blackParticipantId === null) {
-      invariant(
-        game.whiteParticipantId !== null,
-        "White participant is required",
-      );
-      const whitePlayer = playerStats.get(game.whiteParticipantId)!;
-      whitePlayer.points += 1;
-      whitePlayer.gamesPlayed += 1;
-      return;
-    }
-
     if (!game.result) return;
-
-    const whitePlayer = playerStats.get(game.whiteParticipantId)!;
-    const blackPlayer = playerStats.get(game.blackParticipantId)!;
 
     const whitePoints = calculatePointsFromResult(game.result, true);
     const blackPoints = calculatePointsFromResult(game.result, false);
 
-    whitePlayer.points += whitePoints;
-    blackPlayer.points += blackPoints;
-    whitePlayer.gamesPlayed += 1;
-    blackPlayer.gamesPlayed += 1;
+    if (game.whiteParticipantId != null) {
+      const whitePlayer = playerStats.get(game.whiteParticipantId)!;
+      whitePlayer.points += whitePoints;
+      whitePlayer.gamesPlayed += 1;
+    }
+
+    if (game.blackParticipantId != null) {
+      const blackPlayer = playerStats.get(game.blackParticipantId)!;
+      blackPlayer.points += blackPoints;
+      blackPlayer.gamesPlayed += 1;
+    }
   });
 
+  // TODO: check if sonnebornberger calculation is still correct
   games.forEach((game) => {
     if (!game.result) return;
 

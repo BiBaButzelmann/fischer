@@ -17,6 +17,7 @@ import { user } from "../schema/auth";
 import { getBerlinTime } from "@/lib/date";
 
 // TODO: if user is participant -> set all upcoming games to defeat
+// TODO: if user is participant and has "won" a bye game in the future -> update bye game result
 export async function softDeleteUser(userId: string) {
   const session = await authWithRedirect();
   if (session.user.role !== "admin") {

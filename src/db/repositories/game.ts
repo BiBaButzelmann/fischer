@@ -19,6 +19,8 @@ import { referee } from "../schema/referee";
 import { profile } from "../schema/profile";
 import { getMatchEnteringHelperIdByUserId } from "./match-entering-helper";
 import invariant from "tiny-invariant";
+import { alias } from "drizzle-orm/pg-core";
+import { participant } from "../schema/participant";
 
 export async function getGameById(gameId: number) {
   return await db.query.game.findFirst({
@@ -144,7 +146,6 @@ export async function isUserParticipantInGame(
   );
 }
 
-// TODO: filter out games with deleted participants
 export async function getGamesByTournamentId(
   tournamentId: number,
   groupId?: number,
@@ -152,10 +153,15 @@ export async function getGamesByTournamentId(
   round?: number,
   participantId?: number,
 ) {
+  const whiteParticipant = alias(participant, "whiteParticipant");
+  const blackParticipant = alias(participant, "blackParticipant");
+
   const conditions = [
     eq(game.tournamentId, tournamentId),
     isNotNull(game.whiteParticipantId),
     isNotNull(game.blackParticipantId),
+    isNull(whiteParticipant.deletedAt),
+    isNull(blackParticipant.deletedAt),
   ];
 
   if (groupId !== undefined) {
@@ -192,6 +198,14 @@ export async function getGamesByTournamentId(
     .leftJoin(group, eq(game.groupId, group.id))
     .leftJoin(matchdayGame, eq(matchdayGame.gameId, game.id))
     .leftJoin(matchday, eq(matchdayGame.matchdayId, matchday.id))
+    .leftJoin(
+      whiteParticipant,
+      eq(whiteParticipant.id, game.whiteParticipantId),
+    )
+    .leftJoin(
+      blackParticipant,
+      eq(blackParticipant.id, game.blackParticipantId),
+    )
     .where(and(...conditions))
     .orderBy(
       asc(matchday.date),
@@ -265,18 +279,10 @@ export async function getGamesByTournamentId(
   return gameIds.map((id) => gameMap.get(id)).filter(Boolean);
 }
 
-// TODO: check wether deleted participants should be filtered out
 export async function getCompletedGames(groupId: number, maxRound?: number) {
   const result = await db.query.game.findMany({
-    where: (game, { and, eq, lte, isNotNull, or, isNull }) => {
-      const conditions = [
-        eq(game.groupId, groupId),
-        or(
-          isNotNull(game.result),
-          isNull(game.whiteParticipantId),
-          isNull(game.blackParticipantId),
-        ),
-      ];
+    where: (game, { and, eq, lte, isNotNull }) => {
+      const conditions = [eq(game.groupId, groupId), isNotNull(game.result)];
 
       if (maxRound !== undefined) {
         conditions.push(lte(game.round, maxRound));
