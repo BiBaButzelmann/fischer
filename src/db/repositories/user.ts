@@ -92,6 +92,26 @@ export async function softDeleteUser(userId: string) {
         .where(
           and(eq(game.blackParticipantId, participantId), isNull(game.result)),
         );
+      // set all bye games to -:-
+      // consider all games without a board number to be a bye game
+      await tx
+        .update(game)
+        .set({ result: "-:-" })
+        .where(
+          and(
+            eq(game.whiteParticipantId, participantId),
+            isNull(game.boardNumber),
+          ),
+        );
+      await tx
+        .update(game)
+        .set({ result: "-:-" })
+        .where(
+          and(
+            eq(game.blackParticipantId, participantId),
+            isNull(game.boardNumber),
+          ),
+        );
     }
 
     return { success: true, deletedAt };
