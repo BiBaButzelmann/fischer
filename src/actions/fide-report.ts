@@ -56,15 +56,50 @@ export const generateFideReportFile = action(
     invariant(organizerProfile, "Organizer profile not found");
 
     const gamesInMonth = await getGamesInMonth(groupId, month);
-    const completedGamesInMonth = gamesInMonth.filter((game) => {
+
+    const completedGames = gamesInMonth.filter((game) => {
       return game.result != null;
     });
-    invariant(
-      gamesInMonth.length === completedGamesInMonth.length,
-      "Cannot generate report if not all games are completed",
-    );
 
-    const gamesAsWhiteParticipant = completedGamesInMonth.reduce(
+    // a game is considered to have actually been played, if:
+    // - it is not a bye game
+    // - both participants were not disabled at the time of the game
+    const actuallyPlayedGames = completedGames.filter((game) => {
+      const isByeGame =
+        game.whiteParticipantId == null || game.blackParticipantId == null;
+
+      if (isByeGame) {
+        return false;
+      }
+
+      // check for disabled participants
+      const date = game.matchday.date;
+      const whiteParticipant = data.participants.find(
+        (p) => p.participant.id === game.whiteParticipantId,
+      );
+      const blackParticipant = data.participants.find(
+        (p) => p.participant.id === game.blackParticipantId,
+      );
+      invariant(
+        whiteParticipant,
+        `White participant ${game.whiteParticipantId} not found`,
+      );
+      invariant(
+        blackParticipant,
+        `Black participant ${game.blackParticipantId} not found`,
+      );
+
+      const isWhiteParticipantDisabled =
+        whiteParticipant.participant.deletedAt != null &&
+        whiteParticipant.participant.deletedAt <= date;
+      const isBlackParticipantDisabled =
+        blackParticipant.participant.deletedAt != null &&
+        blackParticipant.participant.deletedAt <= date;
+
+      return !isWhiteParticipantDisabled && !isBlackParticipantDisabled;
+    });
+
+    const gamesAsWhiteParticipant = actuallyPlayedGames.reduce(
       (acc, game) => {
         if (
           game.whiteParticipantId === null ||
@@ -79,7 +114,7 @@ export const generateFideReportFile = action(
       {} as Record<number, number[]>,
     );
 
-    const gamesAsBlackParticipant = completedGamesInMonth.reduce(
+    const gamesAsBlackParticipant = actuallyPlayedGames.reduce(
       (acc, game) => {
         if (
           game.whiteParticipantId === null ||
@@ -95,14 +130,12 @@ export const generateFideReportFile = action(
     );
 
     const standings = calculateStandings(
-      completedGamesInMonth,
+      actuallyPlayedGames,
       data.participants.map((p) => p.participant),
     );
 
     const getPointsOfPlayer = (participantId: number) => {
-      const standing = standings.find(
-        (s) => s.participant.id === participantId,
-      );
+      const standing = standings.find((s) => s.participantId === participantId);
       invariant(
         standing != null,
         `Participant ${participantId} could not be found in standings`,
@@ -123,7 +156,7 @@ export const generateFideReportFile = action(
 
     const getGroupPositionOfPlayer = (participantId: number) => {
       const currentGroupPosition = standings.findIndex(
-        (s) => s.participant.id === participantId,
+        (s) => s.participantId === participantId,
       );
       invariant(
         currentGroupPosition >= 0,
@@ -135,7 +168,7 @@ export const generateFideReportFile = action(
     const entries = data.participants.map(({ groupPosition, participant }) => {
       const whiteGameIds = gamesAsWhiteParticipant[participant.id] ?? [];
       const blackGameIds = gamesAsBlackParticipant[participant.id] ?? [];
-      const participantGames = completedGamesInMonth.filter(
+      const participantGames = actuallyPlayedGames.filter(
         (game) =>
           whiteGameIds.includes(game.id) || blackGameIds.includes(game.id),
       );
