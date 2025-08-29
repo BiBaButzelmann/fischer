@@ -1,6 +1,9 @@
 import type { gameResults } from "@/db/schema/columns.helpers";
-import type { PlayerStanding, PlayerStats } from "@/db/types/standings";
-import type { ParticipantWithRating } from "@/db/types/participant";
+import type { PlayerStats } from "@/db/types/standings";
+import type {
+  ParticipantWithName,
+  ParticipantWithRating,
+} from "@/db/types/participant";
 import type { Game } from "@/db/types/game";
 import invariant from "tiny-invariant";
 
@@ -32,9 +35,9 @@ function calculatePointsFromResult(
 
 export function calculateStandings(
   games: Game[],
-  participants: ParticipantWithRating[],
-): PlayerStanding[] {
-  const participantsMap = new Map<number, ParticipantWithRating>();
+  participants: ParticipantWithName[],
+): PlayerStats[] {
+  const participantsMap = new Map<number, ParticipantWithName>();
   participants.forEach((participant) => {
     participantsMap.set(participant.id, participant);
   });
@@ -50,41 +53,25 @@ export function calculateStandings(
   });
 
   games.forEach((game) => {
-    if (game.whiteParticipantId === null) {
-      invariant(
-        game.blackParticipantId !== null,
-        "Black participant is required",
-      );
-      const blackPlayer = playerStats.get(game.blackParticipantId)!;
-      blackPlayer.points += 1;
-      blackPlayer.gamesPlayed += 1;
-      return;
-    }
-    if (game.blackParticipantId === null) {
-      invariant(
-        game.whiteParticipantId !== null,
-        "White participant is required",
-      );
-      const whitePlayer = playerStats.get(game.whiteParticipantId)!;
-      whitePlayer.points += 1;
-      whitePlayer.gamesPlayed += 1;
-      return;
-    }
-
     if (!game.result) return;
-
-    const whitePlayer = playerStats.get(game.whiteParticipantId)!;
-    const blackPlayer = playerStats.get(game.blackParticipantId)!;
 
     const whitePoints = calculatePointsFromResult(game.result, true);
     const blackPoints = calculatePointsFromResult(game.result, false);
 
-    whitePlayer.points += whitePoints;
-    blackPlayer.points += blackPoints;
-    whitePlayer.gamesPlayed += 1;
-    blackPlayer.gamesPlayed += 1;
+    if (game.whiteParticipantId != null) {
+      const whitePlayer = playerStats.get(game.whiteParticipantId)!;
+      whitePlayer.points += whitePoints;
+      whitePlayer.gamesPlayed += 1;
+    }
+
+    if (game.blackParticipantId != null) {
+      const blackPlayer = playerStats.get(game.blackParticipantId)!;
+      blackPlayer.points += blackPoints;
+      blackPlayer.gamesPlayed += 1;
+    }
   });
 
+  // TODO: check if sonnebornberger calculation is still correct
   games.forEach((game) => {
     if (!game.result) return;
 
@@ -111,14 +98,9 @@ export function calculateStandings(
     }
   });
 
-  return Array.from(playerStats.values())
-    .sort((a, b) => comparePlayerStats(a, b, participantsMap))
-    .map((stats) => ({
-      participant: participantsMap.get(stats.participantId)!,
-      points: stats.points,
-      gamesPlayed: stats.gamesPlayed,
-      sonnebornBerger: stats.sonnebornBerger,
-    }));
+  return Array.from(playerStats.values()).sort((a, b) =>
+    comparePlayerStats(a, b, participantsMap),
+  );
 }
 
 function comparePlayerStats(

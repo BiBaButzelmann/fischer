@@ -142,12 +142,12 @@ export async function scheduleGamesForGroup(
         );
 
         const isByeGame = !whitePlayer || !blackPlayer;
-
         const boardNumber = isByeGame ? null : startingBoardNumber++;
 
         gamesToInsert.push({
           whiteParticipantId: whitePlayer?.participant.id ?? null,
           blackParticipantId: blackPlayer?.participant.id ?? null,
+          result: isByeGame ? (whitePlayer == null ? "-:+" : "+:-") : null,
           tournamentId,
           groupId: group.id,
           round: roundIdx + 1,

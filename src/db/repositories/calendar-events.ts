@@ -19,10 +19,23 @@ export async function getCalendarEventsForParticipant(
 ): Promise<CalendarEvent[]> {
   const games = await getParticipantGames(participantId);
 
-  return games.map((game) => {
+  const events: CalendarEvent[] = [];
+  for (const game of games) {
     const gameDateTime = getGameTimeFromGame(game);
 
-    return {
+    const whitePlayerDisabled =
+      game.whiteParticipant?.deletedAt != null &&
+      game.whiteParticipant.deletedAt <= gameDateTime;
+    const blackPlayerDisabled =
+      game.blackParticipant?.deletedAt != null &&
+      game.blackParticipant.deletedAt <= gameDateTime;
+
+    if (whitePlayerDisabled || blackPlayerDisabled) {
+      // Skip games where one of the players is disabled at the time of the game
+      continue;
+    }
+
+    events.push({
       id: `game-${game.id}`,
       title: `Runde ${game.round}`,
       start: gameDateTime,
@@ -34,8 +47,9 @@ export async function getCalendarEventsForParticipant(
         tournamentId: game.tournamentId,
         groupId: game.groupId,
       },
-    };
-  });
+    });
+  }
+  return events;
 }
 
 export async function getCalendarEventsForReferee(

@@ -1,7 +1,7 @@
 "use server";
 
 import { authWithRedirect } from "@/auth/utils";
-import { count, eq, or } from "drizzle-orm";
+import { and, count, eq, isNull, or } from "drizzle-orm";
 import { db } from "../client";
 import { game } from "../schema/game";
 import { gamePostponement } from "../schema/gamePostponement";
@@ -32,6 +32,7 @@ export async function softDeleteUser(userId: string) {
     };
   }
   const { id: profileId } = profileData;
+  // TODO: do not store time in db in local time, always use utc
   const deletedAt = getBerlinTime();
 
   return await db.transaction(async (tx) => {
@@ -40,10 +41,11 @@ export async function softDeleteUser(userId: string) {
       .set({ deletedAt })
       .where(eq(profile.id, profileId));
 
-    await tx
+    const participantData = await tx
       .update(participant)
       .set({ deletedAt })
-      .where(eq(participant.profileId, profileId));
+      .where(eq(participant.profileId, profileId))
+      .returning();
 
     await tx
       .update(juror)
@@ -74,6 +76,43 @@ export async function softDeleteUser(userId: string) {
       .update(tournament)
       .set({ deletedAt })
       .where(eq(tournament.organizerProfileId, profileId));
+
+    if (participantData.length > 0) {
+      const participantId = participantData[0].id;
+
+      await tx
+        .update(game)
+        .set({ result: "-:+" })
+        .where(
+          and(eq(game.whiteParticipantId, participantId), isNull(game.result)),
+        );
+      await tx
+        .update(game)
+        .set({ result: "+:-" })
+        .where(
+          and(eq(game.blackParticipantId, participantId), isNull(game.result)),
+        );
+      // set all bye games to -:-
+      // consider all games without a board number to be a bye game
+      await tx
+        .update(game)
+        .set({ result: "-:-" })
+        .where(
+          and(
+            eq(game.whiteParticipantId, participantId),
+            isNull(game.boardNumber),
+          ),
+        );
+      await tx
+        .update(game)
+        .set({ result: "-:-" })
+        .where(
+          and(
+            eq(game.blackParticipantId, participantId),
+            isNull(game.boardNumber),
+          ),
+        );
+    }
 
     return { success: true, deletedAt };
   });
