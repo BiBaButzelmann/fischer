@@ -78,9 +78,15 @@ export async function StandingsDisplay({
   }
 
   // game is relevant if neither participant is "irrelevant"
+  // and the game is not in the future
   const relevantGames: Set<Game> = new Set();
 
+  const now = new Date("2025-09-20");
   for (const game of games) {
+    if (game.matchdayGame.matchday.date > now) {
+      continue;
+    }
+
     const { whiteParticipantId, blackParticipantId } = game;
 
     const isRelevantWhiteParticipant =

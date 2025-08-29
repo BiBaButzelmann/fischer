@@ -37,11 +37,6 @@ export function calculateStandings(
   games: Game[],
   participants: ParticipantWithName[],
 ): PlayerStats[] {
-  /**
-   * TODO: checken ob participant deaktiviert wurde
-   * - Checken ob participant deletedAt != null ist
-   */
-
   const participantsMap = new Map<number, ParticipantWithName>();
   participants.forEach((participant) => {
     participantsMap.set(participant.id, participant);
