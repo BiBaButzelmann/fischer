@@ -1,6 +1,7 @@
 import { auth } from "@/auth/utils";
 import { GenerateFideReportButton } from "@/components/admin/fide-report/generate-fide-report-button";
 import { GenerateFideReportSelector } from "@/components/admin/fide-report/generate-fide-report-selector";
+import { PendingResultItem } from "@/components/notification/pending-result-item";
 import { PendingResultsList } from "@/components/notification/pending-results-list";
 import {
   Card,
@@ -110,7 +111,11 @@ async function ButtonSection({ selectedGroupId, selectedMonth }: Props) {
           </div>
           <div className="bg-white dark:bg-card border border-gray-200 dark:border-card-border rounded-lg">
             <div className="max-h-64 overflow-y-auto">
-              <PendingResultsList gameIds={uncompletedGameIds} />
+              <PendingResultsList
+                items={uncompletedGameIds.map((gameId) => (
+                  <PendingResultItem key={gameId} gameId={gameId} />
+                ))}
+              />
             </div>
           </div>
         </div>

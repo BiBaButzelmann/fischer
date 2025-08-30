@@ -3,13 +3,11 @@
 import { PendingResultsList } from "@/components/notification/pending-results-list";
 
 type Props = {
-  gameIds: number[];
-  participantId?: number;
-  onClick: () => void;
+  gameItems: React.ReactNode[];
 };
 
-export function NotificationPopup({ gameIds, participantId, onClick }: Props) {
-  if (gameIds.length === 0) {
+export function NotificationPopup({ gameItems }: Props) {
+  if (gameItems.length === 0) {
     return (
       <div className="absolute right-0 top-12 w-96 bg-white dark:bg-card border border-gray-200 dark:border-card-border rounded-lg shadow-lg z-50">
         <div className="p-4 text-center text-gray-500 dark:text-gray-400">
@@ -22,11 +20,7 @@ export function NotificationPopup({ gameIds, participantId, onClick }: Props) {
   return (
     <div className="absolute right-0 top-12 w-96 bg-white dark:bg-card border border-gray-200 dark:border-card-border rounded-lg shadow-lg z-50">
       <div className="max-h-96 overflow-y-auto">
-        <PendingResultsList
-          gameIds={gameIds}
-          participantId={participantId}
-          onClick={onClick}
-        />
+        <PendingResultsList items={gameItems} />
       </div>
     </div>
   );
