@@ -6,6 +6,7 @@ import {
 } from "@/db/repositories/game";
 import { NotificationBell } from "./notification-bell";
 import { getRefereeByUserId } from "@/db/repositories/referee";
+import { PendingResultItem } from "./pending-result-item";
 
 export async function NotificationCenter() {
   const session = await auth();
@@ -31,8 +32,13 @@ export async function NotificationCenter() {
 
   return (
     <NotificationBell
-      gameIds={Array.from(gameIds)}
-      participantId={participant?.id}
+      gameItems={Array.from(gameIds).map((id) => (
+        <PendingResultItem
+          key={id}
+          gameId={id}
+          participantId={participant?.id}
+        />
+      ))}
     />
   );
 }

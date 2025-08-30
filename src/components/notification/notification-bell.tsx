@@ -1,28 +1,28 @@
 "use client";
 
-import { useState } from "react";
 import { Bell } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { NotificationPopup } from "@/components/notification/notification-popup";
+import { useState } from "react";
 
 type Props = {
-  gameIds: number[];
-  participantId?: number;
+  gameItems: React.ReactNode[];
 };
 
-export function NotificationBell({ gameIds, participantId }: Props) {
+export function NotificationBell({ gameItems }: Props) {
   const [isOpen, setIsOpen] = useState(false);
 
-  const pendingCount = gameIds.length;
-  const toggleOpen = () => setIsOpen(!isOpen);
+  const toggle = () => setIsOpen(!isOpen);
   const close = () => setIsOpen(false);
+
+  const pendingCount = gameItems.length;
 
   return (
     <div className="relative">
       <Button
         variant="outline"
         size="icon"
-        onClick={toggleOpen}
+        onClick={toggle}
         className="relative bg-transparent"
       >
         <Bell className="w-5 h-5" />
@@ -36,9 +36,11 @@ export function NotificationBell({ gameIds, participantId }: Props) {
       {isOpen && (
         <>
           <NotificationPopup
-            gameIds={gameIds}
-            participantId={participantId}
-            onClick={close}
+            gameItems={gameItems.map((item, i) => (
+              <div key={i} onClick={toggle}>
+                {item}
+              </div>
+            ))}
           />
           <div className="fixed inset-0 z-40" onClick={close} />
         </>
