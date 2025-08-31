@@ -35,7 +35,7 @@ export function EditGroupsGrid({
     helperAssignedCounts,
     addHelperToGroup,
     removeHelperFromGroup,
-    getGroupedHelperIds,
+    getMatchEnteringHelpersForGroup,
   } = useHelperAssignments(currentAssignments, matchEnteringHelpers);
 
   const handleAddNewGroup = () => {
@@ -96,8 +96,11 @@ export function EditGroupsGrid({
 
   const handleSaveGroup = (groupData: GridGroup) => {
     startTransition(async () => {
-      await saveGroup(tournamentId, groupData);
-      await updateMatchEnteringHelpers(tournamentId, getGroupedHelperIds());
+      const groupId = await saveGroup(tournamentId, groupData);
+      const matchEnteringHelperIds = getMatchEnteringHelpersForGroup(
+        groupData.id,
+      ).map((h) => h.id);
+      await updateMatchEnteringHelpers(groupId, matchEnteringHelperIds);
     });
   };
 

@@ -3,7 +3,6 @@ import { group } from "../schema/group";
 import { participant, participantGroup } from "../schema/participant";
 import { profile } from "../schema/profile";
 import { and, eq, getTableColumns, isNull } from "drizzle-orm";
-import { type ParticipantAndGroup } from "../types/participant";
 
 export async function getParticipantByProfileIdAndTournamentId(
   profileId: number,
@@ -21,7 +20,7 @@ export async function getParticipantByProfileIdAndTournamentId(
 export async function getParticipantWithGroupByProfileIdAndTournamentId(
   profileId: number,
   tournamentId: number,
-): Promise<ParticipantAndGroup | undefined> {
+) {
   return await db.query.participant.findFirst({
     where: (participant, { eq, and }) =>
       and(
@@ -33,6 +32,7 @@ export async function getParticipantWithGroupByProfileIdAndTournamentId(
         with: {
           group: {
             columns: {
+              id: true,
               groupName: true,
               dayOfWeek: true,
             },
@@ -108,5 +108,25 @@ export async function getParticipantsByGroupId(groupId: number) {
     .innerJoin(group, eq(participantGroup.groupId, group.id))
     .innerJoin(participant, eq(participantGroup.participantId, participant.id))
     .innerJoin(profile, eq(participant.profileId, profile.id))
-    .where(eq(group.id, groupId));
+    .where(and(eq(group.id, groupId), isNull(participant.deletedAt)));
+}
+
+export async function getParticipantsWithProfileByGroupId(groupId: number) {
+  return await db
+    .select({
+      ...getTableColumns(participant),
+      profile: {
+        userId: profile.userId,
+        firstName: profile.firstName,
+        lastName: profile.lastName,
+        email: profile.email,
+        phoneNumber: profile.phoneNumber,
+      },
+    })
+    .from(participantGroup)
+    .innerJoin(group, eq(participantGroup.groupId, group.id))
+    .innerJoin(participant, eq(participantGroup.participantId, participant.id))
+    .innerJoin(profile, eq(participant.profileId, profile.id))
+    .where(eq(group.id, groupId))
+    .orderBy(profile.lastName, profile.firstName);
 }

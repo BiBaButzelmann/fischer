@@ -1,8 +1,20 @@
 import { resend } from "./client";
-import TournamentStartedMail from "./templates/tournament-started-mail";
+import { RolesData } from "@/db/types/role";
+import {
+  TournamentStartedMail,
+  ParticipantGroupData,
+} from "./templates/tournament-started";
 
-export async function sendTournamentStartedMail(to: string, firstName: string) {
-  let recipientAddress = to;
+type Props = {
+  name: string;
+  email: string;
+  roles: RolesData;
+  tournamentId: number;
+  participantData?: ParticipantGroupData;
+};
+
+export async function sendTournamentStartedMail(data: Props) {
+  let recipientAddress = data.email;
   if (process.env.NODE_ENV === "development") {
     recipientAddress = "delivered@resend.dev";
   }
@@ -12,7 +24,10 @@ export async function sendTournamentStartedMail(to: string, firstName: string) {
     to: recipientAddress,
     subject: "Das Turnier ist gestartet!",
     react: TournamentStartedMail({
-      name: firstName,
+      name: data.name,
+      roles: data.roles,
+      tournamentId: data.tournamentId,
+      participantData: data.participantData,
     }),
   });
 }

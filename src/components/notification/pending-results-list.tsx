@@ -1,14 +1,9 @@
-"use client";
-
-import { PendingResultItem } from "@/components/notification/pending-result-item";
-
 type Props = {
-  gameIds: number[];
   participantId?: number;
-  onClick?: () => void;
+  items: React.ReactNode[];
 };
 
-export function PendingResultsList({ gameIds, participantId, onClick }: Props) {
+export function PendingResultsList({ items }: Props) {
   return (
     <>
       <div className="px-4 py-3 border-b border-gray-200 dark:border-card-border">
@@ -16,14 +11,7 @@ export function PendingResultsList({ gameIds, participantId, onClick }: Props) {
           Ausstehende Ergebnismeldungen
         </h3>
       </div>
-      {gameIds.map((gameId) => (
-        <PendingResultItem
-          key={gameId}
-          gameId={gameId}
-          participantId={participantId}
-          onClick={onClick}
-        />
-      ))}
+      {items}
     </>
   );
 }

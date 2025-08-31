@@ -11,8 +11,7 @@ import { matchEnteringHelperFormSchema } from "@/schema/matchEnteringHelper";
 import { authWithRedirect } from "@/auth/utils";
 import { getTournamentById } from "@/db/repositories/tournament";
 import { getProfileByUserId } from "@/db/repositories/profile";
-import { and, eq, inArray } from "drizzle-orm";
-import { getGroupsByTournamentId } from "@/db/repositories/group";
+import { and, eq } from "drizzle-orm";
 import { revalidatePath } from "next/cache";
 
 export async function createMatchEnteringHelper(
@@ -71,38 +70,28 @@ export async function deleteMatchEnteringHelper(
 }
 
 export async function updateMatchEnteringHelpers(
-  tournamentId: number,
-  groupedMatchEnteringHelperIds: Record<number, number[]>,
+  groupId: number,
+  matchEnteringHelperIds: number[],
 ) {
   const session = await authWithRedirect();
   invariant(session?.user.role === "admin", "Unauthorized");
 
-  const tournament = await getTournamentById(tournamentId);
-  invariant(tournament != null, "Tournament not found");
-
-  const groups = await getGroupsByTournamentId(tournamentId);
-  invariant(groups.length > 0, "No groups found for tournament");
-
-  const groupIds = groups.map((group) => group.id);
-
   await db.transaction(async (tx) => {
     await tx
       .delete(groupMatchEnteringHelper)
-      .where(inArray(groupMatchEnteringHelper.groupId, groupIds));
+      .where(eq(groupMatchEnteringHelper.groupId, groupId));
 
     const insertValues: (typeof groupMatchEnteringHelper.$inferInsert)[] = [];
-    for (const [groupId, matchEnteringHelperIds] of Object.entries(
-      groupedMatchEnteringHelperIds,
-    )) {
-      for (const matchEnteringHelperId of matchEnteringHelperIds) {
-        insertValues.push({
-          groupId: parseInt(groupId, 10),
-          matchEnteringHelperId: matchEnteringHelperId,
-        });
-      }
+    for (const matchEnteringHelperId of matchEnteringHelperIds) {
+      insertValues.push({
+        groupId: groupId,
+        matchEnteringHelperId: matchEnteringHelperId,
+      });
     }
 
-    await tx.insert(groupMatchEnteringHelper).values(insertValues);
+    if (insertValues.length > 0) {
+      await tx.insert(groupMatchEnteringHelper).values(insertValues);
+    }
   });
 
   revalidatePath("/admin/gruppen");
