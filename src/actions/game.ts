@@ -15,9 +15,14 @@ import { revalidatePath } from "next/cache";
 import invariant from "tiny-invariant";
 import { bergerFide, nextEvenNumber } from "@/lib/pairing-utils";
 import { redirect } from "next/navigation";
-import { getDateTimeFromDefaultTime } from "@/lib/game-time";
+import {
+  getDateTimeFromDefaultTime,
+  getGameTimeFromGame,
+} from "@/lib/game-time";
 import { sendGamePostponementEmails } from "@/actions/email/game-postponement";
 import { updateBoardNumbers } from "@/actions/board-number";
+import { getBerlinTime } from "@/lib/date";
+import { getRolesByUserId } from "@/db/repositories/role";
 
 export async function removeScheduledGamesForGroup(
   tournamentId: number,
@@ -299,13 +304,37 @@ export async function rescheduleGamesForGroup(
 
 export async function updateGameResult(gameId: number, result: GameResult) {
   const session = await authWithRedirect();
+
+  const gameData = await db.query.game.findFirst({
+    where: eq(game.id, gameId),
+    with: {
+      matchdayGame: {
+        with: {
+          matchday: true,
+        },
+      },
+    },
+  });
+  invariant(gameData, "Game not found");
+
   const isUserParticipating = await isUserParticipantInGame(
     gameId,
     session.user.id,
   );
+  const userRoles = await getRolesByUserId(session.user.id);
+  const isAdmin = userRoles.includes("admin");
+  const isReferee = userRoles.includes("referee");
+
   invariant(
-    isUserParticipating || session.user.role === "admin",
-    "User is not participating in this game",
+    isUserParticipating || isAdmin || isReferee,
+    "User is not authorized to update this game result",
+  );
+
+  const gameDateTime = getGameTimeFromGame(gameData);
+  const now = getBerlinTime();
+  invariant(
+    gameDateTime <= now,
+    "Cannot submit result for games that haven't happened yet",
   );
 
   await db

@@ -21,6 +21,7 @@ import { MatchDay } from "@/db/types/match-day";
 import { authClient } from "@/auth-client";
 import { Role } from "@/db/types/role";
 import { GameActions } from "./game-actions";
+import { getBerlinTime } from "@/lib/date";
 
 type Props = {
   games: GameWithParticipantProfilesAndGroupAndMatchday[];
@@ -64,9 +65,15 @@ export function GamesList({
         userId || "",
       );
 
+      const game = games.find((g) => g.id === gameId);
+      const isGameInPastOrToday = game
+        ? getGameTimeFromGame(game) <= getBerlinTime()
+        : false;
+
       return {
         canView: isParticipant || isReferee || isMatchEnteringHelper || isAdmin,
-        canSubmitResult: isGameParticipant || isReferee || isAdmin,
+        canSubmitResult:
+          (isGameParticipant || isReferee || isAdmin) && isGameInPastOrToday,
         canPostpone: isGameParticipant || isAdmin,
       };
     },
@@ -77,6 +84,7 @@ export function GamesList({
       isReferee,
       isMatchEnteringHelper,
       isAdmin,
+      games,
     ],
   );
 

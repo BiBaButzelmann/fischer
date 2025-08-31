@@ -77,7 +77,7 @@ export function ReportResultDialog({
           <DialogHeader>
             <DialogTitle>Ergebnis melden</DialogTitle>
             <DialogDescription>
-              Melde hier das Ergebnis der Partie. Klicke speichern wenn du
+              Melde hier das Ergebnis der Partie. Klicke speichern, wenn du
               fertig bist.
             </DialogDescription>
           </DialogHeader>
