@@ -38,6 +38,22 @@ export function EditGroupsGrid({
     getMatchEnteringHelpersForGroup,
   } = useHelperAssignments(currentAssignments, matchEnteringHelpers);
 
+  const generateGroupName = (groupNumber: number): string => {
+    if (groupNumber === 1) {
+      return "A";
+    }
+
+    // For groups 2+, calculate which letter group and which number within that group
+    // Groups 2,3,4 -> B1,B2,B3 (letter B = 2nd letter)
+    // Groups 5,6,7 -> C1,C2,C3 (letter C = 3rd letter)
+    // etc.
+    const letterIndex = Math.floor((groupNumber - 2) / 3) + 2; // Start from B (2nd letter)
+    const numberWithinLetter = ((groupNumber - 2) % 3) + 1; // 1, 2, or 3
+
+    const letter = String.fromCharCode(64 + letterIndex);
+    return `${letter}${numberWithinLetter}`;
+  };
+
   const handleAddNewGroup = () => {
     setGridGroups((prev) => {
       const existingNumbers = prev.map((g) => g.groupNumber);
@@ -46,7 +62,7 @@ export function EditGroupsGrid({
         nextGroupNumber++;
       }
 
-      const groupLetter = String.fromCharCode(64 + nextGroupNumber); // 64 + 1 = 65 (A)
+      const groupName = generateGroupName(nextGroupNumber);
 
       return [
         ...prev,
@@ -54,7 +70,7 @@ export function EditGroupsGrid({
           id: Date.now(),
           isNew: true,
           groupNumber: nextGroupNumber,
-          groupName: groupLetter,
+          groupName: groupName,
           dayOfWeek: null,
           participants: [],
           matchEnteringHelpers: [],
