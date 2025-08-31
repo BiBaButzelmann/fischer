@@ -19,7 +19,6 @@
 
 ### Tier 3
 
-- Mobile: nach Auswahl in der Sidebar sollte die Sidebar einklappen (Arne)
 - Spieltage verwalten: show group (badge) of users (Arne)
 - Juroren verwalten: Einteilung in aktiv und Nachrücker (Arne)
 - overview: show own group
