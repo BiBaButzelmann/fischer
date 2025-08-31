@@ -1,6 +1,37 @@
 import { DateTime } from "luxon";
 import { isHoliday } from "./holidays";
 
+/**
+ * Gets the current time in Berlin timezone
+ * @returns A Date object representing the current time in Berlin
+ */
+export function getBerlinTime(): Date {
+  const berlinNow = new Date().toLocaleString("en-US", {
+    timeZone: "Europe/Berlin",
+  });
+  return new Date(berlinNow);
+}
+
+/**
+ * Converts any date to Berlin timezone
+ * @param date - The date to convert
+ * @returns A Date object representing the given date in Berlin timezone
+ */
+export function toBerlinTime(date: Date): Date {
+  const berlinTime = date.toLocaleString("en-US", {
+    timeZone: "Europe/Berlin",
+  });
+  return new Date(berlinTime);
+}
+
+/**
+ * Gets a Luxon DateTime instance in Berlin timezone
+ * @returns A DateTime object representing the current time in Berlin
+ */
+export function getBerlinDateTime(): DateTime {
+  return DateTime.now().setZone("Europe/Berlin");
+}
+
 export function getDatetimeString(date: Date) {
   const options: Intl.DateTimeFormatOptions = {
     year: "numeric",

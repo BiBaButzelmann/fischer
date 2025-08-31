@@ -139,11 +139,16 @@ export async function AppSidebar() {
                   <span>Spieltage verwalten</span>
                 </Link>
               </SidebarMenuButton>
-
               <SidebarMenuButton asChild>
                 <Link href="/admin/fide-bericht">
                   <FileCheck />
                   <span>Fide Bericht</span>
+                </Link>
+              </SidebarMenuButton>
+              <SidebarMenuButton asChild>
+                <Link href="/admin/namensschilder">
+                  <LayoutDashboard />
+                  <p className="mt-1">Namensschilder</p>
                 </Link>
               </SidebarMenuButton>
             </SidebarGroupContent>

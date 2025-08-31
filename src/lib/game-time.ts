@@ -1,5 +1,6 @@
 import { GAME_START_TIME } from "@/constants/constants";
 import { GameWithMatchday } from "@/db/types/game";
+import { toBerlinTime } from "./date";
 
 /**
  * Creates a Date object for a game with the specified matchday date and the standard game start time (7 PM German time)
@@ -13,7 +14,7 @@ export function getDateTimeFromDefaultTime(matchdayDate: Date): Date {
     GAME_START_TIME.minutes,
     GAME_START_TIME.seconds,
   );
-  return gameDateTime;
+  return toBerlinTime(gameDateTime);
 }
 
 /**
@@ -28,7 +29,7 @@ export function getSetupHelperTimeFromDefaultTime(matchdayDate: Date): Date {
     GAME_START_TIME.minutes - 30,
     GAME_START_TIME.seconds,
   );
-  return setupDateTime;
+  return toBerlinTime(setupDateTime);
 }
 
 /**

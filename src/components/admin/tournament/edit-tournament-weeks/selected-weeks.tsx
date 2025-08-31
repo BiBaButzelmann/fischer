@@ -1,5 +1,4 @@
 import { CalendarIcon } from "lucide-react";
-import { DateTime } from "luxon";
 import { type Week } from "./types";
 import { WeekCalendar } from "./week-calendar";
 import { Label } from "@/components/ui/label";
@@ -9,6 +8,7 @@ import {
   PopoverTrigger,
 } from "@/components/ui/popover";
 import { Button } from "@/components/ui/button";
+import { getBerlinDateTime } from "@/lib/date";
 
 export function SelectedWeeks({
   selectedWeeks,
@@ -79,12 +79,12 @@ export function SelectedWeeks({
 }
 
 function getCalendarWeek(weekNumber: number) {
-  const date = DateTime.now().set({ weekNumber });
+  const date = getBerlinDateTime().set({ weekNumber });
   return `KW (${date.toFormat("n/yyyy")})`;
 }
 
 function getWeekRange(weekNumber: number) {
-  const startOfWeek = DateTime.now().set({ weekNumber }).startOf("week");
+  const startOfWeek = getBerlinDateTime().set({ weekNumber }).startOf("week");
   const endOfWeek = startOfWeek.endOf("week");
   return `${startOfWeek.toFormat("dd.MM")} - ${endOfWeek.toFormat("dd.MM.yyyy")}`;
 }

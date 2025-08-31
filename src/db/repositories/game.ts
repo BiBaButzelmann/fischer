@@ -9,6 +9,7 @@ import {
   isNull,
   isNotNull,
 } from "drizzle-orm";
+import { getBerlinTime } from "@/lib/date";
 import { group } from "../schema/group";
 import { matchdayGame, matchdayReferee } from "../schema/matchday";
 import { matchday } from "../schema/matchday";
@@ -209,6 +210,7 @@ export async function getGamesByTournamentId(
       whiteParticipant: {
         columns: {
           fideRating: true,
+          dwzRating: true,
         },
         with: {
           profile: {
@@ -225,6 +227,7 @@ export async function getGamesByTournamentId(
       blackParticipant: {
         columns: {
           fideRating: true,
+          dwzRating: true,
         },
         with: {
           profile: {
@@ -345,7 +348,7 @@ export async function getPendingGamesByParticipantId(participantId: number) {
           eq(game.blackParticipantId, participantId),
         ),
         isNull(game.result),
-        sql`${matchday.date} < ${new Date()}`,
+        sql`${matchday.date} < ${getBerlinTime()}`,
       ),
     )
     .orderBy(asc(matchday.date))
@@ -366,7 +369,7 @@ export async function getPendingGamesByRefereeId(refereeId: number) {
       and(
         eq(matchdayReferee.refereeId, refereeId),
         isNull(game.result),
-        sql`${matchday.date} < ${new Date()}`,
+        sql`${matchday.date} < ${getBerlinTime()}`,
       ),
     )
     .orderBy(asc(matchday.date))
@@ -431,6 +434,7 @@ export async function getParticipantsInGroup(groupId: number) {
           dwzRating: true,
           fideRating: true,
           title: true,
+          chessClub: true,
         },
         with: {
           profile: {

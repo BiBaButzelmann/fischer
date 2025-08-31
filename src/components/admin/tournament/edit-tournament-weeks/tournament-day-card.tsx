@@ -5,6 +5,7 @@ import { type WeekDay, type Week } from "./types";
 import { Badge } from "@/components/ui/badge";
 import { Label } from "@/components/ui/label";
 import { Switch } from "@/components/ui/switch";
+import { getBerlinDateTime } from "@/lib/date";
 
 export function TournamentDayCard({
   day,
@@ -16,7 +17,7 @@ export function TournamentDayCard({
   onUpdateRefereeNeeded: (index: number, day: WeekDay, value: boolean) => void;
 }) {
   const dates = useMemo(() => {
-    const startOfWeek = DateTime.now()
+    const startOfWeek = getBerlinDateTime()
       .set({ weekNumber: week.weekNumber })
       .startOf("week");
     const tuesday = startOfWeek.plus({ days: 1 });

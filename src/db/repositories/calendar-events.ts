@@ -4,6 +4,7 @@ import {
   getDateTimeFromDefaultTime,
   getSetupHelperTimeFromDefaultTime,
 } from "@/lib/game-time";
+import { getBerlinTime } from "@/lib/date";
 import { getMatchdaysByRefereeId } from "./referee";
 import { getParticipantWithGroupByProfileIdAndTournamentId } from "./participant";
 import { getRefereeByProfileIdAndTournamentId } from "./referee";
@@ -105,10 +106,7 @@ export async function getUpcomingEventsByProfileAndTournament(
 
   const allEvents = await Promise.all(eventPromises);
 
-  const berlinNow = new Date().toLocaleString("en-US", {
-    timeZone: "Europe/Berlin",
-  });
-  const currentBerlinTime = new Date(berlinNow);
+  const currentBerlinTime = getBerlinTime();
 
   return allEvents
     .flat()
