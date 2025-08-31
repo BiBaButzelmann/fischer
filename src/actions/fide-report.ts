@@ -64,6 +64,7 @@ export const generateFideReportFile = action(
     // a game is considered to have actually been played, if:
     // - it is not a bye game
     // - both participants were not disabled at the time of the game
+    // TODO: account for all games except for bye games
     const actuallyPlayedGames = completedGames.filter((game) => {
       const isByeGame =
         game.whiteParticipantId == null || game.blackParticipantId == null;
