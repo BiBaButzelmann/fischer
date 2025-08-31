@@ -48,9 +48,21 @@ export function Pairing({ group }: { group: GroupWithParticipantsAndGames }) {
     }
 
     const isNotAvailable =
-      participant.notAvailableDays?.some((notAvailableDate) =>
-        isSameDate(notAvailableDate, matchdayDate),
-      ) || false;
+      participant.notAvailableDays?.some((notAvailableDate) => {
+        // TODO: HOTFIX: Add 1 day to compensate for timezone offset in existing database data
+        const adjustedDate = new Date(notAvailableDate);
+        adjustedDate.setDate(adjustedDate.getDate() + 1);
+        console.log(
+          `Checking participant ${participant.profile.firstName} ${participant.profile.lastName}:`,
+          {
+            notAvailableDays: participant.notAvailableDays,
+            adjustedDate: adjustedDate.toDateString(),
+            matchdayDate: matchdayDate.toDateString(),
+            isSame: isSameDate(adjustedDate, matchdayDate),
+          },
+        );
+        return isSameDate(adjustedDate, matchdayDate);
+      }) || false;
 
     return (
       <div
@@ -142,13 +154,13 @@ export function Pairing({ group }: { group: GroupWithParticipantsAndGames }) {
                         <div>
                           <ParticipantCell
                             participantId={game.whiteParticipantId!}
-                            matchdayDate={games[0].matchdayGame.matchday.date}
+                            matchdayDate={gameDateTime}
                           />
                         </div>
                         <div>
                           <ParticipantCell
                             participantId={game.blackParticipantId!}
-                            matchdayDate={games[0].matchdayGame.matchday.date}
+                            matchdayDate={gameDateTime}
                           />
                         </div>
                       </div>

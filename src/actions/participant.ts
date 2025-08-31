@@ -36,6 +36,10 @@ export async function createParticipant(
   const currentProfile = await getProfileByUserId(session.user.id);
   invariant(currentProfile, "Profile not found");
 
+  const normalizedNotAvailableDays = data.notAvailableDays?.map((date) => {
+    return new Date(date.getFullYear(), date.getMonth(), date.getDate());
+  });
+
   await db
     .insert(participant)
     .values({
@@ -50,7 +54,7 @@ export async function createParticipant(
       birthYear: data.birthYear,
       preferredMatchDay: data.preferredMatchDay,
       secondaryMatchDays: data.secondaryMatchDays,
-      notAvailableDays: data.notAvailableDays,
+      notAvailableDays: normalizedNotAvailableDays,
       zpsClubId: data.zpsClub,
       zpsPlayerId: data.zpsPlayer,
       entryFeePayed: data.chessClubType === "other" ? false : null,
@@ -67,7 +71,7 @@ export async function createParticipant(
         birthYear: data.birthYear,
         preferredMatchDay: data.preferredMatchDay,
         secondaryMatchDays: data.secondaryMatchDays,
-        notAvailableDays: data.notAvailableDays,
+        notAvailableDays: normalizedNotAvailableDays,
         zpsClubId: data.zpsClub,
         zpsPlayerId: data.zpsPlayer,
         entryFeePayed: data.chessClubType === "other" ? false : null,
