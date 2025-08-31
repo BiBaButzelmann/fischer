@@ -4,22 +4,9 @@
 
 ### Tier 1
 
-- add feature to disable players from the tournament after start (Paul)
-
-  - admin disables player in group:
-  - if no of games is 50 percent or more:
-    - past games count towards fide and standings
-    - future games count as free win for the opponents
-  - if no of games is less than 50 percent:
-    - past games count towards fide but not standings
-    - future games have no impact at all and are deleted
-
-- fix: Bye games dont count towards standings (unnecessary) (TBD)
-- drucken: feature to print the Kärtchen (Paul)
-
 - Eingabehelfer: Seite implementieren (Paul)
 
-  - Eingabehelfer: show count of missing submissions
+- Eingabehelfer: show count of missing submissions
 
 - DWZ Bericht (Paul) deadline November
 

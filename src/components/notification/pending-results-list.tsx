@@ -8,6 +8,7 @@ type Props = {
   onClick?: () => void;
 };
 
+// FIXME: this cannot be a client component since pending result item is a server component
 export function PendingResultsList({ gameIds, participantId, onClick }: Props) {
   return (
     <>
