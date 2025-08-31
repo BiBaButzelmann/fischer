@@ -1,5 +1,5 @@
-import { getActiveTournament } from "@/db/repositories/tournament";
-import { auth } from "@/auth/utils";
+"use client";
+
 import {
   Sidebar,
   SidebarContent,
@@ -10,6 +10,7 @@ import {
   SidebarHeader,
   SidebarMenu,
   SidebarMenuButton,
+  useSidebar,
 } from "../ui/sidebar";
 import Link from "next/link";
 import { SidebarUserMenu } from "./sidebar-user-menu";
@@ -26,10 +27,22 @@ import {
 } from "lucide-react";
 import { Button } from "../ui/button";
 import Image from "next/image";
+import { auth } from "@/auth/utils";
+import { Tournament } from "@/db/types/tournament";
 
-export async function AppSidebar() {
-  const session = await auth();
-  const tournament = await getActiveTournament();
+type Props = {
+  session: Awaited<ReturnType<typeof auth>>;
+  tournament?: Tournament;
+};
+
+export function AppSidebar({ session, tournament }: Props) {
+  const { setOpenMobile, isMobile } = useSidebar();
+
+  const handleMobileMenuClick = () => {
+    if (isMobile) {
+      setOpenMobile(false);
+    }
+  };
 
   const stage = tournament?.stage;
 
@@ -41,7 +54,11 @@ export async function AppSidebar() {
   return (
     <Sidebar>
       <SidebarHeader>
-        <Link className="inline-flex items-center gap-2" href="/uebersicht">
+        <Link
+          className="inline-flex items-center gap-2"
+          href="/uebersicht"
+          onClick={handleMobileMenuClick}
+        >
           <Image
             src="/logo.webp"
             alt="HSK 1830 Logo"
@@ -58,25 +75,25 @@ export async function AppSidebar() {
           <SidebarGroupContent>
             <SidebarMenu>
               <SidebarMenuButton asChild>
-                <Link href="/uebersicht">
+                <Link href="/uebersicht" onClick={handleMobileMenuClick}>
                   <LayoutDashboard />
                   <p className="mt-1">Übersicht</p>
                 </Link>
               </SidebarMenuButton>
               <SidebarMenuButton asChild>
-                <Link href="/partien">
+                <Link href="/partien" onClick={handleMobileMenuClick}>
                   <SwordsIcon />
                   <span>Partien</span>
                 </Link>
               </SidebarMenuButton>
               <SidebarMenuButton asChild>
-                <Link href="/rangliste">
+                <Link href="/rangliste" onClick={handleMobileMenuClick}>
                   <Medal />
                   <span>Rangliste</span>
                 </Link>
               </SidebarMenuButton>
               <SidebarMenuButton asChild>
-                <Link href="/kalender">
+                <Link href="/kalender" onClick={handleMobileMenuClick}>
                   <CalendarIcon />
                   <span>Kalender</span>
                 </Link>
@@ -122,43 +139,52 @@ export async function AppSidebar() {
             <SidebarGroupLabel>Admin</SidebarGroupLabel>
             <SidebarGroupContent>
               <SidebarMenuButton asChild>
-                <Link href="/admin/tournament">
+                <Link href="/admin/tournament" onClick={handleMobileMenuClick}>
                   <BinocularsIcon />
                   <span>Turnier verwalten</span>
                 </Link>
               </SidebarMenuButton>
               <SidebarMenuButton asChild>
-                <Link href="/admin/nutzerverwaltung">
+                <Link
+                  href="/admin/nutzerverwaltung"
+                  onClick={handleMobileMenuClick}
+                >
                   <UserRoundCogIcon />
                   <span>Nutzer verwalten</span>
                 </Link>
               </SidebarMenuButton>
               <SidebarMenuButton asChild>
-                <Link href="/admin/gruppen">
+                <Link href="/admin/gruppen" onClick={handleMobileMenuClick}>
                   <Users />
                   <span>Gruppen verwalten</span>
                 </Link>
               </SidebarMenuButton>
               <SidebarMenuButton asChild>
-                <Link href="/admin/paarungen">
+                <Link href="/admin/paarungen" onClick={handleMobileMenuClick}>
                   <Users />
                   <span>Paarungen verwalten</span>
                 </Link>
               </SidebarMenuButton>
               <SidebarMenuButton asChild>
-                <Link href="/admin/spieltage">
+                <Link href="/admin/spieltage" onClick={handleMobileMenuClick}>
                   <CalendarIcon />
                   <span>Spieltage verwalten</span>
                 </Link>
               </SidebarMenuButton>
               <SidebarMenuButton asChild>
-                <Link href="/admin/fide-bericht">
+                <Link
+                  href="/admin/fide-bericht"
+                  onClick={handleMobileMenuClick}
+                >
                   <FileCheck />
                   <span>Fide Bericht</span>
                 </Link>
               </SidebarMenuButton>
               <SidebarMenuButton asChild>
-                <Link href="/admin/namensschilder">
+                <Link
+                  href="/admin/namensschilder"
+                  onClick={handleMobileMenuClick}
+                >
                   <LayoutDashboard />
                   <p className="mt-1">Namensschilder</p>
                 </Link>
@@ -170,17 +196,23 @@ export async function AppSidebar() {
       <SidebarFooter>
         {isRegistrationOpen && session ? (
           <Button asChild>
-            <Link href="/klubturnier-anmeldung">Anmeldung anpassen</Link>
+            <Link href="/klubturnier-anmeldung" onClick={handleMobileMenuClick}>
+              Anmeldung anpassen
+            </Link>
           </Button>
         ) : null}
         {isRegistrationOpen && !session ? (
           <Button asChild>
-            <Link href="/registrieren">Registrieren</Link>
+            <Link href="/registrieren" onClick={handleMobileMenuClick}>
+              Registrieren
+            </Link>
           </Button>
         ) : null}
         {isRunning && !session ? (
           <Button asChild>
-            <Link href="/anmelden">Anmelden</Link>
+            <Link href="/anmelden" onClick={handleMobileMenuClick}>
+              Anmelden
+            </Link>
           </Button>
         ) : null}
         {session ? <SidebarUserMenu session={session} /> : null}
