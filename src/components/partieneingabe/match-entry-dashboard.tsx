@@ -30,7 +30,7 @@ export function MatchEntryDashboard({ pendingGames, completedGames }: Props) {
                 Meine Partieneingabe
               </h1>
               <p className="text-slate-600 mt-1">
-                Ihnen zugewiesene Schachpartien zur Eingabe
+                Dir zugewiesene Schachpartien zur Eingabe
               </p>
             </div>
             <div className="flex items-center gap-4">

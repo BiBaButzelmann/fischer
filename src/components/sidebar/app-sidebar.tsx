@@ -90,7 +90,7 @@ export async function AppSidebar() {
               </SidebarMenuButton>
               {canAccessMatchEntry && isRunning && (
                 <SidebarMenuButton asChild>
-                  <Link href="/partien-eingabe">
+                  <Link href="/partieneingabe">
                     <ClipboardEdit />
                     <span>Partieneingabe</span>
                   </Link>
