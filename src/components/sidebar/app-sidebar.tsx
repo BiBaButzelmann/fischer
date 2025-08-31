@@ -14,6 +14,7 @@ import {
 } from "../ui/sidebar";
 import Link from "next/link";
 import { SidebarUserMenu } from "./sidebar-user-menu";
+import { SidebarLink } from "./sidebar-link";
 import {
   BinocularsIcon,
   BookTextIcon,
@@ -74,30 +75,18 @@ export function AppSidebar({ session, tournament }: Props) {
           <SidebarGroupLabel>Turnier</SidebarGroupLabel>
           <SidebarGroupContent>
             <SidebarMenu>
-              <SidebarMenuButton asChild>
-                <Link href="/uebersicht" onClick={handleMobileMenuClick}>
-                  <LayoutDashboard />
-                  <p className="mt-1">Übersicht</p>
-                </Link>
-              </SidebarMenuButton>
-              <SidebarMenuButton asChild>
-                <Link href="/partien" onClick={handleMobileMenuClick}>
-                  <SwordsIcon />
-                  <span>Partien</span>
-                </Link>
-              </SidebarMenuButton>
-              <SidebarMenuButton asChild>
-                <Link href="/rangliste" onClick={handleMobileMenuClick}>
-                  <Medal />
-                  <span>Rangliste</span>
-                </Link>
-              </SidebarMenuButton>
-              <SidebarMenuButton asChild>
-                <Link href="/kalender" onClick={handleMobileMenuClick}>
-                  <CalendarIcon />
-                  <span>Kalender</span>
-                </Link>
-              </SidebarMenuButton>
+              <SidebarLink href="/uebersicht" icon={LayoutDashboard}>
+                Übersicht
+              </SidebarLink>
+              <SidebarLink href="/partien" icon={SwordsIcon}>
+                Partien
+              </SidebarLink>
+              <SidebarLink href="/rangliste" icon={Medal}>
+                Rangliste
+              </SidebarLink>
+              <SidebarLink href="/kalender" icon={CalendarIcon}>
+                Kalender
+              </SidebarLink>
             </SidebarMenu>
           </SidebarGroupContent>
         </SidebarGroup>
@@ -106,30 +95,30 @@ export function AppSidebar({ session, tournament }: Props) {
             <SidebarGroupLabel>Dokumente</SidebarGroupLabel>
             <SidebarGroupContent>
               <SidebarMenu>
-                <SidebarMenuButton asChild>
-                  <Link href="/ausschreibung" target="_blank">
-                    <BookTextIcon />
-                    <span>Ausschreibung</span>
-                  </Link>
-                </SidebarMenuButton>
-                <SidebarMenuButton asChild>
-                  <Link href="/turnierordnung" target="_blank">
-                    <BookTextIcon />
-                    <span>Turnierordnung</span>
-                  </Link>
-                </SidebarMenuButton>
-                <SidebarMenuButton asChild>
-                  <Link href="/anleitung" target="_blank">
-                    <BookTextIcon />
-                    <span>Anleitung Webseite</span>
-                  </Link>
-                </SidebarMenuButton>
-                <SidebarMenuButton asChild>
-                  <Link href="/uhren" target="_blank">
-                    <BookTextIcon />
-                    <span>Anleitung Schachuhren</span>
-                  </Link>
-                </SidebarMenuButton>
+                <SidebarLink
+                  href="/ausschreibung"
+                  icon={BookTextIcon}
+                  target="_blank"
+                >
+                  Ausschreibung
+                </SidebarLink>
+                <SidebarLink
+                  href="/turnierordnung"
+                  icon={BookTextIcon}
+                  target="_blank"
+                >
+                  Turnierordnung
+                </SidebarLink>
+                <SidebarLink
+                  href="/anleitung"
+                  icon={BookTextIcon}
+                  target="_blank"
+                >
+                  Anleitung Webseite
+                </SidebarLink>
+                <SidebarLink href="/uhren" icon={BookTextIcon} target="_blank">
+                  Anleitung Schachuhren
+                </SidebarLink>
               </SidebarMenu>
             </SidebarGroupContent>
           </SidebarGroup>
@@ -138,57 +127,30 @@ export function AppSidebar({ session, tournament }: Props) {
           <SidebarGroup>
             <SidebarGroupLabel>Admin</SidebarGroupLabel>
             <SidebarGroupContent>
-              <SidebarMenuButton asChild>
-                <Link href="/admin/tournament" onClick={handleMobileMenuClick}>
-                  <BinocularsIcon />
-                  <span>Turnier verwalten</span>
-                </Link>
-              </SidebarMenuButton>
-              <SidebarMenuButton asChild>
-                <Link
-                  href="/admin/nutzerverwaltung"
-                  onClick={handleMobileMenuClick}
-                >
-                  <UserRoundCogIcon />
-                  <span>Nutzer verwalten</span>
-                </Link>
-              </SidebarMenuButton>
-              <SidebarMenuButton asChild>
-                <Link href="/admin/gruppen" onClick={handleMobileMenuClick}>
-                  <Users />
-                  <span>Gruppen verwalten</span>
-                </Link>
-              </SidebarMenuButton>
-              <SidebarMenuButton asChild>
-                <Link href="/admin/paarungen" onClick={handleMobileMenuClick}>
-                  <Users />
-                  <span>Paarungen verwalten</span>
-                </Link>
-              </SidebarMenuButton>
-              <SidebarMenuButton asChild>
-                <Link href="/admin/spieltage" onClick={handleMobileMenuClick}>
-                  <CalendarIcon />
-                  <span>Spieltage verwalten</span>
-                </Link>
-              </SidebarMenuButton>
-              <SidebarMenuButton asChild>
-                <Link
-                  href="/admin/fide-bericht"
-                  onClick={handleMobileMenuClick}
-                >
-                  <FileCheck />
-                  <span>Fide Bericht</span>
-                </Link>
-              </SidebarMenuButton>
-              <SidebarMenuButton asChild>
-                <Link
-                  href="/admin/namensschilder"
-                  onClick={handleMobileMenuClick}
-                >
-                  <LayoutDashboard />
-                  <p className="mt-1">Namensschilder</p>
-                </Link>
-              </SidebarMenuButton>
+              <SidebarLink href="/admin/tournament" icon={BinocularsIcon}>
+                Turnier verwalten
+              </SidebarLink>
+              <SidebarLink
+                href="/admin/nutzerverwaltung"
+                icon={UserRoundCogIcon}
+              >
+                Nutzer verwalten
+              </SidebarLink>
+              <SidebarLink href="/admin/gruppen" icon={Users}>
+                Gruppen verwalten
+              </SidebarLink>
+              <SidebarLink href="/admin/paarungen" icon={Users}>
+                Paarungen verwalten
+              </SidebarLink>
+              <SidebarLink href="/admin/spieltage" icon={CalendarIcon}>
+                Spieltage verwalten
+              </SidebarLink>
+              <SidebarLink href="/admin/fide-bericht" icon={FileCheck}>
+                Fide Bericht
+              </SidebarLink>
+              <SidebarLink href="/admin/namensschilder" icon={LayoutDashboard}>
+                Namensschilder
+              </SidebarLink>
             </SidebarGroupContent>
           </SidebarGroup>
         ) : null}
