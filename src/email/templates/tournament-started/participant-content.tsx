@@ -8,9 +8,9 @@ import { ParticipantTable } from "./participant-table";
 type Props = {
   tournamentId: number;
   participantGroup: {
+    groupId: number;
     groupName: string;
     dayOfWeek: DayOfWeek;
-    groupId: number;
     participants: ParticipantWithProfile[];
   };
 };

@@ -15,9 +15,9 @@ type Props = {
   tournamentId: number;
   participantGroup:
     | {
+        groupId: number;
         groupName: string;
         dayOfWeek: DayOfWeek;
-        groupId: number;
         participants: ParticipantWithProfile[];
       }
     | undefined;

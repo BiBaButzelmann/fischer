@@ -10,9 +10,9 @@ type Props = {
   roles: RolesData;
   tournamentId: number;
   participantGroup?: {
+    groupId: number;
     groupName: string;
     dayOfWeek: DayOfWeek;
-    groupId: number;
     participants: ParticipantWithProfile[];
   };
 };

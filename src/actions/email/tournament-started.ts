@@ -54,9 +54,9 @@ export async function sendTournamentStartedEmails(tournamentId: number) {
       );
 
       return {
+        groupId: groupInfo.id,
         groupName: groupInfo.groupName,
         dayOfWeek: groupInfo.dayOfWeek,
-        groupId: groupInfo.id,
         participants: groupParticipants,
       };
     };
