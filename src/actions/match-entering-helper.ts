@@ -11,8 +11,7 @@ import { matchEnteringHelperFormSchema } from "@/schema/matchEnteringHelper";
 import { authWithRedirect } from "@/auth/utils";
 import { getTournamentById } from "@/db/repositories/tournament";
 import { getProfileByUserId } from "@/db/repositories/profile";
-import { and, eq, inArray } from "drizzle-orm";
-import { getGroupsByTournamentId } from "@/db/repositories/group";
+import { and, eq } from "drizzle-orm";
 import { revalidatePath } from "next/cache";
 
 export async function createMatchEnteringHelper(
