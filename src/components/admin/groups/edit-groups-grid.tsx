@@ -288,8 +288,12 @@ export function EditGroupsGrid({
         ).map((h) => h.id);
         await updateMatchEnteringHelpers(groupId, matchEnteringHelperIds);
         toast.success("Gruppe erfolgreich gespeichert");
-      } catch {
-        toast.error("Fehler beim Speichern der Gruppe");
+      } catch (error) {
+        toast.error(
+          error instanceof Error
+            ? error.message
+            : "Fehler beim Speichern der Gruppe",
+        );
       }
     });
   };

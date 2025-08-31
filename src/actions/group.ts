@@ -73,33 +73,48 @@ export async function saveGroup(tournamentId: number, groupData: GridGroup) {
         ),
       });
 
+      let targetGroup;
       if (existingGroup) {
-        throw new Error(
-          `Eine Gruppe mit der Nummer ${groupData.groupNumber} existiert bereits für dieses Turnier.`,
-        );
+        await tx
+          .update(group)
+          .set({
+            groupName: groupData.groupName,
+            dayOfWeek: groupData.dayOfWeek,
+          })
+          .where(eq(group.id, existingGroup.id));
+
+        targetGroup = existingGroup;
+      } else {
+        const insertedGroup = await tx
+          .insert(group)
+          .values({
+            groupName: groupData.groupName,
+            groupNumber: groupData.groupNumber,
+            dayOfWeek: groupData.dayOfWeek,
+            tournamentId,
+          })
+          .returning();
+
+        targetGroup = insertedGroup[0];
       }
 
-      const insertedGroup = await tx
-        .insert(group)
-        .values({
-          groupName: groupData.groupName,
-          groupNumber: groupData.groupNumber,
-          dayOfWeek: groupData.dayOfWeek,
-          tournamentId,
-        })
-        .returning();
+      if (existingGroup) {
+        await tx
+          .delete(participantGroup)
+          .where(eq(participantGroup.groupId, targetGroup.id));
+      }
 
       if (groupData.participants.length > 0) {
         await tx.insert(participantGroup).values(
           groupData.participants.map((p, index) => ({
             participantId: p.id,
-            groupId: insertedGroup[0].id,
+            groupId: targetGroup.id,
             groupPosition: index + 1,
           })),
         );
       }
 
-      groupId = insertedGroup[0].id;
+      groupId = targetGroup.id;
     } else {
       const existingGroup = await tx.query.group.findFirst({
         where: eq(group.id, groupData.id),
@@ -118,9 +133,13 @@ export async function saveGroup(tournamentId: number, groupData: GridGroup) {
       });
 
       if (conflictingGroup) {
-        throw new Error(
-          `Eine andere Gruppe mit der Nummer ${groupData.groupNumber} existiert bereits für dieses Turnier.`,
-        );
+        await tx
+          .update(group)
+          .set({
+            groupName: groupData.groupName,
+            dayOfWeek: groupData.dayOfWeek,
+          })
+          .where(eq(group.id, conflictingGroup.id));
       }
 
       const gamesToDelete = await tx.query.game.findMany({
