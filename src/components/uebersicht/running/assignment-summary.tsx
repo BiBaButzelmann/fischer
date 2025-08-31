@@ -153,7 +153,15 @@ async function SetupHelperSection({
             Aufbauhelfer
           </p>
           <p className="text-sm text-gray-500 dark:text-gray-400 mt-1">
-            {assignedDaysCount === 1 ? <>für <span className="font-bold">einen</span> Tag</> : <>für <span className="font-bold">{assignedDaysCount}</span> Tage</>}
+            {assignedDaysCount === 1 ? (
+              <>
+                für <span className="font-bold">einen</span> Tag
+              </>
+            ) : (
+              <>
+                für <span className="font-bold">{assignedDaysCount}</span> Tage
+              </>
+            )}
           </p>
         </div>
         <div className="flex-shrink-0">
@@ -182,19 +190,32 @@ async function RefereeSection({
   }
 
   return (
-    <div className="flex items-center gap-4 p-4 bg-white dark:bg-card border border-gray-200 dark:border-card-border rounded-xl shadow-sm transition-all hover:shadow-md">
-      <div className="flex-shrink-0 p-3 rounded-full bg-red-100 dark:bg-red-900/30">
-        <Gavel className="w-6 h-6 text-red-600 dark:text-red-400" />
+    <Link href="/kalender" className="block">
+      <div className="flex items-center gap-4 p-4 bg-white dark:bg-card border border-gray-200 dark:border-card-border rounded-xl shadow-sm transition-all hover:shadow-md cursor-pointer hover:opacity-80">
+        <div className="flex-shrink-0 p-3 rounded-full bg-red-100 dark:bg-red-900/30">
+          <Gavel className="w-6 h-6 text-red-600 dark:text-red-400" />
+        </div>
+        <div className="flex-grow">
+          <p className="font-bold text-gray-800 dark:text-gray-100">
+            Schiedsrichter
+          </p>
+          <p className="text-sm text-gray-500 dark:text-gray-400 mt-1">
+            {assignedDaysCount === 1 ? (
+              <>
+                für <span className="font-bold">einen</span> Tag
+              </>
+            ) : (
+              <>
+                für <span className="font-bold">{assignedDaysCount}</span> Tage
+              </>
+            )}
+          </p>
+        </div>
+        <div className="flex-shrink-0">
+          <ChevronRight className="w-5 h-5 text-gray-400 dark:text-gray-500" />
+        </div>
       </div>
-      <div className="flex-grow">
-        <p className="font-bold text-gray-800 dark:text-gray-100">
-          Schiedsrichter
-        </p>
-        <p className="text-sm text-gray-500 dark:text-gray-400 mt-1">
-          {assignedDaysCount === 1 ? <>für <span className="font-bold">einen</span> Tag</> : <>für <span className="font-bold">{assignedDaysCount}</span> Tage</>}
-        </p>
-      </div>
-    </div>
+    </Link>
   );
 }
 
@@ -226,7 +247,16 @@ async function MatchEnteringHelperSection({
         </p>
         <div className="flex items-center gap-2 text-sm text-gray-500 dark:text-gray-400 mt-1">
           <span>
-            {assignedGroupsCount === 1 ? <>für <span className="font-bold">eine</span> Gruppe</> : <>für <span className="font-bold">{assignedGroupsCount}</span> Gruppen</>}
+            {assignedGroupsCount === 1 ? (
+              <>
+                für <span className="font-bold">eine</span> Gruppe
+              </>
+            ) : (
+              <>
+                für <span className="font-bold">{assignedGroupsCount}</span>{" "}
+                Gruppen
+              </>
+            )}
           </span>
         </div>
       </div>
