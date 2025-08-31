@@ -303,7 +303,7 @@ export function EditGroupsGrid({
       <div className="flex justify-end gap-4 items-center">
         <Input
           type="number"
-          placeholder="Spieler pro Gruppe"
+          placeholder="Gruppengröße"
           value={participantsPerGroup}
           onChange={(e) => setParticipantsPerGroup(e.target.value)}
           onKeyPress={handleKeyPress}
