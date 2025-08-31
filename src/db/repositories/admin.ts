@@ -1,8 +1,13 @@
 "use server";
 
 import { db } from "../client";
-import { isNull } from "drizzle-orm";
+import { and, eq, isNull, or, exists, sql } from "drizzle-orm";
 import { profile } from "../schema/profile";
+import { participant } from "../schema/participant";
+import { referee } from "../schema/referee";
+import { juror } from "../schema/juror";
+import { matchEnteringHelper } from "../schema/matchEnteringHelper";
+import { setupHelper } from "../schema/setupHelper";
 
 export async function getAllProfiles() {
   return await db.query.profile.findMany({
@@ -152,114 +157,83 @@ export async function getAllDisabledProfiles() {
   });
 }
 
-export async function getContributorsWithEmailByTournamentId(
+export async function getAllProfilesWithRolesByTournamentId(
   tournamentId: number,
 ) {
-  const [participants, referees, jurors, matchEnteringHelpers, setupHelpers] =
-    await Promise.all([
-      db.query.participant.findMany({
-        where: (participant, { eq, and }) =>
-          and(
-            eq(participant.tournamentId, tournamentId),
-            isNull(participant.deletedAt),
+  return await db
+    .select({
+      id: profile.id,
+      firstName: profile.firstName,
+      lastName: profile.lastName,
+      email: profile.email,
+      phoneNumber: profile.phoneNumber,
+    })
+    .from(profile)
+    .where(
+      and(
+        isNull(profile.deletedAt),
+        or(
+          exists(
+            db
+              .select()
+              .from(participant)
+              .where(
+                and(
+                  sql`${participant.profileId} = ${profile.id}`,
+                  eq(participant.tournamentId, tournamentId),
+                  isNull(participant.deletedAt),
+                ),
+              ),
           ),
-        with: {
-          profile: {
-            columns: {
-              firstName: true,
-              lastName: true,
-              email: true,
-            },
-          },
-        },
-      }),
-      db.query.referee.findMany({
-        where: (referee, { eq, and }) =>
-          and(
-            eq(referee.tournamentId, tournamentId),
-            isNull(referee.deletedAt),
+          exists(
+            db
+              .select()
+              .from(referee)
+              .where(
+                and(
+                  sql`${referee.profileId} = ${profile.id}`,
+                  eq(referee.tournamentId, tournamentId),
+                  isNull(referee.deletedAt),
+                ),
+              ),
           ),
-        with: {
-          profile: {
-            columns: {
-              firstName: true,
-              lastName: true,
-              email: true,
-            },
-          },
-        },
-      }),
-      db.query.juror.findMany({
-        where: (juror, { eq, and }) =>
-          and(eq(juror.tournamentId, tournamentId), isNull(juror.deletedAt)),
-        with: {
-          profile: {
-            columns: {
-              firstName: true,
-              lastName: true,
-              email: true,
-            },
-          },
-        },
-      }),
-      db.query.matchEnteringHelper.findMany({
-        where: (matchEnteringHelper, { eq, and }) =>
-          and(
-            eq(matchEnteringHelper.tournamentId, tournamentId),
-            isNull(matchEnteringHelper.deletedAt),
+          exists(
+            db
+              .select()
+              .from(juror)
+              .where(
+                and(
+                  sql`${juror.profileId} = ${profile.id}`,
+                  eq(juror.tournamentId, tournamentId),
+                  isNull(juror.deletedAt),
+                ),
+              ),
           ),
-        with: {
-          profile: {
-            columns: {
-              firstName: true,
-              lastName: true,
-              email: true,
-            },
-          },
-        },
-      }),
-      db.query.setupHelper.findMany({
-        where: (setupHelper, { eq, and }) =>
-          and(
-            eq(setupHelper.tournamentId, tournamentId),
-            isNull(setupHelper.deletedAt),
+          exists(
+            db
+              .select()
+              .from(matchEnteringHelper)
+              .where(
+                and(
+                  sql`${matchEnteringHelper.profileId} = ${profile.id}`,
+                  eq(matchEnteringHelper.tournamentId, tournamentId),
+                  isNull(matchEnteringHelper.deletedAt),
+                ),
+              ),
           ),
-        with: {
-          profile: {
-            columns: {
-              firstName: true,
-              lastName: true,
-              email: true,
-            },
-          },
-        },
-      }),
-    ]);
-
-  const allContributors = [
-    ...participants.map((p) => ({
-      ...p.profile,
-      role: "participant" as const,
-    })),
-    ...referees.map((r) => ({ ...r.profile, role: "referee" as const })),
-    ...jurors.map((j) => ({ ...j.profile, role: "juror" as const })),
-    ...matchEnteringHelpers.map((m) => ({
-      ...m.profile,
-      role: "matchEnteringHelper" as const,
-    })),
-    ...setupHelpers.map((s) => ({
-      ...s.profile,
-      role: "setupHelper" as const,
-    })),
-  ];
-
-  return allContributors.reduce(
-    (acc, person) => {
-      if (!acc.some((p) => p.email === person.email)) {
-        acc.push(person);
-      }
-      return acc;
-    },
-    [] as typeof allContributors,
-  );
+          exists(
+            db
+              .select()
+              .from(setupHelper)
+              .where(
+                and(
+                  sql`${setupHelper.profileId} = ${profile.id}`,
+                  eq(setupHelper.tournamentId, tournamentId),
+                  isNull(setupHelper.deletedAt),
+                ),
+              ),
+          ),
+        ),
+      ),
+    );
 }
