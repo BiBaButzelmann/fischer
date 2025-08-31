@@ -1,5 +1,6 @@
 import { getActiveTournament } from "@/db/repositories/tournament";
 import { auth } from "@/auth/utils";
+import { getRolesByUserId } from "@/db/repositories/role";
 import {
   Sidebar,
   SidebarContent,
@@ -23,6 +24,7 @@ import {
   SwordsIcon,
   UserRoundCogIcon,
   Users,
+  ClipboardEdit,
 } from "lucide-react";
 import { Button } from "../ui/button";
 import Image from "next/image";
@@ -37,6 +39,11 @@ export async function AppSidebar() {
   const isRunning = stage === "running";
   const isActive = stage === "registration" || stage === "running";
   const isAdmin = session?.user.role === "admin";
+
+  const userRoles = session ? await getRolesByUserId(session.user.id) : [];
+  const canAccessMatchEntry = userRoles.some((role) =>
+    ["participant", "matchEnteringHelper", "admin"].includes(role),
+  );
 
   return (
     <Sidebar>
@@ -81,6 +88,14 @@ export async function AppSidebar() {
                   <span>Kalender</span>
                 </Link>
               </SidebarMenuButton>
+              {canAccessMatchEntry && isRunning && (
+                <SidebarMenuButton asChild>
+                  <Link href="/partien-eingabe">
+                    <ClipboardEdit />
+                    <span>Partieneingabe</span>
+                  </Link>
+                </SidebarMenuButton>
+              )}
             </SidebarMenu>
           </SidebarGroupContent>
         </SidebarGroup>

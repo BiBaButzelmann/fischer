@@ -65,3 +65,14 @@ export async function getMatchEnteringHelperAssignmentCountByProfileIdAndTournam
 
   return assignmentCount[0]?.count ?? 0;
 }
+
+export async function getAssignedGroupsByMatchEnteringHelperId(
+  matchEnteringHelperId: number,
+) {
+  return await db
+    .select({ groupId: groupMatchEnteringHelper.groupId })
+    .from(groupMatchEnteringHelper)
+    .where(
+      eq(groupMatchEnteringHelper.matchEnteringHelperId, matchEnteringHelperId),
+    );
+}
