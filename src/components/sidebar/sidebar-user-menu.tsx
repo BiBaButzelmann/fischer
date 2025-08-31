@@ -11,14 +11,10 @@ import {
   DropdownMenuTrigger,
 } from "../ui/dropdown-menu";
 import { Button } from "../ui/button";
-import { auth } from "@/auth";
 import { useSidebar } from "../ui/sidebar";
+import { Session } from "@/types/auth";
 
-export function SidebarUserMenu({
-  session,
-}: {
-  session: typeof auth.$Infer.Session;
-}) {
+export function SidebarUserMenu({ session }: { session: Session }) {
   const { setOpenMobile, isMobile } = useSidebar();
 
   const handleMobileMenuClick = () => {
