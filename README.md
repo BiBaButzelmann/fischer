@@ -16,8 +16,6 @@
   - reuse upcoming events component and show all setup helper events
   - that aren´t in the past on own page
   - PDF contains: Group, boardnumber, participants
-- tutorial mail: custom mail for each role (Arend -> Arne)
-- assigned matchdays in mail (Arend -> Arne)
 
 ### Tier 3
 
