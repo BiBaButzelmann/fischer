@@ -5,10 +5,13 @@ import { GroupsGrid } from "./groups-grid";
 import { useState, useTransition } from "react";
 import { GridGroup } from "./types";
 import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
 import { saveGroup, deleteGroup, updateGroupName } from "@/actions/group";
 import { MatchEnteringHelperWithName } from "@/db/types/match-entering-helper";
 import { useHelperAssignments } from "@/hooks/useHelperAssignments";
 import { updateMatchEnteringHelpers } from "@/actions/match-entering-helper";
+import { toast } from "sonner";
+import { NUMBER_OF_GROUPS_WITH_ELO } from "@/constants/constants";
 
 export function EditGroupsGrid({
   tournamentId,
@@ -24,6 +27,7 @@ export function EditGroupsGrid({
   currentAssignments: Record<number, MatchEnteringHelperWithName[]>;
 }) {
   const [isPending, startTransition] = useTransition();
+  const [participantsPerGroup, setParticipantsPerGroup] = useState<string>("");
 
   const [unassignedParticipants, setUnassignedParticipants] = useState(
     initialUnassignedParticipants,
@@ -37,6 +41,128 @@ export function EditGroupsGrid({
     removeHelperFromGroup,
     getMatchEnteringHelpersForGroup,
   } = useHelperAssignments(currentAssignments, matchEnteringHelpers);
+
+  const sortParticipantsByElo = (
+    participants: ParticipantWithName[],
+  ): ParticipantWithName[] => {
+    return [...participants].sort((a, b) => {
+      if (a.fideRating !== null && b.fideRating !== null) {
+        if (a.fideRating !== b.fideRating) {
+          return b.fideRating - a.fideRating;
+        }
+      } else if (a.fideRating !== null && b.fideRating === null) {
+        return -1;
+      } else if (a.fideRating === null && b.fideRating !== null) {
+        return 1;
+      }
+
+      if (a.dwzRating !== null && b.dwzRating !== null) {
+        if (a.dwzRating !== b.dwzRating) {
+          return b.dwzRating - a.dwzRating;
+        }
+      } else if (a.dwzRating !== null && b.dwzRating === null) {
+        return -1;
+      } else if (a.dwzRating === null && b.dwzRating !== null) {
+        return 1;
+      }
+
+      return a.profile.lastName.localeCompare(b.profile.lastName);
+    });
+  };
+
+  const sortParticipantsByDwz = (
+    participants: ParticipantWithName[],
+  ): ParticipantWithName[] => {
+    return [...participants].sort((a, b) => {
+      if (a.dwzRating !== null && b.dwzRating !== null) {
+        if (a.dwzRating !== b.dwzRating) {
+          return b.dwzRating - a.dwzRating;
+        }
+      } else if (a.dwzRating !== null && b.dwzRating === null) {
+        return -1;
+      } else if (a.dwzRating === null && b.dwzRating !== null) {
+        return 1;
+      }
+
+      return a.profile.lastName.localeCompare(b.profile.lastName);
+    });
+  };
+
+  const handleKeyPress = (e: React.KeyboardEvent) => {
+    if (e.key === "Enter") {
+      handleAutoDistribute();
+    }
+  };
+
+  const handleAutoDistribute = () => {
+    const playersPerGroup = parseInt(participantsPerGroup);
+    if (isNaN(playersPerGroup) || playersPerGroup <= 0) {
+      toast.error("Bitte gib eine gültige Anzahl von Spielern pro Gruppe ein.");
+      return;
+    }
+
+    if (unassignedParticipants.length === 0) {
+      toast.error("Keine unzugewiesenen Teilnehmer vorhanden.");
+      return;
+    }
+
+    if (gridGroups.length === 0) {
+      toast.error("Keine Gruppen vorhanden. Bitte erstelle zuerst Gruppen.");
+      return;
+    }
+
+    const eloSortedParticipants = sortParticipantsByElo(unassignedParticipants);
+    const dwzSortedParticipants = sortParticipantsByDwz(unassignedParticipants);
+
+    const updatedGroups: GridGroup[] = [];
+    let unassignedIndex = 0;
+
+    for (let i = 0; i < gridGroups.length; i++) {
+      const currentGroup = gridGroups[i];
+      const currentParticipantCount = currentGroup.participants.length;
+      const spotsNeeded = Math.max(
+        0,
+        playersPerGroup - currentParticipantCount,
+      );
+
+      const endIndex = Math.min(
+        unassignedIndex + spotsNeeded,
+        unassignedParticipants.length,
+      );
+
+      let participantsToAdd: ParticipantWithName[];
+
+      if (i < NUMBER_OF_GROUPS_WITH_ELO) {
+        participantsToAdd = eloSortedParticipants.slice(
+          unassignedIndex,
+          endIndex,
+        );
+      } else {
+        participantsToAdd = dwzSortedParticipants.slice(
+          unassignedIndex,
+          endIndex,
+        );
+      }
+
+      updatedGroups.push({
+        ...currentGroup,
+        participants: [...currentGroup.participants, ...participantsToAdd],
+      });
+
+      unassignedIndex = endIndex;
+    }
+
+    const remainingUnassigned = unassignedParticipants.slice(unassignedIndex);
+
+    setGridGroups(updatedGroups);
+    setUnassignedParticipants(remainingUnassigned);
+
+    const assignedCount =
+      unassignedParticipants.length - remainingUnassigned.length;
+    toast.success(
+      `${assignedCount} Teilnehmer auf ${gridGroups.length} Gruppen verteilt. ${remainingUnassigned.length} verbleiben.`,
+    );
+  };
 
   const generateGroupName = (groupNumber: number): string => {
     if (groupNumber === 1) {
@@ -124,7 +250,16 @@ export function EditGroupsGrid({
 
   return (
     <div className="flex flex-col gap-4">
-      <div className="flex justify-end">
+      <div className="flex justify-end gap-4 items-center">
+        <Input
+          type="number"
+          placeholder="Spieler pro Gruppe"
+          value={participantsPerGroup}
+          onChange={(e) => setParticipantsPerGroup(e.target.value)}
+          onKeyPress={handleKeyPress}
+          className="w-40"
+          min="1"
+        />
         <Button
           variant="outline"
           onClick={handleAddNewGroup}
