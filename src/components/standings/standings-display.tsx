@@ -8,6 +8,7 @@ import { calculateStandings } from "@/lib/standings";
 import type { TournamentNames } from "@/db/types/tournament";
 import type { GroupSummary } from "@/db/types/group";
 import { Game, GameWithMatchday } from "@/db/types/game";
+import { getBerlinTime } from "@/lib/date";
 
 type Props = {
   tournamentNames: TournamentNames[];
@@ -79,7 +80,7 @@ export async function StandingsDisplay({
   // and the game is not in the future
   const relevantGames: Set<Game> = new Set();
 
-  const now = new Date("2025-09-20");
+  const now = getBerlinTime();
   for (const game of games) {
     if (game.matchdayGame.matchday.date > now) {
       continue;
