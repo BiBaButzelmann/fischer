@@ -1,4 +1,12 @@
-import { Wrench, Gavel, Hash, Scale, Check, ClipboardList, ChevronRight } from "lucide-react";
+import {
+  Wrench,
+  Gavel,
+  Hash,
+  Scale,
+  Check,
+  ClipboardList,
+  ChevronRight,
+} from "lucide-react";
 import Link from "next/link";
 
 import { matchDays } from "@/constants/constants";

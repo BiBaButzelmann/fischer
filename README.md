@@ -21,5 +21,3 @@
 
 - Spieltage verwalten: show group (badge) of users (Arne)
 - Juroren verwalten: Einteilung in aktiv und Nachrücker (Arne)
-- overview: show own group
-- overview: show own standings
