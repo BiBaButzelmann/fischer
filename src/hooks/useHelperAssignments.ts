@@ -77,13 +77,8 @@ export function useHelperAssignments(
     });
   };
 
-  const getGroupedHelperIds = () => {
-    return Object.fromEntries(
-      Object.entries(assignments).map(([groupId, helpers]) => [
-        groupId,
-        helpers.map((helper) => helper.id),
-      ]),
-    ) as Record<GroupId, number[]>;
+  const getMatchEnteringHelpersForGroup = (groupId: number) => {
+    return assignments[groupId] ?? [];
   };
 
   return {
@@ -91,6 +86,6 @@ export function useHelperAssignments(
     helperAssignedCounts,
     addHelperToGroup,
     removeHelperFromGroup,
-    getGroupedHelperIds,
+    getMatchEnteringHelpersForGroup,
   };
 }
