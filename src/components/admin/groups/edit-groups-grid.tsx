@@ -46,13 +46,15 @@ export function EditGroupsGrid({
         nextGroupNumber++;
       }
 
+      const groupLetter = String.fromCharCode(64 + nextGroupNumber); // 64 + 1 = 65 (A)
+
       return [
         ...prev,
         {
           id: Date.now(),
           isNew: true,
           groupNumber: nextGroupNumber,
-          groupName: `Gruppe ${nextGroupNumber}`,
+          groupName: groupLetter,
           dayOfWeek: null,
           participants: [],
           matchEnteringHelpers: [],
