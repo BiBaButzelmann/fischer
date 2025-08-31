@@ -9,30 +9,30 @@ import { RefereeContent } from "./referee-content";
 import { SetupHelperContent } from "./setup-helper-content";
 import invariant from "tiny-invariant";
 
+export type ParticipantGroupData = {
+  groupId: number;
+  groupName: string;
+  dayOfWeek: DayOfWeek;
+  participants: ParticipantWithProfile[];
+};
+
 type Props = {
   name: string;
   roles: RolesData;
   tournamentId: number;
-  participantGroup:
-    | {
-        groupId: number;
-        groupName: string;
-        dayOfWeek: DayOfWeek;
-        participants: ParticipantWithProfile[];
-      }
-    | undefined;
+  participantData: ParticipantGroupData | undefined;
 };
 
 export function TournamentStartedMail({
   name,
   roles,
   tournamentId,
-  participantGroup,
+  participantData,
 }: Props) {
   if (roles.participant) {
     invariant(
-      participantGroup,
-      "Participant group data must be provided when user has participant role",
+      participantData,
+      "Participant data must be provided when user has participant role",
     );
   }
 
@@ -63,7 +63,7 @@ export function TournamentStartedMail({
       {roles.participant && (
         <ParticipantContent
           tournamentId={tournamentId}
-          participantGroup={participantGroup!}
+          participantGroup={participantData!}
         />
       )}
 

@@ -69,7 +69,7 @@ export async function sendTournamentStartedEmails(tournamentId: number) {
       email: profile.email,
       roles,
       tournamentId,
-      participantGroup: participantData,
+      participantData: participantData,
     });
   });
 

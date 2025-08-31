@@ -1,20 +1,16 @@
 import { resend } from "./client";
 import { RolesData } from "@/db/types/role";
-import { DayOfWeek } from "@/db/types/group";
-import { ParticipantWithProfile } from "@/db/types/participant";
-import { TournamentStartedMail } from "./templates/tournament-started";
+import {
+  TournamentStartedMail,
+  ParticipantGroupData,
+} from "./templates/tournament-started";
 
 type Props = {
   name: string;
   email: string;
   roles: RolesData;
   tournamentId: number;
-  participantGroup?: {
-    groupId: number;
-    groupName: string;
-    dayOfWeek: DayOfWeek;
-    participants: ParticipantWithProfile[];
-  };
+  participantData?: ParticipantGroupData;
 };
 
 export async function sendTournamentStartedMail(data: Props) {
@@ -31,7 +27,7 @@ export async function sendTournamentStartedMail(data: Props) {
       name: data.name,
       roles: data.roles,
       tournamentId: data.tournamentId,
-      participantGroup: data.participantGroup,
+      participantData: data.participantData,
     }),
   });
 }

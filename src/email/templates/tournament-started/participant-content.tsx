@@ -1,18 +1,12 @@
 import * as React from "react";
-import { DayOfWeek } from "@/db/types/group";
-import { ParticipantWithProfile } from "@/db/types/participant";
 import { matchDays } from "@/constants/constants";
 import { buildGameViewUrl, buildResultsViewUrl } from "@/lib/navigation";
 import { ParticipantTable } from "./participant-table";
+import { ParticipantGroupData } from "./index";
 
 type Props = {
   tournamentId: number;
-  participantGroup: {
-    groupId: number;
-    groupName: string;
-    dayOfWeek: DayOfWeek;
-    participants: ParticipantWithProfile[];
-  };
+  participantGroup: ParticipantGroupData;
 };
 
 export function ParticipantContent({ tournamentId, participantGroup }: Props) {
