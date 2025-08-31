@@ -6,6 +6,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { ParticipantEntry } from "../groups/participant-entry";
 import { Bird } from "lucide-react";
 import { getDateTimeFromDefaultTime, formatGameDate } from "@/lib/game-time";
+import { isSameDate } from "@/lib/date";
 
 export function Pairing({ group }: { group: GroupWithParticipantsAndGames }) {
   if (!group.games || group.games.length === 0) {
@@ -26,21 +27,43 @@ export function Pairing({ group }: { group: GroupWithParticipantsAndGames }) {
     return group.participants.find((p) => p.id === participantId);
   };
 
-  const ParticipantCell = ({ participantId }: { participantId: number }) => {
+  const ParticipantCell = ({
+    participantId,
+    matchdayDate,
+  }: {
+    participantId: number;
+    matchdayDate: Date;
+  }) => {
     const participant = findParticipant(participantId);
-    return participant ? (
-      <ParticipantEntry
-        participant={participant}
-        showMatchDays={false}
-        showFideRating={false}
-        showDwzRating={false}
-      />
-    ) : (
-      <div className="flex items-center gap-2 py-1">
-        <Bird className="h-4 w-4 text-amber-700" />
-        <p className="font-semibold flex-grow truncate text-red-700">
-          spielfrei
-        </p>
+
+    if (!participant) {
+      return (
+        <div className="flex items-center gap-2 py-1">
+          <Bird className="h-4 w-4 text-amber-700" />
+          <p className="font-semibold flex-grow truncate text-red-700">
+            spielfrei
+          </p>
+        </div>
+      );
+    }
+
+    const isNotAvailable =
+      participant.notAvailableDays?.some((notAvailableDate) =>
+        isSameDate(notAvailableDate, matchdayDate),
+      ) || false;
+
+    return (
+      <div
+        className={`flex items-center gap-2 py-1 px-2 rounded ${
+          isNotAvailable ? "bg-red-100 border border-red-300" : ""
+        }`}
+      >
+        <ParticipantEntry
+          participant={participant}
+          showMatchDays={false}
+          showFideRating={false}
+          showDwzRating={false}
+        />
       </div>
     );
   };
@@ -92,23 +115,19 @@ export function Pairing({ group }: { group: GroupWithParticipantsAndGames }) {
           return (
             <TabsContent key={round} value={`round-${round}`} className="mt-0">
               <div className="bg-white rounded-lg border border-gray-200 shadow-sm">
-                {/* Header Section */}
                 <div className="bg-gray-50 border-b border-gray-200 px-6 py-4 rounded-t-lg">
                   <h3 className="text-lg font-semibold text-gray-900">
                     Runde {round} am {dateDisplay}
                   </h3>
                 </div>
 
-                {/* Table Content */}
                 <div className="overflow-hidden">
-                  {/* Table Header */}
                   <div className="grid grid-cols-[80px_1fr_1fr] gap-6 px-6 py-3 bg-gray-50 border-b border-gray-200 font-semibold text-sm text-gray-700">
                     <div>Brett</div>
                     <div>Weiß</div>
                     <div>Schwarz</div>
                   </div>
 
-                  {/* Table Rows */}
                   <div className="divide-y divide-gray-100">
                     {games.map((game, index) => (
                       <div
@@ -120,15 +139,16 @@ export function Pairing({ group }: { group: GroupWithParticipantsAndGames }) {
                         <div className="font-semibold text-gray-900">
                           {game.boardNumber}
                         </div>
-                        {/* TODO: add color coding for players that dont have time on that date */}
                         <div>
                           <ParticipantCell
                             participantId={game.whiteParticipantId!}
+                            matchdayDate={games[0].matchdayGame.matchday.date}
                           />
                         </div>
                         <div>
                           <ParticipantCell
                             participantId={game.blackParticipantId!}
+                            matchdayDate={games[0].matchdayGame.matchday.date}
                           />
                         </div>
                       </div>
