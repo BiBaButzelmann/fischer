@@ -24,49 +24,52 @@ export async function sendTournamentStartedEmails(tournamentId: number) {
       tournamentId,
     );
 
+    const getParticipantData = async () => {
+      const participantWithGroup =
+        await getParticipantWithGroupByProfileIdAndTournamentId(
+          profile.id,
+          tournamentId,
+        );
+
+      invariant(
+        participantWithGroup,
+        `Participant ${profile.firstName} ${profile.lastName} not found`,
+      );
+      invariant(
+        participantWithGroup.group,
+        `Participant ${profile.firstName} ${profile.lastName} is not assigned to a group`,
+      );
+      invariant(
+        participantWithGroup.group.group,
+        `Group not found for participant ${profile.firstName} ${profile.lastName}`,
+      );
+      const groupInfo = participantWithGroup.group.group;
+      invariant(
+        groupInfo.dayOfWeek,
+        `Group ${groupInfo.groupName} has no matchday assigned`,
+      );
+
+      const groupParticipants = await getParticipantsWithProfileByGroupId(
+        groupInfo.id,
+      );
+
+      return {
+        groupName: groupInfo.groupName,
+        dayOfWeek: groupInfo.dayOfWeek,
+        groupId: groupInfo.id,
+        participants: groupParticipants,
+      };
+    };
+
+    const participantData =
+      roles.participant != null ? await getParticipantData() : undefined;
+
     return sendTournamentStartedMail({
       name: profile.firstName,
       email: profile.email,
       roles,
       tournamentId,
-      participantGroup: roles.participant
-        ? await (async () => {
-            const participantWithGroup =
-              await getParticipantWithGroupByProfileIdAndTournamentId(
-                profile.id,
-                tournamentId,
-              );
-
-            invariant(
-              participantWithGroup,
-              `Participant ${profile.firstName} ${profile.lastName} not found`,
-            );
-            invariant(
-              participantWithGroup.group,
-              `Participant ${profile.firstName} ${profile.lastName} is not assigned to a group`,
-            );
-            invariant(
-              participantWithGroup.group.group,
-              `Group not found for participant ${profile.firstName} ${profile.lastName}`,
-            );
-            const groupInfo = participantWithGroup.group.group;
-            invariant(
-              groupInfo.dayOfWeek,
-              `Group ${groupInfo.groupName} has no matchday assigned`,
-            );
-
-            const groupParticipants = await getParticipantsWithProfileByGroupId(
-              groupInfo.id,
-            );
-
-            return {
-              groupName: groupInfo.groupName,
-              dayOfWeek: groupInfo.dayOfWeek,
-              groupId: groupInfo.id,
-              participants: groupParticipants,
-            };
-          })()
-        : undefined,
+      participantGroup: participantData,
     });
   });
 
