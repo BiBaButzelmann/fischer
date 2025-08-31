@@ -53,7 +53,6 @@ export async function StandingsDisplay({
   // participant is relevant if they are active
   // or when they are deactivated but have played at least 50% of their games
   const relevantParticipantIds: Set<number> = new Set();
-  const irrelevantParticipantIds: Set<number> = new Set();
 
   for (const participant of participants) {
     const { deletedAt } = participant;
@@ -74,7 +73,6 @@ export async function StandingsDisplay({
       relevantParticipantIds.add(participant.id);
       continue;
     }
-    irrelevantParticipantIds.add(participant.id);
   }
 
   // game is relevant if neither participant is "irrelevant"
