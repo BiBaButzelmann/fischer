@@ -62,6 +62,8 @@ export async function saveGroup(tournamentId: number, groupData: GridGroup) {
   const session = await authWithRedirect();
   invariant(session?.user.role === "admin", "Unauthorized");
 
+  let groupId: number | undefined;
+
   await db.transaction(async (tx) => {
     if (groupData.isNew) {
       const insertedGroup = await tx
@@ -83,6 +85,8 @@ export async function saveGroup(tournamentId: number, groupData: GridGroup) {
           })),
         );
       }
+
+      groupId = insertedGroup[0].id;
     } else {
       const existingGroup = await tx.query.group.findFirst({
         where: eq(group.id, groupData.id),
@@ -139,13 +143,19 @@ export async function saveGroup(tournamentId: number, groupData: GridGroup) {
           })),
         );
       }
+
+      groupId = existingGroup.id;
     }
   });
+
+  invariant(groupId, "Group ID should be defined after saving the group");
 
   revalidatePath("/admin/gruppen");
   revalidatePath("/admin/paarungen");
   revalidatePath("/partien");
   revalidatePath("/kalender");
+
+  return groupId;
 }
 
 export async function updateGroupName(groupId: number, newName: string) {
