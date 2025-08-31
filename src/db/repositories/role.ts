@@ -61,7 +61,7 @@ export async function getRolesByProfileId(profileId: number): Promise<Role[]> {
   ];
 }
 
-export async function getRolesByUserId(userId: string): Promise<Role[]> {
+export async function getRolesByUserId(userId: string) {
   const profile = await getProfileByUserId(userId);
   if (!profile) {
     return [];

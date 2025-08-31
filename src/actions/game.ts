@@ -22,6 +22,7 @@ import {
 import { sendGamePostponementEmails } from "@/actions/email/game-postponement";
 import { updateBoardNumbers } from "@/actions/board-number";
 import { getBerlinTime } from "@/lib/date";
+import { getRolesByUserId } from "@/db/repositories/role";
 
 export async function removeScheduledGamesForGroup(
   tournamentId: number,
@@ -320,8 +321,9 @@ export async function updateGameResult(gameId: number, result: GameResult) {
     gameId,
     session.user.id,
   );
-  const isAdmin = session.user.role === "admin";
-  const isReferee = session.user.role === "referee";
+  const userRoles = await getRolesByUserId(session.user.id);
+  const isAdmin = userRoles.includes("admin");
+  const isReferee = userRoles.includes("referee");
 
   invariant(
     isUserParticipating || isAdmin || isReferee,
