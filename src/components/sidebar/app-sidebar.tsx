@@ -27,11 +27,11 @@ import {
 } from "lucide-react";
 import { Button } from "../ui/button";
 import Image from "next/image";
-import { auth } from "@/auth/utils";
+import { auth } from "@/auth";
 import { Tournament } from "@/db/types/tournament";
 
 type Props = {
-  session: Awaited<ReturnType<typeof auth>>;
+  session: typeof auth.$Infer.Session;
   tournament?: Tournament;
 };
 
