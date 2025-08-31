@@ -11,13 +11,17 @@ import {
   DropdownMenuTrigger,
 } from "../ui/dropdown-menu";
 import { Button } from "../ui/button";
-import { auth } from "@/auth";
+import { useSidebar } from "../ui/sidebar";
+import { Session } from "@/types/auth";
 
-export function SidebarUserMenu({
-  session,
-}: {
-  session: typeof auth.$Infer.Session;
-}) {
+export function SidebarUserMenu({ session }: { session: Session }) {
+  const { setOpenMobile, isMobile } = useSidebar();
+
+  const handleMobileMenuClick = () => {
+    if (isMobile) {
+      setOpenMobile(false);
+    }
+  };
   return (
     <div className="flex flex-col gap-2">
       <DropdownMenu>
@@ -42,7 +46,7 @@ export function SidebarUserMenu({
 
           <DropdownMenuSeparator />
 
-          <Link href="/einstellungen">
+          <Link href="/einstellungen" onClick={handleMobileMenuClick}>
             <DropdownMenuItem>
               <>
                 <SettingsIcon />
@@ -51,7 +55,7 @@ export function SidebarUserMenu({
             </DropdownMenuItem>
           </Link>
 
-          <Link href="/ausloggen">
+          <Link href="/ausloggen" onClick={handleMobileMenuClick}>
             <DropdownMenuItem>
               <LogOutIcon />
               Ausloggen

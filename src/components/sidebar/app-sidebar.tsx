@@ -1,5 +1,5 @@
-import { getActiveTournament } from "@/db/repositories/tournament";
-import { auth } from "@/auth/utils";
+"use client";
+
 import {
   Sidebar,
   SidebarContent,
@@ -9,10 +9,11 @@ import {
   SidebarGroupLabel,
   SidebarHeader,
   SidebarMenu,
-  SidebarMenuButton,
+  useSidebar,
 } from "../ui/sidebar";
 import Link from "next/link";
 import { SidebarUserMenu } from "./sidebar-user-menu";
+import { SidebarLink } from "./sidebar-link";
 import {
   BinocularsIcon,
   BookTextIcon,
@@ -26,10 +27,22 @@ import {
 } from "lucide-react";
 import { Button } from "../ui/button";
 import Image from "next/image";
+import { Session } from "@/types/auth";
+import { Tournament } from "@/db/types/tournament";
 
-export async function AppSidebar() {
-  const session = await auth();
-  const tournament = await getActiveTournament();
+type Props = {
+  session: Session | null;
+  tournament?: Tournament;
+};
+
+export function AppSidebar({ session, tournament }: Props) {
+  const { setOpenMobile, isMobile } = useSidebar();
+
+  const handleMobileMenuClick = () => {
+    if (isMobile) {
+      setOpenMobile(false);
+    }
+  };
 
   const stage = tournament?.stage;
 
@@ -41,7 +54,11 @@ export async function AppSidebar() {
   return (
     <Sidebar>
       <SidebarHeader>
-        <Link className="inline-flex items-center gap-2" href="/uebersicht">
+        <Link
+          className="inline-flex items-center gap-2"
+          href="/uebersicht"
+          onClick={handleMobileMenuClick}
+        >
           <Image
             src="/logo.webp"
             alt="HSK 1830 Logo"
@@ -57,30 +74,18 @@ export async function AppSidebar() {
           <SidebarGroupLabel>Turnier</SidebarGroupLabel>
           <SidebarGroupContent>
             <SidebarMenu>
-              <SidebarMenuButton asChild>
-                <Link href="/uebersicht">
-                  <LayoutDashboard />
-                  <p className="mt-1">Übersicht</p>
-                </Link>
-              </SidebarMenuButton>
-              <SidebarMenuButton asChild>
-                <Link href="/partien">
-                  <SwordsIcon />
-                  <span>Partien</span>
-                </Link>
-              </SidebarMenuButton>
-              <SidebarMenuButton asChild>
-                <Link href="/rangliste">
-                  <Medal />
-                  <span>Rangliste</span>
-                </Link>
-              </SidebarMenuButton>
-              <SidebarMenuButton asChild>
-                <Link href="/kalender">
-                  <CalendarIcon />
-                  <span>Kalender</span>
-                </Link>
-              </SidebarMenuButton>
+              <SidebarLink href="/uebersicht" icon={LayoutDashboard}>
+                Übersicht
+              </SidebarLink>
+              <SidebarLink href="/partien" icon={SwordsIcon}>
+                Partien
+              </SidebarLink>
+              <SidebarLink href="/rangliste" icon={Medal}>
+                Rangliste
+              </SidebarLink>
+              <SidebarLink href="/kalender" icon={CalendarIcon}>
+                Kalender
+              </SidebarLink>
             </SidebarMenu>
           </SidebarGroupContent>
         </SidebarGroup>
@@ -89,30 +94,30 @@ export async function AppSidebar() {
             <SidebarGroupLabel>Dokumente</SidebarGroupLabel>
             <SidebarGroupContent>
               <SidebarMenu>
-                <SidebarMenuButton asChild>
-                  <Link href="/ausschreibung" target="_blank">
-                    <BookTextIcon />
-                    <span>Ausschreibung</span>
-                  </Link>
-                </SidebarMenuButton>
-                <SidebarMenuButton asChild>
-                  <Link href="/turnierordnung" target="_blank">
-                    <BookTextIcon />
-                    <span>Turnierordnung</span>
-                  </Link>
-                </SidebarMenuButton>
-                <SidebarMenuButton asChild>
-                  <Link href="/anleitung" target="_blank">
-                    <BookTextIcon />
-                    <span>Anleitung Webseite</span>
-                  </Link>
-                </SidebarMenuButton>
-                <SidebarMenuButton asChild>
-                  <Link href="/uhren" target="_blank">
-                    <BookTextIcon />
-                    <span>Anleitung Schachuhren</span>
-                  </Link>
-                </SidebarMenuButton>
+                <SidebarLink
+                  href="/ausschreibung"
+                  icon={BookTextIcon}
+                  target="_blank"
+                >
+                  Ausschreibung
+                </SidebarLink>
+                <SidebarLink
+                  href="/turnierordnung"
+                  icon={BookTextIcon}
+                  target="_blank"
+                >
+                  Turnierordnung
+                </SidebarLink>
+                <SidebarLink
+                  href="/anleitung"
+                  icon={BookTextIcon}
+                  target="_blank"
+                >
+                  Anleitung Webseite
+                </SidebarLink>
+                <SidebarLink href="/uhren" icon={BookTextIcon} target="_blank">
+                  Anleitung Schachuhren
+                </SidebarLink>
               </SidebarMenu>
             </SidebarGroupContent>
           </SidebarGroup>
@@ -121,48 +126,30 @@ export async function AppSidebar() {
           <SidebarGroup>
             <SidebarGroupLabel>Admin</SidebarGroupLabel>
             <SidebarGroupContent>
-              <SidebarMenuButton asChild>
-                <Link href="/admin/tournament">
-                  <BinocularsIcon />
-                  <span>Turnier verwalten</span>
-                </Link>
-              </SidebarMenuButton>
-              <SidebarMenuButton asChild>
-                <Link href="/admin/nutzerverwaltung">
-                  <UserRoundCogIcon />
-                  <span>Nutzer verwalten</span>
-                </Link>
-              </SidebarMenuButton>
-              <SidebarMenuButton asChild>
-                <Link href="/admin/gruppen">
-                  <Users />
-                  <span>Gruppen verwalten</span>
-                </Link>
-              </SidebarMenuButton>
-              <SidebarMenuButton asChild>
-                <Link href="/admin/paarungen">
-                  <Users />
-                  <span>Paarungen verwalten</span>
-                </Link>
-              </SidebarMenuButton>
-              <SidebarMenuButton asChild>
-                <Link href="/admin/spieltage">
-                  <CalendarIcon />
-                  <span>Spieltage verwalten</span>
-                </Link>
-              </SidebarMenuButton>
-              <SidebarMenuButton asChild>
-                <Link href="/admin/fide-bericht">
-                  <FileCheck />
-                  <span>Fide Bericht</span>
-                </Link>
-              </SidebarMenuButton>
-              <SidebarMenuButton asChild>
-                <Link href="/admin/namensschilder">
-                  <LayoutDashboard />
-                  <p className="mt-1">Namensschilder</p>
-                </Link>
-              </SidebarMenuButton>
+              <SidebarLink href="/admin/tournament" icon={BinocularsIcon}>
+                Turnier verwalten
+              </SidebarLink>
+              <SidebarLink
+                href="/admin/nutzerverwaltung"
+                icon={UserRoundCogIcon}
+              >
+                Nutzer verwalten
+              </SidebarLink>
+              <SidebarLink href="/admin/gruppen" icon={Users}>
+                Gruppen verwalten
+              </SidebarLink>
+              <SidebarLink href="/admin/paarungen" icon={Users}>
+                Paarungen verwalten
+              </SidebarLink>
+              <SidebarLink href="/admin/spieltage" icon={CalendarIcon}>
+                Spieltage verwalten
+              </SidebarLink>
+              <SidebarLink href="/admin/fide-bericht" icon={FileCheck}>
+                Fide Bericht
+              </SidebarLink>
+              <SidebarLink href="/admin/namensschilder" icon={LayoutDashboard}>
+                Namensschilder
+              </SidebarLink>
             </SidebarGroupContent>
           </SidebarGroup>
         ) : null}
@@ -170,17 +157,23 @@ export async function AppSidebar() {
       <SidebarFooter>
         {isRegistrationOpen && session ? (
           <Button asChild>
-            <Link href="/klubturnier-anmeldung">Anmeldung anpassen</Link>
+            <Link href="/klubturnier-anmeldung" onClick={handleMobileMenuClick}>
+              Anmeldung anpassen
+            </Link>
           </Button>
         ) : null}
         {isRegistrationOpen && !session ? (
           <Button asChild>
-            <Link href="/registrieren">Registrieren</Link>
+            <Link href="/registrieren" onClick={handleMobileMenuClick}>
+              Registrieren
+            </Link>
           </Button>
         ) : null}
         {isRunning && !session ? (
           <Button asChild>
-            <Link href="/anmelden">Anmelden</Link>
+            <Link href="/anmelden" onClick={handleMobileMenuClick}>
+              Anmelden
+            </Link>
           </Button>
         ) : null}
         {session ? <SidebarUserMenu session={session} /> : null}

@@ -1,4 +1,13 @@
-import { Wrench, Gavel, Hash, Scale, Check, ClipboardList } from "lucide-react";
+import {
+  Wrench,
+  Gavel,
+  Hash,
+  Scale,
+  Check,
+  ClipboardList,
+  ChevronRight,
+} from "lucide-react";
+import Link from "next/link";
 
 import { matchDays } from "@/constants/constants";
 import { getGroupNameAndDayOfWeekByProfileIdAndTournamentId } from "@/db/repositories/group";
@@ -6,6 +15,7 @@ import { getRefereeAssignmentCountByProfileIdAndTournamentId } from "@/db/reposi
 import { getMatchEnteringHelperAssignmentCountByProfileIdAndTournamentId } from "@/db/repositories/match-entering-helper";
 import { getSetupHelperAssignmentCountByProfileIdAndTournamentId } from "@/db/repositories/setup-helper";
 import { RolesData } from "@/db/types/role";
+import { buildResultsViewUrl } from "@/lib/navigation";
 
 type Props = {
   profileId: number;
@@ -84,24 +94,34 @@ async function ParticipantSection({
     );
   }
 
+  const ranglisteUrl = buildResultsViewUrl({
+    tournamentId: tournamentId.toString(),
+    groupId: playerGroup.id.toString(),
+  });
+
   return (
-    <div className="flex items-center gap-4 p-4 bg-white dark:bg-card border border-gray-200 dark:border-card-border rounded-xl shadow-sm transition-all hover:shadow-md">
-      <div className="flex-shrink-0 p-3 rounded-full bg-blue-100 dark:bg-blue-900/30 flex items-center justify-center w-12 h-12">
-        <span className="font-bold text-blue-600 dark:text-blue-400 text-xl">
-          {playerGroup.groupName}
-        </span>
-      </div>
-      <div className="flex-grow">
-        <p className="font-bold text-gray-800 dark:text-gray-100">Spieler</p>
-        <div className="flex items-center gap-2 text-sm text-gray-500 dark:text-gray-400 mt-1">
-          <span>
-            {playerGroup.dayOfWeek
-              ? matchDays[playerGroup.dayOfWeek]
-              : "Spieltag noch nicht zugeteilt"}
+    <Link href={ranglisteUrl} className="block">
+      <div className="flex items-center gap-4 p-4 bg-white dark:bg-card border border-gray-200 dark:border-card-border rounded-xl shadow-sm transition-all hover:shadow-md cursor-pointer hover:opacity-80">
+        <div className="flex-shrink-0 p-3 rounded-full bg-blue-100 dark:bg-blue-900/30 flex items-center justify-center w-12 h-12">
+          <span className="font-bold text-blue-600 dark:text-blue-400 text-xl">
+            {playerGroup.groupName}
           </span>
         </div>
+        <div className="flex-grow">
+          <p className="font-bold text-gray-800 dark:text-gray-100">Spieler</p>
+          <div className="flex items-center gap-2 text-sm text-gray-500 dark:text-gray-400 mt-1">
+            <span>
+              {playerGroup.dayOfWeek
+                ? matchDays[playerGroup.dayOfWeek]
+                : "Spieltag noch nicht zugeteilt"}
+            </span>
+          </div>
+        </div>
+        <div className="flex-shrink-0">
+          <ChevronRight className="w-5 h-5 text-gray-400 dark:text-gray-500" />
+        </div>
       </div>
-    </div>
+    </Link>
   );
 }
 
