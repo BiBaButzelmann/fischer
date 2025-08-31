@@ -19,7 +19,7 @@ export function UpcomingGameEvent({
 }: Props) {
   return (
     <UpcomingEvent
-      title="Spiel"
+      title="Partie"
       start={start}
       url={buildGameViewUrl({
         tournamentId,
