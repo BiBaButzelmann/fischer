@@ -3,7 +3,7 @@
 import { db } from "@/db/client";
 import { participantGroup } from "@/db/schema/participant";
 import { ParticipantWithName } from "@/db/types/participant";
-import { and, eq, inArray } from "drizzle-orm";
+import { and, eq, inArray, ne } from "drizzle-orm";
 import { revalidatePath } from "next/cache";
 import { GridGroup } from "@/components/admin/groups/types";
 import { group } from "@/db/schema/group";
@@ -66,6 +66,19 @@ export async function saveGroup(tournamentId: number, groupData: GridGroup) {
 
   await db.transaction(async (tx) => {
     if (groupData.isNew) {
+      const existingGroup = await tx.query.group.findFirst({
+        where: and(
+          eq(group.tournamentId, tournamentId),
+          eq(group.groupNumber, groupData.groupNumber),
+        ),
+      });
+
+      if (existingGroup) {
+        throw new Error(
+          `Eine Gruppe mit der Nummer ${groupData.groupNumber} existiert bereits für dieses Turnier.`,
+        );
+      }
+
       const insertedGroup = await tx
         .insert(group)
         .values({
@@ -94,6 +107,20 @@ export async function saveGroup(tournamentId: number, groupData: GridGroup) {
 
       if (!existingGroup) {
         throw new Error(`Group ${groupData.id} not found`);
+      }
+
+      const conflictingGroup = await tx.query.group.findFirst({
+        where: and(
+          eq(group.tournamentId, tournamentId),
+          eq(group.groupNumber, groupData.groupNumber),
+          ne(group.id, groupData.id),
+        ),
+      });
+
+      if (conflictingGroup) {
+        throw new Error(
+          `Eine andere Gruppe mit der Nummer ${groupData.groupNumber} existiert bereits für dieses Turnier.`,
+        );
       }
 
       const gamesToDelete = await tx.query.game.findMany({
@@ -194,4 +221,16 @@ export async function updateGroupPositions(
 
   revalidatePath("/admin/gruppen");
   revalidatePath("/admin/paarungen");
+}
+
+export async function getExistingGroupNumbers(tournamentId: number) {
+  const session = await authWithRedirect();
+  invariant(session?.user.role === "admin", "Unauthorized");
+
+  const groups = await db.query.group.findMany({
+    where: eq(group.tournamentId, tournamentId),
+    columns: { groupNumber: true },
+  });
+
+  return groups.map((g) => g.groupNumber);
 }

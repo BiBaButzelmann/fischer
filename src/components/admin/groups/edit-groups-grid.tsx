@@ -6,12 +6,18 @@ import { useState, useTransition } from "react";
 import { GridGroup } from "./types";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { saveGroup, deleteGroup, updateGroupName } from "@/actions/group";
+import {
+  saveGroup,
+  deleteGroup,
+  updateGroupName,
+  getExistingGroupNumbers,
+} from "@/actions/group";
 import { MatchEnteringHelperWithName } from "@/db/types/match-entering-helper";
 import { useHelperAssignments } from "@/hooks/useHelperAssignments";
 import { updateMatchEnteringHelpers } from "@/actions/match-entering-helper";
 import { toast } from "sonner";
 import { NUMBER_OF_GROUPS_WITH_ELO } from "@/constants/constants";
+import invariant from "tiny-invariant";
 
 export function EditGroupsGrid({
   tournamentId,
@@ -96,18 +102,24 @@ export function EditGroupsGrid({
 
   const handleAutoDistribute = () => {
     const playersPerGroup = parseInt(participantsPerGroup);
-    if (isNaN(playersPerGroup) || playersPerGroup <= 0) {
-      toast.error("Bitte gib eine gültige Anzahl von Spielern pro Gruppe ein.");
-      return;
-    }
 
-    if (unassignedParticipants.length === 0) {
-      toast.error("Keine unzugewiesenen Teilnehmer vorhanden.");
-      return;
-    }
+    try {
+      invariant(
+        !isNaN(playersPerGroup) && playersPerGroup > 0,
+        "Bitte gib eine gültige Anzahl von Spielern pro Gruppe ein.",
+      );
 
-    if (gridGroups.length === 0) {
-      toast.error("Keine Gruppen vorhanden. Bitte erstelle zuerst Gruppen.");
+      invariant(
+        unassignedParticipants.length > 0,
+        "Keine unzugewiesenen Teilnehmer vorhanden.",
+      );
+
+      invariant(
+        gridGroups.length > 0,
+        "Keine Gruppen vorhanden. Bitte erstelle zuerst Gruppen.",
+      );
+    } catch (error) {
+      toast.error(error instanceof Error ? error.message : "Ungültige Eingabe");
       return;
     }
 
@@ -180,50 +192,74 @@ export function EditGroupsGrid({
     return `${letter}${numberWithinLetter}`;
   };
 
-  const handleAddNewGroup = () => {
-    setGridGroups((prev) => {
-      const existingNumbers = prev.map((g) => g.groupNumber);
-      let nextGroupNumber = 1;
-      while (existingNumbers.includes(nextGroupNumber)) {
-        nextGroupNumber++;
-      }
+  const handleAddNewGroup = async () => {
+    try {
+      const existingGroupNumbers = await getExistingGroupNumbers(tournamentId);
+      invariant(
+        Array.isArray(existingGroupNumbers),
+        "Fehler beim Laden der bestehenden Gruppennummern",
+      );
 
-      const groupName = generateGroupName(nextGroupNumber);
+      setGridGroups((prev) => {
+        const allExistingNumbers = [
+          ...existingGroupNumbers,
+          ...prev.map((g) => g.groupNumber),
+        ];
 
-      return [
-        ...prev,
-        {
-          id: Date.now(),
-          isNew: true,
-          groupNumber: nextGroupNumber,
-          groupName: groupName,
-          dayOfWeek: null,
-          participants: [],
-          matchEnteringHelpers: [],
-        } as GridGroup,
-      ];
-    });
+        let nextGroupNumber = 1;
+        while (allExistingNumbers.includes(nextGroupNumber)) {
+          nextGroupNumber++;
+        }
+
+        const groupName = generateGroupName(nextGroupNumber);
+
+        return [
+          ...prev,
+          {
+            id: Date.now(),
+            isNew: true,
+            groupNumber: nextGroupNumber,
+            groupName: groupName,
+            dayOfWeek: null,
+            participants: [],
+            matchEnteringHelpers: [],
+          } as GridGroup,
+        ];
+      });
+
+      toast.success("Neue Gruppe hinzugefügt");
+    } catch (error) {
+      console.error("Error creating new group:", error);
+      toast.error(
+        error instanceof Error
+          ? error.message
+          : "Fehler beim Erstellen einer neuen Gruppe",
+      );
+    }
   };
-
   const handleDeleteGroup = (groupId: number) => {
     startTransition(async () => {
-      const newGroups = [...gridGroups];
-      const groupIndex = newGroups.findIndex((g) => g.id === groupId);
-      if (groupIndex === -1) return;
+      try {
+        const newGroups = [...gridGroups];
+        const groupIndex = newGroups.findIndex((g) => g.id === groupId);
 
-      const deletedGroup = newGroups.splice(groupIndex, 1);
-      setGridGroups(newGroups);
-      setUnassignedParticipants([
-        ...unassignedParticipants,
-        ...deletedGroup[0].participants,
-      ]);
+        invariant(groupIndex !== -1, "Gruppe nicht gefunden");
 
-      if (!deletedGroup[0].isNew) {
-        await deleteGroup(groupId);
+        const deletedGroup = newGroups.splice(groupIndex, 1);
+        setGridGroups(newGroups);
+        setUnassignedParticipants([
+          ...unassignedParticipants,
+          ...deletedGroup[0].participants,
+        ]);
+
+        if (!deletedGroup[0].isNew) {
+          await deleteGroup(groupId);
+        }
+      } catch {
+        toast.error("Fehler beim Löschen der Gruppe");
       }
     });
   };
-
   const handleUpdateGroupName = (groupId: number, newName: string) => {
     const updatedGroups = gridGroups.map((g) =>
       g.id === groupId ? { ...g, groupName: newName } : g,
@@ -240,11 +276,21 @@ export function EditGroupsGrid({
 
   const handleSaveGroup = (groupData: GridGroup) => {
     startTransition(async () => {
-      const groupId = await saveGroup(tournamentId, groupData);
-      const matchEnteringHelperIds = getMatchEnteringHelpersForGroup(
-        groupData.id,
-      ).map((h) => h.id);
-      await updateMatchEnteringHelpers(groupId, matchEnteringHelperIds);
+      try {
+        const groupId = await saveGroup(tournamentId, groupData);
+        invariant(
+          groupId,
+          "Gruppe ID sollte nach dem Speichern definiert sein",
+        );
+
+        const matchEnteringHelperIds = getMatchEnteringHelpersForGroup(
+          groupData.id,
+        ).map((h) => h.id);
+        await updateMatchEnteringHelpers(groupId, matchEnteringHelperIds);
+        toast.success("Gruppe erfolgreich gespeichert");
+      } catch {
+        toast.error("Fehler beim Speichern der Gruppe");
+      }
     });
   };
 
@@ -262,7 +308,7 @@ export function EditGroupsGrid({
         />
         <Button
           variant="outline"
-          onClick={handleAddNewGroup}
+          onClick={() => startTransition(handleAddNewGroup)}
           disabled={isPending}
         >
           Gruppe hinzufügen
