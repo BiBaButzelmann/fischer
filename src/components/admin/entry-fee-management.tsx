@@ -1,6 +1,3 @@
-"use client";
-
-import { useState } from "react";
 import {
   Card,
   CardContent,
@@ -12,8 +9,6 @@ import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Check, X, Euro, User } from "lucide-react";
 import { updateEntryFeeStatus } from "@/actions/participant";
-import { useTransition } from "react";
-import { toast } from "sonner";
 
 type EntryFeeParticipant = {
   id: number;
@@ -30,35 +25,10 @@ type Props = {
 };
 
 export function EntryFeeManagement({ participants }: Props) {
-  const [isPending, startTransition] = useTransition();
-  const [localParticipants, setLocalParticipants] = useState(participants);
-
-  const handleEntryFeeUpdate = (participantId: number, paid: boolean) => {
-    startTransition(async () => {
-      try {
-        await updateEntryFeeStatus(participantId, paid);
-
-        setLocalParticipants((prev) =>
-          prev.map((p) =>
-            p.id === participantId ? { ...p, entryFeePayed: paid } : p,
-          ),
-        );
-
-        toast.success(
-          paid
-            ? "Startgeld als bezahlt markiert"
-            : "Startgeld als unbezahlt markiert",
-        );
-      } catch {
-        toast.error("Fehler beim Aktualisieren des Startgeld-Status");
-      }
-    });
-  };
-
-  const unpaidParticipants = localParticipants.filter(
+  const unpaidParticipants = participants.filter(
     (participant) => !participant.entryFeePayed,
   );
-  const paidParticipants = localParticipants.filter(
+  const paidParticipants = participants.filter(
     (participant) => participant.entryFeePayed,
   );
 
@@ -91,8 +61,6 @@ export function EntryFeeManagement({ participants }: Props) {
                 <ParticipantRow
                   key={participant.id}
                   participant={participant}
-                  onUpdateStatus={handleEntryFeeUpdate}
-                  isPending={isPending}
                 />
               ))}
             </div>
@@ -127,8 +95,6 @@ export function EntryFeeManagement({ participants }: Props) {
                 <ParticipantRow
                   key={participant.id}
                   participant={participant}
-                  onUpdateStatus={handleEntryFeeUpdate}
-                  isPending={isPending}
                 />
               ))}
             </div>
@@ -141,16 +107,13 @@ export function EntryFeeManagement({ participants }: Props) {
 
 type ParticipantRowProps = {
   participant: EntryFeeParticipant;
-  onUpdateStatus: (participantId: number, paid: boolean) => void;
-  isPending: boolean;
 };
 
-function ParticipantRow({
-  participant,
-  onUpdateStatus,
-  isPending,
-}: ParticipantRowProps) {
+function ParticipantRow({ participant }: ParticipantRowProps) {
   const isPaid = participant.entryFeePayed;
+
+  const updateToPaid = updateEntryFeeStatus.bind(null, participant.id, true);
+  const updateToUnpaid = updateEntryFeeStatus.bind(null, participant.id, false);
 
   return (
     <div className="flex items-center justify-between p-4 bg-gray-50 rounded-lg border">
@@ -181,20 +144,21 @@ function ParticipantRow({
           )}
         </Badge>
 
-        <Button
-          variant={isPaid ? "outline" : "default"}
-          size="sm"
-          onClick={() => onUpdateStatus(participant.id, !isPaid)}
-          disabled={isPending}
-          className={
-            isPaid
-              ? "text-red-600 hover:text-red-700 hover:bg-red-50"
-              : "bg-green-600 hover:bg-green-700"
-          }
-        >
-          <Euro className="h-4 w-4 mr-1" />
-          {isPaid ? "Als unbezahlt markieren" : "Als bezahlt markieren"}
-        </Button>
+        <form action={isPaid ? updateToUnpaid : updateToPaid}>
+          <Button
+            type="submit"
+            variant={isPaid ? "outline" : "default"}
+            size="sm"
+            className={
+              isPaid
+                ? "text-red-600 hover:text-red-700 hover:bg-red-50"
+                : "bg-green-600 hover:bg-green-700"
+            }
+          >
+            <Euro className="h-4 w-4 mr-1" />
+            {isPaid ? "Als unbezahlt markieren" : "Als bezahlt markieren"}
+          </Button>
+        </form>
       </div>
     </div>
   );

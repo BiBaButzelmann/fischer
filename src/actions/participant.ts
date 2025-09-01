@@ -10,6 +10,7 @@ import { getTournamentById } from "@/db/repositories/tournament";
 import { getProfileByUserId } from "@/db/repositories/profile";
 import { and, eq } from "drizzle-orm";
 import { DEFAULT_CLUB_LABEL } from "@/constants/constants";
+import { revalidatePath } from "next/cache";
 
 export async function createParticipant(
   tournamentId: number,
@@ -181,9 +182,10 @@ export async function updateEntryFeeStatus(
 ) {
   const session = await authWithRedirect();
 
-  if (session.user.role !== "admin") {
-    throw new Error("Unauthorized: Admin access required");
-  }
+  invariant(
+    session.user.role === "admin",
+    "Unauthorized: Admin access required",
+  );
 
   await db
     .update(participant)
@@ -191,4 +193,6 @@ export async function updateEntryFeeStatus(
       entryFeePayed,
     })
     .where(eq(participant.id, participantId));
+
+  revalidatePath("/admin/startgeld");
 }
