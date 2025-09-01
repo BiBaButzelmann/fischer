@@ -22,7 +22,7 @@ export function EmailReminderButton({ unpaidCount }: Props) {
     startTransition(async () => {
       try {
         await sendEntryFeeReminderEmails();
-      } catch (error) {
+      } catch {
         toast.error("Fehler beim Versenden der E-Mails");
       }
     });
