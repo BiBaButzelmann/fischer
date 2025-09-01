@@ -267,3 +267,30 @@ export async function getNonDefaultClubParticipantsByTournamentId(
     orderBy: (participant, { asc }) => [asc(participant.id)],
   });
 }
+
+export async function getNonDefaultClubParticipantsWithEmailByTournamentId(
+  tournamentId: number,
+) {
+  return await db.query.participant.findMany({
+    where: (participant, { eq, and, ne }) =>
+      and(
+        eq(participant.tournamentId, tournamentId),
+        ne(participant.chessClub, DEFAULT_CLUB_LABEL),
+        isNull(participant.deletedAt),
+      ),
+    columns: {
+      id: true,
+      entryFeePayed: true,
+    },
+    with: {
+      profile: {
+        columns: {
+          firstName: true,
+          lastName: true,
+          email: true,
+        },
+      },
+    },
+    orderBy: (participant, { asc }) => [asc(participant.id)],
+  });
+}
