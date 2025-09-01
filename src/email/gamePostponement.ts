@@ -1,5 +1,5 @@
 import { GamePostponementMail } from "@/email/templates/game-postponement-mail";
-import { resend } from "./client";
+import { sendEmail } from "./client";
 
 type GamePostponementEmailData = {
   playerEmail: string;
@@ -21,19 +21,13 @@ type GamePostponementEmailData = {
 export async function sendGamePostponementEmail(
   data: GamePostponementEmailData,
 ) {
-  let recipientAddress = data.playerEmail;
-  if (process.env.NODE_ENV === "development") {
-    recipientAddress = "delivered@resend.dev";
-  }
-
   const isPlayerPostponing = data.playerName === data.postponingPlayerName;
   const subject = isPlayerPostponing
     ? "Partie erfolgreich verschoben"
     : "Deine Partie wurde verschoben";
 
-  await resend.emails.send({
-    from: "klubturnier@hsk1830.de",
-    to: recipientAddress,
+  await sendEmail({
+    to: data.playerEmail,
     subject: subject,
     react: GamePostponementMail({
       playerName: data.playerName,

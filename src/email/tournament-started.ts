@@ -1,4 +1,4 @@
-import { resend } from "./client";
+import { sendEmail } from "./client";
 import { RolesData } from "@/db/types/role";
 import {
   TournamentStartedMail,
@@ -14,14 +14,8 @@ type Props = {
 };
 
 export async function sendTournamentStartedMail(data: Props) {
-  let recipientAddress = data.email;
-  if (process.env.NODE_ENV === "development") {
-    recipientAddress = "delivered@resend.dev";
-  }
-
-  await resend.emails.send({
-    from: "klubturnier@hsk1830.de",
-    to: recipientAddress,
+  await sendEmail({
+    to: data.email,
     subject: "Das Turnier ist gestartet!",
     react: TournamentStartedMail({
       name: data.name,
