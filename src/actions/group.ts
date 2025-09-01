@@ -66,55 +66,27 @@ export async function saveGroup(tournamentId: number, groupData: GridGroup) {
 
   await db.transaction(async (tx) => {
     if (groupData.isNew) {
-      const existingGroup = await tx.query.group.findFirst({
-        where: and(
-          eq(group.tournamentId, tournamentId),
-          eq(group.groupNumber, groupData.groupNumber),
-        ),
-      });
-
-      let targetGroup;
-      if (existingGroup) {
-        await tx
-          .update(group)
-          .set({
-            groupName: groupData.groupName,
-            dayOfWeek: groupData.dayOfWeek,
-          })
-          .where(eq(group.id, existingGroup.id));
-
-        targetGroup = existingGroup;
-      } else {
-        const insertedGroup = await tx
-          .insert(group)
-          .values({
-            groupName: groupData.groupName,
-            groupNumber: groupData.groupNumber,
-            dayOfWeek: groupData.dayOfWeek,
-            tournamentId,
-          })
-          .returning();
-
-        targetGroup = insertedGroup[0];
-      }
-
-      if (existingGroup) {
-        await tx
-          .delete(participantGroup)
-          .where(eq(participantGroup.groupId, targetGroup.id));
-      }
+      const insertedGroup = await tx
+        .insert(group)
+        .values({
+          groupName: groupData.groupName,
+          groupNumber: groupData.groupNumber,
+          dayOfWeek: groupData.dayOfWeek,
+          tournamentId,
+        })
+        .returning();
 
       if (groupData.participants.length > 0) {
         await tx.insert(participantGroup).values(
           groupData.participants.map((p, index) => ({
             participantId: p.id,
-            groupId: targetGroup.id,
+            groupId: insertedGroup[0].id,
             groupPosition: index + 1,
           })),
         );
       }
 
-      groupId = targetGroup.id;
+      groupId = insertedGroup[0].id;
     } else {
       const existingGroup = await tx.query.group.findFirst({
         where: eq(group.id, groupData.id),
@@ -122,24 +94,6 @@ export async function saveGroup(tournamentId: number, groupData: GridGroup) {
 
       if (!existingGroup) {
         throw new Error(`Group ${groupData.id} not found`);
-      }
-
-      const conflictingGroup = await tx.query.group.findFirst({
-        where: and(
-          eq(group.tournamentId, tournamentId),
-          eq(group.groupNumber, groupData.groupNumber),
-          ne(group.id, groupData.id),
-        ),
-      });
-
-      if (conflictingGroup) {
-        await tx
-          .update(group)
-          .set({
-            groupName: groupData.groupName,
-            dayOfWeek: groupData.dayOfWeek,
-          })
-          .where(eq(group.id, conflictingGroup.id));
       }
 
       const gamesToDelete = await tx.query.game.findMany({
