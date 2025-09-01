@@ -193,70 +193,54 @@ export function EditGroupsGrid({
   };
 
   const handleAddNewGroup = async () => {
-    try {
-      const existingGroupNumbers = await getExistingGroupNumbers(tournamentId);
-      invariant(
-        Array.isArray(existingGroupNumbers),
-        "Fehler beim Laden der bestehenden Gruppennummern",
-      );
+    const existingGroupNumbers = await getExistingGroupNumbers(tournamentId);
+    invariant(
+      Array.isArray(existingGroupNumbers),
+      "Fehler beim Laden der bestehenden Gruppennummern",
+    );
 
-      setGridGroups((prev) => {
-        const allExistingNumbers = [
-          ...existingGroupNumbers,
-          ...prev.map((g) => g.groupNumber),
-        ];
+    setGridGroups((prev) => {
+      const allExistingNumbers = [
+        ...existingGroupNumbers,
+        ...prev.map((g) => g.groupNumber),
+      ];
 
-        let nextGroupNumber = 1;
-        while (allExistingNumbers.includes(nextGroupNumber)) {
-          nextGroupNumber++;
-        }
+      let nextGroupNumber = 1;
+      while (allExistingNumbers.includes(nextGroupNumber)) {
+        nextGroupNumber++;
+      }
 
-        const groupName = generateGroupName(nextGroupNumber);
+      const groupName = generateGroupName(nextGroupNumber);
 
-        return [
-          ...prev,
-          {
-            id: Date.now(),
-            isNew: true,
-            groupNumber: nextGroupNumber,
-            groupName: groupName,
-            dayOfWeek: null,
-            participants: [],
-            matchEnteringHelpers: [],
-          } as GridGroup,
-        ];
-      });
-
-      toast.success("Neue Gruppe hinzugefügt");
-    } catch (error) {
-      console.error("Error creating new group:", error);
-      toast.error(
-        error instanceof Error
-          ? error.message
-          : "Fehler beim Erstellen einer neuen Gruppe",
-      );
-    }
+      return [
+        ...prev,
+        {
+          id: Date.now(),
+          isNew: true,
+          groupNumber: nextGroupNumber,
+          groupName: groupName,
+          dayOfWeek: null,
+          participants: [],
+          matchEnteringHelpers: [],
+        } as GridGroup,
+      ];
+    });
   };
   const handleDeleteGroup = (groupId: number) => {
     startTransition(async () => {
-      try {
-        const newGroups = [...gridGroups];
-        const groupIndex = newGroups.findIndex((g) => g.id === groupId);
+      const newGroups = [...gridGroups];
+      const groupIndex = newGroups.findIndex((g) => g.id === groupId);
+      if (groupIndex === -1) return;
 
-        invariant(groupIndex !== -1, "Gruppe nicht gefunden");
+      const deletedGroup = newGroups.splice(groupIndex, 1);
+      setGridGroups(newGroups);
+      setUnassignedParticipants([
+        ...unassignedParticipants,
+        ...deletedGroup[0].participants,
+      ]);
 
-        const deletedGroup = newGroups.splice(groupIndex, 1);
-        setGridGroups(newGroups);
-        setUnassignedParticipants([
-          ...unassignedParticipants,
-          ...deletedGroup[0].participants,
-        ]);
-
-        if (!deletedGroup[0].isNew) {
-          await deleteGroup(groupId);
-        }
-      } catch {
-        toast.error("Fehler beim Löschen der Gruppe");
+      if (!deletedGroup[0].isNew) {
+        await deleteGroup(groupId);
       }
     });
   };
