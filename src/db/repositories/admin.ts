@@ -8,6 +8,7 @@ import { referee } from "../schema/referee";
 import { juror } from "../schema/juror";
 import { matchEnteringHelper } from "../schema/matchEnteringHelper";
 import { setupHelper } from "../schema/setupHelper";
+import { DEFAULT_CLUB_LABEL } from "@/constants/constants";
 
 export async function getAllProfiles() {
   return await db.query.profile.findMany({
@@ -236,4 +237,35 @@ export async function getAllProfilesWithRolesByTournamentId(
         ),
       ),
     );
+}
+
+export async function getNonDefaultClubParticipantsByTournamentId(
+  tournamentId: number,
+) {
+  const { DEFAULT_CLUB_LABEL } = await import("@/constants/constants");
+
+  return await db.query.participant.findMany({
+    where: (participant, { eq, and, ne }) =>
+      and(
+        eq(participant.tournamentId, tournamentId),
+        ne(participant.chessClub, DEFAULT_CLUB_LABEL),
+        isNull(participant.deletedAt),
+      ),
+    columns: {
+      id: true,
+      chessClub: true,
+      dwzRating: true,
+      fideRating: true,
+      entryFeePayed: true,
+    },
+    with: {
+      profile: {
+        columns: {
+          firstName: true,
+          lastName: true,
+        },
+      },
+    },
+    orderBy: (participant, { asc }) => [asc(participant.id)],
+  });
 }

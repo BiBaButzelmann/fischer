@@ -174,3 +174,21 @@ export async function getParticipantEloData(
     zpsPlayer: clubFields[5],
   };
 }
+
+export async function updateEntryFeeStatus(
+  participantId: number,
+  entryFeePayed: boolean,
+) {
+  const session = await authWithRedirect();
+
+  if (session.user.role !== "admin") {
+    throw new Error("Unauthorized: Admin access required");
+  }
+
+  await db
+    .update(participant)
+    .set({
+      entryFeePayed,
+    })
+    .where(eq(participant.id, participantId));
+}
