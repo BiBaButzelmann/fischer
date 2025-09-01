@@ -14,14 +14,10 @@ export function EmailReminderButton({ unpaidCount }: Props) {
   const [isPending, startTransition] = useTransition();
 
   const handleSendReminders = () => {
-    if (unpaidCount === 0) {
-      toast.info("Keine Erinnerungen zu versenden - alle haben bezahlt!");
-      return;
-    }
-
     startTransition(async () => {
       try {
-        await sendEntryFeeReminderEmails();
+        const result = await sendEntryFeeReminderEmails();
+        toast.success(result.message);
       } catch {
         toast.error("Fehler beim Versenden der E-Mails");
       }
