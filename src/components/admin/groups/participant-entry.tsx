@@ -36,12 +36,12 @@ export function ParticipantEntry({
       )}
       {showFideRating && (
         <Badge className="whitespace-nowrap w-[75px]">
-          FIDE {participant?.fideRating ?? "?"}
+          FIDE {participant?.fideRating ?? "0"}
         </Badge>
       )}
       {showDwzRating && (
         <Badge variant="secondary" className="whitespace-nowrap w-[75px]">
-          DWZ {participant?.dwzRating ?? ""}
+          DWZ {participant?.dwzRating ?? "0"}
         </Badge>
       )}
     </div>

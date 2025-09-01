@@ -35,3 +35,5 @@ export const GAME_START_TIME = {
   minutes: 0,
   seconds: 0,
 } as const;
+
+export const NUMBER_OF_GROUPS_WITH_ELO = 4;

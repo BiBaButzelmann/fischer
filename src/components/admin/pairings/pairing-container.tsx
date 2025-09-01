@@ -5,15 +5,12 @@ import { GroupWithParticipantsAndGames } from "@/db/types/group";
 import { GroupPositionManager } from "./group-position-manager";
 import { Pairing } from "./pairing";
 
-type GroupPairingsContainerProps = {
+type Props = {
   tournamentId: number;
   groups: GroupWithParticipantsAndGames[];
 };
 
-export function PairingContainer({
-  tournamentId,
-  groups,
-}: GroupPairingsContainerProps) {
+export function PairingContainer({ tournamentId, groups }: Props) {
   const [selectedGroupId, setSelectedGroupId] = useState<number>(groups[0].id);
 
   const handleGroupChange = (groupId: number) => {
@@ -24,7 +21,6 @@ export function PairingContainer({
 
   return (
     <div className="flex gap-6">
-      {/* Left side: Group selector and participants */}
       <div className="w-96 flex-shrink-0">
         <GroupPositionManager
           tournamentId={tournamentId}
@@ -32,8 +28,7 @@ export function PairingContainer({
           onGroupChange={handleGroupChange}
         />
       </div>
-      {/* TODO: there is a bug that for 9 players only 4 pairings are shown, see todo in game.ts */}
-      {/* Right side: Pairings for selected group */}
+
       <div className="flex-1 min-w-0">
         {selectedGroup ? (
           <Pairing group={selectedGroup} />
