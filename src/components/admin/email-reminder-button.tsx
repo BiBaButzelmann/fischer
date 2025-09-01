@@ -21,11 +21,9 @@ export function EmailReminderButton({ unpaidCount }: Props) {
 
     startTransition(async () => {
       try {
-        const result = await sendEntryFeeReminderEmails();
-        toast.success(result.message);
+        await sendEntryFeeReminderEmails();
       } catch (error) {
         toast.error("Fehler beim Versenden der E-Mails");
-        console.error("Error sending entry fee reminder emails:", error);
       }
     });
   };

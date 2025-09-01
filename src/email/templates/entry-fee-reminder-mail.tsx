@@ -2,9 +2,10 @@ import * as React from "react";
 
 type Props = {
   firstName: string;
+  lastName: string;
 };
 
-export function EntryFeeReminderMail({ firstName }: Props) {
+export function EntryFeeReminderMail({ firstName, lastName }: Props) {
   return (
     <div
       style={{
@@ -49,7 +50,10 @@ export function EntryFeeReminderMail({ firstName }: Props) {
           IBAN: <strong>DE86 2005 0550 1216 1326 86</strong>
         </p>
         <p style={{ margin: "5px 0" }}>
-          Verwendungszweck: <strong>Klubturnier 2025 {firstName}</strong>
+          Verwendungszweck:{" "}
+          <strong>
+            Klubturnier 2025 {firstName} {lastName}
+          </strong>
         </p>
       </div>
 

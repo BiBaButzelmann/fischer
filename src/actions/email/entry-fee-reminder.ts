@@ -31,6 +31,7 @@ export async function sendEntryFeeReminderEmails() {
     return sendEntryFeeReminderEmail(
       participant.profile.email,
       participant.profile.firstName,
+      participant.profile.lastName,
     );
   });
 

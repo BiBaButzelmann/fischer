@@ -1,7 +1,11 @@
 import { EntryFeeReminderMail } from "@/email/templates/entry-fee-reminder-mail";
 import { resend } from "./client";
 
-export async function sendEntryFeeReminderEmail(to: string, firstName: string) {
+export async function sendEntryFeeReminderEmail(
+  to: string,
+  firstName: string,
+  lastName: string,
+) {
   let recipientAddress = to;
   if (process.env.NODE_ENV === "development") {
     recipientAddress = "delivered@resend.dev";
@@ -13,6 +17,7 @@ export async function sendEntryFeeReminderEmail(to: string, firstName: string) {
     subject: "Startgeld HSK-Klubturnier",
     react: EntryFeeReminderMail({
       firstName,
+      lastName,
     }),
   });
 }
