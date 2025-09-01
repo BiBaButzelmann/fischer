@@ -1,4 +1,4 @@
-import { resend } from "./client";
+import { sendEmail } from "./client";
 import { PasswordResetMail } from "./templates/password-reset-mail";
 
 export async function sendPasswordResetEmail(
@@ -6,13 +6,8 @@ export async function sendPasswordResetEmail(
   firstName: string,
   url: string,
 ) {
-  let recipientAddress = to;
-  if (process.env.NODE_ENV === "development") {
-    recipientAddress = "delivered@resend.dev";
-  }
-  await resend.emails.send({
-    from: "klubturnier@hsk1830.de",
-    to: recipientAddress,
+  await sendEmail({
+    to,
     subject: "Password zurücksetzen",
     react: PasswordResetMail({
       firstName: firstName,

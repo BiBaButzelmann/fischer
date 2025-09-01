@@ -18,6 +18,7 @@ import {
   BinocularsIcon,
   BookTextIcon,
   CalendarIcon,
+  Euro,
   FileCheck,
   LayoutDashboard,
   Medal,
@@ -137,6 +138,9 @@ export function AppSidebar({ session, tournament }: Props) {
               </SidebarLink>
               <SidebarLink href="/admin/gruppen" icon={Users}>
                 Gruppen verwalten
+              </SidebarLink>
+              <SidebarLink href="/admin/startgeld" icon={Euro}>
+                Startgeld verwalten
               </SidebarLink>
               <SidebarLink href="/admin/paarungen" icon={Users}>
                 Paarungen verwalten

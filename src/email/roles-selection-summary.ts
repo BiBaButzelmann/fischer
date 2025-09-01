@@ -1,4 +1,4 @@
-import { resend } from "./client";
+import { sendEmail } from "./client";
 import { RolesData } from "@/db/types/role";
 import RoleSelectionSummaryMail from "./templates/roles-selection-summary-mail";
 
@@ -7,13 +7,8 @@ export async function sendRolesSelectionSummaryMail(
   firstName: string,
   roles: RolesData,
 ) {
-  let recipientAddress = to;
-  if (process.env.NODE_ENV === "development") {
-    recipientAddress = "delivered@resend.dev";
-  }
-  await resend.emails.send({
-    from: "klubturnier@hsk1830.de",
-    to: recipientAddress,
+  await sendEmail({
+    to,
     subject: "Anmeldebestätigung für das Klubturnier",
     react: RoleSelectionSummaryMail({
       name: firstName,

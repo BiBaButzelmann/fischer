@@ -10,6 +10,7 @@ import { getTournamentById } from "@/db/repositories/tournament";
 import { getProfileByUserId } from "@/db/repositories/profile";
 import { and, eq } from "drizzle-orm";
 import { DEFAULT_CLUB_LABEL } from "@/constants/constants";
+import { revalidatePath } from "next/cache";
 
 export async function createParticipant(
   tournamentId: number,
@@ -173,4 +174,25 @@ export async function getParticipantEloData(
     zpsClub: clubFields[4],
     zpsPlayer: clubFields[5],
   };
+}
+
+export async function updateEntryFeeStatus(
+  participantId: number,
+  entryFeePayed: boolean,
+) {
+  const session = await authWithRedirect();
+
+  invariant(
+    session.user.role === "admin",
+    "Unauthorized: Admin access required",
+  );
+
+  await db
+    .update(participant)
+    .set({
+      entryFeePayed,
+    })
+    .where(eq(participant.id, participantId));
+
+  revalidatePath("/admin/startgeld");
 }
