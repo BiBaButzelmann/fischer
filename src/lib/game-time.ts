@@ -18,7 +18,7 @@ export function getDateTimeFromDefaultTime(matchdayDate: Date): Date {
     GAME_START_TIME.minutes,
     GAME_START_TIME.seconds,
   );
-  return toBerlinTime(gameDateTime);
+  return gameDateTime;
 }
 
 /**
@@ -33,7 +33,7 @@ export function getSetupHelperTimeFromDefaultTime(matchdayDate: Date): Date {
     GAME_START_TIME.minutes - 30,
     GAME_START_TIME.seconds,
   );
-  return toBerlinTime(setupDateTime);
+  return setupDateTime;
 }
 
 /**
