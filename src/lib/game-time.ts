@@ -4,7 +4,6 @@
 
 import { GAME_START_TIME } from "@/constants/constants";
 import { GameWithMatchday } from "@/db/types/game";
-import { toBerlinTime } from "./date";
 
 /**
  * Creates a Date object for a game with the specified matchday date and the standard game start time (7 PM German time)
