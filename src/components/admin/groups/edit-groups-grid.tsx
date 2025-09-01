@@ -276,25 +276,11 @@ export function EditGroupsGrid({
 
   const handleSaveGroup = (groupData: GridGroup) => {
     startTransition(async () => {
-      try {
-        const groupId = await saveGroup(tournamentId, groupData);
-        invariant(
-          groupId,
-          "Gruppe ID sollte nach dem Speichern definiert sein",
-        );
-
-        const matchEnteringHelperIds = getMatchEnteringHelpersForGroup(
-          groupData.id,
-        ).map((h) => h.id);
-        await updateMatchEnteringHelpers(groupId, matchEnteringHelperIds);
-        toast.success("Gruppe erfolgreich gespeichert");
-      } catch (error) {
-        toast.error(
-          error instanceof Error
-            ? error.message
-            : "Fehler beim Speichern der Gruppe",
-        );
-      }
+      const groupId = await saveGroup(tournamentId, groupData);
+      const matchEnteringHelperIds = getMatchEnteringHelpersForGroup(
+        groupData.id,
+      ).map((h) => h.id);
+      await updateMatchEnteringHelpers(groupId, matchEnteringHelperIds);
     });
   };
 
