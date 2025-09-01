@@ -2,7 +2,7 @@
 
 import { match } from "ts-pattern";
 import { useEffect, useState } from "react";
-import { getBerlinTime, toBerlinTime } from "@/lib/date";
+import { getCurrentLocalDateTime, toLocalDateTime } from "@/lib/date";
 
 type Props = {
   date: Date;
@@ -59,20 +59,25 @@ function Timers({ timeLeft }: { timeLeft: TimeLeft }) {
 }
 
 function calculateTimeLeft(date: Date) {
-  const currentBerlinTime = getBerlinTime();
+  const currentLocalTime = getCurrentLocalDateTime();
 
   const endOfRegistrationDate = new Date(date);
   endOfRegistrationDate.setHours(23, 59, 59, 999);
-  const berlinTargetTime = toBerlinTime(endOfRegistrationDate);
+  const targetTime = toLocalDateTime(endOfRegistrationDate);
 
-  const difference = berlinTargetTime.getTime() - currentBerlinTime.getTime();
+  const diff = targetTime.diff(currentLocalTime, [
+    "days",
+    "hours",
+    "minutes",
+    "seconds",
+  ]);
 
-  return difference > 0
+  return targetTime > currentLocalTime
     ? {
-        days: Math.floor(difference / (1000 * 60 * 60 * 24)),
-        hours: Math.floor((difference / (1000 * 60 * 60)) % 24),
-        minutes: Math.floor((difference / 1000 / 60) % 60),
-        seconds: Math.floor((difference / 1000) % 60),
+        days: Math.floor(diff.days),
+        hours: Math.floor(diff.hours),
+        minutes: Math.floor(diff.minutes),
+        seconds: Math.floor(diff.seconds),
       }
     : undefined;
 }

@@ -50,19 +50,6 @@ export function getGameTimeFromGame(game: GameWithMatchday): DateTime {
 }
 
 /**
- * Formats a game date for display in German locale (DD.MM.YYYY format)
- * @param gameDateTime - The game date/time to format
- * @returns A formatted date string in German format
- */
-export function formatGameDate(gameDateTime: Date): string {
-  return gameDateTime.toLocaleDateString("de-DE", {
-    year: "numeric",
-    month: "2-digit",
-    day: "2-digit",
-  });
-}
-
-/**
  * Formats the standard game start time for display (HH:MM Uhr format)
  * @returns A formatted time string in German format
  */

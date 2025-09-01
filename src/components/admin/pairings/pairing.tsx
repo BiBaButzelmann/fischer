@@ -5,8 +5,9 @@ import { GameWithMatchday } from "@/db/types/game";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { ParticipantEntry } from "../groups/participant-entry";
 import { Bird } from "lucide-react";
-import { getDateTimeFromDefaultTime, formatGameDate } from "@/lib/game-time";
+import { getDateTimeFromDefaultTime, toDateString } from "@/lib/game-time";
 import { isSameDate } from "@/lib/date";
+import { DateTime } from "luxon";
 
 export function Pairing({ group }: { group: GroupWithParticipantsAndGames }) {
   if (!group.games || group.games.length === 0) {
@@ -32,7 +33,7 @@ export function Pairing({ group }: { group: GroupWithParticipantsAndGames }) {
     matchdayDate,
   }: {
     participantId: number;
-    matchdayDate: Date;
+    matchdayDate: DateTime;
   }) => {
     const participant = findParticipant(participantId);
 
@@ -113,7 +114,7 @@ export function Pairing({ group }: { group: GroupWithParticipantsAndGames }) {
           const gameDateTime = getDateTimeFromDefaultTime(
             games[0].matchdayGame.matchday.date,
           );
-          const dateDisplay = formatGameDate(gameDateTime);
+          const dateDisplay = toDateString(gameDateTime);
 
           return (
             <TabsContent key={round} value={`round-${round}`} className="mt-0">

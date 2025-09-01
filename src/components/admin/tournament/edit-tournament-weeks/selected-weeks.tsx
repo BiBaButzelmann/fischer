@@ -8,7 +8,7 @@ import {
   PopoverTrigger,
 } from "@/components/ui/popover";
 import { Button } from "@/components/ui/button";
-import { getBerlinDateTime } from "@/lib/date";
+import { getCurrentLocalDateTime } from "@/lib/date";
 
 export function SelectedWeeks({
   selectedWeeks,
@@ -79,12 +79,14 @@ export function SelectedWeeks({
 }
 
 function getCalendarWeek(weekNumber: number) {
-  const date = getBerlinDateTime().set({ weekNumber });
+  const date = getCurrentLocalDateTime().set({ weekNumber });
   return `KW (${date.toFormat("n/yyyy")})`;
 }
 
 function getWeekRange(weekNumber: number) {
-  const startOfWeek = getBerlinDateTime().set({ weekNumber }).startOf("week");
+  const startOfWeek = getCurrentLocalDateTime()
+    .set({ weekNumber })
+    .startOf("week");
   const endOfWeek = startOfWeek.endOf("week");
   return `${startOfWeek.toFormat("dd.MM")} - ${endOfWeek.toFormat("dd.MM.yyyy")}`;
 }

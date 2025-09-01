@@ -21,7 +21,7 @@ import {
 } from "@/lib/game-time";
 import { sendGamePostponementEmails } from "@/actions/email/game-postponement";
 import { updateBoardNumbers } from "@/actions/board-number";
-import { getBerlinTime } from "@/lib/date";
+import { getCurrentLocalDateTime } from "@/lib/date";
 import { getRolesByUserId } from "@/db/repositories/role";
 
 export async function removeScheduledGamesForGroup(
@@ -255,11 +255,11 @@ export async function updateGameMatchdayAndBoardNumber(
 
   await db.transaction(async (tx) => {
     await tx.insert(gamePostponement).values({
-      gameId,
+      gameId: gameId,
       postponingParticipantId: postponingParticipant.id,
       postponedByProfileId: userProfile.id,
-      from: fromTimestamp,
-      to: toTimestamp,
+      from: fromTimestamp.toJSDate(),
+      to: toTimestamp.toJSDate(),
     });
 
     await tx
@@ -331,7 +331,7 @@ export async function updateGameResult(gameId: number, result: GameResult) {
   );
 
   const gameDateTime = getGameTimeFromGame(gameData);
-  const now = getBerlinTime();
+  const now = getCurrentLocalDateTime();
   invariant(
     gameDateTime <= now,
     "Cannot submit result for games that haven't happened yet",

@@ -1,61 +1,20 @@
 import { DateTime } from "luxon";
 import { isHoliday } from "./holidays";
 
-/**
- * Gets the current time in Berlin timezone
- * @returns A Date object representing the current time in Berlin
- */
-export function getBerlinTime(): Date {
-  const berlinNow = new Date().toLocaleString("en-US", {
-    timeZone: "Europe/Berlin",
-  });
-  return new Date(berlinNow);
+export function getCurrentLocalDateTime(): DateTime {
+  return DateTime.now().setZone("Europe/Berlin");
 }
 
 export function toLocalDateTime(date: Date): DateTime {
   return DateTime.fromJSDate(date).setZone("Europe/Berlin");
 }
 
-/**
- * Converts any date to Berlin timezone
- * @param date - The date to convert
- * @returns A Date object representing the given date in Berlin timezone
- */
-export function toBerlinTime(date: Date): Date {
-  const berlinTime = date.toLocaleString("en-US", {
-    timeZone: "Europe/Berlin",
-  });
-  return new Date(berlinTime);
+export function getDatetimeString(date: DateTime) {
+  return date.toFormat("dd.MM.yyyy HH:mm");
 }
 
-/**
- * Gets a Luxon DateTime instance in Berlin timezone
- * @returns A DateTime object representing the current time in Berlin
- */
-export function getBerlinDateTime(): DateTime {
-  return DateTime.now().setZone("Europe/Berlin");
-}
-
-export function getDatetimeString(date: Date) {
-  const options: Intl.DateTimeFormatOptions = {
-    year: "numeric",
-    month: "2-digit",
-    day: "2-digit",
-    hour: "2-digit",
-    minute: "2-digit",
-    hour12: false,
-  };
-  return date.toLocaleString("de-DE", options).replace(",", "");
-}
-
-/**
- * Compares two dates to check if they are the same day (ignoring time)
- * @param date1 - First date to compare
- * @param date2 - Second date to compare
- * @returns True if the dates represent the same day, false otherwise
- */
-export function isSameDate(date1: Date, date2: Date): boolean {
-  return date1.toDateString() === date2.toDateString();
+export function isSameDate(date1: DateTime, date2: DateTime): boolean {
+  return date1.equals(date2);
 }
 
 /**
@@ -109,4 +68,13 @@ export function formatSimpleDate(date: Date): string {
     month: "2-digit",
     year: "numeric",
   });
+}
+
+/**
+ * Formats a game date for display in German locale (DD.MM.YYYY format)
+ * @param date - The game date/time to format
+ * @returns A formatted date string in German format
+ */
+export function toDateString(date: DateTime): string {
+  return date.toFormat("dd.MM.yyyy");
 }
