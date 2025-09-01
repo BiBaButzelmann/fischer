@@ -49,7 +49,7 @@ export function EntryFeeManagement({ participants }: Props) {
             ? "Startgeld als bezahlt markiert"
             : "Startgeld als unbezahlt markiert",
         );
-      } catch (error) {
+      } catch {
         toast.error("Fehler beim Aktualisieren des Startgeld-Status");
       }
     });

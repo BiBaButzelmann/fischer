@@ -242,8 +242,6 @@ export async function getAllProfilesWithRolesByTournamentId(
 export async function getNonDefaultClubParticipantsByTournamentId(
   tournamentId: number,
 ) {
-  const { DEFAULT_CLUB_LABEL } = await import("@/constants/constants");
-
   return await db.query.participant.findMany({
     where: (participant, { eq, and, ne }) =>
       and(
