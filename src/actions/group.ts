@@ -3,7 +3,7 @@
 import { db } from "@/db/client";
 import { participantGroup } from "@/db/schema/participant";
 import { ParticipantWithName } from "@/db/types/participant";
-import { and, eq, inArray, ne } from "drizzle-orm";
+import { and, eq, inArray } from "drizzle-orm";
 import { revalidatePath } from "next/cache";
 import { GridGroup } from "@/components/admin/groups/types";
 import { group } from "@/db/schema/group";
