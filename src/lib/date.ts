@@ -12,6 +12,10 @@ export function getBerlinTime(): Date {
   return new Date(berlinNow);
 }
 
+export function toLocalDateTime(date: Date): DateTime {
+  return DateTime.fromJSDate(date).setZone("Europe/Berlin");
+}
+
 /**
  * Converts any date to Berlin timezone
  * @param date - The date to convert
