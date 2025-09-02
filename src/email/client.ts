@@ -13,7 +13,7 @@ export async function sendEmail({
   react: ReactElement;
 }) {
   let recipientAddress = to;
-  if (process.env.NODE_ENV === "development") {
+  if (process.env.VERCEL_ENV !== "production") {
     recipientAddress = "delivered@resend.dev";
   }
 
