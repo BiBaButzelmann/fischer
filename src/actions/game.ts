@@ -21,7 +21,7 @@ import {
 } from "@/lib/game-time";
 import { sendGamePostponementEmails } from "@/actions/email/game-postponement";
 import { updateBoardNumbers } from "@/actions/board-number";
-import { getBerlinTime } from "@/lib/date";
+import { getCurrentLocalDateTime } from "@/lib/date";
 import { getRolesByUserId } from "@/db/repositories/role";
 
 export async function removeScheduledGamesForGroup(
@@ -250,8 +250,10 @@ export async function updateGameMatchdayAndBoardNumber(
   });
   invariant(userProfile, "User profile not found");
 
-  const fromTimestamp = getDateTimeFromDefaultTime(currentMatchday.date);
-  const toTimestamp = getDateTimeFromDefaultTime(newMatchday.date);
+  const fromTimestamp = getDateTimeFromDefaultTime(
+    currentMatchday.date,
+  ).toJSDate();
+  const toTimestamp = getDateTimeFromDefaultTime(newMatchday.date).toJSDate();
 
   await db.transaction(async (tx) => {
     await tx.insert(gamePostponement).values({
@@ -331,7 +333,7 @@ export async function updateGameResult(gameId: number, result: GameResult) {
   );
 
   const gameDateTime = getGameTimeFromGame(gameData);
-  const now = getBerlinTime();
+  const now = getCurrentLocalDateTime();
   invariant(
     gameDateTime <= now,
     "Cannot submit result for games that haven't happened yet",
