@@ -24,7 +24,7 @@ import { profile } from "../schema/profile";
 import { getMatchEnteringHelperIdByUserId } from "./match-entering-helper";
 import invariant from "tiny-invariant";
 import { alias } from "drizzle-orm/pg-core";
-import { PLAYED_GAME_RESULTS } from "@/constants/constants";
+import { PLAYED_GAME_RESULTS } from "../types/game";
 
 export async function getGameById(gameId: number) {
   return await db.query.game.findFirst({

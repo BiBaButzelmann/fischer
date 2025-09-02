@@ -100,3 +100,13 @@ export type GameWithParticipantsAndPGN = Game & {
 };
 
 export type GameResult = InferEnum<typeof game.result>;
+
+export type PlayedGameResult = "1:0" | "0:1" | "½-½" | "0-½" | "½-0";
+
+export const PLAYED_GAME_RESULTS: PlayedGameResult[] = [
+  "1:0",
+  "0:1",
+  "½-½",
+  "0-½",
+  "½-0",
+] as const;
