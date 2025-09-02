@@ -1,14 +1,6 @@
 import { authWithRedirect } from "@/auth/utils";
 import { PrintButton } from "@/components/partien/print/print-button";
 import { Badge } from "@/components/ui/badge";
-import {
-  Table,
-  TableBody,
-  TableCell,
-  TableHead,
-  TableHeader,
-  TableRow,
-} from "@/components/ui/table";
 import { getGamesByTournamentId } from "@/db/repositories/game";
 import { getRolesByUserId } from "@/db/repositories/role";
 import { getParticipantFullName } from "@/lib/participant";
@@ -48,42 +40,34 @@ export default async function Page({
       <div className="print:hidden">
         <PrintButton />
       </div>
-      <div className="w-[210mm]">
-        <Table>
-          <TableHeader>
-            <TableRow>
-              <TableHead className="hidden md:table-cell sticky top-0 bg-card text-center">
-                Gruppe
-              </TableHead>
-              <TableHead className="hidden md:table-cell sticky top-0 bg-card text-center">
-                Brett
-              </TableHead>
-              <TableHead className="sticky top-0 bg-card">Weiß</TableHead>
-              <TableHead className="sticky top-0 bg-card">Schwarz</TableHead>
-            </TableRow>
-          </TableHeader>
-          <TableBody>
-            {games.map((game) => (
-              <TableRow
-                key={game.id}
-                className="cursor-default even:bg-gray-100"
-              >
-                <TableCell className="w-16 text-center">
-                  <Badge variant="secondary">{game.group.groupName}</Badge>
-                </TableCell>
-                <TableCell className="w-16 text-center">
-                  <Badge variant="outline">{game.boardNumber}</Badge>
-                </TableCell>
-                <TableCell className="w-40 truncate">
-                  {getParticipantFullName(game.whiteParticipant!)}
-                </TableCell>
-                <TableCell className="w-40 truncate">
-                  {getParticipantFullName(game.blackParticipant!)}
-                </TableCell>
-              </TableRow>
-            ))}
-          </TableBody>
-        </Table>
+      <div className="w-[210mm] text-sm">
+        <div className="flex items-center text-muted-foreground py-1.5 border-b font-medium">
+          <div className="basis-28 text-center">Gruppe</div>
+          <div className="basis-28 text-center">Brett</div>
+          <div className="flex-1">Weiß</div>
+          <div className="flex-1">Schwarz</div>
+        </div>
+        <div>
+          {games.map((game) => (
+            <div
+              key={game.id}
+              className="flex items-center py-1.5 even:bg-gray-100"
+            >
+              <div className="basis-28 text-center">
+                <Badge variant="secondary">{game.group.groupName}</Badge>
+              </div>
+              <div className="basis-28 text-center">
+                <Badge variant="outline">{game.boardNumber}</Badge>
+              </div>
+              <div className="flex-1 truncate">
+                {getParticipantFullName(game.whiteParticipant!)}
+              </div>
+              <div className="flex-1 truncate">
+                {getParticipantFullName(game.blackParticipant!)}
+              </div>
+            </div>
+          ))}
+        </div>
       </div>
     </div>
   );
