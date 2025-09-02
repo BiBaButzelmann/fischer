@@ -1,13 +1,14 @@
 import { buildGameViewUrl } from "@/lib/navigation";
 import { Gamepad2 } from "lucide-react";
 import { EventIcon, UpcomingEvent } from "./upcoming-event";
+import { DateTime } from "luxon";
 
 type Props = {
   tournamentId: number;
   groupId: number;
   round: number;
   participantId: number;
-  start: Date;
+  start: DateTime;
 };
 
 export function UpcomingGameEvent({

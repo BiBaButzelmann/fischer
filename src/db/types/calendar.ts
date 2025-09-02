@@ -1,7 +1,9 @@
+import { DateTime } from "luxon";
+
 type GameEvent = {
   id: string;
   title: string;
-  start: Date;
+  start: DateTime;
   extendedProps: {
     eventType: "game";
     gameId: number;
@@ -15,7 +17,7 @@ type GameEvent = {
 type RefereeEvent = {
   id: string;
   title: string;
-  start: Date;
+  start: DateTime;
   extendedProps: {
     eventType: "referee";
     refereeId: number;
@@ -27,7 +29,7 @@ type RefereeEvent = {
 type SetupHelperEvent = {
   id: string;
   title: string;
-  start: Date;
+  start: DateTime;
   extendedProps: {
     eventType: "setupHelper";
     setupHelperId: number;

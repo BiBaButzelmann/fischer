@@ -8,7 +8,7 @@ import { calculateStandings } from "@/lib/standings";
 import type { TournamentNames } from "@/db/types/tournament";
 import type { GroupSummary } from "@/db/types/group";
 import { Game, GameWithMatchday } from "@/db/types/game";
-import { getCurrentLocalDateTime } from "@/lib/date";
+import { getCurrentLocalDateTime, toLocalDateTime } from "@/lib/date";
 
 type Props = {
   tournamentNames: TournamentNames[];
@@ -82,7 +82,7 @@ export async function StandingsDisplay({
 
   const now = getCurrentLocalDateTime();
   for (const game of games) {
-    if (game.matchdayGame.matchday.date > now) {
+    if (toLocalDateTime(game.matchdayGame.matchday.date) > now) {
       continue;
     }
 

@@ -10,13 +10,14 @@ import { NotebookPen } from "lucide-react";
 import { PostponeGameDialog } from "./postpone-game-dialog";
 import { ReportResultDialog } from "./report-result-dialog";
 import { isGameActuallyPlayed } from "@/lib/game-auth";
+import { DateTime } from "luxon";
 
 type Props = {
   gameId: number;
   currentResult: GameResult | null;
   onResultChange: (gameId: number, result: GameResult) => Promise<void>;
   availableMatchdays: MatchDay[];
-  currentGameDate: Date;
+  currentGameDate: DateTime;
   game: GameWithParticipantProfilesAndGroupAndMatchday;
   isReferee: boolean;
   canView: boolean;

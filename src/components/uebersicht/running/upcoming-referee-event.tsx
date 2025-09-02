@@ -1,11 +1,12 @@
 import { buildGameViewUrl } from "@/lib/navigation";
 import { Gavel } from "lucide-react";
 import { UpcomingEvent, EventIcon } from "./upcoming-event";
+import { DateTime } from "luxon";
 
 type Props = {
   tournamentId: number;
   matchdayId: number;
-  start: Date;
+  start: DateTime;
 };
 
 export function UpcomingRefereeEvent({

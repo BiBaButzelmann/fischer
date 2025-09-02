@@ -3,7 +3,7 @@
 import { db } from "@/db/client";
 import { group } from "@/db/schema/group";
 import { sendGamePostponementNotifications } from "@/email/gamePostponement";
-import { displayLongDate } from "@/lib/date";
+import { displayLongDate, toLocalDateTime } from "@/lib/date";
 import { eq } from "drizzle-orm";
 import type { GameWithParticipantProfilesAndMatchday } from "@/db/types/game";
 import type { ParticipantWithName } from "@/db/types/participant";
@@ -27,8 +27,10 @@ export async function sendGamePostponementEmails(
   const whitePlayerName = `${gameData.whiteParticipant.profile.firstName} ${gameData.whiteParticipant.profile.lastName}`;
   const blackPlayerName = `${gameData.blackParticipant.profile.firstName} ${gameData.blackParticipant.profile.lastName}`;
 
-  const oldDateFormatted = displayLongDate(currentMatchday.date);
-  const newDateFormatted = displayLongDate(newMatchday.date);
+  const oldDateFormatted = displayLongDate(
+    toLocalDateTime(currentMatchday.date),
+  );
+  const newDateFormatted = displayLongDate(toLocalDateTime(newMatchday.date));
 
   const whitePlayerEmailData = {
     playerEmail: gameData.whiteParticipant.profile.email,

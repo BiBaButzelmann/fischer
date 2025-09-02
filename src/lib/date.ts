@@ -34,13 +34,8 @@ export function displayShortDateOrHoliday(date: DateTime): string {
  * @param date - The date to format
  * @returns A formatted date string like "Donnerstag, 15. August 2024"
  */
-export function displayLongDate(date: Date): string {
-  return date.toLocaleDateString("de-DE", {
-    weekday: "long",
-    year: "numeric",
-    month: "long",
-    day: "numeric",
-  });
+export function displayLongDate(date: DateTime): string {
+  return date.setLocale("de-DE").toFormat("cccc, d. LLLL yyyy");
 }
 
 /**
@@ -48,26 +43,10 @@ export function displayLongDate(date: Date): string {
  * @param date - The date to format
  * @returns Formatted date and time string
  */
-export function formatEventDateTime(date: Date): string {
-  const dateStr = formatSimpleDate(date);
-  const timeStr = date.toLocaleTimeString("de-DE", {
-    hour: "2-digit",
-    minute: "2-digit",
-  });
+export function formatEventDateTime(date: DateTime): string {
+  const dateStr = date.setLocale("de-DE").toFormat("dd.MM.yyyy");
+  const timeStr = date.setLocale("de-DE").toFormat("HH:mm");
   return `${dateStr} um ${timeStr}`;
-}
-
-/**
- * Formats a date in German format (dd.MM.yyyy)
- * @param date - The date to format
- * @returns Formatted date string
- */
-export function formatSimpleDate(date: Date): string {
-  return date.toLocaleDateString("de-DE", {
-    day: "2-digit",
-    month: "2-digit",
-    year: "numeric",
-  });
 }
 
 /**

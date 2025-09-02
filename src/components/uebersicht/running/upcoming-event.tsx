@@ -2,10 +2,11 @@ import { formatEventDateTime } from "@/lib/date";
 import { Clock, LucideIcon } from "lucide-react";
 import Link from "next/link";
 import { ReactNode } from "react";
+import { DateTime } from "luxon";
 
 type Props = {
   title: string;
-  start: Date;
+  start: DateTime;
   url: string;
   icon: ReactNode;
 };
