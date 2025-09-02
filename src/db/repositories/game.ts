@@ -224,7 +224,12 @@ export async function getGamesByTournamentId(
   }
 
   const games = await db.query.game.findMany({
-    where: (game, { inArray }) => inArray(game.id, gameIds),
+    where: (game, { inArray, isNotNull, and }) =>
+      and(
+        inArray(game.id, gameIds),
+        isNotNull(game.whiteParticipantId),
+        isNotNull(game.blackParticipantId),
+      ),
     with: {
       whiteParticipant: {
         columns: {
