@@ -1,6 +1,5 @@
 "use client";
 
-import { getRolesByUserId } from "@/db/repositories/role";
 import {
   Sidebar,
   SidebarContent,
@@ -10,6 +9,7 @@ import {
   SidebarGroupLabel,
   SidebarHeader,
   SidebarMenu,
+  SidebarMenuButton,
   useSidebar,
 } from "../ui/sidebar";
 import Link from "next/link";
@@ -32,13 +32,15 @@ import { Button } from "../ui/button";
 import Image from "next/image";
 import { Session } from "@/types/auth";
 import { Tournament } from "@/db/types/tournament";
+import { Role } from "@/db/types/role";
 
 type Props = {
   session: Session | null;
   tournament?: Tournament;
+  userRoles: Role[];
 };
 
-export function AppSidebar({ session, tournament }: Props) {
+export function AppSidebar({ session, tournament, userRoles }: Props) {
   const { setOpenMobile, isMobile } = useSidebar();
 
   const handleMobileMenuClick = () => {
@@ -54,7 +56,6 @@ export function AppSidebar({ session, tournament }: Props) {
   const isActive = stage === "registration" || stage === "running";
   const isAdmin = session?.user.role === "admin";
 
-  const userRoles = session ? await getRolesByUserId(session.user.id) : [];
   const canAccessMatchEntry = userRoles.some((role) =>
     ["participant", "matchEnteringHelper", "admin"].includes(role),
   );
@@ -95,12 +96,9 @@ export function AppSidebar({ session, tournament }: Props) {
                 Kalender
               </SidebarLink>
               {canAccessMatchEntry && isRunning && (
-                <SidebarMenuButton asChild>
-                  <Link href="/partieneingabe">
-                    <ClipboardEdit />
-                    <span>Partieneingabe</span>
-                  </Link>
-                </SidebarMenuButton>
+                <SidebarLink href="/partieneingabe" icon={ClipboardEdit}>
+                  Partieneingabe
+                </SidebarLink>
               )}
             </SidebarMenu>
           </SidebarGroupContent>
