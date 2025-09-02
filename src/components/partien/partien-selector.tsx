@@ -187,19 +187,6 @@ export function PartienSelector({
                 ) : (
                   <span>Datum wählen</span>
                 )}
-                {selectedMatchday && (
-                  <Button
-                    variant="ghost"
-                    size="sm"
-                    onClick={(e) => {
-                      e.stopPropagation();
-                      handleMatchdayChange(undefined);
-                    }}
-                    className="absolute right-1 h-6 w-6 p-0 hover:bg-gray-100"
-                  >
-                    ✕
-                  </Button>
-                )}
               </Button>
             </PopoverTrigger>
             <PopoverContent className="w-auto p-0">
@@ -218,6 +205,19 @@ export function PartienSelector({
               />
             </PopoverContent>
           </Popover>
+          {selectedMatchday && (
+            <Button
+              variant="ghost"
+              size="sm"
+              onClick={(e) => {
+                e.stopPropagation();
+                handleMatchdayChange(undefined);
+              }}
+              className="absolute top-1/2 -translate-y-1/2 right-1 h-6 w-6 p-0 hover:bg-gray-100"
+            >
+              ✕
+            </Button>
+          )}
         </div>
       </div>
       <div className="flex flex-col gap-1">
