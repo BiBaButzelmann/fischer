@@ -14,6 +14,7 @@ import { auth } from "@/auth/utils";
 import { Button } from "@/components/ui/button";
 import Link from "next/link";
 import { buildGameViewParams } from "@/lib/navigation";
+import { Printer } from "lucide-react";
 
 export default async function Page({
   searchParams,
@@ -102,13 +103,13 @@ export default async function Page({
         <h1 className="flex-1 text-3xl font-bold text-gray-900 mb-4">
           Partien
         </h1>
-        <Button asChild>
+        <Button variant="outline" asChild>
           <Link
             href={`/partien/drucken?${buildGameViewParams(queryData)}`}
             target="_blank"
             rel="noopener noreferrer"
           >
-            Drucken
+            <Printer />
           </Link>
         </Button>
       </div>

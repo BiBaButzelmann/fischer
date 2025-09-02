@@ -28,13 +28,10 @@ export default async function Page({
   );
 
   return (
-    <div>
-      <div className="print:hidden">
-        <PrintButton />
-      </div>
+    <div className="flex gap-4 p-4 print:p-0">
       <div className="w-[210mm] text-sm">
         <div className="flex items-center text-muted-foreground py-1.5 border-b font-medium">
-          <div className="basis-[8rem] text-center">Gruppe</div>
+          <div className="basis-[8rem] text-center">Datum</div>
           <div className="basis-28 text-center">Gruppe</div>
           <div className="basis-28 text-center">Brett</div>
           <div className="flex-1">Weiß</div>
@@ -66,6 +63,9 @@ export default async function Page({
             </div>
           ))}
         </div>
+      </div>
+      <div className="print:hidden">
+        <PrintButton />
       </div>
     </div>
   );
