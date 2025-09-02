@@ -14,7 +14,7 @@ export function getDatetimeString(date: DateTime) {
 }
 
 export function isSameDate(date1: DateTime, date2: DateTime): boolean {
-  return date1.equals(date2);
+  return date1.hasSame(date2, "day");
 }
 
 /**
