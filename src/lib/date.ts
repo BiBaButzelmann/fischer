@@ -57,14 +57,3 @@ export function formatEventDateTime(date: DateTime): string {
 export function toDateString(date: DateTime): string {
   return date.toFormat("dd.MM.yyyy");
 }
-
-/**
- * Normalizes a date to midnight UTC while preserving the calendar date
- * @param date - The date to normalize
- * @returns A new Date object set to midnight UTC for the same calendar date
- */
-export function toMidnightUTC(date: Date): Date {
-  return new Date(
-    Date.UTC(date.getFullYear(), date.getMonth(), date.getDate(), 0, 0, 0, 0),
-  );
-}
