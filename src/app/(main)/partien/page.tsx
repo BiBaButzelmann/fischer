@@ -11,6 +11,10 @@ import { getRolesByUserId } from "@/db/repositories/role";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { getAllMatchdaysByTournamentId } from "@/db/repositories/match-day";
 import { auth } from "@/auth/utils";
+import { Button } from "@/components/ui/button";
+import Link from "next/link";
+import { buildGameViewParams } from "@/lib/navigation";
+import { Printer } from "lucide-react";
 
 export default async function Page({
   searchParams,
@@ -70,24 +74,45 @@ export default async function Page({
     (_, i) => i + 1,
   );
 
+  const queryData = {
+    tournamentId: parseInt(selectedTournamentId),
+    groupId: groupId ? parseInt(selectedGroup) : undefined,
+    round: round ? parseInt(round) : undefined,
+    participantId: participantId ? parseInt(participantId) : undefined,
+    matchdayId: matchdayId ? parseInt(matchdayId) : undefined,
+  };
+
   // TODO: Refactor conditional data loading - this should be handled by separate components
   const [participants, games, userRoles] = await Promise.all([
     selectedGroup
       ? getParticipantsByGroupId(Number(selectedGroup))
       : Promise.resolve([]),
     getGamesByTournamentId(
-      Number(selectedTournamentId),
-      groupId ? Number(groupId) : undefined,
-      matchdayId ? Number(matchdayId) : undefined,
-      round != null ? Number(round) : undefined,
-      participantId != null ? Number(participantId) : undefined,
+      queryData.tournamentId,
+      queryData.groupId,
+      queryData.matchdayId,
+      queryData.round,
+      queryData.participantId,
     ),
     session?.user.id ? getRolesByUserId(session.user.id) : Promise.resolve([]),
   ]);
 
   return (
     <div>
-      <h1 className="text-3xl font-bold text-gray-900 mb-4">Partien</h1>
+      <div className="flex items-center w-full">
+        <h1 className="flex-1 text-3xl font-bold text-gray-900 mb-4">
+          Partien
+        </h1>
+        <Button variant="outline" asChild>
+          <Link
+            href={`/partien/drucken?${buildGameViewParams(queryData)}`}
+            target="_blank"
+            rel="noopener noreferrer"
+          >
+            <Printer />
+          </Link>
+        </Button>
+      </div>
       <div className="flex flex-col gap-1 md:gap-2">
         <PartienSelector
           selectedTournamentId={selectedTournamentId}
