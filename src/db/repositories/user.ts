@@ -32,8 +32,7 @@ export async function softDeleteUser(userId: string) {
     };
   }
   const { id: profileId } = profileData;
-  // TODO: do not store time in db in local time, always use utc
-  const deletedAt = getCurrentLocalDateTime();
+  const deletedAt = getCurrentLocalDateTime().toJSDate();
 
   return await db.transaction(async (tx) => {
     await tx
