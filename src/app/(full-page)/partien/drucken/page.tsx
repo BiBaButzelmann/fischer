@@ -1,6 +1,8 @@
 import { PrintButton } from "@/components/partien/print/print-button";
 import { Badge } from "@/components/ui/badge";
 import { getGamesByTournamentId } from "@/db/repositories/game";
+import { toDateString } from "@/lib/date";
+import { getDateTimeFromDefaultTime } from "@/lib/game-time";
 import { getParticipantFullName } from "@/lib/participant";
 
 export default async function Page({
@@ -32,6 +34,7 @@ export default async function Page({
       </div>
       <div className="w-[210mm] text-sm">
         <div className="flex items-center text-muted-foreground py-1.5 border-b font-medium">
+          <div className="basis-[8rem] text-center">Gruppe</div>
           <div className="basis-28 text-center">Gruppe</div>
           <div className="basis-28 text-center">Brett</div>
           <div className="flex-1">Weiß</div>
@@ -43,6 +46,11 @@ export default async function Page({
               key={game.id}
               className="flex items-center py-1.5 even:bg-gray-100"
             >
+              <div className="basis-[8rem] text-center">
+                {toDateString(
+                  getDateTimeFromDefaultTime(game.matchdayGame.matchday.date),
+                )}
+              </div>
               <div className="basis-28 text-center">
                 <Badge variant="secondary">{game.group.groupName}</Badge>
               </div>
