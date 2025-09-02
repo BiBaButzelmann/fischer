@@ -56,7 +56,6 @@ export async function sendTournamentStartedEmails(tournamentId: number) {
     await sleep(1000);
   }
 
-  console.debug("Mails sent", mailsSent, "out of", profiles.length);
   return { sent: mailsSent };
 }
 
