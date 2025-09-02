@@ -102,17 +102,15 @@ export default async function Page({
         <h1 className="flex-1 text-3xl font-bold text-gray-900 mb-4">
           Partien
         </h1>
-        {userRoles.includes("setupHelper") || userRoles.includes("admin") ? (
-          <Button asChild>
-            <Link
-              href={`/partien/drucken?${buildGameViewParams(queryData)}`}
-              target="_blank"
-              rel="noopener noreferrer"
-            >
-              Drucken
-            </Link>
-          </Button>
-        ) : null}
+        <Button asChild>
+          <Link
+            href={`/partien/drucken?${buildGameViewParams(queryData)}`}
+            target="_blank"
+            rel="noopener noreferrer"
+          >
+            Drucken
+          </Link>
+        </Button>
       </div>
       <div className="flex flex-col gap-1 md:gap-2">
         <PartienSelector

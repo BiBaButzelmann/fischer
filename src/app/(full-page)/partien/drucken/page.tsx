@@ -1,10 +1,7 @@
-import { authWithRedirect } from "@/auth/utils";
 import { PrintButton } from "@/components/partien/print/print-button";
 import { Badge } from "@/components/ui/badge";
 import { getGamesByTournamentId } from "@/db/repositories/game";
-import { getRolesByUserId } from "@/db/repositories/role";
 import { getParticipantFullName } from "@/lib/participant";
-import { redirect } from "next/navigation";
 
 export default async function Page({
   searchParams,
@@ -17,13 +14,6 @@ export default async function Page({
     matchdayId?: string;
   }>;
 }) {
-  const session = await authWithRedirect();
-  const roles = await getRolesByUserId(session.user.id);
-
-  if (!roles.includes("setupHelper") && session.user.role !== "admin") {
-    redirect("/partien");
-  }
-
   const { tournamentId, groupId, round, participantId, matchdayId } =
     await searchParams;
 
