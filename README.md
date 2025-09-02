@@ -21,3 +21,7 @@
 
 - Spieltage verwalten: show group (badge) of users (Arne)
 - Juroren verwalten: Einteilung in aktiv und Nachrücker (Arne)
+
+## FIXMEs
+
+- fix a bug that notAvailableDates from participant form are not stored correctly

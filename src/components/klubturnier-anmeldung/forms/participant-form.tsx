@@ -427,9 +427,7 @@ export function ParticipateForm({
                     selected={field.value ?? []}
                     onSelect={(selectedDates) => {
                       if (selectedDates && selectedDates.length <= 5) {
-                        const normalizedDates =
-                          selectedDates.map(toMidnightUTC);
-                        field.onChange(normalizedDates);
+                        field.onChange(selectedDates);
                       }
                     }}
                     numberOfMonths={1}
