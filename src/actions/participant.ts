@@ -10,6 +10,7 @@ import { getTournamentById } from "@/db/repositories/tournament";
 import { getProfileByUserId } from "@/db/repositories/profile";
 import { and, eq } from "drizzle-orm";
 import { DEFAULT_CLUB_LABEL } from "@/constants/constants";
+import { revalidatePath } from "next/cache";
 
 export async function createParticipant(
   tournamentId: number,
@@ -28,10 +29,7 @@ export async function createParticipant(
   }
 
   const tournament = await getTournamentById(tournamentId);
-  invariant(
-    tournament != null && tournament.stage === "registration",
-    "Tournament not found or not in registration stage",
-  );
+  invariant(tournament != null, "Tournament not found");
 
   const currentProfile = await getProfileByUserId(session.user.id);
   invariant(currentProfile, "Profile not found");
@@ -82,10 +80,7 @@ export async function deleteParticipant(
   const session = await authWithRedirect();
 
   const tournament = await getTournamentById(tournamentId);
-  invariant(
-    tournament != null && tournament.stage === "registration",
-    "Tournament not found or not in registration stage",
-  );
+  invariant(tournament != null, "Tournament not found");
 
   const currentProfile = await getProfileByUserId(session.user.id);
   invariant(currentProfile, "Profile not found");
@@ -173,4 +168,25 @@ export async function getParticipantEloData(
     zpsClub: clubFields[4],
     zpsPlayer: clubFields[5],
   };
+}
+
+export async function updateEntryFeeStatus(
+  participantId: number,
+  entryFeePayed: boolean,
+) {
+  const session = await authWithRedirect();
+
+  invariant(
+    session.user.role === "admin",
+    "Unauthorized: Admin access required",
+  );
+
+  await db
+    .update(participant)
+    .set({
+      entryFeePayed,
+    })
+    .where(eq(participant.id, participantId));
+
+  revalidatePath("/admin/startgeld");
 }

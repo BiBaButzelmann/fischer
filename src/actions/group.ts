@@ -195,3 +195,15 @@ export async function updateGroupPositions(
   revalidatePath("/admin/gruppen");
   revalidatePath("/admin/paarungen");
 }
+
+export async function getExistingGroupNumbers(tournamentId: number) {
+  const session = await authWithRedirect();
+  invariant(session?.user.role === "admin", "Unauthorized");
+
+  const groups = await db.query.group.findMany({
+    where: eq(group.tournamentId, tournamentId),
+    columns: { groupNumber: true },
+  });
+
+  return groups.map((g) => g.groupNumber);
+}

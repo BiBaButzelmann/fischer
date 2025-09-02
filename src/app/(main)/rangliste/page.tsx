@@ -81,8 +81,13 @@ export default async function Page({
                 Rangliste
               </CardTitle>
             </CardHeader>
-            <div className="p-6 text-center text-muted-foreground">
-              Keine Gruppen für dieses Turnier gefunden.
+            <div className="p-6">
+              <div className="bg-blue-50 border border-blue-200 rounded-lg p-4">
+                <p className="text-blue-800 text-sm text-center">
+                  Die Gruppen werden am <strong>02.09.2025</strong> bekannt
+                  gegeben.
+                </p>
+              </div>
             </div>
           </Card>
         </div>

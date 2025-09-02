@@ -2,7 +2,7 @@ import { db } from "../client";
 import { group } from "../schema/group";
 import { participant, participantGroup } from "../schema/participant";
 import { profile } from "../schema/profile";
-import { and, eq, getTableColumns, isNull } from "drizzle-orm";
+import { and, eq, getTableColumns, isNull, desc, sql } from "drizzle-orm";
 
 export async function getParticipantByProfileIdAndTournamentId(
   profileId: number,
@@ -74,6 +74,12 @@ export async function getUnassignedParticipantsByTournamentId(
         eq(participant.tournamentId, tournamentId),
         isNull(participantGroup.participantId),
       ),
+    )
+    .orderBy(
+      sql`${participant.fideRating} IS NULL`,
+      desc(participant.fideRating),
+      sql`${participant.dwzRating} IS NULL`,
+      desc(participant.dwzRating),
     );
 }
 

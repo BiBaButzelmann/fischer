@@ -38,6 +38,7 @@ export async function getGroupNameAndDayOfWeekByProfileIdAndTournamentId(
         with: {
           group: {
             columns: {
+              id: true,
               groupName: true,
               dayOfWeek: true,
             },
