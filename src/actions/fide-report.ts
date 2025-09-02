@@ -4,7 +4,7 @@ import { authWithRedirect } from "@/auth/utils";
 import { monthLabels } from "@/constants/constants";
 import { db } from "@/db/client";
 import { getGamesInMonth } from "@/db/repositories/game";
-import { Game } from "@/db/types/game";
+import { GameResult } from "@/db/types/game";
 import { action } from "@/lib/actions";
 import { generateFideReport } from "@/lib/fide-report";
 import { PlayerEntry, Result } from "@/lib/fide-report/types";
@@ -277,11 +277,8 @@ export const generateFideReportFile = action(
   },
 );
 
-function mapResult(
-  result: NonNullable<Game["result"]>,
-  isWhite: boolean,
-): Result["result"] {
-  return match<NonNullable<Game["result"]>, Result["result"]>(result)
+function mapResult(result: GameResult, isWhite: boolean): Result["result"] {
+  return match<GameResult, Result["result"]>(result)
     .with("+:-", () => (isWhite ? "+" : "-"))
     .with("-:-", () => (isWhite ? "-" : "-"))
     .with("-:+", () => (isWhite ? "-" : "+"))

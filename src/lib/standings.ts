@@ -1,14 +1,13 @@
-import type { gameResults } from "@/db/schema/columns.helpers";
 import type { PlayerStats } from "@/db/types/standings";
 import type {
   ParticipantWithName,
   ParticipantWithRating,
 } from "@/db/types/participant";
-import type { Game } from "@/db/types/game";
+import type { Game, GameResult } from "@/db/types/game";
 import invariant from "tiny-invariant";
 
 function calculatePointsFromResult(
-  result: (typeof gameResults)[number],
+  result: GameResult,
   isWhite: boolean,
 ): number {
   switch (result) {

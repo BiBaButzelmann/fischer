@@ -48,6 +48,10 @@ export async function deleteMatchEnteringHelper(
 
   const tournament = await getTournamentById(tournamentId);
   invariant(tournament != null, "Tournament not found");
+  invariant(
+    tournament.stage === "registration",
+    "Cannot delete match entering helper in this stage",
+  );
 
   const currentProfile = await getProfileByUserId(session.user.id);
   invariant(currentProfile, "Match Entering Helper not found");

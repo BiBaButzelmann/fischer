@@ -46,6 +46,10 @@ export async function deleteSetupHelper(
 
   const tournament = await getTournamentById(tournamentId);
   invariant(tournament != null, "Tournament not found");
+  invariant(
+    tournament.stage === "registration",
+    "Cannot delete setup helper in this stage",
+  );
 
   const currentProfile = await getProfileByUserId(session.user.id);
   invariant(currentProfile, "Profile not found");

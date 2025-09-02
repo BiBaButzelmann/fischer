@@ -9,11 +9,9 @@ import { getUserGameRights } from "@/lib/game-auth";
 import { redirect } from "next/navigation";
 
 async function getGamesForUser(userId: string, isAdmin: boolean) {
-  if (isAdmin) {
-    return getAllGamesWithParticipantsAndPGN();
-  }
-
-  return getGamesAccessibleByUser(userId);
+  return isAdmin
+    ? await getAllGamesWithParticipantsAndPGN()
+    : await getGamesAccessibleByUser(userId);
 }
 
 export default async function Page() {

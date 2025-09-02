@@ -82,7 +82,7 @@ export function MatchEntryDashboard({ pendingGames, completedGames }: Props) {
                       Keine ausstehenden Partien
                     </p>
                     <p className="text-sm">
-                      Alle Ihnen zugewiesenen Partien wurden eingegeben!
+                      Alle dir zugewiesenen Partien wurden eingegeben!
                     </p>
                   </div>
                 )}

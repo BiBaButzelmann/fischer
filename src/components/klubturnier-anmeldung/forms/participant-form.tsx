@@ -471,7 +471,8 @@ export function ParticipateForm({
           >
             Änderungen speichern
           </Button>
-          {initialValues !== undefined ? (
+          {initialValues !== undefined &&
+          tournament.stage === "registration" ? (
             <Button
               disabled={isPending}
               className="w-full sm:w-auto "
