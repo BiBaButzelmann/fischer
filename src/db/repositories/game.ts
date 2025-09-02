@@ -24,6 +24,7 @@ import { profile } from "../schema/profile";
 import { getMatchEnteringHelperIdByUserId } from "./match-entering-helper";
 import invariant from "tiny-invariant";
 import { alias } from "drizzle-orm/pg-core";
+import { PLAYED_GAME_RESULTS } from "@/constants/constants";
 
 export async function getGameById(gameId: number) {
   return await db.query.game.findFirst({
@@ -532,10 +533,11 @@ export async function isUserRefereeInGame(gameId: number, userId: string) {
 
 export async function getAllGamesWithParticipantsAndPGN() {
   return await db.query.game.findMany({
-    where: (game, { and, isNotNull }) =>
+    where: (game, { and, isNotNull, inArray }) =>
       and(
         isNotNull(game.whiteParticipantId),
         isNotNull(game.blackParticipantId),
+        inArray(game.result, PLAYED_GAME_RESULTS),
       ),
     with: {
       whiteParticipant: {
@@ -566,10 +568,11 @@ export async function getAllGamesWithParticipantsAndPGN() {
 
 export async function getGamesAccessibleByUser(userId: string) {
   return await db.query.game.findMany({
-    where: (game, { and, or, eq, isNotNull, exists }) =>
+    where: (game, { and, or, eq, isNotNull, exists, inArray }) =>
       and(
         isNotNull(game.whiteParticipantId),
         isNotNull(game.blackParticipantId),
+        inArray(game.result, PLAYED_GAME_RESULTS),
         or(
           exists(
             db

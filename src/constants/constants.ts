@@ -37,3 +37,5 @@ export const GAME_START_TIME = {
 } as const;
 
 export const NUMBER_OF_GROUPS_WITH_ELO = 4;
+
+export const PLAYED_GAME_RESULTS = ["1:0", "0:1", "½-½", "0-½", "½-0"] as const;
