@@ -9,7 +9,6 @@ import {
   SidebarGroupLabel,
   SidebarHeader,
   SidebarMenu,
-  SidebarMenuButton,
   useSidebar,
 } from "../ui/sidebar";
 import Link from "next/link";
