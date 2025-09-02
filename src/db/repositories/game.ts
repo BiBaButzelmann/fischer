@@ -467,7 +467,7 @@ export async function getAllGroupNamesByTournamentId(tournamentId: number) {
     })
     .from(group)
     .where(eq(group.tournamentId, tournamentId))
-    .orderBy(group.groupNumber);
+    .orderBy(group.groupName);
 }
 
 export async function isUserMatchEnteringHelperInGame(
