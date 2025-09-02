@@ -30,11 +30,7 @@ export const isWhite = (
   return game.whiteParticipant?.id === participantId;
 };
 
-export const getUserGameRights = async (
-  gameId: number,
-  userId: string,
-  isAdmin: boolean,
-) => {
+export const getUserGameRights = async (gameId: number, userId: string) => {
   const [userRoles, isGameParticipant, isMatchEnteringHelper, isReferee] =
     await Promise.all([
       getRolesByUserId(userId),
@@ -44,6 +40,7 @@ export const getUserGameRights = async (
     ]);
 
   const isParticipant = userRoles.includes("participant");
+  const isAdmin = userRoles.includes("admin");
 
   if (isGameParticipant || isMatchEnteringHelper || isAdmin) {
     return "edit";
