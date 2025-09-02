@@ -536,41 +536,6 @@ export async function isUserRefereeInGame(gameId: number, userId: string) {
   return refereeAssignment.length > 0;
 }
 
-export async function getAllGamesWithParticipantsAndPGN() {
-  return await db.query.game.findMany({
-    where: (game, { and, isNotNull, inArray }) =>
-      and(
-        isNotNull(game.whiteParticipantId),
-        isNotNull(game.blackParticipantId),
-        inArray(game.result, PLAYED_GAME_RESULTS),
-      ),
-    with: {
-      whiteParticipant: {
-        with: {
-          profile: {
-            columns: {
-              firstName: true,
-              lastName: true,
-            },
-          },
-        },
-      },
-      blackParticipant: {
-        with: {
-          profile: {
-            columns: {
-              firstName: true,
-              lastName: true,
-            },
-          },
-        },
-      },
-      pgn: true,
-    },
-    orderBy: (game, { asc }) => [asc(game.round)],
-  });
-}
-
 export async function getGamesAccessibleByUser(userId: string) {
   return await db.query.game.findMany({
     where: (game, { and, or, eq, isNotNull, exists, inArray }) =>
