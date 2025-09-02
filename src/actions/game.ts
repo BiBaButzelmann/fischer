@@ -250,16 +250,13 @@ export async function updateGameMatchdayAndBoardNumber(
   });
   invariant(userProfile, "User profile not found");
 
-  const fromTimestamp = getDateTimeFromDefaultTime(currentMatchday.date);
-  const toTimestamp = getDateTimeFromDefaultTime(newMatchday.date);
-
   await db.transaction(async (tx) => {
     await tx.insert(gamePostponement).values({
-      gameId: gameId,
+      gameId,
       postponingParticipantId: postponingParticipant.id,
       postponedByProfileId: userProfile.id,
-      from: fromTimestamp.toJSDate(),
-      to: toTimestamp.toJSDate(),
+      from: currentMatchday.date,
+      to: newMatchday.date,
     });
 
     await tx
