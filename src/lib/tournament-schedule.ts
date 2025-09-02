@@ -1,4 +1,4 @@
-import { getBerlinDateTime } from "./date";
+import { getCurrentLocalDateTime } from "./date";
 
 export function generateTournamentWeeksSchedule(
   tournamentWeeks: Array<{
@@ -16,7 +16,7 @@ export function generateTournamentWeeksSchedule(
         ? `Woche ${++regularWeekCount}`
         : `Verlegungswoche ${++catchUpWeekCount}`;
 
-    const weekStart = getBerlinDateTime()
+    const weekStart = getCurrentLocalDateTime()
       .set({ weekNumber: week.weekNumber })
       .startOf("week");
 
@@ -57,7 +57,7 @@ export function generateRefereeAssignmentSchedule<
         ? `Woche ${++regularWeekCount}`
         : `Verlegungswoche ${++catchUpWeekCount}`;
 
-    const weekStart = getBerlinDateTime()
+    const weekStart = getCurrentLocalDateTime()
       .set({ weekNumber: week.weekNumber })
       .startOf("week");
 

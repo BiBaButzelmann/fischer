@@ -17,7 +17,7 @@ import { toast } from "sonner";
 import { Skeleton } from "@/components/ui/skeleton";
 import { useRouter } from "next/navigation";
 import { buildGameViewUrl } from "@/lib/navigation";
-import { isSameDate } from "@/lib/date";
+import { isSameDate, toLocalDateTime } from "@/lib/date";
 
 type Props = {
   events: CalendarEvent[];
@@ -36,10 +36,12 @@ export function MyGamesCalendar({ events, matchdays = [] }: Props) {
     editable: event.extendedProps.eventType === "game",
   }));
 
-  const validDropDates = matchdays.map((matchday) => matchday.date);
+  const validDropDates = matchdays.map((matchday) =>
+    toLocalDateTime(matchday.date),
+  );
 
   const initialDate =
-    validDropDates.length > 0 ? validDropDates[0] : new Date();
+    validDropDates.length > 0 ? validDropDates[0].toJSDate() : new Date();
 
   const handleEventDrop = useCallback(
     async (info: EventDropArg) => {
@@ -59,7 +61,7 @@ export function MyGamesCalendar({ events, matchdays = [] }: Props) {
         return;
       }
 
-      const newDate = info.event.start;
+      const newDate = toLocalDateTime(info.event.start!);
       const isMatchdayDate = validDropDates.some((validDate) =>
         isSameDate(validDate, newDate),
       );
@@ -69,7 +71,7 @@ export function MyGamesCalendar({ events, matchdays = [] }: Props) {
       }
 
       const targetMatchday = matchdays.find((matchday) =>
-        isSameDate(matchday.date, newDate),
+        isSameDate(toLocalDateTime(matchday.date), newDate),
       ) as MatchDay;
 
       startTransition(async () => {
@@ -149,8 +151,8 @@ export function MyGamesCalendar({ events, matchdays = [] }: Props) {
     (dropInfo) => {
       if (validDropDates.length === 0) return true;
 
-      const dropDate = new Date(dropInfo.start);
-      return validDropDates.some((validDate: Date) =>
+      const dropDate = toLocalDateTime(dropInfo.start);
+      return validDropDates.some((validDate) =>
         isSameDate(validDate, dropDate),
       );
     },
@@ -159,8 +161,8 @@ export function MyGamesCalendar({ events, matchdays = [] }: Props) {
 
   const handleDayCellDidMount = useCallback(
     (info: DayCellMountArg) => {
-      const cellDate = new Date(info.date);
-      const isMatchdayDate = validDropDates.some((validDate: Date) =>
+      const cellDate = toLocalDateTime(info.date);
+      const isMatchdayDate = validDropDates.some((validDate) =>
         isSameDate(validDate, cellDate),
       );
 
@@ -187,8 +189,8 @@ export function MyGamesCalendar({ events, matchdays = [] }: Props) {
         const htmlElement = cell as HTMLElement;
         const dateStr = htmlElement.getAttribute("data-date");
         if (dateStr) {
-          const cellDate = new Date(dateStr);
-          const isMatchdayDate = validDropDates.some((validDate: Date) =>
+          const cellDate = toLocalDateTime(new Date(dateStr));
+          const isMatchdayDate = validDropDates.some((validDate) =>
             isSameDate(validDate, cellDate),
           );
 
@@ -204,14 +206,16 @@ export function MyGamesCalendar({ events, matchdays = [] }: Props) {
 
   const handleDateClick = useCallback(
     (info: DateClickArg) => {
-      const clickedDate = new Date(info.date);
-      const isMatchdayDate = validDropDates.some((validDate: Date) =>
+      const clickedDate = toLocalDateTime(info.date);
+      const isMatchdayDate = validDropDates.some((validDate) =>
         isSameDate(validDate, clickedDate),
       );
 
       if (!isMatchdayDate) return;
 
-      const matchday = matchdays.find((md) => isSameDate(md.date, clickedDate));
+      const matchday = matchdays.find((md) =>
+        isSameDate(toLocalDateTime(md.date), clickedDate),
+      );
 
       if (matchday) {
         const url = buildGameViewUrl({

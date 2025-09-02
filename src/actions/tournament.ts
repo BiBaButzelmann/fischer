@@ -12,7 +12,7 @@ import { eq } from "drizzle-orm";
 import { TournamentStage } from "@/db/types/tournament";
 import { matchday } from "@/db/schema/matchday";
 import { isHoliday } from "@/lib/holidays";
-import { getBerlinDateTime } from "@/lib/date";
+import { getCurrentLocalDateTime } from "@/lib/date";
 
 export async function createTournament(
   formData: z.infer<typeof createTournamentFormSchema>,
@@ -158,19 +158,19 @@ function getMatchDays(
   >["selectedCalendarWeeks"],
 ) {
   return insertedTournamentWeeks.flatMap((week, index) => {
-    const tuesday = getBerlinDateTime()
+    const tuesday = getCurrentLocalDateTime()
       .set({
         weekNumber: week.weekNumber,
         weekday: 2,
       })
       .toJSDate();
-    const thursday = getBerlinDateTime()
+    const thursday = getCurrentLocalDateTime()
       .set({
         weekNumber: week.weekNumber,
         weekday: 4,
       })
       .toJSDate();
-    const friday = getBerlinDateTime()
+    const friday = getCurrentLocalDateTime()
       .set({
         weekNumber: week.weekNumber,
         weekday: 5,
@@ -183,7 +183,7 @@ function getMatchDays(
         tournamentId,
         tournamentWeekId: week.id,
         dayOfWeek: "tuesday",
-        date: getBerlinDateTime()
+        date: getCurrentLocalDateTime()
           .set({
             weekNumber: week.weekNumber,
             weekday: 2,
@@ -197,7 +197,7 @@ function getMatchDays(
         tournamentId,
         tournamentWeekId: week.id,
         dayOfWeek: "thursday",
-        date: getBerlinDateTime()
+        date: getCurrentLocalDateTime()
           .set({
             weekNumber: week.weekNumber,
             weekday: 4,
@@ -211,7 +211,7 @@ function getMatchDays(
         tournamentId,
         tournamentWeekId: week.id,
         dayOfWeek: "friday",
-        date: getBerlinDateTime()
+        date: getCurrentLocalDateTime()
           .set({
             weekNumber: week.weekNumber,
             weekday: 5,

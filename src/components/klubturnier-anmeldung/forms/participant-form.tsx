@@ -31,6 +31,7 @@ import { MatchDaysCheckboxes } from "./matchday-selection";
 import { CountryDropdown } from "@/components/ui/country-dropdown";
 import { cn } from "@/lib/utils";
 import { isHoliday } from "@/lib/holidays";
+import { toMidnightUTC } from "@/lib/date";
 
 import { Tournament } from "@/db/types/tournament";
 import { getParticipantEloData } from "@/actions/participant";
