@@ -16,12 +16,12 @@ import {
 import { useMemo, useCallback } from "react";
 import { useIsMobile } from "@/hooks/use-mobile";
 import { useRouter } from "next/navigation";
-import { formatGameDate, getGameTimeFromGame } from "@/lib/game-time";
+import { getGameTimeFromGame } from "@/lib/game-time";
 import { MatchDay } from "@/db/types/match-day";
 import { authClient } from "@/auth-client";
 import { Role } from "@/db/types/role";
 import { GameActions } from "./game-actions";
-import { getBerlinTime } from "@/lib/date";
+import { getCurrentLocalDateTime, toDateString } from "@/lib/date";
 
 type Props = {
   games: GameWithParticipantProfilesAndGroupAndMatchday[];
@@ -67,7 +67,7 @@ export function GamesList({
 
       const game = games.find((g) => g.id === gameId);
       const isGameInPastOrToday = game
-        ? getGameTimeFromGame(game) <= getBerlinTime()
+        ? getGameTimeFromGame(game) <= getCurrentLocalDateTime()
         : false;
 
       return {
@@ -167,7 +167,7 @@ export function GamesList({
                 )}
               </TableCell>
               <TableCell className="hidden md:table-cell w-24 text-center">
-                {formatGameDate(getGameTimeFromGame(game))}
+                {toDateString(getGameTimeFromGame(game))}
               </TableCell>
               {hasAnyActions && (
                 <TableCell className="hidden md:flex items-center gap-2 w-32">

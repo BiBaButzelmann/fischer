@@ -31,7 +31,7 @@ import { authClient } from "@/auth-client";
 
 type Props = {
   gameId: number;
-  currentResult: string | null;
+  currentResult: GameResult | null;
   onResultChange: (gameId: number, result: GameResult) => Promise<void>;
   isReferee?: boolean;
 };

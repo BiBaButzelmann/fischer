@@ -99,4 +99,7 @@ export type GameWithParticipantsAndPGN = Game & {
   } | null;
 };
 
+export const PLAYED_GAME_RESULTS = ["1:0", "0:1", "½-½", "0-½", "½-0"] as const;
+
 export type GameResult = InferEnum<typeof game.result>;
+export type PlayedGameResult = (typeof PLAYED_GAME_RESULTS)[number];

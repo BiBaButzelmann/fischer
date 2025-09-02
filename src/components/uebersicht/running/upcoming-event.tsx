@@ -1,4 +1,4 @@
-import { formatEventDateTime } from "@/lib/date";
+import { formatEventDateTime, toLocalDateTime } from "@/lib/date";
 import { Clock, LucideIcon } from "lucide-react";
 import Link from "next/link";
 import { ReactNode } from "react";
@@ -18,7 +18,7 @@ export function UpcomingEvent({ title, start, url, icon }: Props) {
           <p className="font-bold text-gray-800 dark:text-gray-100">{title}</p>
           <div className="flex items-center gap-2 text-sm text-gray-500 dark:text-gray-400 mt-1">
             <Clock className="w-4 h-4" />
-            <span>{formatEventDateTime(start)}</span>
+            <span>{formatEventDateTime(toLocalDateTime(start))}</span>
           </div>
         </div>
       </div>

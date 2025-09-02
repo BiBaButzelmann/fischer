@@ -9,7 +9,7 @@ import {
   isNull,
   isNotNull,
 } from "drizzle-orm";
-import { getBerlinTime } from "@/lib/date";
+import { getCurrentLocalDateTime } from "@/lib/date";
 import { group } from "../schema/group";
 import { matchdayGame, matchdayReferee } from "../schema/matchday";
 import { matchday } from "../schema/matchday";
@@ -24,6 +24,7 @@ import { profile } from "../schema/profile";
 import { getMatchEnteringHelperIdByUserId } from "./match-entering-helper";
 import invariant from "tiny-invariant";
 import { alias } from "drizzle-orm/pg-core";
+import { PLAYED_GAME_RESULTS } from "../types/game";
 
 export async function getGameById(gameId: number) {
   return await db.query.game.findFirst({
@@ -223,7 +224,12 @@ export async function getGamesByTournamentId(
   }
 
   const games = await db.query.game.findMany({
-    where: (game, { inArray }) => inArray(game.id, gameIds),
+    where: (game, { inArray, isNotNull, and }) =>
+      and(
+        inArray(game.id, gameIds),
+        isNotNull(game.whiteParticipantId),
+        isNotNull(game.blackParticipantId),
+      ),
     with: {
       whiteParticipant: {
         columns: {
@@ -366,7 +372,7 @@ export async function getPendingGamesByParticipantId(participantId: number) {
           eq(game.blackParticipantId, participantId),
         ),
         isNull(game.result),
-        sql`${matchday.date} < ${getBerlinTime()}`,
+        sql`${matchday.date} < ${getCurrentLocalDateTime()}`,
       ),
     )
     .orderBy(asc(matchday.date))
@@ -387,7 +393,7 @@ export async function getPendingGamesByRefereeId(refereeId: number) {
       and(
         eq(matchdayReferee.refereeId, refereeId),
         isNull(game.result),
-        sql`${matchday.date} < ${getBerlinTime()}`,
+        sql`${matchday.date} < ${getCurrentLocalDateTime()}`,
       ),
     )
     .orderBy(asc(matchday.date))
@@ -530,46 +536,13 @@ export async function isUserRefereeInGame(gameId: number, userId: string) {
   return refereeAssignment.length > 0;
 }
 
-export async function getAllGamesWithParticipantsAndPGN() {
-  return await db.query.game.findMany({
-    where: (game, { and, isNotNull }) =>
-      and(
-        isNotNull(game.whiteParticipantId),
-        isNotNull(game.blackParticipantId),
-      ),
-    with: {
-      whiteParticipant: {
-        with: {
-          profile: {
-            columns: {
-              firstName: true,
-              lastName: true,
-            },
-          },
-        },
-      },
-      blackParticipant: {
-        with: {
-          profile: {
-            columns: {
-              firstName: true,
-              lastName: true,
-            },
-          },
-        },
-      },
-      pgn: true,
-    },
-    orderBy: (game, { asc }) => [asc(game.round)],
-  });
-}
-
 export async function getGamesAccessibleByUser(userId: string) {
   return await db.query.game.findMany({
-    where: (game, { and, or, eq, isNotNull, exists }) =>
+    where: (game, { and, or, eq, isNotNull, exists, inArray }) =>
       and(
         isNotNull(game.whiteParticipantId),
         isNotNull(game.blackParticipantId),
+        inArray(game.result, PLAYED_GAME_RESULTS),
         or(
           exists(
             db

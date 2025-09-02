@@ -16,17 +16,20 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import z from "zod";
 import { Switch } from "@/components/ui/switch";
 import { Info, Users, Gavel } from "lucide-react";
+import { TournamentStage } from "@/db/types/tournament";
 
 type Props = {
   initiallyParticipating?: boolean;
   onSubmit: () => Promise<void>;
   onDelete: () => Promise<void>;
+  tournamentStage: TournamentStage;
 };
 
 export function JurorForm({
   initiallyParticipating,
   onSubmit,
   onDelete,
+  tournamentStage,
 }: Props) {
   const [isPending, startTransition] = useTransition();
   const form = useForm<z.infer<typeof jurorFormSchema>>({
@@ -111,7 +114,8 @@ export function JurorForm({
           >
             Antwort speichern
           </Button>
-          {initiallyParticipating !== undefined ? (
+          {initiallyParticipating !== undefined &&
+          tournamentStage === "registration" ? (
             <Button
               disabled={isPending}
               onClick={handleDelete}

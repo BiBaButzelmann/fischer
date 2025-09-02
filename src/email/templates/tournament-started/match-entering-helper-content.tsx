@@ -1,5 +1,5 @@
 import * as React from "react";
-// TODO: add page URL
+
 export function MatchEnteringHelperContent() {
   return (
     <div style={{ marginBottom: "20px" }}>
@@ -11,7 +11,22 @@ export function MatchEnteringHelperContent() {
         als Eingabehelfer unterstützen möchtest!
       </p>
       <p>
-        <strong>TODO: Implement match entering helper side and add URL</strong>
+        Deine Aufgabe ist es, die dir zugeteilten Partien direkt auf der
+        Webseite in einem integrierten Schachbrett einzugeben.
+      </p>
+      <p>
+        Die Partieneingabe findest du unter folgendem Link:
+        <br />{" "}
+        <a
+          href="https://klubturnier.hsk1830.de/partieneingabe"
+          style={{ color: "#2980b9", fontWeight: "bold" }}
+        >
+          klubturnier.hsk1830.de/partieneingabe
+        </a>
+      </p>
+      <p>
+        Dort findest du alle dir zugewiesenen Partien und kannst sie direkt
+        eingeben.
       </p>
     </div>
   );

@@ -184,6 +184,7 @@ export function RolesManager({
             initialValues={rolesData.setupHelper ?? undefined}
             onSubmit={handleSetupHelperFormSubmit}
             onDelete={handleDeleteSetupHelper}
+            tournamentStage={tournament.stage}
           />
         </RoleCard>
         <RoleCard
@@ -197,6 +198,7 @@ export function RolesManager({
             initialValues={rolesData.matchEnteringHelper ?? undefined}
             onSubmit={handleMatchEnteringHelperFormSubmit}
             onDelete={handleDeleteMatchEnteringHelper}
+            tournamentStage={tournament.stage}
           />
         </RoleCard>
         <RoleCard
@@ -218,6 +220,7 @@ export function RolesManager({
             }
             onSubmit={handleRefereeFormSubmit}
             onDelete={handleDeleteReferee}
+            tournamentStage={tournament.stage}
           />
         </RoleCard>
 
@@ -232,6 +235,7 @@ export function RolesManager({
             initiallyParticipating={rolesData.juror != null ? true : undefined}
             onSubmit={handleJurorFormSubmit}
             onDelete={handleDeleteJuror}
+            tournamentStage={tournament.stage}
           />
         </RoleCard>
       </Accordion>

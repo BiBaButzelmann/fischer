@@ -12,11 +12,9 @@ export const gamePostponement = pgTable("game_postponement", {
   postponedByProfileId: integer("postponed_by_profile_id").notNull(),
   from: timestamp("from", {
     mode: "date",
-    withTimezone: true,
   }).notNull(),
   to: timestamp("to", {
     mode: "date",
-    withTimezone: true,
   }).notNull(),
 
   ...timestamps,

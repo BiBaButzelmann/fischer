@@ -31,6 +31,10 @@ export async function deleteJuror(tournamentId: number, jurorId: number) {
 
   const tournament = await getTournamentById(tournamentId);
   invariant(tournament != null, "Tournament not found");
+  invariant(
+    tournament.stage === "registration",
+    "Cannot delete juror in this stage",
+  );
 
   const currentProfile = await getProfileByUserId(session.user.id);
   invariant(currentProfile, "Juror not found");

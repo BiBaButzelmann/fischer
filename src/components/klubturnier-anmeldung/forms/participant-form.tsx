@@ -31,7 +31,6 @@ import { MatchDaysCheckboxes } from "./matchday-selection";
 import { CountryDropdown } from "@/components/ui/country-dropdown";
 import { cn } from "@/lib/utils";
 import { isHoliday } from "@/lib/holidays";
-
 import { Tournament } from "@/db/types/tournament";
 import { getParticipantEloData } from "@/actions/participant";
 import { Profile } from "@/db/types/profile";
@@ -472,7 +471,8 @@ export function ParticipateForm({
           >
             Änderungen speichern
           </Button>
-          {initialValues !== undefined ? (
+          {initialValues !== undefined &&
+          tournament.stage === "registration" ? (
             <Button
               disabled={isPending}
               className="w-full sm:w-auto "

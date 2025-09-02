@@ -1,7 +1,7 @@
 import { Calendar } from "@/components/ui/calendar";
+import { getCurrentLocalDateTime } from "@/lib/date";
 import { DateTime } from "luxon";
 import { useMemo } from "react";
-import { getBerlinDateTime } from "@/lib/date";
 
 export function WeekCalendar({
   weekNumber,
@@ -11,7 +11,9 @@ export function WeekCalendar({
   onSelect: (weekNumber: number | undefined) => void;
 }) {
   const selected = useMemo(() => {
-    const startOfWeek = getBerlinDateTime().set({ weekNumber }).startOf("week");
+    const startOfWeek = getCurrentLocalDateTime()
+      .set({ weekNumber })
+      .startOf("week");
     const endOfWeek = startOfWeek.endOf("week");
     return {
       from: startOfWeek.toJSDate(),

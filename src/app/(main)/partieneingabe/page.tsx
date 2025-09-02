@@ -1,20 +1,9 @@
 import { authWithRedirect } from "@/auth/utils";
 import { MatchEntryDashboard } from "@/components/partieneingabe/match-entry-dashboard";
-import {
-  getAllGamesWithParticipantsAndPGN,
-  getGamesAccessibleByUser,
-} from "@/db/repositories/game";
+import { getGamesAccessibleByUser } from "@/db/repositories/game";
 import { getRolesByUserId } from "@/db/repositories/role";
 import { getUserGameRights } from "@/lib/game-auth";
 import { redirect } from "next/navigation";
-
-async function getGamesForUser(userId: string, isAdmin: boolean) {
-  if (isAdmin) {
-    return getAllGamesWithParticipantsAndPGN();
-  }
-
-  return getGamesAccessibleByUser(userId);
-}
 
 export default async function Page() {
   const session = await authWithRedirect();
@@ -28,8 +17,7 @@ export default async function Page() {
     redirect("/uebersicht");
   }
 
-  const isAdmin = session.user.role === "admin";
-  const allGames = await getGamesForUser(session.user.id, isAdmin);
+  const allGames = await getGamesAccessibleByUser(session.user.id);
 
   const allRights = await Promise.all(
     allGames.map((game) => getUserGameRights(game.id, session.user.id)),

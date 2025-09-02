@@ -1,9 +1,9 @@
 import Link from "next/link";
-import { formatSimpleDate } from "@/lib/date";
 import { buildGameViewUrl } from "@/lib/navigation";
 import { ParticipatingPlayerDisplay } from "./participating-player-display";
 import { getGameWithParticipantsAndMatchday } from "@/db/repositories/game";
 import invariant from "tiny-invariant";
+import { toDateString, toLocalDateTime } from "@/lib/date";
 
 type Props = {
   gameId: number;
@@ -52,7 +52,8 @@ export async function PendingResultItem({
             </span>
           </h4>
           <p className="text-xs text-gray-500 dark:text-gray-400 mt-1">
-            Gespielt am {formatSimpleDate(game.matchdayGame.matchday.date)}
+            Gespielt am{" "}
+            {toDateString(toLocalDateTime(game.matchdayGame.matchday.date))}
           </p>
         </div>
       </div>

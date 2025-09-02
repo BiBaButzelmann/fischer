@@ -1,24 +1,21 @@
-// TODO: update the time zone logic
-// TODO: all dates / times should be in UTC in database
-// TODO: when formatting the time to display -> convert to correct time zone
-
 import { GAME_START_TIME } from "@/constants/constants";
 import { GameWithMatchday } from "@/db/types/game";
-import { toBerlinTime } from "./date";
+import { DateTime } from "luxon";
 
 /**
  * Creates a Date object for a game with the specified matchday date and the standard game start time (7 PM German time)
  * @param matchdayDate - The date of the matchday (Date object or string)
  * @returns A Date object with the game date and time
  */
-export function getDateTimeFromDefaultTime(matchdayDate: Date): Date {
-  const gameDateTime = new Date(matchdayDate);
-  gameDateTime.setHours(
-    GAME_START_TIME.hours,
-    GAME_START_TIME.minutes,
-    GAME_START_TIME.seconds,
-  );
-  return toBerlinTime(gameDateTime);
+export function getDateTimeFromDefaultTime(matchdayDate: Date): DateTime {
+  const gameDateTime = DateTime.fromJSDate(matchdayDate)
+    .setZone("Europe/Berlin")
+    .set({
+      hour: GAME_START_TIME.hours,
+      minute: GAME_START_TIME.minutes,
+      second: GAME_START_TIME.seconds,
+    });
+  return gameDateTime;
 }
 
 /**
@@ -26,14 +23,17 @@ export function getDateTimeFromDefaultTime(matchdayDate: Date): Date {
  * @param matchdayDate - The date of the matchday (Date object or string)
  * @returns A Date object with the setup helper date and time
  */
-export function getSetupHelperTimeFromDefaultTime(matchdayDate: Date): Date {
-  const setupDateTime = new Date(matchdayDate);
-  setupDateTime.setHours(
-    GAME_START_TIME.hours,
-    GAME_START_TIME.minutes - 30,
-    GAME_START_TIME.seconds,
-  );
-  return toBerlinTime(setupDateTime);
+export function getSetupHelperTimeFromDefaultTime(
+  matchdayDate: Date,
+): DateTime {
+  const setupDateTime = DateTime.fromJSDate(matchdayDate)
+    .setZone("Europe/Berlin")
+    .set({
+      hour: GAME_START_TIME.hours,
+      minute: GAME_START_TIME.minutes - 30,
+      second: GAME_START_TIME.seconds,
+    });
+  return setupDateTime;
 }
 
 /**
@@ -41,21 +41,8 @@ export function getSetupHelperTimeFromDefaultTime(matchdayDate: Date): Date {
  * @param game - The game object with matchdayGame relation
  * @returns A Date object with the game date and time
  */
-export function getGameTimeFromGame(game: GameWithMatchday): Date {
+export function getGameTimeFromGame(game: GameWithMatchday): DateTime {
   return getDateTimeFromDefaultTime(game.matchdayGame.matchday.date);
-}
-
-/**
- * Formats a game date for display in German locale (DD.MM.YYYY format)
- * @param gameDateTime - The game date/time to format
- * @returns A formatted date string in German format
- */
-export function formatGameDate(gameDateTime: Date): string {
-  return gameDateTime.toLocaleDateString("de-DE", {
-    year: "numeric",
-    month: "2-digit",
-    day: "2-digit",
-  });
 }
 
 /**
