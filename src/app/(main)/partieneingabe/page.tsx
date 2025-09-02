@@ -31,29 +31,26 @@ export default async function Page() {
   const isAdmin = session.user.role === "admin";
   const allGames = await getGamesForUser(session.user.id, isAdmin);
 
-  const gamesWithRights = await Promise.all(
-    allGames.map(async (game) => {
-      const rights = await getUserGameRights(game.id, session.user.id);
-      return {
-        game,
-        rights,
-        hasPgn: game.pgn !== null,
-      };
-    }),
+  const allRights = await Promise.all(
+    allGames.map((game) => getUserGameRights(game.id, session.user.id)),
   );
 
-  const editableGames = gamesWithRights.filter(
-    ({ rights }) => rights === "edit",
+  const gameRightsMap = new Map(
+    allGames.map((game, index) => [game.id, allRights[index]]),
   );
 
-  const pendingGames = editableGames.filter(({ hasPgn }) => !hasPgn);
-  const completedGames = editableGames.filter(({ hasPgn }) => hasPgn);
+  const editableGames = allGames.filter(
+    (game) => gameRightsMap.get(game.id) === "edit",
+  );
+
+  const pendingGames = editableGames.filter((game) => game.pgn === null);
+  const completedGames = editableGames.filter((game) => game.pgn !== null);
 
   return (
     <div>
       <MatchEntryDashboard
-        pendingGames={pendingGames.map(({ game }) => game)}
-        completedGames={completedGames.map(({ game }) => game)}
+        pendingGames={pendingGames}
+        completedGames={completedGames}
       />
     </div>
   );

@@ -6,6 +6,8 @@ import { ScrollArea } from "@/components/ui/scroll-area";
 import { Clock, CheckCircle2, ArrowRight } from "lucide-react";
 import Link from "next/link";
 import { GameWithParticipantsAndPGN } from "@/db/types/game";
+import { getParticipantFullName } from "@/lib/participant";
+import invariant from "tiny-invariant";
 
 type Props = {
   pendingGames: GameWithParticipantsAndPGN[];
@@ -16,8 +18,11 @@ export function MatchEntryDashboard({ pendingGames, completedGames }: Props) {
   const getPlayerName = (
     participant: GameWithParticipantsAndPGN["whiteParticipant"],
   ) => {
-    if (!participant) return "Unbekannt";
-    return `${participant.profile.firstName} ${participant.profile.lastName}`;
+    invariant(
+      participant,
+      "Participant should not be null in match entry context",
+    );
+    return getParticipantFullName(participant);
   };
 
   return (
