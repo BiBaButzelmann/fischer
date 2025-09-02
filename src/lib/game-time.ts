@@ -1,7 +1,3 @@
-// TODO: update the time zone logic
-// TODO: all dates / times should be in UTC in database
-// TODO: when formatting the time to display -> convert to correct time zone
-
 import { GAME_START_TIME } from "@/constants/constants";
 import { GameWithMatchday } from "@/db/types/game";
 import { DateTime } from "luxon";
