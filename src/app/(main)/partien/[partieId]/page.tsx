@@ -1,7 +1,7 @@
 import z from "zod";
 import { getParticipantFullName } from "@/lib/participant";
 import { ParticipantWithName } from "@/db/types/participant";
-import { GameWithPGN } from "@/db/types/game";
+import { GameWithParticipantsAndPGNAndDate } from "@/db/types/game";
 import { getGameById } from "@/db/repositories/game";
 import { auth } from "@/auth/utils";
 import { redirect } from "next/navigation";
@@ -38,11 +38,7 @@ export default async function GamePage({ params }: Props) {
     );
   }
 
-  const userRights = await getUserGameRights(
-    gameId,
-    session.user.id,
-    session.user.role === "admin",
-  );
+  const userRights = await getUserGameRights(gameId, session.user.id);
 
   if (!userRights) {
     return (
@@ -73,7 +69,7 @@ async function PgnContainer({
   game,
   allowEdit,
 }: {
-  game: GameWithPGN;
+  game: GameWithParticipantsAndPGNAndDate;
   allowEdit: boolean;
 }) {
   if (!game.whiteParticipant || !game.blackParticipant) {

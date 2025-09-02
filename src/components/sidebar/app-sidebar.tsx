@@ -25,18 +25,21 @@ import {
   SwordsIcon,
   UserRoundCogIcon,
   Users,
+  ClipboardEdit,
 } from "lucide-react";
 import { Button } from "../ui/button";
 import Image from "next/image";
 import { Session } from "@/types/auth";
 import { Tournament } from "@/db/types/tournament";
+import { Role } from "@/db/types/role";
 
 type Props = {
   session: Session | null;
   tournament?: Tournament;
+  userRoles: Role[];
 };
 
-export function AppSidebar({ session, tournament }: Props) {
+export function AppSidebar({ session, tournament, userRoles }: Props) {
   const { setOpenMobile, isMobile } = useSidebar();
 
   const handleMobileMenuClick = () => {
@@ -51,6 +54,10 @@ export function AppSidebar({ session, tournament }: Props) {
   const isRunning = stage === "running";
   const isActive = stage === "registration" || stage === "running";
   const isAdmin = session?.user.role === "admin";
+
+  const canAccessMatchEntry = userRoles.some((role) =>
+    ["participant", "matchEnteringHelper", "admin"].includes(role),
+  );
 
   return (
     <Sidebar>
@@ -87,6 +94,11 @@ export function AppSidebar({ session, tournament }: Props) {
               <SidebarLink href="/kalender" icon={CalendarIcon}>
                 Kalender
               </SidebarLink>
+              {canAccessMatchEntry && isRunning && (
+                <SidebarLink href="/partieneingabe" icon={ClipboardEdit}>
+                  Partieneingabe
+                </SidebarLink>
+              )}
             </SidebarMenu>
           </SidebarGroupContent>
         </SidebarGroup>

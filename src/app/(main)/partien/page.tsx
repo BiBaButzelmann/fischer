@@ -72,7 +72,6 @@ export default async function Page({
 
   // TODO: Refactor conditional data loading - this should be handled by separate components
   const [participants, games, userRoles] = await Promise.all([
-    //TODO: proper validation
     selectedGroup
       ? getParticipantsByGroupId(Number(selectedGroup))
       : Promise.resolve([]),

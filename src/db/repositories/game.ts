@@ -14,13 +14,16 @@ import { group } from "../schema/group";
 import { matchdayGame, matchdayReferee } from "../schema/matchday";
 import { matchday } from "../schema/matchday";
 import { game } from "../schema/game";
-import { groupMatchEnteringHelper } from "../schema/matchEnteringHelper";
+import {
+  groupMatchEnteringHelper,
+  matchEnteringHelper,
+} from "../schema/matchEnteringHelper";
+import { participant } from "../schema/participant";
 import { referee } from "../schema/referee";
 import { profile } from "../schema/profile";
 import { getMatchEnteringHelperIdByUserId } from "./match-entering-helper";
 import invariant from "tiny-invariant";
 import { alias } from "drizzle-orm/pg-core";
-import { participant } from "../schema/participant";
 
 export async function getGameById(gameId: number) {
   return await db.query.game.findFirst({
@@ -467,13 +470,13 @@ export async function getAllGroupNamesByTournamentId(tournamentId: number) {
     })
     .from(group)
     .where(eq(group.tournamentId, tournamentId))
-    .orderBy(group.groupNumber);
+    .orderBy(group.groupName);
 }
 
 export async function isUserMatchEnteringHelperInGame(
   gameId: number,
   userId: string,
-): Promise<boolean> {
+) {
   const [groupData, matchEnteringHelperId] = await Promise.all([
     db
       .select({ groupId: game.groupId })
@@ -525,4 +528,108 @@ export async function isUserRefereeInGame(gameId: number, userId: string) {
     .limit(1);
 
   return refereeAssignment.length > 0;
+}
+
+export async function getAllGamesWithParticipantsAndPGN() {
+  return await db.query.game.findMany({
+    where: (game, { and, isNotNull }) =>
+      and(
+        isNotNull(game.whiteParticipantId),
+        isNotNull(game.blackParticipantId),
+      ),
+    with: {
+      whiteParticipant: {
+        with: {
+          profile: {
+            columns: {
+              firstName: true,
+              lastName: true,
+            },
+          },
+        },
+      },
+      blackParticipant: {
+        with: {
+          profile: {
+            columns: {
+              firstName: true,
+              lastName: true,
+            },
+          },
+        },
+      },
+      pgn: true,
+    },
+    orderBy: (game, { asc }) => [asc(game.round)],
+  });
+}
+
+export async function getGamesAccessibleByUser(userId: string) {
+  return await db.query.game.findMany({
+    where: (game, { and, or, eq, isNotNull, exists }) =>
+      and(
+        isNotNull(game.whiteParticipantId),
+        isNotNull(game.blackParticipantId),
+        or(
+          exists(
+            db
+              .select()
+              .from(participant)
+              .innerJoin(profile, eq(participant.profileId, profile.id))
+              .where(
+                and(
+                  eq(profile.userId, userId),
+                  or(
+                    eq(game.whiteParticipantId, participant.id),
+                    eq(game.blackParticipantId, participant.id),
+                  ),
+                ),
+              ),
+          ),
+          exists(
+            db
+              .select()
+              .from(groupMatchEnteringHelper)
+              .innerJoin(
+                matchEnteringHelper,
+                eq(
+                  groupMatchEnteringHelper.matchEnteringHelperId,
+                  matchEnteringHelper.id,
+                ),
+              )
+              .innerJoin(profile, eq(matchEnteringHelper.profileId, profile.id))
+              .where(
+                and(
+                  eq(profile.userId, userId),
+                  eq(game.groupId, groupMatchEnteringHelper.groupId),
+                ),
+              ),
+          ),
+        ),
+      ),
+    with: {
+      whiteParticipant: {
+        with: {
+          profile: {
+            columns: {
+              firstName: true,
+              lastName: true,
+            },
+          },
+        },
+      },
+      blackParticipant: {
+        with: {
+          profile: {
+            columns: {
+              firstName: true,
+              lastName: true,
+            },
+          },
+        },
+      },
+      pgn: true,
+    },
+    orderBy: (game, { asc }) => [asc(game.round)],
+  });
 }
