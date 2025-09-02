@@ -10,6 +10,7 @@ import PgnViewer from "@/components/game/chessboard/pgn-viewer";
 import { Suspense } from "react";
 import { DateTime } from "luxon";
 import { getGameTimeFromGame } from "@/lib/game-time";
+import { toDateString } from "@/lib/date";
 
 type Props = {
   params: Promise<{ partieId: string }>;
@@ -123,5 +124,5 @@ function getInitialPGN(
   whiteParticipant: string,
   blackParticipant: string,
 ) {
-  return `[Event "${tournamentName}"]\n[Site "https://klubturnier.hsk1830.de"]\n[Date "${date.toFormat("dd.MM.yyyy")}"]\n[Round "${round}"]\n[White "${whiteParticipant}"]\n[Black "${blackParticipant}"]\n[Result "*"]\n\n*`;
+  return `[Event "${tournamentName}"]\n[Site "https://klubturnier.hsk1830.de"]\n[Date "${toDateString(date)}"]\n[Round "${round}"]\n[White "${whiteParticipant}"]\n[Black "${blackParticipant}"]\n[Result "*"]\n\n*`;
 }
