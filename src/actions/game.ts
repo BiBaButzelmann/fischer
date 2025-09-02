@@ -23,6 +23,7 @@ import { sendGamePostponementEmails } from "@/actions/email/game-postponement";
 import { updateBoardNumbers } from "@/actions/board-number";
 import { getCurrentLocalDateTime } from "@/lib/date";
 import { getRolesByUserId } from "@/db/repositories/role";
+import { fr } from "date-fns/locale";
 
 export async function removeScheduledGamesForGroup(
   tournamentId: number,
@@ -250,13 +251,18 @@ export async function updateGameMatchdayAndBoardNumber(
   });
   invariant(userProfile, "User profile not found");
 
+  const fromTimestamp = getDateTimeFromDefaultTime(
+    currentMatchday.date,
+  ).toJSDate();
+  const toTimestamp = getDateTimeFromDefaultTime(newMatchday.date).toJSDate();
+
   await db.transaction(async (tx) => {
     await tx.insert(gamePostponement).values({
       gameId,
       postponingParticipantId: postponingParticipant.id,
       postponedByProfileId: userProfile.id,
-      from: currentMatchday.date,
-      to: newMatchday.date,
+      from: fromTimestamp,
+      to: toTimestamp,
     });
 
     await tx
