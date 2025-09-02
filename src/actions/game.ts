@@ -23,7 +23,6 @@ import { sendGamePostponementEmails } from "@/actions/email/game-postponement";
 import { updateBoardNumbers } from "@/actions/board-number";
 import { getCurrentLocalDateTime } from "@/lib/date";
 import { getRolesByUserId } from "@/db/repositories/role";
-import { fr } from "date-fns/locale";
 
 export async function removeScheduledGamesForGroup(
   tournamentId: number,
