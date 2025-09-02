@@ -1,13 +1,10 @@
-/**
- * Builds a URL for navigating to the game view page with the specified parameters
- */
-export function buildGameViewUrl(params: {
+export function buildGameViewParams(params: {
   tournamentId: number;
   groupId?: number;
   round?: number;
   participantId?: number;
   matchdayId?: number;
-}): string {
+}) {
   const searchParams = new URLSearchParams();
   searchParams.set("tournamentId", params.tournamentId.toString());
 
@@ -27,6 +24,20 @@ export function buildGameViewUrl(params: {
     searchParams.set("matchdayId", params.matchdayId.toString());
   }
 
+  return searchParams;
+}
+
+/**
+ * Builds a URL for navigating to the game view page with the specified parameters
+ */
+export function buildGameViewUrl(params: {
+  tournamentId: number;
+  groupId?: number;
+  round?: number;
+  participantId?: number;
+  matchdayId?: number;
+}): string {
+  const searchParams = buildGameViewParams(params);
   return `/partien?${searchParams.toString()}`;
 }
 
