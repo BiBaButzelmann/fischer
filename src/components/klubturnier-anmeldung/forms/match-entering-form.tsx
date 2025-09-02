@@ -23,6 +23,7 @@ import z from "zod";
 import { useTransition } from "react";
 import { matchEnteringHelperFormSchema } from "@/schema/matchEnteringHelper";
 import { ClipboardEdit, Info, Users } from "lucide-react";
+import { TournamentStage } from "@/db/types/tournament";
 
 type Props = {
   initialValues?: z.infer<typeof matchEnteringHelperFormSchema>;
@@ -30,12 +31,14 @@ type Props = {
     data: z.infer<typeof matchEnteringHelperFormSchema>,
   ) => Promise<void>;
   onDelete: () => Promise<void>;
+  tournamentStage: TournamentStage;
 };
 
 export function MatchEnteringForm({
   initialValues,
   onSubmit,
   onDelete,
+  tournamentStage,
 }: Props) {
   const [isPending, startTransition] = useTransition();
   const form = useForm<z.infer<typeof matchEnteringHelperFormSchema>>({
@@ -137,7 +140,7 @@ export function MatchEnteringForm({
           >
             Änderungen speichern
           </Button>
-          {initialValues !== undefined ? (
+          {initialValues !== undefined && tournamentStage === "registration" ? (
             <Button
               disabled={isPending}
               onClick={handleDelete}

@@ -25,13 +25,20 @@ import { MatchDaysCheckboxes } from "./matchday-selection";
 import { setupHelperFormSchema } from "@/schema/setupHelper";
 
 import { Info, Users, Wrench } from "lucide-react";
+import { TournamentStage } from "@/db/types/tournament";
 
 type Props = {
   initialValues?: z.infer<typeof setupHelperFormSchema>;
   onSubmit: (data: z.infer<typeof setupHelperFormSchema>) => Promise<void>;
   onDelete: () => Promise<void>;
+  tournamentStage: TournamentStage;
 };
-export function SetupHelperForm({ initialValues, onSubmit, onDelete }: Props) {
+export function SetupHelperForm({
+  initialValues,
+  onSubmit,
+  onDelete,
+  tournamentStage,
+}: Props) {
   const [isPending, startTransition] = useTransition();
   const form = useForm<z.infer<typeof setupHelperFormSchema>>({
     resolver: zodResolver(setupHelperFormSchema),
@@ -143,7 +150,7 @@ export function SetupHelperForm({ initialValues, onSubmit, onDelete }: Props) {
           >
             Änderungen speichern
           </Button>
-          {initialValues !== undefined ? (
+          {initialValues !== undefined && tournamentStage === "registration" ? (
             <Button
               disabled={isPending}
               onClick={handleDelete}

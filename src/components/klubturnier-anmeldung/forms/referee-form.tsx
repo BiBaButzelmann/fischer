@@ -26,14 +26,21 @@ import { useTransition } from "react";
 import { MatchDaysCheckboxes } from "./matchday-selection";
 
 import { Info, Shield, Users } from "lucide-react";
+import { TournamentStage } from "@/db/types/tournament";
 
 type Props = {
   initialValues?: z.infer<typeof refereeFormSchema>;
   onSubmit: (data: z.infer<typeof refereeFormSchema>) => Promise<void>;
   onDelete: () => Promise<void>;
+  tournamentStage: TournamentStage;
 };
 
-export function RefereeForm({ initialValues, onSubmit, onDelete }: Props) {
+export function RefereeForm({
+  initialValues,
+  onSubmit,
+  onDelete,
+  tournamentStage,
+}: Props) {
   const [isPending, startTransition] = useTransition();
   const form = useForm<z.infer<typeof refereeFormSchema>>({
     resolver: zodResolver(refereeFormSchema),
@@ -168,7 +175,7 @@ export function RefereeForm({ initialValues, onSubmit, onDelete }: Props) {
           >
             Änderungen speichern
           </Button>
-          {initialValues !== undefined ? (
+          {initialValues !== undefined && tournamentStage === "registration" ? (
             <Button
               disabled={isPending}
               onClick={handleDelete}
