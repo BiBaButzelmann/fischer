@@ -31,8 +31,8 @@ export function SetupHelperContent({ tournamentId }: Props) {
           klubturnier.hsk1830.de{gameUrl}
         </a>
         <br />
-        Dort kannst du über den "Drucken" Knopf alle Partien des Spieltages
-        ausdrucken.
+        Dort kannst du über den &quot;Drucken&quot; Knopf alle Partien des
+        Spieltages ausdrucken.
       </p>
       <p>
         Wenn du einmal krank oder aus einem anderen Grund verhindert bist,
