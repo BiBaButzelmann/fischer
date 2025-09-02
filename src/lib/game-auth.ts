@@ -3,10 +3,17 @@ import {
   isUserMatchEnteringHelperInGame,
   isUserRefereeInGame,
 } from "@/db/repositories/game";
-import { GameResult, GameWithParticipants, PlayedGameResult, PLAYED_GAME_RESULTS } from "@/db/types/game";
+import {
+  GameResult,
+  GameWithParticipants,
+  PlayedGameResult,
+  PLAYED_GAME_RESULTS,
+} from "@/db/types/game";
 import { getRolesByUserId } from "@/db/repositories/role";
 
-export const isGameActuallyPlayed = (result: GameResult | null): result is PlayedGameResult => {
+export const isGameActuallyPlayed = (
+  result: GameResult | null,
+): result is PlayedGameResult => {
   if (!result) return false;
   return PLAYED_GAME_RESULTS.includes(result as PlayedGameResult);
 };
