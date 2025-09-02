@@ -31,7 +31,7 @@ export function MyGamesCalendar({ events, matchdays = [] }: Props) {
   const calendarEvents: EventInput[] = events.map((event) => ({
     id: event.id,
     title: event.title,
-    start: event.start.toJSDate(),
+    start: event.start,
     extendedProps: event.extendedProps,
     editable: event.extendedProps.eventType === "game",
   }));

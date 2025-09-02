@@ -38,7 +38,7 @@ export async function getCalendarEventsForParticipant(
     events.push({
       id: `game-${game.id}`,
       title: `Runde ${game.round}`,
-      start: gameDateTime,
+      start: gameDateTime.toJSDate(),
       extendedProps: {
         eventType: "game" as const,
         gameId: game.id,
@@ -59,7 +59,7 @@ export async function getCalendarEventsForReferee(refereeId: number) {
     return {
       id: `referee-${entry.matchday.id}`,
       title: `Schiedsrichter`,
-      start: getDateTimeFromDefaultTime(entry.matchday.date),
+      start: getDateTimeFromDefaultTime(entry.matchday.date).toJSDate(),
       extendedProps: {
         eventType: "referee" as const,
         refereeId: entry.referee.id,
@@ -77,7 +77,7 @@ export async function getCalendarEventsForSetupHelper(setupHelperId: number) {
     return {
       id: `setupHelper-${entry.matchday.id}`,
       title: `Aufbauhelfer`,
-      start: getSetupHelperTimeFromDefaultTime(entry.matchday.date),
+      start: getSetupHelperTimeFromDefaultTime(entry.matchday.date).toJSDate(),
       extendedProps: {
         eventType: "setupHelper" as const,
         setupHelperId: entry.setupHelper.id,
@@ -116,11 +116,11 @@ export async function getUpcomingEventsByProfileAndTournament(
 
   const allEvents = await Promise.all(eventPromises);
 
-  const currentTime = getCurrentLocalDateTime();
+  const currentTime = getCurrentLocalDateTime().toJSDate();
 
   return allEvents
     .flat()
     .filter((event) => event.start > currentTime)
-    .sort((a, b) => a.start.toMillis() - b.start.toMillis())
+    .sort((a, b) => a.start.getTime() - b.start.getTime())
     .slice(0, limit);
 }

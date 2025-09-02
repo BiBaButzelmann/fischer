@@ -6,7 +6,7 @@ import { DateTime } from "luxon";
 type Props = {
   tournamentId: number;
   matchdayId: number;
-  start: DateTime;
+  start: Date;
 };
 
 export function UpcomingRefereeEvent({
