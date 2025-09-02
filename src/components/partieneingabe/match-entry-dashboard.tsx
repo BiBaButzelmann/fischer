@@ -15,14 +15,10 @@ type Props = {
 };
 
 export function MatchEntryDashboard({ pendingGames, completedGames }: Props) {
-  const getPlayerName = (
-    participant: GameWithParticipantsAndPGN["whiteParticipant"],
-  ) => {
-    invariant(
-      participant,
-      "Participant should not be null in match entry context",
-    );
-    return getParticipantFullName(participant);
+  const getPlayerNames = (game: GameWithParticipantsAndPGN) => {
+    invariant(game.whiteParticipant, "White participant should not be null");
+    invariant(game.blackParticipant, "Black participant should not be null");
+    return `${getParticipantFullName(game.whiteParticipant)} vs ${getParticipantFullName(game.blackParticipant)}`;
   };
 
   return (
@@ -72,9 +68,7 @@ export function MatchEntryDashboard({ pendingGames, completedGames }: Props) {
                   >
                     <div className="flex items-center justify-between">
                       <span className="font-medium text-slate-900">
-                        Runde {game.round}:{" "}
-                        {getPlayerName(game.whiteParticipant)} vs{" "}
-                        {getPlayerName(game.blackParticipant)}
+                        Runde {game.round}: {getPlayerNames(game)}
                       </span>
                       <ArrowRight className="h-4 w-4 text-slate-400 group-hover:text-slate-600 transition-colors" />
                     </div>
@@ -118,9 +112,7 @@ export function MatchEntryDashboard({ pendingGames, completedGames }: Props) {
                   >
                     <div className="flex items-center justify-between">
                       <span className="font-medium text-slate-900">
-                        Runde {game.round}:{" "}
-                        {getPlayerName(game.whiteParticipant)} vs{" "}
-                        {getPlayerName(game.blackParticipant)}
+                        Runde {game.round}: {getPlayerNames(game)}
                       </span>
                       <CheckCircle2 className="h-5 w-5 text-green-600" />
                     </div>
