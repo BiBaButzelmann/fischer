@@ -9,6 +9,7 @@ import { juror } from "../schema/juror";
 import { matchEnteringHelper } from "../schema/matchEnteringHelper";
 import { setupHelper } from "../schema/setupHelper";
 import { DEFAULT_CLUB_LABEL } from "@/constants/constants";
+import { ParticipantWithZps } from "../types/participant";
 
 export async function getAllProfiles() {
   return await db.query.profile.findMany({
@@ -28,7 +29,9 @@ export async function getAllProfiles() {
   });
 }
 
-export async function getAllParticipantsByTournamentId(tournamentId: number) {
+export async function getAllParticipantsByTournamentId(
+  tournamentId: number,
+): Promise<ParticipantWithZps[]> {
   return await db.query.participant.findMany({
     where: (participant, { eq, and }) =>
       and(

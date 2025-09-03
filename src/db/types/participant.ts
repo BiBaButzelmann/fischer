@@ -23,7 +23,7 @@ export type ParticipantAndGroup = Participant & {
 
 export type ParticipantWithRating = Pick<
   Participant,
-  "id" | "dwzRating" | "fideRating" | "title" | "chessClub" | "zpsPlayerId"
+  "id" | "dwzRating" | "fideRating" | "title" | "chessClub"
 > & {
   profile: {
     firstName: string;
@@ -38,5 +38,19 @@ export type ParticipantWithProfile = Participant & {
     lastName: string;
     email: string;
     phoneNumber: string | null;
+  };
+};
+
+export type ParticipantWithZps = Pick<
+  Participant,
+  "id" | "dwzRating" | "fideRating" | "zpsPlayerId"
+> & {
+  profile: {
+    id: number;
+    userId: string;
+    firstName: string;
+    lastName: string;
+    phoneNumber: string | null;
+    deletedAt: Date | null;
   };
 };

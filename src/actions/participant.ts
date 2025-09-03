@@ -11,6 +11,7 @@ import { getProfileByUserId } from "@/db/repositories/profile";
 import { and, eq } from "drizzle-orm";
 import { DEFAULT_CLUB_LABEL } from "@/constants/constants";
 import { revalidatePath } from "next/cache";
+import { ParticipantWithZps } from "@/db/types/participant";
 
 export async function createParticipant(
   tournamentId: number,
@@ -206,14 +207,9 @@ export async function getDwzAndEloByZpsNumber(zps: string) {
   };
 }
 
-export async function updateParticipantRatingsFromServer(participantData: {
-  id: number;
-  profile: {
-    firstName: string;
-    lastName: string;
-  };
-  zpsPlayerId: string | null;
-}): Promise<{
+export async function updateParticipantRatingsFromServer(
+  participantData: ParticipantWithZps,
+): Promise<{
   success: boolean;
   message: string;
   updatedRatings?: {
