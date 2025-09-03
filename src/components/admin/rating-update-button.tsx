@@ -31,9 +31,7 @@ export function RatingUpdateButton({ participants }: Props) {
         setUpdateProgress({ current: i + 1, total });
 
         try {
-          const result = await updateParticipantRatingsFromServer(
-            participant.id,
-          );
+          const result = await updateParticipantRatingsFromServer(participant);
 
           if (result.success) {
             successful++;

@@ -11,7 +11,6 @@ import { getProfileByUserId } from "@/db/repositories/profile";
 import { and, eq } from "drizzle-orm";
 import { DEFAULT_CLUB_LABEL } from "@/constants/constants";
 import { revalidatePath } from "next/cache";
-import { getParticipantForRatingUpdate } from "@/db/repositories/participant";
 
 export async function createParticipant(
   tournamentId: number,
@@ -175,9 +174,13 @@ export async function getParticipantEloData(
   };
 }
 
-export async function updateParticipantRatingsFromServer(
-  participantId: number,
-): Promise<{
+export async function updateParticipantRatingsFromServer(participantData: {
+  id: number;
+  profile: {
+    firstName: string;
+    lastName: string;
+  };
+}): Promise<{
   success: boolean;
   message: string;
   updatedRatings?: {
@@ -192,26 +195,16 @@ export async function updateParticipantRatingsFromServer(
     "Unauthorized: Admin access required",
   );
 
-  const existingParticipant =
-    await getParticipantForRatingUpdate(participantId);
-
-  if (!existingParticipant) {
-    return {
-      success: false,
-      message: "Teilnehmer nicht gefunden",
-    };
-  }
-
   try {
     const eloData = await getParticipantEloData(
-      existingParticipant.profile.firstName,
-      existingParticipant.profile.lastName,
+      participantData.profile.firstName,
+      participantData.profile.lastName,
     );
 
     if (!eloData) {
       return {
         success: false,
-        message: `Keine Wertungsdaten für ${existingParticipant.profile.firstName} ${existingParticipant.profile.lastName} gefunden (nicht im DSB-Verein gefunden)`,
+        message: `Keine Wertungsdaten für ${participantData.profile.firstName} ${participantData.profile.lastName} gefunden (nicht im DSB-Verein gefunden)`,
       };
     }
 
@@ -226,13 +219,13 @@ export async function updateParticipantRatingsFromServer(
         zpsClubId: eloData.zpsClub,
         zpsPlayerId: eloData.zpsPlayer,
       })
-      .where(eq(participant.id, participantId));
+      .where(eq(participant.id, participantData.id));
 
     revalidatePath("/admin/nutzerverwaltung");
 
     return {
       success: true,
-      message: `${existingParticipant.profile.firstName} ${existingParticipant.profile.lastName}: Wertungszahlen aktualisiert`,
+      message: `${participantData.profile.firstName} ${participantData.profile.lastName}: Wertungszahlen aktualisiert`,
       updatedRatings: {
         dwzRating: eloData.dwzRating,
         fideRating: eloData.fideRating,
@@ -241,7 +234,7 @@ export async function updateParticipantRatingsFromServer(
   } catch (error) {
     return {
       success: false,
-      message: `Fehler bei ${existingParticipant.profile.firstName} ${existingParticipant.profile.lastName}: ${error instanceof Error ? error.message : "Unbekannter Fehler"}`,
+      message: `Fehler bei ${participantData.profile.firstName} ${participantData.profile.lastName}: ${error instanceof Error ? error.message : "Unbekannter Fehler"}`,
     };
   }
 }
