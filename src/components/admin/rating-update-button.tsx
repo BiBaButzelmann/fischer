@@ -36,7 +36,7 @@ export function RatingUpdateButton({ participants }: Props) {
         } else if (result.failed > 0) {
           toast.error(`Alle ${result.failed} Aktualisierungen fehlgeschlagen`);
         }
-      } catch (error) {
+      } catch {
         toast.error("Fehler beim Aktualisieren der Wertungszahlen");
       }
     });
