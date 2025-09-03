@@ -5,6 +5,7 @@ import { RefreshCw } from "lucide-react";
 import { useTransition } from "react";
 import { updateAllParticipantRatings } from "@/actions/participant";
 import { toast } from "sonner";
+import { isError } from "@/lib/actions";
 
 type RatingUpdateParticipant = {
   id: number;
@@ -24,20 +25,21 @@ export function RatingUpdateButton({ participants }: Props) {
 
   const handleUpdateRatings = () => {
     startTransition(async () => {
-      try {
-        const result = await updateAllParticipantRatings(participants);
+      const result = await updateAllParticipantRatings(participants);
 
-        if (result.successful > 0) {
-          toast.success(
-            `${result.successful} Wertungszahlen erfolgreich aktualisiert${
-              result.failed > 0 ? `, ${result.failed} fehlgeschlagen` : ""
-            }`,
-          );
-        } else if (result.failed > 0) {
-          toast.error(`Alle ${result.failed} Aktualisierungen fehlgeschlagen`);
-        }
-      } catch {
-        toast.error("Fehler beim Aktualisieren der Wertungszahlen");
+      if (isError(result)) {
+        toast.error(result.error);
+        return;
+      }
+
+      if (result.successful > 0) {
+        toast.success(
+          `${result.successful} Wertungszahlen erfolgreich aktualisiert${
+            result.failed > 0 ? `, ${result.failed} fehlgeschlagen` : ""
+          }`,
+        );
+      } else if (result.failed > 0) {
+        toast.error(`Alle ${result.failed} Aktualisierungen fehlgeschlagen`);
       }
     });
   };

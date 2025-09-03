@@ -11,6 +11,7 @@ import { getProfileByUserId } from "@/db/repositories/profile";
 import { and, eq } from "drizzle-orm";
 import { DEFAULT_CLUB_LABEL } from "@/constants/constants";
 import { revalidatePath } from "next/cache";
+import { action } from "@/lib/actions";
 
 export async function createParticipant(
   tournamentId: number,
@@ -206,62 +207,68 @@ export async function getDwzAndEloByZpsNumber(zps: string) {
   };
 }
 
-export async function updateAllParticipantRatings(
-  participants: {
-    id: number;
-    profile: {
-      firstName: string;
-      lastName: string;
-    };
-    zpsPlayerId: string | null;
-  }[],
-): Promise<{
-  successful: number;
-  failed: number;
-}> {
-  const session = await authWithRedirect();
+export const updateAllParticipantRatings = action(
+  async (
+    participants: {
+      id: number;
+      profile: {
+        firstName: string;
+        lastName: string;
+      };
+      zpsPlayerId: string | null;
+    }[],
+  ): Promise<{
+    successful: number;
+    failed: number;
+  }> => {
+    const session = await authWithRedirect();
 
-  invariant(
-    session.user.role === "admin",
-    "Unauthorized: Admin access required",
-  );
+    invariant(
+      session.user.role === "admin",
+      "Unauthorized: Admin access required",
+    );
 
-  let successful = 0;
-  let failed = 0;
-
-  for (const participantData of participants) {
-    try {
-      if (!participantData.zpsPlayerId) {
-        failed++;
-        continue;
-      }
-
-      const eloData = await getDwzAndEloByZpsNumber(
-        participantData.zpsPlayerId,
-      );
-      if (!eloData) {
-        failed++;
-        continue;
-      }
-
-      await db
-        .update(participant)
-        .set({
-          dwzRating: eloData.dwzRating,
-          fideRating: eloData.fideRating,
-        })
-        .where(eq(participant.id, participantData.id));
-
-      successful++;
-    } catch {
-      failed++;
+    if (participants.length === 0) {
+      throw new Error("Keine Teilnehmer zum Aktualisieren vorhanden");
     }
-  }
 
-  revalidatePath("/admin/nutzerverwaltung");
+    let successful = 0;
+    let failed = 0;
 
-  return { successful, failed };
-}
+    for (const participantData of participants) {
+      try {
+        if (!participantData.zpsPlayerId) {
+          failed++;
+          continue;
+        }
+
+        const eloData = await getDwzAndEloByZpsNumber(
+          participantData.zpsPlayerId,
+        );
+        if (!eloData) {
+          failed++;
+          continue;
+        }
+
+        await db
+          .update(participant)
+          .set({
+            dwzRating: eloData.dwzRating,
+            fideRating: eloData.fideRating,
+          })
+          .where(eq(participant.id, participantData.id));
+
+        successful++;
+      } catch {
+        failed++;
+      }
+    }
+
+    revalidatePath("/admin/nutzerverwaltung");
+
+    return { successful, failed };
+  },
+);
 
 export async function updateEntryFeeStatus(
   participantId: number,
