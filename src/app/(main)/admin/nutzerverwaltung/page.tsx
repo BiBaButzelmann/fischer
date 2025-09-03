@@ -134,6 +134,7 @@ export default async function Page() {
         <TabsContent value="participants" className="space-y-4">
           <ParticipantList
             participants={participants}
+            tournamentId={tournament.id}
             title="Teilnehmer"
             description={`${participants.length} Spieler sind für das Turnier angemeldet`}
             icon={User}
@@ -262,12 +263,14 @@ function UserList({
 
 function ParticipantList({
   participants,
+  tournamentId,
   title,
   description,
   icon: Icon,
   emptyMessage,
 }: {
   participants: ParticipantWithRatings[];
+  tournamentId: number;
   title: string;
   description: string;
   icon: LucideIcon;
@@ -287,12 +290,7 @@ function ParticipantList({
             </div>
           </div>
           {participants.length > 0 && (
-            <RatingUpdateButton
-              participants={participants.map((p) => ({
-                id: p.id,
-                zpsPlayerId: p.zpsPlayerId,
-              }))}
-            />
+            <RatingUpdateButton tournamentId={tournamentId} />
           )}
         </div>
       </CardHeader>

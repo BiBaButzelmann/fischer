@@ -8,6 +8,7 @@ import { participantFormSchema } from "@/schema/participant";
 import { authWithRedirect } from "@/auth/utils";
 import { getTournamentById } from "@/db/repositories/tournament";
 import { getProfileByUserId } from "@/db/repositories/profile";
+import { getParticipantsWithZpsPlayerIdByTournamentId } from "@/db/repositories/participant";
 import { and, eq } from "drizzle-orm";
 import { DEFAULT_CLUB_LABEL } from "@/constants/constants";
 import { revalidatePath } from "next/cache";
@@ -209,10 +210,7 @@ export async function getDwzAndEloByZpsNumber(zps: string) {
 
 export const updateAllParticipantRatings = action(
   async (
-    participants: {
-      id: number;
-      zpsPlayerId: string | null;
-    }[],
+    tournamentId: number,
   ): Promise<{
     updated: number;
     failed: number;
@@ -225,8 +223,13 @@ export const updateAllParticipantRatings = action(
       "Unauthorized: Admin access required",
     );
 
+    const participants =
+      await getParticipantsWithZpsPlayerIdByTournamentId(tournamentId);
+
     if (participants.length === 0) {
-      throw new Error("Keine Teilnehmer zum Aktualisieren vorhanden");
+      throw new Error(
+        "Keine Teilnehmer mit ZPS-Player-ID zum Aktualisieren vorhanden",
+      );
     }
 
     let updated = 0;
@@ -234,12 +237,8 @@ export const updateAllParticipantRatings = action(
 
     for (const participantData of participants) {
       try {
-        if (!participantData.zpsPlayerId) {
-          continue;
-        }
-
         const eloData = await getDwzAndEloByZpsNumber(
-          participantData.zpsPlayerId,
+          participantData.zpsPlayerId!,
         );
         if (!eloData) {
           failed++;

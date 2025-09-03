@@ -40,17 +40,3 @@ export type ParticipantWithProfile = Participant & {
     phoneNumber: string | null;
   };
 };
-
-export type ParticipantWithZps = Pick<
-  Participant,
-  "id" | "dwzRating" | "fideRating" | "zpsPlayerId"
-> & {
-  profile: {
-    id: number;
-    userId: string;
-    firstName: string;
-    lastName: string;
-    phoneNumber: string | null;
-    deletedAt: Date | null;
-  };
-};

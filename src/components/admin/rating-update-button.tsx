@@ -7,22 +7,17 @@ import { updateAllParticipantRatings } from "@/actions/participant";
 import { toast } from "sonner";
 import { isError } from "@/lib/actions";
 
-type RatingUpdateParticipant = {
-  id: number;
-  zpsPlayerId: string | null;
-};
-
 type Props = {
-  participants: RatingUpdateParticipant[];
+  tournamentId: number;
 };
 
-export function RatingUpdateButton({ participants }: Props) {
+export function RatingUpdateButton({ tournamentId }: Props) {
   const [isPending, startTransition] = useTransition();
 
   const handleUpdateRatings = () => {
     startTransition(async () => {
       try {
-        const result = await updateAllParticipantRatings(participants);
+        const result = await updateAllParticipantRatings(tournamentId);
 
         if (isError(result)) {
           toast.error(result.error);
