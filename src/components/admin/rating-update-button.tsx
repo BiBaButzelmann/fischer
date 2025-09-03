@@ -32,7 +32,7 @@ export function RatingUpdateButton({ participants }: Props) {
         toast.info(
           `${result.updated} von ${result.total} Wertungszahlen aktualisiert${result.failed > 0 ? ` (${result.failed} fehlgeschlagen)` : ""}`,
         );
-      } catch (error) {
+      } catch {
         toast.error("Fehler beim Aktualisieren der Wertungszahlen");
       }
     });
