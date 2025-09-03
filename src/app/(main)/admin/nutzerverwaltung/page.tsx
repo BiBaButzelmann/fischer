@@ -31,6 +31,8 @@ import { UserRow } from "@/components/admin/user-row";
 import { ParticipantRow } from "@/components/admin/participant-row";
 import { RatingUpdateButton } from "@/components/admin/rating-update-button";
 import { redirect } from "next/navigation";
+import { ProfileWithName } from "@/db/types/profile";
+import { ParticipantWithRating } from "@/db/types/participant";
 
 export default async function Page() {
   const session = await authWithRedirect();
@@ -197,23 +199,6 @@ export default async function Page() {
   );
 }
 
-type ProfileWithName = {
-  id: number;
-  userId: string;
-  firstName: string;
-  lastName: string;
-  phoneNumber?: string | null;
-  deletedAt: Date | null;
-};
-
-type ParticipantWithRatings = {
-  id: number;
-  dwzRating: number | null;
-  fideRating: number | null;
-  zpsPlayerId: string | null;
-  profile: ProfileWithName;
-};
-
 function UserList({
   users,
   title,
@@ -269,7 +254,7 @@ function ParticipantList({
   icon: Icon,
   emptyMessage,
 }: {
-  participants: ParticipantWithRatings[];
+  participants: ParticipantWithRating[];
   tournamentId: number;
   title: string;
   description: string;
