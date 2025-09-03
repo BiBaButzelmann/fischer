@@ -21,6 +21,52 @@ export async function sendTournamentStartedEmails(tournamentId: number) {
 
   const profiles = await getAllProfilesWithRolesByTournamentId(tournamentId);
 
+  const mailsSent = await sendEmailsToProfiles(profiles, tournamentId, false);
+
+  return { sent: mailsSent };
+}
+
+export async function sendTournamentStartedEmailsToGroup(
+  tournamentId: number,
+  groupId: number,
+) {
+  const session = await authWithRedirect();
+  invariant(session.user.role === "admin", "Unauthorized");
+
+  const tournament = await getTournamentById(tournamentId);
+  invariant(tournament, "Tournament not found");
+  invariant(tournament.stage === "running", "Tournament is not running");
+
+  const groupParticipants = await getParticipantsWithProfileByGroupId(groupId);
+
+  const profiles = groupParticipants.map((participant) => ({
+    id: participant.profileId,
+    firstName: participant.profile.firstName,
+    lastName: participant.profile.lastName,
+    email: participant.profile.email,
+    phoneNumber: participant.profile.phoneNumber,
+  }));
+
+  const mailsSent = await sendEmailsToProfiles(profiles, tournamentId, true);
+
+  return { sent: mailsSent };
+}
+
+function sleep(ms: number) {
+  return new Promise((resolve) => setTimeout(resolve, ms));
+}
+
+async function sendEmailsToProfiles(
+  profiles: {
+    id: number;
+    firstName: string;
+    lastName: string;
+    email: string;
+    phoneNumber: string;
+  }[],
+  tournamentId: number,
+  isGroupUpdate: boolean = false,
+) {
   let mailsSent = 0;
   for (let i = 0; i < profiles.length; i += 2) {
     const profile1 = profiles[i];
@@ -38,6 +84,7 @@ export async function sendTournamentStartedEmails(tournamentId: number) {
         tournamentId,
         roles: dataProfile1.roles,
         participantData: dataProfile1.participantData,
+        isGroupUpdate,
       });
       mailsSent++;
     }
@@ -49,6 +96,7 @@ export async function sendTournamentStartedEmails(tournamentId: number) {
         tournamentId,
         roles: dataProfile2.roles,
         participantData: dataProfile2.participantData,
+        isGroupUpdate,
       });
       mailsSent++;
     }
@@ -56,11 +104,7 @@ export async function sendTournamentStartedEmails(tournamentId: number) {
     await sleep(1000);
   }
 
-  return { sent: mailsSent };
-}
-
-function sleep(ms: number) {
-  return new Promise((resolve) => setTimeout(resolve, ms));
+  return mailsSent;
 }
 
 async function getEmailData(tournamentId: number, profileId: number) {
