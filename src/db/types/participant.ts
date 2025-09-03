@@ -23,7 +23,7 @@ export type ParticipantAndGroup = Participant & {
 
 export type ParticipantWithRating = Pick<
   Participant,
-  "id" | "dwzRating" | "fideRating" | "title" | "chessClub"
+  "id" | "dwzRating" | "fideRating" | "title" | "chessClub" | "zpsPlayerId"
 > & {
   profile: {
     firstName: string;

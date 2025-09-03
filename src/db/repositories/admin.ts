@@ -39,6 +39,7 @@ export async function getAllParticipantsByTournamentId(tournamentId: number) {
       id: true,
       dwzRating: true,
       fideRating: true,
+      zpsPlayerId: true,
     },
     with: {
       profile: {

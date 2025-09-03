@@ -174,12 +174,45 @@ export async function getParticipantEloData(
   };
 }
 
+export async function getDwzAndEloByZpsNumber(zps: string) {
+  const clubData = await fetch(
+    "https://www.schachbund.de/php/dewis/verein.php?zps=40023&format=csv",
+  );
+  const clubCsv = await clubData.text();
+
+  const clubCsvLines = clubCsv.split("\n");
+  const matchingClubLine = clubCsvLines.find((line) => {
+    const fields = line.split("|");
+    const rowZps = fields[5]?.trim() || "";
+
+    return rowZps === zps;
+  });
+  if (!matchingClubLine) {
+    return null;
+  }
+
+  const clubFields = matchingClubLine.split("|");
+  if (clubFields.length !== 14) {
+    return null;
+  }
+
+  const ratingSchema = z.coerce.number();
+  const dwzRating = ratingSchema.safeParse(clubFields[7]);
+  const fideRating = ratingSchema.safeParse(clubFields[12]);
+
+  return {
+    dwzRating: dwzRating.success ? dwzRating.data : null,
+    fideRating: fideRating.success ? fideRating.data : null,
+  };
+}
+
 export async function updateParticipantRatingsFromServer(participantData: {
   id: number;
   profile: {
     firstName: string;
     lastName: string;
   };
+  zpsPlayerId: string | null;
 }): Promise<{
   success: boolean;
   message: string;
@@ -196,15 +229,27 @@ export async function updateParticipantRatingsFromServer(participantData: {
   );
 
   try {
-    const eloData = await getParticipantEloData(
-      participantData.profile.firstName,
-      participantData.profile.lastName,
-    );
+    if (!participantData.zpsPlayerId) {
+      return {
+        success: false,
+        message: `Keine ZPS Spieler-ID für ${participantData.profile.firstName} ${participantData.profile.lastName} verfügbar`,
+      };
+    }
+
+    const zpsNumber = participantData.zpsPlayerId;
+    if (!zpsNumber) {
+      return {
+        success: false,
+        message: `Ungültige ZPS Spieler-ID für ${participantData.profile.firstName} ${participantData.profile.lastName}`,
+      };
+    }
+
+    const eloData = await getDwzAndEloByZpsNumber(zpsNumber);
 
     if (!eloData) {
       return {
         success: false,
-        message: `Keine Wertungsdaten für ${participantData.profile.firstName} ${participantData.profile.lastName} gefunden (nicht im DSB-Verein gefunden)`,
+        message: `Keine Wertungsdaten für ZPS ${zpsNumber} gefunden`,
       };
     }
 
@@ -213,11 +258,6 @@ export async function updateParticipantRatingsFromServer(participantData: {
       .set({
         dwzRating: eloData.dwzRating,
         fideRating: eloData.fideRating,
-        title: eloData.title,
-        nationality: eloData.nationality,
-        fideId: eloData.fideId,
-        zpsClubId: eloData.zpsClub,
-        zpsPlayerId: eloData.zpsPlayer,
       })
       .where(eq(participant.id, participantData.id));
 

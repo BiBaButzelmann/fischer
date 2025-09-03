@@ -8,7 +8,7 @@ import { toast } from "sonner";
 import { ParticipantWithRating } from "@/db/types/participant";
 
 type Props = {
-  participants: Pick<ParticipantWithRating, "id" | "profile">[];
+  participants: Pick<ParticipantWithRating, "id" | "profile" | "zpsPlayerId">[];
 };
 
 export function RatingUpdateButton({ participants }: Props) {
@@ -26,22 +26,19 @@ export function RatingUpdateButton({ participants }: Props) {
 
       setUpdateProgress({ current: 0, total });
 
-      for (let i = 0; i < participants.length; i++) {
-        const participant = participants[i];
-        setUpdateProgress({ current: i + 1, total });
+      const promises = participants.map((participant) =>
+        updateParticipantRatingsFromServer(participant),
+      );
 
-        try {
-          const result = await updateParticipantRatingsFromServer(participant);
+      const results = await Promise.allSettled(promises);
 
-          if (result.success) {
-            successful++;
-          } else {
-            failed++;
-          }
-        } catch {
+      results.forEach((result) => {
+        if (result.status === "fulfilled" && result.value.success) {
+          successful++;
+        } else {
           failed++;
         }
-      }
+      });
 
       setUpdateProgress(null);
 
