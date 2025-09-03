@@ -23,13 +23,15 @@ export function RatingUpdateButton({ participants }: Props) {
     startTransition(async () => {
       try {
         const result = await updateAllParticipantRatings(participants);
-        
+
         if (isError(result)) {
           toast.error(result.error);
           return;
         }
-        
-        toast.info(`${result.updated} von ${result.total} Wertungszahlen aktualisiert${result.failed > 0 ? ` (${result.failed} fehlgeschlagen)` : ''}`);
+
+        toast.info(
+          `${result.updated} von ${result.total} Wertungszahlen aktualisiert${result.failed > 0 ? ` (${result.failed} fehlgeschlagen)` : ""}`,
+        );
       } catch (error) {
         toast.error("Fehler beim Aktualisieren der Wertungszahlen");
       }
