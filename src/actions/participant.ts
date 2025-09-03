@@ -206,22 +206,18 @@ export async function getDwzAndEloByZpsNumber(zps: string) {
   };
 }
 
-export async function updateParticipantRatingsFromServer(
-  participantData: {
+export async function updateAllParticipantRatings(
+  participants: {
     id: number;
     profile: {
       firstName: string;
       lastName: string;
     };
     zpsPlayerId: string | null;
-  },
+  }[],
 ): Promise<{
-  success: boolean;
-  message: string;
-  updatedRatings?: {
-    dwzRating: number | null;
-    fideRating: number | null;
-  };
+  successful: number;
+  failed: number;
 }> {
   const session = await authWithRedirect();
 
@@ -230,55 +226,41 @@ export async function updateParticipantRatingsFromServer(
     "Unauthorized: Admin access required",
   );
 
-  try {
-    if (!participantData.zpsPlayerId) {
-      return {
-        success: false,
-        message: `Keine ZPS Spieler-ID für ${participantData.profile.firstName} ${participantData.profile.lastName} verfügbar`,
-      };
+  let successful = 0;
+  let failed = 0;
+
+  for (const participantData of participants) {
+    try {
+      if (!participantData.zpsPlayerId) {
+        failed++;
+        continue;
+      }
+
+      const eloData = await getDwzAndEloByZpsNumber(
+        participantData.zpsPlayerId,
+      );
+      if (!eloData) {
+        failed++;
+        continue;
+      }
+
+      await db
+        .update(participant)
+        .set({
+          dwzRating: eloData.dwzRating,
+          fideRating: eloData.fideRating,
+        })
+        .where(eq(participant.id, participantData.id));
+
+      successful++;
+    } catch {
+      failed++;
     }
-
-    const zpsNumber = participantData.zpsPlayerId;
-    if (!zpsNumber) {
-      return {
-        success: false,
-        message: `Ungültige ZPS Spieler-ID für ${participantData.profile.firstName} ${participantData.profile.lastName}`,
-      };
-    }
-
-    const eloData = await getDwzAndEloByZpsNumber(zpsNumber);
-
-    if (!eloData) {
-      return {
-        success: false,
-        message: `Keine Wertungsdaten für ZPS ${zpsNumber} gefunden`,
-      };
-    }
-
-    await db
-      .update(participant)
-      .set({
-        dwzRating: eloData.dwzRating,
-        fideRating: eloData.fideRating,
-      })
-      .where(eq(participant.id, participantData.id));
-
-    revalidatePath("/admin/nutzerverwaltung");
-
-    return {
-      success: true,
-      message: `${participantData.profile.firstName} ${participantData.profile.lastName}: Wertungszahlen aktualisiert`,
-      updatedRatings: {
-        dwzRating: eloData.dwzRating,
-        fideRating: eloData.fideRating,
-      },
-    };
-  } catch (error) {
-    return {
-      success: false,
-      message: `Fehler bei ${participantData.profile.firstName} ${participantData.profile.lastName}: ${error instanceof Error ? error.message : "Unbekannter Fehler"}`,
-    };
   }
+
+  revalidatePath("/admin/nutzerverwaltung");
+
+  return { successful, failed };
 }
 
 export async function updateEntryFeeStatus(
