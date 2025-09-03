@@ -35,6 +35,12 @@ export async function getAllParticipantsByTournamentId(tournamentId: number) {
         eq(participant.tournamentId, tournamentId),
         isNull(participant.deletedAt),
       ),
+    columns: {
+      id: true,
+      dwzRating: true,
+      fideRating: true,
+      preferredMatchDay: true,
+    },
     with: {
       profile: {
         columns: {
