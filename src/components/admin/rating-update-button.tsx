@@ -37,7 +37,7 @@ export function RatingUpdateButton({ participants }: Props) {
           } else {
             failed++;
           }
-        } catch (error) {
+        } catch {
           failed++;
         }
       }
