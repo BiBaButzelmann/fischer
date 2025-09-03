@@ -5,15 +5,10 @@ import { RefreshCw } from "lucide-react";
 import { useState, useTransition } from "react";
 import { updateParticipantRatingsFromServer } from "@/actions/participant";
 import { toast } from "sonner";
+import { ParticipantWithRating } from "@/db/types/participant";
 
 type Props = {
-  participants: Array<{
-    id: number;
-    profile: {
-      firstName: string;
-      lastName: string;
-    };
-  }>;
+  participants: Pick<ParticipantWithRating, "id" | "profile">[];
 };
 
 export function RatingUpdateButton({ participants }: Props) {
@@ -36,36 +31,18 @@ export function RatingUpdateButton({ participants }: Props) {
         setUpdateProgress({ current: i + 1, total });
 
         try {
-          console.log(
-            `Updating participant ${participant.id}: ${participant.profile.firstName} ${participant.profile.lastName}`,
-          );
           const result = await updateParticipantRatingsFromServer(
             participant.id,
-          );
-
-          console.log(
-            `Update result for participant ${participant.id}:`,
-            result,
           );
 
           if (result.success) {
             successful++;
           } else {
             failed++;
-            console.warn(
-              `Failed to update ${participant.profile.firstName} ${participant.profile.lastName}: ${result.message}`,
-            );
           }
-        } catch (error) {
+        } catch {
           failed++;
-          console.error(
-            `Error updating ${participant.profile.firstName} ${participant.profile.lastName}:`,
-            error,
-          );
         }
-
-        // Small delay to prevent overwhelming the server
-        await new Promise((resolve) => setTimeout(resolve, 100));
       }
 
       setUpdateProgress(null);
