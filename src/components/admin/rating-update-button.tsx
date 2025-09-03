@@ -5,10 +5,18 @@ import { RefreshCw } from "lucide-react";
 import { useState, useTransition } from "react";
 import { updateParticipantRatingsFromServer } from "@/actions/participant";
 import { toast } from "sonner";
-import { ParticipantWithZps } from "@/db/types/participant";
+
+type RatingUpdateParticipant = {
+  id: number;
+  profile: {
+    firstName: string;
+    lastName: string;
+  };
+  zpsPlayerId: string | null;
+};
 
 type Props = {
-  participants: ParticipantWithZps[];
+  participants: RatingUpdateParticipant[];
 };
 
 export function RatingUpdateButton({ participants }: Props) {

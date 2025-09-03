@@ -30,7 +30,6 @@ import {
 import { UserRow } from "@/components/admin/user-row";
 import { ParticipantRow } from "@/components/admin/participant-row";
 import { RatingUpdateButton } from "@/components/admin/rating-update-button";
-import { ParticipantWithZps } from "@/db/types/participant";
 import { redirect } from "next/navigation";
 
 export default async function Page() {
@@ -206,6 +205,14 @@ type ProfileWithName = {
   deletedAt: Date | null;
 };
 
+type ParticipantWithRatings = {
+  id: number;
+  dwzRating: number | null;
+  fideRating: number | null;
+  zpsPlayerId: string | null;
+  profile: ProfileWithName;
+};
+
 function UserList({
   users,
   title,
@@ -260,7 +267,7 @@ function ParticipantList({
   icon: Icon,
   emptyMessage,
 }: {
-  participants: ParticipantWithZps[];
+  participants: ParticipantWithRatings[];
   title: string;
   description: string;
   icon: LucideIcon;
