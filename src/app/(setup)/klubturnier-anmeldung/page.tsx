@@ -16,6 +16,10 @@ export default async function RolesPage() {
     redirect("/willkommen");
   }
 
+  if (tournament.stage !== "registration") {
+    redirect("/uebersicht");
+  }
+
   const initialValues = await getRolesDataByProfileIdAndTournamentId(
     profile.id,
     tournament.id,
