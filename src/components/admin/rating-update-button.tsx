@@ -9,10 +9,6 @@ import { isError } from "@/lib/actions";
 
 type RatingUpdateParticipant = {
   id: number;
-  profile: {
-    firstName: string;
-    lastName: string;
-  };
   zpsPlayerId: string | null;
 };
 

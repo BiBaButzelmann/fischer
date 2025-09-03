@@ -211,10 +211,6 @@ export const updateAllParticipantRatings = action(
   async (
     participants: {
       id: number;
-      profile: {
-        firstName: string;
-        lastName: string;
-      };
       zpsPlayerId: string | null;
     }[],
   ): Promise<{

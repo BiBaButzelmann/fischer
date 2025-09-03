@@ -287,7 +287,12 @@ function ParticipantList({
             </div>
           </div>
           {participants.length > 0 && (
-            <RatingUpdateButton participants={participants} />
+            <RatingUpdateButton
+              participants={participants.map((p) => ({
+                id: p.id,
+                zpsPlayerId: p.zpsPlayerId,
+              }))}
+            />
           )}
         </div>
       </CardHeader>
