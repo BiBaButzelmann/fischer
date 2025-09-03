@@ -115,30 +115,6 @@ export async function getParticipantEloData(
 } | null> {
   await authWithRedirect();
 
-  const clubData = await fetchClubDataForPlayer(firstName, lastName);
-  if (!clubData) {
-    return null;
-  }
-
-  const ratingData = await fetchRatingsByPlayerId(clubData.zpsPlayer);
-  if (!ratingData) {
-    return null;
-  }
-
-  return {
-    ...ratingData,
-    zpsClub: clubData.zpsClub,
-    zpsPlayer: clubData.zpsPlayer,
-  };
-}
-
-async function fetchClubDataForPlayer(
-  firstName: string,
-  lastName: string,
-): Promise<{
-  zpsClub: string;
-  zpsPlayer: string;
-} | null> {
   const clubData = await fetch(
     "https://www.schachbund.de/php/dewis/verein.php?zps=40023&format=csv",
   );
@@ -170,7 +146,30 @@ async function fetchClubDataForPlayer(
     return null;
   }
 
+  const playerData = await fetch(
+    `https://www.schachbund.de/php/dewis/spieler.php?pkz=${playerId}&format=csv`,
+  );
+  const playerCsv = await playerData.text();
+
+  const playerCsvLines = playerCsv.split("\n");
+  const matchingPlayerLine = playerCsvLines[1].replace(/[\n\r\t]/gm, "");
+
+  const playerFields = matchingPlayerLine.split("|");
+
+  if (playerFields.length !== 10) {
+    return null;
+  }
+
+  const ratingSchema = z.coerce.number();
+  const fideRating = ratingSchema.safeParse(playerFields[7]);
+  const dwzRating = ratingSchema.safeParse(playerFields[4]);
+
   return {
+    title: playerFields[8] || null,
+    nationality: playerFields[9],
+    fideRating: fideRating.success ? fideRating.data : null,
+    dwzRating: dwzRating.success ? dwzRating.data : null,
+    fideId: playerFields[6] || null,
     zpsClub: clubFields[4],
     zpsPlayer: clubFields[5],
   };
