@@ -12,9 +12,14 @@ import { cn } from "@/lib/utils";
 type Props = {
   profileId?: number;
   participants: ParticipantWithName[];
+  eloSortedCount: number;
 };
 
-export function Participants({ profileId, participants }: Props) {
+export function Participants({
+  profileId,
+  participants,
+  eloSortedCount,
+}: Props) {
   return (
     <Table>
       <TableHeader>
@@ -32,6 +37,9 @@ export function Participants({ profileId, participants }: Props) {
             className={cn(
               "hover:bg-muted",
               profileId === p.profileId ? "bg-secondary" : "",
+              eloSortedCount && index === eloSortedCount
+                ? "border-t-2 border-muted-foreground/30"
+                : "",
             )}
           >
             <TableCell>{index + 1}</TableCell>
