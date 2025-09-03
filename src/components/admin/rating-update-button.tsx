@@ -21,21 +21,17 @@ export function RatingUpdateButton({ participants }: Props) {
 
   const handleUpdateRatings = () => {
     startTransition(async () => {
-      const result = await updateAllParticipantRatings(participants);
-
-      if (isError(result)) {
-        toast.error(result.error);
-        return;
-      }
-
-      if (result.successful > 0) {
-        toast.success(
-          `${result.successful} Wertungszahlen erfolgreich aktualisiert${
-            result.failed > 0 ? `, ${result.failed} fehlgeschlagen` : ""
-          }`,
-        );
-      } else if (result.failed > 0) {
-        toast.error(`Alle ${result.failed} Aktualisierungen fehlgeschlagen`);
+      try {
+        const result = await updateAllParticipantRatings(participants);
+        
+        if (isError(result)) {
+          toast.error(result.error);
+          return;
+        }
+        
+        toast.info(`${result.updated} von ${result.total} Wertungszahlen aktualisiert${result.failed > 0 ? ` (${result.failed} fehlgeschlagen)` : ''}`);
+      } catch (error) {
+        toast.error("Fehler beim Aktualisieren der Wertungszahlen");
       }
     });
   };

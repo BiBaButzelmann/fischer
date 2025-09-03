@@ -214,8 +214,9 @@ export const updateAllParticipantRatings = action(
       zpsPlayerId: string | null;
     }[],
   ): Promise<{
-    successful: number;
+    updated: number;
     failed: number;
+    total: number;
   }> => {
     const session = await authWithRedirect();
 
@@ -228,13 +229,12 @@ export const updateAllParticipantRatings = action(
       throw new Error("Keine Teilnehmer zum Aktualisieren vorhanden");
     }
 
-    let successful = 0;
+    let updated = 0;
     let failed = 0;
 
     for (const participantData of participants) {
       try {
         if (!participantData.zpsPlayerId) {
-          failed++;
           continue;
         }
 
@@ -254,7 +254,7 @@ export const updateAllParticipantRatings = action(
           })
           .where(eq(participant.id, participantData.id));
 
-        successful++;
+        updated++;
       } catch {
         failed++;
       }
@@ -262,7 +262,7 @@ export const updateAllParticipantRatings = action(
 
     revalidatePath("/admin/nutzerverwaltung");
 
-    return { successful, failed };
+    return { updated, failed, total: participants.length };
   },
 );
 
