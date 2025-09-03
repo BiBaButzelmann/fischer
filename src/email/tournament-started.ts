@@ -11,17 +11,19 @@ type Props = {
   roles: RolesData;
   tournamentId: number;
   participantData?: ParticipantGroupData;
+  isGroupUpdate?: boolean;
 };
 
 export async function sendTournamentStartedMail(data: Props) {
   await sendEmail({
     to: data.email,
-    subject: "Das Turnier ist gestartet!",
+    subject: data.isGroupUpdate ? "Deine Gruppe wurde geändert" : "Das Turnier ist gestartet!",
     react: TournamentStartedMail({
       name: data.name,
       roles: data.roles,
       tournamentId: data.tournamentId,
       participantData: data.participantData,
+      isGroupUpdate: data.isGroupUpdate,
     }),
   });
 }

@@ -21,7 +21,7 @@ export async function sendTournamentStartedEmails(tournamentId: number) {
 
   const profiles = await getAllProfilesWithRolesByTournamentId(tournamentId);
 
-  const mailsSent = await sendEmailsToProfiles(profiles, tournamentId);
+  const mailsSent = await sendEmailsToProfiles(profiles, tournamentId, false);
 
   return { sent: mailsSent };
 }
@@ -47,7 +47,7 @@ export async function sendTournamentStartedEmailsToGroup(
     phoneNumber: participant.profile.phoneNumber,
   }));
 
-  const mailsSent = await sendEmailsToProfiles(profiles, tournamentId);
+  const mailsSent = await sendEmailsToProfiles(profiles, tournamentId, true);
 
   return { sent: mailsSent };
 }
@@ -65,6 +65,7 @@ async function sendEmailsToProfiles(
     phoneNumber: string;
   }[],
   tournamentId: number,
+  isGroupUpdate: boolean = false,
 ) {
   let mailsSent = 0;
   for (let i = 0; i < profiles.length; i += 2) {
@@ -83,6 +84,7 @@ async function sendEmailsToProfiles(
         tournamentId,
         roles: dataProfile1.roles,
         participantData: dataProfile1.participantData,
+        isGroupUpdate,
       });
       mailsSent++;
     }
@@ -94,6 +96,7 @@ async function sendEmailsToProfiles(
         tournamentId,
         roles: dataProfile2.roles,
         participantData: dataProfile2.participantData,
+        isGroupUpdate,
       });
       mailsSent++;
     }
