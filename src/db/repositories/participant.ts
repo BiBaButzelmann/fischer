@@ -136,3 +136,21 @@ export async function getParticipantsWithProfileByGroupId(groupId: number) {
     .where(eq(group.id, groupId))
     .orderBy(profile.lastName, profile.firstName);
 }
+
+export async function getParticipantForRatingUpdate(participantId: number) {
+  return await db.query.participant.findFirst({
+    where: eq(participant.id, participantId),
+    columns: {
+      id: true,
+      zpsPlayerId: true,
+    },
+    with: {
+      profile: {
+        columns: {
+          firstName: true,
+          lastName: true,
+        },
+      },
+    },
+  });
+}

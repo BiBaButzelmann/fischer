@@ -29,8 +29,8 @@ import {
 } from "lucide-react";
 import { UserRow } from "@/components/admin/user-row";
 import { ParticipantRow } from "@/components/admin/participant-row";
+import { RatingUpdateButton } from "@/components/admin/rating-update-button";
 import { redirect } from "next/navigation";
-import { DayOfWeek } from "@/db/types/group";
 
 export default async function Page() {
   const session = await authWithRedirect();
@@ -143,10 +143,7 @@ export default async function Page() {
 
         <TabsContent value="referees" className="space-y-4">
           <UserList
-            users={referees.map((r) => ({
-              ...r.profile,
-              preferredMatchDay: r.preferredMatchDay,
-            }))}
+            users={referees.map((r) => r.profile)}
             title="Schiedsrichter"
             description={`${referees.length} Schiedsrichter sind für das Turnier verfügbar`}
             icon={Shield}
@@ -205,7 +202,6 @@ type ProfileWithName = {
   firstName: string;
   lastName: string;
   phoneNumber?: string | null;
-  preferredMatchDay?: DayOfWeek | null;
   deletedAt: Date | null;
 };
 
@@ -213,7 +209,6 @@ type ParticipantWithProfile = {
   id: number;
   dwzRating: number | null;
   fideRating: number | null;
-  preferredMatchDay: DayOfWeek;
   profile: ProfileWithName;
 };
 
@@ -280,14 +275,19 @@ function ParticipantList({
   return (
     <Card>
       <CardHeader>
-        <div className="flex items-center gap-3">
-          <div className="p-2 bg-gray-100 border border-gray-200 rounded-lg">
-            <Icon className="h-5 w-5 text-gray-600" />
+        <div className="flex items-center justify-between">
+          <div className="flex items-center gap-3">
+            <div className="p-2 bg-gray-100 border border-gray-200 rounded-lg">
+              <Icon className="h-5 w-5 text-gray-600" />
+            </div>
+            <div>
+              <CardTitle className="text-lg">{title}</CardTitle>
+              <CardDescription>{description}</CardDescription>
+            </div>
           </div>
-          <div>
-            <CardTitle className="text-lg">{title}</CardTitle>
-            <CardDescription>{description}</CardDescription>
-          </div>
+          {participants.length > 0 && (
+            <RatingUpdateButton participants={participants} />
+          )}
         </div>
       </CardHeader>
       <CardContent>

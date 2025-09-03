@@ -11,6 +11,7 @@ import { getProfileByUserId } from "@/db/repositories/profile";
 import { and, eq } from "drizzle-orm";
 import { DEFAULT_CLUB_LABEL } from "@/constants/constants";
 import { revalidatePath } from "next/cache";
+import { getParticipantForRatingUpdate } from "@/db/repositories/participant";
 
 export async function createParticipant(
   tournamentId: number,
@@ -114,6 +115,30 @@ export async function getParticipantEloData(
 } | null> {
   await authWithRedirect();
 
+  const clubData = await fetchClubDataForPlayer(firstName, lastName);
+  if (!clubData) {
+    return null;
+  }
+
+  const ratingData = await fetchRatingsByPlayerId(clubData.zpsPlayer);
+  if (!ratingData) {
+    return null;
+  }
+
+  return {
+    ...ratingData,
+    zpsClub: clubData.zpsClub,
+    zpsPlayer: clubData.zpsPlayer,
+  };
+}
+
+async function fetchClubDataForPlayer(
+  firstName: string,
+  lastName: string,
+): Promise<{
+  zpsClub: string;
+  zpsPlayer: string;
+} | null> {
   const clubData = await fetch(
     "https://www.schachbund.de/php/dewis/verein.php?zps=40023&format=csv",
   );
@@ -145,33 +170,169 @@ export async function getParticipantEloData(
     return null;
   }
 
-  const playerData = await fetch(
-    `https://www.schachbund.de/php/dewis/spieler.php?pkz=${playerId}&format=csv`,
-  );
-  const playerCsv = await playerData.text();
-
-  const playerCsvLines = playerCsv.split("\n");
-  const matchingPlayerLine = playerCsvLines[1].replace(/[\n\r\t]/gm, "");
-
-  const playerFields = matchingPlayerLine.split("|");
-
-  if (playerFields.length !== 10) {
-    return null;
-  }
-
-  const ratingSchema = z.coerce.number();
-  const fideRating = ratingSchema.safeParse(playerFields[7]);
-  const dwzRating = ratingSchema.safeParse(playerFields[4]);
-
   return {
-    title: playerFields[8] || null,
-    nationality: playerFields[9],
-    fideRating: fideRating.success ? fideRating.data : null,
-    dwzRating: dwzRating.success ? dwzRating.data : null,
-    fideId: playerFields[6] || null,
     zpsClub: clubFields[4],
     zpsPlayer: clubFields[5],
   };
+}
+
+async function fetchRatingsByPlayerId(playerId: string): Promise<{
+  title: string | null;
+  nationality: string;
+  fideRating: number | null;
+  dwzRating: number | null;
+  fideId: string | null;
+} | null> {
+  try {
+    console.log(`Fetching ratings for player ID: ${playerId}`);
+
+    const playerData = await fetch(
+      `https://www.schachbund.de/php/dewis/spieler.php?pkz=${playerId}&format=csv`,
+    );
+
+    if (!playerData.ok) {
+      console.error(
+        `HTTP error: ${playerData.status} ${playerData.statusText}`,
+      );
+      return null;
+    }
+
+    const playerCsv = await playerData.text();
+    console.log(`Raw CSV response: ${playerCsv.slice(0, 200)}...`);
+
+    const playerCsvLines = playerCsv.split("\n");
+    console.log(`CSV lines count: ${playerCsvLines.length}`);
+
+    if (playerCsvLines.length < 2) {
+      console.error("Not enough CSV lines returned");
+      return null;
+    }
+
+    const matchingPlayerLine = playerCsvLines[1].replace(/[\n\r\t]/gm, "");
+    console.log(`Player line: ${matchingPlayerLine}`);
+
+    const playerFields = matchingPlayerLine.split("|");
+    console.log(
+      `Player fields count: ${playerFields.length}, fields:`,
+      playerFields,
+    );
+
+    if (playerFields.length !== 10) {
+      console.error(`Expected 10 fields, got ${playerFields.length}`);
+      return null;
+    }
+
+    const ratingSchema = z.coerce.number();
+    const fideRating = ratingSchema.safeParse(playerFields[7]);
+    const dwzRating = ratingSchema.safeParse(playerFields[4]);
+
+    const result = {
+      title: playerFields[8] || null,
+      nationality: playerFields[9],
+      fideRating: fideRating.success ? fideRating.data : null,
+      dwzRating: dwzRating.success ? dwzRating.data : null,
+      fideId: playerFields[6] || null,
+    };
+
+    console.log(`Parsed result:`, result);
+    return result;
+  } catch (error) {
+    console.error(`Error in fetchRatingsByPlayerId:`, error);
+    return null;
+  }
+}
+
+export async function updateParticipantRatingsFromServer(
+  participantId: number,
+): Promise<{
+  success: boolean;
+  message: string;
+  updatedRatings?: {
+    dwzRating: number | null;
+    fideRating: number | null;
+  };
+}> {
+  const session = await authWithRedirect();
+
+  invariant(
+    session.user.role === "admin",
+    "Unauthorized: Admin access required",
+  );
+
+  console.log(`Starting rating update for participant ID: ${participantId}`);
+
+  const existingParticipant =
+    await getParticipantForRatingUpdate(participantId);
+
+  if (!existingParticipant) {
+    console.error(`Participant not found: ${participantId}`);
+    return {
+      success: false,
+      message: "Teilnehmer nicht gefunden",
+    };
+  }
+
+  console.log(`Found participant:`, existingParticipant);
+
+  if (!existingParticipant.zpsPlayerId) {
+    console.error(`No ZPS player ID for participant: ${participantId}`);
+    return {
+      success: false,
+      message: `Keine ZPS-Spieler-ID für ${existingParticipant.profile.firstName} ${existingParticipant.profile.lastName}`,
+    };
+  }
+
+  try {
+    console.log(
+      `Fetching ratings for ZPS ID: ${existingParticipant.zpsPlayerId}`,
+    );
+    const ratingData = await fetchRatingsByPlayerId(
+      existingParticipant.zpsPlayerId,
+    );
+
+    if (!ratingData) {
+      console.error(
+        `No rating data received for participant: ${participantId}`,
+      );
+      return {
+        success: false,
+        message: `Keine Wertungsdaten für ${existingParticipant.profile.firstName} ${existingParticipant.profile.lastName} gefunden (möglicherweise kein DSB-Mitglied)`,
+      };
+    }
+
+    console.log(
+      `Updating database for participant: ${participantId}`,
+      ratingData,
+    );
+    await db
+      .update(participant)
+      .set({
+        dwzRating: ratingData.dwzRating,
+        fideRating: ratingData.fideRating,
+        title: ratingData.title,
+        nationality: ratingData.nationality,
+        fideId: ratingData.fideId,
+      })
+      .where(eq(participant.id, participantId));
+
+    console.log(`Database update successful for participant: ${participantId}`);
+    revalidatePath("/admin/nutzerverwaltung");
+
+    return {
+      success: true,
+      message: `${existingParticipant.profile.firstName} ${existingParticipant.profile.lastName}: Wertungszahlen aktualisiert`,
+      updatedRatings: {
+        dwzRating: ratingData.dwzRating,
+        fideRating: ratingData.fideRating,
+      },
+    };
+  } catch (error) {
+    console.error(`Error updating participant ${participantId}:`, error);
+    return {
+      success: false,
+      message: `Fehler bei ${existingParticipant.profile.firstName} ${existingParticipant.profile.lastName}: ${error instanceof Error ? error.message : "Unbekannter Fehler"}`,
+    };
+  }
 }
 
 export async function updateEntryFeeStatus(

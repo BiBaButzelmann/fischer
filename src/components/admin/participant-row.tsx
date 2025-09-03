@@ -19,11 +19,9 @@ import {
 } from "@/actions/admin";
 import { toast } from "sonner";
 import { Badge } from "@/components/ui/badge";
-import { matchDaysShort } from "@/constants/constants";
 import { ProfileWithName } from "@/db/types/profile";
-import { DayOfWeek } from "@/db/types/group";
 
-type ParticipantRowProps = {
+type Props = {
   participant: {
     id: number;
     dwzRating: number | null;
@@ -36,7 +34,7 @@ type ParticipantRowProps = {
 export function ParticipantRow({
   participant,
   showDeleteActions = false,
-}: ParticipantRowProps) {
+}: Props) {
   const [softDeleteOpen, setSoftDeleteOpen] = useState(false);
   const [hardDeleteOpen, setHardDeleteOpen] = useState(false);
   const [isPending, startTransition] = useTransition();
