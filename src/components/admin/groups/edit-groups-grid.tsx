@@ -5,7 +5,6 @@ import { GroupsGrid } from "./groups-grid";
 import { useEffect, useState, useTransition } from "react";
 import { GridGroup } from "./types";
 import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
 import {
   saveGroup,
   deleteGroup,
@@ -32,8 +31,6 @@ export function EditGroupsGrid({
   currentAssignments: Record<number, MatchEnteringHelperWithName[]>;
 }) {
   const [isPending, startTransition] = useTransition();
-  const [participantsPerGroup, setParticipantsPerGroup] = useState<string>("");
-
   const [unassignedParticipants, setUnassignedParticipants] = useState(
     initialUnassignedParticipants,
   );
@@ -51,7 +48,7 @@ export function EditGroupsGrid({
     getMatchEnteringHelpersForGroup,
   } = useHelperAssignments(currentAssignments, matchEnteringHelpers);
 
-  const handleAutoDistribute = (participantsPerGroup: number) => {
+  const handleDistributeParticipants = (participantsPerGroup: number) => {
     const eloSortedParticipants = sortParticipantsByElo(unassignedParticipants);
     const dwzSortedParticipants = sortParticipantsByDwz(unassignedParticipants);
 
@@ -190,16 +187,17 @@ export function EditGroupsGrid({
           tournamentId={tournamentId}
           groups={gridGroups}
           unassignedParticipants={unassignedParticipants}
+          matchEnteringHelpers={matchEnteringHelpers}
+          helperAssignedCounts={helperAssignedCounts}
+          helperAssignments={helperAssignments}
           onChangeGroups={setGridGroups}
           onChangeUnassignedParticipants={setUnassignedParticipants}
           onDeleteGroup={handleDeleteGroup}
           onSaveGroup={handleSaveGroup}
           onUpdateGroupName={handleUpdateGroupName}
-          matchEnteringHelpers={matchEnteringHelpers}
-          helperAssignedCounts={helperAssignedCounts}
-          helperAssignments={helperAssignments}
           onAddHelperToGroup={addHelperToGroup}
           onRemoveHelperFromGroup={removeHelperFromGroup}
+          onDistributeParticipants={handleDistributeParticipants}
         />
       </div>
     </div>

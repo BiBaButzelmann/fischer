@@ -15,7 +15,7 @@ import {
   useSensors,
 } from "@dnd-kit/core";
 import { CSS } from "@dnd-kit/utilities";
-import { useMemo, useState } from "react";
+import { FormEvent, useMemo, useState } from "react";
 import invariant from "tiny-invariant";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { GridGroup } from "./types";
@@ -25,9 +25,15 @@ import { GroupTitle } from "./group-title";
 import { GroupStats } from "./group-stats";
 import { GroupMatchEnteringHelperSelector } from "../match-entering-helper/match-entering-helper-selector";
 import { Button } from "@/components/ui/button";
-import { Trash, Save } from "lucide-react";
+import { Trash, Save, FastForward } from "lucide-react";
 import { DayOfWeek } from "@/db/types/group";
 import { MatchEnteringHelperWithName } from "@/db/types/match-entering-helper";
+import {
+  Popover,
+  PopoverContent,
+  PopoverTrigger,
+} from "@/components/ui/popover";
+import { Input } from "@/components/ui/input";
 
 export const UNASSIGNED_CONTAINER_ID = "unassigned-droppable";
 const UNASSIGNED_CONTAINER_TYPE = "unassigned";
@@ -37,30 +43,32 @@ const PARTICIPANT_CONTAINER_TYPE = "participant";
 export function GroupsGrid({
   groups,
   unassignedParticipants,
+  matchEnteringHelpers,
+  helperAssignedCounts,
+  helperAssignments,
   onChangeGroups,
   onChangeUnassignedParticipants,
   onDeleteGroup,
   onSaveGroup,
   onUpdateGroupName,
-  matchEnteringHelpers,
-  helperAssignedCounts,
-  helperAssignments,
   onAddHelperToGroup,
   onRemoveHelperFromGroup,
+  onDistributeParticipants,
 }: {
   tournamentId: number;
   groups: GridGroup[];
   unassignedParticipants: ParticipantWithName[];
+  matchEnteringHelpers: MatchEnteringHelperWithName[];
+  helperAssignedCounts: Record<number, number>;
+  helperAssignments: Record<number, MatchEnteringHelperWithName[]>;
   onChangeGroups: (groups: GridGroup[]) => void;
   onChangeUnassignedParticipants: (participants: ParticipantWithName[]) => void;
   onDeleteGroup: (groupId: number) => void;
   onSaveGroup: (group: GridGroup) => void;
   onUpdateGroupName: (groupId: number, newName: string) => void;
-  matchEnteringHelpers: MatchEnteringHelperWithName[];
-  helperAssignedCounts: Record<number, number>;
-  helperAssignments: Record<number, MatchEnteringHelperWithName[]>;
   onAddHelperToGroup: (groupId: number, helperId: string) => void;
   onRemoveHelperFromGroup: (groupId: number, helperId: number) => void;
+  onDistributeParticipants: (participantsPerGroup: number) => void;
 }) {
   const [activeItem, setActiveItem] = useState<ParticipantWithName | null>(
     null,
@@ -128,7 +136,10 @@ export function GroupsGrid({
                 onRemoveHelperFromGroup={onRemoveHelperFromGroup}
               />
             ))}
-            <UnassignedContainer participants={unassignedParticipants} />
+            <UnassignedContainer
+              participants={unassignedParticipants}
+              onDistributeParticipants={onDistributeParticipants}
+            />
           </div>
         </div>
         <DragOverlay>
@@ -153,12 +164,12 @@ export function GroupContainer({
   onRemoveHelperFromGroup,
 }: {
   group: GridGroup;
+  matchEnteringHelpers: MatchEnteringHelperWithName[];
+  helperAssignedCounts: Record<number, number>;
   onChangeGroupName: (groupId: number, newName: string) => void;
   onChangeGroupMatchDay: (groupId: number, matchDay: DayOfWeek | null) => void;
   onDeleteGroup: (groupId: number) => void;
   onSaveGroup: (group: GridGroup) => void;
-  matchEnteringHelpers: MatchEnteringHelperWithName[];
-  helperAssignedCounts: Record<number, number>;
   onAddHelperToGroup: (groupId: number, helperId: string) => void;
   onRemoveHelperFromGroup: (groupId: number, helperId: number) => void;
 }) {
@@ -191,6 +202,7 @@ export function GroupContainer({
               size="icon"
               variant="outline"
               className="text-blue-600 border-blue-600"
+              disabled={group.isNew}
               onClick={() => onSaveGroup(group)}
             >
               <Save className="h-4 w-4" />
@@ -252,8 +264,10 @@ export function GroupContainer({
 
 export function UnassignedContainer({
   participants,
+  onDistributeParticipants,
 }: {
   participants: ParticipantWithName[];
+  onDistributeParticipants: (participantsPerGroup: number) => void;
 }) {
   const { setNodeRef } = useDroppable({
     id: UNASSIGNED_CONTAINER_ID,
@@ -262,10 +276,43 @@ export function UnassignedContainer({
     },
   });
 
+  const handleSubmit = (event: FormEvent<HTMLFormElement>) => {
+    event.preventDefault();
+    const form = event.currentTarget;
+    const formElements = form.elements as typeof form.elements & {
+      participantsPerGroup: HTMLInputElement;
+    };
+    const participantsPerGroup = Number(
+      formElements.participantsPerGroup.value,
+    );
+    onDistributeParticipants(participantsPerGroup);
+  };
+
   return (
     <Card>
       <CardHeader>
-        <CardTitle>Nicht zugewiesene Teilnehmer</CardTitle>
+        <CardTitle>
+          <div className="flex items-center">
+            <span className="flex-1">Nicht zugewiesene Teilnehmer</span>
+            <Popover>
+              <PopoverTrigger asChild>
+                <Button variant="outline" className="mt-0">
+                  <FastForward />
+                </Button>
+              </PopoverTrigger>
+              <PopoverContent className="p-4">
+                <form onSubmit={handleSubmit} className="space-y-2">
+                  <Input
+                    id="participantsPerGroup"
+                    type="number"
+                    placeholder="Teilnehmer pro Gruppe"
+                  />
+                  <Button type="submit">Verteilen</Button>
+                </form>
+              </PopoverContent>
+            </Popover>
+          </div>
+        </CardTitle>
       </CardHeader>
       <CardContent ref={setNodeRef}>
         <SortableContext items={participants.map((p) => p.id)}>
