@@ -8,9 +8,11 @@ import { participantFormSchema } from "@/schema/participant";
 import { authWithRedirect } from "@/auth/utils";
 import { getTournamentById } from "@/db/repositories/tournament";
 import { getProfileByUserId } from "@/db/repositories/profile";
+import { getParticipantsWithZpsPlayerIdByTournamentId } from "@/db/repositories/participant";
 import { and, eq } from "drizzle-orm";
 import { DEFAULT_CLUB_LABEL } from "@/constants/constants";
 import { revalidatePath } from "next/cache";
+import { action } from "@/lib/actions";
 
 export async function createParticipant(
   tournamentId: number,
@@ -173,6 +175,95 @@ export async function getParticipantEloData(
     zpsPlayer: clubFields[5],
   };
 }
+
+export async function getDwzAndEloByZpsNumber(zps: string) {
+  const clubData = await fetch(
+    "https://www.schachbund.de/php/dewis/verein.php?zps=40023&format=csv",
+  );
+  const clubCsv = await clubData.text();
+
+  const clubCsvLines = clubCsv.split("\n");
+  const matchingClubLine = clubCsvLines.find((line) => {
+    const fields = line.split("|");
+    const rowZps = fields[5]?.trim() || "";
+
+    return rowZps === zps;
+  });
+  if (!matchingClubLine) {
+    return null;
+  }
+
+  const clubFields = matchingClubLine.split("|");
+  if (clubFields.length !== 14) {
+    return null;
+  }
+
+  const ratingSchema = z.coerce.number();
+  const dwzRating = ratingSchema.safeParse(clubFields[7]);
+  const fideRating = ratingSchema.safeParse(clubFields[12]);
+
+  return {
+    dwzRating: dwzRating.success ? dwzRating.data : null,
+    fideRating: fideRating.success ? fideRating.data : null,
+  };
+}
+
+export const updateAllParticipantRatings = action(
+  async (
+    tournamentId: number,
+  ): Promise<{
+    updated: number;
+    failed: number;
+    total: number;
+  }> => {
+    const session = await authWithRedirect();
+
+    invariant(
+      session.user.role === "admin",
+      "Unauthorized: Admin access required",
+    );
+
+    const participants =
+      await getParticipantsWithZpsPlayerIdByTournamentId(tournamentId);
+
+    if (participants.length === 0) {
+      throw new Error(
+        "Keine Teilnehmer mit ZPS-Player-ID zum Aktualisieren vorhanden",
+      );
+    }
+
+    let updated = 0;
+    let failed = 0;
+
+    for (const participantData of participants) {
+      try {
+        const eloData = await getDwzAndEloByZpsNumber(
+          participantData.zpsPlayerId!,
+        );
+        if (!eloData) {
+          failed++;
+          continue;
+        }
+
+        await db
+          .update(participant)
+          .set({
+            dwzRating: eloData.dwzRating,
+            fideRating: eloData.fideRating,
+          })
+          .where(eq(participant.id, participantData.id));
+
+        updated++;
+      } catch {
+        failed++;
+      }
+    }
+
+    revalidatePath("/admin/nutzerverwaltung");
+
+    return { updated, failed, total: participants.length };
+  },
+);
 
 export async function updateEntryFeeStatus(
   participantId: number,

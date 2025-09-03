@@ -1,10 +1,10 @@
-import { ParticipantWithRating } from "@/db/types/participant";
+import { ParticipantWithRatingAndChessClub } from "@/db/types/participant";
 import Image from "next/image";
 
 type Props = {
   tournamentName: string;
   groupName: string;
-  participant: ParticipantWithRating;
+  participant: ParticipantWithRatingAndChessClub;
 };
 
 export function NameCard({ tournamentName, groupName, participant }: Props) {

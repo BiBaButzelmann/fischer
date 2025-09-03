@@ -136,3 +136,19 @@ export async function getParticipantsWithProfileByGroupId(groupId: number) {
     .where(eq(group.id, groupId))
     .orderBy(profile.lastName, profile.firstName);
 }
+
+export async function getParticipantsWithZpsPlayerIdByTournamentId(
+  tournamentId: number,
+) {
+  return await db.query.participant.findMany({
+    where: (participant, { eq, and, isNotNull }) =>
+      and(
+        eq(participant.tournamentId, tournamentId),
+        isNotNull(participant.zpsPlayerId),
+      ),
+    columns: {
+      id: true,
+      zpsPlayerId: true,
+    },
+  });
+}
