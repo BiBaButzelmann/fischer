@@ -26,19 +26,21 @@ export function RatingUpdateButton({ participants }: Props) {
 
       setUpdateProgress({ current: 0, total });
 
-      const promises = participants.map((participant) =>
-        updateParticipantRatingsFromServer(participant),
-      );
+      for (let i = 0; i < participants.length; i++) {
+        const participant = participants[i];
+        setUpdateProgress({ current: i + 1, total });
 
-      const results = await Promise.allSettled(promises);
-
-      results.forEach((result) => {
-        if (result.status === "fulfilled" && result.value.success) {
-          successful++;
-        } else {
+        try {
+          const result = await updateParticipantRatingsFromServer(participant);
+          if (result.success) {
+            successful++;
+          } else {
+            failed++;
+          }
+        } catch (error) {
           failed++;
         }
-      });
+      }
 
       setUpdateProgress(null);
 
