@@ -51,16 +51,8 @@ export function TournamentStartedMail({
       {isGroupUpdate ? (
         <>
           <p>
-            Aufgrund von späten Anmeldungen wurde deine Gruppe leider verändert. Hier findest du deine neuen Informationen:
-          </p>
-          <p>Besuche die Turnierwebsite unter folgendem Link:</p>
-          <p>
-            <a
-              href="https://klubturnier.hsk1830.de"
-              style={{ color: "#2980b9", fontWeight: "bold" }}
-            >
-              klubturnier.hsk1830.de
-            </a>
+            Aufgrund von späten Anmeldungen wurde deine Gruppe leider verändert.
+            Hier findest du deine neuen Informationen:
           </p>
         </>
       ) : (
