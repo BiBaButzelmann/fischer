@@ -16,7 +16,7 @@ import { MatchEnteringHelperWithName } from "@/db/types/match-entering-helper";
 import { useHelperAssignments } from "@/hooks/useHelperAssignments";
 import { updateMatchEnteringHelpers } from "@/actions/match-entering-helper";
 import { toast } from "sonner";
-import { NUMBER_OF_GROUPS_WITH_ELO } from "@/constants/constants";
+import { sortParticipantsByEloAndDWZ } from "@/lib/participant-sorting";
 import invariant from "tiny-invariant";
 
 export function EditGroupsGrid({
@@ -48,59 +48,13 @@ export function EditGroupsGrid({
     getMatchEnteringHelpersForGroup,
   } = useHelperAssignments(currentAssignments, matchEnteringHelpers);
 
-  const sortParticipantsByElo = (
-    participants: ParticipantWithName[],
-  ): ParticipantWithName[] => {
-    return [...participants].sort((a, b) => {
-      if (a.fideRating !== null && b.fideRating !== null) {
-        if (a.fideRating !== b.fideRating) {
-          return b.fideRating - a.fideRating;
-        }
-      } else if (a.fideRating !== null && b.fideRating === null) {
-        return -1;
-      } else if (a.fideRating === null && b.fideRating !== null) {
-        return 1;
-      }
-
-      if (a.dwzRating !== null && b.dwzRating !== null) {
-        if (a.dwzRating !== b.dwzRating) {
-          return b.dwzRating - a.dwzRating;
-        }
-      } else if (a.dwzRating !== null && b.dwzRating === null) {
-        return -1;
-      } else if (a.dwzRating === null && b.dwzRating !== null) {
-        return 1;
-      }
-
-      return a.profile.lastName.localeCompare(b.profile.lastName);
-    });
-  };
-
-  const sortParticipantsByDwz = (
-    participants: ParticipantWithName[],
-  ): ParticipantWithName[] => {
-    return [...participants].sort((a, b) => {
-      if (a.dwzRating !== null && b.dwzRating !== null) {
-        if (a.dwzRating !== b.dwzRating) {
-          return b.dwzRating - a.dwzRating;
-        }
-      } else if (a.dwzRating !== null && b.dwzRating === null) {
-        return -1;
-      } else if (a.dwzRating === null && b.dwzRating !== null) {
-        return 1;
-      }
-
-      return a.profile.lastName.localeCompare(b.profile.lastName);
-    });
-  };
-
   const handleKeyPress = (e: React.KeyboardEvent) => {
     if (e.key === "Enter") {
       handleAutoDistribute();
     }
   };
 
-  const handleAutoDistribute = () => {
+  const handleAutoDistribute = async () => {
     const playersPerGroup = parseInt(participantsPerGroup);
 
     try {
@@ -123,8 +77,10 @@ export function EditGroupsGrid({
       return;
     }
 
-    const eloSortedParticipants = sortParticipantsByElo(unassignedParticipants);
-    const dwzSortedParticipants = sortParticipantsByDwz(unassignedParticipants);
+    const { sortedParticipants } = await sortParticipantsByEloAndDWZ(
+      unassignedParticipants,
+      tournamentId,
+    );
 
     const updatedGroups: GridGroup[] = [];
     let unassignedIndex = 0;
@@ -139,22 +95,13 @@ export function EditGroupsGrid({
 
       const endIndex = Math.min(
         unassignedIndex + spotsNeeded,
-        unassignedParticipants.length,
+        sortedParticipants.length,
       );
 
-      let participantsToAdd: ParticipantWithName[];
-
-      if (i < NUMBER_OF_GROUPS_WITH_ELO) {
-        participantsToAdd = eloSortedParticipants.slice(
-          unassignedIndex,
-          endIndex,
-        );
-      } else {
-        participantsToAdd = dwzSortedParticipants.slice(
-          unassignedIndex,
-          endIndex,
-        );
-      }
+      const participantsToAdd = sortedParticipants.slice(
+        unassignedIndex,
+        endIndex,
+      );
 
       updatedGroups.push({
         ...currentGroup,
@@ -164,7 +111,7 @@ export function EditGroupsGrid({
       unassignedIndex = endIndex;
     }
 
-    const remainingUnassigned = unassignedParticipants.slice(unassignedIndex);
+    const remainingUnassigned = sortedParticipants.slice(unassignedIndex);
 
     setGridGroups(updatedGroups);
     setUnassignedParticipants(remainingUnassigned);
