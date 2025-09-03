@@ -269,6 +269,8 @@ export function UnassignedContainer({
   participants: ParticipantWithName[];
   onDistributeParticipants: (participantsPerGroup: number) => void;
 }) {
+  const [isOpen, setIsOpen] = useState(false);
+
   const { setNodeRef } = useDroppable({
     id: UNASSIGNED_CONTAINER_ID,
     data: {
@@ -286,6 +288,7 @@ export function UnassignedContainer({
       formElements.participantsPerGroup.value,
     );
     onDistributeParticipants(participantsPerGroup);
+    setIsOpen(false);
   };
 
   return (
@@ -294,7 +297,7 @@ export function UnassignedContainer({
         <CardTitle>
           <div className="flex items-center">
             <span className="flex-1">Nicht zugewiesene Teilnehmer</span>
-            <Popover>
+            <Popover open={isOpen} onOpenChange={setIsOpen}>
               <PopoverTrigger asChild>
                 <Button variant="outline" className="mt-0">
                   <FastForward />

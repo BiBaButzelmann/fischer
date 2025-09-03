@@ -38,7 +38,8 @@ export function EditGroupsGrid({
 
   useEffect(() => {
     setGridGroups(initialGroups);
-  }, [initialGroups]);
+    setUnassignedParticipants(initialUnassignedParticipants);
+  }, [initialGroups, initialUnassignedParticipants]);
 
   const {
     assignments: helperAssignments,
@@ -62,6 +63,10 @@ export function EditGroupsGrid({
         0,
         participantsPerGroup - currentParticipantCount,
       );
+
+      if (spotsNeeded === 0) {
+        continue;
+      }
 
       const endIndex = Math.min(
         unassignedIndex + spotsNeeded,
@@ -98,8 +103,12 @@ export function EditGroupsGrid({
     const assignedCount =
       unassignedParticipants.length - remainingUnassigned.length;
     toast.success(
-      `${assignedCount} Teilnehmer auf ${gridGroups.length} Gruppen verteilt. ${remainingUnassigned.length} verbleiben.`,
+      `${assignedCount} Teilnehmer auf ${updatedGroups.length} Gruppen verteilt. ${remainingUnassigned.length} verbleiben.`,
     );
+
+    startTransition(async () => {
+      await Promise.all(updatedGroups.map(handleSaveGroup));
+    });
   };
 
   const handleAddNewGroup = async () => {
