@@ -51,8 +51,8 @@ export function TournamentStartedMail({
       {isGroupUpdate ? (
         <>
           <p>
-            Aufgrund von späten Anmeldungen wurde deine Gruppe leider verändert.
-            Hier findest du deine neuen Informationen:
+            Aufgrund von verspäteten Anmeldungen wurde deine Gruppe leider
+            verändert. Hier findest du deine neuen Informationen:
           </p>
         </>
       ) : (
