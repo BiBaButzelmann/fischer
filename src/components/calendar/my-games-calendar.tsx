@@ -1,6 +1,6 @@
 "use client";
 
-import { Calendar } from ".";
+import { Calendar, CalendarExport } from ".";
 import {
   type EventInput,
   type EventDropArg,
@@ -231,6 +231,9 @@ export function MyGamesCalendar({ events, matchdays = [] }: Props) {
 
   return (
     <div className="space-y-4">
+      <div className="flex justify-end">
+        <CalendarExport events={events} />
+      </div>
       <div className="relative">
         {isPending && (
           <div className="absolute inset-0 z-10 flex items-center justify-center">
