@@ -1,21 +1,29 @@
 "use client";
 
 import { Button } from "@/components/ui/button";
-import {
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuItem,
-  DropdownMenuTrigger,
-} from "@/components/ui/dropdown-menu";
 import { CalendarEvent } from "@/db/types/calendar";
-import { Download, Calendar as CalendarIcon } from "lucide-react";
+import { Download } from "lucide-react";
 import { toast } from "sonner";
+import { CALENDAR_EXPORT_DURATIONS } from "@/constants/constants";
 
 type Props = {
   events: CalendarEvent[];
 };
 
 export function CalendarExport({ events }: Props) {
+  const getEventDuration = (event: CalendarEvent): number => {
+    switch (event.extendedProps.eventType) {
+      case "game":
+        return CALENDAR_EXPORT_DURATIONS.GAME;
+      case "referee":
+        return CALENDAR_EXPORT_DURATIONS.REFEREE;
+      case "setupHelper":
+        return CALENDAR_EXPORT_DURATIONS.SETUP_HELPER;
+      default:
+        return CALENDAR_EXPORT_DURATIONS.GAME;
+    }
+  };
+
   const escapeICalText = (text: string): string => {
     return text
       .replace(/\\/g, "\\\\")
@@ -38,13 +46,13 @@ export function CalendarExport({ events }: Props) {
     const icalEvents = events
       .map((event) => {
         const startDate = new Date(event.start);
-        const endDate = new Date(startDate.getTime() + 2 * 60 * 60 * 1000); // Default 2 hours duration
+        const endDate = new Date(startDate.getTime() + getEventDuration(event));
 
         const formatDate = (date: Date) => {
           return date.toISOString().replace(/[-:]/g, "").split(".")[0] + "Z";
         };
 
-        const uid = `${event.id}-${startDate.getTime()}@klubturnier.com`;
+        const uid = `${event.id}-${startDate.getTime()}@klubturnier.hsk1830.de`;
         const summary = escapeICalText(event.title);
         const description = escapeICalText(getEventDescription(event));
         const dtstart = formatDate(startDate);
@@ -98,56 +106,9 @@ export function CalendarExport({ events }: Props) {
       document.body.removeChild(link);
       URL.revokeObjectURL(url);
 
-      toast.success("Kalenderdatei wurde heruntergeladen!");
-    } catch (error) {
-      console.error("Error generating calendar file:", error);
+      toast.success("Kalenderdatei wurde heruntergeladen.");
+    } catch {
       toast.error("Fehler beim Erstellen der Kalenderdatei.");
-    }
-  };
-
-  const exportToGoogleCalendar = () => {
-    try {
-      const baseUrl =
-        "https://calendar.google.com/calendar/render?action=TEMPLATE";
-
-      if (events.length === 1) {
-        const event = events[0];
-        const startDate = new Date(event.start);
-        const endDate = new Date(startDate.getTime() + 2 * 60 * 60 * 1000);
-
-        const formatGoogleDate = (date: Date) => {
-          return date.toISOString().replace(/[-:]/g, "").split(".")[0] + "Z";
-        };
-
-        const params = new URLSearchParams({
-          text: event.title,
-          dates: `${formatGoogleDate(startDate)}/${formatGoogleDate(endDate)}`,
-          details: getEventDescription(event),
-          ctz: "Europe/Berlin",
-        });
-
-        window.open(`${baseUrl}&${params.toString()}`, "_blank");
-      } else {
-        downloadICalFile();
-        toast.info(
-          "Nutzen Sie die heruntergeladene .ics Datei, um alle Termine zu Google Calendar hinzuzufügen.",
-        );
-      }
-    } catch (error) {
-      console.error("Error exporting to Google Calendar:", error);
-      toast.error("Fehler beim Export zu Google Calendar.");
-    }
-  };
-
-  const exportToAppleCalendar = () => {
-    try {
-      downloadICalFile();
-      toast.info(
-        "Öffnen Sie die heruntergeladene .ics Datei, um die Termine zu Apple Calendar hinzuzufügen.",
-      );
-    } catch (error) {
-      console.error("Error exporting to Apple Calendar:", error);
-      toast.error("Fehler beim Export zu Apple Calendar.");
     }
   };
 
@@ -156,27 +117,14 @@ export function CalendarExport({ events }: Props) {
   }
 
   return (
-    <DropdownMenu>
-      <DropdownMenuTrigger asChild>
-        <Button variant="outline" size="sm" className="gap-2">
-          <Download className="h-4 w-4" />
-          Kalender exportieren
-        </Button>
-      </DropdownMenuTrigger>
-      <DropdownMenuContent align="end" className="w-56">
-        <DropdownMenuItem onClick={exportToGoogleCalendar} className="gap-2">
-          <CalendarIcon className="h-4 w-4" />
-          Zu Google Calendar
-        </DropdownMenuItem>
-        <DropdownMenuItem onClick={exportToAppleCalendar} className="gap-2">
-          <CalendarIcon className="h-4 w-4" />
-          Zu Apple Calendar
-        </DropdownMenuItem>
-        <DropdownMenuItem onClick={downloadICalFile} className="gap-2">
-          <Download className="h-4 w-4" />
-          Als .ics Datei herunterladen
-        </DropdownMenuItem>
-      </DropdownMenuContent>
-    </DropdownMenu>
+    <Button
+      variant="outline"
+      size="sm"
+      className="gap-2"
+      onClick={downloadICalFile}
+    >
+      <Download className="h-4 w-4" />
+      Kalender exportieren (.ics)
+    </Button>
   );
 }
