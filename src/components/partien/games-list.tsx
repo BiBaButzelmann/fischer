@@ -148,9 +148,13 @@ export function GamesList({
               <TableCell className="w-40 truncate">
                 {game.whiteParticipant!.profile.firstName}{" "}
                 {game.whiteParticipant!.profile.lastName}
-                {(game.whiteParticipant!.dwzRating !== null || game.whiteParticipant!.fideRating !== null) && (
+                {(game.whiteParticipant!.dwzRating !== null ||
+                  game.whiteParticipant!.fideRating !== null) && (
                   <span className="ml-2 text-muted-foreground text-sm">
-                    ({game.whiteParticipant!.dwzRating ?? game.whiteParticipant!.fideRating})
+                    (
+                    {game.whiteParticipant!.dwzRating ??
+                      game.whiteParticipant!.fideRating}
+                    )
                   </span>
                 )}
               </TableCell>
@@ -160,9 +164,13 @@ export function GamesList({
               <TableCell className="w-40 truncate">
                 {game.blackParticipant!.profile.firstName}{" "}
                 {game.blackParticipant!.profile.lastName}
-                {(game.blackParticipant!.dwzRating !== null || game.blackParticipant!.fideRating !== null) && (
+                {(game.blackParticipant!.dwzRating !== null ||
+                  game.blackParticipant!.fideRating !== null) && (
                   <span className="ml-2 text-muted-foreground text-sm">
-                    ({game.blackParticipant!.dwzRating ?? game.blackParticipant!.fideRating})
+                    (
+                    {game.blackParticipant!.dwzRating ??
+                      game.blackParticipant!.fideRating}
+                    )
                   </span>
                 )}
               </TableCell>
