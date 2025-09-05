@@ -31,6 +31,7 @@ export type GameWithParticipantProfilesAndGroupAndMatchday = Game & {
       phoneNumber: string;
     };
     fideRating: number | null;
+    dwzRating: number | null;
   } | null;
   blackParticipant: {
     profile: {
@@ -41,6 +42,7 @@ export type GameWithParticipantProfilesAndGroupAndMatchday = Game & {
       phoneNumber: string;
     };
     fideRating: number | null;
+    dwzRating: number | null;
   } | null;
   group: {
     id: number;
