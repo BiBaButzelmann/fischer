@@ -4,5 +4,12 @@ export function getParticipantFullName(participant: {
     lastName: string;
   };
 }) {
-  return `${participant.profile.firstName} ${participant.profile.lastName}`;
+  return getFullName(
+    participant.profile.firstName,
+    participant.profile.lastName,
+  );
+}
+
+export function getFullName(firstName: string, lastName: string) {
+  return `${firstName} ${lastName}`;
 }

@@ -79,3 +79,21 @@ export async function getMatchdaysBySetupHelperId(setupHelperId: number) {
     .where(eq(setupHelper.id, setupHelperId))
     .orderBy(asc(matchday.date));
 }
+
+export async function getSetupHelperNamesByMatchdayId(matchdayId: number) {
+  return await db
+    .select({
+      profileId: profile.id,
+      firstName: profile.firstName,
+      lastName: profile.lastName,
+      email: profile.email,
+      phoneNumber: profile.phoneNumber,
+    })
+    .from(matchdaySetupHelper)
+    .innerJoin(
+      setupHelper,
+      eq(matchdaySetupHelper.setupHelperId, setupHelper.id),
+    )
+    .innerJoin(profile, eq(setupHelper.profileId, profile.id))
+    .where(eq(matchdaySetupHelper.matchdayId, matchdayId));
+}
