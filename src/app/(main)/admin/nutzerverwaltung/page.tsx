@@ -208,6 +208,7 @@ type ProfileWithName = {
   lastName: string;
   phoneNumber?: string | null;
   preferredMatchDay?: DayOfWeek | null;
+  secondaryMatchDays?: DayOfWeek[] | null;
   deletedAt: Date | null;
 };
 
