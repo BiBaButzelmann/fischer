@@ -12,6 +12,7 @@ import { toast } from "sonner";
 import { NUMBER_OF_GROUPS_WITH_ELO } from "@/constants/constants";
 import invariant from "tiny-invariant";
 import { isError } from "@/lib/actions";
+import { sortParticipantsByElo, sortParticipantsByDwz } from "@/lib/elo";
 
 export function EditGroupsGrid({
   tournamentId,
@@ -231,52 +232,6 @@ export function EditGroupsGrid({
       </div>
     </div>
   );
-}
-
-function sortParticipantsByElo(
-  participants: ParticipantWithName[],
-): ParticipantWithName[] {
-  return [...participants].sort((a, b) => {
-    if (a.fideRating !== null && b.fideRating !== null) {
-      if (a.fideRating !== b.fideRating) {
-        return b.fideRating - a.fideRating;
-      }
-    } else if (a.fideRating !== null && b.fideRating === null) {
-      return -1;
-    } else if (a.fideRating === null && b.fideRating !== null) {
-      return 1;
-    }
-
-    if (a.dwzRating !== null && b.dwzRating !== null) {
-      if (a.dwzRating !== b.dwzRating) {
-        return b.dwzRating - a.dwzRating;
-      }
-    } else if (a.dwzRating !== null && b.dwzRating === null) {
-      return -1;
-    } else if (a.dwzRating === null && b.dwzRating !== null) {
-      return 1;
-    }
-
-    return a.profile.lastName.localeCompare(b.profile.lastName);
-  });
-}
-
-function sortParticipantsByDwz(
-  participants: ParticipantWithName[],
-): ParticipantWithName[] {
-  return [...participants].sort((a, b) => {
-    if (a.dwzRating !== null && b.dwzRating !== null) {
-      if (a.dwzRating !== b.dwzRating) {
-        return b.dwzRating - a.dwzRating;
-      }
-    } else if (a.dwzRating !== null && b.dwzRating === null) {
-      return -1;
-    } else if (a.dwzRating === null && b.dwzRating !== null) {
-      return 1;
-    }
-
-    return a.profile.lastName.localeCompare(b.profile.lastName);
-  });
 }
 
 function generateGroupName(groupNumber: number): string {

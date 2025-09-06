@@ -34,6 +34,7 @@ import {
 } from "@/components/ui/popover";
 import { Input } from "@/components/ui/input";
 import { cn } from "@/lib/utils";
+import { sortParticipantsByDwz } from "@/lib/elo";
 
 export const UNASSIGNED_CONTAINER_ID = "unassigned-droppable";
 const UNASSIGNED_CONTAINER_TYPE = "unassigned";
@@ -217,7 +218,7 @@ export function GroupsGrid({
 
               return (
                 <GroupContainer
-                  key={group.id}
+                  key={`${group.id}+${group.participants.length}`}
                   group={group}
                   onChangeGroupName={handleChangeGroupName}
                   onChangeGroupMatchDay={handleChangeGroupMatchDay}
@@ -272,6 +273,10 @@ export function GroupContainer({
       group,
     },
   });
+
+  const participants = useMemo(() => {
+    return sortParticipantsByDwz(group.participants);
+  }, [group.participants]);
 
   return (
     <Card
@@ -328,7 +333,7 @@ export function GroupContainer({
 
           {/* Participants */}
           <div className="flex-1 flex flex-col justify-end">
-            {group.participants.map((p) => (
+            {participants.map((p) => (
               <ParticipantItem key={p.id} participant={p} />
             ))}
           </div>
@@ -360,6 +365,10 @@ export function UnassignedContainer({
       type: UNASSIGNED_CONTAINER_TYPE,
     },
   });
+
+  const sortedParticipants = useMemo(() => {
+    return sortParticipantsByDwz(participants);
+  }, [participants]);
 
   const handleSubmit = (event: FormEvent<HTMLFormElement>) => {
     event.preventDefault();
@@ -406,7 +415,7 @@ export function UnassignedContainer({
         </CardTitle>
       </CardHeader>
       <CardContent ref={setNodeRef}>
-        {participants.map((p) => (
+        {sortedParticipants.map((p) => (
           <ParticipantItem key={p.id} participant={p} />
         ))}
       </CardContent>
