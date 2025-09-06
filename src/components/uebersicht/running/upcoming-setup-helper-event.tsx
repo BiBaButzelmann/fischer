@@ -1,8 +1,13 @@
 import { buildGameViewUrl } from "@/lib/navigation";
-import { Wrench } from "lucide-react";
+import { Info, Wrench } from "lucide-react";
 import { UpcomingEvent, EventIcon } from "./upcoming-event";
 import { getSetupHelperNamesByMatchdayId } from "@/db/repositories/setup-helper";
 import { getFullName } from "@/lib/participant";
+import {
+  Tooltip,
+  TooltipContent,
+  TooltipTrigger,
+} from "@/components/ui/tooltip";
 
 type Props = {
   tournamentId: number;
@@ -22,10 +27,6 @@ export async function UpcomingSetupHelperEvent({
     (helper) => helper.profileId !== profileId,
   );
 
-  const setupHelperNames = otherSetupHelpers.map((helper) =>
-    getFullName(helper.firstName, helper.lastName),
-  );
-
   return (
     <UpcomingEvent
       title="Aufbauhelfer"
@@ -40,9 +41,46 @@ export async function UpcomingSetupHelperEvent({
       }
       additionalInfo={
         <span className="text-gray-500 text-sm">
-          mit {setupHelperNames.join(", ")}
+          mit{" "}
+          <span className="inline-flex gap-1 [&>*:not(:last-child)]:after:content-[',']">
+            {otherSetupHelpers.map((s) => (
+              <NameDisplay
+                key={s.profileId}
+                name={getFullName(s.firstName, s.lastName)}
+                email={s.email}
+                phoneNumber={s.phoneNumber}
+              />
+            ))}
+          </span>
         </span>
       }
     />
+  );
+}
+
+function NameDisplay({
+  name,
+  email,
+  phoneNumber,
+}: {
+  name: string;
+  email: string;
+  phoneNumber: string;
+}) {
+  return (
+    <Tooltip>
+      <TooltipTrigger>
+        <span className="inline-flex items-center gap-1">
+          {name}
+          <Info className="size-3" />
+        </span>
+      </TooltipTrigger>
+      <TooltipContent className="bg-white shadow-md">
+        <div className="flex flex-col">
+          <span className="text-gray-500 text-sm">E-Mail: {email}</span>
+          <span className="text-gray-500 text-sm">Telefon: {phoneNumber}</span>
+        </div>
+      </TooltipContent>
+    </Tooltip>
   );
 }
