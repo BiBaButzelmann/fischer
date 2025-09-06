@@ -32,7 +32,7 @@ import { ParticipantRow } from "@/components/admin/participant-row";
 import { RatingUpdateButton } from "@/components/admin/rating-update-button";
 import { redirect } from "next/navigation";
 import { ProfileWithName } from "@/db/types/profile";
-import { ParticipantWithRating } from "@/db/types/participant";
+import { ParticipantWithProfile } from "@/db/types/participant";
 
 export default async function Page() {
   const session = await authWithRedirect();
@@ -254,7 +254,7 @@ function ParticipantList({
   icon: Icon,
   emptyMessage,
 }: {
-  participants: ParticipantWithRating[];
+  participants: ParticipantWithProfile[];
   tournamentId: number;
   title: string;
   description: string;

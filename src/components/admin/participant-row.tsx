@@ -20,6 +20,7 @@ import {
 import { toast } from "sonner";
 import { Badge } from "@/components/ui/badge";
 import { ProfileWithName } from "@/db/types/profile";
+import { getParticipantFullName } from "@/lib/participant";
 
 type Props = {
   participant: {
@@ -38,10 +39,6 @@ export function ParticipantRow({
   const [softDeleteOpen, setSoftDeleteOpen] = useState(false);
   const [hardDeleteOpen, setHardDeleteOpen] = useState(false);
   const [isPending, startTransition] = useTransition();
-
-  const getDisplayName = (profile: ProfileWithName) => {
-    return `${profile.firstName} ${profile.lastName}`;
-  };
 
   const handleSoftDelete = () => {
     startTransition(async () => {
@@ -133,7 +130,7 @@ export function ParticipantRow({
                   : "text-gray-900"
               }`}
             >
-              {getDisplayName(participant.profile)}
+              {getParticipantFullName(participant)}
             </span>
           </div>
 
@@ -200,7 +197,7 @@ export function ParticipantRow({
                   </DialogTitle>
                   <DialogDescription>
                     Möchten Sie den Benutzer &quot;
-                    {getDisplayName(participant.profile)}&quot; deaktivieren?
+                    {getParticipantFullName(participant)}&quot; deaktivieren?
                     Der Benutzer wird ausgeblendet, aber alle Daten bleiben
                     erhalten und können später wiederhergestellt werden.
                   </DialogDescription>
@@ -245,7 +242,7 @@ export function ParticipantRow({
                       Diese Aktion kann nicht rückgängig gemacht werden!
                     </strong>
                     <br />
-                    Der Benutzer &quot;{getDisplayName(participant.profile)}
+                    Der Benutzer &quot;{getParticipantFullName(participant)}
                     &quot; und alle zugehörigen Daten werden permanent aus der
                     Datenbank gelöscht.
                     <br />
