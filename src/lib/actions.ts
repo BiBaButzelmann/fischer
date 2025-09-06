@@ -18,13 +18,17 @@ export function action<TParams extends any[], TReturn>(
           error: error.message,
         };
       }
-      throw new Error("Ein unerwarteter Fehler ist aufgetreten");
+      return {
+        error: "Ein unerwarteter Fehler ist aufgetreten",
+      };
     }
   };
 }
 
-export function isError<T extends object>(
+export function isError<T>(
   response: T | ErrorResponse,
 ): response is ErrorResponse {
-  return "error" in response;
+  return (
+    response != null && typeof response === "object" && "error" in response
+  );
 }

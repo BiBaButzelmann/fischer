@@ -34,11 +34,11 @@ export function useHelperAssignments(
 
   const addHelperToGroup = (
     groupId: GroupId,
-    matchEnteringHelperId: string,
+    matchEnteringHelperId: number,
   ) => {
     setAssignments((prev) => {
       const matchEnteringHelper = matchEnteringHelpers.find(
-        (helper) => helper.id.toString() === matchEnteringHelperId,
+        (helper) => helper.id === matchEnteringHelperId,
       );
       invariant(matchEnteringHelper, "Match entering helper not found");
 
@@ -77,15 +77,10 @@ export function useHelperAssignments(
     });
   };
 
-  const getMatchEnteringHelpersForGroup = (groupId: number) => {
-    return assignments[groupId] ?? [];
-  };
-
   return {
     assignments,
     helperAssignedCounts,
     addHelperToGroup,
     removeHelperFromGroup,
-    getMatchEnteringHelpersForGroup,
   };
 }

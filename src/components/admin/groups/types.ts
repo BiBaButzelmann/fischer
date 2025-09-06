@@ -5,6 +5,7 @@ import { MatchEnteringHelperWithName } from "@/db/types/match-entering-helper";
 export type GridGroup = {
   id: number;
   isNew: boolean;
+  isDeleted: boolean;
   groupNumber: number;
   groupName: string;
   dayOfWeek: DayOfWeek | null;
