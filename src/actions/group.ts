@@ -154,7 +154,7 @@ async function upsertGroups(
         matchEnteringHelperId: h.id,
       })),
     );
-
+  // TODO: check if participantIds actually changed
   type ParticipantGroupInsert = typeof participantGroup.$inferInsert;
   const participantGroupValues: ParticipantGroupInsert[] = groups.flatMap(
     (g, index) =>
