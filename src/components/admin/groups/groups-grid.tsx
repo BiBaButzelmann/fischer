@@ -331,8 +331,7 @@ export function GroupContainer({
             />
           </div>
 
-          {/* Participants */}
-          <div className="flex-1 flex flex-col justify-end">
+          <div className="flex-1 flex flex-col">
             {participants.map((p) => (
               <ParticipantItem key={p.id} participant={p} />
             ))}
