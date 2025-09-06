@@ -25,7 +25,7 @@ import { GroupTitle } from "./group-title";
 import { GroupStats } from "./group-stats";
 import { GroupMatchEnteringHelperSelector } from "../match-entering-helper/match-entering-helper-selector";
 import { Button } from "@/components/ui/button";
-import { Trash, Save, FastForward } from "lucide-react";
+import { Trash, FastForward } from "lucide-react";
 import { DayOfWeek } from "@/db/types/group";
 import { MatchEnteringHelperWithName } from "@/db/types/match-entering-helper";
 import {
@@ -45,11 +45,9 @@ export function GroupsGrid({
   unassignedParticipants,
   matchEnteringHelpers,
   helperAssignedCounts,
-  helperAssignments,
   onChangeGroups,
   onChangeUnassignedParticipants,
   onDeleteGroup,
-  onSaveGroup,
   onUpdateGroupName,
   onAddHelperToGroup,
   onRemoveHelperFromGroup,
@@ -64,9 +62,8 @@ export function GroupsGrid({
   onChangeGroups: (groups: GridGroup[]) => void;
   onChangeUnassignedParticipants: (participants: ParticipantWithName[]) => void;
   onDeleteGroup: (groupId: number) => void;
-  onSaveGroup: (group: GridGroup) => void;
   onUpdateGroupName: (groupId: number, newName: string) => void;
-  onAddHelperToGroup: (groupId: number, helperId: string) => void;
+  onAddHelperToGroup: (groupId: number, helperId: number) => void;
   onRemoveHelperFromGroup: (groupId: number, helperId: number) => void;
   onDistributeParticipants: (participantsPerGroup: number) => void;
 }) {
@@ -104,13 +101,6 @@ export function GroupsGrid({
     onChangeGroups(updatedGroups);
   };
 
-  const groupsWithHelpers = useMemo(() => {
-    return groups.map((group) => ({
-      ...group,
-      matchEnteringHelpers: helperAssignments?.[group.id] ?? [],
-    }));
-  }, [groups, helperAssignments]);
-
   return (
     <div className="flex flex-col gap-4">
       <DndContext
@@ -122,24 +112,29 @@ export function GroupsGrid({
       >
         <div className="flex flex-col gap-4">
           <div className="grid grid-cols-1 sm:grid-cols-1 lg:grid-cols-2 gap-4">
-            {groupsWithHelpers.map((group) => (
-              <GroupContainer
-                key={group.id}
-                group={group}
-                onChangeGroupName={handleChangeGroupName}
-                onChangeGroupMatchDay={handleChangeGroupMatchDay}
-                onDeleteGroup={onDeleteGroup}
-                onSaveGroup={onSaveGroup}
-                matchEnteringHelpers={matchEnteringHelpers}
-                helperAssignedCounts={helperAssignedCounts}
-                onAddHelperToGroup={onAddHelperToGroup}
-                onRemoveHelperFromGroup={onRemoveHelperFromGroup}
+            {groups.map((group) => {
+              if (group.isDeleted) return null;
+
+              return (
+                <GroupContainer
+                  key={group.id}
+                  group={group}
+                  onChangeGroupName={handleChangeGroupName}
+                  onChangeGroupMatchDay={handleChangeGroupMatchDay}
+                  onDeleteGroup={onDeleteGroup}
+                  matchEnteringHelpers={matchEnteringHelpers}
+                  helperAssignedCounts={helperAssignedCounts}
+                  onAddHelperToGroup={onAddHelperToGroup}
+                  onRemoveHelperFromGroup={onRemoveHelperFromGroup}
+                />
+              );
+            })}
+            <div className="col-span-1 lg:col-span-2">
+              <UnassignedContainer
+                participants={unassignedParticipants}
+                onDistributeParticipants={onDistributeParticipants}
               />
-            ))}
-            <UnassignedContainer
-              participants={unassignedParticipants}
-              onDistributeParticipants={onDistributeParticipants}
-            />
+            </div>
           </div>
         </div>
         <DragOverlay>
@@ -157,7 +152,6 @@ export function GroupContainer({
   onChangeGroupName,
   onChangeGroupMatchDay,
   onDeleteGroup,
-  onSaveGroup,
   matchEnteringHelpers,
   helperAssignedCounts,
   onAddHelperToGroup,
@@ -169,8 +163,7 @@ export function GroupContainer({
   onChangeGroupName: (groupId: number, newName: string) => void;
   onChangeGroupMatchDay: (groupId: number, matchDay: DayOfWeek | null) => void;
   onDeleteGroup: (groupId: number) => void;
-  onSaveGroup: (group: GridGroup) => void;
-  onAddHelperToGroup: (groupId: number, helperId: string) => void;
+  onAddHelperToGroup: (groupId: number, helperId: number) => void;
   onRemoveHelperFromGroup: (groupId: number, helperId: number) => void;
 }) {
   const { setNodeRef } = useDroppable({
@@ -198,15 +191,6 @@ export function GroupContainer({
                 groupName={group.groupName}
               />
             </div>
-            <Button
-              size="icon"
-              variant="outline"
-              className="text-blue-600 border-blue-600"
-              disabled={group.isNew}
-              onClick={() => onSaveGroup(group)}
-            >
-              <Save className="h-4 w-4" />
-            </Button>
             <Button
               size="icon"
               variant="outline"

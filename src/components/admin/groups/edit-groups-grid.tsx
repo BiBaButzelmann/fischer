@@ -5,17 +5,13 @@ import { GroupsGrid } from "./groups-grid";
 import { useEffect, useState, useTransition } from "react";
 import { GridGroup } from "./types";
 import { Button } from "@/components/ui/button";
-import {
-  saveGroup,
-  deleteGroup,
-  updateGroupName,
-  getExistingGroupNumbers,
-} from "@/actions/group";
+import { getExistingGroupNumbers, saveGroups } from "@/actions/group";
 import { MatchEnteringHelperWithName } from "@/db/types/match-entering-helper";
 import { useHelperAssignments } from "@/hooks/useHelperAssignments";
-import { updateMatchEnteringHelpers } from "@/actions/match-entering-helper";
 import { toast } from "sonner";
 import { NUMBER_OF_GROUPS_WITH_ELO } from "@/constants/constants";
+import invariant from "tiny-invariant";
+import { isError } from "@/lib/actions";
 
 export function EditGroupsGrid({
   tournamentId,
@@ -31,6 +27,7 @@ export function EditGroupsGrid({
   currentAssignments: Record<number, MatchEnteringHelperWithName[]>;
 }) {
   const [isPending, startTransition] = useTransition();
+
   const [unassignedParticipants, setUnassignedParticipants] = useState(
     initialUnassignedParticipants,
   );
@@ -46,7 +43,6 @@ export function EditGroupsGrid({
     helperAssignedCounts,
     addHelperToGroup,
     removeHelperFromGroup,
-    getMatchEnteringHelpersForGroup,
   } = useHelperAssignments(currentAssignments, matchEnteringHelpers);
 
   const handleDistributeParticipants = (participantsPerGroup: number) => {
@@ -63,10 +59,6 @@ export function EditGroupsGrid({
         0,
         participantsPerGroup - currentParticipantCount,
       );
-
-      if (spotsNeeded === 0) {
-        continue;
-      }
 
       const endIndex = Math.min(
         unassignedIndex + spotsNeeded,
@@ -105,10 +97,6 @@ export function EditGroupsGrid({
     toast.success(
       `${assignedCount} Teilnehmer auf ${updatedGroups.length} Gruppen verteilt. ${remainingUnassigned.length} verbleiben.`,
     );
-
-    startTransition(async () => {
-      await Promise.all(updatedGroups.map(handleSaveGroup));
-    });
   };
 
   const handleAddNewGroup = async () => {
@@ -126,6 +114,7 @@ export function EditGroupsGrid({
     const newGroup: GridGroup = {
       id: Date.now(),
       isNew: true,
+      isDeleted: false,
       groupNumber: nextGroupNumber,
       groupName: generateGroupName(nextGroupNumber),
       dayOfWeek: null,
@@ -134,26 +123,27 @@ export function EditGroupsGrid({
     };
 
     setGridGroups((prev) => [...prev, newGroup]);
-    handleSaveGroup(newGroup);
   };
 
   const handleDeleteGroup = (groupId: number) => {
-    startTransition(async () => {
-      const newGroups = [...gridGroups];
-      const groupIndex = newGroups.findIndex((g) => g.id === groupId);
-      if (groupIndex === -1) return;
+    const newGroups = [...gridGroups];
 
-      const deletedGroup = newGroups.splice(groupIndex, 1);
+    const groupIndex = gridGroups.findIndex((g) => g.id === groupId);
+    invariant(groupIndex !== -1, "Group not found");
+
+    const deletedGroup = gridGroups[groupIndex];
+
+    if (gridGroups[groupIndex].isNew) {
+      setGridGroups((prev) => prev.filter((g) => g.id !== groupId));
+    } else {
+      newGroups[groupIndex].isDeleted = true;
       setGridGroups(newGroups);
-      setUnassignedParticipants([
-        ...unassignedParticipants,
-        ...deletedGroup[0].participants,
-      ]);
+    }
 
-      if (!deletedGroup[0].isNew) {
-        await deleteGroup(groupId);
-      }
-    });
+    setUnassignedParticipants([
+      ...unassignedParticipants,
+      ...deletedGroup.participants,
+    ]);
   };
 
   const handleUpdateGroupName = (groupId: number, newName: string) => {
@@ -161,22 +151,50 @@ export function EditGroupsGrid({
       g.id === groupId ? { ...g, groupName: newName } : g,
     );
     setGridGroups(updatedGroups);
-
-    const group = gridGroups.find((g) => g.id === groupId);
-    if (group && !group.isNew) {
-      startTransition(async () => {
-        await updateGroupName(groupId, newName);
-      });
-    }
   };
 
-  const handleSaveGroup = (groupData: GridGroup) => {
+  const handleAddHelperToGroup = (groupId: number, helperId: number) => {
+    const groupIndex = gridGroups.findIndex((g) => g.id === groupId);
+    invariant(groupIndex !== -1, "Group not found");
+
+    const group = gridGroups[groupIndex];
+    if (group.matchEnteringHelpers.find((h) => h.id === helperId)) {
+      return;
+    }
+
+    const matchEnteringHelper = matchEnteringHelpers.find(
+      (h) => h.id === helperId,
+    );
+    invariant(matchEnteringHelper, "Match entering helper not found");
+
+    const updatedGroups = [...gridGroups];
+    updatedGroups[groupIndex].matchEnteringHelpers.push(matchEnteringHelper);
+
+    setGridGroups(updatedGroups);
+    addHelperToGroup(groupId, helperId);
+  };
+
+  const handleRemoveHelperFromGroup = (groupId: number, helperId: number) => {
+    const groupIndex = gridGroups.findIndex((g) => g.id === groupId);
+    invariant(groupIndex !== -1, "Group not found");
+
+    const updatedGroups = [...gridGroups];
+    updatedGroups[groupIndex].matchEnteringHelpers = updatedGroups[
+      groupIndex
+    ].matchEnteringHelpers.filter((h) => h.id !== helperId);
+
+    setGridGroups(updatedGroups);
+    removeHelperFromGroup(groupId, helperId);
+  };
+
+  const handleSaveChanges = () => {
     startTransition(async () => {
-      const groupId = await saveGroup(tournamentId, groupData);
-      const matchEnteringHelperIds = getMatchEnteringHelpersForGroup(
-        groupData.id,
-      ).map((h) => h.id);
-      await updateMatchEnteringHelpers(groupId, matchEnteringHelperIds);
+      const result = await saveGroups(tournamentId, gridGroups);
+      if (isError(result)) {
+        toast.error(result.error);
+      } else {
+        toast.success("Änderungen erfolgreich gespeichert");
+      }
     });
   };
 
@@ -185,10 +203,13 @@ export function EditGroupsGrid({
       <div className="flex justify-end gap-4 items-center">
         <Button
           variant="outline"
-          onClick={() => startTransition(handleAddNewGroup)}
+          onClick={handleAddNewGroup}
           disabled={isPending}
         >
           Gruppe hinzufügen
+        </Button>
+        <Button onClick={handleSaveChanges} disabled={isPending}>
+          Änderungen speichern
         </Button>
       </div>
       <div className={isPending ? "opacity-50 pointer-events-none" : ""}>
@@ -202,10 +223,9 @@ export function EditGroupsGrid({
           onChangeGroups={setGridGroups}
           onChangeUnassignedParticipants={setUnassignedParticipants}
           onDeleteGroup={handleDeleteGroup}
-          onSaveGroup={handleSaveGroup}
           onUpdateGroupName={handleUpdateGroupName}
-          onAddHelperToGroup={addHelperToGroup}
-          onRemoveHelperFromGroup={removeHelperFromGroup}
+          onAddHelperToGroup={handleAddHelperToGroup}
+          onRemoveHelperFromGroup={handleRemoveHelperFromGroup}
           onDistributeParticipants={handleDistributeParticipants}
         />
       </div>
