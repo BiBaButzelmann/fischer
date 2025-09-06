@@ -3,7 +3,7 @@
 import { db } from "@/db/client";
 import { participantGroup } from "@/db/schema/participant";
 import { ParticipantWithName } from "@/db/types/participant";
-import { and, eq, inArray } from "drizzle-orm";
+import { and, eq, inArray, sql } from "drizzle-orm";
 import { revalidatePath } from "next/cache";
 import { GridGroup } from "@/components/admin/groups/types";
 import { group } from "@/db/schema/group";
@@ -18,6 +18,7 @@ import { action } from "@/lib/actions";
 
 export const saveGroups = action(
   async (tournamentId: number, groupsData: GridGroup[]) => {
+    console.log(groupsData[0].id, groupsData[0].participants);
     const session = await authWithRedirect();
     invariant(session?.user.role === "admin", "Unauthorized");
 
@@ -30,7 +31,9 @@ export const saveGroups = action(
       if (groupIdsToBeDeleted.length > 0) {
         await deleteGroups(tx, groupIdsToBeDeleted);
       }
-      await upsertGroups(tx, tournamentId, groupsToBeUpserted);
+      if (groupsToBeUpserted.length > 0) {
+        await upsertGroups(tx, tournamentId, groupsToBeUpserted);
+      }
     });
 
     revalidatePath("/admin/gruppen");
@@ -72,26 +75,28 @@ async function upsertGroups(
   tournamentId: number,
   groups: GridGroup[],
 ) {
-  const groupIds = groups.map((g) => g.id);
-
-  for (const { groupName, groupNumber, dayOfWeek } of groups) {
-    await db
-      .insert(group)
-      .values({
+  const insertedGroups = await db
+    .insert(group)
+    .values(
+      groups.map(({ groupName, groupNumber, dayOfWeek }) => ({
         tournamentId,
         groupName,
         groupNumber,
         dayOfWeek,
-      })
-      .onConflictDoUpdate({
-        target: [group.tournamentId, group.groupNumber],
-        set: {
-          groupName,
-          groupNumber,
-          dayOfWeek,
-        },
-      });
-  }
+      })),
+    )
+    .onConflictDoUpdate({
+      target: [group.tournamentId, group.groupNumber],
+      set: {
+        groupName: sql.raw(`excluded.${group.groupName.name}`),
+        groupNumber: sql.raw(`excluded.${group.groupNumber.name}`),
+        dayOfWeek: sql.raw(`excluded.${group.dayOfWeek.name}`),
+      },
+    })
+    .returning();
+  const groupIds = insertedGroups.map((g) => g.id);
+
+  console.log("new", groupIds);
 
   await db
     .delete(groupMatchEnteringHelper)
@@ -103,24 +108,29 @@ async function upsertGroups(
   type GroupMatchEnteringHelperInsert =
     typeof groupMatchEnteringHelper.$inferInsert;
   const matchEnteringHelperValues: GroupMatchEnteringHelperInsert[] =
-    groups.flatMap((g) =>
+    groups.flatMap((g, index) =>
       g.matchEnteringHelpers.map((h) => ({
-        groupId: g.id,
+        groupId: groupIds[index],
         matchEnteringHelperId: h.id,
       })),
     );
 
   type ParticipantGroupInsert = typeof participantGroup.$inferInsert;
-  const participantGroupValues: ParticipantGroupInsert[] = groups.flatMap((g) =>
-    g.participants.map((p, index) => ({
-      groupId: g.id,
-      participantId: p.id,
-      groupPosition: index + 1,
-    })),
+  const participantGroupValues: ParticipantGroupInsert[] = groups.flatMap(
+    (g, index) =>
+      g.participants.map((p) => ({
+        groupId: groupIds[index],
+        participantId: p.id,
+        groupPosition: index + 1,
+      })),
   );
 
-  await db.insert(groupMatchEnteringHelper).values(matchEnteringHelperValues);
-  await db.insert(participantGroup).values(participantGroupValues);
+  if (matchEnteringHelperValues.length > 0) {
+    await db.insert(groupMatchEnteringHelper).values(matchEnteringHelperValues);
+  }
+  if (participantGroupValues.length > 0) {
+    await db.insert(participantGroup).values(participantGroupValues);
+  }
 }
 
 export async function updateGroupPositions(
