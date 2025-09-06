@@ -121,13 +121,7 @@ export async function getParticipantsWithProfileByGroupId(groupId: number) {
   return await db
     .select({
       ...getTableColumns(participant),
-      profile: {
-        userId: profile.userId,
-        firstName: profile.firstName,
-        lastName: profile.lastName,
-        email: profile.email,
-        phoneNumber: profile.phoneNumber,
-      },
+      profile: getTableColumns(profile),
     })
     .from(participantGroup)
     .innerJoin(group, eq(participantGroup.groupId, group.id))
@@ -135,4 +129,20 @@ export async function getParticipantsWithProfileByGroupId(groupId: number) {
     .innerJoin(profile, eq(participant.profileId, profile.id))
     .where(eq(group.id, groupId))
     .orderBy(profile.lastName, profile.firstName);
+}
+
+export async function getParticipantsWithZpsPlayerIdByTournamentId(
+  tournamentId: number,
+) {
+  return await db.query.participant.findMany({
+    where: (participant, { eq, and, isNotNull }) =>
+      and(
+        eq(participant.tournamentId, tournamentId),
+        isNotNull(participant.zpsPlayerId),
+      ),
+    columns: {
+      id: true,
+      zpsPlayerId: true,
+    },
+  });
 }

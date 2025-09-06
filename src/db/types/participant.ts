@@ -1,6 +1,7 @@
 import { InferSelectModel } from "drizzle-orm";
 import { participant } from "../schema/participant";
 import { DayOfWeek } from "./group";
+import { ProfileWithName } from "./profile";
 
 export type Participant = InferSelectModel<typeof participant>;
 
@@ -21,7 +22,7 @@ export type ParticipantAndGroup = Participant & {
   } | null;
 };
 
-export type ParticipantWithRating = Pick<
+export type ParticipantWithRatingAndChessClub = Pick<
   Participant,
   "id" | "dwzRating" | "fideRating" | "title" | "chessClub"
 > & {
@@ -31,12 +32,13 @@ export type ParticipantWithRating = Pick<
   };
 };
 
+export type ParticipantWithRating = Pick<
+  Participant,
+  "id" | "dwzRating" | "fideRating"
+> & {
+  profile: ProfileWithName;
+};
+
 export type ParticipantWithProfile = Participant & {
-  profile: {
-    userId: string;
-    firstName: string;
-    lastName: string;
-    email: string;
-    phoneNumber: string | null;
-  };
+  profile: ProfileWithName;
 };

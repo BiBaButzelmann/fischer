@@ -53,11 +53,12 @@ export function AppSidebar({ session, tournament, userRoles }: Props) {
   const isRegistrationOpen = stage === "registration";
   const isRunning = stage === "running";
   const isActive = stage === "registration" || stage === "running";
-  const isAdmin = session?.user.role === "admin";
 
-  const canAccessMatchEntry = userRoles.some((role) =>
-    ["participant", "matchEnteringHelper", "admin"].includes(role),
-  );
+  const isAdmin = userRoles.includes("admin");
+  const isParticipant = userRoles.includes("participant");
+  const isMatchEnteringHelper = userRoles.includes("matchEnteringHelper");
+
+  const canAccessMatchEntry = isAdmin || isParticipant || isMatchEnteringHelper;
 
   return (
     <Sidebar>
@@ -94,7 +95,7 @@ export function AppSidebar({ session, tournament, userRoles }: Props) {
               <SidebarLink href="/kalender" icon={CalendarIcon}>
                 Kalender
               </SidebarLink>
-              {canAccessMatchEntry && isRunning && (
+              {isRunning && canAccessMatchEntry && (
                 <SidebarLink href="/partieneingabe" icon={ClipboardEdit}>
                   Partieneingabe
                 </SidebarLink>

@@ -59,7 +59,7 @@ export async function getGroupNameAndDayOfWeekByProfileIdAndTournamentId(
 export async function getGroupsByTournamentId(tournamentId: number) {
   return await db.query.group.findMany({
     where: (group, { eq }) => eq(group.tournamentId, tournamentId),
-    orderBy: (group, { asc }) => [asc(group.groupNumber)],
+    orderBy: (group, { asc }) => [asc(group.groupName)],
   });
 }
 

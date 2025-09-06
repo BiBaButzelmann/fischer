@@ -21,6 +21,7 @@ type Props = {
   roles: RolesData;
   tournamentId: number;
   participantData: ParticipantGroupData | undefined;
+  isGroupUpdate?: boolean;
 };
 
 export function TournamentStartedMail({
@@ -28,6 +29,7 @@ export function TournamentStartedMail({
   roles,
   tournamentId,
   participantData,
+  isGroupUpdate = false,
 }: Props) {
   if (roles.participant) {
     invariant(
@@ -46,19 +48,30 @@ export function TournamentStartedMail({
     >
       <h1 style={{ color: "#2c3e50" }}>Hallo {name},</h1>
 
-      <p>
-        Das Klubturnier hat offiziell begonnen. Du kannst dich jetzt in das
-        Turniersystem einloggen und deine Partien verfolgen.
-      </p>
-      <p>Besuche die Turnierwebsite unter folgendem Link:</p>
-      <p>
-        <a
-          href="https://klubturnier.hsk1830.de"
-          style={{ color: "#2980b9", fontWeight: "bold" }}
-        >
-          klubturnier.hsk1830.de
-        </a>
-      </p>
+      {isGroupUpdate ? (
+        <>
+          <p>
+            Aufgrund von verspäteten Anmeldungen wurde deine Gruppe leider
+            verändert. Hier findest du deine neuen Informationen:
+          </p>
+        </>
+      ) : (
+        <>
+          <p>
+            Das Klubturnier hat offiziell begonnen. Du kannst dich jetzt in das
+            Turniersystem einloggen und deine Partien verfolgen.
+          </p>
+          <p>Besuche die Turnierwebsite unter folgendem Link:</p>
+          <p>
+            <a
+              href="https://klubturnier.hsk1830.de"
+              style={{ color: "#2980b9", fontWeight: "bold" }}
+            >
+              klubturnier.hsk1830.de
+            </a>
+          </p>
+        </>
+      )}
 
       {roles.participant && (
         <ParticipantContent

@@ -10,14 +10,7 @@ import {
   DialogTitle,
   DialogTrigger,
 } from "@/components/ui/dialog";
-import {
-  User,
-  Trash2,
-  AlertTriangle,
-  RotateCcw,
-  Phone,
-  Mail,
-} from "lucide-react";
+import { User, Trash2, AlertTriangle, RotateCcw, Phone } from "lucide-react";
 import { useState, useTransition } from "react";
 import {
   softDeleteUserProfile,
@@ -26,27 +19,31 @@ import {
 } from "@/actions/admin";
 import { toast } from "sonner";
 import { Badge } from "@/components/ui/badge";
-import { matchDaysShort } from "@/constants/constants";
 import { ProfileWithName } from "@/db/types/profile";
+import { getParticipantFullName } from "@/lib/participant";
 
 type Props = {
-  user: ProfileWithName;
+  participant: {
+    id: number;
+    dwzRating: number | null;
+    fideRating: number | null;
+    profile: ProfileWithName;
+  };
   showDeleteActions?: boolean;
 };
 
-export function UserRow({ user, showDeleteActions = false }: Props) {
+export function ParticipantRow({
+  participant,
+  showDeleteActions = false,
+}: Props) {
   const [softDeleteOpen, setSoftDeleteOpen] = useState(false);
   const [hardDeleteOpen, setHardDeleteOpen] = useState(false);
   const [isPending, startTransition] = useTransition();
 
-  const getDisplayName = (user: ProfileWithName) => {
-    return `${user.firstName} ${user.lastName}`;
-  };
-
   const handleSoftDelete = () => {
     startTransition(async () => {
       try {
-        const result = await softDeleteUserProfile(user.userId);
+        const result = await softDeleteUserProfile(participant.profile.userId);
         if (result.success) {
           toast.success("Benutzer wurde erfolgreich deaktiviert.");
           setSoftDeleteOpen(false);
@@ -66,7 +63,7 @@ export function UserRow({ user, showDeleteActions = false }: Props) {
   const handleHardDelete = () => {
     startTransition(async () => {
       try {
-        const result = await hardDeleteUserProfile(user.userId);
+        const result = await hardDeleteUserProfile(participant.profile.userId);
         if (result.success) {
           toast.success("Benutzer wurde erfolgreich gelöscht.");
           setHardDeleteOpen(false);
@@ -86,7 +83,7 @@ export function UserRow({ user, showDeleteActions = false }: Props) {
   const handleRestore = () => {
     startTransition(async () => {
       try {
-        const result = await restoreUserProfile(user.userId);
+        const result = await restoreUserProfile(participant.profile.userId);
         if (result.success) {
           toast.success("Benutzer wurde erfolgreich wiederhergestellt.");
         } else {
@@ -105,7 +102,7 @@ export function UserRow({ user, showDeleteActions = false }: Props) {
   return (
     <div
       className={`flex items-center justify-between px-3 py-3 rounded-md border ${
-        user.deletedAt != null
+        participant.profile.deletedAt != null
           ? "bg-red-50 border-red-200"
           : "bg-gray-50 border-gray-200"
       }`}
@@ -113,12 +110,14 @@ export function UserRow({ user, showDeleteActions = false }: Props) {
       <div className="flex items-center gap-2">
         <div
           className={`w-6 h-6 rounded-full flex items-center justify-center ${
-            user.deletedAt != null ? "bg-red-200" : "bg-gray-200"
+            participant.profile.deletedAt != null ? "bg-red-200" : "bg-gray-200"
           }`}
         >
           <User
             className={`h-3 w-3 ${
-              user.deletedAt != null ? "text-red-600" : "text-gray-600"
+              participant.profile.deletedAt != null
+                ? "text-red-600"
+                : "text-gray-600"
             }`}
           />
         </div>
@@ -126,46 +125,47 @@ export function UserRow({ user, showDeleteActions = false }: Props) {
           <div className="flex items-center gap-2">
             <span
               className={`font-medium text-sm ${
-                user.deletedAt != null ? "text-red-900" : "text-gray-900"
+                participant.profile.deletedAt != null
+                  ? "text-red-900"
+                  : "text-gray-900"
               }`}
             >
-              {getDisplayName(user)}
+              {getParticipantFullName(participant)}
             </span>
-            {user.preferredMatchDay && (
-              <Badge
-                variant="secondary"
-                className="bg-blue-100 text-blue-800 text-xs px-2 py-0.5"
-              >
-                {matchDaysShort[user.preferredMatchDay]}
-              </Badge>
-            )}
           </div>
+
+          <div className="flex items-center gap-2">
+            <Badge className="whitespace-nowrap w-[75px]">
+              FIDE {participant.fideRating ?? "0"}
+            </Badge>
+            <Badge variant="secondary" className="whitespace-nowrap w-[75px]">
+              DWZ {participant.dwzRating ?? "0"}
+            </Badge>
+          </div>
+
           <div className="flex items-center gap-3 text-xs text-gray-600">
-            {user.phoneNumber && (
+            {participant.profile.phoneNumber && (
               <div className="flex items-center gap-1">
                 <Phone className="h-3 w-3" />
-                <span>{user.phoneNumber}</span>
-              </div>
-            )}
-            {user.email && (
-              <div className="flex items-center gap-1">
-                <Mail className="h-3 w-3" />
-                <span>{user.email}</span>
+                <span>{participant.profile.phoneNumber}</span>
               </div>
             )}
           </div>
-          {user.deletedAt && (
+          {participant.profile.deletedAt && (
             <span className="text-xs text-red-600">
               Deaktiviert:{" "}
-              {new Date(user.deletedAt).toLocaleDateString("de-DE")}
+              {new Date(participant.profile.deletedAt).toLocaleDateString(
+                "de-DE",
+              )}
             </span>
           )}
         </div>
       </div>
       <div className="flex items-center gap-2">
-        <div className="text-xs text-gray-500">ID: {user.id}</div>
-        {/* Show restore button for disabled users, delete buttons for active users */}
-        {user.deletedAt != null ? (
+        <div className="text-xs text-gray-500">
+          ID: {participant.profile.id}
+        </div>
+        {participant.profile.deletedAt != null ? (
           <Button
             variant="outline"
             size="sm"
@@ -178,7 +178,6 @@ export function UserRow({ user, showDeleteActions = false }: Props) {
           </Button>
         ) : showDeleteActions ? (
           <div className="flex items-center gap-1">
-            {/* Soft Delete Button */}
             <Dialog open={softDeleteOpen} onOpenChange={setSoftDeleteOpen}>
               <DialogTrigger asChild>
                 <Button
@@ -197,10 +196,10 @@ export function UserRow({ user, showDeleteActions = false }: Props) {
                     Benutzer deaktivieren
                   </DialogTitle>
                   <DialogDescription>
-                    Möchten Sie den Benutzer &quot;{getDisplayName(user)}&quot;
-                    deaktivieren? Der Benutzer wird ausgeblendet, aber alle
-                    Daten bleiben erhalten und können später wiederhergestellt
-                    werden.
+                    Möchten Sie den Benutzer &quot;
+                    {getParticipantFullName(participant)}&quot; deaktivieren?
+                    Der Benutzer wird ausgeblendet, aber alle Daten bleiben
+                    erhalten und können später wiederhergestellt werden.
                   </DialogDescription>
                 </DialogHeader>
                 <DialogFooter>
@@ -221,7 +220,6 @@ export function UserRow({ user, showDeleteActions = false }: Props) {
               </DialogContent>
             </Dialog>
 
-            {/* Hard Delete Button */}
             <Dialog open={hardDeleteOpen} onOpenChange={setHardDeleteOpen}>
               <DialogTrigger asChild>
                 <Button
@@ -244,9 +242,9 @@ export function UserRow({ user, showDeleteActions = false }: Props) {
                       Diese Aktion kann nicht rückgängig gemacht werden!
                     </strong>
                     <br />
-                    Der Benutzer &quot;{getDisplayName(user)}&quot; und alle
-                    zugehörigen Daten werden permanent aus der Datenbank
-                    gelöscht.
+                    Der Benutzer &quot;{getParticipantFullName(participant)}
+                    &quot; und alle zugehörigen Daten werden permanent aus der
+                    Datenbank gelöscht.
                     <br />
                     <br />
                     Diese Aktion ist nur möglich, wenn der Benutzer keine Spiele

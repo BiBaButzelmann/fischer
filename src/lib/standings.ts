@@ -1,7 +1,7 @@
 import type { PlayerStats } from "@/db/types/standings";
 import type {
   ParticipantWithName,
-  ParticipantWithRating,
+  ParticipantWithRatingAndChessClub,
 } from "@/db/types/participant";
 import type { Game, GameResult } from "@/db/types/game";
 import invariant from "tiny-invariant";
@@ -105,7 +105,7 @@ export function calculateStandings(
 function comparePlayerStats(
   a: PlayerStats,
   b: PlayerStats,
-  participantsMap: Map<number, ParticipantWithRating>,
+  participantsMap: Map<number, ParticipantWithRatingAndChessClub>,
 ): number {
   if (b.points !== a.points) {
     return b.points - a.points;

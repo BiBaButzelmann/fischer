@@ -37,3 +37,9 @@ export const GAME_START_TIME = {
 } as const;
 
 export const NUMBER_OF_GROUPS_WITH_ELO = 4;
+
+export const CALENDAR_EXPORT_DURATIONS = {
+  GAME: 5 * 60 * 60 * 1000,
+  REFEREE: 5 * 60 * 60 * 1000,
+  SETUP_HELPER: 30 * 60 * 1000,
+} as const;

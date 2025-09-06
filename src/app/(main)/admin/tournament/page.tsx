@@ -2,6 +2,7 @@ import { authWithRedirect } from "@/auth/utils";
 import { TournamentStageManager } from "@/components/admin/tournament/tournament-stage-manager";
 import TournamentDetailsManager from "@/components/admin/tournament/tournament-details-manager";
 import { AssignmentMailButton } from "@/components/admin/tournament/assignment-mail-button";
+import { GroupMailButton } from "@/components/admin/tournament/group-mail-button";
 import {
   Collapsible,
   CollapsibleContent,
@@ -10,7 +11,10 @@ import {
 import { ChevronDownIcon } from "lucide-react";
 import { getProfilesByUserRole } from "@/db/repositories/profile";
 import { getLatestTournament } from "@/db/repositories/tournament";
-import { getGroupsWithParticipantsByTournamentId } from "@/db/repositories/group";
+import {
+  getGroupsWithParticipantsByTournamentId,
+  getGroupsByTournamentId,
+} from "@/db/repositories/group";
 import { Tournament } from "@/db/types/tournament";
 import { getTournamentWeeksByTournamentId } from "@/db/repositories/tournamentWeek";
 
@@ -35,6 +39,9 @@ async function ManageTournament({ tournament }: { tournament?: Tournament }) {
   const adminProfiles = await getProfilesByUserRole("admin");
   const groups = tournament
     ? await getGroupsWithParticipantsByTournamentId(tournament.id)
+    : [];
+  const groupNames = tournament
+    ? await getGroupsByTournamentId(tournament.id)
     : [];
   const tournamentWeeks = tournament
     ? await getTournamentWeeksByTournamentId(tournament.id)
@@ -69,7 +76,12 @@ async function ManageTournament({ tournament }: { tournament?: Tournament }) {
       <div className="border border-primary rounded-md p-4">
         <div className="flex items-center justify-between mb-4">
           <h2 className="text-lg font-semibold">Turnierphase verwalten</h2>
-          {tournament && <AssignmentMailButton tournament={tournament} />}
+          <div className="flex items-center gap-2">
+            {tournament && (
+              <GroupMailButton tournament={tournament} groups={groupNames} />
+            )}
+            {tournament && <AssignmentMailButton tournament={tournament} />}
+          </div>
         </div>
         {tournament ? (
           <TournamentStageManager tournament={tournament} />

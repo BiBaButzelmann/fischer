@@ -2,7 +2,7 @@ import { InferEnum, InferSelectModel } from "drizzle-orm";
 import { game } from "../schema/game";
 import {
   ParticipantWithName,
-  ParticipantWithRating,
+  ParticipantWithRatingAndChessClub,
   ParticipantWithProfile,
 } from "./participant";
 
@@ -17,8 +17,8 @@ export type GameWithParticipantRatings = Pick<
   Game,
   "id" | "whiteParticipantId" | "blackParticipantId" | "result" | "round"
 > & {
-  whiteParticipant: ParticipantWithRating;
-  blackParticipant: ParticipantWithRating;
+  whiteParticipant: ParticipantWithRatingAndChessClub;
+  blackParticipant: ParticipantWithRatingAndChessClub;
 };
 
 export type GameWithParticipantProfilesAndGroupAndMatchday = Game & {
@@ -31,6 +31,7 @@ export type GameWithParticipantProfilesAndGroupAndMatchday = Game & {
       phoneNumber: string;
     };
     fideRating: number | null;
+    dwzRating: number | null;
   } | null;
   blackParticipant: {
     profile: {
@@ -41,6 +42,7 @@ export type GameWithParticipantProfilesAndGroupAndMatchday = Game & {
       phoneNumber: string;
     };
     fideRating: number | null;
+    dwzRating: number | null;
   } | null;
   group: {
     id: number;

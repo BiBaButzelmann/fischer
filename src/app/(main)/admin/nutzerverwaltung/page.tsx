@@ -28,8 +28,11 @@ import {
   LucideIcon,
 } from "lucide-react";
 import { UserRow } from "@/components/admin/user-row";
+import { ParticipantRow } from "@/components/admin/participant-row";
+import { RatingUpdateButton } from "@/components/admin/rating-update-button";
 import { redirect } from "next/navigation";
-import { DayOfWeek } from "@/db/types/group";
+import { ProfileWithName } from "@/db/types/profile";
+import { ParticipantWithProfile } from "@/db/types/participant";
 
 export default async function Page() {
   const session = await authWithRedirect();
@@ -131,11 +134,9 @@ export default async function Page() {
         </TabsContent>
 
         <TabsContent value="participants" className="space-y-4">
-          <UserList
-            users={participants.map((p) => ({
-              ...p.profile,
-              preferredMatchDay: p.preferredMatchDay,
-            }))}
+          <ParticipantList
+            participants={participants}
+            tournamentId={tournament.id}
             title="Teilnehmer"
             description={`${participants.length} Spieler sind für das Turnier angemeldet`}
             icon={User}
@@ -145,10 +146,7 @@ export default async function Page() {
 
         <TabsContent value="referees" className="space-y-4">
           <UserList
-            users={referees.map((r) => ({
-              ...r.profile,
-              preferredMatchDay: r.preferredMatchDay,
-            }))}
+            users={referees.map((r) => r.profile)}
             title="Schiedsrichter"
             description={`${referees.length} Schiedsrichter sind für das Turnier verfügbar`}
             icon={Shield}
@@ -201,17 +199,6 @@ export default async function Page() {
   );
 }
 
-type ProfileWithName = {
-  id: number;
-  userId: string;
-  firstName: string;
-  lastName: string;
-  phoneNumber?: string | null;
-  preferredMatchDay?: DayOfWeek | null;
-  secondaryMatchDays?: DayOfWeek[] | null;
-  deletedAt: Date | null;
-};
-
 function UserList({
   users,
   title,
@@ -250,6 +237,58 @@ function UserList({
                 key={user.id}
                 user={user}
                 showDeleteActions={!isDisabledUsers}
+              />
+            ))}
+          </div>
+        )}
+      </CardContent>
+    </Card>
+  );
+}
+
+function ParticipantList({
+  participants,
+  tournamentId,
+  title,
+  description,
+  icon: Icon,
+  emptyMessage,
+}: {
+  participants: ParticipantWithProfile[];
+  tournamentId: number;
+  title: string;
+  description: string;
+  icon: LucideIcon;
+  emptyMessage: string;
+}) {
+  return (
+    <Card>
+      <CardHeader>
+        <div className="flex items-center justify-between">
+          <div className="flex items-center gap-3">
+            <div className="p-2 bg-gray-100 border border-gray-200 rounded-lg">
+              <Icon className="h-5 w-5 text-gray-600" />
+            </div>
+            <div>
+              <CardTitle className="text-lg">{title}</CardTitle>
+              <CardDescription>{description}</CardDescription>
+            </div>
+          </div>
+          {participants.length > 0 && (
+            <RatingUpdateButton tournamentId={tournamentId} />
+          )}
+        </div>
+      </CardHeader>
+      <CardContent>
+        {participants.length === 0 ? (
+          <p className="text-gray-500 text-sm italic">{emptyMessage}</p>
+        ) : (
+          <div className="space-y-1">
+            {participants.map((participant) => (
+              <ParticipantRow
+                key={participant.id}
+                participant={participant}
+                showDeleteActions={true}
               />
             ))}
           </div>
