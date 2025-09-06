@@ -5,7 +5,7 @@ import { GroupsGrid } from "./groups-grid";
 import { useEffect, useState, useTransition } from "react";
 import { GridGroup } from "./types";
 import { Button } from "@/components/ui/button";
-import { getExistingGroupNumbers, saveGroups } from "@/actions/group";
+import { saveGroups } from "@/actions/group";
 import { MatchEnteringHelperWithName } from "@/db/types/match-entering-helper";
 import { useHelperAssignments } from "@/hooks/useHelperAssignments";
 import { toast } from "sonner";
@@ -101,23 +101,12 @@ export function EditGroupsGrid({
   };
 
   const handleAddNewGroup = async () => {
-    const existingGroupNumbers = await getExistingGroupNumbers(tournamentId);
-    const allExistingGroupNumbers = [
-      ...existingGroupNumbers,
-      ...gridGroups.map((g) => g.groupNumber),
-    ];
-
-    let nextGroupNumber = 1;
-    while (allExistingGroupNumbers.includes(nextGroupNumber)) {
-      nextGroupNumber++;
-    }
-
     const newGroup: GridGroup = {
       id: Date.now(),
       isNew: true,
       isDeleted: false,
-      groupNumber: nextGroupNumber,
-      groupName: generateGroupName(nextGroupNumber),
+      groupNumber: gridGroups.length + 1,
+      groupName: generateGroupName(gridGroups.length + 1),
       dayOfWeek: null,
       participants: [],
       matchEnteringHelpers: [],

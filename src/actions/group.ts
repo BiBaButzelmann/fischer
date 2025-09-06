@@ -18,7 +18,6 @@ import { action } from "@/lib/actions";
 
 export const saveGroups = action(
   async (tournamentId: number, groupsData: GridGroup[]) => {
-    console.log(groupsData[0].id, groupsData[0].participants);
     const session = await authWithRedirect();
     invariant(session?.user.role === "admin", "Unauthorized");
 
@@ -28,6 +27,8 @@ export const saveGroups = action(
     const groupsToBeUpserted = groupsData.filter((g) => !g.isDeleted);
 
     await db.transaction(async (tx) => {
+      await cleanupGames(tx, groupsData);
+
       if (groupIdsToBeDeleted.length > 0) {
         await deleteGroups(tx, groupIdsToBeDeleted);
       }
@@ -44,6 +45,41 @@ export const saveGroups = action(
 );
 
 type Transaction = Parameters<Parameters<typeof db.transaction>[0]>[0];
+
+// cleanup games if participants or matchday changed
+async function cleanupGames(db: Transaction, groupsData: GridGroup[]) {
+  for (const groupData of groupsData) {
+    if (groupData.isNew) {
+      continue;
+    }
+
+    const currentDayOfWeek = await db.query.group.findFirst({
+      where: eq(group.id, groupData.id),
+      columns: { dayOfWeek: true },
+    });
+    if (currentDayOfWeek?.dayOfWeek !== groupData.dayOfWeek) {
+      await deleteGroupGames(db, groupData.id);
+      continue;
+    }
+
+    const participants = await db.query.participantGroup.findMany({
+      where: eq(participantGroup.groupId, groupData.id),
+      columns: { participantId: true },
+    });
+    const participantIds = participants.map((p) => p.participantId);
+    const newParticipantIds = groupData.participants.map((p) => p.id);
+
+    const differentLength = participantIds.length !== newParticipantIds.length;
+    const sameIds = participantIds.every((id) =>
+      newParticipantIds.includes(id),
+    );
+
+    if (differentLength || !sameIds) {
+      await deleteGroupGames(db, groupData.id);
+    }
+  }
+}
+
 async function deleteGroups(db: Transaction, groupIds: number[]) {
   await db.delete(group).where(inArray(group.id, groupIds));
   await db
@@ -53,8 +89,14 @@ async function deleteGroups(db: Transaction, groupIds: number[]) {
     .delete(groupMatchEnteringHelper)
     .where(inArray(groupMatchEnteringHelper.groupId, groupIds));
 
+  for (const groupId of groupIds) {
+    await deleteGroupGames(db, groupId);
+  }
+}
+
+async function deleteGroupGames(db: Transaction, groupId: number) {
   const gamesToDelete = await db.query.game.findMany({
-    where: inArray(game.groupId, groupIds),
+    where: eq(game.groupId, groupId),
     columns: { id: true },
   });
   const gameIds = gamesToDelete.map((g: { id: number }) => g.id);
@@ -67,7 +109,7 @@ async function deleteGroups(db: Transaction, groupIds: number[]) {
     .where(inArray(gamePostponement.gameId, gameIds));
   await db.delete(matchdayGame).where(inArray(matchdayGame.gameId, gameIds));
   await db.delete(pgn).where(inArray(pgn.gameId, gameIds));
-  await db.delete(game).where(inArray(game.groupId, groupIds));
+  await db.delete(game).where(eq(game.groupId, groupId));
 }
 
 async function upsertGroups(
@@ -95,8 +137,6 @@ async function upsertGroups(
     })
     .returning();
   const groupIds = insertedGroups.map((g) => g.id);
-
-  console.log("new", groupIds);
 
   await db
     .delete(groupMatchEnteringHelper)
@@ -156,16 +196,4 @@ export async function updateGroupPositions(
 
   revalidatePath("/admin/gruppen");
   revalidatePath("/admin/paarungen");
-}
-
-export async function getExistingGroupNumbers(tournamentId: number) {
-  const session = await authWithRedirect();
-  invariant(session?.user.role === "admin", "Unauthorized");
-
-  const groups = await db.query.group.findMany({
-    where: eq(group.tournamentId, tournamentId),
-    columns: { groupNumber: true },
-  });
-
-  return groups.map((g) => g.groupNumber);
 }
