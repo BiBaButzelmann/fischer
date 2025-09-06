@@ -3,7 +3,7 @@
 import { db } from "@/db/client";
 import { participantGroup } from "@/db/schema/participant";
 import { ParticipantWithName } from "@/db/types/participant";
-import { and, eq, inArray } from "drizzle-orm";
+import { and, eq, inArray, sql } from "drizzle-orm";
 import { revalidatePath } from "next/cache";
 import { GridGroup } from "@/components/admin/groups/types";
 import { group } from "@/db/schema/group";
@@ -72,26 +72,26 @@ async function upsertGroups(
   tournamentId: number,
   groups: GridGroup[],
 ) {
-  const groupIds = groups.map((g) => g.id);
-
-  for (const { groupName, groupNumber, dayOfWeek } of groups) {
-    await db
-      .insert(group)
-      .values({
+  const insertedGroups = await db
+    .insert(group)
+    .values(
+      groups.map(({ groupName, groupNumber, dayOfWeek }) => ({
         tournamentId,
         groupName,
         groupNumber,
         dayOfWeek,
-      })
-      .onConflictDoUpdate({
-        target: [group.tournamentId, group.groupNumber],
-        set: {
-          groupName,
-          groupNumber,
-          dayOfWeek,
-        },
-      });
-  }
+      })),
+    )
+    .onConflictDoUpdate({
+      target: [group.tournamentId, group.groupNumber],
+      set: {
+        groupName: sql.raw(`excluded.${group.groupName.name}`),
+        groupNumber: sql.raw(`excluded.${group.groupNumber.name}`),
+        dayOfWeek: sql.raw(`excluded.${group.dayOfWeek.name}`),
+      },
+    })
+    .returning();
+  const groupIds = insertedGroups.map((g) => g.id);
 
   await db
     .delete(groupMatchEnteringHelper)
@@ -119,8 +119,12 @@ async function upsertGroups(
     })),
   );
 
-  await db.insert(groupMatchEnteringHelper).values(matchEnteringHelperValues);
-  await db.insert(participantGroup).values(participantGroupValues);
+  if (matchEnteringHelperValues.length > 0) {
+    await db.insert(groupMatchEnteringHelper).values(matchEnteringHelperValues);
+  }
+  if (participantGroupValues.length > 0) {
+    await db.insert(participantGroup).values(participantGroupValues);
+  }
 }
 
 export async function updateGroupPositions(
