@@ -40,11 +40,5 @@ export type ParticipantWithRating = Pick<
 };
 
 export type ParticipantWithProfile = Participant & {
-  profile: {
-    userId: string;
-    firstName: string;
-    lastName: string;
-    email: string;
-    phoneNumber: string | null;
-  };
+  profile: ProfileWithName;
 };

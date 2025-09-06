@@ -10,7 +10,14 @@ import {
   DialogTitle,
   DialogTrigger,
 } from "@/components/ui/dialog";
-import { User, Trash2, AlertTriangle, RotateCcw, Phone } from "lucide-react";
+import {
+  User,
+  Trash2,
+  AlertTriangle,
+  RotateCcw,
+  Phone,
+  Mail,
+} from "lucide-react";
 import { useState, useTransition } from "react";
 import {
   softDeleteUserProfile,
@@ -138,6 +145,12 @@ export function UserRow({ user, showDeleteActions = false }: Props) {
               <div className="flex items-center gap-1">
                 <Phone className="h-3 w-3" />
                 <span>{user.phoneNumber}</span>
+              </div>
+            )}
+            {user.email && (
+              <div className="flex items-center gap-1">
+                <Mail className="h-3 w-3" />
+                <span>{user.email}</span>
               </div>
             )}
           </div>

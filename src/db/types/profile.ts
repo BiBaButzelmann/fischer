@@ -10,6 +10,7 @@ export type ProfileWithName = {
   firstName: string;
   lastName: string;
   deletedAt: Date | null;
-  phoneNumber?: string | null;
+  phoneNumber: string;
+  email: string;
   preferredMatchDay?: DayOfWeek | null;
 };

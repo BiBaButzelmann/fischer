@@ -121,13 +121,7 @@ export async function getParticipantsWithProfileByGroupId(groupId: number) {
   return await db
     .select({
       ...getTableColumns(participant),
-      profile: {
-        userId: profile.userId,
-        firstName: profile.firstName,
-        lastName: profile.lastName,
-        email: profile.email,
-        phoneNumber: profile.phoneNumber,
-      },
+      profile: getTableColumns(profile),
     })
     .from(participantGroup)
     .innerJoin(group, eq(participantGroup.groupId, group.id))
