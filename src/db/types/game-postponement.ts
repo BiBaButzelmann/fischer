@@ -14,6 +14,12 @@ export type GamePostponementWithDetails = GamePostponement & {
       id: number;
       groupName: string;
     };
+    matchdayGame: {
+      matchday: {
+        id: number;
+        date: Date;
+      };
+    } | null;
   };
   participant: ParticipantWithName;
   postponedByProfile: {

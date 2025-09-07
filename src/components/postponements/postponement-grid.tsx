@@ -13,13 +13,21 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { displayLongDate, toLocalDateTime } from "@/lib/date";
 import type { GamePostponementWithDetails } from "@/db/types/game-postponement";
 import { CalendarDays, Users } from "lucide-react";
+import Link from "next/link";
+import { buildGameViewUrl } from "@/lib/navigation";
+import invariant from "tiny-invariant";
 
 type Props = {
   postponements: GamePostponementWithDetails[];
   isAdmin?: boolean;
+  tournamentId: number;
 };
 
-export function PostponementGrid({ postponements, isAdmin = false }: Props) {
+export function PostponementGrid({
+  postponements,
+  isAdmin = false,
+  tournamentId,
+}: Props) {
   if (postponements.length === 0) {
     return (
       <Card>
@@ -68,41 +76,75 @@ export function PostponementGrid({ postponements, isAdmin = false }: Props) {
                 const whitePlayer = postponement.game.whiteParticipant;
                 const blackPlayer = postponement.game.blackParticipant;
 
+                const participantId = whitePlayer?.id || blackPlayer?.id;
+                invariant(participantId, "Game must have at least one participant");
+
+                const matchday = postponement.game.matchdayGame?.matchday;
+                invariant(matchday, "Game must have a matchday");
+
+                const gameUrl = buildGameViewUrl({
+                  tournamentId,
+                  groupId: postponement.game.group.id,
+                  round: postponement.game.round,
+                  participantId,
+                  matchdayId: matchday.id,
+                });
+
                 return (
                   <TableRow key={postponement.id}>
                     <TableCell className="font-medium">
-                      {postponement.game.round}
+                      <Link
+                        href={gameUrl}
+                        className="text-blue-600 hover:text-blue-800 hover:underline"
+                      >
+                        {postponement.game.round}
+                      </Link>
                     </TableCell>
                     <TableCell>
-                      <Badge variant="outline">
-                        {postponement.game.group.groupName}
-                      </Badge>
+                      <Link href={gameUrl}>
+                        <Badge
+                          variant="outline"
+                          className="hover:bg-accent cursor-pointer"
+                        >
+                          {postponement.game.group.groupName}
+                        </Badge>
+                      </Link>
                     </TableCell>
                     <TableCell>
-                      <div className="flex items-center gap-2">
-                        <Users className="h-4 w-4" />
-                        {whitePlayer ? (
-                          <>
-                            {whitePlayer.profile.firstName}{" "}
-                            {whitePlayer.profile.lastName}
-                          </>
-                        ) : (
-                          <span className="text-muted-foreground">—</span>
-                        )}
-                      </div>
+                      <Link
+                        href={gameUrl}
+                        className="block hover:text-blue-600"
+                      >
+                        <div className="flex items-center gap-2">
+                          <Users className="h-4 w-4" />
+                          {whitePlayer ? (
+                            <>
+                              {whitePlayer.profile.firstName}{" "}
+                              {whitePlayer.profile.lastName}
+                            </>
+                          ) : (
+                            <span className="text-muted-foreground">—</span>
+                          )}
+                        </div>
+                      </Link>
                     </TableCell>
                     <TableCell>
-                      <div className="flex items-center gap-2">
-                        <Users className="h-4 w-4" />
-                        {blackPlayer ? (
-                          <>
-                            {blackPlayer.profile.firstName}{" "}
-                            {blackPlayer.profile.lastName}
-                          </>
-                        ) : (
-                          <span className="text-muted-foreground">—</span>
-                        )}
-                      </div>
+                      <Link
+                        href={gameUrl}
+                        className="block hover:text-blue-600"
+                      >
+                        <div className="flex items-center gap-2">
+                          <Users className="h-4 w-4" />
+                          {blackPlayer ? (
+                            <>
+                              {blackPlayer.profile.firstName}{" "}
+                              {blackPlayer.profile.lastName}
+                            </>
+                          ) : (
+                            <span className="text-muted-foreground">—</span>
+                          )}
+                        </div>
+                      </Link>
                     </TableCell>
                     <TableCell>
                       <div className="text-sm">

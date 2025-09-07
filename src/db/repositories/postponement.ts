@@ -17,6 +17,13 @@ export async function getPostponementsForUser(userParticipantIds: number[]) {
           group: {
             columns: { id: true, groupName: true },
           },
+          matchdayGame: {
+            with: {
+              matchday: {
+                columns: { id: true, date: true },
+              },
+            },
+          },
         },
       },
       participant: {
@@ -58,6 +65,13 @@ export async function getPostponementsForAdmin(tournamentId: number) {
           },
           group: {
             columns: { id: true, groupName: true },
+          },
+          matchdayGame: {
+            with: {
+              matchday: {
+                columns: { id: true, date: true },
+              },
+            },
           },
         },
       },

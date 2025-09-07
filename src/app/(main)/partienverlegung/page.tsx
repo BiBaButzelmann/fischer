@@ -3,17 +3,13 @@ import { PostponementGrid } from "@/components/postponements/postponement-grid";
 import { authWithRedirect } from "@/auth/utils";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Card, CardContent, CardHeader } from "@/components/ui/card";
-import { profile } from "@/db/schema/profile";
-import { participant } from "@/db/schema/participant";
-import { eq } from "drizzle-orm";
-import type { GamePostponementWithDetails } from "@/db/types/game-postponement";
-import { db } from "@/db/client";
 import {
   getPostponementsForUser as getUserPostponements,
   getPostponementsForAdmin as getAdminPostponements,
 } from "@/db/repositories/postponement";
 import { getLatestTournament } from "@/db/repositories/tournament";
-import invariant from "tiny-invariant";
+import { getParticipantByProfileIdAndTournamentId } from "@/db/repositories/participant";
+import { getProfileByUserId } from "@/db/repositories/profile";
 
 function PostponementSkeleton() {
   return (
@@ -109,27 +105,27 @@ async function PostponementContent({ tournamentId }: { tournamentId: number }) {
   const session = await authWithRedirect();
   const isAdmin = session.user.role === "admin";
 
-  let postponements: GamePostponementWithDetails[];
+  const postponements = isAdmin
+    ? await getAdminPostponements(tournamentId)
+    : await (async () => {
+        const userProfile = await getProfileByUserId(session.user.id);
+        if (!userProfile) return [];
 
-  if (isAdmin) {
-    postponements = await getAdminPostponements(tournamentId);
-  } else {
-    const userProfile = await db.query.profile.findFirst({
-      where: eq(profile.userId, session.user.id),
-    });
-    invariant(userProfile, "User profile not found");
+        const userParticipant = await getParticipantByProfileIdAndTournamentId(
+          userProfile.id,
+          tournamentId,
+        );
 
-    const userParticipants = await db.query.participant.findMany({
-      where: eq(participant.profileId, userProfile.id),
-    });
+        return userParticipant
+          ? await getUserPostponements([userParticipant.id])
+          : [];
+      })();
 
-    if (userParticipants.length === 0) {
-      postponements = [];
-    } else {
-      const userParticipantIds = userParticipants.map((p) => p.id);
-      postponements = await getUserPostponements(userParticipantIds);
-    }
-  }
-
-  return <PostponementGrid postponements={postponements} isAdmin={isAdmin} />;
+  return (
+    <PostponementGrid
+      postponements={postponements}
+      isAdmin={isAdmin}
+      tournamentId={tournamentId}
+    />
+  );
 }
