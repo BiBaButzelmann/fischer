@@ -1,8 +1,5 @@
-import { Suspense } from "react";
 import { PostponementGrid } from "@/components/postponements/postponement-grid";
 import { authWithRedirect } from "@/auth/utils";
-import { Skeleton } from "@/components/ui/skeleton";
-import { Card, CardContent, CardHeader } from "@/components/ui/card";
 import {
   getPostponementsForUser as getUserPostponements,
   getPostponementsForAdmin as getAdminPostponements,
@@ -11,44 +8,24 @@ import { getLatestTournament } from "@/db/repositories/tournament";
 import { getParticipantByProfileIdAndTournamentId } from "@/db/repositories/participant";
 import { getProfileByUserId } from "@/db/repositories/profile";
 
-function PostponementSkeleton() {
-  return (
-    <Card>
-      <CardHeader>
-        <Skeleton className="h-6 w-48" />
-      </CardHeader>
-      <CardContent>
-        <div className="space-y-3">
-          {Array.from({ length: 5 }).map((_, i) => (
-            <Skeleton key={i} className="h-12 w-full" />
-          ))}
-        </div>
-      </CardContent>
-    </Card>
-  );
-}
-
 export default async function PostponementPage() {
   const tournament = await getLatestTournament();
 
   if (!tournament) {
     return (
-      <div className="container mx-auto py-6">
+      <div>
         <div className="space-y-6">
           <div>
-            <h1 className="text-3xl font-bold">Partienverlegungen</h1>
-            <p className="text-muted-foreground mt-2">
-              Übersicht über alle verschobenen Partien
-            </p>
+            <h1 className="text-3xl font-bold text-gray-900 mb-4">
+              Partienverlegungen
+            </h1>
           </div>
 
-          <Card>
-            <CardContent className="pt-6">
-              <div className="text-center text-muted-foreground">
-                <p className="text-lg">Aktuell ist kein Turnier verfügbar.</p>
-              </div>
-            </CardContent>
-          </Card>
+          <div className="border rounded-lg overflow-hidden">
+            <div className="pt-6 pb-6 px-6 text-center text-muted-foreground">
+              <p className="text-lg">Aktuell ist kein Turnier verfügbar.</p>
+            </div>
+          </div>
         </div>
       </div>
     );
@@ -56,46 +33,40 @@ export default async function PostponementPage() {
 
   if (tournament.stage !== "running") {
     return (
-      <div className="container mx-auto py-6">
+      <div>
         <div className="space-y-6">
           <div>
-            <h1 className="text-3xl font-bold">Partienverlegungen</h1>
-            <p className="text-muted-foreground mt-2">
-              Übersicht über alle verschobenen Partien
-            </p>
+            <h1 className="text-3xl font-bold text-gray-900 mb-4">
+              Partienverlegungen
+            </h1>
           </div>
 
-          <Card>
-            <CardContent className="pt-6">
-              <div className="text-center text-muted-foreground">
-                <p className="text-lg">
-                  Partienverlegungen sind nur während eines laufenden Turniers
-                  verfügbar.
-                </p>
-                <p className="mt-2">
-                  Das aktuelle Turnier befindet sich nicht in der Turnierphase.
-                </p>
-              </div>
-            </CardContent>
-          </Card>
+          <div className="border rounded-lg overflow-hidden">
+            <div className="pt-6 pb-6 px-6 text-center text-muted-foreground">
+              <p className="text-lg">
+                Partienverlegungen sind nur während eines laufenden Turniers
+                verfügbar.
+              </p>
+              <p className="mt-2">
+                Das aktuelle Turnier befindet sich nicht in der Turnierphase.
+              </p>
+            </div>
+          </div>
         </div>
       </div>
     );
   }
 
   return (
-    <div className="container mx-auto py-6">
+    <div>
       <div className="space-y-6">
         <div>
-          <h1 className="text-3xl font-bold">Partienverlegungen</h1>
-          <p className="text-muted-foreground mt-2">
-            Übersicht über alle verschobenen Partien
-          </p>
+          <h1 className="text-3xl font-bold text-gray-900 mb-4">
+            Partienverlegungen
+          </h1>
         </div>
 
-        <Suspense fallback={<PostponementSkeleton />}>
-          <PostponementContent tournamentId={tournament.id} />
-        </Suspense>
+        <PostponementContent tournamentId={tournament.id} />
       </div>
     </div>
   );
