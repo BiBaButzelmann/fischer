@@ -26,6 +26,7 @@ import {
   UserRoundCogIcon,
   Users,
   ClipboardEdit,
+  CalendarClock,
 } from "lucide-react";
 import { Button } from "../ui/button";
 import Image from "next/image";
@@ -95,6 +96,11 @@ export function AppSidebar({ session, tournament, userRoles }: Props) {
               <SidebarLink href="/kalender" icon={CalendarIcon}>
                 Kalender
               </SidebarLink>
+              {isRunning && (
+                <SidebarLink href="/partienverlegung" icon={CalendarClock}>
+                  Partienverlegungen
+                </SidebarLink>
+              )}
               {isRunning && canAccessMatchEntry && (
                 <SidebarLink href="/partieneingabe" icon={ClipboardEdit}>
                   Partieneingabe
