@@ -101,12 +101,13 @@ export function EditGroupsGrid({
   };
 
   const handleAddNewGroup = async () => {
+    const nonDeletedGroups = gridGroups.filter((g) => !g.isDeleted);
     const newGroup: GridGroup = {
       id: Date.now(),
       isNew: true,
       isDeleted: false,
-      groupNumber: gridGroups.length + 1,
-      groupName: generateGroupName(gridGroups.length + 1),
+      groupNumber: nonDeletedGroups.length + 1,
+      groupName: generateGroupName(nonDeletedGroups.length + 1),
       dayOfWeek: null,
       participants: [],
       matchEnteringHelpers: [],

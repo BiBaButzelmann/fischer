@@ -15,6 +15,7 @@ import { groupMatchEnteringHelper } from "@/db/schema/matchEnteringHelper";
 import { authWithRedirect } from "@/auth/utils";
 import invariant from "tiny-invariant";
 import { action } from "@/lib/actions";
+import { DayOfWeek } from "@/db/types/group";
 
 export const saveGroups = action(
   async (tournamentId: number, groupsData: GridGroup[]) => {
@@ -24,16 +25,68 @@ export const saveGroups = action(
     const groupIdsToBeDeleted = groupsData
       .filter((g) => g.isDeleted)
       .map((g) => g.id);
-    const groupsToBeUpserted = groupsData.filter((g) => !g.isDeleted);
+
+    const newGroups = groupsData.filter((g) => g.isNew && !g.isDeleted);
+    const existingGroups = groupsData.filter((g) => !g.isNew && !g.isDeleted);
+    const nonDeletedGroups = groupsData.filter((g) => !g.isDeleted);
 
     await db.transaction(async (tx) => {
-      await cleanupGames(tx, groupsData);
-
       if (groupIdsToBeDeleted.length > 0) {
         await deleteGroups(tx, groupIdsToBeDeleted);
       }
-      if (groupsToBeUpserted.length > 0) {
-        await upsertGroups(tx, tournamentId, groupsToBeUpserted);
+
+      for (const group of existingGroups) {
+        if (group.isNew) {
+          continue;
+        }
+
+        const participantsChanged = await hasParticipantsChanged(
+          tx,
+          group.id!,
+          group.participants.map((p) => p.id),
+        );
+        const matchdayChanged = await hasMatchdayChanged(
+          tx,
+          group.id!,
+          group.dayOfWeek,
+        );
+
+        if (matchdayChanged) {
+          await deleteGroupMatchEnteringHelpers(tx, group.id!);
+          await deleteGroupGames(tx, group.id!);
+        }
+
+        if (participantsChanged) {
+          await deleteGroupParticipants(tx, group.id!);
+          await deleteGroupGames(tx, group.id!);
+          await insertGroupParticipants(
+            tx,
+            group.id!,
+            group.participants.map((p) => p.id),
+          );
+        }
+      }
+
+      let insertedGroups: { id: number }[] = [];
+      if (nonDeletedGroups.length > 0) {
+        insertedGroups = await upsertGroups(tx, tournamentId, nonDeletedGroups);
+      }
+
+      if (newGroups.length > 0) {
+        for (let i = 0; i < newGroups.length; i++) {
+          const newGroup = newGroups[i];
+          const insertedGroup = insertedGroups[i];
+          await insertGroupParticipants(
+            tx,
+            insertedGroup.id!,
+            newGroup.participants.map((p) => p.id),
+          );
+          await insertGroupMatchEnteringHelpers(
+            tx,
+            insertedGroup.id!,
+            newGroup.matchEnteringHelpers.map((m) => m.id),
+          );
+        }
       }
     });
 
@@ -46,38 +99,32 @@ export const saveGroups = action(
 
 type Transaction = Parameters<Parameters<typeof db.transaction>[0]>[0];
 
-// cleanup games if participants or matchday changed
-async function cleanupGames(db: Transaction, groupsData: GridGroup[]) {
-  for (const groupData of groupsData) {
-    if (groupData.isNew) {
-      continue;
-    }
+async function hasParticipantsChanged(
+  db: Transaction,
+  groupId: number,
+  newParticipantIds: number[],
+) {
+  const participants = await db.query.participantGroup.findMany({
+    where: eq(participantGroup.groupId, groupId),
+    columns: { participantId: true },
+  });
+  const participantIds = participants.map((p) => p.participantId);
 
-    const currentDayOfWeek = await db.query.group.findFirst({
-      where: eq(group.id, groupData.id),
-      columns: { dayOfWeek: true },
-    });
-    if (currentDayOfWeek?.dayOfWeek !== groupData.dayOfWeek) {
-      await deleteGroupGames(db, groupData.id);
-      continue;
-    }
+  const differentLength = participantIds.length !== newParticipantIds.length;
+  const sameIds = participantIds.every((id) => newParticipantIds.includes(id));
+  return differentLength || !sameIds;
+}
 
-    const participants = await db.query.participantGroup.findMany({
-      where: eq(participantGroup.groupId, groupData.id),
-      columns: { participantId: true },
-    });
-    const participantIds = participants.map((p) => p.participantId);
-    const newParticipantIds = groupData.participants.map((p) => p.id);
-
-    const differentLength = participantIds.length !== newParticipantIds.length;
-    const sameIds = participantIds.every((id) =>
-      newParticipantIds.includes(id),
-    );
-
-    if (differentLength || !sameIds) {
-      await deleteGroupGames(db, groupData.id);
-    }
-  }
+async function hasMatchdayChanged(
+  db: Transaction,
+  groupId: number,
+  newDayOfWeek: DayOfWeek | null,
+) {
+  const currentDayOfWeek = await db.query.group.findFirst({
+    where: eq(group.id, groupId),
+    columns: { dayOfWeek: true },
+  });
+  return currentDayOfWeek?.dayOfWeek !== newDayOfWeek;
 }
 
 async function deleteGroups(db: Transaction, groupIds: number[]) {
@@ -112,12 +159,27 @@ async function deleteGroupGames(db: Transaction, groupId: number) {
   await db.delete(game).where(eq(game.groupId, groupId));
 }
 
+async function deleteGroupParticipants(db: Transaction, groupId: number) {
+  await db
+    .delete(participantGroup)
+    .where(eq(participantGroup.groupId, groupId));
+}
+
+async function deleteGroupMatchEnteringHelpers(
+  db: Transaction,
+  groupId: number,
+) {
+  await db
+    .delete(groupMatchEnteringHelper)
+    .where(eq(groupMatchEnteringHelper.groupId, groupId));
+}
+
 async function upsertGroups(
   db: Transaction,
   tournamentId: number,
   groups: GridGroup[],
 ) {
-  const insertedGroups = await db
+  return await db
     .insert(group)
     .values(
       groups.map(({ groupName, groupNumber, dayOfWeek }) => ({
@@ -136,41 +198,41 @@ async function upsertGroups(
       },
     })
     .returning();
-  const groupIds = insertedGroups.map((g) => g.id);
+}
 
-  await db
-    .delete(groupMatchEnteringHelper)
-    .where(inArray(groupMatchEnteringHelper.groupId, groupIds));
-  await db
-    .delete(participantGroup)
-    .where(inArray(participantGroup.groupId, groupIds));
+async function insertGroupMatchEnteringHelpers(
+  db: Transaction,
+  groupId: number,
+  matchEnteringHelperIds: number[],
+) {
+  if (matchEnteringHelperIds.length === 0) {
+    return;
+  }
 
-  type GroupMatchEnteringHelperInsert =
-    typeof groupMatchEnteringHelper.$inferInsert;
-  const matchEnteringHelperValues: GroupMatchEnteringHelperInsert[] =
-    groups.flatMap((g, index) =>
-      g.matchEnteringHelpers.map((h) => ({
-        groupId: groupIds[index],
-        matchEnteringHelperId: h.id,
-      })),
-    );
-  // TODO: check if participantIds actually changed
-  type ParticipantGroupInsert = typeof participantGroup.$inferInsert;
-  const participantGroupValues: ParticipantGroupInsert[] = groups.flatMap(
-    (g, index) =>
-      g.participants.map((p) => ({
-        groupId: groupIds[index],
-        participantId: p.id,
-        groupPosition: index + 1,
-      })),
+  await db.insert(groupMatchEnteringHelper).values(
+    matchEnteringHelperIds.map((id) => ({
+      groupId,
+      matchEnteringHelperId: id,
+    })),
   );
+}
 
-  if (matchEnteringHelperValues.length > 0) {
-    await db.insert(groupMatchEnteringHelper).values(matchEnteringHelperValues);
+async function insertGroupParticipants(
+  db: Transaction,
+  groupId: number,
+  participantIds: number[],
+) {
+  if (participantIds.length === 0) {
+    return;
   }
-  if (participantGroupValues.length > 0) {
-    await db.insert(participantGroup).values(participantGroupValues);
-  }
+
+  await db.insert(participantGroup).values(
+    participantIds.map((id, index) => ({
+      groupId,
+      participantId: id,
+      groupPosition: index + 1,
+    })),
+  );
 }
 
 export async function updateGroupPositions(
