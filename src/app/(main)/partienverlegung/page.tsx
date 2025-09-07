@@ -1,12 +1,17 @@
 import { PostponementGrid } from "@/components/postponements/postponement-grid";
 import { authWithRedirect } from "@/auth/utils";
+import { Button } from "@/components/ui/button";
+import Link from "next/link";
+import { buildGameViewUrl } from "@/lib/navigation";
 import {
   getPostponementsForUser as getUserPostponements,
   getPostponementsForAdmin as getAdminPostponements,
 } from "@/db/repositories/postponement";
 import { getLatestTournament } from "@/db/repositories/tournament";
-import { getParticipantByProfileIdAndTournamentId } from "@/db/repositories/participant";
+import { getParticipantWithGroupByProfileIdAndTournamentId } from "@/db/repositories/participant";
 import { getProfileByUserId } from "@/db/repositories/profile";
+import { ArrowRight } from "lucide-react";
+import { redirect } from "next/navigation";
 
 export default async function PostponementPage() {
   const tournament = await getLatestTournament();
@@ -60,12 +65,6 @@ export default async function PostponementPage() {
   return (
     <div>
       <div className="space-y-6">
-        <div>
-          <h1 className="text-3xl font-bold text-gray-900 mb-4">
-            Partienverlegungen
-          </h1>
-        </div>
-
         <PostponementContent tournamentId={tournament.id} />
       </div>
     </div>
@@ -76,27 +75,52 @@ async function PostponementContent({ tournamentId }: { tournamentId: number }) {
   const session = await authWithRedirect();
   const isAdmin = session.user.role === "admin";
 
+  const userProfile = await getProfileByUserId(session.user.id);
+  const userParticipant = userProfile
+    ? await getParticipantWithGroupByProfileIdAndTournamentId(
+        userProfile.id,
+        tournamentId,
+      )
+    : null;
+
+  if (!isAdmin && !userParticipant) {
+    redirect("/uebersicht");
+  }
+
+  const userParticipantId = userParticipant?.id;
+  const userGroupId = userParticipant?.group?.group?.id;
+
   const postponements = isAdmin
     ? await getAdminPostponements(tournamentId)
-    : await (async () => {
-        const userProfile = await getProfileByUserId(session.user.id);
-        if (!userProfile) return [];
+    : await getUserPostponements([userParticipantId!]); // Safe: non-admins are guaranteed to be participants
 
-        const userParticipant = await getParticipantByProfileIdAndTournamentId(
-          userProfile.id,
-          tournamentId,
-        );
-
-        return userParticipant
-          ? await getUserPostponements([userParticipant.id])
-          : [];
-      })();
+  const partienUrl = userParticipantId
+    ? buildGameViewUrl({
+        tournamentId,
+        participantId: userParticipantId,
+        ...(userGroupId && { groupId: userGroupId }),
+      })
+    : buildGameViewUrl({ tournamentId });
 
   return (
-    <PostponementGrid
-      postponements={postponements}
-      isAdmin={isAdmin}
-      tournamentId={tournamentId}
-    />
+    <div>
+      <div className="flex items-center w-full">
+        <h1 className="flex-1 text-3xl font-bold text-gray-900 mb-4">
+          Partienverlegungen
+        </h1>
+        <Button variant="outline" asChild className="group">
+          <Link href={partienUrl}>
+            Hier geht&apos;s zu deinen Partien
+            <ArrowRight className="w-4 h-4 ml-2 transition-transform group-hover:translate-x-1" />
+          </Link>
+        </Button>
+      </div>
+
+      <PostponementGrid
+        postponements={postponements}
+        isAdmin={isAdmin}
+        tournamentId={tournamentId}
+      />
+    </div>
   );
 }
