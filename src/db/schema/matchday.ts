@@ -38,6 +38,7 @@ export const matchdaySetupHelper = pgTable(
   {
     matchdayId: integer("matchday_id").notNull(),
     setupHelperId: integer("setup_helper_id").notNull(),
+    canceled: boolean("canceled"),
   },
   (table) => [primaryKey({ columns: [table.matchdayId, table.setupHelperId] })],
 );
