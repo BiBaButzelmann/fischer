@@ -1,23 +1,16 @@
-import { buildGameViewUrl } from "@/lib/navigation";
 import { Wrench } from "lucide-react";
 import { UpcomingEvent, EventIcon } from "./upcoming-event";
 
 type Props = {
-  tournamentId: number;
-  matchdayId: number;
   start: Date;
 };
 
-export async function UpcomingSetupHelperEvent({
-  tournamentId,
-  matchdayId,
-  start,
-}: Props) {
+export async function UpcomingSetupHelperEvent({ start }: Props) {
   return (
     <UpcomingEvent
       title="Aufbauhelfer"
       start={start}
-      url={buildGameViewUrl({ tournamentId, matchdayId })}
+      url="/aufbauhelfer"
       icon={
         <EventIcon
           icon={Wrench}

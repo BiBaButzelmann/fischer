@@ -108,20 +108,7 @@ export function MyGamesCalendar({ events, matchdays = [] }: Props) {
       }
 
       if (info.event.extendedProps.eventType === "setupHelper") {
-        const tournamentId = info.event.extendedProps.tournamentId;
-        const matchdayId = info.event.extendedProps.matchdayId;
-
-        if (!tournamentId || !matchdayId) {
-          toast.error("Fehler: Turnier oder Spieltag nicht gefunden.");
-          return;
-        }
-
-        const url = buildGameViewUrl({
-          tournamentId,
-          matchdayId,
-        });
-
-        router.push(url);
+        router.push("/aufbauhelfer");
         return;
       }
 

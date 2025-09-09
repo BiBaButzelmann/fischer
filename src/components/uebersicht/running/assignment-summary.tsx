@@ -143,7 +143,7 @@ async function SetupHelperSection({
   }
 
   return (
-    <Link href="/kalender" className="block">
+    <Link href="/aufbauhelfer" className="block">
       <div className="flex items-center gap-4 p-4 bg-white dark:bg-card border border-gray-200 dark:border-card-border rounded-xl shadow-sm transition-all hover:shadow-md cursor-pointer hover:opacity-80">
         <div className="flex-shrink-0 p-3 rounded-full bg-green-100 dark:bg-green-900/30">
           <Wrench className="w-6 h-6 text-green-600 dark:text-green-400" />

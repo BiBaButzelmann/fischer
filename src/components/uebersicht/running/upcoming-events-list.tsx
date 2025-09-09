@@ -37,13 +37,8 @@ export function UpcomingEventsList({ events }: Props) {
                   participantId={data.participantId}
                 />
               ))
-              .with({ eventType: "setupHelper" }, (data) => (
-                <UpcomingSetupHelperEvent
-                  key={index}
-                  start={event.start}
-                  tournamentId={data.tournamentId}
-                  matchdayId={data.matchdayId}
-                />
+              .with({ eventType: "setupHelper" }, () => (
+                <UpcomingSetupHelperEvent key={index} start={event.start} />
               ))
               .exhaustive(),
           )}
