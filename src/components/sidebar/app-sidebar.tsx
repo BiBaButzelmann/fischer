@@ -27,6 +27,7 @@ import {
   Users,
   ClipboardEdit,
   CalendarClock,
+  Wrench,
 } from "lucide-react";
 import { Button } from "../ui/button";
 import Image from "next/image";
@@ -126,6 +127,18 @@ export function AppSidebar({ session, tournament, userRoles }: Props) {
               <SidebarMenu>
                 <SidebarLink href="/partieneingabe" icon={ClipboardEdit}>
                   Partieneingabe
+                </SidebarLink>
+              </SidebarMenu>
+            </SidebarGroupContent>
+          </SidebarGroup>
+        )}
+        {isRunning && isSetupHelper && (
+          <SidebarGroup>
+            <SidebarGroupLabel>Aufbauhelfer</SidebarGroupLabel>
+            <SidebarGroupContent>
+              <SidebarMenu>
+                <SidebarLink href="/termine" icon={Wrench}>
+                  Termine
                 </SidebarLink>
               </SidebarMenu>
             </SidebarGroupContent>

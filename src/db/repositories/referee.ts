@@ -96,3 +96,23 @@ export async function getRefereeByMatchdayId(matchdayId: number) {
     )
     .then((rows) => rows[0] || null);
 }
+
+export async function getRefereeByMatchdayId(matchdayId: number) {
+  return await db
+    .select({
+      firstName: profile.firstName,
+      lastName: profile.lastName,
+      email: profile.email,
+      phoneNumber: profile.phoneNumber,
+    })
+    .from(matchdayReferee)
+    .innerJoin(referee, eq(matchdayReferee.refereeId, referee.id))
+    .innerJoin(profile, eq(referee.profileId, profile.id))
+    .where(
+      and(
+        eq(matchdayReferee.matchdayId, matchdayId),
+        isNull(referee.deletedAt),
+      ),
+    )
+    .then((rows) => rows[0] || null);
+}
