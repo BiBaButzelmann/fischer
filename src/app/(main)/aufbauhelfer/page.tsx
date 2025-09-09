@@ -29,6 +29,11 @@ export default async function TerminePage() {
             <h1 className="text-3xl font-bold text-gray-900 mb-4">
               Aufbauhelfer-Termine
             </h1>
+            <p className="text-gray-600 mb-4">
+              Falls du einen Termin absagen musst, suche bitte nach Möglichkeit
+              einen Ersatz oder sprich dich zumindest mit den anderen
+              Aufbauhelfern ab.
+            </p>
           </div>
 
           <div className="border rounded-lg overflow-hidden">
@@ -49,6 +54,11 @@ export default async function TerminePage() {
             <h1 className="text-3xl font-bold text-gray-900 mb-4">
               Aufbauhelfer-Termine
             </h1>
+            <p className="text-gray-600 mb-4">
+              Falls du einen Termin absagen musst, suche bitte nach Möglichkeit
+              einen Ersatz oder sprich dich zumindest mit den anderen
+              Aufbauhelfern ab.
+            </p>
           </div>
 
           <div className="border rounded-lg overflow-hidden">
@@ -95,6 +105,10 @@ export default async function TerminePage() {
           <h1 className="text-3xl font-bold text-gray-900 mb-4">
             Aufbauhelfer-Termine
           </h1>
+          <p className="text-gray-600 mb-4">
+            Falls du einen Termin absagen musst, suche bitte nach Möglichkeit
+            einen Ersatz oder sprich dich mit den anderen Aufbauhelfern ab.
+          </p>
         </div>
 
         <SetupHelperAppointmentsList appointments={appointmentsWithDetails} />
