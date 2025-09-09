@@ -27,7 +27,7 @@ export default async function TerminePage() {
         <div className="space-y-6">
           <div>
             <h1 className="text-3xl font-bold text-gray-900 mb-4">
-              Aufbauhelfer Termine
+              Aufbauhelfer-Termine
             </h1>
           </div>
 
@@ -47,14 +47,14 @@ export default async function TerminePage() {
         <div className="space-y-6">
           <div>
             <h1 className="text-3xl font-bold text-gray-900 mb-4">
-              Aufbauhelfer Termine
+              Aufbauhelfer-Termine
             </h1>
           </div>
 
           <div className="border rounded-lg overflow-hidden">
             <div className="pt-6 pb-6 px-6 text-center text-muted-foreground">
               <p className="text-lg">
-                Aufbauhelfer Termine sind nur während eines laufenden Turniers
+                Aufbauhelfer-Termine sind nur während eines laufenden Turniers
                 verfügbar.
               </p>
               <p className="mt-2">
@@ -93,7 +93,7 @@ export default async function TerminePage() {
       <div className="space-y-6">
         <div>
           <h1 className="text-3xl font-bold text-gray-900 mb-4">
-            Aufbauhelfer Termine
+            Aufbauhelfer-Termine
           </h1>
         </div>
 

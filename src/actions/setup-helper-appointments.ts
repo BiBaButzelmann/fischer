@@ -24,7 +24,7 @@ export async function cancelSetupHelperAppointment(matchdayId: number) {
       ),
     );
 
-  revalidatePath("/termine");
+  revalidatePath("/aufbauhelfer");
 }
 
 export async function uncancelSetupHelperAppointment(matchdayId: number) {
@@ -43,5 +43,5 @@ export async function uncancelSetupHelperAppointment(matchdayId: number) {
       ),
     );
 
-  revalidatePath("/termine");
+  revalidatePath("/aufbauhelfer");
 }

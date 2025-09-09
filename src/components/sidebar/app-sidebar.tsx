@@ -131,8 +131,8 @@ export function AppSidebar({ session, tournament, userRoles }: Props) {
             <SidebarGroupLabel>Aufbauhelfer</SidebarGroupLabel>
             <SidebarGroupContent>
               <SidebarMenu>
-                <SidebarLink href="/termine" icon={Wrench}>
-                  Termine
+                <SidebarLink href="/aufbauhelfer" icon={Wrench}>
+                  Aufbauhelfer-Termine
                 </SidebarLink>
               </SidebarMenu>
             </SidebarGroupContent>

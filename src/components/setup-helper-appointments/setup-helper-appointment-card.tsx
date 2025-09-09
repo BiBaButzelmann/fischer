@@ -4,7 +4,7 @@ import { useTransition } from "react";
 import { Card, CardContent, CardHeader } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-import { Calendar, Clock, X, Undo2, ChevronRight } from "lucide-react";
+import { Clock, X, Undo2, ChevronRight, Wrench } from "lucide-react";
 import { formatEventDateTime, toLocalDateTime } from "@/lib/date";
 import { getSetupHelperTimeFromDefaultTime } from "@/lib/game-time";
 import { matchDays } from "@/constants/constants";
@@ -85,11 +85,10 @@ export function SetupHelperAppointmentCard({ appointment }: Props) {
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-3">
             <div className="flex-shrink-0 p-3 rounded-full bg-green-100">
-              <Calendar className="w-6 h-6 text-green-600" />
+              <Wrench className="w-6 h-6 text-green-600" />
             </div>
             <div>
               <h3 className="font-bold text-lg">
-                Aufbauhelfer -{" "}
                 {matchDays[appointment.dayOfWeek as keyof typeof matchDays]}
               </h3>
               <div className="flex items-center gap-2 text-sm text-gray-500">
