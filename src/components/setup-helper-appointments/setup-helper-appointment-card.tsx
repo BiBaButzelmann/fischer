@@ -121,30 +121,35 @@ export function SetupHelperAppointmentCard({ appointment }: Props) {
           <ContactsList details={appointment.contactDetails} />
         </div>
 
-        <div className="flex justify-center pt-2">
-          {!isCanceled ? (
-            <Button
-              variant="destructive"
-              size="sm"
-              onClick={handleCancel}
-              disabled={isPending}
-              className="flex items-center gap-2"
-            >
-              <X className="w-4 h-4" />
-              Absagen
-            </Button>
-          ) : (
-            <Button
-              variant="outline"
-              size="sm"
-              onClick={handleUncancel}
-              disabled={isPending}
-              className="flex items-center gap-2"
-            >
-              <Undo2 className="w-4 h-4" />
-              Absage rückgängig machen
-            </Button>
-          )}
+        <div className="space-y-3 pt-2">
+          <div className="flex justify-center">
+            {!isCanceled ? (
+              <Button
+                variant="destructive"
+                size="sm"
+                onClick={handleCancel}
+                disabled={isPending}
+                className="flex items-center gap-2"
+              >
+                <X className="w-4 h-4" />
+                Absagen
+              </Button>
+            ) : (
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={handleUncancel}
+                disabled={isPending}
+                className="flex items-center gap-2"
+              >
+                <Undo2 className="w-4 h-4" />
+                Absage rückgängig machen
+              </Button>
+            )}
+          </div>
+          <p className="text-xs text-gray-500 text-center">
+            Das Orga-Team wird automatisch über die Absage benachrichtigt
+          </p>
         </div>
       </CardContent>
     </Card>
