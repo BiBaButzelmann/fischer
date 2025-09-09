@@ -21,7 +21,7 @@ export async function getUpcomingSetupHelperAppointmentsBySetupHelperId(
     .where(
       and(
         eq(matchdaySetupHelper.setupHelperId, setupHelperId),
-        gte(matchday.date, getCurrentLocalDateTime().toJSDate()),
+        gte(matchday.date, getCurrentLocalDateTime().startOf("day").toJSDate()),
       ),
     )
     .orderBy(asc(matchday.date));
