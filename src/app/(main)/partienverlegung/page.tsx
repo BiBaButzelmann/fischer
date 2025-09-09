@@ -4,8 +4,8 @@ import { Button } from "@/components/ui/button";
 import Link from "next/link";
 import { buildGameViewUrl } from "@/lib/navigation";
 import {
-  getPostponementsForUser as getUserPostponements,
-  getPostponementsForAdmin as getAdminPostponements,
+  getPostponementsByParticipantIds as getUserPostponements,
+  getAllPostponements as getAdminPostponements,
 } from "@/db/repositories/postponement";
 import { getLatestTournament } from "@/db/repositories/tournament";
 import { getParticipantWithGroupByProfileIdAndTournamentId } from "@/db/repositories/participant";

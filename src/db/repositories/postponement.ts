@@ -3,7 +3,9 @@ import { gamePostponement } from "@/db/schema/gamePostponement";
 import { game } from "@/db/schema/game";
 import { eq, and, desc, or, inArray } from "drizzle-orm";
 
-export async function getPostponementsForUser(userParticipantIds: number[]) {
+export async function getPostponementsByParticipantIds(
+  participantIds: number[],
+) {
   return await db.query.gamePostponement.findMany({
     with: {
       game: {
@@ -42,8 +44,8 @@ export async function getPostponementsForUser(userParticipantIds: number[]) {
             and(
               eq(game.id, postponement.gameId),
               or(
-                inArray(game.whiteParticipantId, userParticipantIds),
-                inArray(game.blackParticipantId, userParticipantIds),
+                inArray(game.whiteParticipantId, participantIds),
+                inArray(game.blackParticipantId, participantIds),
               ),
             ),
           ),
@@ -52,7 +54,7 @@ export async function getPostponementsForUser(userParticipantIds: number[]) {
   });
 }
 
-export async function getPostponementsForAdmin(tournamentId: number) {
+export async function getAllPostponements(tournamentId: number) {
   return await db.query.gamePostponement.findMany({
     with: {
       game: {
