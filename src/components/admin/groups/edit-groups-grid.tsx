@@ -39,6 +39,8 @@ export function EditGroupsGrid({
     setUnassignedParticipants(initialUnassignedParticipants);
   }, [initialGroups, initialUnassignedParticipants]);
 
+  console.log("gridGroups", gridGroups);
+
   const {
     assignments: helperAssignments,
     helperAssignedCounts,
@@ -102,12 +104,19 @@ export function EditGroupsGrid({
 
   const handleAddNewGroup = async () => {
     const nonDeletedGroups = gridGroups.filter((g) => !g.isDeleted);
+    const groupNumbers = nonDeletedGroups.map((g) => g.groupNumber);
+
+    let nextGroupNumber = 1;
+    while (groupNumbers.includes(nextGroupNumber)) {
+      nextGroupNumber++;
+    }
+
     const newGroup: GridGroup = {
       id: Date.now(),
       isNew: true,
       isDeleted: false,
-      groupNumber: nonDeletedGroups.length + 1,
-      groupName: generateGroupName(nonDeletedGroups.length + 1),
+      groupNumber: nextGroupNumber,
+      groupName: generateGroupName(nextGroupNumber),
       dayOfWeek: null,
       participants: [],
       matchEnteringHelpers: [],
