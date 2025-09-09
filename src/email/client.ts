@@ -24,3 +24,23 @@ export async function sendEmail({
     react,
   });
 }
+
+export async function sendEmailToAdmin({
+  subject,
+  react,
+}: {
+  subject: string;
+  react: ReactElement;
+}) {
+  let recipientAddress = "klubturnier@hsk1830.de";
+  if (process.env.VERCEL_ENV !== "production") {
+    recipientAddress = "delivered@resend.dev";
+  }
+
+  await resend.emails.send({
+    from: "noreply@hsk1830.de",
+    to: recipientAddress,
+    subject,
+    react,
+  });
+}
