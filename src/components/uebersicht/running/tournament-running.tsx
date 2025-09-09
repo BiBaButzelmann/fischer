@@ -160,7 +160,7 @@ async function AuthedGreetingSection({
               <p className="text-lg">Keine anstehenden Termine</p>
             </div>
           ) : (
-            <UpcomingEventsList profile={profile} events={upcomingEvents} />
+            <UpcomingEventsList events={upcomingEvents} />
           )}
         </CardContent>
       </Card>

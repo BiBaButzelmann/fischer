@@ -4,14 +4,12 @@ import { match } from "ts-pattern";
 import { UpcomingRefereeEvent } from "./upcoming-referee-event";
 import { UpcomingGameEvent } from "./upcoming-game-event";
 import { UpcomingSetupHelperEvent } from "./upcoming-setup-helper-event";
-import { ProfileWithName } from "@/db/types/profile";
 
 type Props = {
-  profile: ProfileWithName;
   events: CalendarEvent[];
 };
 
-export function UpcomingEventsList({ profile, events }: Props) {
+export function UpcomingEventsList({ events }: Props) {
   return (
     <>
       <div className="mb-4 flex items-center gap-2 text-sm text-muted-foreground">
@@ -45,7 +43,6 @@ export function UpcomingEventsList({ profile, events }: Props) {
                   start={event.start}
                   tournamentId={data.tournamentId}
                   matchdayId={data.matchdayId}
-                  profileId={profile.id}
                 />
               ))
               .exhaustive(),
