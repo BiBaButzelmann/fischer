@@ -88,6 +88,7 @@ export async function getSetupHelperNamesByMatchdayId(matchdayId: number) {
       lastName: profile.lastName,
       email: profile.email,
       phoneNumber: profile.phoneNumber,
+      canceled: matchdaySetupHelper.canceled,
     })
     .from(matchdaySetupHelper)
     .innerJoin(
