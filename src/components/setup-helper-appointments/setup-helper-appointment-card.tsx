@@ -24,6 +24,7 @@ type ContactDetails = {
     lastName: string;
     email: string;
     phoneNumber: string;
+    canceled: boolean | null;
   }[];
   referee: {
     firstName: string;

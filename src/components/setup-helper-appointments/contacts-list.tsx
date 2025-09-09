@@ -1,6 +1,7 @@
 "use client";
 
 import { Users, Gavel, Phone, Mail } from "lucide-react";
+import { Badge } from "@/components/ui/badge";
 
 type ContactDetails = {
   otherSetupHelpers: {
@@ -8,6 +9,7 @@ type ContactDetails = {
     lastName: string;
     email: string;
     phoneNumber: string;
+    canceled: boolean | null;
   }[];
   referee: {
     firstName: string;
@@ -33,8 +35,13 @@ export function ContactsList({ details }: Props) {
           <div className="space-y-2">
             {details.otherSetupHelpers.map((helper, index) => (
               <div key={index} className="p-3 bg-gray-50 rounded">
-                <div className="font-medium mb-2">
+                <div className="font-medium mb-2 flex items-center gap-2">
                   {helper.firstName} {helper.lastName}
+                  {helper.canceled && (
+                    <Badge variant="destructive" className="text-xs">
+                      Abgesagt
+                    </Badge>
+                  )}
                 </div>
                 <div className="space-y-1 text-sm text-gray-600">
                   <div className="flex items-center gap-2">
