@@ -4,6 +4,7 @@ import { db } from "@/db/client";
 import { matchdaySetupHelper } from "@/db/schema/matchday";
 import { getSetupHelperByUserId } from "@/db/repositories/setup-helper";
 import { authWithRedirect } from "@/auth/utils";
+import { sendSetupHelperAppointmentEmail } from "@/actions/email/setup-helper-appointment";
 import { and, eq } from "drizzle-orm";
 import invariant from "tiny-invariant";
 import { revalidatePath } from "next/cache";
@@ -24,6 +25,8 @@ export async function cancelSetupHelperAppointment(matchdayId: number) {
       ),
     );
 
+  await sendSetupHelperAppointmentEmail(setupHelper.id, matchdayId, true);
+
   revalidatePath("/aufbauhelfer");
 }
 
@@ -42,6 +45,8 @@ export async function uncancelSetupHelperAppointment(matchdayId: number) {
         eq(matchdaySetupHelper.setupHelperId, setupHelper.id),
       ),
     );
+
+  await sendSetupHelperAppointmentEmail(setupHelper.id, matchdayId, false);
 
   revalidatePath("/aufbauhelfer");
 }
