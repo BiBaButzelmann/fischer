@@ -29,6 +29,7 @@ export const matchdayReferee = pgTable(
   {
     matchdayId: integer("matchday_id").notNull(),
     refereeId: integer("referee_id").notNull(),
+    canceled: boolean("canceled"),
   },
   (table) => [primaryKey({ columns: [table.matchdayId, table.refereeId] })],
 );

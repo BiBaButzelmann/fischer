@@ -1,0 +1,1 @@
+ALTER TABLE "matchday_referee" ADD COLUMN "canceled" boolean;
