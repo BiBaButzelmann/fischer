@@ -12,7 +12,7 @@ import { buildGameViewUrl } from "@/lib/navigation";
 import Link from "next/link";
 import { cancelAppointment, uncancelAppointment } from "@/actions/appointment";
 import { toast } from "sonner";
-import { ContactsList } from "../setup-helper-appointments/contacts-list";
+import { ContactsList } from "./contacts-list";
 import { PrintGamesButton } from "@/components/partien/print-games-button";
 import { Appointment } from "@/types/appointment";
 
