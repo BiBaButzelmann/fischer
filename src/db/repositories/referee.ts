@@ -2,7 +2,7 @@ import { db } from "../client";
 import { referee } from "../schema/referee";
 import { profile } from "../schema/profile";
 import { matchday, matchdayReferee } from "../schema/matchday";
-import { and, eq, count, isNull, or } from "drizzle-orm";
+import { and, eq, count, isNull } from "drizzle-orm";
 import type { RefereeWithName } from "../types/referee";
 
 export async function getRefereeByProfileIdAndTournamentId(
