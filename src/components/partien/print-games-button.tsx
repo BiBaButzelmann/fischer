@@ -11,25 +11,11 @@ type Props = {
   matchdayId?: number;
 };
 
-export function PrintGamesButton({
-  tournamentId,
-  groupId,
-  round,
-  participantId,
-  matchdayId,
-}: Props) {
-  const queryData = {
-    tournamentId,
-    groupId,
-    round,
-    participantId,
-    matchdayId,
-  };
-
+export function PrintGamesButton(props: Props) {
   return (
     <Button variant="outline" asChild title="Paarungen drucken">
       <Link
-        href={`/partien/drucken?${buildGameViewParams(queryData)}`}
+        href={`/partien/drucken?${buildGameViewParams(props)}`}
         target="_blank"
         rel="noopener noreferrer"
       >
