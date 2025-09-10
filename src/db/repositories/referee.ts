@@ -74,12 +74,7 @@ export async function getMatchdaysByRefereeId(refereeId: number) {
     .from(referee)
     .innerJoin(matchdayReferee, eq(matchdayReferee.refereeId, referee.id))
     .innerJoin(matchday, eq(matchday.id, matchdayReferee.matchdayId))
-    .where(
-      and(
-        eq(referee.id, refereeId),
-        isNull(matchdayReferee.canceledAt),
-      ),
-    );
+    .where(and(eq(referee.id, refereeId), isNull(matchdayReferee.canceledAt)));
 }
 
 export async function getRefereeByMatchdayId(matchdayId: number) {
