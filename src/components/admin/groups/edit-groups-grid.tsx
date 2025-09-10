@@ -47,68 +47,25 @@ export function EditGroupsGrid({
   } = useHelperAssignments(currentAssignments, matchEnteringHelpers);
 
   const handleDistributeParticipants = (participantsPerGroup: number) => {
-    const eloSortedParticipants = sortParticipantsByElo(unassignedParticipants);
-    const dwzSortedParticipants = sortParticipantsByDwz(unassignedParticipants);
-
-    const deletedGroups = gridGroups.filter((g) => g.isDeleted);
-    const nonDeletedGroups = gridGroups.filter((g) => !g.isDeleted);
-
-    const updatedGroups: GridGroup[] = [];
-    let unassignedIndex = 0;
-
-    for (let i = 0; i < nonDeletedGroups.length; i++) {
-      const currentGroup = nonDeletedGroups[i];
-      if (currentGroup.isDeleted) {
-        updatedGroups.push(currentGroup);
-        continue;
-      }
-
-      const currentParticipantCount = currentGroup.participants.length;
-      const spotsNeeded = Math.max(
-        0,
-        participantsPerGroup - currentParticipantCount,
-      );
-
-      if (spotsNeeded === 0) {
-        updatedGroups.push(currentGroup);
-        continue;
-      }
-
-      const endIndex = Math.min(
-        unassignedIndex + spotsNeeded,
-        unassignedParticipants.length,
-      );
-
-      let participantsToAdd: ParticipantWithName[];
-      if (i < NUMBER_OF_GROUPS_WITH_ELO) {
-        participantsToAdd = eloSortedParticipants.slice(
-          unassignedIndex,
-          endIndex,
-        );
-      } else {
-        participantsToAdd = dwzSortedParticipants.slice(
-          unassignedIndex,
-          endIndex,
-        );
-      }
-
-      updatedGroups.push({
-        ...currentGroup,
-        participants: [...currentGroup.participants, ...participantsToAdd],
-      });
-
-      unassignedIndex = endIndex;
+    const targetSize = Math.floor(participantsPerGroup);
+    if (!Number.isFinite(targetSize) || targetSize <= 0) {
+      toast.error("Ungültige Zielgröße für Gruppen");
+      return;
     }
 
-    const remainingUnassigned = unassignedParticipants.slice(unassignedIndex);
+    const { updatedGroups, newUnassigned, assignedParticipants } =
+      distributeParticipants({
+        groups: gridGroups,
+        unassigned: unassignedParticipants,
+        participantsPerGroup: targetSize,
+        eloGroupCount: NUMBER_OF_GROUPS_WITH_ELO,
+      });
 
-    setGridGroups([...updatedGroups, ...deletedGroups]);
-    setUnassignedParticipants(remainingUnassigned);
+    setGridGroups(updatedGroups);
+    setUnassignedParticipants(newUnassigned);
 
-    const assignedCount =
-      unassignedParticipants.length - remainingUnassigned.length;
     toast.success(
-      `${assignedCount} Teilnehmer auf ${updatedGroups.length} Gruppen verteilt. ${remainingUnassigned.length} verbleiben.`,
+      `${assignedParticipants.length} Teilnehmer verteilt. ${newUnassigned.length} verbleiben.`,
     );
   };
 
@@ -257,4 +214,73 @@ function generateGroupName(groupNumber: number): string {
 
   const letter = String.fromCharCode(64 + letterIndex);
   return `${letter}${numberWithinLetter}`;
+}
+
+function distributeParticipants({
+  groups,
+  unassigned,
+  participantsPerGroup,
+  eloGroupCount,
+}: {
+  groups: GridGroup[];
+  unassigned: ParticipantWithName[];
+  participantsPerGroup: number;
+  eloGroupCount: number;
+}) {
+  const updatedGroups: GridGroup[] = [];
+  const assigned: ParticipantWithName[] = [];
+
+  const remainingIds = new Set(unassigned.map((p) => p.id));
+
+  const eloOrderedAll = sortParticipantsByElo(unassigned);
+  const dwzOrderedAll = sortParticipantsByDwz(unassigned);
+
+  function takeFromOrdered(
+    source: ParticipantWithName[],
+    n: number,
+  ): ParticipantWithName[] {
+    if (n <= 0 || remainingIds.size === 0) return [];
+    const picked: ParticipantWithName[] = [];
+    for (const p of source) {
+      if (!remainingIds.has(p.id)) continue;
+      picked.push(p);
+      remainingIds.delete(p.id);
+      if (picked.length === n) break;
+    }
+    return picked;
+  }
+
+  let activeGroupIndex = 0;
+  for (const group of groups) {
+    if (group.isDeleted) {
+      updatedGroups.push(group);
+      continue;
+    }
+
+    const currentParticipantsCount = group.participants.length;
+    const participantsNeeded = participantsPerGroup - currentParticipantsCount;
+    if (participantsNeeded <= 0) {
+      updatedGroups.push(group);
+      activeGroupIndex++;
+      continue;
+    }
+
+    const ordering =
+      activeGroupIndex < eloGroupCount ? eloOrderedAll : dwzOrderedAll;
+    const toAdd = takeFromOrdered(ordering, participantsNeeded);
+    if (toAdd.length > 0) {
+      assigned.push(...toAdd);
+      updatedGroups.push({
+        ...group,
+        participants: [...group.participants, ...toAdd],
+      });
+    } else {
+      updatedGroups.push(group);
+    }
+    activeGroupIndex++;
+  }
+
+  const newUnassigned = unassigned.filter((p) => remainingIds.has(p.id));
+
+  return { updatedGroups, newUnassigned, assignedParticipants: assigned };
 }
