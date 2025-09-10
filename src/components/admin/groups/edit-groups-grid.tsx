@@ -39,8 +39,6 @@ export function EditGroupsGrid({
     setUnassignedParticipants(initialUnassignedParticipants);
   }, [initialGroups, initialUnassignedParticipants]);
 
-  console.log("gridGroups", gridGroups);
-
   const {
     assignments: helperAssignments,
     helperAssignedCounts,
@@ -52,16 +50,29 @@ export function EditGroupsGrid({
     const eloSortedParticipants = sortParticipantsByElo(unassignedParticipants);
     const dwzSortedParticipants = sortParticipantsByDwz(unassignedParticipants);
 
+    const deletedGroups = gridGroups.filter((g) => g.isDeleted);
+    const nonDeletedGroups = gridGroups.filter((g) => !g.isDeleted);
+
     const updatedGroups: GridGroup[] = [];
     let unassignedIndex = 0;
 
-    for (let i = 0; i < gridGroups.length; i++) {
-      const currentGroup = gridGroups[i];
+    for (let i = 0; i < nonDeletedGroups.length; i++) {
+      const currentGroup = nonDeletedGroups[i];
+      if (currentGroup.isDeleted) {
+        updatedGroups.push(currentGroup);
+        continue;
+      }
+
       const currentParticipantCount = currentGroup.participants.length;
       const spotsNeeded = Math.max(
         0,
         participantsPerGroup - currentParticipantCount,
       );
+
+      if (spotsNeeded === 0) {
+        updatedGroups.push(currentGroup);
+        continue;
+      }
 
       const endIndex = Math.min(
         unassignedIndex + spotsNeeded,
@@ -69,7 +80,6 @@ export function EditGroupsGrid({
       );
 
       let participantsToAdd: ParticipantWithName[];
-
       if (i < NUMBER_OF_GROUPS_WITH_ELO) {
         participantsToAdd = eloSortedParticipants.slice(
           unassignedIndex,
@@ -92,7 +102,7 @@ export function EditGroupsGrid({
 
     const remainingUnassigned = unassignedParticipants.slice(unassignedIndex);
 
-    setGridGroups(updatedGroups);
+    setGridGroups([...updatedGroups, ...deletedGroups]);
     setUnassignedParticipants(remainingUnassigned);
 
     const assignedCount =
