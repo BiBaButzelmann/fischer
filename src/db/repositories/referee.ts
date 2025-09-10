@@ -2,7 +2,7 @@ import { db } from "../client";
 import { referee } from "../schema/referee";
 import { profile } from "../schema/profile";
 import { matchday, matchdayReferee } from "../schema/matchday";
-import { and, eq, count, isNull } from "drizzle-orm";
+import { and, eq, count, isNull, or } from "drizzle-orm";
 import type { RefereeWithName } from "../types/referee";
 
 export async function getRefereeByProfileIdAndTournamentId(
@@ -74,7 +74,15 @@ export async function getMatchdaysByRefereeId(refereeId: number) {
     .from(referee)
     .innerJoin(matchdayReferee, eq(matchdayReferee.refereeId, referee.id))
     .innerJoin(matchday, eq(matchday.id, matchdayReferee.matchdayId))
-    .where(eq(referee.id, refereeId));
+    .where(
+      and(
+        eq(referee.id, refereeId),
+        or(
+          isNull(matchdayReferee.canceled),
+          eq(matchdayReferee.canceled, false),
+        ),
+      ),
+    );
 }
 
 export async function getRefereeByMatchdayId(matchdayId: number) {
