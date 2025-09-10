@@ -1,9 +1,18 @@
 "use client";
 
-import { useTransition } from "react";
+import { useTransition, useState } from "react";
 import { Card, CardContent, CardHeader } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+  DialogTrigger,
+} from "@/components/ui/dialog";
 import { Clock, X, Undo2, ChevronRight, Wrench, Gavel } from "lucide-react";
 import { formatEventDateTime, toLocalDateTime } from "@/lib/date";
 import { getSetupHelperTimeFromDefaultTime } from "@/lib/game-time";
@@ -22,6 +31,7 @@ type Props = {
 
 export function TerminuebersichtAppointmentCard({ appointment }: Props) {
   const [isPending, startTransition] = useTransition();
+  const [isDialogOpen, setIsDialogOpen] = useState(false);
 
   const setupHelperTime = getSetupHelperTimeFromDefaultTime(appointment.date);
   const isCanceled = appointment.isCanceled;
@@ -33,6 +43,7 @@ export function TerminuebersichtAppointmentCard({ appointment }: Props) {
       try {
         await cancelAppointment(appointment.matchdayId);
         toast.success("Termin erfolgreich abgesagt");
+        setIsDialogOpen(false);
       } catch {
         toast.error("Fehler beim Absagen des Termins");
       }
@@ -123,16 +134,45 @@ export function TerminuebersichtAppointmentCard({ appointment }: Props) {
         <div className="space-y-3 pt-2">
           <div className="flex justify-center">
             {!isCanceled ? (
-              <Button
-                variant="destructive"
-                size="sm"
-                onClick={handleCancel}
-                disabled={isPending}
-                className="flex items-center gap-2"
-              >
-                <X className="w-4 h-4" />
-                Absagen
-              </Button>
+              <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
+                <DialogTrigger asChild>
+                  <Button
+                    variant="destructive"
+                    size="sm"
+                    className="flex items-center gap-2"
+                  >
+                    <X className="w-4 h-4" />
+                    Absagen
+                  </Button>
+                </DialogTrigger>
+                <DialogContent>
+                  <DialogHeader>
+                    <DialogTitle>Termin absagen</DialogTitle>
+                    <DialogDescription>
+                      Möchtest du den Termin wirklich absagen? Das Orga-Team
+                      wird automatisch benachrichtigt.
+                    </DialogDescription>
+                  </DialogHeader>
+                  <DialogFooter>
+                    <Button
+                      variant="outline"
+                      onClick={() => setIsDialogOpen(false)}
+                      disabled={isPending}
+                    >
+                      Abbrechen
+                    </Button>
+                    <Button
+                      variant="destructive"
+                      onClick={handleCancel}
+                      disabled={isPending}
+                      className="flex items-center gap-2"
+                    >
+                      <X className="w-4 h-4" />
+                      Termin absagen
+                    </Button>
+                  </DialogFooter>
+                </DialogContent>
+              </Dialog>
             ) : (
               <Button
                 variant="outline"
@@ -146,9 +186,6 @@ export function TerminuebersichtAppointmentCard({ appointment }: Props) {
               </Button>
             )}
           </div>
-          <p className="text-xs text-gray-500 text-center">
-            Das Orga-Team wird automatisch über die Absage benachrichtigt
-          </p>
         </div>
       </CardContent>
     </Card>
