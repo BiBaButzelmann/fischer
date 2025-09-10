@@ -11,7 +11,6 @@ import { getLatestTournament } from "@/db/repositories/tournament";
 import { getParticipantWithGroupByProfileIdAndTournamentId } from "@/db/repositories/participant";
 import { getProfileByUserId } from "@/db/repositories/profile";
 import { ArrowRight } from "lucide-react";
-import { redirect } from "next/navigation";
 import invariant from "tiny-invariant";
 
 export default async function PostponementPage() {
@@ -139,7 +138,6 @@ async function PostponementContent({ tournamentId }: { tournamentId: number }) {
 
       <PostponementGrid
         postponements={postponements}
-        isAdmin={isAdmin}
         tournamentId={tournamentId}
       />
     </div>
