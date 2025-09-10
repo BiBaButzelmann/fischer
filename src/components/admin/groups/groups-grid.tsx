@@ -71,6 +71,7 @@ export function GroupsGrid({
   const participantsGroupMap = useMemo(() => {
     const map: Record<number, number> = {};
     groups.forEach((group) => {
+      if (group.isDeleted) return;
       group.participants.forEach((participant) => {
         map[participant.id] = group.id;
       });
