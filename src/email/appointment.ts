@@ -7,13 +7,15 @@ type AppointmentEmailData = {
   date: string;
   email: string;
   phoneNumber: string;
+  role?: "referee" | "setupHelper";
 };
 
-export async function sendSetupHelperAppointmentNotification(
+export async function sendAppointmentNotification(
   data: AppointmentEmailData,
 ) {
+  const roleText = data.role === "referee" ? "Schiedsrichter" : "Aufbauhelfer";
   const actionText = data.isCancellation ? "abgesagt" : "wieder angenommen";
-  const subject = `Aufbauhelfer ${actionText}: ${data.name}`;
+  const subject = `${roleText} ${actionText}: ${data.name}`;
 
   await sendEmailToAdmin({
     subject: subject,
@@ -25,4 +27,16 @@ export async function sendSetupHelperAppointmentNotification(
       phoneNumber: data.phoneNumber,
     }),
   });
+}
+
+export async function sendSetupHelperAppointmentNotification(
+  data: AppointmentEmailData,
+) {
+  return sendAppointmentNotification({ ...data, role: "setupHelper" });
+}
+
+export async function sendRefereeAppointmentNotification(
+  data: AppointmentEmailData,
+) {
+  return sendAppointmentNotification({ ...data, role: "referee" });
 }
