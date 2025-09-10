@@ -19,7 +19,10 @@ import { getCurrentLocalDateTime } from "@/lib/date";
 import { and, eq } from "drizzle-orm";
 import { revalidatePath } from "next/cache";
 import invariant from "tiny-invariant";
-import { sendSetupHelperAppointmentEmail, sendRefereeAppointmentEmail } from "@/actions/email/appointment";
+import {
+  sendSetupHelperAppointmentEmail,
+  sendRefereeAppointmentEmail,
+} from "@/actions/email/appointment";
 
 export type { Appointment as TerminuebersichtAppointment } from "@/types/appointment";
 
@@ -266,13 +269,16 @@ export async function cancelAppointment(matchdayId: number) {
     }
   });
 
-  // Send email notifications
   const emailPromises = [];
   if (referee) {
-    emailPromises.push(sendRefereeAppointmentEmail(referee.id, matchdayId, true));
+    emailPromises.push(
+      sendRefereeAppointmentEmail(referee.id, matchdayId, true),
+    );
   }
   if (setupHelper) {
-    emailPromises.push(sendSetupHelperAppointmentEmail(setupHelper.id, matchdayId, true));
+    emailPromises.push(
+      sendSetupHelperAppointmentEmail(setupHelper.id, matchdayId, true),
+    );
   }
   await Promise.all(emailPromises);
 
@@ -318,13 +324,16 @@ export async function uncancelAppointment(matchdayId: number) {
     }
   });
 
-  // Send email notifications
   const emailPromises = [];
   if (referee) {
-    emailPromises.push(sendRefereeAppointmentEmail(referee.id, matchdayId, false));
+    emailPromises.push(
+      sendRefereeAppointmentEmail(referee.id, matchdayId, false),
+    );
   }
   if (setupHelper) {
-    emailPromises.push(sendSetupHelperAppointmentEmail(setupHelper.id, matchdayId, false));
+    emailPromises.push(
+      sendSetupHelperAppointmentEmail(setupHelper.id, matchdayId, false),
+    );
   }
   await Promise.all(emailPromises);
 

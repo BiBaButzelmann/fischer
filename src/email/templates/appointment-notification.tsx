@@ -1,15 +1,15 @@
 import * as React from "react";
 
 type Props = {
-  setupHelperName: string;
+  Name: string;
   isCanceled: boolean;
   date: string;
   email: string;
   phoneNumber: string;
 };
 
-export function SetupHelperAppointmentNotification({
-  setupHelperName,
+export function AppointmentNotification({
+  Name,
   isCanceled,
   date,
   email,
@@ -25,11 +25,11 @@ export function SetupHelperAppointmentNotification({
         lineHeight: 1.6,
       }}
     >
-      <h1 style={{ color: "#2c3e50" }}>Aufbauhelfer-Termin {actionText}</h1>
+      <h1 style={{ color: "#2c3e50" }}>Termin {actionText}</h1>
 
       <p>
-        <strong>{setupHelperName}</strong> hat seinen Aufbauhelfer-Termin am{" "}
-        <strong>{date}</strong> {actionText}.
+        <strong>{Name}</strong> hat seinen Termin am <strong>{date}</strong>{" "}
+        {actionText}.
       </p>
 
       <div

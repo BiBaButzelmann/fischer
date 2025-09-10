@@ -1,27 +1,14 @@
 "use server";
 
 import { db } from "@/db/client";
-import { matchday } from "@/db/schema/matchday";
 import { profile } from "@/db/schema/profile";
 import { setupHelper } from "@/db/schema/setupHelper";
 import { referee } from "@/db/schema/referee";
+import { getMatchdayById } from "@/db/repositories/match-day";
 import { sendSetupHelperAppointmentNotification } from "@/email/setupHelperAppointment";
 import { displayLongDate, toLocalDateTime } from "@/lib/date";
 import { eq } from "drizzle-orm";
 import invariant from "tiny-invariant";
-
-async function getMatchdayInfo(matchdayId: number) {
-  const matchdayData = await db
-    .select({
-      date: matchday.date,
-    })
-    .from(matchday)
-    .where(eq(matchday.id, matchdayId))
-    .limit(1);
-
-  invariant(matchdayData.length > 0, "Matchday not found");
-  return matchdayData[0];
-}
 
 export async function sendSetupHelperAppointmentEmail(
   setupHelperId: number,
@@ -43,13 +30,14 @@ export async function sendSetupHelperAppointmentEmail(
   invariant(setupHelperData.length > 0, "Setup helper not found");
   const setupHelperProfile = setupHelperData[0];
 
-  const matchdayInfo = await getMatchdayInfo(matchdayId);
+  const matchdayInfo = await getMatchdayById(matchdayId);
+  invariant(matchdayInfo, "Matchday not found");
 
   const setupHelperName = `${setupHelperProfile.firstName} ${setupHelperProfile.lastName}`;
   const formattedDate = displayLongDate(toLocalDateTime(matchdayInfo.date));
 
   const emailData = {
-    setupHelperName,
+    name: setupHelperName,
     isCancellation: isCanceled,
     date: formattedDate,
     email: setupHelperProfile.email,
@@ -79,13 +67,14 @@ export async function sendRefereeAppointmentEmail(
   invariant(refereeData.length > 0, "Referee not found");
   const refereeProfile = refereeData[0];
 
-  const matchdayInfo = await getMatchdayInfo(matchdayId);
+  const matchdayInfo = await getMatchdayById(matchdayId);
+  invariant(matchdayInfo, "Matchday not found");
 
   const refereeName = `${refereeProfile.firstName} ${refereeProfile.lastName}`;
   const formattedDate = displayLongDate(toLocalDateTime(matchdayInfo.date));
 
   const emailData = {
-    setupHelperName: refereeName,
+    name: refereeName,
     isCancellation: isCanceled,
     date: formattedDate,
     email: refereeProfile.email,

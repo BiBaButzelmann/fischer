@@ -49,6 +49,12 @@ export async function getMatchdaysWithRefereeAndSetupHelpersByTournamentId(
   });
 }
 
+export async function getMatchdayById(matchdayId: number) {
+  return await db.query.matchday.findFirst({
+    where: eq(matchday.id, matchdayId),
+  });
+}
+
 export async function getGroupIdsByMatchdayId(matchdayId: number) {
   const data = await db.query.matchdayGame.findMany({
     where: (matchdayGame, { eq }) => eq(matchdayGame.matchdayId, matchdayId),

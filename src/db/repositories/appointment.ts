@@ -26,7 +26,10 @@ export async function getRefereeAppointmentsByRefereeId(
     .from(matchdayReferee)
     .innerJoin(matchday, eq(matchday.id, matchdayReferee.matchdayId))
     .where(
-      and(eq(matchdayReferee.refereeId, refereeId), gte(matchday.date, fromDate)),
+      and(
+        eq(matchdayReferee.refereeId, refereeId),
+        gte(matchday.date, fromDate),
+      ),
     )
     .orderBy(asc(matchday.date));
 }
@@ -84,7 +87,10 @@ export async function getSetupHelpersInfoByMatchdayIds(
       canceled: matchdaySetupHelper.canceled,
     })
     .from(matchdaySetupHelper)
-    .innerJoin(setupHelper, eq(matchdaySetupHelper.setupHelperId, setupHelper.id))
+    .innerJoin(
+      setupHelper,
+      eq(matchdaySetupHelper.setupHelperId, setupHelper.id),
+    )
     .innerJoin(profileSchema, eq(setupHelper.profileId, profileSchema.id))
     .where(
       and(
