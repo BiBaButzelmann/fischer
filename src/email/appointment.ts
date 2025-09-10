@@ -10,9 +10,7 @@ type AppointmentEmailData = {
   role?: "referee" | "setupHelper";
 };
 
-export async function sendAppointmentNotification(
-  data: AppointmentEmailData,
-) {
+export async function sendAppointmentNotification(data: AppointmentEmailData) {
   const roleText = data.role === "referee" ? "Schiedsrichter" : "Aufbauhelfer";
   const actionText = data.isCancellation ? "abgesagt" : "wieder angenommen";
   const subject = `${roleText} ${actionText}: ${data.name}`;

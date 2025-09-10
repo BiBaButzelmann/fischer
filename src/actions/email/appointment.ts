@@ -5,7 +5,10 @@ import { profile } from "@/db/schema/profile";
 import { setupHelper } from "@/db/schema/setupHelper";
 import { referee } from "@/db/schema/referee";
 import { getMatchdayById } from "@/db/repositories/match-day";
-import { sendSetupHelperAppointmentNotification, sendRefereeAppointmentNotification } from "@/email/appointment";
+import {
+  sendSetupHelperAppointmentNotification,
+  sendRefereeAppointmentNotification,
+} from "@/email/appointment";
 import { displayLongDate, toLocalDateTime } from "@/lib/date";
 import { eq } from "drizzle-orm";
 import invariant from "tiny-invariant";
