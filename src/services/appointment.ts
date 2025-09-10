@@ -52,7 +52,7 @@ async function getUpcomingRefereeAppointments(
       date: appointment.date,
       dayOfWeek: appointment.dayOfWeek,
       tournamentId: appointment.tournamentId,
-      isCanceled: appointment.canceled === true,
+      isCanceled: appointment.canceledAt !== null,
       userRoles: {
         isReferee: true,
         isSetupHelper: false,
@@ -63,7 +63,7 @@ async function getUpcomingRefereeAppointments(
           lastName: helper.lastName,
           email: helper.email,
           phoneNumber: helper.phoneNumber,
-          canceled: helper.canceled,
+          canceled: helper.canceledAt !== null,
         })),
         referee: refereeForMatchday
           ? {
@@ -71,7 +71,7 @@ async function getUpcomingRefereeAppointments(
               lastName: refereeForMatchday.lastName,
               email: refereeForMatchday.email,
               phoneNumber: refereeForMatchday.phoneNumber,
-              canceled: refereeForMatchday.canceled,
+              canceled: refereeForMatchday.canceledAt !== null,
             }
           : null,
       },
@@ -122,7 +122,7 @@ async function getUpcomingSetupHelperAppointments(
       date: appointment.date,
       dayOfWeek: appointment.dayOfWeek,
       tournamentId: appointment.tournamentId,
-      isCanceled: appointment.canceled === true,
+      isCanceled: appointment.canceledAt !== null,
       userRoles: {
         isReferee: false,
         isSetupHelper: true,
@@ -133,7 +133,7 @@ async function getUpcomingSetupHelperAppointments(
           lastName: helper.lastName,
           email: helper.email,
           phoneNumber: helper.phoneNumber,
-          canceled: helper.canceled,
+          canceled: helper.canceledAt !== null,
         })),
         referee: refereeForMatchday
           ? {
@@ -141,7 +141,7 @@ async function getUpcomingSetupHelperAppointments(
               lastName: refereeForMatchday.lastName,
               email: refereeForMatchday.email,
               phoneNumber: refereeForMatchday.phoneNumber,
-              canceled: refereeForMatchday.canceled,
+              canceled: refereeForMatchday.canceledAt !== null,
             }
           : null,
       },

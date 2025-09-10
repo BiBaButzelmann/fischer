@@ -31,7 +31,7 @@ export const cancelAppointment = action(async (matchdayId: number) => {
     if (referee) {
       await tx
         .update(matchdayReferee)
-        .set({ canceled: true })
+        .set({ canceledAt: new Date() })
         .where(
           and(
             eq(matchdayReferee.matchdayId, matchdayId),
@@ -43,7 +43,7 @@ export const cancelAppointment = action(async (matchdayId: number) => {
     if (setupHelper) {
       await tx
         .update(matchdaySetupHelper)
-        .set({ canceled: true })
+        .set({ canceledAt: new Date() })
         .where(
           and(
             eq(matchdaySetupHelper.matchdayId, matchdayId),
@@ -86,7 +86,7 @@ export const uncancelAppointment = action(async (matchdayId: number) => {
     if (referee) {
       await tx
         .update(matchdayReferee)
-        .set({ canceled: false })
+        .set({ canceledAt: null })
         .where(
           and(
             eq(matchdayReferee.matchdayId, matchdayId),
@@ -98,7 +98,7 @@ export const uncancelAppointment = action(async (matchdayId: number) => {
     if (setupHelper) {
       await tx
         .update(matchdaySetupHelper)
-        .set({ canceled: false })
+        .set({ canceledAt: null })
         .where(
           and(
             eq(matchdaySetupHelper.matchdayId, matchdayId),

@@ -21,7 +21,7 @@ export async function getRefereeAppointmentsByRefereeId(
       date: matchday.date,
       dayOfWeek: matchday.dayOfWeek,
       tournamentId: matchday.tournamentId,
-      canceled: matchdayReferee.canceled,
+      canceledAt: matchdayReferee.canceledAt,
     })
     .from(matchdayReferee)
     .innerJoin(matchday, eq(matchday.id, matchdayReferee.matchdayId))
@@ -44,7 +44,7 @@ export async function getSetupHelperAppointmentsBySetupHelperId(
       date: matchday.date,
       dayOfWeek: matchday.dayOfWeek,
       tournamentId: matchday.tournamentId,
-      canceled: matchdaySetupHelper.canceled,
+      canceledAt: matchdaySetupHelper.canceledAt,
     })
     .from(matchdaySetupHelper)
     .innerJoin(matchday, eq(matchday.id, matchdaySetupHelper.matchdayId))
@@ -65,7 +65,7 @@ export async function getRefereeInfoByMatchdayIds(matchdayIds: number[]) {
       lastName: profileSchema.lastName,
       email: profileSchema.email,
       phoneNumber: profileSchema.phoneNumber,
-      canceled: matchdayReferee.canceled,
+      canceledAt: matchdayReferee.canceledAt,
     })
     .from(matchdayReferee)
     .innerJoin(referee, eq(matchdayReferee.refereeId, referee.id))
@@ -84,7 +84,7 @@ export async function getSetupHelpersInfoByMatchdayIds(
       lastName: profileSchema.lastName,
       email: profileSchema.email,
       phoneNumber: profileSchema.phoneNumber,
-      canceled: matchdaySetupHelper.canceled,
+      canceledAt: matchdaySetupHelper.canceledAt,
     })
     .from(matchdaySetupHelper)
     .innerJoin(

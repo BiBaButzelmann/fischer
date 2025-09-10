@@ -4,6 +4,7 @@ import {
   primaryKey,
   date,
   boolean,
+  timestamp,
 } from "drizzle-orm/pg-core";
 import { relations } from "drizzle-orm";
 import { tournament } from "./tournament";
@@ -29,7 +30,7 @@ export const matchdayReferee = pgTable(
   {
     matchdayId: integer("matchday_id").notNull(),
     refereeId: integer("referee_id").notNull(),
-    canceled: boolean("canceled"),
+    canceledAt: timestamp("canceled_at", { mode: "date" }),
   },
   (table) => [primaryKey({ columns: [table.matchdayId, table.refereeId] })],
 );
@@ -39,7 +40,7 @@ export const matchdaySetupHelper = pgTable(
   {
     matchdayId: integer("matchday_id").notNull(),
     setupHelperId: integer("setup_helper_id").notNull(),
-    canceled: boolean("canceled"),
+    canceledAt: timestamp("canceled_at", { mode: "date" }),
   },
   (table) => [primaryKey({ columns: [table.matchdayId, table.setupHelperId] })],
 );
