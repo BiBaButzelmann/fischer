@@ -12,6 +12,7 @@ import { getParticipantWithGroupByProfileIdAndTournamentId } from "@/db/reposito
 import { getProfileByUserId } from "@/db/repositories/profile";
 import { ArrowRight } from "lucide-react";
 import { redirect } from "next/navigation";
+import invariant from "tiny-invariant";
 
 export default async function PostponementPage() {
   const tournament = await getLatestTournament();
@@ -75,30 +76,50 @@ async function PostponementContent({ tournamentId }: { tournamentId: number }) {
   const session = await authWithRedirect();
   const isAdmin = session.user.role === "admin";
 
-  const userProfile = await getProfileByUserId(session.user.id);
-  const userParticipant = userProfile
-    ? await getParticipantWithGroupByProfileIdAndTournamentId(
-        userProfile.id,
-        tournamentId,
-      )
-    : null;
+  const profile = await getProfileByUserId(session.user.id);
+  invariant(profile, "Profile must exist for authenticated user");
 
-  if (!isAdmin && !userParticipant) {
-    redirect("/uebersicht");
+  const participant = await getParticipantWithGroupByProfileIdAndTournamentId(
+    profile.id,
+    tournamentId,
+  );
+
+  if (!isAdmin && (!participant || !participant.group)) {
+    return (
+      <div>
+        <div className="space-y-6">
+          <div>
+            <h1 className="text-3xl font-bold text-gray-900 mb-4">
+              Partienverlegungen
+            </h1>
+          </div>
+
+          <div className="border rounded-lg overflow-hidden">
+            <div className="pt-6 pb-6 px-6 text-center text-muted-foreground">
+              <p className="text-lg">Du bist noch keiner Gruppe zugeordnet.</p>
+              <p className="mt-2">
+                Partienverlegungen sind erst verfügbar, wenn du einer Gruppe
+                zugewiesen wurdest.
+              </p>
+            </div>
+          </div>
+        </div>
+      </div>
+    );
   }
 
-  const userParticipantId = userParticipant?.id;
-  const userGroupId = userParticipant?.group?.group?.id;
+  const userParticipantId = participant?.id;
+  const userGroupId = participant?.group?.group?.id;
 
   const postponements = isAdmin
     ? await getAdminPostponements(tournamentId)
-    : await getUserPostponements([userParticipantId!]); // Safe: non-admins are guaranteed to be participants
+    : await getUserPostponements([userParticipantId!]);
 
   const partienUrl = userParticipantId
     ? buildGameViewUrl({
         tournamentId,
         participantId: userParticipantId,
-        ...(userGroupId && { groupId: userGroupId }),
+        groupId: userGroupId,
       })
     : buildGameViewUrl({ tournamentId });
 
