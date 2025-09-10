@@ -19,13 +19,8 @@ export function UpcomingEventsList({ events }: Props) {
         <div className="space-y-4">
           {events.map((event, index) =>
             match(event.extendedProps)
-              .with({ eventType: "referee" }, (data) => (
-                <UpcomingRefereeEvent
-                  key={index}
-                  start={event.start}
-                  tournamentId={data.tournamentId}
-                  matchdayId={data.matchdayId}
-                />
+              .with({ eventType: "referee" }, () => (
+                <UpcomingRefereeEvent key={index} start={event.start} />
               ))
               .with({ eventType: "game" }, (data) => (
                 <UpcomingGameEvent

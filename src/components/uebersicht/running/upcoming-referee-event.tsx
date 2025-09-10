@@ -1,23 +1,16 @@
-import { buildGameViewUrl } from "@/lib/navigation";
 import { Gavel } from "lucide-react";
 import { UpcomingEvent, EventIcon } from "./upcoming-event";
 
 type Props = {
-  tournamentId: number;
-  matchdayId: number;
   start: Date;
 };
 
-export function UpcomingRefereeEvent({
-  tournamentId,
-  matchdayId,
-  start,
-}: Props) {
+export function UpcomingRefereeEvent({ start }: Props) {
   return (
     <UpcomingEvent
       title="Schiedsrichter"
       start={start}
-      url={buildGameViewUrl({ tournamentId, matchdayId })}
+      url="/terminuebersicht"
       icon={
         <EventIcon
           icon={Gavel}

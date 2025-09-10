@@ -4,59 +4,36 @@ import { useTransition } from "react";
 import { Card, CardContent, CardHeader } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-import { Clock, X, Undo2, ChevronRight, Wrench } from "lucide-react";
+import { Clock, X, Undo2, ChevronRight, Wrench, Gavel } from "lucide-react";
 import { formatEventDateTime, toLocalDateTime } from "@/lib/date";
 import { getSetupHelperTimeFromDefaultTime } from "@/lib/game-time";
 import { matchDays } from "@/constants/constants";
 import { buildGameViewUrl } from "@/lib/navigation";
 import Link from "next/link";
-import {
-  cancelSetupHelperAppointment,
-  uncancelSetupHelperAppointment,
-} from "@/actions/setup-helper-appointments";
+import { cancelAppointment, uncancelAppointment } from "@/actions/appointment";
 import { toast } from "sonner";
-import { ContactsList } from "./contacts-list";
+import { ContactsList } from "../setup-helper-appointments/contacts-list";
 import { PrintGamesButton } from "@/components/partien/print-games-button";
-
-type ContactDetails = {
-  otherSetupHelpers: {
-    firstName: string;
-    lastName: string;
-    email: string;
-    phoneNumber: string;
-    canceled: boolean | null;
-  }[];
-  referee: {
-    firstName: string;
-    lastName: string;
-    email: string;
-    phoneNumber: string;
-  } | null;
-};
-
-type Appointment = {
-  matchdayId: number;
-  date: Date;
-  dayOfWeek: string;
-  tournamentId: number;
-  canceled: boolean | null;
-  contactDetails: ContactDetails;
-};
+import { Appointment } from "@/types/appointment";
+import { Referee } from "@/db/types/referee";
+import { SetupHelper } from "@/db/types/setup-helper";
 
 type Props = {
   appointment: Appointment;
 };
 
-export function SetupHelperAppointmentCard({ appointment }: Props) {
+export function TerminuebersichtAppointmentCard({ appointment }: Props) {
   const [isPending, startTransition] = useTransition();
 
-  const setupTime = getSetupHelperTimeFromDefaultTime(appointment.date);
-  const isCanceled = appointment.canceled === true;
+  const setupHelperTime = getSetupHelperTimeFromDefaultTime(appointment.date);
+  const isCanceled = appointment.isCanceled;
+
+  const { isReferee, isSetupHelper } = appointment.userRoles;
 
   const handleCancel = () => {
     startTransition(async () => {
       try {
-        await cancelSetupHelperAppointment(appointment.matchdayId);
+        await cancelAppointment(appointment.matchdayId);
         toast.success("Termin erfolgreich abgesagt");
       } catch {
         toast.error("Fehler beim Absagen des Termins");
@@ -67,7 +44,7 @@ export function SetupHelperAppointmentCard({ appointment }: Props) {
   const handleUncancel = () => {
     startTransition(async () => {
       try {
-        await uncancelSetupHelperAppointment(appointment.matchdayId);
+        await uncancelAppointment(appointment.matchdayId);
         toast.success("Absage erfolgreich rückgängig gemacht");
       } catch {
         toast.error("Fehler beim Rückgängigmachen der Absage");
@@ -85,9 +62,24 @@ export function SetupHelperAppointmentCard({ appointment }: Props) {
       <CardHeader className="pb-3">
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-3">
-            <div className="flex-shrink-0 p-3 rounded-full bg-green-100">
-              <Wrench className="w-6 h-6 text-green-600" />
-            </div>
+            {isReferee && isSetupHelper ? (
+              <div className="flex gap-2">
+                <div className="flex-shrink-0 p-2 rounded-full bg-red-100">
+                  <Gavel className="w-4 h-4 text-red-600" />
+                </div>
+                <div className="flex-shrink-0 p-2 rounded-full bg-green-100">
+                  <Wrench className="w-4 h-4 text-green-600" />
+                </div>
+              </div>
+            ) : isReferee ? (
+              <div className="flex-shrink-0 p-3 rounded-full bg-red-100">
+                <Gavel className="w-6 h-6 text-red-600" />
+              </div>
+            ) : (
+              <div className="flex-shrink-0 p-3 rounded-full bg-green-100">
+                <Wrench className="w-6 h-6 text-green-600" />
+              </div>
+            )}
             <div>
               <h3 className="font-bold text-lg">
                 {matchDays[appointment.dayOfWeek as keyof typeof matchDays]}
@@ -95,9 +87,18 @@ export function SetupHelperAppointmentCard({ appointment }: Props) {
               <div className="flex items-center gap-2 text-sm text-gray-500">
                 <Clock className="w-4 h-4" />
                 <span>
-                  {formatEventDateTime(toLocalDateTime(setupTime.toJSDate()))}
+                  {formatEventDateTime(
+                    toLocalDateTime(setupHelperTime.toJSDate()),
+                  )}
                 </span>
               </div>
+              <p className="text-sm text-gray-600 mt-1">
+                {isReferee && isSetupHelper
+                  ? "Schiedsrichter & Aufbauhelfer"
+                  : isReferee
+                    ? "Schiedsrichter"
+                    : "Aufbauhelfer"}
+              </p>
             </div>
           </div>
           <div className="flex items-center gap-2">

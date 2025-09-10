@@ -27,7 +27,6 @@ import {
   Users,
   ClipboardEdit,
   CalendarClock,
-  Wrench,
 } from "lucide-react";
 import { Button } from "../ui/button";
 import Image from "next/image";
@@ -60,6 +59,7 @@ export function AppSidebar({ session, tournament, userRoles }: Props) {
   const isParticipant = userRoles.includes("participant");
   const isMatchEnteringHelper = userRoles.includes("matchEnteringHelper");
   const isSetupHelper = userRoles.includes("setupHelper");
+  const isReferee = userRoles.includes("referee");
 
   const canAccessMatchEntry = isAdmin || isParticipant || isMatchEnteringHelper;
   const canAccessPostponements = isAdmin || isParticipant;
@@ -99,6 +99,11 @@ export function AppSidebar({ session, tournament, userRoles }: Props) {
               <SidebarLink href="/kalender" icon={CalendarIcon}>
                 Kalender
               </SidebarLink>
+              {isRunning && (isSetupHelper || isReferee) && (
+                <SidebarLink href="/terminuebersicht" icon={CalendarClock}>
+                  Terminübersicht
+                </SidebarLink>
+              )}
             </SidebarMenu>
           </SidebarGroupContent>
         </SidebarGroup>
@@ -121,18 +126,6 @@ export function AppSidebar({ session, tournament, userRoles }: Props) {
               <SidebarMenu>
                 <SidebarLink href="/partieneingabe" icon={ClipboardEdit}>
                   Partieneingabe
-                </SidebarLink>
-              </SidebarMenu>
-            </SidebarGroupContent>
-          </SidebarGroup>
-        )}
-        {isRunning && isSetupHelper && (
-          <SidebarGroup>
-            <SidebarGroupLabel>Aufbauhelfer</SidebarGroupLabel>
-            <SidebarGroupContent>
-              <SidebarMenu>
-                <SidebarLink href="/aufbauhelfer" icon={Wrench}>
-                  Aufbauhelfer-Termine
                 </SidebarLink>
               </SidebarMenu>
             </SidebarGroupContent>

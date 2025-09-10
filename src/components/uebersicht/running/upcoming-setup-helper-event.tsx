@@ -10,7 +10,7 @@ export async function UpcomingSetupHelperEvent({ start }: Props) {
     <UpcomingEvent
       title="Aufbauhelfer"
       start={start}
-      url="/aufbauhelfer"
+      url="/terminuebersicht"
       icon={
         <EventIcon
           icon={Wrench}
