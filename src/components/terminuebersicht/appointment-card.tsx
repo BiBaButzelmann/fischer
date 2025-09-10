@@ -15,8 +15,6 @@ import { toast } from "sonner";
 import { ContactsList } from "../setup-helper-appointments/contacts-list";
 import { PrintGamesButton } from "@/components/partien/print-games-button";
 import { Appointment } from "@/types/appointment";
-import { Referee } from "@/db/types/referee";
-import { SetupHelper } from "@/db/types/setup-helper";
 
 type Props = {
   appointment: Appointment;
