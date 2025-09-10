@@ -6,7 +6,7 @@ import { getSetupHelperByUserId } from "@/db/repositories/setup-helper";
 import { redirect } from "next/navigation";
 import { TerminuebersichtAppointmentsList } from "@/components/terminuebersicht/appointments-list";
 
-export default async function TerminuebersichtPage() {
+export default async function Page() {
   const tournament = await getLatestTournament();
   const session = await authWithRedirect();
 
