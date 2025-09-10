@@ -24,8 +24,6 @@ import {
   sendRefereeAppointmentEmail,
 } from "@/actions/email/appointment";
 
-export type { Appointment } from "@/types/appointment";
-
 function combineAppointments(
   refereeAppointments: Array<{
     matchdayId: number;
