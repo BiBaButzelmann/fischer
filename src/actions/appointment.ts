@@ -13,8 +13,9 @@ import {
   sendSetupHelperAppointmentEmail,
   sendRefereeAppointmentEmail,
 } from "@/actions/email/appointment";
+import { action } from "@/lib/actions";
 
-export async function cancelAppointment(matchdayId: number) {
+export const cancelAppointment = action(async (matchdayId: number) => {
   const session = await authWithRedirect();
 
   const [referee, setupHelper] = await Promise.all([
@@ -66,9 +67,9 @@ export async function cancelAppointment(matchdayId: number) {
   await Promise.all(emailPromises);
 
   revalidatePath("/terminuebersicht");
-}
+});
 
-export async function uncancelAppointment(matchdayId: number) {
+export const uncancelAppointment = action(async (matchdayId: number) => {
   const session = await authWithRedirect();
 
   const [referee, setupHelper] = await Promise.all([
@@ -121,4 +122,4 @@ export async function uncancelAppointment(matchdayId: number) {
   await Promise.all(emailPromises);
 
   revalidatePath("/terminuebersicht");
-}
+});
