@@ -17,10 +17,7 @@ export async function createReferee(
   const session = await authWithRedirect();
 
   const tournament = await getTournamentById(tournamentId);
-  invariant(
-    tournament != null && tournament.stage === "registration",
-    "Tournament not found or not in registration stage",
-  );
+  invariant(tournament != null, "Tournament not found");
 
   const currentProfile = await getProfileByUserId(session.user.id);
   invariant(currentProfile, "Profile not found");
