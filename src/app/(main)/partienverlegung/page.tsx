@@ -3,9 +3,7 @@ import { authWithRedirect } from "@/auth/utils";
 import { Button } from "@/components/ui/button";
 import Link from "next/link";
 import { buildGameViewUrl } from "@/lib/navigation";
-import {
-  getAllPostponements,
-} from "@/db/repositories/postponement";
+import { getAllPostponements } from "@/db/repositories/postponement";
 import { getLatestTournament } from "@/db/repositories/tournament";
 import { getParticipantWithGroupByProfileIdAndTournamentId } from "@/db/repositories/participant";
 import { getProfileByUserId } from "@/db/repositories/profile";
