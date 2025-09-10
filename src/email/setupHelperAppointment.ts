@@ -1,8 +1,8 @@
-import { SetupHelperAppointmentNotification } from "@/email/templates/setup-helper-appointment-notification";
+import { AppointmentNotification as AppointmentNotification } from "@/email/templates/appointment-notification";
 import { sendEmailToAdmin } from "./client";
 
-type SetupHelperAppointmentEmailData = {
-  setupHelperName: string;
+type AppointmentEmailData = {
+  name: string;
   isCancellation: boolean;
   date: string;
   email: string;
@@ -10,15 +10,15 @@ type SetupHelperAppointmentEmailData = {
 };
 
 export async function sendSetupHelperAppointmentNotification(
-  data: SetupHelperAppointmentEmailData,
+  data: AppointmentEmailData,
 ) {
   const actionText = data.isCancellation ? "abgesagt" : "wieder angenommen";
-  const subject = `Aufbauhelfer ${actionText}: ${data.setupHelperName}`;
+  const subject = `Aufbauhelfer ${actionText}: ${data.name}`;
 
   await sendEmailToAdmin({
     subject: subject,
-    react: SetupHelperAppointmentNotification({
-      setupHelperName: data.setupHelperName,
+    react: AppointmentNotification({
+      Name: data.name,
       isCanceled: data.isCancellation,
       date: data.date,
       email: data.email,
