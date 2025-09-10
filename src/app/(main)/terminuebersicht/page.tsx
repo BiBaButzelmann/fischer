@@ -22,6 +22,10 @@ export default async function Page() {
     redirect("/uebersicht");
   }
 
+  if (!tournament || tournament.stage !== "running") {
+    redirect("/uebersicht");
+  }
+
   if (tournament?.stage !== "running") {
     redirect("/uebersicht");
   }
