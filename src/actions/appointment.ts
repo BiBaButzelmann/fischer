@@ -25,20 +25,20 @@ import {
 } from "@/actions/email/appointment";
 
 function combineAppointments(
-  refereeAppointments: Array<{
+  refereeAppointments: {
     matchdayId: number;
     date: Date;
     dayOfWeek: string;
     tournamentId: number;
     canceled: boolean | null;
-  }>,
-  setupHelperAppointments: Array<{
+  }[],
+  setupHelperAppointments: {
     matchdayId: number;
     date: Date;
     dayOfWeek: string;
     tournamentId: number;
     canceled: boolean | null;
-  }>,
+  }[],
 ) {
   const allAppointments = [
     ...refereeAppointments.map((app) => ({
@@ -80,7 +80,7 @@ function combineAppointments(
         }
         return acc;
       },
-      [] as Array<{
+      [] as {
         matchdayId: number;
         date: Date;
         dayOfWeek: string;
@@ -89,7 +89,7 @@ function combineAppointments(
         setupHelperCanceled: boolean | null;
         userIsReferee: boolean;
         userIsSetupHelper: boolean;
-      }>,
+      }[],
     )
     .map((app) => ({
       matchdayId: app.matchdayId,
@@ -107,22 +107,22 @@ function combineAppointments(
 }
 
 function createContactDetailsLookup(
-  refereeInfo: Array<{
+  refereeInfo: {
     matchdayId: number;
     firstName: string;
     lastName: string;
     email: string;
     phoneNumber: string;
     canceled: boolean | null;
-  }>,
-  setupHelpersInfo: Array<{
+  }[],
+  setupHelpersInfo: {
     matchdayId: number;
     firstName: string;
     lastName: string;
     email: string;
     phoneNumber: string;
     canceled: boolean | null;
-  }>,
+  }[],
 ) {
   const refereeByMatchday = new Map(
     refereeInfo.map((ref) => [
@@ -153,24 +153,21 @@ function createContactDetailsLookup(
     },
     new Map<
       number,
-      Array<{
+      {
         firstName: string;
         lastName: string;
         email: string;
         phoneNumber: string;
         canceled: boolean | null;
-      }>
+      }[]
     >(),
   );
 
   return { refereeByMatchday, setupHelpersByMatchday };
 }
 
-export async function getUpcomingAppointmentsByUserId(
-  userId: string,
-): Promise<Appointment[]> {
+export async function getUpcomingAppointmentsByUserId(userId: string) {
   const profile = await getProfileByUserId(userId);
-
   invariant(profile, "Profile not found for user");
 
   const [userReferee, userSetupHelper] = await Promise.all([
@@ -204,10 +201,6 @@ export async function getUpcomingAppointmentsByUserId(
     refereeAppointments,
     setupHelperAppointments,
   );
-
-  if (combinedAppointments.length === 0) {
-    return [];
-  }
 
   const matchdayIds = combinedAppointments.map((app) => app.matchdayId);
 
