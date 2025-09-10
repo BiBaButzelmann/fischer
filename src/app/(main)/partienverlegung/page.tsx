@@ -4,8 +4,7 @@ import { Button } from "@/components/ui/button";
 import Link from "next/link";
 import { buildGameViewUrl } from "@/lib/navigation";
 import {
-  getPostponementsByParticipantIds as getUserPostponements,
-  getAllPostponements as getAdminPostponements,
+  getAllPostponements,
 } from "@/db/repositories/postponement";
 import { getLatestTournament } from "@/db/repositories/tournament";
 import { getParticipantWithGroupByProfileIdAndTournamentId } from "@/db/repositories/participant";
@@ -111,8 +110,8 @@ async function PostponementContent({ tournamentId }: { tournamentId: number }) {
   const userGroupId = participant?.group?.group?.id;
 
   const postponements = isAdmin
-    ? await getAdminPostponements(tournamentId)
-    : await getUserPostponements([userParticipantId!]);
+    ? await getAllPostponements(tournamentId)
+    : await getAllPostponements(tournamentId, [userParticipantId!]);
 
   const partienUrl = userParticipantId
     ? buildGameViewUrl({
