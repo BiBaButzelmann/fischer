@@ -15,19 +15,17 @@ import { CalendarDays } from "lucide-react";
 import { useRouter } from "next/navigation";
 import { buildGameViewUrl } from "@/lib/navigation";
 import invariant from "tiny-invariant";
+import { authClient } from "@/auth-client";
 
 type Props = {
   postponements: GamePostponementWithDetails[];
-  isAdmin?: boolean;
   tournamentId: number;
 };
 
-export function PostponementGrid({
-  postponements,
-  isAdmin = false,
-  tournamentId,
-}: Props) {
+export function PostponementGrid({ postponements, tournamentId }: Props) {
   const router = useRouter();
+  const { data: session } = authClient.useSession();
+  const isAdmin = session?.user?.role === "admin";
 
   const handleNavigate = (gameUrl: string) => {
     router.push(gameUrl);
