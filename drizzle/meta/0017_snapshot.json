@@ -93,12 +93,8 @@
           "name": "account_user_id_user_id_fk",
           "tableFrom": "account",
           "tableTo": "user",
-          "columnsFrom": [
-            "user_id"
-          ],
-          "columnsTo": [
-            "id"
-          ],
+          "columnsFrom": ["user_id"],
+          "columnsTo": ["id"],
           "onDelete": "cascade",
           "onUpdate": "no action"
         }
@@ -174,12 +170,8 @@
           "name": "session_user_id_user_id_fk",
           "tableFrom": "session",
           "tableTo": "user",
-          "columnsFrom": [
-            "user_id"
-          ],
-          "columnsTo": [
-            "id"
-          ],
+          "columnsFrom": ["user_id"],
+          "columnsTo": ["id"],
           "onDelete": "cascade",
           "onUpdate": "no action"
         }
@@ -189,9 +181,7 @@
         "session_token_unique": {
           "name": "session_token_unique",
           "nullsNotDistinct": false,
-          "columns": [
-            "token"
-          ]
+          "columns": ["token"]
         }
       },
       "policies": {},
@@ -276,9 +266,7 @@
         "user_email_unique": {
           "name": "user_email_unique",
           "nullsNotDistinct": false,
-          "columns": [
-            "email"
-          ]
+          "columns": ["email"]
         }
       },
       "policies": {},
@@ -579,10 +567,7 @@
       "compositePrimaryKeys": {
         "group_tournament_id_group_number_pk": {
           "name": "group_tournament_id_group_number_pk",
-          "columns": [
-            "tournament_id",
-            "group_number"
-          ]
+          "columns": ["tournament_id", "group_number"]
         }
       },
       "uniqueConstraints": {},
@@ -649,10 +634,7 @@
         "juror_tournament_id_profile_id_unique": {
           "name": "juror_tournament_id_profile_id_unique",
           "nullsNotDistinct": false,
-          "columns": [
-            "tournament_id",
-            "profile_id"
-          ]
+          "columns": ["tournament_id", "profile_id"]
         }
       },
       "policies": {},
@@ -681,10 +663,7 @@
       "compositePrimaryKeys": {
         "group_match_entering_helper_group_id_match_entering_helper_id_pk": {
           "name": "group_match_entering_helper_group_id_match_entering_helper_id_pk",
-          "columns": [
-            "group_id",
-            "match_entering_helper_id"
-          ]
+          "columns": ["group_id", "match_entering_helper_id"]
         }
       },
       "uniqueConstraints": {},
@@ -757,10 +736,7 @@
         "match_entering_helper_tournament_id_profile_id_unique": {
           "name": "match_entering_helper_tournament_id_profile_id_unique",
           "nullsNotDistinct": false,
-          "columns": [
-            "tournament_id",
-            "profile_id"
-          ]
+          "columns": ["tournament_id", "profile_id"]
         }
       },
       "policies": {},
@@ -869,10 +845,7 @@
       "compositePrimaryKeys": {
         "matchday_game_matchday_id_game_id_pk": {
           "name": "matchday_game_matchday_id_game_id_pk",
-          "columns": [
-            "matchday_id",
-            "game_id"
-          ]
+          "columns": ["matchday_id", "game_id"]
         }
       },
       "uniqueConstraints": {},
@@ -908,10 +881,7 @@
       "compositePrimaryKeys": {
         "matchday_referee_matchday_id_referee_id_pk": {
           "name": "matchday_referee_matchday_id_referee_id_pk",
-          "columns": [
-            "matchday_id",
-            "referee_id"
-          ]
+          "columns": ["matchday_id", "referee_id"]
         }
       },
       "uniqueConstraints": {},
@@ -947,10 +917,7 @@
       "compositePrimaryKeys": {
         "matchday_setup_helper_matchday_id_setup_helper_id_pk": {
           "name": "matchday_setup_helper_matchday_id_setup_helper_id_pk",
-          "columns": [
-            "matchday_id",
-            "setup_helper_id"
-          ]
+          "columns": ["matchday_id", "setup_helper_id"]
         }
       },
       "uniqueConstraints": {},
@@ -1105,10 +1072,7 @@
         "participant_tournament_id_profile_id_unique": {
           "name": "participant_tournament_id_profile_id_unique",
           "nullsNotDistinct": false,
-          "columns": [
-            "tournament_id",
-            "profile_id"
-          ]
+          "columns": ["tournament_id", "profile_id"]
         }
       },
       "policies": {},
@@ -1143,11 +1107,7 @@
       "compositePrimaryKeys": {
         "participant_group_group_id_participant_id_group_position_pk": {
           "name": "participant_group_group_id_participant_id_group_position_pk",
-          "columns": [
-            "group_id",
-            "participant_id",
-            "group_position"
-          ]
+          "columns": ["group_id", "participant_id", "group_position"]
         }
       },
       "uniqueConstraints": {},
@@ -1218,12 +1178,8 @@
           "name": "pgn_game_id_game_id_fk",
           "tableFrom": "pgn",
           "tableTo": "game",
-          "columnsFrom": [
-            "game_id"
-          ],
-          "columnsTo": [
-            "id"
-          ],
+          "columnsFrom": ["game_id"],
+          "columnsTo": ["id"],
           "onDelete": "cascade",
           "onUpdate": "no action"
         }
@@ -1311,9 +1267,7 @@
         "profile_email_unique": {
           "name": "profile_email_unique",
           "nullsNotDistinct": false,
-          "columns": [
-            "email"
-          ]
+          "columns": ["email"]
         }
       },
       "policies": {},
@@ -1399,10 +1353,7 @@
         "referee_tournament_id_profile_id_unique": {
           "name": "referee_tournament_id_profile_id_unique",
           "nullsNotDistinct": false,
-          "columns": [
-            "tournament_id",
-            "profile_id"
-          ]
+          "columns": ["tournament_id", "profile_id"]
         }
       },
       "policies": {},
@@ -1482,10 +1433,7 @@
         "setup_helper_tournament_id_profile_id_unique": {
           "name": "setup_helper_tournament_id_profile_id_unique",
           "nullsNotDistinct": false,
-          "columns": [
-            "tournament_id",
-            "profile_id"
-          ]
+          "columns": ["tournament_id", "profile_id"]
         }
       },
       "policies": {},
@@ -1693,50 +1641,27 @@
     "public.result": {
       "name": "result",
       "schema": "public",
-      "values": [
-        "1:0",
-        "0:1",
-        "½-½",
-        "+:-",
-        "-:+",
-        "-:-",
-        "0-½",
-        "½-0"
-      ]
+      "values": ["1:0", "0:1", "½-½", "+:-", "-:+", "-:-", "0-½", "½-0"]
     },
     "public.gender": {
       "name": "gender",
       "schema": "public",
-      "values": [
-        "m",
-        "f"
-      ]
+      "values": ["m", "f"]
     },
     "public.match_day": {
       "name": "match_day",
       "schema": "public",
-      "values": [
-        "tuesday",
-        "thursday",
-        "friday"
-      ]
+      "values": ["tuesday", "thursday", "friday"]
     },
     "public.tournament_stage": {
       "name": "tournament_stage",
       "schema": "public",
-      "values": [
-        "registration",
-        "running",
-        "done"
-      ]
+      "values": ["registration", "running", "done"]
     },
     "public.tournament_week_status": {
       "name": "tournament_week_status",
       "schema": "public",
-      "values": [
-        "regular",
-        "catch-up"
-      ]
+      "values": ["regular", "catch-up"]
     }
   },
   "schemas": {},

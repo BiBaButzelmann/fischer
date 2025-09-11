@@ -111,19 +111,9 @@ export function MatchdayAppointmentCard({
     <Card className="transition-all">
       <CardHeader className="pb-4">
         <div className="flex items-center justify-between">
-          <div className="text-center">
-            <h2 className="text-2xl font-bold text-gray-900">
-              {matchDays[dayOfWeek as keyof typeof matchDays]}
-            </h2>
-            <div className="flex items-center gap-2 text-sm text-gray-500 justify-center">
-              <Clock className="w-4 h-4" />
-              <span>
-                {formatEventDateTime(
-                  toLocalDateTime(setupHelperTime.toJSDate()),
-                )}
-              </span>
-            </div>
-          </div>
+          <h2 className="text-2xl font-bold">
+            {matchDays[dayOfWeek as keyof typeof matchDays]}
+          </h2>
           <div className="flex items-center gap-2">
             <Link href={gameUrl}>
               <Button variant="outline" className="group">
@@ -136,6 +126,12 @@ export function MatchdayAppointmentCard({
               matchdayId={matchdayId}
             />
           </div>
+        </div>
+        <div className="flex items-center gap-2 text-sm text-muted-foreground mt-2">
+          <Clock className="w-4 h-4" />
+          <span>
+            {formatEventDateTime(toLocalDateTime(setupHelperTime.toJSDate()))}
+          </span>
         </div>
       </CardHeader>
 
