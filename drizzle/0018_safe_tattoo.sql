@@ -1,2 +1,0 @@
-ALTER TABLE "matchday_referee" ALTER COLUMN "canceled_at" SET DATA TYPE timestamp;--> statement-breakpoint
-ALTER TABLE "matchday_setup_helper" ALTER COLUMN "canceled_at" SET DATA TYPE timestamp;
