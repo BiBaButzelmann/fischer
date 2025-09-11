@@ -16,12 +16,15 @@ import {
 import { useMemo, useCallback } from "react";
 import { useIsMobile } from "@/hooks/use-mobile";
 import { useRouter } from "next/navigation";
-import { getGameTimeFromGame } from "@/lib/game-time";
 import { MatchDay } from "@/db/types/match-day";
 import { authClient } from "@/auth-client";
 import { Role } from "@/db/types/role";
 import { GameActions } from "./game-actions";
-import { getCurrentLocalDateTime, toDateString } from "@/lib/date";
+import {
+  getCurrentLocalDateTime,
+  toDateString,
+  toLocalDateTime,
+} from "@/lib/date";
 
 type Props = {
   games: GameWithParticipantProfilesAndGroupAndMatchday[];
@@ -67,7 +70,7 @@ export function GamesList({
 
       const game = games.find((g) => g.id === gameId);
       const isGameInPastOrToday = game
-        ? getGameTimeFromGame(game) <= getCurrentLocalDateTime()
+        ? toLocalDateTime(game.time) <= getCurrentLocalDateTime()
         : false;
 
       return {
@@ -175,7 +178,7 @@ export function GamesList({
                 )}
               </TableCell>
               <TableCell className="hidden md:table-cell w-24 text-center">
-                {toDateString(getGameTimeFromGame(game))}
+                {toDateString(toLocalDateTime(game.time))}
               </TableCell>
               {hasAnyActions && (
                 <TableCell className="hidden md:flex items-center gap-2 w-32">
@@ -184,7 +187,7 @@ export function GamesList({
                     currentResult={game.result}
                     onResultChange={onResultChange}
                     availableMatchdays={availableMatchdays}
-                    currentGameDate={getGameTimeFromGame(game)}
+                    currentGameDate={toLocalDateTime(game.time)}
                     game={game}
                     isReferee={isReferee}
                     {...getGameActionPermissions(game.id)}
