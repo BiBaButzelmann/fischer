@@ -26,6 +26,7 @@ import {
   UserRoundCogIcon,
   Users,
   ClipboardEdit,
+  CalendarClock,
 } from "lucide-react";
 import { Button } from "../ui/button";
 import Image from "next/image";
@@ -59,6 +60,7 @@ export function AppSidebar({ session, tournament, userRoles }: Props) {
   const isMatchEnteringHelper = userRoles.includes("matchEnteringHelper");
 
   const canAccessMatchEntry = isAdmin || isParticipant || isMatchEnteringHelper;
+  const canAccessPostponements = isAdmin || isParticipant;
 
   return (
     <Sidebar>
@@ -95,14 +97,33 @@ export function AppSidebar({ session, tournament, userRoles }: Props) {
               <SidebarLink href="/kalender" icon={CalendarIcon}>
                 Kalender
               </SidebarLink>
-              {isRunning && canAccessMatchEntry && (
-                <SidebarLink href="/partieneingabe" icon={ClipboardEdit}>
-                  Partieneingabe
-                </SidebarLink>
-              )}
             </SidebarMenu>
           </SidebarGroupContent>
         </SidebarGroup>
+        {isRunning && canAccessPostponements && (
+          <SidebarGroup>
+            <SidebarGroupLabel>Spieler</SidebarGroupLabel>
+            <SidebarGroupContent>
+              <SidebarMenu>
+                <SidebarLink href="/partienverlegung" icon={CalendarClock}>
+                  Partienverlegungen
+                </SidebarLink>
+              </SidebarMenu>
+            </SidebarGroupContent>
+          </SidebarGroup>
+        )}
+        {isRunning && canAccessMatchEntry && (
+          <SidebarGroup>
+            <SidebarGroupLabel>Eingabehelfer</SidebarGroupLabel>
+            <SidebarGroupContent>
+              <SidebarMenu>
+                <SidebarLink href="/partieneingabe" icon={ClipboardEdit}>
+                  Partieneingabe
+                </SidebarLink>
+              </SidebarMenu>
+            </SidebarGroupContent>
+          </SidebarGroup>
+        )}
         {isActive ? (
           <SidebarGroup>
             <SidebarGroupLabel>Dokumente</SidebarGroupLabel>
@@ -152,9 +173,6 @@ export function AppSidebar({ session, tournament, userRoles }: Props) {
               <SidebarLink href="/admin/gruppen" icon={Users}>
                 Gruppen verwalten
               </SidebarLink>
-              <SidebarLink href="/admin/startgeld" icon={Euro}>
-                Startgeld verwalten
-              </SidebarLink>
               <SidebarLink href="/admin/paarungen" icon={Users}>
                 Paarungen verwalten
               </SidebarLink>
@@ -163,6 +181,9 @@ export function AppSidebar({ session, tournament, userRoles }: Props) {
               </SidebarLink>
               <SidebarLink href="/admin/fide-bericht" icon={FileCheck}>
                 Fide Bericht
+              </SidebarLink>
+              <SidebarLink href="/admin/startgeld" icon={Euro}>
+                Startgeld verwalten
               </SidebarLink>
               <SidebarLink href="/admin/namensschilder" icon={LayoutDashboard}>
                 Namensschilder
