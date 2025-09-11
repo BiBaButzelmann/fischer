@@ -41,6 +41,7 @@ export async function EditGroups({ tournament }: { tournament: Tournament }) {
       ({
         id: g.id,
         isNew: false,
+        isDeleted: false,
         groupName: g.groupName,
         groupNumber: g.groupNumber,
         dayOfWeek: g.dayOfWeek,

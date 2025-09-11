@@ -10,6 +10,7 @@ import {
 import { SetupHelperWithName } from "@/db/types/setup-helper";
 import { matchDaysShort } from "@/constants/constants";
 import { X } from "lucide-react";
+import { UserWeekdayDisplay } from "../user-weekday-display";
 
 type Props = {
   setupHelpers: SetupHelperWithName[];
@@ -44,15 +45,10 @@ export function SetupHelperSelector({
                 className="flex items-center justify-between"
               >
                 {setupHelper.profile.firstName} {setupHelper.profile.lastName}{" "}
-                <div className="flex gap-1">
-                  <Badge>{matchDaysShort[setupHelper.preferredMatchDay]}</Badge>
-                  {setupHelper.secondaryMatchDays.length > 0 &&
-                    setupHelper.secondaryMatchDays.map((day) => (
-                      <Badge key={day} variant="secondary">
-                        {matchDaysShort[day]}
-                      </Badge>
-                    ))}
-                </div>
+                <UserWeekdayDisplay
+                  preferredMatchDay={setupHelper.preferredMatchDay}
+                  secondaryMatchDays={setupHelper.secondaryMatchDays}
+                />
               </SelectItem>
             ))}
           </SelectContent>
