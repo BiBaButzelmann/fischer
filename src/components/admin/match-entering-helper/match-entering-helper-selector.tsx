@@ -13,7 +13,7 @@ type Props = {
   matchEnteringHelpers: MatchEnteringHelperWithName[];
   assignedHelpers: MatchEnteringHelperWithName[];
   helperAssignedCounts: Record<number, number>;
-  onAddHelper: (helperId: string) => void;
+  onAddHelper: (helperId: number) => void;
   onRemoveHelper: (helperId: number) => void;
 };
 
@@ -26,7 +26,7 @@ export function GroupMatchEnteringHelperSelector({
 }: Props) {
   return (
     <div className="space-y-2">
-      <Select value="" onValueChange={onAddHelper}>
+      <Select value="" onValueChange={(v) => onAddHelper(parseInt(v))}>
         <SelectTrigger>
           <SelectValue placeholder="Eingabehelfer hinzufügen..." />
         </SelectTrigger>

@@ -1,7 +1,6 @@
 import { Badge } from "@/components/ui/badge";
 import { ParticipantWithName } from "@/db/types/participant";
 import { UserWeekdayDisplay } from "../user-weekday-display";
-import { Rabbit, Turtle } from "lucide-react";
 
 export function ParticipantEntry({
   participant,
@@ -16,15 +15,6 @@ export function ParticipantEntry({
 }) {
   return (
     <div className="flex items-center gap-2 py-1">
-      <div className="flex-shrink-0">
-        {participant.fideId &&
-        participant.birthYear &&
-        participant.nationality ? (
-          <Rabbit className="h-4 w-4 text-amber-700" />
-        ) : (
-          <Turtle className="h-4 w-4 text-green-600" />
-        )}
-      </div>
       <p className="font-semibold flex-grow truncate">
         {participant.profile.firstName} {participant.profile.lastName}
       </p>

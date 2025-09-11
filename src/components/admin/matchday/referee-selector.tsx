@@ -8,6 +8,7 @@ import {
 import { RefereeWithName } from "@/db/types/referee";
 import { Badge } from "@/components/ui/badge";
 import { matchDaysShort } from "@/constants/constants";
+import { UserWeekdayDisplay } from "../user-weekday-display";
 
 type Props = {
   referees: RefereeWithName[];
@@ -33,16 +34,10 @@ export function RefereeSelector({ referees, onSelect, value = "" }: Props) {
                 <Badge variant="default" className="text-xs px-1 py-0">
                   {matchDaysShort[referee.preferredMatchDay]}
                 </Badge>
-                {referee.secondaryMatchDays.length > 0 &&
-                  referee.secondaryMatchDays.map((day) => (
-                    <Badge
-                      key={day}
-                      variant="secondary"
-                      className="text-xs px-1 py-0"
-                    >
-                      {matchDaysShort[day]}
-                    </Badge>
-                  ))}
+                <UserWeekdayDisplay
+                  preferredMatchDay={referee.preferredMatchDay}
+                  secondaryMatchDays={referee.secondaryMatchDays}
+                />
               </div>
             </div>
           </SelectItem>
