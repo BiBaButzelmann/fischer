@@ -2,7 +2,7 @@ import { PrintButton } from "@/components/partien/print/print-button";
 import { Badge } from "@/components/ui/badge";
 import { getGamesByTournamentId } from "@/db/repositories/game";
 import { toDateString } from "@/lib/date";
-import { getDateTimeFromDefaultTime } from "@/lib/game-time";
+import { getDateTimeFromTournamentTime } from "@/lib/game-time";
 import { getParticipantFullName } from "@/lib/participant";
 
 export default async function Page({
@@ -27,6 +27,16 @@ export default async function Page({
     participantId != null ? Number(participantId) : undefined,
   );
 
+  const gamesWithDates = await Promise.all(
+    games.map(async (game) => ({
+      ...game,
+      gameDateTime: await getDateTimeFromTournamentTime(
+        game.matchdayGame.matchday.date,
+        game.tournamentId,
+      ),
+    })),
+  );
+
   return (
     <div className="flex gap-4 p-4 print:p-0">
       <div className="w-[210mm] text-sm">
@@ -38,15 +48,13 @@ export default async function Page({
           <div className="flex-1">Schwarz</div>
         </div>
         <div>
-          {games.map((game) => (
+          {gamesWithDates.map((game) => (
             <div
               key={game.id}
               className="flex items-center py-1.5 even:bg-gray-100"
             >
               <div className="basis-[8rem] text-center">
-                {toDateString(
-                  getDateTimeFromDefaultTime(game.matchdayGame.matchday.date),
-                )}
+                {toDateString(game.gameDateTime)}
               </div>
               <div className="basis-28 text-center">
                 <Badge variant="secondary">{game.group.groupName}</Badge>
