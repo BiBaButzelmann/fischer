@@ -291,7 +291,7 @@ export async function getGamesByTournamentId(
   const gamesWithTime = await Promise.all(
     orderedGames.map(async (game) => ({
       ...game,
-      calculatedGameTime: (await getGameTimeFromGame(game)).toJSDate(),
+      time: (await getGameTimeFromGame(game)).toJSDate(),
     })),
   );
 
