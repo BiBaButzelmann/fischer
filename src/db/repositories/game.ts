@@ -10,6 +10,7 @@ import {
   isNotNull,
 } from "drizzle-orm";
 import { getCurrentLocalDateTime } from "@/lib/date";
+import { getGameTimeFromGame } from "@/lib/game-time";
 import { group } from "../schema/group";
 import { matchdayGame, matchdayReferee } from "../schema/matchday";
 import { matchday } from "../schema/matchday";
@@ -285,7 +286,16 @@ export async function getGamesByTournamentId(
   });
 
   const gameMap = new Map(games.map((game) => [game.id, game]));
-  return gameIds.map((id) => gameMap.get(id)).filter(Boolean);
+  const orderedGames = gameIds.map((id) => gameMap.get(id)).filter(Boolean);
+
+  const gamesWithTime = await Promise.all(
+    orderedGames.map(async (game) => ({
+      ...game,
+      calculatedGameTime: (await getGameTimeFromGame(game)).toJSDate(),
+    })),
+  );
+
+  return gamesWithTime;
 }
 
 export async function getCompletedGames(groupId: number, maxRound?: number) {
