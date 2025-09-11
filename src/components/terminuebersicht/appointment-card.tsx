@@ -2,7 +2,6 @@
 
 import { useTransition, useState } from "react";
 import { Card, CardContent, CardHeader } from "@/components/ui/card";
-import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import {
   Dialog,
@@ -13,39 +12,76 @@ import {
   DialogTitle,
   DialogTrigger,
 } from "@/components/ui/dialog";
-import { Clock, X, Undo2, ChevronRight, Wrench, Gavel } from "lucide-react";
+import { Clock, ChevronRight, X, Undo2 } from "lucide-react";
 import { formatEventDateTime, toLocalDateTime } from "@/lib/date";
 import { getSetupHelperTimeFromDefaultTime } from "@/lib/game-time";
 import { matchDays } from "@/constants/constants";
 import { buildGameViewUrl } from "@/lib/navigation";
 import Link from "next/link";
-import { cancelAppointment, uncancelAppointment } from "@/actions/appointment";
-import { toast } from "sonner";
-import { ContactsList } from "./contacts-list";
 import { PrintGamesButton } from "@/components/partien/print-games-button";
-import { Appointment } from "@/types/appointment";
+import {
+  RefereeAppointment,
+  SetupHelperAppointment,
+} from "@/services/appointment";
+import {
+  cancelRefereeAppointment,
+  uncancelRefereeAppointment,
+  cancelSetupHelperAppointment,
+  uncancelSetupHelperAppointment,
+} from "@/actions/appointment";
+import { toast } from "sonner";
+import { RefereeAppointmentSection } from "./referee-appointment-section";
+import { SetupHelperAppointmentSection } from "./setup-helper-appointment-section";
 
 type Props = {
-  appointment: Appointment;
+  refereeAppointment?: RefereeAppointment;
+  setupHelperAppointment?: SetupHelperAppointment;
 };
 
-export function TerminuebersichtAppointmentCard({ appointment }: Props) {
+export function MatchdayAppointmentCard({
+  refereeAppointment,
+  setupHelperAppointment,
+}: Props) {
   const [isPending, startTransition] = useTransition();
   const [isDialogOpen, setIsDialogOpen] = useState(false);
 
-  const setupHelperTime = getSetupHelperTimeFromDefaultTime(appointment.date);
-  const isCanceled = appointment.isCanceled;
+  const appointment = refereeAppointment || setupHelperAppointment;
+  if (!appointment) return null;
 
-  const { isReferee, isSetupHelper } = appointment.userRoles;
+  const { matchdayId, date, dayOfWeek, tournamentId } = appointment;
+
+  const setupHelperTime = getSetupHelperTimeFromDefaultTime(date);
+
+  const gameUrl = buildGameViewUrl({
+    tournamentId,
+    matchdayId,
+  });
+
+  const hasAnyAppointment = refereeAppointment || setupHelperAppointment;
+  const hasAnyCancelledAppointment =
+    refereeAppointment?.isCanceled || setupHelperAppointment?.isCanceled;
+  const hasAnyActiveAppointment =
+    (refereeAppointment && !refereeAppointment.isCanceled) ||
+    (setupHelperAppointment && !setupHelperAppointment.isCanceled);
 
   const handleCancel = () => {
     startTransition(async () => {
       try {
-        await cancelAppointment(appointment.matchdayId);
-        toast.success("Termin erfolgreich abgesagt");
+        const promises = [];
+
+        if (refereeAppointment && !refereeAppointment.isCanceled) {
+          promises.push(cancelRefereeAppointment(matchdayId));
+        }
+
+        if (setupHelperAppointment && !setupHelperAppointment.isCanceled) {
+          promises.push(cancelSetupHelperAppointment(matchdayId));
+        }
+
+        await Promise.all(promises);
+        toast.success("Termine erfolgreich abgesagt");
         setIsDialogOpen(false);
       } catch {
-        toast.error("Fehler beim Absagen des Termins");
+        toast.error("Fehler beim Absagen der Termine");
       }
     });
   };
@@ -53,65 +89,42 @@ export function TerminuebersichtAppointmentCard({ appointment }: Props) {
   const handleUncancel = () => {
     startTransition(async () => {
       try {
-        await uncancelAppointment(appointment.matchdayId);
-        toast.success("Absage erfolgreich rückgängig gemacht");
+        const promises = [];
+
+        if (refereeAppointment?.isCanceled) {
+          promises.push(uncancelRefereeAppointment(matchdayId));
+        }
+
+        if (setupHelperAppointment?.isCanceled) {
+          promises.push(uncancelSetupHelperAppointment(matchdayId));
+        }
+
+        await Promise.all(promises);
+        toast.success("Absagen erfolgreich rückgängig gemacht");
       } catch {
-        toast.error("Fehler beim Rückgängigmachen der Absage");
+        toast.error("Fehler beim Rückgängigmachen der Absagen");
       }
     });
   };
 
-  const gameUrl = buildGameViewUrl({
-    tournamentId: appointment.tournamentId,
-    matchdayId: appointment.matchdayId,
-  });
-
   return (
     <Card className="transition-all">
-      <CardHeader className="pb-3">
+      <CardHeader className="pb-4">
         <div className="flex items-center justify-between">
-          <div className="flex items-center gap-3">
-            {isReferee && isSetupHelper ? (
-              <div className="flex gap-2">
-                <div className="flex-shrink-0 p-2 rounded-full bg-red-100">
-                  <Gavel className="w-4 h-4 text-red-600" />
-                </div>
-                <div className="flex-shrink-0 p-2 rounded-full bg-green-100">
-                  <Wrench className="w-4 h-4 text-green-600" />
-                </div>
-              </div>
-            ) : isReferee ? (
-              <div className="flex-shrink-0 p-3 rounded-full bg-red-100">
-                <Gavel className="w-6 h-6 text-red-600" />
-              </div>
-            ) : (
-              <div className="flex-shrink-0 p-3 rounded-full bg-green-100">
-                <Wrench className="w-6 h-6 text-green-600" />
-              </div>
-            )}
-            <div>
-              <h3 className="font-bold text-lg">
-                {matchDays[appointment.dayOfWeek as keyof typeof matchDays]}
-              </h3>
-              <div className="flex items-center gap-2 text-sm text-gray-500">
-                <Clock className="w-4 h-4" />
-                <span>
-                  {formatEventDateTime(
-                    toLocalDateTime(setupHelperTime.toJSDate()),
-                  )}
-                </span>
-              </div>
-              <p className="text-sm text-gray-600 mt-1">
-                {isReferee && isSetupHelper
-                  ? "Schiedsrichter & Aufbauhelfer"
-                  : isReferee
-                    ? "Schiedsrichter"
-                    : "Aufbauhelfer"}
-              </p>
+          <div className="text-center">
+            <h2 className="text-2xl font-bold text-gray-900">
+              {matchDays[dayOfWeek as keyof typeof matchDays]}
+            </h2>
+            <div className="flex items-center gap-2 text-sm text-gray-500 justify-center">
+              <Clock className="w-4 h-4" />
+              <span>
+                {formatEventDateTime(
+                  toLocalDateTime(setupHelperTime.toJSDate()),
+                )}
+              </span>
             </div>
           </div>
           <div className="flex items-center gap-2">
-            {isCanceled && <Badge variant="destructive">Abgesagt</Badge>}
             <Link href={gameUrl}>
               <Button variant="outline" className="group">
                 Zu den Partien
@@ -119,21 +132,25 @@ export function TerminuebersichtAppointmentCard({ appointment }: Props) {
               </Button>
             </Link>
             <PrintGamesButton
-              tournamentId={appointment.tournamentId}
-              matchdayId={appointment.matchdayId}
+              tournamentId={tournamentId}
+              matchdayId={matchdayId}
             />
           </div>
         </div>
       </CardHeader>
 
-      <CardContent className="space-y-4">
-        <div className="space-y-4">
-          <ContactsList details={appointment.contactDetails} />
-        </div>
+      <CardContent className="space-y-6">
+        {refereeAppointment && (
+          <RefereeAppointmentSection appointment={refereeAppointment} />
+        )}
 
-        <div className="space-y-3 pt-2">
-          <div className="flex justify-center">
-            {!isCanceled ? (
+        {setupHelperAppointment && (
+          <SetupHelperAppointmentSection appointment={setupHelperAppointment} />
+        )}
+
+        {hasAnyAppointment && (
+          <div className="flex justify-center pt-4 border-t">
+            {hasAnyActiveAppointment ? (
               <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
                 <DialogTrigger asChild>
                   <Button
@@ -142,15 +159,15 @@ export function TerminuebersichtAppointmentCard({ appointment }: Props) {
                     className="flex items-center gap-2"
                   >
                     <X className="w-4 h-4" />
-                    Absagen
+                    Termine absagen
                   </Button>
                 </DialogTrigger>
                 <DialogContent>
                   <DialogHeader>
-                    <DialogTitle>Termin absagen</DialogTitle>
+                    <DialogTitle>Termine absagen</DialogTitle>
                     <DialogDescription>
-                      Möchtest du den Termin wirklich absagen? Das Orga-Team
-                      wird automatisch benachrichtigt.
+                      Möchtest du deine Termine für diesen Spieltag absagen? Das
+                      Orga-Team wird automatisch benachrichtigt.
                     </DialogDescription>
                   </DialogHeader>
                   <DialogFooter>
@@ -168,12 +185,12 @@ export function TerminuebersichtAppointmentCard({ appointment }: Props) {
                       className="flex items-center gap-2"
                     >
                       <X className="w-4 h-4" />
-                      Termin absagen
+                      Termine absagen
                     </Button>
                   </DialogFooter>
                 </DialogContent>
               </Dialog>
-            ) : (
+            ) : hasAnyCancelledAppointment ? (
               <Button
                 variant="outline"
                 size="sm"
@@ -182,11 +199,11 @@ export function TerminuebersichtAppointmentCard({ appointment }: Props) {
                 className="flex items-center gap-2"
               >
                 <Undo2 className="w-4 h-4" />
-                Absage rückgängig machen
+                Absagen rückgängig machen
               </Button>
-            )}
+            ) : null}
           </div>
-        </div>
+        )}
       </CardContent>
     </Card>
   );

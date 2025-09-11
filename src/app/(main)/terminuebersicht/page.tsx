@@ -4,7 +4,10 @@ import { getRefereeByUserId } from "@/db/repositories/referee";
 import { getSetupHelperByUserId } from "@/db/repositories/setup-helper";
 import { redirect } from "next/navigation";
 import { TerminuebersichtAppointmentsList } from "@/components/terminuebersicht/appointments-list";
-import { getUpcomingAppointmentsByUserId } from "@/services/appointment";
+import {
+  getRefereeAppointmentsByUserId,
+  getSetupHelperAppointmentsByUserId,
+} from "@/services/appointment";
 
 export default async function Page() {
   const tournament = await getLatestTournament();
@@ -23,7 +26,10 @@ export default async function Page() {
     redirect("/uebersicht");
   }
 
-  const appointments = await getUpcomingAppointmentsByUserId(session.user.id);
+  const [refereeAppointments, setupHelperAppointments] = await Promise.all([
+    getRefereeAppointmentsByUserId(session.user.id),
+    getSetupHelperAppointmentsByUserId(session.user.id),
+  ]);
 
   return (
     <div>
@@ -44,7 +50,10 @@ export default async function Page() {
           </p>
         </div>
 
-        <TerminuebersichtAppointmentsList appointments={appointments} />
+        <TerminuebersichtAppointmentsList
+          refereeAppointments={refereeAppointments}
+          setupHelperAppointments={setupHelperAppointments}
+        />
       </div>
     </div>
   );

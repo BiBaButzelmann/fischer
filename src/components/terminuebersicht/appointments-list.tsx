@@ -1,12 +1,51 @@
 import { Calendar } from "lucide-react";
-import { Appointment } from "@/types/appointment";
-import { TerminuebersichtAppointmentCard } from "./appointment-card";
+import {
+  RefereeAppointment,
+  SetupHelperAppointment,
+} from "@/services/appointment";
+import { MatchdayAppointmentCard } from "./appointment-card";
 
-type Props = {
-  appointments: Appointment[];
+type MatchdayAppointment = {
+  refereeAppointment?: RefereeAppointment;
+  setupHelperAppointment?: SetupHelperAppointment;
 };
 
-export function TerminuebersichtAppointmentsList({ appointments }: Props) {
+type Props = {
+  refereeAppointments: RefereeAppointment[];
+  setupHelperAppointments: SetupHelperAppointment[];
+};
+
+export function TerminuebersichtAppointmentsList({
+  refereeAppointments,
+  setupHelperAppointments,
+}: Props) {
+  const appointmentsByMatchday = new Map<number, MatchdayAppointment>();
+
+  for (const appointment of refereeAppointments) {
+    appointmentsByMatchday.set(appointment.matchdayId, {
+      refereeAppointment: appointment,
+    });
+  }
+
+  for (const appointment of setupHelperAppointments) {
+    const existing = appointmentsByMatchday.get(appointment.matchdayId);
+    if (existing) {
+      existing.setupHelperAppointment = appointment;
+    } else {
+      appointmentsByMatchday.set(appointment.matchdayId, {
+        setupHelperAppointment: appointment,
+      });
+    }
+  }
+
+  const appointments = Array.from(appointmentsByMatchday.values()).sort(
+    (a, b) => {
+      const dateA = (a.refereeAppointment || a.setupHelperAppointment)!.date;
+      const dateB = (b.refereeAppointment || b.setupHelperAppointment)!.date;
+      return dateA.getTime() - dateB.getTime();
+    },
+  );
+
   if (appointments.length === 0) {
     return (
       <div className="border rounded-lg overflow-hidden">
@@ -23,11 +62,12 @@ export function TerminuebersichtAppointmentsList({ appointments }: Props) {
   }
 
   return (
-    <div className="space-y-4">
+    <div className="space-y-6">
       {appointments.map((appointment) => (
-        <TerminuebersichtAppointmentCard
-          key={appointment.matchdayId}
-          appointment={appointment}
+        <MatchdayAppointmentCard
+          key={(appointment.refereeAppointment || appointment.setupHelperAppointment)!.matchdayId}
+          refereeAppointment={appointment.refereeAppointment}
+          setupHelperAppointment={appointment.setupHelperAppointment}
         />
       ))}
     </div>
