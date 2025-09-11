@@ -1,6 +1,6 @@
 {
-  "id": "f19b03fe-0499-4cd6-afee-3cc3153d90f5",
-  "prevId": "da94b88f-e250-454f-83b6-2a5a6cd6e870",
+  "id": "838ac351-76d0-4b09-baaa-13fc9018f001",
+  "prevId": "a53cf7b9-fc53-4e5b-affb-e6ec7efe7627",
   "version": "7",
   "dialect": "postgresql",
   "tables": {
@@ -895,12 +895,6 @@
           "type": "integer",
           "primaryKey": false,
           "notNull": true
-        },
-        "canceled_at": {
-          "name": "canceled_at",
-          "type": "boolean",
-          "primaryKey": false,
-          "notNull": false
         }
       },
       "indexes": {},
@@ -934,12 +928,6 @@
           "type": "integer",
           "primaryKey": false,
           "notNull": true
-        },
-        "canceled_at": {
-          "name": "canceled_at",
-          "type": "boolean",
-          "primaryKey": false,
-          "notNull": false
         }
       },
       "indexes": {},

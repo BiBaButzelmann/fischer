@@ -65,7 +65,10 @@ export function TerminuebersichtAppointmentsList({
     <div className="space-y-6">
       {appointments.map((appointment) => (
         <MatchdayAppointmentCard
-          key={(appointment.refereeAppointment || appointment.setupHelperAppointment)!.matchdayId}
+          key={
+            (appointment.refereeAppointment ||
+              appointment.setupHelperAppointment)!.matchdayId
+          }
           refereeAppointment={appointment.refereeAppointment}
           setupHelperAppointment={appointment.setupHelperAppointment}
         />
