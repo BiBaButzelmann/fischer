@@ -1,5 +1,5 @@
 {
-  "id": "984bb944-9587-46be-b4fb-e30d928931ad",
+  "id": "119eb6cf-b895-4957-ba49-9ba59703d5d8",
   "prevId": "838ac351-76d0-4b09-baaa-13fc9018f001",
   "version": "7",
   "dialect": "postgresql",
@@ -898,7 +898,7 @@
         },
         "canceled_at": {
           "name": "canceled_at",
-          "type": "timestamp",
+          "type": "timestamp with time zone",
           "primaryKey": false,
           "notNull": false
         }
@@ -937,7 +937,7 @@
         },
         "canceled_at": {
           "name": "canceled_at",
-          "type": "timestamp",
+          "type": "timestamp with time zone",
           "primaryKey": false,
           "notNull": false
         }
@@ -1604,6 +1604,13 @@
           "primaryKey": false,
           "notNull": true,
           "default": "'registration'"
+        },
+        "game_start_time": {
+          "name": "game_start_time",
+          "type": "time",
+          "primaryKey": false,
+          "notNull": true,
+          "default": "'19:00:00'"
         },
         "organizer_profile_id": {
           "name": "organizer_profile_id",
