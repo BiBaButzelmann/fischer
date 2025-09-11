@@ -107,9 +107,18 @@ async function PostponementContent({ tournamentId }: { tournamentId: number }) {
   const userParticipantId = participant?.id;
   const userGroupId = participant?.group?.group?.id;
 
-  const postponements = isAdmin
-    ? await getAllPostponements(tournamentId)
-    : await getAllPostponements(tournamentId, [userParticipantId!]);
+  let postponements;
+  if (isAdmin) {
+    postponements = await getAllPostponements(tournamentId);
+  } else {
+    invariant(
+      userParticipantId && userGroupId,
+      "Non-admin user must have participant ID and group ID",
+    );
+    postponements = await getAllPostponements(tournamentId, [
+      userParticipantId,
+    ]);
+  }
 
   const partienUrl = userParticipantId
     ? buildGameViewUrl({
