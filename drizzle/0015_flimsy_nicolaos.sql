@@ -1,1 +1,0 @@
-ALTER TABLE "matchday_setup_helper" ADD COLUMN "canceled" boolean;
