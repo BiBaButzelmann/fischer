@@ -106,48 +106,6 @@
       "when": 1756811402843,
       "tag": "0014_dapper_joshua_kane",
       "breakpoints": true
-    },
-    {
-      "idx": 15,
-      "version": "7",
-      "when": 1757424740006,
-      "tag": "0015_flimsy_nicolaos",
-      "breakpoints": true
-    },
-    {
-      "idx": 16,
-      "version": "7",
-      "when": 1757435820993,
-      "tag": "0016_crazy_fat_cobra",
-      "breakpoints": true
-    },
-    {
-      "idx": 17,
-      "version": "7",
-      "when": 1757592085825,
-      "tag": "0017_noisy_blonde_phantom",
-      "breakpoints": true
-    },
-    {
-      "idx": 18,
-      "version": "7",
-      "when": 1757597167935,
-      "tag": "0018_woozy_overlord",
-      "breakpoints": true
-    },
-    {
-      "idx": 19,
-      "version": "7",
-      "when": 1757597192992,
-      "tag": "0019_amused_jack_flag",
-      "breakpoints": true
-    },
-    {
-      "idx": 20,
-      "version": "7",
-      "when": 1757604740144,
-      "tag": "0020_good_landau",
-      "breakpoints": true
     }
   ]
 }

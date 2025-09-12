@@ -1,2 +1,0 @@
--- Migration 0017: Column renames already completed
--- The canceled_at columns already exist with correct names
