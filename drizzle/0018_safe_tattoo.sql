@@ -1,2 +1,2 @@
-ALTER TABLE "matchday_referee" ALTER COLUMN "canceled_at" SET DATA TYPE timestamp;--> statement-breakpoint
-ALTER TABLE "matchday_setup_helper" ALTER COLUMN "canceled_at" SET DATA TYPE timestamp;
+ALTER TABLE "matchday_referee" ALTER COLUMN "canceled_at" SET DATA TYPE timestamp with time zone;--> statement-breakpoint
+ALTER TABLE "matchday_setup_helper" ALTER COLUMN "canceled_at" SET DATA TYPE timestamp with time zone;
