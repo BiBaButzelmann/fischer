@@ -16,7 +16,7 @@ import invariant from "tiny-invariant";
 import { bergerFide, nextEvenNumber } from "@/lib/pairing-utils";
 import { redirect } from "next/navigation";
 import {
-  getDateTimeFromDefaultTime,
+  getDateTimeFromTournamentTime,
   getGameTimeFromGame,
 } from "@/lib/game-time";
 import { sendGamePostponementEmails } from "@/actions/email/game-postponement";
@@ -250,18 +250,22 @@ export async function updateGameMatchdayAndBoardNumber(
   });
   invariant(userProfile, "User profile not found");
 
-  const fromTimestamp = getDateTimeFromDefaultTime(
+  const fromTimestamp = await getDateTimeFromTournamentTime(
     currentMatchday.date,
-  ).toJSDate();
-  const toTimestamp = getDateTimeFromDefaultTime(newMatchday.date).toJSDate();
+    gameData.tournamentId,
+  );
+  const toTimestamp = await getDateTimeFromTournamentTime(
+    newMatchday.date,
+    gameData.tournamentId,
+  );
 
   await db.transaction(async (tx) => {
     await tx.insert(gamePostponement).values({
       gameId,
       postponingParticipantId: postponingParticipant.id,
       postponedByProfileId: userProfile.id,
-      from: fromTimestamp,
-      to: toTimestamp,
+      from: fromTimestamp.toJSDate(),
+      to: toTimestamp.toJSDate(),
     });
 
     await tx
@@ -332,7 +336,7 @@ export async function updateGameResult(gameId: number, result: GameResult) {
     "User is not authorized to update this game result",
   );
 
-  const gameDateTime = getGameTimeFromGame(gameData);
+  const gameDateTime = await getGameTimeFromGame(gameData);
   const now = getCurrentLocalDateTime();
   invariant(
     gameDateTime <= now,

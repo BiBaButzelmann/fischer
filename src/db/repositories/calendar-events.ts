@@ -1,8 +1,8 @@
 import { CalendarEvent } from "../types/calendar";
 import {
   getGameTimeFromGame,
-  getDateTimeFromDefaultTime,
-  getSetupHelperTimeFromDefaultTime,
+  getDateTimeFromTournamentTime,
+  getSetupHelperTimeFromTournamentTime,
 } from "@/lib/game-time";
 import { getCurrentLocalDateTime, toLocalDateTime } from "@/lib/date";
 import { getMatchdaysByRefereeId } from "./referee";
@@ -18,19 +18,18 @@ export async function getCalendarEventsForParticipant(
   participantId: number,
 ): Promise<CalendarEvent[]> {
   const games = await getParticipantGames(participantId);
-
   const events: CalendarEvent[] = [];
   for (const game of games) {
-    const gameDateTime = getGameTimeFromGame(game);
+    const gameDateTime = await getGameTimeFromGame(game);
 
-    const whitePlayerDisabled =
-      game.whiteParticipant?.deletedAt != null &&
+    const whitePlayerDeleted =
+      game.whiteParticipant?.deletedAt &&
       toLocalDateTime(game.whiteParticipant.deletedAt) <= gameDateTime;
-    const blackPlayerDisabled =
-      game.blackParticipant?.deletedAt != null &&
+    const blackPlayerDeleted =
+      game.blackParticipant?.deletedAt &&
       toLocalDateTime(game.blackParticipant.deletedAt) <= gameDateTime;
 
-    if (whitePlayerDisabled || blackPlayerDisabled) {
+    if (whitePlayerDeleted || blackPlayerDeleted) {
       // Skip games where one of the players is disabled at the time of the game
       continue;
     }
@@ -42,7 +41,7 @@ export async function getCalendarEventsForParticipant(
       extendedProps: {
         eventType: "game" as const,
         gameId: game.id,
-        participantId: participantId,
+        participantId,
         round: game.round,
         tournamentId: game.tournamentId,
         groupId: game.groupId,
@@ -55,37 +54,51 @@ export async function getCalendarEventsForParticipant(
 export async function getCalendarEventsForReferee(refereeId: number) {
   const refereeMatchdays = await getMatchdaysByRefereeId(refereeId);
 
-  return refereeMatchdays.map((entry) => {
-    return {
-      id: `referee-${entry.matchday.id}`,
-      title: `Schiedsrichter`,
-      start: getDateTimeFromDefaultTime(entry.matchday.date).toJSDate(),
-      extendedProps: {
-        eventType: "referee" as const,
-        refereeId: entry.referee.id,
-        matchdayId: entry.matchday.id,
-        tournamentId: entry.matchday.tournamentId,
-      },
-    };
-  });
+  return await Promise.all(
+    refereeMatchdays.map(async (entry) => {
+      const startTime = await getDateTimeFromTournamentTime(
+        entry.matchday.date,
+        entry.matchday.tournamentId,
+      );
+
+      return {
+        id: `referee-${entry.matchday.id}`,
+        title: `Schiedsrichter`,
+        start: startTime.toJSDate(),
+        extendedProps: {
+          eventType: "referee" as const,
+          refereeId: entry.referee.id,
+          matchdayId: entry.matchday.id,
+          tournamentId: entry.matchday.tournamentId,
+        },
+      };
+    }),
+  );
 }
 
 export async function getCalendarEventsForSetupHelper(setupHelperId: number) {
   const setupHelperMatchdays = await getMatchdaysBySetupHelperId(setupHelperId);
 
-  return setupHelperMatchdays.map((entry) => {
-    return {
-      id: `setupHelper-${entry.matchday.id}`,
-      title: `Aufbauhelfer`,
-      start: getSetupHelperTimeFromDefaultTime(entry.matchday.date).toJSDate(),
-      extendedProps: {
-        eventType: "setupHelper" as const,
-        setupHelperId: entry.setupHelper.id,
-        matchdayId: entry.matchday.id,
-        tournamentId: entry.matchday.tournamentId,
-      },
-    };
-  });
+  return await Promise.all(
+    setupHelperMatchdays.map(async (entry) => {
+      const startTime = await getSetupHelperTimeFromTournamentTime(
+        entry.matchday.date,
+        entry.matchday.tournamentId,
+      );
+
+      return {
+        id: `setupHelper-${entry.matchday.id}`,
+        title: `Aufbauhelfer`,
+        start: startTime.toJSDate(),
+        extendedProps: {
+          eventType: "setupHelper" as const,
+          setupHelperId: entry.setupHelper.id,
+          matchdayId: entry.matchday.id,
+          tournamentId: entry.matchday.tournamentId,
+        },
+      };
+    }),
+  );
 }
 
 export async function getUpcomingEventsByProfileAndTournament(

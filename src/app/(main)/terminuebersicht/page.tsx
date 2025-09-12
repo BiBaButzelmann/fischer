@@ -26,6 +26,10 @@ export default async function Page() {
     redirect("/uebersicht");
   }
 
+  if (tournament?.stage !== "running") {
+    redirect("/uebersicht");
+  }
+
   const [refereeAppointments, setupHelperAppointments] = await Promise.all([
     getRefereeAppointmentsByUserId(session.user.id),
     getSetupHelperAppointmentsByUserId(session.user.id),

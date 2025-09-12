@@ -84,7 +84,7 @@ async function PgnContainer({
   const whiteDisplay = formatDisplayName(game.whiteParticipant);
   const blackDisplay = formatDisplayName(game.blackParticipant);
 
-  const gameDateTime = getGameTimeFromGame(game);
+  const gameDateTime = await getGameTimeFromGame(game);
 
   const pgn =
     game.pgn != null

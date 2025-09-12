@@ -30,12 +30,6 @@ export const monthLabels = [
   "Dezember",
 ];
 
-export const GAME_START_TIME = {
-  hours: 19,
-  minutes: 0,
-  seconds: 0,
-} as const;
-
 export const NUMBER_OF_GROUPS_WITH_ELO = 4;
 
 export const CALENDAR_EXPORT_DURATIONS = {

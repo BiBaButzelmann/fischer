@@ -7,6 +7,7 @@ import {
   pgTable,
   smallint,
   text,
+  time,
 } from "drizzle-orm/pg-core";
 import { profile } from "./profile";
 import { timestamps } from "./columns.helpers";
@@ -39,6 +40,7 @@ export const tournament = pgTable("tournament", {
   phone: text("phone").notNull(),
   email: text("email").notNull(),
   stage: tournamentStage("stage").default("registration").notNull(),
+  gameStartTime: time("game_start_time").notNull().default("19:00:00"),
 
   organizerProfileId: integer("organizer_profile_id"),
 

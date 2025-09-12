@@ -1,54 +1,98 @@
-import { GAME_START_TIME } from "@/constants/constants";
+import { getGameStartTimeByTournamentId } from "@/db/repositories/tournament";
 import { GameWithMatchday } from "@/db/types/game";
 import { DateTime } from "luxon";
+import invariant from "tiny-invariant";
 
 /**
- * Creates a Date object for a game with the specified matchday date and the standard game start time (7 PM German time)
+ * Creates a Date object for a game with the specified matchday date and tournament-specific game start time
  * @param matchdayDate - The date of the matchday (Date object or string)
+ * @param tournamentId - The tournament ID to get the game start time from
  * @returns A Date object with the game date and time
  */
-export function getDateTimeFromDefaultTime(matchdayDate: Date): DateTime {
+export async function getDateTimeFromTournamentTime(
+  matchdayDate: Date,
+  tournamentId: number,
+) {
+  const tournamentTime = await getGameStartTimeByTournamentId(tournamentId);
+
+  invariant(tournamentTime, `Tournament with ID ${tournamentId} not found`);
+  invariant(
+    tournamentTime.gameStartTime,
+    `Tournament with ID ${tournamentId} has no game start time`,
+  );
+
+  const [hours, minutes, seconds] = tournamentTime.gameStartTime
+    .split(":")
+    .map(Number);
+
   const gameDateTime = DateTime.fromJSDate(matchdayDate)
     .setZone("Europe/Berlin")
     .set({
-      hour: GAME_START_TIME.hours,
-      minute: GAME_START_TIME.minutes,
-      second: GAME_START_TIME.seconds,
+      hour: hours,
+      minute: minutes,
+      second: seconds,
     });
   return gameDateTime;
 }
 
 /**
- * Creates a Date object for setup helper with the specified matchday date and 30 minutes before game start time (6:30 PM German time)
+ * Creates a Date object for setup helper with the specified matchday date and 30 minutes before game start time
  * @param matchdayDate - The date of the matchday (Date object or string)
+ * @param tournamentId - The tournament ID to get the game start time from
  * @returns A Date object with the setup helper date and time
  */
-export function getSetupHelperTimeFromDefaultTime(
+export async function getSetupHelperTimeFromTournamentTime(
   matchdayDate: Date,
-): DateTime {
+  tournamentId: number,
+): Promise<DateTime> {
+  const tournamentTime = await getGameStartTimeByTournamentId(tournamentId);
+
+  invariant(tournamentTime, `Tournament with ID ${tournamentId} not found`);
+  invariant(
+    tournamentTime.gameStartTime,
+    `Tournament with ID ${tournamentId} has no game start time`,
+  );
+
+  const [hours, minutes, seconds] = tournamentTime.gameStartTime
+    .split(":")
+    .map(Number);
+
   const setupDateTime = DateTime.fromJSDate(matchdayDate)
     .setZone("Europe/Berlin")
     .set({
-      hour: GAME_START_TIME.hours,
-      minute: GAME_START_TIME.minutes - 30,
-      second: GAME_START_TIME.seconds,
+      hour: hours,
+      minute: minutes - 30,
+      second: seconds,
     });
   return setupDateTime;
 }
 
 /**
  * Creates a Date object for a game from a complete game object
- * @param game - The game object with matchdayGame relation
+ * @param game - The game object with matchdayGame relation and tournamentId
  * @returns A Date object with the game date and time
  */
-export function getGameTimeFromGame(game: GameWithMatchday): DateTime {
-  return getDateTimeFromDefaultTime(game.matchdayGame.matchday.date);
+export async function getGameTimeFromGame(game: GameWithMatchday) {
+  return await getDateTimeFromTournamentTime(
+    game.matchdayGame.matchday.date,
+    game.tournamentId,
+  );
 }
 
 /**
- * Formats the standard game start time for display (HH:MM Uhr format)
+ * Formats the game start time for a specific tournament for display (HH:MM Uhr format)
+ * @param tournamentId - The tournament ID to get the game start time from
  * @returns A formatted time string in German format
  */
-export function formatGameTime(): string {
-  return `${GAME_START_TIME.hours.toString().padStart(2, "0")}:${GAME_START_TIME.minutes.toString().padStart(2, "0")} Uhr`;
+export async function formatGameTimeByTournament(tournamentId: number) {
+  const tournamentTime = await getGameStartTimeByTournamentId(tournamentId);
+
+  invariant(tournamentTime, `Tournament with ID ${tournamentId} not found`);
+  invariant(
+    tournamentTime.gameStartTime,
+    `Tournament with ID ${tournamentId} has no game start time`,
+  );
+
+  const [hours, minutes] = tournamentTime.gameStartTime.split(":").map(Number);
+  return `${hours.toString().padStart(2, "0")}:${minutes.toString().padStart(2, "0")} Uhr`;
 }

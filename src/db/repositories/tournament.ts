@@ -6,6 +6,15 @@ export async function getTournamentById(tournamentId: number) {
   });
 }
 
+export async function getGameStartTimeByTournamentId(tournamentId: number) {
+  return await db.query.tournament.findFirst({
+    columns: {
+      gameStartTime: true,
+    },
+    where: (tournament, { eq }) => eq(tournament.id, tournamentId),
+  });
+}
+
 export async function getActiveTournament() {
   return await db.query.tournament.findFirst({
     where: (tournament, { or, eq }) =>
