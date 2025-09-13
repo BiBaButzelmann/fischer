@@ -18,10 +18,7 @@ import { getSetupHelperTimeFromDefaultTime } from "@/lib/game-time";
 import { buildGameViewUrl } from "@/lib/navigation";
 import Link from "next/link";
 import { PrintGamesButton } from "@/components/partien/print-games-button";
-import {
-  RefereeAppointment,
-  SetupHelperAppointment,
-} from "@/services/appointment";
+import { MatchdayAppointment } from "@/services/appointment";
 import {
   cancelRefereeAppointment,
   uncancelRefereeAppointment,
@@ -33,21 +30,17 @@ import { RefereeAppointmentSection } from "./referee-appointment-section";
 import { SetupHelperAppointmentSection } from "./setup-helper-appointment-section";
 
 type Props = {
-  refereeAppointment?: RefereeAppointment;
-  setupHelperAppointment?: SetupHelperAppointment;
+  appointment: MatchdayAppointment;
 };
-
-export function MatchdayAppointmentCard({
-  refereeAppointment,
-  setupHelperAppointment,
-}: Props) {
+export function MatchdayAppointmentCard({ appointment }: Props) {
   const [isPending, startTransition] = useTransition();
   const [isDialogOpen, setIsDialogOpen] = useState(false);
 
-  const appointment = refereeAppointment || setupHelperAppointment;
-  if (!appointment) return null;
+  const baseAppointment =
+    appointment.refereeAppointment ?? appointment.setupHelperAppointment;
+  if (!baseAppointment) return null;
 
-  const { matchdayId, date, tournamentId } = appointment;
+  const { matchdayId, date, tournamentId } = baseAppointment;
 
   const setupHelperTime = getSetupHelperTimeFromDefaultTime(date);
 
@@ -56,23 +49,33 @@ export function MatchdayAppointmentCard({
     matchdayId,
   });
 
-  const hasAnyAppointment = refereeAppointment || setupHelperAppointment;
+  const hasAnyAppointment =
+    appointment.refereeAppointment || appointment.setupHelperAppointment;
   const hasAnyCancelledAppointment =
-    refereeAppointment?.isCanceled || setupHelperAppointment?.isCanceled;
+    appointment.refereeAppointment?.isCanceled ||
+    appointment.setupHelperAppointment?.isCanceled;
   const hasAnyActiveAppointment =
-    (refereeAppointment && !refereeAppointment.isCanceled) ||
-    (setupHelperAppointment && !setupHelperAppointment.isCanceled);
+    (appointment.refereeAppointment &&
+      !appointment.refereeAppointment.isCanceled) ||
+    (appointment.setupHelperAppointment &&
+      !appointment.setupHelperAppointment.isCanceled);
 
   const handleCancel = () => {
     startTransition(async () => {
       try {
         const promises = [];
 
-        if (refereeAppointment && !refereeAppointment.isCanceled) {
+        if (
+          appointment.refereeAppointment &&
+          !appointment.refereeAppointment.isCanceled
+        ) {
           promises.push(cancelRefereeAppointment(matchdayId));
         }
 
-        if (setupHelperAppointment && !setupHelperAppointment.isCanceled) {
+        if (
+          appointment.setupHelperAppointment &&
+          !appointment.setupHelperAppointment.isCanceled
+        ) {
           promises.push(cancelSetupHelperAppointment(matchdayId));
         }
 
@@ -90,11 +93,11 @@ export function MatchdayAppointmentCard({
       try {
         const promises = [];
 
-        if (refereeAppointment?.isCanceled) {
+        if (appointment.refereeAppointment?.isCanceled) {
           promises.push(uncancelRefereeAppointment(matchdayId));
         }
 
-        if (setupHelperAppointment?.isCanceled) {
+        if (appointment.setupHelperAppointment?.isCanceled) {
           promises.push(uncancelSetupHelperAppointment(matchdayId));
         }
 
@@ -135,12 +138,16 @@ export function MatchdayAppointmentCard({
       </CardHeader>
 
       <CardContent className="space-y-6">
-        {refereeAppointment && (
-          <RefereeAppointmentSection appointment={refereeAppointment} />
+        {appointment.refereeAppointment && (
+          <RefereeAppointmentSection
+            appointment={appointment.refereeAppointment}
+          />
         )}
 
-        {setupHelperAppointment && (
-          <SetupHelperAppointmentSection appointment={setupHelperAppointment} />
+        {appointment.setupHelperAppointment && (
+          <SetupHelperAppointmentSection
+            appointment={appointment.setupHelperAppointment}
+          />
         )}
 
         {hasAnyAppointment && (

@@ -25,6 +25,10 @@ export type SetupHelperAppointment = RefereeAppointment & {
     canceled: boolean | null;
   }[];
 };
+export type MatchdayAppointment = {
+  refereeAppointment?: RefereeAppointment;
+  setupHelperAppointment?: SetupHelperAppointment;
+};
 
 export async function getRefereeAppointmentsByUserId(userId: string) {
   const userReferee = await getRefereeByUserId(userId);

@@ -69,8 +69,7 @@ export function AppointmentsList({
             (appointment.refereeAppointment ||
               appointment.setupHelperAppointment)!.matchdayId
           }
-          refereeAppointment={appointment.refereeAppointment}
-          setupHelperAppointment={appointment.setupHelperAppointment}
+          appointment={appointment}
         />
       ))}
     </div>
