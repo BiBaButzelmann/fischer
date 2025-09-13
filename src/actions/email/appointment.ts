@@ -18,33 +18,28 @@ export async function sendSetupHelperAppointmentEmail(
   matchdayId: number,
   isCanceled: boolean,
 ) {
-  const setupHelperData = await db
-    .select({
-      firstName: profile.firstName,
-      lastName: profile.lastName,
-      email: profile.email,
-      phoneNumber: profile.phoneNumber,
-    })
-    .from(setupHelper)
-    .innerJoin(profile, eq(setupHelper.profileId, profile.id))
-    .where(eq(setupHelper.id, setupHelperId))
-    .limit(1);
+  const setupHelperData = await db.query.setupHelper.findFirst({
+    where: eq(setupHelper.id, setupHelperId),
+    with: {
+      profile: true,
+    },
+  });
 
-  invariant(setupHelperData.length > 0, "Setup helper not found");
-  const setupHelperProfile = setupHelperData[0];
+  invariant(setupHelperData, "Setup helper not found");
 
   const matchdayInfo = await getMatchdayById(matchdayId);
   invariant(matchdayInfo, "Matchday not found");
 
-  const setupHelperName = `${setupHelperProfile.firstName} ${setupHelperProfile.lastName}`;
+  const profile = setupHelperData.profile;
+  const setupHelperName = `${profile.firstName} ${profile.lastName}`;
   const formattedDate = displayLongDate(toLocalDateTime(matchdayInfo.date));
 
   const emailData = {
     name: setupHelperName,
     isCancellation: isCanceled,
     date: formattedDate,
-    email: setupHelperProfile.email,
-    phoneNumber: setupHelperProfile.phoneNumber,
+    email: profile.email,
+    phoneNumber: profile.phoneNumber,
   };
 
   await sendSetupHelperAppointmentNotification(emailData);
