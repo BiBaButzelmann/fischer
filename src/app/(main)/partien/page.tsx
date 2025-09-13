@@ -5,16 +5,13 @@ import {
 } from "@/db/repositories/game";
 import { PartienSelector } from "@/components/partien/partien-selector";
 import { GamesList } from "@/components/partien/games-list";
+import { PrintGamesButton } from "@/components/partien/print-games-button";
 import { updateGameResult } from "@/actions/game";
 import { getParticipantsByGroupId } from "@/db/repositories/participant";
 import { getRolesByUserId } from "@/db/repositories/role";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { getAllMatchdaysByTournamentId } from "@/db/repositories/match-day";
 import { auth } from "@/auth/utils";
-import { Button } from "@/components/ui/button";
-import Link from "next/link";
-import { buildGameViewParams } from "@/lib/navigation";
-import { Printer } from "lucide-react";
 
 export default async function Page({
   searchParams,
@@ -103,15 +100,13 @@ export default async function Page({
         <h1 className="flex-1 text-3xl font-bold text-gray-900 mb-4">
           Partien
         </h1>
-        <Button variant="outline" asChild>
-          <Link
-            href={`/partien/drucken?${buildGameViewParams(queryData)}`}
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            <Printer />
-          </Link>
-        </Button>
+        <PrintGamesButton
+          tournamentId={queryData.tournamentId}
+          groupId={queryData.groupId}
+          round={queryData.round}
+          participantId={queryData.participantId}
+          matchdayId={queryData.matchdayId}
+        />
       </div>
       <div className="flex flex-col gap-1 md:gap-2">
         <PartienSelector

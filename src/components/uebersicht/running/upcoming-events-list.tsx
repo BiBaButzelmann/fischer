@@ -4,14 +4,12 @@ import { match } from "ts-pattern";
 import { UpcomingRefereeEvent } from "./upcoming-referee-event";
 import { UpcomingGameEvent } from "./upcoming-game-event";
 import { UpcomingSetupHelperEvent } from "./upcoming-setup-helper-event";
-import { ProfileWithName } from "@/db/types/profile";
 
 type Props = {
-  profile: ProfileWithName;
   events: CalendarEvent[];
 };
 
-export function UpcomingEventsList({ profile, events }: Props) {
+export function UpcomingEventsList({ events }: Props) {
   return (
     <>
       <div className="mb-4 flex items-center gap-2 text-sm text-muted-foreground">
@@ -21,13 +19,8 @@ export function UpcomingEventsList({ profile, events }: Props) {
         <div className="space-y-4">
           {events.map((event, index) =>
             match(event.extendedProps)
-              .with({ eventType: "referee" }, (data) => (
-                <UpcomingRefereeEvent
-                  key={index}
-                  start={event.start}
-                  tournamentId={data.tournamentId}
-                  matchdayId={data.matchdayId}
-                />
+              .with({ eventType: "referee" }, () => (
+                <UpcomingRefereeEvent key={index} start={event.start} />
               ))
               .with({ eventType: "game" }, (data) => (
                 <UpcomingGameEvent
@@ -39,14 +32,8 @@ export function UpcomingEventsList({ profile, events }: Props) {
                   participantId={data.participantId}
                 />
               ))
-              .with({ eventType: "setupHelper" }, (data) => (
-                <UpcomingSetupHelperEvent
-                  key={index}
-                  start={event.start}
-                  tournamentId={data.tournamentId}
-                  matchdayId={data.matchdayId}
-                  profileId={profile.id}
-                />
+              .with({ eventType: "setupHelper" }, () => (
+                <UpcomingSetupHelperEvent key={index} start={event.start} />
               ))
               .exhaustive(),
           )}
