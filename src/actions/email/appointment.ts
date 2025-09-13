@@ -50,33 +50,28 @@ export async function sendRefereeAppointmentEmail(
   matchdayId: number,
   isCanceled: boolean,
 ) {
-  const refereeData = await db
-    .select({
-      firstName: profile.firstName,
-      lastName: profile.lastName,
-      email: profile.email,
-      phoneNumber: profile.phoneNumber,
-    })
-    .from(referee)
-    .innerJoin(profile, eq(referee.profileId, profile.id))
-    .where(eq(referee.id, refereeId))
-    .limit(1);
+  const refereeData = await db.query.referee.findFirst({
+    where: eq(referee.id, refereeId),
+    with: {
+      profile: true,
+    },
+  });
 
-  invariant(refereeData.length > 0, "Referee not found");
-  const refereeProfile = refereeData[0];
+  invariant(refereeData, "Referee not found");
 
   const matchdayInfo = await getMatchdayById(matchdayId);
   invariant(matchdayInfo, "Matchday not found");
 
-  const refereeName = `${refereeProfile.firstName} ${refereeProfile.lastName}`;
+  const profile = refereeData.profile;
+  const refereeName = `${profile.firstName} ${profile.lastName}`;
   const formattedDate = displayLongDate(toLocalDateTime(matchdayInfo.date));
 
   const emailData = {
     name: refereeName,
     isCancellation: isCanceled,
     date: formattedDate,
-    email: refereeProfile.email,
-    phoneNumber: refereeProfile.phoneNumber,
+    email: profile.email,
+    phoneNumber: profile.phoneNumber,
   };
 
   await sendRefereeAppointmentNotification(emailData);
