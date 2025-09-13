@@ -1,7 +1,6 @@
 "use server";
 
 import { db } from "@/db/client";
-import { profile } from "@/db/schema/profile";
 import { setupHelper } from "@/db/schema/setupHelper";
 import { referee } from "@/db/schema/referee";
 import { getMatchdayById } from "@/db/repositories/match-day";

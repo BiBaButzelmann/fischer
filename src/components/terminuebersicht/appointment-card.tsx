@@ -15,7 +15,6 @@ import {
 import { Clock, ChevronRight, X, Undo2 } from "lucide-react";
 import { formatEventDateTime, toLocalDateTime } from "@/lib/date";
 import { getSetupHelperTimeFromDefaultTime } from "@/lib/game-time";
-import { matchDays } from "@/constants/constants";
 import { buildGameViewUrl } from "@/lib/navigation";
 import Link from "next/link";
 import { PrintGamesButton } from "@/components/partien/print-games-button";
@@ -48,7 +47,7 @@ export function MatchdayAppointmentCard({
   const appointment = refereeAppointment || setupHelperAppointment;
   if (!appointment) return null;
 
-  const { matchdayId, date, dayOfWeek, tournamentId } = appointment;
+  const { matchdayId, date, tournamentId } = appointment;
 
   const setupHelperTime = getSetupHelperTimeFromDefaultTime(date);
 

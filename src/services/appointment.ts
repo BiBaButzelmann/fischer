@@ -12,7 +12,6 @@ import invariant from "tiny-invariant";
 export type RefereeAppointment = {
   matchdayId: number;
   date: Date;
-  dayOfWeek: string;
   tournamentId: number;
   isCanceled: boolean;
 };
