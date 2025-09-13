@@ -15,7 +15,7 @@ type Props = {
   setupHelperAppointments: SetupHelperAppointment[];
 };
 
-export function TerminuebersichtAppointmentsList({
+export function AppointmentsList({
   refereeAppointments,
   setupHelperAppointments,
 }: Props) {

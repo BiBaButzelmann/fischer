@@ -3,7 +3,7 @@ import { getLatestTournament } from "@/db/repositories/tournament";
 import { getRefereeByUserId } from "@/db/repositories/referee";
 import { getSetupHelperByUserId } from "@/db/repositories/setup-helper";
 import { redirect } from "next/navigation";
-import { TerminuebersichtAppointmentsList } from "@/components/terminuebersicht/appointments-list";
+import { AppointmentsList } from "@/components/terminuebersicht/appointments-list";
 import {
   getRefereeAppointmentsByUserId,
   getSetupHelperAppointmentsByUserId,
@@ -50,7 +50,7 @@ export default async function Page() {
           </p>
         </div>
 
-        <TerminuebersichtAppointmentsList
+        <AppointmentsList
           refereeAppointments={refereeAppointments}
           setupHelperAppointments={setupHelperAppointments}
         />
