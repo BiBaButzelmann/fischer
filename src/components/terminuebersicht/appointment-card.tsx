@@ -112,7 +112,7 @@ export function MatchdayAppointmentCard({
       <CardHeader className="pb-4">
         <div className="flex items-center justify-between">
           <h2 className="text-2xl font-bold">
-            {matchDays[dayOfWeek as keyof typeof matchDays]}
+            {toLocalDateTime(date).setLocale("de").weekdayLong}
           </h2>
           <div className="flex items-center gap-2">
             <Link href={gameUrl}>
