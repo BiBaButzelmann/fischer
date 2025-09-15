@@ -14,19 +14,14 @@ import {
 } from "@/components/ui/dialog";
 import { Clock, ChevronRight, X, Undo2 } from "lucide-react";
 import { formatEventDateTime, toLocalDateTime } from "@/lib/date";
-import { matchDays } from "@/constants/constants";
+import { getSetupHelperTimeFromDefaultTime } from "@/lib/game-time";
 import { buildGameViewUrl } from "@/lib/navigation";
 import Link from "next/link";
 import { PrintGamesButton } from "@/components/partien/print-games-button";
+import { MatchdayAppointment } from "@/services/appointment";
 import {
-  RefereeAppointment,
-  SetupHelperAppointment,
-} from "@/services/appointment";
-import {
-  cancelRefereeAppointment,
-  uncancelRefereeAppointment,
-  cancelSetupHelperAppointment,
-  uncancelSetupHelperAppointment,
+  cancelMatchdayAppointments,
+  uncancelMatchdayAppointments,
 } from "@/actions/appointment";
 import { toast } from "sonner";
 import { RefereeAppointmentSection } from "./referee-appointment-section";
@@ -34,59 +29,29 @@ import { SetupHelperAppointmentSection } from "./setup-helper-appointment-sectio
 import invariant from "tiny-invariant";
 
 type Props = {
-  refereeAppointment?: RefereeAppointment;
-  setupHelperAppointment?: SetupHelperAppointment;
+  appointment: MatchdayAppointment;
 };
-
-export function MatchdayAppointmentCard({
-  refereeAppointment,
-  setupHelperAppointment,
-}: Props) {
+export function MatchdayAppointmentCard({ appointment }: Props) {
   const [isPending, startTransition] = useTransition();
   const [isDialogOpen, setIsDialogOpen] = useState(false);
 
-  const appointment = refereeAppointment || setupHelperAppointment;
-  if (!appointment) return null;
+  const { matchdayId, matchdayDate, tournamentId, cancelledAt, appointments } =
+    appointment;
 
-  const { matchdayId, dayOfWeek, tournamentId } = appointment;
-
-  const displayTime = setupHelperAppointment?.setupHelperTime
-    ? toLocalDateTime(setupHelperAppointment.setupHelperTime)
-    : refereeAppointment?.gameStartTime
-      ? toLocalDateTime(refereeAppointment.gameStartTime)
-      : null;
-
-  invariant(
-    displayTime,
-    "Either setup helper time or game start time is required",
-  );
+  const setupHelperTime = getSetupHelperTimeFromDefaultTime(matchdayDate);
 
   const gameUrl = buildGameViewUrl({
     tournamentId,
     matchdayId,
   });
 
-  const hasAnyAppointment = refereeAppointment || setupHelperAppointment;
-  const hasAnyCancelledAppointment =
-    refereeAppointment?.isCanceled || setupHelperAppointment?.isCanceled;
-  const hasAnyActiveAppointment =
-    (refereeAppointment && !refereeAppointment.isCanceled) ||
-    (setupHelperAppointment && !setupHelperAppointment.isCanceled);
+  const isCancelled = cancelledAt !== null;
+  const hasActiveAppointments = !isCancelled;
 
   const handleCancel = () => {
     startTransition(async () => {
       try {
-        const promises = [];
-
-        if (refereeAppointment && !refereeAppointment.isCanceled) {
-          promises.push(cancelRefereeAppointment(matchdayId));
-        }
-
-        if (setupHelperAppointment && !setupHelperAppointment.isCanceled) {
-          promises.push(cancelSetupHelperAppointment(matchdayId));
-        }
-
-        await Promise.all(promises);
+        await cancelMatchdayAppointments(matchdayId);
         toast.success("Termine erfolgreich abgesagt");
         setIsDialogOpen(false);
       } catch {
@@ -98,17 +63,7 @@ export function MatchdayAppointmentCard({
   const handleUncancel = () => {
     startTransition(async () => {
       try {
-        const promises = [];
-
-        if (refereeAppointment?.isCanceled) {
-          promises.push(uncancelRefereeAppointment(matchdayId));
-        }
-
-        if (setupHelperAppointment?.isCanceled) {
-          promises.push(uncancelSetupHelperAppointment(matchdayId));
-        }
-
-        await Promise.all(promises);
+        await uncancelMatchdayAppointments(matchdayId);
         toast.success("Absagen erfolgreich rückgängig gemacht");
       } catch {
         toast.error("Fehler beim Rückgängigmachen der Absagen");
@@ -121,7 +76,7 @@ export function MatchdayAppointmentCard({
       <CardHeader className="pb-4">
         <div className="flex items-center justify-between">
           <h2 className="text-2xl font-bold">
-            {matchDays[dayOfWeek as keyof typeof matchDays]}
+            {toLocalDateTime(matchdayDate).setLocale("de").weekdayLong}
           </h2>
           <div className="flex items-center gap-2">
             <Link href={gameUrl}>
@@ -143,17 +98,27 @@ export function MatchdayAppointmentCard({
       </CardHeader>
 
       <CardContent className="space-y-6">
-        {refereeAppointment && (
-          <RefereeAppointmentSection appointment={refereeAppointment} />
-        )}
+        {appointments.map((appointmentType, index) => {
+          if (appointmentType.type === "referee") {
+            return (
+              <RefereeAppointmentSection
+                key={`referee-${index}`}
+                isCanceled={isCancelled}
+              />
+            );
+          }
+          return (
+            <SetupHelperAppointmentSection
+              key={`setupHelper-${index}`}
+              otherSetupHelpers={appointmentType.otherSetupHelpers}
+              isCanceled={isCancelled}
+            />
+          );
+        })}
 
-        {setupHelperAppointment && (
-          <SetupHelperAppointmentSection appointment={setupHelperAppointment} />
-        )}
-
-        {hasAnyAppointment && (
+        {appointments.length > 0 && (
           <div className="flex justify-center pt-4 border-t">
-            {hasAnyActiveAppointment ? (
+            {hasActiveAppointments ? (
               <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
                 <DialogTrigger asChild>
                   <Button
@@ -193,7 +158,7 @@ export function MatchdayAppointmentCard({
                   </DialogFooter>
                 </DialogContent>
               </Dialog>
-            ) : hasAnyCancelledAppointment ? (
+            ) : isCancelled ? (
               <Button
                 variant="outline"
                 size="sm"

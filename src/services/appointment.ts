@@ -13,20 +13,12 @@ import {
 } from "@/lib/game-time";
 import invariant from "tiny-invariant";
 
-export type Appointment = {
-  matchdayId: number;
-  date: Date;
-  dayOfWeek: string;
-  tournamentId: number;
-  isCanceled: boolean;
+type RefereeAppointment = {
+  type: "referee";
 };
 
-export type RefereeAppointment = Appointment & {
-  gameStartTime: Date;
-};
-
-export type SetupHelperAppointment = Appointment & {
-  setupHelperTime: Date;
+type SetupHelperAppointment = {
+  type: "setupHelper";
   otherSetupHelpers: {
     firstName: string;
     lastName: string;
@@ -36,92 +28,103 @@ export type SetupHelperAppointment = Appointment & {
   }[];
 };
 
-export async function getRefereeAppointmentsByUserId(userId: string) {
-  const userReferee = await getRefereeByUserId(userId);
-  if (!userReferee) {
+type Appointment = RefereeAppointment | SetupHelperAppointment;
+
+export type MatchdayAppointment = {
+  matchdayId: number;
+  matchdayDate: Date;
+  tournamentId: number;
+  cancelledAt: Date | null;
+  appointments: Appointment[];
+};
+
+export async function getMatchdayAppointmentsByUserId(
+  userId: string,
+): Promise<MatchdayAppointment[]> {
+  const [userReferee, userSetupHelper] = await Promise.all([
+    getRefereeByUserId(userId),
+    getSetupHelperByUserId(userId),
+  ]);
+
+  if (!userReferee && !userSetupHelper) {
     return [];
   }
 
   const currentDate = getCurrentLocalDateTime().startOf("day").toJSDate();
+  const appointmentsByMatchday = new Map<number, MatchdayAppointment>();
 
-  const refereeAppointments = await getRefereeAppointmentsByRefereeId(
-    userReferee.id,
-    currentDate,
-  );
-
-  return Promise.all(
-    refereeAppointments.map(async (appointment) => {
-      const gameStartTime = await getDateTimeFromTournamentTime(
-        appointment.date,
-        appointment.tournamentId,
-      );
-
-      return {
-        matchdayId: appointment.matchdayId,
-        date: appointment.date,
-        dayOfWeek: appointment.dayOfWeek,
-        tournamentId: appointment.tournamentId,
-        isCanceled: appointment.canceledAt !== null,
-        gameStartTime: gameStartTime.toJSDate(),
-      };
-    }),
-  );
-}
-
-export async function getSetupHelperAppointmentsByUserId(userId: string) {
-  const userSetupHelper = await getSetupHelperByUserId(userId);
-  if (!userSetupHelper) {
-    return [];
-  }
-
-  const profile = await getProfileByUserId(userId);
-  invariant(profile, "Profile not found for user");
-
-  const currentDate = getCurrentLocalDateTime().startOf("day").toJSDate();
-
-  const setupHelperAppointments =
-    await getSetupHelperAppointmentsBySetupHelperId(
-      userSetupHelper.id,
+  if (userReferee) {
+    const refereeAppointments = await getRefereeAppointmentsByRefereeId(
+      userReferee.id,
       currentDate,
     );
 
-  if (setupHelperAppointments.length === 0) {
-    return [];
+    for (const appointment of refereeAppointments) {
+      const existing = appointmentsByMatchday.get(appointment.matchdayId);
+      if (existing) {
+        existing.appointments.push({ type: "referee" });
+      } else {
+        appointmentsByMatchday.set(appointment.matchdayId, {
+          matchdayId: appointment.matchdayId,
+          matchdayDate: appointment.date,
+          tournamentId: appointment.tournamentId,
+          cancelledAt: appointment.canceledAt,
+          appointments: [{ type: "referee" }],
+        });
+      }
+    }
   }
 
-  const matchdayIds = setupHelperAppointments.map((app) => app.matchdayId);
+  if (userSetupHelper) {
+    const profile = await getProfileByUserId(userId);
+    invariant(profile, "Profile not found for user");
 
-  const allSetupHelpersInfo = await getSetupHelpersInfoByMatchdayIds(
-    matchdayIds,
-    profile.id,
-  );
-
-  return Promise.all(
-    setupHelperAppointments.map(async (appointment) => {
-      const setupHelpersForMatchday = allSetupHelpersInfo.filter(
-        (helper) => helper.matchdayId === appointment.matchdayId,
+    const setupHelperAppointments =
+      await getSetupHelperAppointmentsBySetupHelperId(
+        userSetupHelper.id,
+        currentDate,
       );
 
-      const setupHelperTime = await getSetupHelperTimeFromTournamentTime(
-        appointment.date,
-        appointment.tournamentId,
+    if (setupHelperAppointments.length > 0) {
+      const matchdayIds = setupHelperAppointments.map((app) => app.matchdayId);
+      const allSetupHelpersInfo = await getSetupHelpersInfoByMatchdayIds(
+        matchdayIds,
+        profile.id,
       );
 
-      return {
-        matchdayId: appointment.matchdayId,
-        date: appointment.date,
-        dayOfWeek: appointment.dayOfWeek,
-        tournamentId: appointment.tournamentId,
-        isCanceled: appointment.canceledAt !== null,
-        setupHelperTime: setupHelperTime.toJSDate(),
-        otherSetupHelpers: setupHelpersForMatchday.map((sh) => ({
-          firstName: sh.firstName,
-          lastName: sh.lastName,
-          email: sh.email,
-          phoneNumber: sh.phoneNumber,
-          canceled: sh.canceledAt !== null,
-        })),
-      };
-    }),
+      for (const appointment of setupHelperAppointments) {
+        const setupHelpersForMatchday = allSetupHelpersInfo.filter(
+          (helper) => helper.matchdayId === appointment.matchdayId,
+        );
+
+        const setupHelperAppointment: SetupHelperAppointment = {
+          type: "setupHelper",
+          otherSetupHelpers: setupHelpersForMatchday.map((sh) => ({
+            firstName: sh.firstName,
+            lastName: sh.lastName,
+            email: sh.email,
+            phoneNumber: sh.phoneNumber,
+            canceled: sh.canceledAt !== null,
+          })),
+        };
+
+        const existing = appointmentsByMatchday.get(appointment.matchdayId);
+        if (existing) {
+          existing.appointments.push(setupHelperAppointment);
+        } else {
+          appointmentsByMatchday.set(appointment.matchdayId, {
+            matchdayId: appointment.matchdayId,
+            matchdayDate: appointment.date,
+            tournamentId: appointment.tournamentId,
+            cancelledAt: appointment.canceledAt,
+            appointments: [setupHelperAppointment],
+          });
+        }
+      }
+    }
+  }
+
+  return Array.from(appointmentsByMatchday.values()).sort(
+    (a, b) => a.matchdayDate.getTime() - b.matchdayDate.getTime(),
   );
 }

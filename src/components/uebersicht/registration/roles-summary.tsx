@@ -6,7 +6,6 @@ import {
   Gavel,
   Calendar,
   Hash,
-  BellIcon,
   CheckCircle2,
 } from "lucide-react";
 import { getRolesDataByProfileIdAndTournamentId } from "@/db/repositories/role";
@@ -238,7 +237,7 @@ function SetupHelperSection({ setupHelper }: { setupHelper: SetupHelper }) {
 function RefereeSection({ referee }: { referee: Referee }) {
   return (
     <RoleSection
-      icon={<BellIcon className="h-4 w-4 text-gray-600" />}
+      icon={<Gavel className="h-4 w-4 text-gray-600" />}
       title="Schiedsrichter"
     >
       <div className="space-y-3">
