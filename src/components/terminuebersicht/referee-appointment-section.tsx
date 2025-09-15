@@ -2,13 +2,12 @@
 
 import { Badge } from "@/components/ui/badge";
 import { Gavel } from "lucide-react";
-import { RefereeAppointment } from "@/services/appointment";
 
 type Props = {
-  appointment: RefereeAppointment;
+  isCanceled: boolean;
 };
 
-export function RefereeAppointmentSection({ appointment }: Props) {
+export function RefereeAppointmentSection({ isCanceled }: Props) {
   return (
     <div className="border rounded-lg p-4">
       <div className="flex items-center justify-between mb-4">
@@ -24,9 +23,7 @@ export function RefereeAppointmentSection({ appointment }: Props) {
           </div>
         </div>
         <div className="flex items-center gap-2">
-          {appointment.isCanceled && (
-            <Badge variant="destructive">Abgesagt</Badge>
-          )}
+          {isCanceled && <Badge variant="destructive">Abgesagt</Badge>}
         </div>
       </div>
     </div>

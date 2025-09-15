@@ -20,10 +20,8 @@ import Link from "next/link";
 import { PrintGamesButton } from "@/components/partien/print-games-button";
 import { MatchdayAppointment } from "@/services/appointment";
 import {
-  cancelRefereeAppointment,
-  uncancelRefereeAppointment,
-  cancelSetupHelperAppointment,
-  uncancelSetupHelperAppointment,
+  cancelMatchdayAppointments,
+  uncancelMatchdayAppointments,
 } from "@/actions/appointment";
 import { toast } from "sonner";
 import { RefereeAppointmentSection } from "./referee-appointment-section";
@@ -36,50 +34,23 @@ export function MatchdayAppointmentCard({ appointment }: Props) {
   const [isPending, startTransition] = useTransition();
   const [isDialogOpen, setIsDialogOpen] = useState(false);
 
-  const baseAppointment =
-    appointment.refereeAppointment ?? appointment.setupHelperAppointment;
-  if (!baseAppointment) return null;
+  const { matchdayId, matchdayDate, tournamentId, cancelledAt, appointments } =
+    appointment;
 
-  const { matchdayId, date, tournamentId } = baseAppointment;
-
-  const setupHelperTime = getSetupHelperTimeFromDefaultTime(date);
+  const setupHelperTime = getSetupHelperTimeFromDefaultTime(matchdayDate);
 
   const gameUrl = buildGameViewUrl({
     tournamentId,
     matchdayId,
   });
 
-  const hasAnyAppointment =
-    appointment.refereeAppointment || appointment.setupHelperAppointment;
-  const hasAnyCancelledAppointment =
-    appointment.refereeAppointment?.isCanceled ||
-    appointment.setupHelperAppointment?.isCanceled;
-  const hasAnyActiveAppointment =
-    (appointment.refereeAppointment &&
-      !appointment.refereeAppointment.isCanceled) ||
-    (appointment.setupHelperAppointment &&
-      !appointment.setupHelperAppointment.isCanceled);
+  const isCancelled = cancelledAt !== null;
+  const hasActiveAppointments = !isCancelled;
 
   const handleCancel = () => {
     startTransition(async () => {
       try {
-        const promises = [];
-
-        if (
-          appointment.refereeAppointment &&
-          !appointment.refereeAppointment.isCanceled
-        ) {
-          promises.push(cancelRefereeAppointment(matchdayId));
-        }
-
-        if (
-          appointment.setupHelperAppointment &&
-          !appointment.setupHelperAppointment.isCanceled
-        ) {
-          promises.push(cancelSetupHelperAppointment(matchdayId));
-        }
-
-        await Promise.all(promises);
+        await cancelMatchdayAppointments(matchdayId);
         toast.success("Termine erfolgreich abgesagt");
         setIsDialogOpen(false);
       } catch {
@@ -91,17 +62,7 @@ export function MatchdayAppointmentCard({ appointment }: Props) {
   const handleUncancel = () => {
     startTransition(async () => {
       try {
-        const promises = [];
-
-        if (appointment.refereeAppointment?.isCanceled) {
-          promises.push(uncancelRefereeAppointment(matchdayId));
-        }
-
-        if (appointment.setupHelperAppointment?.isCanceled) {
-          promises.push(uncancelSetupHelperAppointment(matchdayId));
-        }
-
-        await Promise.all(promises);
+        await uncancelMatchdayAppointments(matchdayId);
         toast.success("Absagen erfolgreich rückgängig gemacht");
       } catch {
         toast.error("Fehler beim Rückgängigmachen der Absagen");
@@ -114,7 +75,7 @@ export function MatchdayAppointmentCard({ appointment }: Props) {
       <CardHeader className="pb-4">
         <div className="flex items-center justify-between">
           <h2 className="text-2xl font-bold">
-            {toLocalDateTime(date).setLocale("de").weekdayLong}
+            {toLocalDateTime(matchdayDate).setLocale("de").weekdayLong}
           </h2>
           <div className="flex items-center gap-2">
             <Link href={gameUrl}>
@@ -138,21 +99,27 @@ export function MatchdayAppointmentCard({ appointment }: Props) {
       </CardHeader>
 
       <CardContent className="space-y-6">
-        {appointment.refereeAppointment && (
-          <RefereeAppointmentSection
-            appointment={appointment.refereeAppointment}
-          />
-        )}
+        {appointments.map((appointmentType, index) => {
+          if (appointmentType.type === "referee") {
+            return (
+              <RefereeAppointmentSection
+                key={`referee-${index}`}
+                isCanceled={isCancelled}
+              />
+            );
+          }
+          return (
+            <SetupHelperAppointmentSection
+              key={`setupHelper-${index}`}
+              otherSetupHelpers={appointmentType.otherSetupHelpers}
+              isCanceled={isCancelled}
+            />
+          );
+        })}
 
-        {appointment.setupHelperAppointment && (
-          <SetupHelperAppointmentSection
-            appointment={appointment.setupHelperAppointment}
-          />
-        )}
-
-        {hasAnyAppointment && (
+        {appointments.length > 0 && (
           <div className="flex justify-center pt-4 border-t">
-            {hasAnyActiveAppointment ? (
+            {hasActiveAppointments ? (
               <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
                 <DialogTrigger asChild>
                   <Button
@@ -192,7 +159,7 @@ export function MatchdayAppointmentCard({ appointment }: Props) {
                   </DialogFooter>
                 </DialogContent>
               </Dialog>
-            ) : hasAnyCancelledAppointment ? (
+            ) : isCancelled ? (
               <Button
                 variant="outline"
                 size="sm"

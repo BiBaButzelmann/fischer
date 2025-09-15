@@ -15,90 +15,102 @@ import {
 } from "@/actions/email/appointment";
 import { action } from "@/lib/actions";
 
-export const cancelRefereeAppointment = action(async (matchdayId: number) => {
+export const cancelMatchdayAppointments = action(async (matchdayId: number) => {
   const session = await authWithRedirect();
 
-  const referee = await getRefereeByUserId(session.user.id);
-  invariant(referee, "Unauthorized: User is not a referee");
+  const [referee, setupHelper] = await Promise.all([
+    getRefereeByUserId(session.user.id),
+    getSetupHelperByUserId(session.user.id),
+  ]);
 
-  await db
-    .update(matchdayReferee)
-    .set({ canceledAt: new Date() })
-    .where(
-      and(
-        eq(matchdayReferee.matchdayId, matchdayId),
-        eq(matchdayReferee.refereeId, referee.id),
-      ),
+  invariant(
+    referee || setupHelper,
+    "Unauthorized: User must be either a referee or setup helper",
+  );
+
+  const promises = [];
+
+  if (referee) {
+    promises.push(
+      db
+        .update(matchdayReferee)
+        .set({ canceledAt: new Date() })
+        .where(
+          and(
+            eq(matchdayReferee.matchdayId, matchdayId),
+            eq(matchdayReferee.refereeId, referee.id),
+          ),
+        ),
+      sendRefereeAppointmentEmail(referee.id, matchdayId, true),
     );
+  }
 
-  await sendRefereeAppointmentEmail(referee.id, matchdayId, true);
+  if (setupHelper) {
+    promises.push(
+      db
+        .update(matchdaySetupHelper)
+        .set({ canceledAt: new Date() })
+        .where(
+          and(
+            eq(matchdaySetupHelper.matchdayId, matchdayId),
+            eq(matchdaySetupHelper.setupHelperId, setupHelper.id),
+          ),
+        ),
+      sendSetupHelperAppointmentEmail(setupHelper.id, matchdayId, true),
+    );
+  }
 
+  await Promise.all(promises);
   revalidatePath("/terminuebersicht");
 });
 
-export const uncancelRefereeAppointment = action(async (matchdayId: number) => {
-  const session = await authWithRedirect();
+export const uncancelMatchdayAppointments = action(
+  async (matchdayId: number) => {
+    const session = await authWithRedirect();
 
-  const referee = await getRefereeByUserId(session.user.id);
-  invariant(referee, "Unauthorized: User is not a referee");
+    const [referee, setupHelper] = await Promise.all([
+      getRefereeByUserId(session.user.id),
+      getSetupHelperByUserId(session.user.id),
+    ]);
 
-  await db
-    .update(matchdayReferee)
-    .set({ canceledAt: null })
-    .where(
-      and(
-        eq(matchdayReferee.matchdayId, matchdayId),
-        eq(matchdayReferee.refereeId, referee.id),
-      ),
+    invariant(
+      referee || setupHelper,
+      "Unauthorized: User must be either a referee or setup helper",
     );
 
-  await sendRefereeAppointmentEmail(referee.id, matchdayId, false);
+    const promises = [];
 
-  revalidatePath("/terminuebersicht");
-});
-
-export const cancelSetupHelperAppointment = action(
-  async (matchdayId: number) => {
-    const session = await authWithRedirect();
-
-    const setupHelper = await getSetupHelperByUserId(session.user.id);
-    invariant(setupHelper, "Unauthorized: User is not a setup helper");
-
-    await db
-      .update(matchdaySetupHelper)
-      .set({ canceledAt: new Date() })
-      .where(
-        and(
-          eq(matchdaySetupHelper.matchdayId, matchdayId),
-          eq(matchdaySetupHelper.setupHelperId, setupHelper.id),
-        ),
+    if (referee) {
+      promises.push(
+        db
+          .update(matchdayReferee)
+          .set({ canceledAt: null })
+          .where(
+            and(
+              eq(matchdayReferee.matchdayId, matchdayId),
+              eq(matchdayReferee.refereeId, referee.id),
+            ),
+          ),
+        sendRefereeAppointmentEmail(referee.id, matchdayId, false),
       );
+    }
 
-    await sendSetupHelperAppointmentEmail(setupHelper.id, matchdayId, true);
-
-    revalidatePath("/terminuebersicht");
-  },
-);
-
-export const uncancelSetupHelperAppointment = action(
-  async (matchdayId: number) => {
-    const session = await authWithRedirect();
-
-    const setupHelper = await getSetupHelperByUserId(session.user.id);
-    invariant(setupHelper, "Unauthorized: User is not a setup helper");
-
-    await db
-      .update(matchdaySetupHelper)
-      .set({ canceledAt: null })
-      .where(
-        and(
-          eq(matchdaySetupHelper.matchdayId, matchdayId),
-          eq(matchdaySetupHelper.setupHelperId, setupHelper.id),
-        ),
+    if (setupHelper) {
+      promises.push(
+        db
+          .update(matchdaySetupHelper)
+          .set({ canceledAt: null })
+          .where(
+            and(
+              eq(matchdaySetupHelper.matchdayId, matchdayId),
+              eq(matchdaySetupHelper.setupHelperId, setupHelper.id),
+            ),
+          ),
+        sendSetupHelperAppointmentEmail(setupHelper.id, matchdayId, false),
       );
+    }
 
-    await sendSetupHelperAppointmentEmail(setupHelper.id, matchdayId, false);
-
+    await Promise.all(promises);
     revalidatePath("/terminuebersicht");
   },
 );

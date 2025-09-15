@@ -2,13 +2,22 @@
 
 import { Badge } from "@/components/ui/badge";
 import { Wrench, Users, Phone, Mail } from "lucide-react";
-import { SetupHelperAppointment } from "@/services/appointment";
 
 type Props = {
-  appointment: SetupHelperAppointment;
+  otherSetupHelpers: {
+    firstName: string;
+    lastName: string;
+    email: string;
+    phoneNumber: string;
+    canceled: boolean | null;
+  }[];
+  isCanceled: boolean;
 };
 
-export function SetupHelperAppointmentSection({ appointment }: Props) {
+export function SetupHelperAppointmentSection({
+  otherSetupHelpers,
+  isCanceled,
+}: Props) {
   return (
     <div className="border rounded-lg p-4">
       <div className="flex items-center justify-between mb-4">
@@ -21,20 +30,18 @@ export function SetupHelperAppointmentSection({ appointment }: Props) {
           </div>
         </div>
         <div className="flex items-center gap-2">
-          {appointment.isCanceled && (
-            <Badge variant="destructive">Abgesagt</Badge>
-          )}
+          {isCanceled && <Badge variant="destructive">Abgesagt</Badge>}
         </div>
       </div>
 
-      {appointment.otherSetupHelpers.length > 0 && (
+      {otherSetupHelpers.length > 0 && (
         <div className="space-y-2 mb-4">
           <h4 className="font-medium text-sm flex items-center gap-2">
             <Users className="w-4 h-4" />
             Die anderen Aufbauhelfer:
           </h4>
           <div className="space-y-2">
-            {appointment.otherSetupHelpers.map((helper, index) => (
+            {otherSetupHelpers.map((helper, index) => (
               <div key={index} className="p-2 bg-muted rounded text-sm">
                 <div className="font-medium flex items-center gap-2">
                   {helper.firstName} {helper.lastName}
