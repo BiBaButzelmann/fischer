@@ -22,8 +22,8 @@ export function SetupHelperAppointmentSection({
     <div className="border rounded-lg p-4">
       <div className="flex items-center justify-between mb-4">
         <div className="flex items-center gap-3">
-          <div className="flex-shrink-0 p-2 rounded-full bg-primary/10">
-            <Wrench className="w-5 h-5 text-primary" />
+          <div className="flex-shrink-0 p-2 rounded-full bg-green-100">
+            <Wrench className="w-5 h-5 text-green-600" />
           </div>
           <div>
             <h3 className="font-semibold">Aufbauhelfer</h3>
