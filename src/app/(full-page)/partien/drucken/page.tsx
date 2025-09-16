@@ -27,15 +27,13 @@ export default async function Page({
     participantId != null ? Number(participantId) : undefined,
   );
 
-  const gamesWithDates = await Promise.all(
-    games.map(async (game) => ({
-      ...game,
-      gameDateTime: await getDateTimeFromTournamentTime(
-        game.matchdayGame.matchday.date,
-        game.tournamentId,
-      ),
-    })),
-  );
+  const gamesWithDates = games.map((game) => ({
+    ...game,
+    gameDateTime: getDateTimeFromTournamentTime(
+      game.matchdayGame.matchday.date,
+      game.tournament.gameStartTime,
+    ),
+  }));
 
   return (
     <div className="flex gap-4 p-4 print:p-0">

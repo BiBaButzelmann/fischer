@@ -10,7 +10,7 @@ import {
   isNotNull,
 } from "drizzle-orm";
 import { getCurrentLocalDateTime } from "@/lib/date";
-import { getGameTimeFromGame } from "@/lib/game-time";
+import { getDateTimeFromTournamentTime } from "@/lib/game-time";
 import { group } from "../schema/group";
 import { matchdayGame, matchdayReferee } from "../schema/matchday";
 import { matchday } from "../schema/matchday";
@@ -301,7 +301,10 @@ export async function getGamesByTournamentId(
 
   const gamesWithTime = orderedGames.map((game) => ({
     ...game,
-    time: getGameTimeFromGame(game, game.tournament.gameStartTime).toJSDate(),
+    time: getDateTimeFromTournamentTime(
+      game.matchdayGame.matchday.date,
+      game.tournament.gameStartTime,
+    ).toJSDate(),
   }));
 
   return gamesWithTime;
