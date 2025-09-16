@@ -346,7 +346,10 @@ export async function updateGameResult(gameId: number, result: GameResult) {
     "User is not authorized to update this game result",
   );
 
-  const gameDateTime = getGameTimeFromGame(gameData, gameData.tournament.gameStartTime);
+  const gameDateTime = getGameTimeFromGame(
+    gameData,
+    gameData.tournament.gameStartTime,
+  );
   const now = getCurrentLocalDateTime();
   invariant(
     gameDateTime <= now,

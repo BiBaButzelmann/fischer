@@ -34,8 +34,14 @@ export function MatchdayAppointmentCard({ appointment }: Props) {
   const [isPending, startTransition] = useTransition();
   const [isDialogOpen, setIsDialogOpen] = useState(false);
 
-  const { matchdayId, matchdayDate, tournamentId, gameStartTime, cancelledAt, appointments } =
-    appointment;
+  const {
+    matchdayId,
+    matchdayDate,
+    tournamentId,
+    gameStartTime,
+    cancelledAt,
+    appointments,
+  } = appointment;
 
   const gameUrl = buildGameViewUrl({
     tournamentId,
@@ -45,7 +51,10 @@ export function MatchdayAppointmentCard({ appointment }: Props) {
   const isCancelled = cancelledAt !== null;
   const hasActiveAppointments = !isCancelled;
 
-  const appointmentDateTime = getDateTimeFromTournamentTime(matchdayDate, gameStartTime);
+  const appointmentDateTime = getDateTimeFromTournamentTime(
+    matchdayDate,
+    gameStartTime,
+  );
 
   const handleCancel = () => {
     startTransition(async () => {
