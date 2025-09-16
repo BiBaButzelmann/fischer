@@ -454,12 +454,7 @@ export async function getParticipantsInGroup(groupId: number) {
     with: {
       participant: {
         with: {
-          profile: {
-            columns: {
-              firstName: true,
-              lastName: true,
-            },
-          },
+          profile: true,
         },
       },
     },
