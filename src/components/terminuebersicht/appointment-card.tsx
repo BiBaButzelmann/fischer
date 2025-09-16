@@ -14,7 +14,7 @@ import {
 } from "@/components/ui/dialog";
 import { Clock, ChevronRight, X, Undo2 } from "lucide-react";
 import { formatEventDateTime, toLocalDateTime } from "@/lib/date";
-import { getSetupHelperTimeFromDefaultTime } from "@/lib/game-time";
+import { getDateTimeFromTournamentTime } from "@/lib/game-time";
 import { buildGameViewUrl } from "@/lib/navigation";
 import Link from "next/link";
 import { PrintGamesButton } from "@/components/partien/print-games-button";
@@ -26,7 +26,6 @@ import {
 import { toast } from "sonner";
 import { RefereeAppointmentSection } from "./referee-appointment-section";
 import { SetupHelperAppointmentSection } from "./setup-helper-appointment-section";
-import invariant from "tiny-invariant";
 
 type Props = {
   appointment: MatchdayAppointment;
@@ -35,10 +34,8 @@ export function MatchdayAppointmentCard({ appointment }: Props) {
   const [isPending, startTransition] = useTransition();
   const [isDialogOpen, setIsDialogOpen] = useState(false);
 
-  const { matchdayId, matchdayDate, tournamentId, cancelledAt, appointments } =
+  const { matchdayId, matchdayDate, tournamentId, gameStartTime, cancelledAt, appointments } =
     appointment;
-
-  const setupHelperTime = getSetupHelperTimeFromDefaultTime(matchdayDate);
 
   const gameUrl = buildGameViewUrl({
     tournamentId,
@@ -47,6 +44,8 @@ export function MatchdayAppointmentCard({ appointment }: Props) {
 
   const isCancelled = cancelledAt !== null;
   const hasActiveAppointments = !isCancelled;
+
+  const appointmentDateTime = getDateTimeFromTournamentTime(matchdayDate, gameStartTime);
 
   const handleCancel = () => {
     startTransition(async () => {
@@ -93,7 +92,7 @@ export function MatchdayAppointmentCard({ appointment }: Props) {
         </div>
         <div className="flex items-center gap-2 text-sm text-muted-foreground mt-2">
           <Clock className="w-4 h-4" />
-          <span>{formatEventDateTime(displayTime)}</span>
+          <span>{formatEventDateTime(appointmentDateTime)}</span>
         </div>
       </CardHeader>
 

@@ -5,9 +5,11 @@ import {
   getSetupHelperTimeFromTournamentTime,
 } from "@/lib/game-time";
 import { getCurrentLocalDateTime, toLocalDateTime } from "@/lib/date";
-import { getMatchdaysByRefereeId } from "./referee";
 import { getParticipantWithGroupByProfileIdAndTournamentId } from "./participant";
-import { getRefereeByProfileIdAndTournamentId } from "./referee";
+import {
+  getMatchdaysByRefereeId,
+  getRefereeByProfileIdAndTournamentId,
+} from "./referee";
 import {
   getMatchdaysBySetupHelperId,
   getSetupHelperByProfileIdAndTournamentId,
@@ -20,7 +22,10 @@ export async function getCalendarEventsForParticipant(
   const games = await getParticipantGames(participantId);
   const events: CalendarEvent[] = [];
   for (const game of games) {
-    const gameDateTime = await getGameTimeFromGame(game);
+    const gameDateTime = getGameTimeFromGame(
+      game,
+      game.tournament.gameStartTime,
+    );
 
     const whitePlayerDeleted =
       game.whiteParticipant?.deletedAt &&
@@ -54,51 +59,47 @@ export async function getCalendarEventsForParticipant(
 export async function getCalendarEventsForReferee(refereeId: number) {
   const refereeMatchdays = await getMatchdaysByRefereeId(refereeId);
 
-  return await Promise.all(
-    refereeMatchdays.map(async (entry) => {
-      const startTime = await getDateTimeFromTournamentTime(
-        entry.matchday.date,
-        entry.matchday.tournamentId,
-      );
+  return refereeMatchdays.map((entry) => {
+    const startTime = getDateTimeFromTournamentTime(
+      entry.matchday.date,
+      entry.tournament.gameStartTime,
+    );
 
-      return {
-        id: `referee-${entry.matchday.id}`,
-        title: `Schiedsrichter`,
-        start: startTime.toJSDate(),
-        extendedProps: {
-          eventType: "referee" as const,
-          refereeId: entry.referee.id,
-          matchdayId: entry.matchday.id,
-          tournamentId: entry.matchday.tournamentId,
-        },
-      };
-    }),
-  );
+    return {
+      id: `referee-${entry.matchday.id}`,
+      title: `Schiedsrichter`,
+      start: startTime.toJSDate(),
+      extendedProps: {
+        eventType: "referee" as const,
+        refereeId: entry.referee.id,
+        matchdayId: entry.matchday.id,
+        tournamentId: entry.matchday.tournamentId,
+      },
+    };
+  });
 }
 
 export async function getCalendarEventsForSetupHelper(setupHelperId: number) {
   const setupHelperMatchdays = await getMatchdaysBySetupHelperId(setupHelperId);
 
-  return await Promise.all(
-    setupHelperMatchdays.map(async (entry) => {
-      const startTime = await getSetupHelperTimeFromTournamentTime(
-        entry.matchday.date,
-        entry.matchday.tournamentId,
-      );
+  return setupHelperMatchdays.map((entry) => {
+    const startTime = getSetupHelperTimeFromTournamentTime(
+      entry.matchday.date,
+      entry.tournament.gameStartTime,
+    );
 
-      return {
-        id: `setupHelper-${entry.matchday.id}`,
-        title: `Aufbauhelfer`,
-        start: startTime.toJSDate(),
-        extendedProps: {
-          eventType: "setupHelper" as const,
-          setupHelperId: entry.setupHelper.id,
-          matchdayId: entry.matchday.id,
-          tournamentId: entry.matchday.tournamentId,
-        },
-      };
-    }),
-  );
+    return {
+      id: `setupHelper-${entry.matchday.id}`,
+      title: `Aufbauhelfer`,
+      start: startTime.toJSDate(),
+      extendedProps: {
+        eventType: "setupHelper" as const,
+        setupHelperId: entry.setupHelper.id,
+        matchdayId: entry.matchday.id,
+        tournamentId: entry.matchday.tournamentId,
+      },
+    };
+  });
 }
 
 export async function getUpcomingEventsByProfileAndTournament(
@@ -112,27 +113,32 @@ export async function getUpcomingEventsByProfileAndTournament(
     getSetupHelperByProfileIdAndTournamentId(profileId, tournamentId),
   ]);
 
-  const eventPromises: Promise<CalendarEvent[]>[] = [];
+  const allEvents: CalendarEvent[] = [];
+
   if (participant) {
-    eventPromises.push(getCalendarEventsForParticipant(participant.id));
+    const participantEvents = await getCalendarEventsForParticipant(
+      participant.id,
+    );
+    allEvents.push(...participantEvents);
   }
   if (referee) {
-    eventPromises.push(getCalendarEventsForReferee(referee.id));
+    const refereeEvents = await getCalendarEventsForReferee(referee.id);
+    allEvents.push(...refereeEvents);
   }
   if (setupHelper) {
-    eventPromises.push(getCalendarEventsForSetupHelper(setupHelper.id));
+    const setupHelperEvents = await getCalendarEventsForSetupHelper(
+      setupHelper.id,
+    );
+    allEvents.push(...setupHelperEvents);
   }
 
-  if (eventPromises.length === 0) {
+  if (allEvents.length === 0) {
     return [];
   }
-
-  const allEvents = await Promise.all(eventPromises);
 
   const currentTime = getCurrentLocalDateTime().toJSDate();
 
   return allEvents
-    .flat()
     .filter((event) => event.start > currentTime)
     .sort((a, b) => a.start.getTime() - b.start.getTime())
     .slice(0, limit);

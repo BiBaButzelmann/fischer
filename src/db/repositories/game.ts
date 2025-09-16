@@ -55,6 +55,7 @@ export async function getGameById(gameId: number) {
       tournament: {
         columns: {
           name: true,
+          gameStartTime: true,
         },
       },
       matchdayGame: {
@@ -100,6 +101,11 @@ export async function getParticipantGames(participantId: number) {
               lastName: true,
             },
           },
+        },
+      },
+      tournament: {
+        columns: {
+          gameStartTime: true,
         },
       },
       matchdayGame: {
@@ -273,6 +279,11 @@ export async function getGamesByTournamentId(
           groupNumber: true,
         },
       },
+      tournament: {
+        columns: {
+          gameStartTime: true,
+        },
+      },
       matchdayGame: {
         with: {
           matchday: {
@@ -288,12 +299,10 @@ export async function getGamesByTournamentId(
   const gameMap = new Map(games.map((game) => [game.id, game]));
   const orderedGames = gameIds.map((id) => gameMap.get(id)).filter(Boolean);
 
-  const gamesWithTime = await Promise.all(
-    orderedGames.map(async (game) => ({
-      ...game,
-      time: (await getGameTimeFromGame(game)).toJSDate(),
-    })),
-  );
+  const gamesWithTime = orderedGames.map((game) => ({
+    ...game,
+    time: getGameTimeFromGame(game, game.tournament.gameStartTime).toJSDate(),
+  }));
 
   return gamesWithTime;
 }
@@ -443,6 +452,11 @@ export async function getGameWithParticipantsAndMatchday(gameId: number) {
               lastName: true,
             },
           },
+        },
+      },
+      tournament: {
+        columns: {
+          gameStartTime: true,
         },
       },
       matchdayGame: {

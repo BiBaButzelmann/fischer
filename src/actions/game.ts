@@ -206,6 +206,11 @@ export async function updateGameMatchdayAndBoardNumber(
     with: {
       whiteParticipant: { with: { profile: true } },
       blackParticipant: { with: { profile: true } },
+      tournament: {
+        columns: {
+          gameStartTime: true,
+        },
+      },
       matchdayGame: {
         with: {
           matchday: true,
@@ -250,13 +255,13 @@ export async function updateGameMatchdayAndBoardNumber(
   });
   invariant(userProfile, "User profile not found");
 
-  const fromTimestamp = await getDateTimeFromTournamentTime(
+  const fromTimestamp = getDateTimeFromTournamentTime(
     currentMatchday.date,
-    gameData.tournamentId,
+    gameData.tournament.gameStartTime,
   );
-  const toTimestamp = await getDateTimeFromTournamentTime(
+  const toTimestamp = getDateTimeFromTournamentTime(
     newMatchday.date,
-    gameData.tournamentId,
+    gameData.tournament.gameStartTime,
   );
 
   await db.transaction(async (tx) => {
@@ -314,6 +319,11 @@ export async function updateGameResult(gameId: number, result: GameResult) {
   const gameData = await db.query.game.findFirst({
     where: eq(game.id, gameId),
     with: {
+      tournament: {
+        columns: {
+          gameStartTime: true,
+        },
+      },
       matchdayGame: {
         with: {
           matchday: true,
@@ -336,7 +346,7 @@ export async function updateGameResult(gameId: number, result: GameResult) {
     "User is not authorized to update this game result",
   );
 
-  const gameDateTime = await getGameTimeFromGame(gameData);
+  const gameDateTime = getGameTimeFromGame(gameData, gameData.tournament.gameStartTime);
   const now = getCurrentLocalDateTime();
   invariant(
     gameDateTime <= now,

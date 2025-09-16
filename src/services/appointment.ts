@@ -7,10 +7,6 @@ import { getProfileByUserId } from "@/db/repositories/profile";
 import { getRefereeByUserId } from "@/db/repositories/referee";
 import { getSetupHelperByUserId } from "@/db/repositories/setup-helper";
 import { getCurrentLocalDateTime } from "@/lib/date";
-import {
-  getSetupHelperTimeFromTournamentTime,
-  getDateTimeFromTournamentTime,
-} from "@/lib/game-time";
 import invariant from "tiny-invariant";
 
 type RefereeAppointment = {
@@ -34,6 +30,7 @@ export type MatchdayAppointment = {
   matchdayId: number;
   matchdayDate: Date;
   tournamentId: number;
+  gameStartTime: string;
   cancelledAt: Date | null;
   appointments: Appointment[];
 };
@@ -68,6 +65,7 @@ export async function getMatchdayAppointmentsByUserId(
           matchdayId: appointment.matchdayId,
           matchdayDate: appointment.date,
           tournamentId: appointment.tournamentId,
+          gameStartTime: appointment.gameStartTime,
           cancelledAt: appointment.canceledAt,
           appointments: [{ type: "referee" }],
         });
@@ -116,6 +114,7 @@ export async function getMatchdayAppointmentsByUserId(
             matchdayId: appointment.matchdayId,
             matchdayDate: appointment.date,
             tournamentId: appointment.tournamentId,
+            gameStartTime: appointment.gameStartTime,
             cancelledAt: appointment.canceledAt,
             appointments: [setupHelperAppointment],
           });
