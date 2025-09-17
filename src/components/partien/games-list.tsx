@@ -22,6 +22,7 @@ import { authClient } from "@/auth-client";
 import { Role } from "@/db/types/role";
 import { GameActions } from "./game-actions";
 import { getCurrentLocalDateTime, toDateString } from "@/lib/date";
+import { getParticipantFullName } from "@/lib/participant";
 
 type Props = {
   games: GameWithParticipantProfilesAndGroupAndMatchday[];
@@ -114,7 +115,7 @@ export function GamesList({
             <TableHead className="hidden md:table-cell sticky top-0 bg-card text-center">
               Runde
             </TableHead>
-            <TableHead className="sticky top-0 bg-card">Weiß</TableHead>
+            <TableHead className="w-8 sticky top-0 bg-card">Weiß</TableHead>
             <TableHead className="sticky top-0 bg-card text-center">
               Ergebnis
             </TableHead>
@@ -162,8 +163,7 @@ export function GamesList({
                 {game.result ? game.result.replace(":", " : ") : "-"}
               </TableCell>
               <TableCell className="w-40 truncate">
-                {game.blackParticipant!.profile.firstName}{" "}
-                {game.blackParticipant!.profile.lastName}
+                {getParticipantFullName(game.blackParticipant!)}
                 {(game.blackParticipant!.dwzRating !== null ||
                   game.blackParticipant!.fideRating !== null) && (
                   <span className="ml-2 text-muted-foreground text-sm">
@@ -174,11 +174,11 @@ export function GamesList({
                   </span>
                 )}
               </TableCell>
-              <TableCell className="hidden md:table-cell w-24 text-center">
+              <TableCell className="w-24 text-center">
                 {toDateString(getGameTimeFromGame(game))}
               </TableCell>
               {hasAnyActions && (
-                <TableCell className="hidden md:flex items-center gap-2 w-32">
+                <TableCell className="flex items-center gap-2">
                   <GameActions
                     gameId={game.id}
                     currentResult={game.result}
