@@ -71,8 +71,12 @@ export function GamesList({
 
       const game = games.find((g) => g.id === gameId);
       const isGameInPastOrToday = game
-        ? toLocalDateTime(game.matchdayGame.matchday.date) < getCurrentLocalDateTime() ||
-          isSameDate(toLocalDateTime(game.matchdayGame.matchday.date), getCurrentLocalDateTime())
+        ? toLocalDateTime(game.matchdayGame.matchday.date) <
+            getCurrentLocalDateTime() ||
+          isSameDate(
+            toLocalDateTime(game.matchdayGame.matchday.date),
+            getCurrentLocalDateTime(),
+          )
         : false;
 
       return {
