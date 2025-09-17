@@ -10,7 +10,7 @@ export default async function Page() {
 
   const userRoles = await getRolesByUserId(session.user.id);
   const canEnterAnyGame = userRoles.some((role) =>
-    ["participant", "matchEnteringHelper", "admin"].includes(role),
+    ["participant", "matchEnteringHelper", "admin", "referee"].includes(role),
   );
 
   if (!canEnterAnyGame) {

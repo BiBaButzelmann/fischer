@@ -47,11 +47,11 @@ export const getUserGameRights = async (gameId: number, userId: string) => {
   const isParticipant = userRoles.includes("participant");
   const isAdmin = userRoles.includes("admin");
 
-  if (isGameParticipant || isMatchEnteringHelper || isAdmin) {
+  if (isGameParticipant || isMatchEnteringHelper || isAdmin || isReferee) {
     return "edit";
   }
 
-  if (isParticipant || isReferee) {
+  if (isParticipant) {
     return "view";
   }
 

@@ -573,6 +573,18 @@ export async function getGamesAccessibleByUser(userId: string) {
                 ),
               ),
           ),
+          exists(
+            db
+              .select()
+              .from(referee)
+              .innerJoin(profile, eq(referee.profileId, profile.id))
+              .where(
+                and(
+                  eq(profile.userId, userId),
+                  eq(referee.tournamentId, game.tournamentId),
+                ),
+              ),
+          ),
         ),
       ),
     with: {
