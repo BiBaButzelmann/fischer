@@ -54,7 +54,6 @@ export type GameWithParticipantProfilesAndGroupAndMatchday = Game & {
       date: Date;
     };
   };
-  time: Date;
 };
 
 export type GameWithMatchday = Game & {

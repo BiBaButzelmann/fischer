@@ -24,6 +24,7 @@ import {
   getCurrentLocalDateTime,
   toDateString,
   toLocalDateTime,
+  isSameDate,
 } from "@/lib/date";
 
 type Props = {
@@ -70,7 +71,8 @@ export function GamesList({
 
       const game = games.find((g) => g.id === gameId);
       const isGameInPastOrToday = game
-        ? toLocalDateTime(game.time) <= getCurrentLocalDateTime()
+        ? toLocalDateTime(game.matchdayGame.matchday.date) < getCurrentLocalDateTime() ||
+          isSameDate(toLocalDateTime(game.matchdayGame.matchday.date), getCurrentLocalDateTime())
         : false;
 
       return {
@@ -178,7 +180,7 @@ export function GamesList({
                 )}
               </TableCell>
               <TableCell className="hidden md:table-cell w-24 text-center">
-                {toDateString(toLocalDateTime(game.time))}
+                {toDateString(toLocalDateTime(game.matchdayGame.matchday.date))}
               </TableCell>
               {hasAnyActions && (
                 <TableCell className="hidden md:flex items-center gap-2 w-32">
@@ -187,7 +189,9 @@ export function GamesList({
                     currentResult={game.result}
                     onResultChange={onResultChange}
                     availableMatchdays={availableMatchdays}
-                    currentGameDate={toLocalDateTime(game.time)}
+                    currentGameDate={toLocalDateTime(
+                      game.matchdayGame.matchday.date,
+                    )}
                     game={game}
                     isReferee={isReferee}
                     {...getGameActionPermissions(game.id)}
