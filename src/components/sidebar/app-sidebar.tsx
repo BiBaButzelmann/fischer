@@ -58,6 +58,8 @@ export function AppSidebar({ session, tournament, userRoles }: Props) {
   const isAdmin = userRoles.includes("admin");
   const isParticipant = userRoles.includes("participant");
   const isMatchEnteringHelper = userRoles.includes("matchEnteringHelper");
+  const isSetupHelper = userRoles.includes("setupHelper");
+  const isReferee = userRoles.includes("referee");
 
   const canAccessMatchEntry = isAdmin || isParticipant || isMatchEnteringHelper;
   const canAccessPostponements = isAdmin || isParticipant;
@@ -97,6 +99,11 @@ export function AppSidebar({ session, tournament, userRoles }: Props) {
               <SidebarLink href="/kalender" icon={CalendarIcon}>
                 Kalender
               </SidebarLink>
+              {isRunning && (isSetupHelper || isReferee) && (
+                <SidebarLink href="/terminuebersicht" icon={CalendarClock}>
+                  Terminübersicht
+                </SidebarLink>
+              )}
             </SidebarMenu>
           </SidebarGroupContent>
         </SidebarGroup>
