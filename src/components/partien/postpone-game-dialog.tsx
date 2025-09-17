@@ -64,7 +64,11 @@ export function PostponeGameDialog({
 
     startTransition(async () => {
       try {
-        await updateGameMatchdayAndBoardNumber(gameId, selectedMatchday.id);
+        const result = await updateGameMatchdayAndBoardNumber(gameId, selectedMatchday.id);
+        if (result?.error) {
+          toast.error(result.error);
+          return;
+        }
         toast.success("Partie erfolgreich verschoben!");
         setSelectedDate(undefined);
         setIsOpen(false);
