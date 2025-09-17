@@ -213,15 +213,21 @@ export async function updateGameMatchdayAndBoardNumber(
       },
     },
   });
-  invariant(gameData, "Game not found");
+  invariant(gameData, "Partie nicht gefunden");
+
+  if (gameData.result !== null) {
+    return {
+      error: "Partie mit einem Ergebnis kann nicht mehr verschoben werden",
+    };
+  }
 
   invariant(
     gameData.whiteParticipant,
-    "White participant not found - cannot postpone bye games",
+    "Weißer Spieler nicht gefunden - Freilose können nicht verschoben werden",
   );
   invariant(
     gameData.blackParticipant,
-    "Black participant not found - cannot postpone bye games",
+    "Schwarzer Spieler nicht gefunden - Freilose können nicht verschoben werden",
   );
 
   const isUserInGame =
@@ -229,16 +235,16 @@ export async function updateGameMatchdayAndBoardNumber(
     gameData.blackParticipant.profile.userId === session.user.id;
   invariant(
     isUserInGame || session.user.role === "admin",
-    "Unauthorized to move this game",
+    "Nicht berechtigt, diese Partie zu verschieben",
   );
 
   const currentMatchday = gameData.matchdayGame?.matchday;
-  invariant(currentMatchday, "Current matchday not found");
+  invariant(currentMatchday, "Aktueller Spieltag nicht gefunden");
 
   const newMatchday = await db.query.matchday.findFirst({
     where: eq(matchday.id, newMatchdayId),
   });
-  invariant(newMatchday, "New matchday not found");
+  invariant(newMatchday, "Neuer Spieltag nicht gefunden");
 
   const postponingParticipant =
     gameData.whiteParticipant.profile.userId === session.user.id
@@ -248,7 +254,7 @@ export async function updateGameMatchdayAndBoardNumber(
   const userProfile = await db.query.profile.findFirst({
     where: eq(profile.userId, session.user.id),
   });
-  invariant(userProfile, "User profile not found");
+  invariant(userProfile, "Benutzerprofil nicht gefunden");
 
   const fromTimestamp = getDateTimeFromDefaultTime(
     currentMatchday.date,
