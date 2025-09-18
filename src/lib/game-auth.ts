@@ -1,7 +1,6 @@
 import {
   isUserParticipantInGame,
   isUserMatchEnteringHelperInGame,
-  isUserRefereeInGame,
 } from "@/db/repositories/game";
 import {
   GameResult,
@@ -36,16 +35,16 @@ export const isWhite = (
 };
 
 export const getUserGameRights = async (gameId: number, userId: string) => {
-  const [userRoles, isGameParticipant, isMatchEnteringHelper, isReferee] =
+  const [userRoles, isGameParticipant, isMatchEnteringHelper] =
     await Promise.all([
       getRolesByUserId(userId),
       isUserParticipantInGame(gameId, userId),
       isUserMatchEnteringHelperInGame(gameId, userId),
-      isUserRefereeInGame(gameId, userId),
     ]);
 
   const isParticipant = userRoles.includes("participant");
   const isAdmin = userRoles.includes("admin");
+  const isReferee = userRoles.includes("referee");
 
   if (isGameParticipant || isMatchEnteringHelper || isAdmin || isReferee) {
     return "edit";
