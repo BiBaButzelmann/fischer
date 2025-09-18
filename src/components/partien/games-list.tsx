@@ -194,54 +194,59 @@ export function GamesList({
         {games.map((game) => {
           const permissions = getGameActionPermissions(game.id);
           return (
-            <div
-              key={game.id}
-              className="p-3 flex flex-col gap-2"
-              onClick={() => handleNavigate(game.id)}
-            >
-              <div className="flex items-center justify-between text-xs text-muted-foreground">
-                <span className="flex items-center gap-1">
-                  <Badge variant="secondary" className="text-[10px] px-1 py-0">
-                    {game.group.groupName}
-                  </Badge>
-                  <Badge variant="outline" className="text-[10px] px-1 py-0">
-                    Brett {game.boardNumber}
-                  </Badge>
-                  <Badge variant="outline" className="text-[10px] px-1 py-0">
-                    Runde {game.round}
-                  </Badge>
-                </span>
-                <span>{toDateString(getGameTimeFromGame(game))}</span>
-              </div>
-              <div className="flex items-center gap-2">
-                <div className="flex-1">
-                  <div className="text-sm font-medium truncate">
-                    {getParticipantFullName(game.whiteParticipant!)}
-                  </div>
-                  {(game.whiteParticipant!.dwzRating !== null ||
-                    game.whiteParticipant!.fideRating !== null) && (
-                    <div className="text-[11px] text-muted-foreground">
-                      Elo/DWZ:{" "}
-                      {game.whiteParticipant!.dwzRating ??
-                        game.whiteParticipant!.fideRating}
-                    </div>
-                  )}
+            <div key={game.id} className="p-3 flex flex-col gap-2">
+              <div
+                className="flex flex-col gap-2"
+                onClick={() => handleNavigate(game.id)}
+                role="button"
+              >
+                <div className="flex items-center justify-between text-xs text-muted-foreground">
+                  <span className="flex items-center gap-1">
+                    <Badge
+                      variant="secondary"
+                      className="text-[10px] px-1 py-0"
+                    >
+                      {game.group.groupName}
+                    </Badge>
+                    <Badge variant="outline" className="text-[10px] px-1 py-0">
+                      Brett {game.boardNumber}
+                    </Badge>
+                    <Badge variant="outline" className="text-[10px] px-1 py-0">
+                      Runde {game.round}
+                    </Badge>
+                  </span>
+                  <span>{toDateString(getGameTimeFromGame(game))}</span>
                 </div>
-                <div className="px-2 text-center font-semibold text-sm min-w-[52px]">
-                  {game.result ? game.result.replace(":", " : ") : "-"}
-                </div>
-                <div className="flex-1 text-right">
-                  <div className="text-sm font-medium truncate">
-                    {getParticipantFullName(game.blackParticipant!)}
-                  </div>
-                  {(game.blackParticipant!.dwzRating !== null ||
-                    game.blackParticipant!.fideRating !== null) && (
-                    <div className="text-[11px] text-muted-foreground">
-                      Elo/DWZ:{" "}
-                      {game.blackParticipant!.dwzRating ??
-                        game.blackParticipant!.fideRating}
+                <div className="flex items-center gap-2">
+                  <div className="flex-1 flex-shrink">
+                    <div className="text-sm font-medium truncate">
+                      {getParticipantFullName(game.whiteParticipant!)}
                     </div>
-                  )}
+                    {(game.whiteParticipant!.dwzRating !== null ||
+                      game.whiteParticipant!.fideRating !== null) && (
+                      <div className="text-[11px] text-muted-foreground">
+                        Elo/DWZ:{" "}
+                        {game.whiteParticipant!.dwzRating ??
+                          game.whiteParticipant!.fideRating}
+                      </div>
+                    )}
+                  </div>
+                  <div className="px-2 text-center font-semibold text-sm min-w-[52px]">
+                    {game.result ? game.result.replace(":", " : ") : "-"}
+                  </div>
+                  <div className="flex-1 flex-shrink text-right">
+                    <div className="text-sm font-medium truncate">
+                      {getParticipantFullName(game.blackParticipant!)}
+                    </div>
+                    {(game.blackParticipant!.dwzRating !== null ||
+                      game.blackParticipant!.fideRating !== null) && (
+                      <div className="text-[11px] text-muted-foreground">
+                        Elo/DWZ:{" "}
+                        {game.blackParticipant!.dwzRating ??
+                          game.blackParticipant!.fideRating}
+                      </div>
+                    )}
+                  </div>
                 </div>
               </div>
               {hasAnyActions &&
