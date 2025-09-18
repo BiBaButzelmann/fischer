@@ -9,7 +9,7 @@ import { PrintGamesButton } from "@/components/partien/print-games-button";
 import { updateGameResult } from "@/actions/game";
 import { getParticipantsByGroupId } from "@/db/repositories/participant";
 import { getRolesByUserId } from "@/db/repositories/role";
-import { ScrollArea } from "@/components/ui/scroll-area";
+import { ScrollArea, ScrollBar } from "@/components/ui/scroll-area";
 import { getAllMatchdaysByTournamentId } from "@/db/repositories/match-day";
 import { auth } from "@/auth/utils";
 
@@ -129,6 +129,7 @@ export default async function Page({
               availableMatchdays={matchdays}
               userRoles={userRoles}
             />
+            <ScrollBar orientation="horizontal" />
           </ScrollArea>
         ) : (
           <div>Keine Partien gefunden</div>
