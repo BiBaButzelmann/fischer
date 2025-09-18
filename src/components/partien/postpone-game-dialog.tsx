@@ -64,7 +64,10 @@ export function PostponeGameDialog({
 
     startTransition(async () => {
       try {
-        const result = await updateGameMatchdayAndBoardNumber(gameId, selectedMatchday.id);
+        const result = await updateGameMatchdayAndBoardNumber(
+          gameId,
+          selectedMatchday.id,
+        );
         if (result?.error) {
           toast.error(result.error);
           return;

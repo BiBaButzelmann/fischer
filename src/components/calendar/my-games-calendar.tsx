@@ -76,7 +76,10 @@ export function MyGamesCalendar({ events, matchdays = [] }: Props) {
 
       startTransition(async () => {
         try {
-          const result = await updateGameMatchdayAndBoardNumber(gameId, targetMatchday.id);
+          const result = await updateGameMatchdayAndBoardNumber(
+            gameId,
+            targetMatchday.id,
+          );
           if (result?.error) {
             toast.error(result.error);
             info.revert();
