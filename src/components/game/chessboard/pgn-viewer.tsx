@@ -106,37 +106,35 @@ export default function PgnViewer({
   );
 
   return (
-    <div className="rounded-xl border bg-card shadow p-6 w-fit">
-      <div className="flex flex-col lg:flex-row gap-6 w-full">
-        <div className="flex-shrink-0 w-full max-w-lg mx-auto lg:mx-0">
-          <div className="aspect-square w-full">
-            <Chessboard
-              position={fen}
-              arePiecesDraggable={allowEdit}
-              onPieceDrop={handleDrop}
-              onSquareClick={handleSquareClick}
-              animationDuration={0}
-              customSquareStyles={{
-                ...(selectedSquare && {
-                  [selectedSquare]: {
-                    boxShadow: "inset 0 0 1px 6px rgba(255,255,255,0.75)",
-                  },
-                }),
-              }}
-            />
-          </div>
-        </div>
-
-        <div className="w-80 flex-shrink-0">
-          <MoveHistory
-            history={moves}
-            currentMoveIndex={currentIndex}
-            goToMove={setCurrentIndex}
-            onSave={allowEdit ? handleSave : undefined}
-            isSaving={isPending}
-            showSave={allowEdit}
+    <div className="flex flex-col lg:flex-row gap-6 w-full">
+      <div className="flex-shrink-0 w-full max-w-lg mx-auto lg:mx-0">
+        <div className="aspect-square w-full">
+          <Chessboard
+            position={fen}
+            arePiecesDraggable={allowEdit}
+            onPieceDrop={handleDrop}
+            onSquareClick={handleSquareClick}
+            animationDuration={0}
+            customSquareStyles={{
+              ...(selectedSquare && {
+                [selectedSquare]: {
+                  boxShadow: "inset 0 0 1px 6px rgba(255,255,255,0.75)",
+                },
+              }),
+            }}
           />
         </div>
+      </div>
+
+      <div className="w-full lg:w-80 flex-shrink-0">
+        <MoveHistory
+          history={moves}
+          currentMoveIndex={currentIndex}
+          goToMove={setCurrentIndex}
+          onSave={allowEdit ? handleSave : undefined}
+          isSaving={isPending}
+          showSave={allowEdit}
+        />
       </div>
     </div>
   );
