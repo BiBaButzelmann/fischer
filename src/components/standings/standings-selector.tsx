@@ -62,8 +62,8 @@ export function StandingsSelector({
     );
   };
   return (
-    <div className="flex flex-wrap gap-2 md:gap-4 mb-4">
-      <div className="flex flex-col gap-1">
+    <div className="flex flex-nowrap gap-2 md:gap-4 mb-4">
+      <div className="flex max-w-48 flex-1 flex-col gap-1">
         <Label htmlFor="tournament-select" className="text-sm font-medium">
           Ausgabe
         </Label>
@@ -71,7 +71,7 @@ export function StandingsSelector({
           value={selectedTournamentId}
           onValueChange={handleTournamentChange}
         >
-          <SelectTrigger id="tournament-select" className="w-48">
+          <SelectTrigger id="tournament-select" className="w-full">
             <SelectValue />
           </SelectTrigger>
           <SelectContent>
@@ -83,12 +83,12 @@ export function StandingsSelector({
           </SelectContent>
         </Select>
       </div>
-      <div className="flex flex-col gap-1">
+      <div className="flex max-w-48 flex-1 flex-col gap-1">
         <Label htmlFor="group-select" className="text-sm font-medium">
           Gruppe
         </Label>
         <Select value={selectedGroupId || ""} onValueChange={handleGroupChange}>
-          <SelectTrigger id="group-select" className="w-48">
+          <SelectTrigger id="group-select" className="w-full">
             <SelectValue />
           </SelectTrigger>
           <SelectContent>
@@ -100,7 +100,7 @@ export function StandingsSelector({
           </SelectContent>
         </Select>
       </div>
-      <div className="flex flex-col gap-1">
+      <div className="hidden md:flex max-w-48 flex-1 flex-col gap-1">
         <Label htmlFor="round-select" className="text-sm font-medium">
           Stand nach
         </Label>
@@ -111,7 +111,7 @@ export function StandingsSelector({
         >
           <SelectTrigger
             id="round-select"
-            className="w-48"
+            className="w-full"
             clearable={!!selectedRound}
             onClear={() => handleRoundChange(undefined)}
           >
