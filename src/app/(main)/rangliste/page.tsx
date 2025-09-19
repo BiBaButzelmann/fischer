@@ -1,9 +1,4 @@
-import {
-  Card,
-  CardDescription,
-  CardHeader,
-  CardTitle,
-} from "@/components/ui/card";
+import { Card, CardHeader, CardTitle } from "@/components/ui/card";
 import {
   getAllActiveTournamentNames,
   getTournamentById,
@@ -104,29 +99,22 @@ export default async function Page({
   );
 
   return (
-    <div className="bg-background text-foreground h-full p-4 sm:p-6 md:p-8">
-      <div className="max-w-5xl mx-auto">
-        <Card>
-          <CardHeader>
-            <CardTitle className="text-2xl font-bold tracking-tight">
-              Rangliste
-            </CardTitle>
-            <CardDescription>
-              Ohne Rundenauswahl wird die Gesamtrangliste über alle Runden
-              angezeigt. Zur Feinwertung wird das Sonneborn-Berger-System
-              verwendet.
-            </CardDescription>
-          </CardHeader>
-          <StandingsDisplay
-            tournamentNames={tournamentNames}
-            groups={groups}
-            rounds={rounds}
-            selectedTournamentId={selectedTournamentId}
-            selectedGroupId={selectedGroupId}
-            selectedRound={selectedRound}
-          />
-        </Card>
+    <div>
+      <div className="md:w-2/3 mb-8">
+        <h1 className="text-3xl font-bold text-gray-900 mb-4">Rangliste</h1>
+        <p className="text-gray-700">
+          Ohne Rundenauswahl wird die Gesamtrangliste über alle Runden
+          angezeigt. Zur Feinwertung wird das Sonneborn-Berger-System verwendet.
+        </p>
       </div>
+      <StandingsDisplay
+        tournamentNames={tournamentNames}
+        groups={groups}
+        rounds={rounds}
+        selectedTournamentId={selectedTournamentId}
+        selectedGroupId={selectedGroupId}
+        selectedRound={selectedRound}
+      />
     </div>
   );
 }
