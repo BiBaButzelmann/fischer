@@ -10,7 +10,7 @@ import {
 } from "react";
 import { Chess, Move, Square } from "chess.js";
 import { Chessboard } from "react-chessboard";
-import { savePGN, downloadPGN, uploadPGN } from "@/actions/pgn";
+import { savePGN } from "@/actions/pgn";
 import { isError } from "@/lib/actions";
 import { toast } from "sonner";
 import { MoveHistory } from "./move-history";
@@ -58,24 +58,16 @@ export default function PgnViewer({
   }, [fullPGN, gameId]);
 
   const handleDownload = useCallback(() => {
-    startTransition(async () => {
-      const result = await downloadPGN(fullPGN, gameId);
-
-      if (isError(result)) {
-        toast.error(result.error);
-      } else {
-        const blob = new Blob([result.pgn], { type: "text/plain" });
-        const url = URL.createObjectURL(blob);
-        const link = document.createElement("a");
-        link.href = url;
-        link.download = `game-${gameId}.pgn`;
-        document.body.appendChild(link);
-        link.click();
-        document.body.removeChild(link);
-        URL.revokeObjectURL(url);
-        toast.success("PGN erfolgreich heruntergeladen");
-      }
-    });
+    const blob = new Blob([fullPGN], { type: "text/plain" });
+    const url = URL.createObjectURL(blob);
+    const link = document.createElement("a");
+    link.href = url;
+    link.download = `game-${gameId}.pgn`;
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+    URL.revokeObjectURL(url);
+    toast.success("PGN erfolgreich heruntergeladen");
   }, [fullPGN, gameId]);
 
   const handleUpload = useCallback(() => {
@@ -91,22 +83,20 @@ export default function PgnViewer({
       reader.onload = (e) => {
         const content = e.target?.result as string;
         if (content) {
-          startTransition(async () => {
-            const result = await uploadPGN(content, gameId);
+          const trimmedContent = content.trim();
+          if (!trimmedContent) {
+            toast.error("PGN darf nicht leer sein.");
+            return;
+          }
 
-            if (isError(result)) {
-              toast.error(result.error);
-            } else {
-              try {
-                const newMoves = movesFromPGN(result.pgn);
-                setMoves(newMoves);
-                setCurrentIndex(newMoves.length - 1);
-                toast.success("PGN erfolgreich hochgeladen");
-              } catch {
-                toast.error("Ungültige PGN-Datei");
-              }
-            }
-          });
+          try {
+            const newMoves = movesFromPGN(trimmedContent);
+            setMoves(newMoves);
+            setCurrentIndex(newMoves.length - 1);
+            toast.success("PGN erfolgreich hochgeladen");
+          } catch {
+            toast.error("Ungültige PGN-Datei");
+          }
         }
       };
       reader.readAsText(file);
