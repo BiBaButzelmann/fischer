@@ -79,6 +79,11 @@ export default function PgnViewer({
       const file = event.target.files?.[0];
       if (!file) return;
 
+      if (!file.name.toLowerCase().endsWith(".pgn")) {
+        toast.error("Bitte wähle eine .pgn Datei aus.");
+        return;
+      }
+
       const reader = new FileReader();
       reader.onload = (e) => {
         const content = e.target?.result as string;
