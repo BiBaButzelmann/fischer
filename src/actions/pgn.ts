@@ -4,14 +4,17 @@ import { db } from "@/db/client";
 import { pgn } from "@/db/schema/pgn";
 import { getUserGameRights } from "@/lib/game-auth";
 import { authWithRedirect } from "@/auth/utils";
+import { action } from "@/lib/actions";
+import invariant from "tiny-invariant";
 
-export const savePGN = async (newValue: string, gameId: number) => {
+export const savePGN = action(async (newValue: string, gameId: number) => {
   const session = await authWithRedirect();
   const userRights = await getUserGameRights(gameId, session.user.id);
 
-  if (userRights !== "edit") {
-    return { error: "You are not authorized to edit this game." };
-  }
+  invariant(
+    userRights === "edit",
+    "Du bist nicht berechtigt, diese Partie zu bearbeiten.",
+  );
 
   await db
     .insert(pgn)
@@ -20,4 +23,32 @@ export const savePGN = async (newValue: string, gameId: number) => {
       target: pgn.gameId,
       set: { value: newValue },
     });
-};
+});
+
+export const downloadPGN = action(
+  async (currentPGN: string, gameId: number) => {
+    const session = await authWithRedirect();
+    const userRights = await getUserGameRights(gameId, session.user.id);
+
+    invariant(
+      userRights,
+      "Du bist nicht berechtigt, diese Partie herunterzuladen.",
+    );
+
+    return { pgn: currentPGN };
+  },
+);
+
+export const uploadPGN = action(async (pgnContent: string, gameId: number) => {
+  const session = await authWithRedirect();
+  const userRights = await getUserGameRights(gameId, session.user.id);
+  const pgn = pgnContent.trim();
+
+  invariant(
+    userRights === "edit",
+    "Du bist nicht berechtigt, diese Partie hochzuladen.",
+  );
+  invariant(pgn, "PGN darf nicht leer sein.");
+
+  return { pgn };
+});

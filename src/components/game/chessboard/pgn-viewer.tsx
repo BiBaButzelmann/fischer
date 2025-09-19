@@ -6,10 +6,12 @@ import {
   useCallback,
   useMemo,
   useTransition,
+  useRef,
 } from "react";
 import { Chess, Move, Square } from "chess.js";
 import { Chessboard } from "react-chessboard";
-import { savePGN } from "@/actions/pgn";
+import { savePGN, downloadPGN, uploadPGN } from "@/actions/pgn";
+import { isError } from "@/lib/actions";
 import { toast } from "sonner";
 import { MoveHistory } from "./move-history";
 
@@ -28,6 +30,7 @@ export default function PgnViewer({
   const [currentIndex, setCurrentIndex] = useState(moves.length - 1);
   const [isPending, startTransition] = useTransition();
   const [selectedSquare, setSelectedSquare] = useState<string | null>(null);
+  const fileInputRef = useRef<HTMLInputElement>(null);
 
   useChessboardControls({
     onArrowLeft: () => setCurrentIndex((i) => Math.max(-1, i - 1)),
@@ -46,13 +49,74 @@ export default function PgnViewer({
     startTransition(async () => {
       const result = await savePGN(fullPGN, gameId);
 
-      if (result?.error) {
-        toast.error("Fehler beim Speichern der Partie");
+      if (isError(result)) {
+        toast.error(result.error);
       } else {
         toast.success("Partie erfolgreich gespeichert");
       }
     });
   }, [fullPGN, gameId]);
+
+  const handleDownload = useCallback(() => {
+    startTransition(async () => {
+      const result = await downloadPGN(fullPGN, gameId);
+
+      if (isError(result)) {
+        toast.error(result.error);
+      } else {
+        const blob = new Blob([result.pgn], { type: "text/plain" });
+        const url = URL.createObjectURL(blob);
+        const link = document.createElement("a");
+        link.href = url;
+        link.download = `game-${gameId}.pgn`;
+        document.body.appendChild(link);
+        link.click();
+        document.body.removeChild(link);
+        URL.revokeObjectURL(url);
+        toast.success("PGN erfolgreich heruntergeladen");
+      }
+    });
+  }, [fullPGN, gameId]);
+
+  const handleUpload = useCallback(() => {
+    fileInputRef.current?.click();
+  }, []);
+
+  const handleFileChange = useCallback(
+    (event: React.ChangeEvent<HTMLInputElement>) => {
+      const file = event.target.files?.[0];
+      if (!file) return;
+
+      const reader = new FileReader();
+      reader.onload = (e) => {
+        const content = e.target?.result as string;
+        if (content) {
+          startTransition(async () => {
+            const result = await uploadPGN(content, gameId);
+
+            if (isError(result)) {
+              toast.error(result.error);
+            } else {
+              try {
+                const newMoves = movesFromPGN(result.pgn);
+                setMoves(newMoves);
+                setCurrentIndex(newMoves.length - 1);
+                toast.success("PGN erfolgreich hochgeladen");
+              } catch {
+                toast.error("Ungültige PGN-Datei");
+              }
+            }
+          });
+        }
+      };
+      reader.readAsText(file);
+
+      if (fileInputRef.current) {
+        fileInputRef.current.value = "";
+      }
+    },
+    [gameId],
+  );
 
   const makeMove = useCallback(
     (from: string, to: string, promotion?: string): boolean => {
@@ -121,6 +185,13 @@ export default function PgnViewer({
 
   return (
     <div className="flex flex-col lg:flex-row gap-6 w-full">
+      <input
+        ref={fileInputRef}
+        type="file"
+        accept=".pgn"
+        style={{ display: "none" }}
+        onChange={handleFileChange}
+      />
       <div className="flex-shrink-0 w-full max-w-lg mx-auto lg:mx-0">
         <div className="aspect-square w-full">
           <Chessboard
@@ -146,8 +217,11 @@ export default function PgnViewer({
           currentMoveIndex={currentIndex}
           goToMove={setCurrentIndex}
           onSave={allowEdit ? handleSave : undefined}
+          onDownload={handleDownload}
+          onUpload={allowEdit ? handleUpload : undefined}
           isSaving={isPending}
           showSave={allowEdit}
+          showUpload={allowEdit}
         />
       </div>
     </div>
