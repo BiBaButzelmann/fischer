@@ -1,54 +1,79 @@
-import { GAME_START_TIME } from "@/constants/constants";
 import { GameWithMatchday } from "@/db/types/game";
 import { DateTime } from "luxon";
+import invariant from "tiny-invariant";
 
 /**
- * Creates a Date object for a game with the specified matchday date and the standard game start time (7 PM German time)
+ * Creates a Date object for a game with the specified matchday date and game start time
  * @param matchdayDate - The date of the matchday (Date object or string)
+ * @param gameStartTime - The game start time in HH:MM:SS format
  * @returns A Date object with the game date and time
  */
-export function getDateTimeFromDefaultTime(matchdayDate: Date): DateTime {
+export function getDateTimeFromTournamentTime(
+  matchdayDate: Date,
+  gameStartTime: string,
+) {
+  invariant(gameStartTime, "Game start time is required");
+
+  const [hours, minutes, seconds] = gameStartTime.split(":").map(Number);
+
   const gameDateTime = DateTime.fromJSDate(matchdayDate)
     .setZone("Europe/Berlin")
     .set({
-      hour: GAME_START_TIME.hours,
-      minute: GAME_START_TIME.minutes,
-      second: GAME_START_TIME.seconds,
+      hour: hours,
+      minute: minutes,
+      second: seconds,
     });
   return gameDateTime;
 }
 
 /**
- * Creates a Date object for setup helper with the specified matchday date and 30 minutes before game start time (6:30 PM German time)
+ * Creates a Date object for setup helper with the specified matchday date and 30 minutes before game start time
  * @param matchdayDate - The date of the matchday (Date object or string)
+ * @param gameStartTime - The game start time in HH:MM:SS format
  * @returns A Date object with the setup helper date and time
  */
-export function getSetupHelperTimeFromDefaultTime(
+export function getSetupHelperTimeFromTournamentTime(
   matchdayDate: Date,
+  gameStartTime: string,
 ): DateTime {
+  invariant(gameStartTime, "Game start time is required");
+
+  const [hours, minutes, seconds] = gameStartTime.split(":").map(Number);
+
   const setupDateTime = DateTime.fromJSDate(matchdayDate)
     .setZone("Europe/Berlin")
     .set({
-      hour: GAME_START_TIME.hours,
-      minute: GAME_START_TIME.minutes - 30,
-      second: GAME_START_TIME.seconds,
+      hour: hours,
+      minute: minutes - 30,
+      second: seconds,
     });
   return setupDateTime;
 }
 
 /**
  * Creates a Date object for a game from a complete game object
- * @param game - The game object with matchdayGame relation
+ * @param game - The game object with matchdayGame relation and gameStartTime
+ * @param gameStartTime - The game start time in HH:MM:SS format
  * @returns A Date object with the game date and time
  */
-export function getGameTimeFromGame(game: GameWithMatchday): DateTime {
-  return getDateTimeFromDefaultTime(game.matchdayGame.matchday.date);
+export function getGameTimeFromGame(
+  game: GameWithMatchday,
+  gameStartTime: string,
+) {
+  return getDateTimeFromTournamentTime(
+    game.matchdayGame.matchday.date,
+    gameStartTime,
+  );
 }
 
 /**
- * Formats the standard game start time for display (HH:MM Uhr format)
+ * Formats the game start time for display (HH:MM Uhr format)
+ * @param gameStartTime - The game start time in HH:MM:SS format
  * @returns A formatted time string in German format
  */
-export function formatGameTime(): string {
-  return `${GAME_START_TIME.hours.toString().padStart(2, "0")}:${GAME_START_TIME.minutes.toString().padStart(2, "0")} Uhr`;
+export function formatGameTimeByTournament(gameStartTime: string) {
+  invariant(gameStartTime, "Game start time is required");
+
+  const [hours, minutes] = gameStartTime.split(":").map(Number);
+  return `${hours.toString().padStart(2, "0")}:${minutes.toString().padStart(2, "0")} Uhr`;
 }

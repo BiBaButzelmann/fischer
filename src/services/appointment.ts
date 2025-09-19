@@ -30,6 +30,7 @@ export type MatchdayAppointment = {
   matchdayId: number;
   matchdayDate: Date;
   tournamentId: number;
+  gameStartTime: string;
   cancelledAt: Date | null;
   appointments: Appointment[];
 };
@@ -64,6 +65,7 @@ export async function getMatchdayAppointmentsByUserId(
           matchdayId: appointment.matchdayId,
           matchdayDate: appointment.date,
           tournamentId: appointment.tournamentId,
+          gameStartTime: appointment.gameStartTime,
           cancelledAt: appointment.canceledAt,
           appointments: [{ type: "referee" }],
         });
@@ -112,6 +114,7 @@ export async function getMatchdayAppointmentsByUserId(
             matchdayId: appointment.matchdayId,
             matchdayDate: appointment.date,
             tournamentId: appointment.tournamentId,
+            gameStartTime: appointment.gameStartTime,
             cancelledAt: appointment.canceledAt,
             appointments: [setupHelperAppointment],
           });

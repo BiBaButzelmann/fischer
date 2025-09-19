@@ -1,0 +1,1 @@
+ALTER TABLE "tournament" ADD COLUMN "game_start_time" time DEFAULT '19:00:00' NOT NULL;

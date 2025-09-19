@@ -10,6 +10,7 @@ import {
   isNotNull,
 } from "drizzle-orm";
 import { getCurrentLocalDateTime } from "@/lib/date";
+import { getDateTimeFromTournamentTime } from "@/lib/game-time";
 import { group } from "../schema/group";
 import { matchdayGame, matchdayReferee } from "../schema/matchday";
 import { matchday } from "../schema/matchday";
@@ -54,6 +55,7 @@ export async function getGameById(gameId: number) {
       tournament: {
         columns: {
           name: true,
+          gameStartTime: true,
         },
       },
       matchdayGame: {
@@ -99,6 +101,11 @@ export async function getParticipantGames(participantId: number) {
               lastName: true,
             },
           },
+        },
+      },
+      tournament: {
+        columns: {
+          gameStartTime: true,
         },
       },
       matchdayGame: {
@@ -272,6 +279,11 @@ export async function getGamesByTournamentId(
           groupNumber: true,
         },
       },
+      tournament: {
+        columns: {
+          gameStartTime: true,
+        },
+      },
       matchdayGame: {
         with: {
           matchday: {
@@ -285,7 +297,17 @@ export async function getGamesByTournamentId(
   });
 
   const gameMap = new Map(games.map((game) => [game.id, game]));
-  return gameIds.map((id) => gameMap.get(id)).filter(Boolean);
+  const orderedGames = gameIds.map((id) => gameMap.get(id)).filter(Boolean);
+
+  const gamesWithTime = orderedGames.map((game) => ({
+    ...game,
+    time: getDateTimeFromTournamentTime(
+      game.matchdayGame.matchday.date,
+      game.tournament.gameStartTime,
+    ).toJSDate(),
+  }));
+
+  return gamesWithTime;
 }
 
 export async function getCompletedGames(groupId: number, maxRound?: number) {
@@ -433,6 +455,11 @@ export async function getGameWithParticipantsAndMatchday(gameId: number) {
               lastName: true,
             },
           },
+        },
+      },
+      tournament: {
+        columns: {
+          gameStartTime: true,
         },
       },
       matchdayGame: {
