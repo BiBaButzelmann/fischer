@@ -1,7 +1,6 @@
 "use client";
 
 import { useRouter } from "next/navigation";
-import { CardContent } from "../ui/card";
 import {
   Select,
   SelectContent,
@@ -63,75 +62,70 @@ export function StandingsSelector({
     );
   };
   return (
-    <CardContent>
-      <div className="flex flex-wrap gap-2 md:gap-4 mb-4">
-        <div className="flex flex-col gap-1">
-          <Label htmlFor="tournament-select" className="text-sm font-medium">
-            Ausgabe
-          </Label>
-          <Select
-            value={selectedTournamentId}
-            onValueChange={handleTournamentChange}
-          >
-            <SelectTrigger id="tournament-select" className="w-48">
-              <SelectValue />
-            </SelectTrigger>
-            <SelectContent>
-              {tournamentNames.map((t) => (
-                <SelectItem key={t.id} value={t.id.toString()}>
-                  {t.name}
-                </SelectItem>
-              ))}
-            </SelectContent>
-          </Select>
-        </div>
-        <div className="flex flex-col gap-1">
-          <Label htmlFor="group-select" className="text-sm font-medium">
-            Gruppe
-          </Label>
-          <Select
-            value={selectedGroupId || ""}
-            onValueChange={handleGroupChange}
-          >
-            <SelectTrigger id="group-select" className="w-48">
-              <SelectValue />
-            </SelectTrigger>
-            <SelectContent>
-              {groups.map((g) => (
-                <SelectItem key={g.id} value={g.id.toString()}>
-                  {g.groupName}
-                </SelectItem>
-              ))}
-            </SelectContent>
-          </Select>
-        </div>
-        <div className="flex flex-col gap-1">
-          <Label htmlFor="round-select" className="text-sm font-medium">
-            Stand nach
-          </Label>
-          <Select
-            key={selectedRound}
-            value={selectedRound || ""}
-            onValueChange={handleRoundChange}
-          >
-            <SelectTrigger
-              id="round-select"
-              className="w-48"
-              clearable={!!selectedRound}
-              onClear={() => handleRoundChange(undefined)}
-            >
-              <SelectValue />
-            </SelectTrigger>
-            <SelectContent>
-              {rounds.map((r) => (
-                <SelectItem key={r} value={r.toString()}>
-                  Runde {r}
-                </SelectItem>
-              ))}
-            </SelectContent>
-          </Select>
-        </div>
+    <div className="flex flex-nowrap gap-2 md:gap-4 mb-4">
+      <div className="flex max-w-48 flex-1 flex-col gap-1">
+        <Label htmlFor="tournament-select" className="text-sm font-medium">
+          Ausgabe
+        </Label>
+        <Select
+          value={selectedTournamentId}
+          onValueChange={handleTournamentChange}
+        >
+          <SelectTrigger id="tournament-select" className="w-full">
+            <SelectValue />
+          </SelectTrigger>
+          <SelectContent>
+            {tournamentNames.map((t) => (
+              <SelectItem key={t.id} value={t.id.toString()}>
+                {t.name}
+              </SelectItem>
+            ))}
+          </SelectContent>
+        </Select>
       </div>
-    </CardContent>
+      <div className="flex max-w-48 flex-1 flex-col gap-1">
+        <Label htmlFor="group-select" className="text-sm font-medium">
+          Gruppe
+        </Label>
+        <Select value={selectedGroupId || ""} onValueChange={handleGroupChange}>
+          <SelectTrigger id="group-select" className="w-full">
+            <SelectValue />
+          </SelectTrigger>
+          <SelectContent>
+            {groups.map((g) => (
+              <SelectItem key={g.id} value={g.id.toString()}>
+                {g.groupName}
+              </SelectItem>
+            ))}
+          </SelectContent>
+        </Select>
+      </div>
+      <div className="hidden md:flex max-w-48 flex-1 flex-col gap-1">
+        <Label htmlFor="round-select" className="text-sm font-medium">
+          Stand nach
+        </Label>
+        <Select
+          key={selectedRound}
+          value={selectedRound || ""}
+          onValueChange={handleRoundChange}
+        >
+          <SelectTrigger
+            id="round-select"
+            className="w-full"
+            clearable={!!selectedRound}
+            onClear={() => handleRoundChange(undefined)}
+          >
+            <SelectValue />
+          </SelectTrigger>
+          <SelectContent>
+            {rounds.map((r) => (
+              <SelectItem key={r} value={r.toString()}>
+                Runde {r}
+              </SelectItem>
+            ))}
+          </SelectContent>
+        </Select>
+      </div>
+    </div>
   );
 }

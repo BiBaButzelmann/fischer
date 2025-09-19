@@ -2,6 +2,7 @@ import { db } from "../client";
 import { referee } from "../schema/referee";
 import { profile } from "../schema/profile";
 import { matchday, matchdayReferee } from "../schema/matchday";
+import { tournament } from "../schema/tournament";
 import { and, eq, count, isNull } from "drizzle-orm";
 import type { RefereeWithName } from "../types/referee";
 
@@ -70,10 +71,14 @@ export async function getMatchdaysByRefereeId(refereeId: number) {
     .select({
       referee: referee,
       matchday: matchday,
+      tournament: {
+        gameStartTime: tournament.gameStartTime,
+      },
     })
     .from(referee)
     .innerJoin(matchdayReferee, eq(matchdayReferee.refereeId, referee.id))
     .innerJoin(matchday, eq(matchday.id, matchdayReferee.matchdayId))
+    .innerJoin(tournament, eq(matchday.tournamentId, tournament.id))
     .where(and(eq(referee.id, refereeId), isNull(matchdayReferee.canceledAt)));
 }
 

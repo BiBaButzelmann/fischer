@@ -16,7 +16,7 @@ import invariant from "tiny-invariant";
 import { bergerFide, nextEvenNumber } from "@/lib/pairing-utils";
 import { redirect } from "next/navigation";
 import {
-  getDateTimeFromDefaultTime,
+  getDateTimeFromTournamentTime,
   getGameTimeFromGame,
 } from "@/lib/game-time";
 import { sendGamePostponementEmails } from "@/actions/email/game-postponement";
@@ -206,6 +206,11 @@ export async function updateGameMatchdayAndBoardNumber(
     with: {
       whiteParticipant: { with: { profile: true } },
       blackParticipant: { with: { profile: true } },
+      tournament: {
+        columns: {
+          gameStartTime: true,
+        },
+      },
       matchdayGame: {
         with: {
           matchday: true,
@@ -256,18 +261,22 @@ export async function updateGameMatchdayAndBoardNumber(
   });
   invariant(userProfile, "Benutzerprofil nicht gefunden");
 
-  const fromTimestamp = getDateTimeFromDefaultTime(
+  const fromTimestamp = getDateTimeFromTournamentTime(
     currentMatchday.date,
-  ).toJSDate();
-  const toTimestamp = getDateTimeFromDefaultTime(newMatchday.date).toJSDate();
+    gameData.tournament.gameStartTime,
+  );
+  const toTimestamp = getDateTimeFromTournamentTime(
+    newMatchday.date,
+    gameData.tournament.gameStartTime,
+  );
 
   await db.transaction(async (tx) => {
     await tx.insert(gamePostponement).values({
       gameId,
       postponingParticipantId: postponingParticipant.id,
       postponedByProfileId: userProfile.id,
-      from: fromTimestamp,
-      to: toTimestamp,
+      from: fromTimestamp.toJSDate(),
+      to: toTimestamp.toJSDate(),
     });
 
     await tx
@@ -316,6 +325,11 @@ export async function updateGameResult(gameId: number, result: GameResult) {
   const gameData = await db.query.game.findFirst({
     where: eq(game.id, gameId),
     with: {
+      tournament: {
+        columns: {
+          gameStartTime: true,
+        },
+      },
       matchdayGame: {
         with: {
           matchday: true,
@@ -338,7 +352,10 @@ export async function updateGameResult(gameId: number, result: GameResult) {
     "User is not authorized to update this game result",
   );
 
-  const gameDateTime = getGameTimeFromGame(gameData);
+  const gameDateTime = getGameTimeFromGame(
+    gameData,
+    gameData.tournament.gameStartTime,
+  );
   const now = getCurrentLocalDateTime();
   invariant(
     gameDateTime <= now,

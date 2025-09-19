@@ -15,12 +15,16 @@ import {
 } from "@/db/types/game";
 import { useMemo, useCallback } from "react";
 import { useRouter } from "next/navigation";
-import { getGameTimeFromGame } from "@/lib/game-time";
 import { MatchDay } from "@/db/types/match-day";
 import { authClient } from "@/auth-client";
 import { Role } from "@/db/types/role";
 import { GameActions } from "./game-actions";
-import { getCurrentLocalDateTime, toDateString } from "@/lib/date";
+import {
+  getCurrentLocalDateTime,
+  toDateString,
+  toLocalDateTime,
+  isSameDate,
+} from "@/lib/date";
 import { getParticipantFullName } from "@/lib/participant";
 
 type Props = {
@@ -66,7 +70,12 @@ export function GamesList({
 
       const game = games.find((g) => g.id === gameId);
       const isGameInPastOrToday = game
-        ? getGameTimeFromGame(game) <= getCurrentLocalDateTime()
+        ? toLocalDateTime(game.matchdayGame.matchday.date) <
+            getCurrentLocalDateTime() ||
+          isSameDate(
+            toLocalDateTime(game.matchdayGame.matchday.date),
+            getCurrentLocalDateTime(),
+          )
         : false;
 
       return {
@@ -169,7 +178,9 @@ export function GamesList({
                   )}
                 </TableCell>
                 <TableCell className="w-24 text-center">
-                  {toDateString(getGameTimeFromGame(game))}
+                  {toDateString(
+                    toLocalDateTime(game.matchdayGame.matchday.date),
+                  )}
                 </TableCell>
                 {hasAnyActions && (
                   <TableCell className="flex items-center gap-2">
@@ -178,7 +189,9 @@ export function GamesList({
                       currentResult={game.result}
                       onResultChange={onResultChange}
                       availableMatchdays={availableMatchdays}
-                      currentGameDate={getGameTimeFromGame(game)}
+                      currentGameDate={toLocalDateTime(
+                        game.matchdayGame.matchday.date,
+                      )}
                       game={game}
                       isReferee={isReferee}
                       {...getGameActionPermissions(game.id)}
@@ -215,7 +228,11 @@ export function GamesList({
                       Runde {game.round}
                     </Badge>
                   </span>
-                  <span>{toDateString(getGameTimeFromGame(game))}</span>
+                  <span>
+                    {toDateString(
+                      toLocalDateTime(game.matchdayGame.matchday.date),
+                    )}
+                  </span>
                 </div>
                 <div className="flex items-center gap-2">
                   <div className="flex-1 flex-shrink">
@@ -259,7 +276,9 @@ export function GamesList({
                       currentResult={game.result}
                       onResultChange={onResultChange}
                       availableMatchdays={availableMatchdays}
-                      currentGameDate={getGameTimeFromGame(game)}
+                      currentGameDate={toLocalDateTime(
+                        game.matchdayGame.matchday.date,
+                      )}
                       game={game}
                       isReferee={isReferee}
                       {...permissions}

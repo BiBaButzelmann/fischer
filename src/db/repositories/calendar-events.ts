@@ -1,13 +1,15 @@
 import { CalendarEvent } from "../types/calendar";
 import {
   getGameTimeFromGame,
-  getDateTimeFromDefaultTime,
-  getSetupHelperTimeFromDefaultTime,
+  getDateTimeFromTournamentTime,
+  getSetupHelperTimeFromTournamentTime,
 } from "@/lib/game-time";
 import { getCurrentLocalDateTime, toLocalDateTime } from "@/lib/date";
-import { getMatchdaysByRefereeId } from "./referee";
 import { getParticipantWithGroupByProfileIdAndTournamentId } from "./participant";
-import { getRefereeByProfileIdAndTournamentId } from "./referee";
+import {
+  getMatchdaysByRefereeId,
+  getRefereeByProfileIdAndTournamentId,
+} from "./referee";
 import {
   getMatchdaysBySetupHelperId,
   getSetupHelperByProfileIdAndTournamentId,
@@ -18,19 +20,21 @@ export async function getCalendarEventsForParticipant(
   participantId: number,
 ): Promise<CalendarEvent[]> {
   const games = await getParticipantGames(participantId);
-
   const events: CalendarEvent[] = [];
   for (const game of games) {
-    const gameDateTime = getGameTimeFromGame(game);
+    const gameDateTime = getGameTimeFromGame(
+      game,
+      game.tournament.gameStartTime,
+    );
 
-    const whitePlayerDisabled =
-      game.whiteParticipant?.deletedAt != null &&
+    const whitePlayerDeleted =
+      game.whiteParticipant?.deletedAt &&
       toLocalDateTime(game.whiteParticipant.deletedAt) <= gameDateTime;
-    const blackPlayerDisabled =
-      game.blackParticipant?.deletedAt != null &&
+    const blackPlayerDeleted =
+      game.blackParticipant?.deletedAt &&
       toLocalDateTime(game.blackParticipant.deletedAt) <= gameDateTime;
 
-    if (whitePlayerDisabled || blackPlayerDisabled) {
+    if (whitePlayerDeleted || blackPlayerDeleted) {
       // Skip games where one of the players is disabled at the time of the game
       continue;
     }
@@ -42,7 +46,7 @@ export async function getCalendarEventsForParticipant(
       extendedProps: {
         eventType: "game" as const,
         gameId: game.id,
-        participantId: participantId,
+        participantId,
         round: game.round,
         tournamentId: game.tournamentId,
         groupId: game.groupId,
@@ -56,10 +60,15 @@ export async function getCalendarEventsForReferee(refereeId: number) {
   const refereeMatchdays = await getMatchdaysByRefereeId(refereeId);
 
   return refereeMatchdays.map((entry) => {
+    const startTime = getDateTimeFromTournamentTime(
+      entry.matchday.date,
+      entry.tournament.gameStartTime,
+    );
+
     return {
       id: `referee-${entry.matchday.id}`,
       title: `Schiedsrichter`,
-      start: getDateTimeFromDefaultTime(entry.matchday.date).toJSDate(),
+      start: startTime.toJSDate(),
       extendedProps: {
         eventType: "referee" as const,
         refereeId: entry.referee.id,
@@ -74,10 +83,15 @@ export async function getCalendarEventsForSetupHelper(setupHelperId: number) {
   const setupHelperMatchdays = await getMatchdaysBySetupHelperId(setupHelperId);
 
   return setupHelperMatchdays.map((entry) => {
+    const startTime = getSetupHelperTimeFromTournamentTime(
+      entry.matchday.date,
+      entry.tournament.gameStartTime,
+    );
+
     return {
       id: `setupHelper-${entry.matchday.id}`,
       title: `Aufbauhelfer`,
-      start: getSetupHelperTimeFromDefaultTime(entry.matchday.date).toJSDate(),
+      start: startTime.toJSDate(),
       extendedProps: {
         eventType: "setupHelper" as const,
         setupHelperId: entry.setupHelper.id,
@@ -99,27 +113,32 @@ export async function getUpcomingEventsByProfileAndTournament(
     getSetupHelperByProfileIdAndTournamentId(profileId, tournamentId),
   ]);
 
-  const eventPromises: Promise<CalendarEvent[]>[] = [];
+  const allEvents: CalendarEvent[] = [];
+
   if (participant) {
-    eventPromises.push(getCalendarEventsForParticipant(participant.id));
+    const participantEvents = await getCalendarEventsForParticipant(
+      participant.id,
+    );
+    allEvents.push(...participantEvents);
   }
   if (referee) {
-    eventPromises.push(getCalendarEventsForReferee(referee.id));
+    const refereeEvents = await getCalendarEventsForReferee(referee.id);
+    allEvents.push(...refereeEvents);
   }
   if (setupHelper) {
-    eventPromises.push(getCalendarEventsForSetupHelper(setupHelper.id));
+    const setupHelperEvents = await getCalendarEventsForSetupHelper(
+      setupHelper.id,
+    );
+    allEvents.push(...setupHelperEvents);
   }
 
-  if (eventPromises.length === 0) {
+  if (allEvents.length === 0) {
     return [];
   }
-
-  const allEvents = await Promise.all(eventPromises);
 
   const currentTime = getCurrentLocalDateTime().toJSDate();
 
   return allEvents
-    .flat()
     .filter((event) => event.start > currentTime)
     .sort((a, b) => a.start.getTime() - b.start.getTime())
     .slice(0, limit);

@@ -8,7 +8,6 @@ import {
   TableHeader,
   TableRow,
 } from "../ui/table";
-import { CardContent } from "../ui/card";
 import { cn } from "@/lib/utils";
 import { buildGameViewUrl } from "@/lib/navigation";
 import { useRouter } from "next/navigation";
@@ -46,55 +45,57 @@ export function StandingsTable({
   };
 
   return (
-    <CardContent>
-      <div className="border rounded-lg overflow-hidden">
-        <Table>
-          <TableHeader>
+    <div className="border rounded-lg overflow-hidden">
+      <Table>
+        <TableHeader>
+          <TableRow>
+            <TableHead className="w-[50px] text-center">#</TableHead>
+            <TableHead>Name</TableHead>
+            <TableHead className="text-right">DWZ</TableHead>
+            <TableHead className="hidden md:table-cell text-right">
+              ELO
+            </TableHead>
+            <TableHead className="text-right">Punkte</TableHead>
+            <TableHead className="text-right">Feinwertung</TableHead>
+            <TableHead className="hidden md:table-cell text-right">
+              Anzahl Partien
+            </TableHead>
+          </TableRow>
+        </TableHeader>
+        <TableBody>
+          {standings.length === 0 ? (
             <TableRow>
-              <TableHead className="w-[50px] text-center">#</TableHead>
-              <TableHead>Name</TableHead>
-              <TableHead className="text-right">DWZ</TableHead>
-              <TableHead className="text-right">ELO</TableHead>
-              <TableHead className="text-right">Punkte</TableHead>
-              <TableHead className="text-right">Feinwertung</TableHead>
-              <TableHead className="text-right">Anzahl Partien</TableHead>
+              <TableCell colSpan={7} className="text-center h-24">
+                Keine Ergebnisse für Gruppe{" "}
+                {selectedGroup?.groupName || selectedGroupId}
+                {selectedRound && ` bis Runde ${selectedRound}`} gefunden.
+                <br />
+                <span className="text-sm text-muted-foreground">
+                  Möglicherweise wurden noch keine Spiele eingegeben oder
+                  beendet.
+                </span>
+              </TableCell>
             </TableRow>
-          </TableHeader>
-          <TableBody>
-            {standings.length === 0 ? (
-              <TableRow>
-                <TableCell colSpan={7} className="text-center h-24">
-                  Keine Ergebnisse für Gruppe{" "}
-                  {selectedGroup?.groupName || selectedGroupId}
-                  {selectedRound && ` bis Runde ${selectedRound}`} gefunden.
-                  <br />
-                  <span className="text-sm text-muted-foreground">
-                    Möglicherweise wurden noch keine Spiele eingegeben oder
-                    beendet.
-                  </span>
-                </TableCell>
-              </TableRow>
-            ) : (
-              standings.map((playerStats, index) => {
-                const participant = participants.find(
-                  (p) => p.id === playerStats.participantId,
-                );
-                invariant(participant, "Participant not found");
-                return (
-                  <StandingsRow
-                    key={participant.id}
-                    participant={participant}
-                    playerStats={playerStats}
-                    position={index + 1}
-                    handlePlayerClick={handlePlayerClick}
-                  />
-                );
-              })
-            )}
-          </TableBody>
-        </Table>
-      </div>
-    </CardContent>
+          ) : (
+            standings.map((playerStats, index) => {
+              const participant = participants.find(
+                (p) => p.id === playerStats.participantId,
+              );
+              invariant(participant, "Participant not found");
+              return (
+                <StandingsRow
+                  key={participant.id}
+                  participant={participant}
+                  playerStats={playerStats}
+                  position={index + 1}
+                  handlePlayerClick={handlePlayerClick}
+                />
+              );
+            })
+          )}
+        </TableBody>
+      </Table>
+    </div>
   );
 }
 
@@ -145,7 +146,7 @@ function StandingsRow({
       <TableCell className="text-right">
         {participant.dwzRating || "-"}
       </TableCell>
-      <TableCell className="text-right">
+      <TableCell className="hidden md:table-cell text-right">
         {participant.fideRating || "-"}
       </TableCell>
       <TableCell className="text-right">
@@ -154,7 +155,9 @@ function StandingsRow({
       <TableCell className="text-right">
         {playerStats.sonnebornBerger.toFixed(2)}
       </TableCell>
-      <TableCell className="text-right">{playerStats.gamesPlayed}</TableCell>
+      <TableCell className="hidden md:table-cell text-right">
+        {playerStats.gamesPlayed}
+      </TableCell>
     </TableRow>
   );
 }

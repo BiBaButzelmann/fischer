@@ -14,7 +14,7 @@ import {
 } from "@/components/ui/dialog";
 import { Clock, ChevronRight, X, Undo2 } from "lucide-react";
 import { formatEventDateTime, toLocalDateTime } from "@/lib/date";
-import { getSetupHelperTimeFromDefaultTime } from "@/lib/game-time";
+import { getDateTimeFromTournamentTime } from "@/lib/game-time";
 import { buildGameViewUrl } from "@/lib/navigation";
 import Link from "next/link";
 import { PrintGamesButton } from "@/components/partien/print-games-button";
@@ -34,10 +34,14 @@ export function MatchdayAppointmentCard({ appointment }: Props) {
   const [isPending, startTransition] = useTransition();
   const [isDialogOpen, setIsDialogOpen] = useState(false);
 
-  const { matchdayId, matchdayDate, tournamentId, cancelledAt, appointments } =
-    appointment;
-
-  const setupHelperTime = getSetupHelperTimeFromDefaultTime(matchdayDate);
+  const {
+    matchdayId,
+    matchdayDate,
+    tournamentId,
+    gameStartTime,
+    cancelledAt,
+    appointments,
+  } = appointment;
 
   const gameUrl = buildGameViewUrl({
     tournamentId,
@@ -46,6 +50,11 @@ export function MatchdayAppointmentCard({ appointment }: Props) {
 
   const isCancelled = cancelledAt !== null;
   const hasActiveAppointments = !isCancelled;
+
+  const appointmentDateTime = getDateTimeFromTournamentTime(
+    matchdayDate,
+    gameStartTime,
+  );
 
   const handleCancel = () => {
     startTransition(async () => {
@@ -92,9 +101,7 @@ export function MatchdayAppointmentCard({ appointment }: Props) {
         </div>
         <div className="flex items-center gap-2 text-sm text-muted-foreground mt-2">
           <Clock className="w-4 h-4" />
-          <span>
-            {formatEventDateTime(toLocalDateTime(setupHelperTime.toJSDate()))}
-          </span>
+          <span>{formatEventDateTime(appointmentDateTime)}</span>
         </div>
       </CardHeader>
 
@@ -128,12 +135,12 @@ export function MatchdayAppointmentCard({ appointment }: Props) {
                     className="flex items-center gap-2"
                   >
                     <X className="w-4 h-4" />
-                    Termine absagen
+                    Termin absagen
                   </Button>
                 </DialogTrigger>
                 <DialogContent>
                   <DialogHeader>
-                    <DialogTitle>Termine absagen</DialogTitle>
+                    <DialogTitle>Termin absagen</DialogTitle>
                     <DialogDescription>
                       Möchtest du deine Termine für diesen Spieltag absagen? Das
                       Orga-Team wird automatisch benachrichtigt.

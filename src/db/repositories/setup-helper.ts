@@ -4,6 +4,7 @@ import { db } from "../client";
 import { setupHelper } from "../schema/setupHelper";
 import { profile } from "../schema/profile";
 import { matchday, matchdaySetupHelper } from "../schema/matchday";
+import { tournament } from "../schema/tournament";
 import { and, eq, count, asc, isNull } from "drizzle-orm";
 
 export async function getSetupHelperByProfileIdAndTournamentId(
@@ -69,6 +70,9 @@ export async function getMatchdaysBySetupHelperId(setupHelperId: number) {
     .select({
       setupHelper: setupHelper,
       matchday: matchday,
+      tournament: {
+        gameStartTime: tournament.gameStartTime,
+      },
     })
     .from(setupHelper)
     .innerJoin(
@@ -76,6 +80,7 @@ export async function getMatchdaysBySetupHelperId(setupHelperId: number) {
       eq(matchdaySetupHelper.setupHelperId, setupHelper.id),
     )
     .innerJoin(matchday, eq(matchday.id, matchdaySetupHelper.matchdayId))
+    .innerJoin(tournament, eq(matchday.tournamentId, tournament.id))
     .where(
       and(
         eq(setupHelper.id, setupHelperId),

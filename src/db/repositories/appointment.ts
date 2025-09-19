@@ -9,6 +9,7 @@ import {
 import { referee } from "../schema/referee";
 import { setupHelper } from "../schema/setupHelper";
 import { profile as profileSchema } from "../schema/profile";
+import { tournament } from "../schema/tournament";
 import { and, eq, gte, asc, ne, inArray } from "drizzle-orm";
 
 export async function getRefereeAppointmentsByRefereeId(
@@ -21,10 +22,12 @@ export async function getRefereeAppointmentsByRefereeId(
       date: matchday.date,
       dayOfWeek: matchday.dayOfWeek,
       tournamentId: matchday.tournamentId,
+      gameStartTime: tournament.gameStartTime,
       canceledAt: matchdayReferee.canceledAt,
     })
     .from(matchdayReferee)
     .innerJoin(matchday, eq(matchday.id, matchdayReferee.matchdayId))
+    .innerJoin(tournament, eq(matchday.tournamentId, tournament.id))
     .where(
       and(
         eq(matchdayReferee.refereeId, refereeId),
@@ -44,10 +47,12 @@ export async function getSetupHelperAppointmentsBySetupHelperId(
       date: matchday.date,
       dayOfWeek: matchday.dayOfWeek,
       tournamentId: matchday.tournamentId,
+      gameStartTime: tournament.gameStartTime,
       canceledAt: matchdaySetupHelper.canceledAt,
     })
     .from(matchdaySetupHelper)
     .innerJoin(matchday, eq(matchday.id, matchdaySetupHelper.matchdayId))
+    .innerJoin(tournament, eq(matchday.tournamentId, tournament.id))
     .where(
       and(
         eq(matchdaySetupHelper.setupHelperId, setupHelperId),

@@ -85,6 +85,7 @@ export type GameWithParticipantsAndDate = GameWithParticipants & {
 export type GameWithParticipantsAndPGNAndDate = GameWithParticipantsAndPGN & {
   tournament: {
     name: string;
+    gameStartTime: string;
   };
   matchdayGame: {
     matchday: {

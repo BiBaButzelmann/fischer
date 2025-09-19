@@ -79,7 +79,7 @@ async function PgnContainer({
     );
   }
 
-  const gameDateTime = getGameTimeFromGame(game);
+  const gameDateTime = getGameTimeFromGame(game, game.tournament.gameStartTime);
 
   const pgn =
     game.pgn != null
