@@ -42,8 +42,6 @@ export default function PgnViewer({
   const fileInputRef = useRef<HTMLInputElement>(null);
 
   useChessboardControls({
-    currentIndex,
-    movesLength: moves.length,
     onArrowLeft: () => setCurrentIndex((i) => Math.max(-1, i - 1)),
     onArrowRight: () =>
       setCurrentIndex((i) => Math.min(moves.length - 1, i + 1)),
@@ -277,15 +275,11 @@ function computePGNFromMoves(moves: Move[]): string {
 }
 
 const useChessboardControls = ({
-  currentIndex,
-  movesLength,
   onArrowLeft,
   onArrowRight,
   onArrowUp,
   onArrowDown,
 }: {
-  currentIndex: number;
-  movesLength: number;
   onArrowLeft: () => void;
   onArrowRight: () => void;
   onArrowUp: () => void;
@@ -294,29 +288,20 @@ const useChessboardControls = ({
   useEffect(() => {
     function onKey(e: KeyboardEvent) {
       if (e.key === "ArrowLeft") {
+        e.preventDefault();
         onArrowLeft();
       } else if (e.key === "ArrowRight") {
+        e.preventDefault();
         onArrowRight();
       } else if (e.key === "ArrowUp") {
-        if (currentIndex !== -1) {
-          e.preventDefault();
-        }
+        e.preventDefault();
         onArrowUp();
       } else if (e.key === "ArrowDown") {
-        if (currentIndex !== movesLength - 1) {
-          e.preventDefault();
-        }
+        e.preventDefault();
         onArrowDown();
       }
     }
     window.addEventListener("keydown", onKey);
     return () => window.removeEventListener("keydown", onKey);
-  }, [
-    currentIndex,
-    movesLength,
-    onArrowLeft,
-    onArrowRight,
-    onArrowUp,
-    onArrowDown,
-  ]);
+  }, [onArrowLeft, onArrowRight, onArrowUp, onArrowDown]);
 };
