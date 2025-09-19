@@ -93,23 +93,15 @@ async function PgnContainer({
         );
 
   return (
-    <div>
-      <div className="mb-4 pb-3">
-        <h1 className="text-lg sm:text-2xl font-semibold text-gray-900">
-          Runde {game.round} • {toDateString(gameDateTime)}
-        </h1>
-      </div>
-
-      <div className="mt-2">
-        <PgnViewer
-          gameId={game.id}
-          initialPGN={pgn}
-          allowEdit={allowEdit}
-          whitePlayer={game.whiteParticipant}
-          blackPlayer={game.blackParticipant}
-          gameResult={game.result!}
-        />
-      </div>
+    <div className="mt-2">
+      <PgnViewer
+        gameId={game.id}
+        initialPGN={pgn}
+        allowEdit={allowEdit}
+        whitePlayer={game.whiteParticipant}
+        blackPlayer={game.blackParticipant}
+        gameResult={game.result!}
+      />
     </div>
   );
 }
