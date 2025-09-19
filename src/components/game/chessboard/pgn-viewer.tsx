@@ -40,9 +40,13 @@ export default function PgnViewer({
   const [selectedSquare, setSelectedSquare] = useState<string | null>(null);
 
   useChessboardControls({
+    currentIndex,
+    movesLength: moves.length,
     onArrowLeft: () => setCurrentIndex((i) => Math.max(-1, i - 1)),
     onArrowRight: () =>
       setCurrentIndex((i) => Math.min(moves.length - 1, i + 1)),
+    onArrowUp: () => setCurrentIndex(-1),
+    onArrowDown: () => setCurrentIndex(moves.length - 1),
   });
 
   const fen = useMemo(
@@ -204,11 +208,19 @@ function computePGNFromMoves(moves: Move[]): string {
 }
 
 const useChessboardControls = ({
+  currentIndex,
+  movesLength,
   onArrowLeft,
   onArrowRight,
+  onArrowUp,
+  onArrowDown,
 }: {
+  currentIndex: number;
+  movesLength: number;
   onArrowLeft: () => void;
   onArrowRight: () => void;
+  onArrowUp: () => void;
+  onArrowDown: () => void;
 }) => {
   useEffect(() => {
     function onKey(e: KeyboardEvent) {
@@ -216,9 +228,26 @@ const useChessboardControls = ({
         onArrowLeft();
       } else if (e.key === "ArrowRight") {
         onArrowRight();
+      } else if (e.key === "ArrowUp") {
+        if (currentIndex !== -1) {
+          e.preventDefault();
+        }
+        onArrowUp();
+      } else if (e.key === "ArrowDown") {
+        if (currentIndex !== movesLength - 1) {
+          e.preventDefault();
+        }
+        onArrowDown();
       }
     }
     window.addEventListener("keydown", onKey);
     return () => window.removeEventListener("keydown", onKey);
-  }, [onArrowLeft, onArrowRight]);
+  }, [
+    currentIndex,
+    movesLength,
+    onArrowLeft,
+    onArrowRight,
+    onArrowUp,
+    onArrowDown,
+  ]);
 };
