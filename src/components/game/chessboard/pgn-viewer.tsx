@@ -11,7 +11,6 @@ import {
 import { Chess, Move, Square } from "chess.js";
 import { Chessboard } from "react-chessboard";
 import { savePGN } from "@/actions/pgn";
-import { isError } from "@/lib/actions";
 import { toast } from "sonner";
 import { MoveHistory } from "./move-history";
 
@@ -110,7 +109,7 @@ export default function PgnViewer({
         fileInputRef.current.value = "";
       }
     },
-    [gameId],
+    [setMoves, setCurrentIndex],
   );
 
   const makeMove = useCallback(
