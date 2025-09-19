@@ -131,7 +131,7 @@ export default function PgnViewer({
 
   return (
     <div className="flex flex-col lg:flex-row gap-6 w-full">
-      <div className="flex-shrink-0 w-full max-w-lg mx-auto lg:mx-0">
+      <div className="flex-shrink-0 w-full max-w-lg mx-auto lg:mx-0 border border-gray-200 rounded-lg shadow-sm overflow-hidden">
         <PlayerDisplay
           participant={blackPlayer}
           result={getIndividualPlayerResult(gameResult, false)}

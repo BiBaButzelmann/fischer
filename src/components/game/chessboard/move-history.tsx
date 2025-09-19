@@ -64,8 +64,8 @@ export function MoveHistory({
   }
 
   return (
-    <div className="w-full flex flex-col h-[512px]">
-      <div className="h-full rounded-xl border bg-card text-card-foreground shadow flex flex-col">
+    <div className="w-full flex flex-col h-full max-h-[570px]">
+      <div className="h-full rounded-lg border border-gray-200 bg-card text-card-foreground shadow-sm flex flex-col">
         <div className="flex flex-col space-y-1.5 p-4 pb-3 flex-shrink-0">
           <div className="font-semibold leading-none tracking-tight flex items-center">
             <div className="flex items-center gap-2">

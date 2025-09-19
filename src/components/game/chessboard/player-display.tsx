@@ -12,11 +12,9 @@ export function PlayerDisplay({ participant, result, position }: Props) {
   const rating = participant.dwzRating ?? participant.fideRating;
   const displayName = getParticipantFullName(participant);
 
-  const borderRadius = position === "top" ? "rounded-t-lg" : "rounded-b-lg";
-
   return (
     <div
-      className={`px-3 py-1.5 bg-white border border-gray-200 shadow-sm ${borderRadius} flex items-center gap-3`}
+      className={`px-3 py-1 bg-white ${position === "top" ? "rounded-t-lg" : "rounded-b-lg"} flex items-center gap-3`}
     >
       <div className="text-sm font-bold text-gray-900">{result}</div>
       <div className="w-px h-3 bg-gray-300"></div>
