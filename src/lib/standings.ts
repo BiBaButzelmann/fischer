@@ -1,8 +1,5 @@
 import type { PlayerStats } from "@/db/types/standings";
-import type {
-  ParticipantWithName,
-  ParticipantWithRatingAndChessClub,
-} from "@/db/types/participant";
+import type { ParticipantWithRating } from "@/db/types/participant";
 import type { Game, GameResult } from "@/db/types/game";
 import invariant from "tiny-invariant";
 
@@ -34,9 +31,9 @@ function calculatePointsFromResult(
 
 export function calculateStandings(
   games: Game[],
-  participants: ParticipantWithName[],
+  participants: ParticipantWithRating[],
 ): PlayerStats[] {
-  const participantsMap = new Map<number, ParticipantWithName>();
+  const participantsMap = new Map<number, ParticipantWithRating>();
   participants.forEach((participant) => {
     participantsMap.set(participant.id, participant);
   });
@@ -70,7 +67,6 @@ export function calculateStandings(
     }
   });
 
-  // TODO: check if sonnebornberger calculation is still correct
   games.forEach((game) => {
     if (!game.result) return;
 
@@ -105,7 +101,7 @@ export function calculateStandings(
 function comparePlayerStats(
   a: PlayerStats,
   b: PlayerStats,
-  participantsMap: Map<number, ParticipantWithRatingAndChessClub>,
+  participantsMap: Map<number, ParticipantWithRating>,
 ): number {
   if (b.points !== a.points) {
     return b.points - a.points;

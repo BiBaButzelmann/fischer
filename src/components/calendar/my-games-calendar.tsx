@@ -76,7 +76,15 @@ export function MyGamesCalendar({ events, matchdays = [] }: Props) {
 
       startTransition(async () => {
         try {
-          await updateGameMatchdayAndBoardNumber(gameId, targetMatchday.id);
+          const result = await updateGameMatchdayAndBoardNumber(
+            gameId,
+            targetMatchday.id,
+          );
+          if (result?.error) {
+            toast.error(result.error);
+            info.revert();
+            return;
+          }
           toast.success("Spiel erfolgreich verschoben!");
         } catch {
           toast.error("Fehler beim Verschieben des Spiels.");

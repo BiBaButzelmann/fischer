@@ -7,9 +7,8 @@ import {
   useMemo,
   useTransition,
 } from "react";
-import { Chess, Move } from "chess.js";
+import { Chess, Move, Square } from "chess.js";
 import { Chessboard } from "react-chessboard";
-import type { Square } from "react-chessboard/dist/chessboard/types";
 import { savePGN } from "@/actions/pgn";
 import { toast } from "sonner";
 import { MoveHistory } from "./move-history";
@@ -56,14 +55,19 @@ export default function PgnViewer({
   }, [fullPGN, gameId]);
 
   const makeMove = useCallback(
-    (from: string, to: string): boolean => {
+    (from: string, to: string, promotion?: string): boolean => {
       const boardState = currentBoardState(moves, currentIndex);
 
       try {
-        const move = boardState.move({
+        const moveOptions: { from: string; to: string; promotion?: string } = {
           from,
           to,
-        });
+        };
+        if (promotion) {
+          moveOptions.promotion = promotion;
+        }
+
+        const move = boardState.move(moveOptions);
         const updatedMoves = moves.slice(0, currentIndex + 1).concat(move);
         setMoves(updatedMoves);
         setCurrentIndex(updatedMoves.length - 1);
@@ -76,10 +80,20 @@ export default function PgnViewer({
   );
 
   const handleDrop = useCallback(
-    (sourceSquare: string, targetSquare: string): boolean => {
-      return makeMove(sourceSquare, targetSquare);
+    (sourceSquare: string, targetSquare: string, piece?: string): boolean => {
+      if (!allowEdit) return false;
+
+      let promotion: string | undefined;
+      if (piece && piece.length === 2) {
+        const promotionPiece = piece[1].toLowerCase();
+        if (["q", "r", "b", "n"].includes(promotionPiece)) {
+          promotion = promotionPiece;
+        }
+      }
+
+      return makeMove(sourceSquare, targetSquare, promotion);
     },
-    [makeMove],
+    [allowEdit, makeMove],
   );
 
   const handleSquareClick = useCallback(
@@ -106,37 +120,35 @@ export default function PgnViewer({
   );
 
   return (
-    <div className="rounded-xl border bg-card shadow p-6 w-fit">
-      <div className="flex flex-col lg:flex-row gap-6 w-full">
-        <div className="flex-shrink-0 w-full max-w-lg mx-auto lg:mx-0">
-          <div className="aspect-square w-full">
-            <Chessboard
-              position={fen}
-              arePiecesDraggable={allowEdit}
-              onPieceDrop={handleDrop}
-              onSquareClick={handleSquareClick}
-              animationDuration={0}
-              customSquareStyles={{
-                ...(selectedSquare && {
-                  [selectedSquare]: {
-                    boxShadow: "inset 0 0 1px 6px rgba(255,255,255,0.75)",
-                  },
-                }),
-              }}
-            />
-          </div>
-        </div>
-
-        <div className="w-80 flex-shrink-0">
-          <MoveHistory
-            history={moves}
-            currentMoveIndex={currentIndex}
-            goToMove={setCurrentIndex}
-            onSave={allowEdit ? handleSave : undefined}
-            isSaving={isPending}
-            showSave={allowEdit}
+    <div className="flex flex-col lg:flex-row gap-6 w-full">
+      <div className="flex-shrink-0 w-full max-w-lg mx-auto lg:mx-0">
+        <div className="aspect-square w-full">
+          <Chessboard
+            position={fen}
+            arePiecesDraggable={allowEdit}
+            onPieceDrop={handleDrop}
+            onSquareClick={handleSquareClick}
+            animationDuration={0}
+            customSquareStyles={{
+              ...(selectedSquare && {
+                [selectedSquare]: {
+                  boxShadow: "inset 0 0 1px 6px rgba(255,255,255,0.75)",
+                },
+              }),
+            }}
           />
         </div>
+      </div>
+
+      <div className="w-full lg:w-80 flex-shrink-0">
+        <MoveHistory
+          history={moves}
+          currentMoveIndex={currentIndex}
+          goToMove={setCurrentIndex}
+          onSave={allowEdit ? handleSave : undefined}
+          isSaving={isPending}
+          showSave={allowEdit}
+        />
       </div>
     </div>
   );
@@ -150,7 +162,7 @@ function movesFromPGN(pgn: string): Move[] {
 
 function currentBoardState(moves: Move[], index: number): Chess {
   const chess = new Chess();
-  for (let i = 0; i <= index; i++) {
+  for (let i = 0; i <= index && i < moves.length; i++) {
     chess.move(moves[i]);
   }
   return chess;

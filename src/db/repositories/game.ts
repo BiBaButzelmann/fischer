@@ -481,12 +481,7 @@ export async function getParticipantsInGroup(groupId: number) {
     with: {
       participant: {
         with: {
-          profile: {
-            columns: {
-              firstName: true,
-              lastName: true,
-            },
-          },
+          profile: true,
         },
       },
     },
@@ -544,25 +539,6 @@ export async function isUserMatchEnteringHelperInGame(
   return assignment.length > 0;
 }
 
-export async function isUserRefereeInGame(gameId: number, userId: string) {
-  const refereeAssignment = await db
-    .select({
-      refereeId: matchdayReferee.refereeId,
-    })
-    .from(game)
-    .innerJoin(matchdayGame, eq(game.id, matchdayGame.gameId))
-    .innerJoin(
-      matchdayReferee,
-      eq(matchdayGame.matchdayId, matchdayReferee.matchdayId),
-    )
-    .innerJoin(referee, eq(matchdayReferee.refereeId, referee.id))
-    .innerJoin(profile, eq(referee.profileId, profile.id))
-    .where(and(eq(game.id, gameId), eq(profile.userId, userId)))
-    .limit(1);
-
-  return refereeAssignment.length > 0;
-}
-
 export async function getGamesAccessibleByUser(userId: string) {
   return await db.query.game.findMany({
     where: (game, { and, or, eq, isNotNull, exists, inArray }) =>
@@ -602,6 +578,18 @@ export async function getGamesAccessibleByUser(userId: string) {
                 and(
                   eq(profile.userId, userId),
                   eq(game.groupId, groupMatchEnteringHelper.groupId),
+                ),
+              ),
+          ),
+          exists(
+            db
+              .select()
+              .from(referee)
+              .innerJoin(profile, eq(referee.profileId, profile.id))
+              .where(
+                and(
+                  eq(profile.userId, userId),
+                  eq(referee.tournamentId, game.tournamentId),
                 ),
               ),
           ),

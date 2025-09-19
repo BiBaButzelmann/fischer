@@ -98,12 +98,16 @@ async function PgnContainer({
         );
 
   return (
-    <div className="p-4">
-      <h1 className="mb-4 text-2xl font-semibold">
-        {whiteDisplay} vs {blackDisplay}
-      </h1>
+    <div>
+      <div className="mb-8">
+        <h1 className="flex-1 text-3xl font-bold text-gray-900 mb-4">
+          {whiteDisplay} vs {blackDisplay}
+        </h1>
+      </div>
 
-      <PgnViewer gameId={game.id} initialPGN={pgn} allowEdit={allowEdit} />
+      <div>
+        <PgnViewer gameId={game.id} initialPGN={pgn} allowEdit={allowEdit} />
+      </div>
     </div>
   );
 }

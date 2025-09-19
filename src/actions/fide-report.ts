@@ -25,12 +25,7 @@ export const generateFideReportFile = action(
           with: {
             participant: {
               with: {
-                profile: {
-                  columns: {
-                    firstName: true,
-                    lastName: true,
-                  },
-                },
+                profile: true,
               },
             },
           },
