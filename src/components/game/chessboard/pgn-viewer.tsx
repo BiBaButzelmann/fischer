@@ -49,8 +49,8 @@ export default function PgnViewer({
     startTransition(async () => {
       const result = await savePGN(fullPGN, gameId);
 
-      if (isError(result)) {
-        toast.error(result.error);
+      if (result?.error) {
+        toast.error("Fehler beim Speichern der Partie");
       } else {
         toast.success("Partie erfolgreich gespeichert");
       }
