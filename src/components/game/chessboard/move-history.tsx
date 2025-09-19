@@ -8,8 +8,11 @@ type Props = {
   currentMoveIndex: number;
   goToMove: (ply: number) => void;
   onSave?: () => void;
+  onDownload?: () => void;
+  onUpload?: () => void;
   isSaving?: boolean;
   showSave?: boolean;
+  showUpload?: boolean;
 };
 
 export function MoveHistory({
@@ -17,8 +20,11 @@ export function MoveHistory({
   currentMoveIndex,
   goToMove,
   onSave,
+  onDownload,
+  onUpload,
   isSaving = false,
   showSave = false,
+  showUpload = false,
 }: Props) {
   const rows: React.ReactNode[] = [];
   for (let i = 0; i < history.length; i += 2) {
@@ -96,8 +102,8 @@ export function MoveHistory({
             </div>
           </div>
         </div>
-        {showSave && onSave && (
-          <div className="px-4 pb-4 border-t flex-shrink-0">
+        <div className="px-4 pb-4 border-t flex-shrink-0">
+          {showSave && onSave && (
             <Button
               variant="outline"
               className="w-full mt-4"
@@ -106,8 +112,30 @@ export function MoveHistory({
             >
               {isSaving ? "Speichern..." : "Speichern"}
             </Button>
-          </div>
-        )}
+          )}
+
+          {onDownload && (
+            <Button
+              variant="outline"
+              className="w-full mt-2"
+              onClick={onDownload}
+              disabled={isSaving}
+            >
+              PGN herunterladen
+            </Button>
+          )}
+
+          {showUpload && onUpload && (
+            <Button
+              variant="outline"
+              className="w-full mt-2"
+              onClick={onUpload}
+              disabled={isSaving}
+            >
+              PGN hochladen
+            </Button>
+          )}
+        </div>
       </div>
     </div>
   );
