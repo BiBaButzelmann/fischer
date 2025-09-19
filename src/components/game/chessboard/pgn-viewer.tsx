@@ -12,17 +12,27 @@ import { Chessboard } from "react-chessboard";
 import { savePGN } from "@/actions/pgn";
 import { toast } from "sonner";
 import { MoveHistory } from "./move-history";
+import { PlayerDisplay } from "./player-display";
+import { ParticipantWithName } from "@/db/types/participant";
+import { getIndividualPlayerResult } from "@/lib/game-result-utils";
+import { GameResult } from "@/db/types/game";
 
 export type Props = {
   gameId: number;
   initialPGN: string;
   allowEdit?: boolean;
+  whitePlayer: ParticipantWithName;
+  blackPlayer: ParticipantWithName;
+  gameResult: GameResult;
 };
 
 export default function PgnViewer({
   gameId,
   initialPGN,
   allowEdit = false,
+  whitePlayer,
+  blackPlayer,
+  gameResult,
 }: Props) {
   const [moves, setMoves] = useState(() => movesFromPGN(initialPGN));
   const [currentIndex, setCurrentIndex] = useState(moves.length - 1);
@@ -122,6 +132,12 @@ export default function PgnViewer({
   return (
     <div className="flex flex-col lg:flex-row gap-6 w-full">
       <div className="flex-shrink-0 w-full max-w-lg mx-auto lg:mx-0">
+        <PlayerDisplay
+          participant={blackPlayer}
+          result={getIndividualPlayerResult(gameResult, false)}
+          position="top"
+        />
+
         <div className="aspect-square w-full">
           <Chessboard
             position={fen}
@@ -138,6 +154,12 @@ export default function PgnViewer({
             }}
           />
         </div>
+
+        <PlayerDisplay
+          participant={whitePlayer}
+          result={getIndividualPlayerResult(gameResult, true)}
+          position="bottom"
+        />
       </div>
 
       <div className="w-full lg:w-80 flex-shrink-0">

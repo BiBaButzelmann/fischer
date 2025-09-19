@@ -40,12 +40,11 @@ export default async function GamePage({ params }: Props) {
   }
 
   const userRights = await getUserGameRights(gameId, session.user.id);
-
   if (!userRights) {
     return (
       <div className="p-4">
         <p className="text-red-600">
-          Sie sind nicht berechtigt, diese Partie anzuzeigen.
+          Du bist nicht berechtigt, diese Partie anzuzeigen.
         </p>
       </div>
     );
@@ -81,9 +80,6 @@ async function PgnContainer({
     );
   }
 
-  const whiteDisplay = formatDisplayName(game.whiteParticipant);
-  const blackDisplay = formatDisplayName(game.blackParticipant);
-
   const gameDateTime = getGameTimeFromGame(game);
 
   const pgn =
@@ -93,28 +89,30 @@ async function PgnContainer({
           game.tournament.name,
           gameDateTime,
           game.round,
-          whiteDisplay,
-          blackDisplay,
+          getParticipantFullName(game.whiteParticipant),
+          getParticipantFullName(game.blackParticipant),
         );
 
   return (
     <div>
-      <div className="mb-8">
-        <h1 className="flex-1 text-3xl font-bold text-gray-900 mb-4">
-          {whiteDisplay} vs {blackDisplay}
+      <div className="mb-4 pb-3">
+        <h1 className="text-lg sm:text-2xl font-semibold text-gray-900">
+          Runde {game.round} • {toDateString(gameDateTime)}
         </h1>
       </div>
 
-      <div>
-        <PgnViewer gameId={game.id} initialPGN={pgn} allowEdit={allowEdit} />
+      <div className="mt-2">
+        <PgnViewer
+          gameId={game.id}
+          initialPGN={pgn}
+          allowEdit={allowEdit}
+          whitePlayer={game.whiteParticipant}
+          blackPlayer={game.blackParticipant}
+          gameResult={game.result!}
+        />
       </div>
     </div>
   );
-}
-
-function formatDisplayName(p: ParticipantWithName) {
-  const rating = p.fideRating ?? p.dwzRating;
-  return `${getParticipantFullName(p)}${rating ? ` (${rating})` : ""}`;
 }
 
 function getInitialPGN(
