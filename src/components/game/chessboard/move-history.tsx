@@ -1,6 +1,7 @@
 "use client";
 
 import clsx from "clsx";
+import { useEffect, useRef } from "react";
 import { Button } from "@/components/ui/button";
 
 type Props = {
@@ -20,6 +21,27 @@ export function MoveHistory({
   isSaving = false,
   showSave = false,
 }: Props) {
+  const scrollContainerRef = useRef<HTMLDivElement>(null);
+  const currentMoveRef = useRef<HTMLTableCellElement>(null);
+
+  useEffect(() => {
+    if (currentMoveRef.current && scrollContainerRef.current) {
+      const moveElement = currentMoveRef.current;
+      const container = scrollContainerRef.current;
+
+      const containerHeight = container.clientHeight;
+      const moveTop = moveElement.offsetTop;
+      const moveHeight = moveElement.offsetHeight;
+
+      const targetScrollTop = moveTop - containerHeight / 2 + moveHeight / 2;
+
+      container.scrollTo({
+        top: Math.max(0, targetScrollTop),
+        behavior: "smooth",
+      });
+    }
+  }, [currentMoveIndex]);
+
   const rows: React.ReactNode[] = [];
   for (let i = 0; i < history.length; i += 2) {
     const white = history[i];
@@ -34,6 +56,7 @@ export function MoveHistory({
           {i / 2 + 1}.
         </td>
         <td
+          ref={currentMoveIndex === whitePly ? currentMoveRef : null}
           className={clsx(
             "px-3 py-1.5 cursor-pointer rounded-sm transition-all duration-150 font-mono text-sm min-w-[4rem]",
             "hover:bg-accent hover:text-accent-foreground hover:shadow-sm",
@@ -46,6 +69,7 @@ export function MoveHistory({
           {white ? white.san : "…"}
         </td>
         <td
+          ref={currentMoveIndex === blackPly && black ? currentMoveRef : null}
           className={clsx(
             "px-3 py-1.5 rounded-sm transition-all duration-150 font-mono text-sm min-w-[4rem]",
             black
@@ -76,7 +100,10 @@ export function MoveHistory({
         </div>
         <div className="flex-1 overflow-hidden">
           <div className="h-full px-4 pb-4">
-            <div className="h-full overflow-y-auto rounded-md border bg-background/50 scrollbar-thin scrollbar-thumb-gray-400 scrollbar-track-gray-100">
+            <div
+              ref={scrollContainerRef}
+              className="h-full overflow-y-auto rounded-md border bg-background/50 scrollbar-thin scrollbar-thumb-gray-400 scrollbar-track-gray-100"
+            >
               <table className="w-full">
                 <tbody className="divide-y divide-border/30">
                   {rows.length > 0 ? (
