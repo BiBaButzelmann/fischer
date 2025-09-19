@@ -148,7 +148,7 @@ function movesFromPGN(pgn: string): Move[] {
 
 function currentBoardState(moves: Move[], index: number): Chess {
   const chess = new Chess();
-  for (let i = 0; i <= index; i++) {
+  for (let i = 0; i <= index && i < moves.length; i++) {
     chess.move(moves[i]);
   }
   return chess;

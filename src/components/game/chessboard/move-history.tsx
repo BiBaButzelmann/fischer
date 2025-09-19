@@ -47,13 +47,15 @@ export function MoveHistory({
         </td>
         <td
           className={clsx(
-            "px-3 py-1.5 cursor-pointer rounded-sm transition-all duration-150 font-mono text-sm min-w-[4rem]",
-            "hover:bg-accent hover:text-accent-foreground hover:shadow-sm",
-            currentMoveIndex === blackPly
+            "px-3 py-1.5 rounded-sm transition-all duration-150 font-mono text-sm min-w-[4rem]",
+            black
+              ? "cursor-pointer hover:bg-accent hover:text-accent-foreground hover:shadow-sm"
+              : "cursor-default",
+            currentMoveIndex === blackPly && black
               ? "bg-primary text-primary-foreground font-semibold shadow-sm"
               : "text-foreground",
           )}
-          onClick={() => goToMove(blackPly)}
+          onClick={black ? () => goToMove(blackPly) : undefined}
         >
           {black ? black.san : "…"}
         </td>
