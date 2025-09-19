@@ -25,20 +25,27 @@ export function MoveHistory({
   const currentMoveRef = useRef<HTMLTableCellElement>(null);
 
   useEffect(() => {
-    if (currentMoveRef.current && scrollContainerRef.current) {
-      const moveElement = currentMoveRef.current;
+    if (scrollContainerRef.current) {
       const container = scrollContainerRef.current;
 
-      const containerHeight = container.clientHeight;
-      const moveTop = moveElement.offsetTop;
-      const moveHeight = moveElement.offsetHeight;
+      if (currentMoveIndex === -1) {
+        container.scrollTo({
+          top: 0,
+          behavior: "smooth",
+        });
+      } else if (currentMoveRef.current) {
+        const moveElement = currentMoveRef.current;
+        const containerHeight = container.clientHeight;
+        const moveTop = moveElement.offsetTop;
+        const moveHeight = moveElement.offsetHeight;
 
-      const targetScrollTop = moveTop - containerHeight / 2 + moveHeight / 2;
+        const targetScrollTop = moveTop - containerHeight / 2 + moveHeight / 2;
 
-      container.scrollTo({
-        top: Math.max(0, targetScrollTop),
-        behavior: "smooth",
-      });
+        container.scrollTo({
+          top: Math.max(0, targetScrollTop),
+          behavior: "smooth",
+        });
+      }
     }
   }, [currentMoveIndex]);
 
