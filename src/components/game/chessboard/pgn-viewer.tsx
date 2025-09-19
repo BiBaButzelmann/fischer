@@ -189,7 +189,8 @@ export default function PgnViewer({
         ref={fileInputRef}
         type="file"
         accept=".pgn"
-        style={{ display: "none" }}
+        className="hidden"
+        aria-hidden="true"
         onChange={handleFileChange}
       />
       <div className="flex-shrink-0 w-full max-w-lg mx-auto lg:mx-0">
