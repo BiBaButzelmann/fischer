@@ -228,7 +228,11 @@ export function GamesList({
                       Runde {game.round}
                     </Badge>
                   </span>
-                  <span>{toDateString(getGameTimeFromGame(game))}</span>
+                  <span>
+                    {toDateString(
+                      toLocalDateTime(game.matchdayGame.matchday.date),
+                    )}
+                  </span>
                 </div>
                 <div className="flex items-center gap-2">
                   <div className="flex-1 flex-shrink">
@@ -272,7 +276,9 @@ export function GamesList({
                       currentResult={game.result}
                       onResultChange={onResultChange}
                       availableMatchdays={availableMatchdays}
-                      currentGameDate={getGameTimeFromGame(game)}
+                      currentGameDate={toLocalDateTime(
+                        game.matchdayGame.matchday.date,
+                      )}
                       game={game}
                       isReferee={isReferee}
                       {...permissions}
