@@ -36,6 +36,7 @@ export default function PgnViewer({
   gameResult,
 }: Props) {
   const [moves, setMoves] = useState(() => movesFromPGN(initialPGN));
+  const [savedPGN, setSavedPGN] = useState(initialPGN);
   const [currentIndex, setCurrentIndex] = useState(moves.length - 1);
   const [isPending, startTransition] = useTransition();
   const [selectedSquare, setSelectedSquare] = useState<string | null>(null);
@@ -56,6 +57,10 @@ export default function PgnViewer({
 
   const fullPGN = useMemo(() => computePGNFromMoves(moves), [moves]);
 
+  const hasUnsavedChanges = useMemo(() => {
+    return fullPGN !== savedPGN;
+  }, [fullPGN, savedPGN]);
+
   const handleSave = useCallback(() => {
     startTransition(async () => {
       const result = await savePGN(fullPGN, gameId);
@@ -64,6 +69,7 @@ export default function PgnViewer({
         toast.error("Fehler beim Speichern der Partie");
       } else {
         toast.success("Partie erfolgreich gespeichert");
+        setSavedPGN(fullPGN); // Update saved state to match current PGN
       }
     });
   }, [fullPGN, gameId]);
@@ -241,6 +247,7 @@ export default function PgnViewer({
           isSaving={isPending}
           showSave={allowEdit}
           showUpload={allowEdit}
+          hasUnsavedChanges={hasUnsavedChanges}
         />
       </div>
     </div>

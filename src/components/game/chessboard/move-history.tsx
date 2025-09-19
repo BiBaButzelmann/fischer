@@ -3,6 +3,12 @@
 import clsx from "clsx";
 import { useEffect, useRef } from "react";
 import { Button } from "@/components/ui/button";
+import {
+  Tooltip,
+  TooltipContent,
+  TooltipTrigger,
+} from "@/components/ui/tooltip";
+import { Save, Download, Upload } from "lucide-react";
 
 type Props = {
   history: { san: string }[];
@@ -14,6 +20,7 @@ type Props = {
   isSaving?: boolean;
   showSave?: boolean;
   showUpload?: boolean;
+  hasUnsavedChanges?: boolean;
 };
 
 export function MoveHistory({
@@ -26,6 +33,7 @@ export function MoveHistory({
   isSaving = false,
   showSave = false,
   showUpload = false,
+  hasUnsavedChanges = false,
 }: Props) {
   const scrollContainerRef = useRef<HTMLDivElement>(null);
   const currentMoveRef = useRef<HTMLTableCellElement>(null);
@@ -105,10 +113,7 @@ export function MoveHistory({
       <div className="h-full rounded-lg border border-gray-200 bg-card text-card-foreground shadow-sm flex flex-col">
         <div className="flex flex-col space-y-1.5 p-4 pb-3 flex-shrink-0">
           <div className="font-semibold leading-none tracking-tight flex items-center">
-            <div className="flex items-center gap-2">
-              <div className="w-2 h-2 bg-primary rounded-full"></div>
-              Notation
-            </div>
+            <div className="flex items-center gap-2">Notation</div>
           </div>
         </div>
         <div className="flex-1 overflow-hidden">
@@ -137,38 +142,69 @@ export function MoveHistory({
           </div>
         </div>
         <div className="px-4 pb-4 border-t flex-shrink-0">
-          {showSave && onSave && (
-            <Button
-              variant="outline"
-              className="w-full mt-4"
-              onClick={onSave}
-              disabled={isSaving}
-            >
-              {isSaving ? "Speichern..." : "Speichern"}
-            </Button>
-          )}
+          <div className="flex items-center mt-4">
+            <div className="flex-1 flex justify-center">
+              {showSave && onSave && (
+                <Tooltip>
+                  <TooltipTrigger asChild>
+                    <Button
+                      variant={hasUnsavedChanges ? "default" : "outline"}
+                      size="icon"
+                      onClick={onSave}
+                      disabled={isSaving}
+                    >
+                      <Save className="h-4 w-4" />
+                    </Button>
+                  </TooltipTrigger>
+                  <TooltipContent>
+                    <p>{isSaving ? "Speichern..." : "Speichern"}</p>
+                  </TooltipContent>
+                </Tooltip>
+              )}
+            </div>
 
-          {onDownload && (
-            <Button
-              variant="outline"
-              className="w-full mt-2"
-              onClick={onDownload}
-              disabled={isSaving}
-            >
-              PGN herunterladen
-            </Button>
-          )}
+            {(onDownload || (showUpload && onUpload)) && showSave && onSave && (
+              <div className="w-px h-8 bg-border" />
+            )}
 
-          {showUpload && onUpload && (
-            <Button
-              variant="outline"
-              className="w-full mt-2"
-              onClick={onUpload}
-              disabled={isSaving}
-            >
-              PGN hochladen
-            </Button>
-          )}
+            <div className="flex-1 flex justify-center gap-2">
+              {onDownload && (
+                <Tooltip>
+                  <TooltipTrigger asChild>
+                    <Button
+                      variant="outline"
+                      size="icon"
+                      onClick={onDownload}
+                      disabled={isSaving}
+                    >
+                      <Download className="h-4 w-4" />
+                    </Button>
+                  </TooltipTrigger>
+                  <TooltipContent>
+                    <p>PGN herunterladen</p>
+                  </TooltipContent>
+                </Tooltip>
+              )}
+
+              {showUpload && onUpload && (
+                <Tooltip>
+                  <TooltipTrigger asChild>
+                    <Button
+                      variant="outline"
+                      size="icon"
+                      onClick={onUpload}
+                      disabled={isSaving}
+                    >
+                      <Upload className="h-4 w-4" />
+                    </Button>
+                  </TooltipTrigger>
+                  <TooltipContent>
+                    <p>PGN hochladen</p>
+                  </TooltipContent>
+                </Tooltip>
+              )}
+            </div>
+          </div>
         </div>
       </div>
     </div>
