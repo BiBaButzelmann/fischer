@@ -59,13 +59,13 @@ export function MoveHistory({
 
     rows.push(
       <tr key={i} className="border-b border-border/30">
-        <td className="pr-3 py-1.5 text-right select-none text-muted-foreground font-medium min-w-[2.5rem] text-xs">
+        <td className="pl-2 pr-1 py-1.5 text-left select-none text-muted-foreground font-medium min-w-[1.5rem] text-xs">
           {i / 2 + 1}.
         </td>
         <td
           ref={currentMoveIndex === whitePly ? currentMoveRef : null}
           className={clsx(
-            "px-3 py-1.5 cursor-pointer rounded-sm transition-all duration-150 font-mono text-sm min-w-[4rem]",
+            "px-2 py-1.5 cursor-pointer rounded-sm transition-all duration-150 font-mono text-sm min-w-[3rem]",
             "hover:bg-accent hover:text-accent-foreground hover:shadow-sm",
             currentMoveIndex === whitePly
               ? "bg-primary text-primary-foreground font-semibold shadow-sm"
@@ -78,7 +78,7 @@ export function MoveHistory({
         <td
           ref={currentMoveIndex === blackPly && black ? currentMoveRef : null}
           className={clsx(
-            "px-3 py-1.5 rounded-sm transition-all duration-150 font-mono text-sm min-w-[4rem]",
+            "px-2 py-1.5 rounded-sm transition-all duration-150 font-mono text-sm min-w-[3rem]",
             black
               ? "cursor-pointer hover:bg-accent hover:text-accent-foreground hover:shadow-sm"
               : "cursor-default",
