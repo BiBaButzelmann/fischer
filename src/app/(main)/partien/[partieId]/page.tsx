@@ -1,6 +1,5 @@
 import z from "zod";
 import { getParticipantFullName } from "@/lib/participant";
-import { ParticipantWithName } from "@/db/types/participant";
 import { GameWithParticipantsAndPGNAndDate } from "@/db/types/game";
 import { getGameById } from "@/db/repositories/game";
 import { auth } from "@/auth/utils";
