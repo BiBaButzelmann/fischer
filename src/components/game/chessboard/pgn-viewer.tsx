@@ -69,7 +69,7 @@ export default function PgnViewer({
         toast.error("Fehler beim Speichern der Partie");
       } else {
         toast.success("Partie erfolgreich gespeichert");
-        setSavedPGN(fullPGN); // Update saved state to match current PGN
+        setSavedPGN(fullPGN);
       }
     });
   }, [fullPGN, gameId]);
