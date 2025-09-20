@@ -1,6 +1,5 @@
 import z from "zod";
 import { getParticipantFullName } from "@/lib/participant";
-import { ParticipantWithName } from "@/db/types/participant";
 import { GameWithParticipantsAndPGNAndDate } from "@/db/types/game";
 import { getGameById } from "@/db/repositories/game";
 import { auth } from "@/auth/utils";
@@ -40,12 +39,11 @@ export default async function GamePage({ params }: Props) {
   }
 
   const userRights = await getUserGameRights(gameId, session.user.id);
-
   if (!userRights) {
     return (
       <div className="p-4">
         <p className="text-red-600">
-          Sie sind nicht berechtigt, diese Partie anzuzeigen.
+          Du bist nicht berechtigt, diese Partie anzuzeigen.
         </p>
       </div>
     );
@@ -81,9 +79,6 @@ async function PgnContainer({
     );
   }
 
-  const whiteDisplay = formatDisplayName(game.whiteParticipant);
-  const blackDisplay = formatDisplayName(game.blackParticipant);
-
   const gameDateTime = getGameTimeFromGame(game, game.tournament.gameStartTime);
 
   const pgn =
@@ -93,28 +88,22 @@ async function PgnContainer({
           game.tournament.name,
           gameDateTime,
           game.round,
-          whiteDisplay,
-          blackDisplay,
+          getParticipantFullName(game.whiteParticipant),
+          getParticipantFullName(game.blackParticipant),
         );
 
   return (
-    <div>
-      <div className="mb-8">
-        <h1 className="flex-1 text-3xl font-bold text-gray-900 mb-4">
-          {whiteDisplay} vs {blackDisplay}
-        </h1>
-      </div>
-
-      <div>
-        <PgnViewer gameId={game.id} initialPGN={pgn} allowEdit={allowEdit} />
-      </div>
+    <div className="mt-2">
+      <PgnViewer
+        gameId={game.id}
+        initialPGN={pgn}
+        allowEdit={allowEdit}
+        whitePlayer={game.whiteParticipant}
+        blackPlayer={game.blackParticipant}
+        gameResult={game.result!}
+      />
     </div>
   );
-}
-
-function formatDisplayName(p: ParticipantWithName) {
-  const rating = p.fideRating ?? p.dwzRating;
-  return `${getParticipantFullName(p)}${rating ? ` (${rating})` : ""}`;
 }
 
 function getInitialPGN(
