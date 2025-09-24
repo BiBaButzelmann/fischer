@@ -20,7 +20,6 @@ import {
   matchEnteringHelper,
 } from "../schema/matchEnteringHelper";
 import { participant } from "../schema/participant";
-import { referee } from "../schema/referee";
 import { profile } from "../schema/profile";
 import { getMatchEnteringHelperIdByUserId } from "./match-entering-helper";
 import invariant from "tiny-invariant";
