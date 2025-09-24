@@ -4,6 +4,6 @@ export function getIndividualPlayerResult(
   gameResult: GameResult,
   isWhite: boolean,
 ) {
-  const [whiteScore, blackScore] = gameResult.split(/[:-]/);
+  const [whiteScore, blackScore] = gameResult.split(/[:|-]/);
   return isWhite ? whiteScore : blackScore;
 }
