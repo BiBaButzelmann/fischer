@@ -4,14 +4,17 @@ import { db } from "@/db/client";
 import { pgn } from "@/db/schema/pgn";
 import { getUserGameRights } from "@/lib/game-auth";
 import { authWithRedirect } from "@/auth/utils";
+import { action } from "@/lib/actions";
+import invariant from "tiny-invariant";
 
-export const savePGN = async (newValue: string, gameId: number) => {
+export const savePGN = action(async (newValue: string, gameId: number) => {
   const session = await authWithRedirect();
   const userRights = await getUserGameRights(gameId, session.user.id);
 
-  if (userRights !== "edit") {
-    return { error: "You are not authorized to edit this game." };
-  }
+  invariant(
+    userRights === "edit",
+    "Du bist nicht berechtigt, diese Partie zu bearbeiten.",
+  );
 
   await db
     .insert(pgn)
@@ -20,4 +23,4 @@ export const savePGN = async (newValue: string, gameId: number) => {
       target: pgn.gameId,
       set: { value: newValue },
     });
-};
+});
