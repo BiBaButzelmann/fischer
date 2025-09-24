@@ -1,20 +1,22 @@
 import { getParticipantFullName } from "@/lib/participant";
 import { ParticipantWithName } from "@/db/types/participant";
+import { type ClassValue } from "clsx";
+import { cn } from "@/lib/utils";
 
 type Props = {
   participant: ParticipantWithName;
   result: string;
-  position: "top" | "bottom";
+  className: ClassValue;
 };
 
-export function PlayerDisplay({ participant, result, position }: Props) {
+export function PlayerDisplay({ participant, result, className }: Props) {
   const titlePrefix = participant.title ? `${participant.title} ` : "";
   const rating = participant.dwzRating ?? participant.fideRating;
   const displayName = getParticipantFullName(participant);
 
   return (
     <div
-      className={`px-3 py-1 bg-white ${position === "top" ? "rounded-t-lg" : "rounded-b-lg"} flex items-center gap-3`}
+      className={cn("px-3 py-1 bg-white flex items-center gap-3", className)}
     >
       <div className="text-sm font-bold text-gray-900">{result}</div>
       <div className="w-px h-3 bg-gray-300"></div>

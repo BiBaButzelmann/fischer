@@ -209,7 +209,7 @@ export default function PgnViewer({
         <PlayerDisplay
           participant={blackPlayer}
           result={getIndividualPlayerResult(gameResult, false)}
-          position="top"
+          className="rounded-t-lg"
         />
 
         <div className="aspect-square w-full">
@@ -232,7 +232,7 @@ export default function PgnViewer({
         <PlayerDisplay
           participant={whitePlayer}
           result={getIndividualPlayerResult(gameResult, true)}
-          position="bottom"
+          className="rounded-b-lg"
         />
       </div>
 
