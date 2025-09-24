@@ -62,8 +62,8 @@ export default async function Page() {
       <div className="max-w-7xl mx-auto space-y-6">
         <Card className="shadow-sm">
           <CardContent className="p-6">
-            <div className="flex items-center justify-between">
-              <div>
+            <div className="flex items-start justify-between">
+              <div className="flex-1">
                 <h1 className="text-3xl font-bold text-slate-900">
                   Meine Partieneingabe
                 </h1>
@@ -95,14 +95,12 @@ export default async function Page() {
                   </div>
                 )}
               </div>
-              <div className="flex items-center gap-4">
-                <div className="text-right">
-                  <div className="text-2xl font-bold text-slate-700">
-                    {pendingGames.length}
-                  </div>
-                  <div className="text-sm text-slate-500">
-                    Ausstehende Partien
-                  </div>
+              <div className="text-right">
+                <div className="text-2xl font-bold text-slate-700">
+                  {pendingGames.length}
+                </div>
+                <div className="text-sm text-slate-500">
+                  Ausstehende Partien
                 </div>
               </div>
             </div>
