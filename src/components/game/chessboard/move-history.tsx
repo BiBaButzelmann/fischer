@@ -1,7 +1,14 @@
 "use client";
 
 import clsx from "clsx";
+import { useEffect, useRef } from "react";
 import { Button } from "@/components/ui/button";
+import {
+  Tooltip,
+  TooltipContent,
+  TooltipTrigger,
+} from "@/components/ui/tooltip";
+import { Save, Download, Upload } from "lucide-react";
 
 type Props = {
   history: { san: string }[];
@@ -13,6 +20,7 @@ type Props = {
   isSaving?: boolean;
   showSave?: boolean;
   showUpload?: boolean;
+  hasUnsavedChanges?: boolean;
 };
 
 export function MoveHistory({
@@ -25,7 +33,36 @@ export function MoveHistory({
   isSaving = false,
   showSave = false,
   showUpload = false,
+  hasUnsavedChanges = false,
 }: Props) {
+  const scrollContainerRef = useRef<HTMLDivElement>(null);
+  const currentMoveRef = useRef<HTMLTableCellElement>(null);
+
+  useEffect(() => {
+    if (scrollContainerRef.current) {
+      const container = scrollContainerRef.current;
+
+      if (currentMoveIndex === -1) {
+        container.scrollTo({
+          top: 0,
+          behavior: "smooth",
+        });
+      } else if (currentMoveRef.current) {
+        const moveElement = currentMoveRef.current;
+        const containerHeight = container.clientHeight;
+        const moveTop = moveElement.offsetTop;
+        const moveHeight = moveElement.offsetHeight;
+
+        const targetScrollTop = moveTop - containerHeight / 2 + moveHeight / 2;
+
+        container.scrollTo({
+          top: Math.max(0, targetScrollTop),
+          behavior: "smooth",
+        });
+      }
+    }
+  }, [currentMoveIndex]);
+
   const rows: React.ReactNode[] = [];
   for (let i = 0; i < history.length; i += 2) {
     const white = history[i];
@@ -36,12 +73,13 @@ export function MoveHistory({
 
     rows.push(
       <tr key={i} className="border-b border-border/30">
-        <td className="pr-3 py-1.5 text-right select-none text-muted-foreground font-medium min-w-[2.5rem] text-xs">
+        <td className="pl-2 pr-1 py-1.5 text-left select-none text-muted-foreground font-medium min-w-[1.5rem] text-xs">
           {i / 2 + 1}.
         </td>
         <td
+          ref={currentMoveIndex === whitePly ? currentMoveRef : null}
           className={clsx(
-            "px-3 py-1.5 cursor-pointer rounded-sm transition-all duration-150 font-mono text-sm min-w-[4rem]",
+            "px-2 py-1.5 cursor-pointer rounded-sm transition-all duration-150 font-mono text-sm min-w-[3rem]",
             "hover:bg-accent hover:text-accent-foreground hover:shadow-sm",
             currentMoveIndex === whitePly
               ? "bg-primary text-primary-foreground font-semibold shadow-sm"
@@ -52,8 +90,9 @@ export function MoveHistory({
           {white ? white.san : "…"}
         </td>
         <td
+          ref={currentMoveIndex === blackPly && black ? currentMoveRef : null}
           className={clsx(
-            "px-3 py-1.5 rounded-sm transition-all duration-150 font-mono text-sm min-w-[4rem]",
+            "px-2 py-1.5 rounded-sm transition-all duration-150 font-mono text-sm min-w-[3rem]",
             black
               ? "cursor-pointer hover:bg-accent hover:text-accent-foreground hover:shadow-sm"
               : "cursor-default",
@@ -70,19 +109,19 @@ export function MoveHistory({
   }
 
   return (
-    <div className="w-full flex flex-col h-[512px]">
-      <div className="h-full rounded-xl border bg-card text-card-foreground shadow flex flex-col">
+    <div className="w-full flex flex-col h-full max-h-[570px]">
+      <div className="h-full rounded-lg border border-gray-200 bg-card text-card-foreground shadow-sm flex flex-col">
         <div className="flex flex-col space-y-1.5 p-4 pb-3 flex-shrink-0">
           <div className="font-semibold leading-none tracking-tight flex items-center">
-            <div className="flex items-center gap-2">
-              <div className="w-2 h-2 bg-primary rounded-full"></div>
-              Notation
-            </div>
+            <div className="flex items-center gap-2">Notation</div>
           </div>
         </div>
         <div className="flex-1 overflow-hidden">
           <div className="h-full px-4 pb-4">
-            <div className="h-full overflow-y-auto rounded-md border bg-background/50 scrollbar-thin scrollbar-thumb-gray-400 scrollbar-track-gray-100">
+            <div
+              ref={scrollContainerRef}
+              className="h-full overflow-y-auto rounded-md border bg-background/50 scrollbar-thin scrollbar-thumb-gray-400 scrollbar-track-gray-100"
+            >
               <table className="w-full">
                 <tbody className="divide-y divide-border/30">
                   {rows.length > 0 ? (
@@ -103,38 +142,69 @@ export function MoveHistory({
           </div>
         </div>
         <div className="px-4 pb-4 border-t flex-shrink-0">
-          {showSave && onSave && (
-            <Button
-              variant="outline"
-              className="w-full mt-4"
-              onClick={onSave}
-              disabled={isSaving}
-            >
-              {isSaving ? "Speichern..." : "Speichern"}
-            </Button>
-          )}
+          <div className="flex items-center mt-4">
+            <div className="flex-1 flex justify-center">
+              {showSave && onSave && (
+                <Tooltip>
+                  <TooltipTrigger asChild>
+                    <Button
+                      variant={hasUnsavedChanges ? "default" : "outline"}
+                      size="icon"
+                      onClick={onSave}
+                      disabled={isSaving}
+                    >
+                      <Save className="h-4 w-4" />
+                    </Button>
+                  </TooltipTrigger>
+                  <TooltipContent>
+                    <p>{isSaving ? "Speichern..." : "Speichern"}</p>
+                  </TooltipContent>
+                </Tooltip>
+              )}
+            </div>
 
-          {onDownload && (
-            <Button
-              variant="outline"
-              className="w-full mt-2"
-              onClick={onDownload}
-              disabled={isSaving}
-            >
-              PGN herunterladen
-            </Button>
-          )}
+            {(onDownload || (showUpload && onUpload)) && showSave && onSave && (
+              <div className="w-px h-8 bg-border" />
+            )}
 
-          {showUpload && onUpload && (
-            <Button
-              variant="outline"
-              className="w-full mt-2"
-              onClick={onUpload}
-              disabled={isSaving}
-            >
-              PGN hochladen
-            </Button>
-          )}
+            <div className="flex-1 flex justify-center gap-2">
+              {onDownload && (
+                <Tooltip>
+                  <TooltipTrigger asChild>
+                    <Button
+                      variant="outline"
+                      size="icon"
+                      onClick={onDownload}
+                      disabled={isSaving}
+                    >
+                      <Download className="h-4 w-4" />
+                    </Button>
+                  </TooltipTrigger>
+                  <TooltipContent>
+                    <p>PGN herunterladen</p>
+                  </TooltipContent>
+                </Tooltip>
+              )}
+
+              {showUpload && onUpload && (
+                <Tooltip>
+                  <TooltipTrigger asChild>
+                    <Button
+                      variant="outline"
+                      size="icon"
+                      onClick={onUpload}
+                      disabled={isSaving}
+                    >
+                      <Upload className="h-4 w-4" />
+                    </Button>
+                  </TooltipTrigger>
+                  <TooltipContent>
+                    <p>PGN hochladen</p>
+                  </TooltipContent>
+                </Tooltip>
+              )}
+            </div>
+          </div>
         </div>
       </div>
     </div>

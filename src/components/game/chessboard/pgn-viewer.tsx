@@ -13,19 +13,30 @@ import { Chessboard } from "react-chessboard";
 import { savePGN } from "@/actions/pgn";
 import { toast } from "sonner";
 import { MoveHistory } from "./move-history";
+import { PlayerDisplay } from "./player-display";
+import { ParticipantWithName } from "@/db/types/participant";
+import { getIndividualPlayerResult } from "@/lib/game-result-utils";
+import { GameResult } from "@/db/types/game";
 
 export type Props = {
   gameId: number;
   initialPGN: string;
   allowEdit?: boolean;
+  whitePlayer: ParticipantWithName;
+  blackPlayer: ParticipantWithName;
+  gameResult: GameResult;
 };
 
 export default function PgnViewer({
   gameId,
   initialPGN,
   allowEdit = false,
+  whitePlayer,
+  blackPlayer,
+  gameResult,
 }: Props) {
   const [moves, setMoves] = useState(() => movesFromPGN(initialPGN));
+  const [savedPGN, setSavedPGN] = useState(initialPGN);
   const [currentIndex, setCurrentIndex] = useState(moves.length - 1);
   const [isPending, startTransition] = useTransition();
   const [selectedSquare, setSelectedSquare] = useState<string | null>(null);
@@ -35,6 +46,8 @@ export default function PgnViewer({
     onArrowLeft: () => setCurrentIndex((i) => Math.max(-1, i - 1)),
     onArrowRight: () =>
       setCurrentIndex((i) => Math.min(moves.length - 1, i + 1)),
+    onArrowUp: () => setCurrentIndex(-1),
+    onArrowDown: () => setCurrentIndex(moves.length - 1),
   });
 
   const fen = useMemo(
@@ -44,6 +57,10 @@ export default function PgnViewer({
 
   const fullPGN = useMemo(() => computePGNFromMoves(moves), [moves]);
 
+  const hasUnsavedChanges = useMemo(() => {
+    return fullPGN !== savedPGN;
+  }, [fullPGN, savedPGN]);
+
   const handleSave = useCallback(() => {
     startTransition(async () => {
       const result = await savePGN(fullPGN, gameId);
@@ -52,6 +69,7 @@ export default function PgnViewer({
         toast.error("Fehler beim Speichern der Partie");
       } else {
         toast.success("Partie erfolgreich gespeichert");
+        setSavedPGN(fullPGN);
       }
     });
   }, [fullPGN, gameId]);
@@ -187,7 +205,13 @@ export default function PgnViewer({
         aria-hidden="true"
         onChange={handleFileChange}
       />
-      <div className="flex-shrink-0 w-full max-w-lg mx-auto lg:mx-0">
+      <div className="flex-shrink-0 w-full max-w-lg mx-auto lg:mx-0 border border-gray-200 rounded-lg shadow-sm overflow-hidden">
+        <PlayerDisplay
+          participant={blackPlayer}
+          result={getIndividualPlayerResult(gameResult, false)}
+          className="rounded-t-lg"
+        />
+
         <div className="aspect-square w-full">
           <Chessboard
             position={fen}
@@ -204,6 +228,12 @@ export default function PgnViewer({
             }}
           />
         </div>
+
+        <PlayerDisplay
+          participant={whitePlayer}
+          result={getIndividualPlayerResult(gameResult, true)}
+          className="rounded-b-lg"
+        />
       </div>
 
       <div className="w-full lg:w-80 flex-shrink-0">
@@ -217,6 +247,7 @@ export default function PgnViewer({
           isSaving={isPending}
           showSave={allowEdit}
           showUpload={allowEdit}
+          hasUnsavedChanges={hasUnsavedChanges}
         />
       </div>
     </div>
@@ -253,19 +284,31 @@ function computePGNFromMoves(moves: Move[]): string {
 const useChessboardControls = ({
   onArrowLeft,
   onArrowRight,
+  onArrowUp,
+  onArrowDown,
 }: {
   onArrowLeft: () => void;
   onArrowRight: () => void;
+  onArrowUp: () => void;
+  onArrowDown: () => void;
 }) => {
   useEffect(() => {
     function onKey(e: KeyboardEvent) {
       if (e.key === "ArrowLeft") {
+        e.preventDefault();
         onArrowLeft();
       } else if (e.key === "ArrowRight") {
+        e.preventDefault();
         onArrowRight();
+      } else if (e.key === "ArrowUp") {
+        e.preventDefault();
+        onArrowUp();
+      } else if (e.key === "ArrowDown") {
+        e.preventDefault();
+        onArrowDown();
       }
     }
     window.addEventListener("keydown", onKey);
     return () => window.removeEventListener("keydown", onKey);
-  }, [onArrowLeft, onArrowRight]);
+  }, [onArrowLeft, onArrowRight, onArrowUp, onArrowDown]);
 };
