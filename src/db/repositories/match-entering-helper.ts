@@ -69,10 +69,19 @@ export async function getMatchEnteringHelperAssignmentCountByProfileIdAndTournam
 export async function getAssignedGroupsByMatchEnteringHelperId(
   matchEnteringHelperId: number,
 ) {
-  return await db
-    .select({ groupId: groupMatchEnteringHelper.groupId })
-    .from(groupMatchEnteringHelper)
-    .where(
-      eq(groupMatchEnteringHelper.matchEnteringHelperId, matchEnteringHelperId),
-    );
+  return await db.query.groupMatchEnteringHelper.findMany({
+    where: eq(
+      groupMatchEnteringHelper.matchEnteringHelperId,
+      matchEnteringHelperId,
+    ),
+    with: {
+      group: {
+        columns: {
+          id: true,
+          groupName: true,
+          dayOfWeek: true,
+        },
+      },
+    },
+  });
 }
