@@ -538,7 +538,7 @@ export async function isUserMatchEnteringHelperInGame(
   return assignment.length > 0;
 }
 
-export async function getGamesAssignedToEnter(userId: string) {
+export async function getGamesToEnterByUserId(userId: string) {
   return await db.query.game.findMany({
     where: (game, { and, or, eq, isNotNull, exists, inArray }) =>
       and(

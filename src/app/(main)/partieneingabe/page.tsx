@@ -1,6 +1,6 @@
 import { authWithRedirect } from "@/auth/utils";
 import { MatchEntryDashboard } from "@/components/partieneingabe/match-entry-dashboard";
-import { getGamesAssignedToEnter } from "@/db/repositories/game";
+import { getGamesToEnterByUserId } from "@/db/repositories/game";
 import { getRolesByUserId } from "@/db/repositories/role";
 import {
   getMatchEnteringHelperIdByUserId,
@@ -28,7 +28,7 @@ export default async function Page() {
   );
 
   const [allGames, assignedGroupsData] = await Promise.all([
-    getGamesAssignedToEnter(session.user.id),
+    getGamesToEnterByUserId(session.user.id),
     matchEnteringHelperId
       ? getAssignedGroupsByMatchEnteringHelperId(matchEnteringHelperId)
       : Promise.resolve([]),
