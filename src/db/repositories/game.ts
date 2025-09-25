@@ -20,7 +20,6 @@ import {
   matchEnteringHelper,
 } from "../schema/matchEnteringHelper";
 import { participant } from "../schema/participant";
-import { referee } from "../schema/referee";
 import { profile } from "../schema/profile";
 import { getMatchEnteringHelperIdByUserId } from "./match-entering-helper";
 import invariant from "tiny-invariant";
@@ -539,7 +538,7 @@ export async function isUserMatchEnteringHelperInGame(
   return assignment.length > 0;
 }
 
-export async function getGamesAccessibleByUser(userId: string) {
+export async function getGamesToEnterByUserId(userId: string) {
   return await db.query.game.findMany({
     where: (game, { and, or, eq, isNotNull, exists, inArray }) =>
       and(
@@ -578,18 +577,6 @@ export async function getGamesAccessibleByUser(userId: string) {
                 and(
                   eq(profile.userId, userId),
                   eq(game.groupId, groupMatchEnteringHelper.groupId),
-                ),
-              ),
-          ),
-          exists(
-            db
-              .select()
-              .from(referee)
-              .innerJoin(profile, eq(referee.profileId, profile.id))
-              .where(
-                and(
-                  eq(profile.userId, userId),
-                  eq(referee.tournamentId, game.tournamentId),
                 ),
               ),
           ),
