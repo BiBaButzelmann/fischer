@@ -1,15 +1,12 @@
 import { authWithRedirect } from "@/auth/utils";
 import { MatchEntryDashboard } from "@/components/partieneingabe/match-entry-dashboard";
+import { AssignedGroups } from "@/components/partieneingabe/assigned-groups";
 import { getGamesToEnterByUserId } from "@/db/repositories/game";
 import { getRolesByUserId } from "@/db/repositories/role";
-import {
-  getMatchEnteringHelperIdByUserId,
-  getAssignedGroupsByMatchEnteringHelperId,
-} from "@/db/repositories/match-entering-helper";
+import { getMatchEnteringHelperIdByUserId } from "@/db/repositories/match-entering-helper";
 import { getUserGameRights } from "@/lib/game-auth";
 import { redirect } from "next/navigation";
 import { Card, CardContent } from "@/components/ui/card";
-import { GroupBadge } from "@/components/ui/group-badge";
 
 export default async function Page() {
   const session = await authWithRedirect();
@@ -23,15 +20,9 @@ export default async function Page() {
     redirect("/uebersicht");
   }
 
-  const matchEnteringHelperId = await getMatchEnteringHelperIdByUserId(
-    session.user.id,
-  );
-
-  const [allGames, assignedGroupsData] = await Promise.all([
+  const [allGames, matchEnteringHelperId] = await Promise.all([
     getGamesToEnterByUserId(session.user.id),
-    matchEnteringHelperId
-      ? getAssignedGroupsByMatchEnteringHelperId(matchEnteringHelperId)
-      : Promise.resolve([]),
+    getMatchEnteringHelperIdByUserId(session.user.id),
   ]);
 
   const allRights = await Promise.all(
@@ -49,12 +40,6 @@ export default async function Page() {
   const pendingGames = editableGames.filter((game) => game.pgn === null);
   const completedGames = editableGames.filter((game) => game.pgn !== null);
 
-  const assignedGroups = assignedGroupsData.map((item) => ({
-    id: item.group.id,
-    groupName: item.group.groupName,
-  }));
-
-  const isMatchEnteringHelper = userRoles.includes("matchEnteringHelper");
   const isParticipant = userRoles.includes("participant");
 
   return (
@@ -67,24 +52,12 @@ export default async function Page() {
                 <h1 className="text-3xl font-bold text-slate-900">
                   Meine Partieneingabe
                 </h1>
-                {isMatchEnteringHelper && assignedGroups.length > 0 && (
-                  <div className="mt-4">
-                    <p className="text-sm text-slate-600 mb-3">
-                      Zugewiesene Gruppen{" "}
-                      <span className="text-slate-500">(+ eigene Partien)</span>
-                      :
-                    </p>
-                    <div className="flex flex-wrap gap-3">
-                      {assignedGroups.map((group) => (
-                        <GroupBadge
-                          key={group.id}
-                          groupName={group.groupName}
-                        />
-                      ))}
-                    </div>
-                  </div>
+                {matchEnteringHelperId && (
+                  <AssignedGroups
+                    matchEnteringHelperId={matchEnteringHelperId}
+                  />
                 )}
-                {!isMatchEnteringHelper && isParticipant && (
+                {!matchEnteringHelperId && isParticipant && (
                   <div className="mt-4">
                     <p className="text-sm text-slate-600">
                       Eigene Partien{" "}
