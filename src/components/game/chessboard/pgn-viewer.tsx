@@ -198,7 +198,9 @@ export default function PgnViewer({
   );
 
   return (
-    <div className={`flex flex-col lg:flex-row w-full ${isMobile ? "gap-0" : "gap-6"}`}>
+    <div
+      className={`flex flex-col lg:flex-row w-full ${isMobile ? "gap-0" : "gap-6"}`}
+    >
       <input
         ref={fileInputRef}
         type="file"

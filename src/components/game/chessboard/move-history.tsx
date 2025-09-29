@@ -117,8 +117,12 @@ export function MoveHistory({
   }
 
   return (
-    <div className={`w-full flex flex-col h-full ${isMobile ? 'max-h-[180px]' : 'max-h-[570px]'}`}>
-      <div className={`h-full flex flex-col ${isMobile ? 'bg-transparent border-0 shadow-none rounded-none' : 'rounded-lg border border-gray-200 bg-card text-card-foreground shadow-sm'}`}>
+    <div
+      className={`w-full flex flex-col h-full ${isMobile ? "max-h-[180px]" : "max-h-[570px]"}`}
+    >
+      <div
+        className={`h-full flex flex-col ${isMobile ? "bg-transparent border-0 shadow-none rounded-none" : "rounded-lg border border-gray-200 bg-card text-card-foreground shadow-sm"}`}
+      >
         {!isMobile && (
           <div className="flex flex-col space-y-1.5 p-4 pb-3 flex-shrink-0">
             <div className="font-semibold leading-none tracking-tight flex items-center">
@@ -127,14 +131,14 @@ export function MoveHistory({
           </div>
         )}
         <div className="flex-1 overflow-hidden">
-          <div className={`h-full ${isMobile ? 'px-0 pb-0' : 'px-4 pb-4'}`}>
+          <div className={`h-full ${isMobile ? "px-0 pb-0" : "px-4 pb-4"}`}>
             <div
               ref={scrollContainerRef}
               className={clsx(
                 "overflow-y-auto scrollbar-thin scrollbar-thumb-gray-400 scrollbar-track-gray-100",
-                isMobile 
-                  ? "max-h-[120px] rounded-none border-0 bg-transparent" 
-                  : "h-full rounded-md border bg-background/50"
+                isMobile
+                  ? "max-h-[120px] rounded-none border-0 bg-transparent"
+                  : "h-full rounded-md border bg-background/50",
               )}
             >
               <table className="w-full">
@@ -156,9 +160,16 @@ export function MoveHistory({
             </div>
           </div>
         </div>
-        {((showSave && onSave) || onDownload || (showUpload && onUpload) || isMobile) && (
-          <div className={`flex-shrink-0 ${isMobile ? 'px-0 pb-2 border-t-0 bg-white' : 'px-4 pb-4 border-t'}`}>
-            <div className={`flex items-center ${isMobile ? 'mt-2 px-4 gap-0' : 'mt-4'}`}>
+        {((showSave && onSave) ||
+          onDownload ||
+          (showUpload && onUpload) ||
+          isMobile) && (
+          <div
+            className={`flex-shrink-0 ${isMobile ? "px-0 pt-1 pb-0 border-t-0 bg-white" : "px-4 pb-4 border-t"}`}
+          >
+            <div
+              className={`flex items-center ${isMobile ? "mt-0 px-4" : "mt-4"}`}
+            >
               {isMobile && (
                 <>
                   {showSave && onSave && (
@@ -166,7 +177,7 @@ export function MoveHistory({
                       variant={hasUnsavedChanges ? "default" : "outline"}
                       onClick={onSave}
                       disabled={isSaving}
-                      className="h-12 w-12 flex-shrink-0 rounded-none"
+                      className="h-12 w-12 mr-2 flex-shrink-0"
                     >
                       <Save className="h-4 w-4" />
                     </Button>
@@ -175,21 +186,25 @@ export function MoveHistory({
                     variant="outline"
                     onClick={() => goToMove(Math.max(-1, currentMoveIndex - 1))}
                     disabled={currentMoveIndex <= -1}
-                    className="flex-1 h-12 rounded-none"
+                    className="flex-1 h-12 mr-1"
                   >
                     <ChevronLeft className="h-5 w-5" />
                   </Button>
                   <Button
                     variant="outline"
-                    onClick={() => goToMove(Math.min(history.length - 1, currentMoveIndex + 1))}
+                    onClick={() =>
+                      goToMove(
+                        Math.min(history.length - 1, currentMoveIndex + 1),
+                      )
+                    }
                     disabled={currentMoveIndex >= history.length - 1}
-                    className="flex-1 h-12 rounded-none"
+                    className="flex-1 h-12 ml-1"
                   >
                     <ChevronRight className="h-5 w-5" />
                   </Button>
                 </>
               )}
-              
+
               {!isMobile && (
                 <>
                   <div className="flex-1 flex justify-center">
@@ -212,47 +227,47 @@ export function MoveHistory({
                     )}
                   </div>
 
-                  {(onDownload || (showUpload && onUpload)) && showSave && onSave && (
-                    <div className="w-px h-8 bg-border" />
-                  )}
+                  {(onDownload || (showUpload && onUpload)) &&
+                    showSave &&
+                    onSave && <div className="w-px h-8 bg-border" />}
 
                   <div className="flex-1 flex justify-center gap-2">
-              {onDownload && (
-                <Tooltip>
-                  <TooltipTrigger asChild>
-                    <Button
-                      variant="outline"
-                      size="icon"
-                      onClick={onDownload}
-                      disabled={isSaving}
-                    >
-                      <Download className="h-4 w-4" />
-                    </Button>
-                  </TooltipTrigger>
-                  <TooltipContent>
-                    <p>PGN herunterladen</p>
-                  </TooltipContent>
-                </Tooltip>
-              )}
+                    {onDownload && (
+                      <Tooltip>
+                        <TooltipTrigger asChild>
+                          <Button
+                            variant="outline"
+                            size="icon"
+                            onClick={onDownload}
+                            disabled={isSaving}
+                          >
+                            <Download className="h-4 w-4" />
+                          </Button>
+                        </TooltipTrigger>
+                        <TooltipContent>
+                          <p>PGN herunterladen</p>
+                        </TooltipContent>
+                      </Tooltip>
+                    )}
 
-              {showUpload && onUpload && (
-                <Tooltip>
-                  <TooltipTrigger asChild>
-                    <Button
-                      variant="outline"
-                      size="icon"
-                      onClick={onUpload}
-                      disabled={isSaving}
-                    >
-                      <Upload className="h-4 w-4" />
-                    </Button>
-                  </TooltipTrigger>
-                  <TooltipContent>
-                    <p>PGN hochladen</p>
-                  </TooltipContent>
-                </Tooltip>
-              )}
-            </div>
+                    {showUpload && onUpload && (
+                      <Tooltip>
+                        <TooltipTrigger asChild>
+                          <Button
+                            variant="outline"
+                            size="icon"
+                            onClick={onUpload}
+                            disabled={isSaving}
+                          >
+                            <Upload className="h-4 w-4" />
+                          </Button>
+                        </TooltipTrigger>
+                        <TooltipContent>
+                          <p>PGN hochladen</p>
+                        </TooltipContent>
+                      </Tooltip>
+                    )}
+                  </div>
                 </>
               )}
             </div>
