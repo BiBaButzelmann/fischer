@@ -9,6 +9,7 @@ import {
   TooltipTrigger,
 } from "@/components/ui/tooltip";
 import { Save, Download, Upload } from "lucide-react";
+import { useIsMobile } from "@/hooks/use-mobile";
 
 type Props = {
   history: { san: string }[];
@@ -37,6 +38,7 @@ export function MoveHistory({
 }: Props) {
   const scrollContainerRef = useRef<HTMLDivElement>(null);
   const currentMoveRef = useRef<HTMLTableCellElement>(null);
+  const isMobile = useIsMobile();
 
   useEffect(() => {
     if (scrollContainerRef.current) {
@@ -120,7 +122,10 @@ export function MoveHistory({
           <div className="h-full px-4 pb-4">
             <div
               ref={scrollContainerRef}
-              className="h-full overflow-y-auto rounded-md border bg-background/50 scrollbar-thin scrollbar-thumb-gray-400 scrollbar-track-gray-100"
+              className={clsx(
+                "overflow-y-auto rounded-md border bg-background/50 scrollbar-thin scrollbar-thumb-gray-400 scrollbar-track-gray-100",
+                isMobile ? "max-h-[300px]" : "h-full"
+              )}
             >
               <table className="w-full">
                 <tbody className="divide-y divide-border/30">
