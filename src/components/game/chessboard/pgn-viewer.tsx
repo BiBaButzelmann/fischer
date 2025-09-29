@@ -17,6 +17,7 @@ import { PlayerDisplay } from "./player-display";
 import { ParticipantWithName } from "@/db/types/participant";
 import { getIndividualPlayerResult } from "@/lib/game-result-utils";
 import { GameResult } from "@/db/types/game";
+import { useIsMobile } from "@/hooks/use-mobile";
 
 export type Props = {
   gameId: number;
@@ -41,6 +42,7 @@ export default function PgnViewer({
   const [isPending, startTransition] = useTransition();
   const [selectedSquare, setSelectedSquare] = useState<string | null>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
+  const isMobile = useIsMobile();
 
   useChessboardControls({
     onArrowLeft: () => setCurrentIndex((i) => Math.max(-1, i - 1)),
@@ -196,7 +198,7 @@ export default function PgnViewer({
   );
 
   return (
-    <div className="flex flex-col lg:flex-row gap-6 w-full">
+    <div className={`flex flex-col lg:flex-row w-full ${isMobile ? "gap-0" : "gap-6"}`}>
       <input
         ref={fileInputRef}
         type="file"
