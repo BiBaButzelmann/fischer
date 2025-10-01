@@ -2,6 +2,7 @@
 
 import { useState, useEffect, useCallback, useRef } from "react";
 import { StockfishService } from "@/services/stockfish-service";
+import { formatEvaluationScore } from "@/lib/stockfish-utils";
 import type { StockfishEvaluation } from "@/types/stockfish";
 
 type UseStockfishOptions = {
@@ -123,39 +124,10 @@ export function useStockfish(options: UseStockfishOptions = {}) {
 
   const formatEvaluation = useCallback(
     (evaluation: StockfishEvaluation): string => {
-      if (evaluation.mate !== undefined) {
-        return evaluation.mate > 0
-          ? `M${evaluation.mate}`
-          : `M${Math.abs(evaluation.mate)}`;
-      }
-
-      if (evaluation.cp !== undefined) {
-        const pawns = evaluation.cp / 100;
-        return pawns > 0 ? `+${pawns.toFixed(2)}` : pawns.toFixed(2);
-      }
-
-      return "0.00";
+      return formatEvaluationScore(evaluation);
     },
     [],
   );
-
-  const formatNodes = useCallback((nodes: number): string => {
-    if (nodes >= 1000000) {
-      return `${(nodes / 1000000).toFixed(1)}M`;
-    } else if (nodes >= 1000) {
-      return `${(nodes / 1000).toFixed(1)}K`;
-    }
-    return nodes.toString();
-  }, []);
-
-  const formatNps = useCallback((nps: number): string => {
-    if (nps >= 1000000) {
-      return `${(nps / 1000000).toFixed(1)}M nps`;
-    } else if (nps >= 1000) {
-      return `${(nps / 1000).toFixed(0)}K nps`;
-    }
-    return `${nps} nps`;
-  }, []);
 
   return {
     isReady,
@@ -167,8 +139,6 @@ export function useStockfish(options: UseStockfishOptions = {}) {
     analyzePositionImmediate,
     stopAnalysis,
     formatEvaluation,
-    formatNodes,
-    formatNps,
     wasmSupported: StockfishService.wasmThreadsSupported(),
   };
 }

@@ -2,7 +2,6 @@
 
 import clsx from "clsx";
 import { useEffect, useRef } from "react";
-import { Chess } from "chess.js";
 import { Button } from "@/components/ui/button";
 import {
   Tooltip,
@@ -11,6 +10,11 @@ import {
 } from "@/components/ui/tooltip";
 import { Save, Download, Upload } from "lucide-react";
 import { useStockfish } from "@/hooks/use-stockfish";
+import {
+  toGermanNotation,
+  convertUciToSan,
+  formatBestLineWithMoveNumbers,
+} from "@/lib/chess-notation";
 
 type Props = {
   history: { san: string }[];
@@ -55,37 +59,6 @@ export function MoveHistory({
       analyzePosition(fen);
     }
   }, [fen, isReady, analyzePosition]);
-
-  const convertPvToSan = (pvMoves: string[], fenPosition: string): string[] => {
-    try {
-      const chess = new Chess(fenPosition);
-      const sanMoves: string[] = [];
-
-      for (const uciMove of pvMoves) {
-        if (uciMove.length < 4) break;
-
-        const from = uciMove.substring(0, 2);
-        const to = uciMove.substring(2, 4);
-        const promotion =
-          uciMove.length > 4 ? uciMove.substring(4, 5) : undefined;
-
-        try {
-          const move = chess.move({ from, to, promotion });
-          if (move) {
-            sanMoves.push(move.san);
-          } else {
-            break;
-          }
-        } catch {
-          break;
-        }
-      }
-
-      return sanMoves;
-    } catch {
-      return [];
-    }
-  };
 
   useEffect(() => {
     if (scrollContainerRef.current) {
@@ -136,7 +109,7 @@ export function MoveHistory({
           )}
           onClick={() => goToMove(whitePly)}
         >
-          {white ? white.san : "…"}
+          {white ? toGermanNotation(white.san) : "…"}
         </td>
         <td
           ref={currentMoveIndex === blackPly && black ? currentMoveRef : null}
@@ -151,7 +124,7 @@ export function MoveHistory({
           )}
           onClick={black ? () => goToMove(blackPly) : undefined}
         >
-          {black ? black.san : "…"}
+          {black ? toGermanNotation(black.san) : "…"}
         </td>
       </tr>,
     );
@@ -185,11 +158,12 @@ export function MoveHistory({
             evaluation.pv.length > 0 &&
             fen &&
             (() => {
-              const bestLine = convertPvToSan(evaluation.pv.slice(0, 5), fen);
+              const bestLine = convertUciToSan(evaluation.pv.slice(0, 8), fen);
               return bestLine.length > 0 ? (
-                <div className="text-xs text-muted-foreground mt-1">
-                  <span className="font-medium">Beste Linie:</span>{" "}
-                  <span className="font-mono">{bestLine.join(" ")}</span>
+                <div className="text-xs mt-2 px-2 py-1.5 rounded-md bg-muted/50 border border-border/30">
+                  <span className="font-mono text-foreground">
+                    {formatBestLineWithMoveNumbers(bestLine, fen)}
+                  </span>
                 </div>
               ) : null;
             })()}

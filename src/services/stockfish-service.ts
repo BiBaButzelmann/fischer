@@ -1,4 +1,9 @@
 import type { StockfishEvaluation, EngineConfig } from "@/types/stockfish";
+import {
+  parseUciInfoLine,
+  calculateThreadCount,
+  calculateHashSize,
+} from "@/lib/stockfish-utils";
 
 type StockfishInstance = {
   addMessageListener: (callback: (message: string) => void) => void;
@@ -130,7 +135,7 @@ export class StockfishService {
     if (line.startsWith("info") && line.includes("depth")) {
       if (!this.isAnalyzing || !this.currentFen) return;
 
-      const evaluation = this.parseEvaluation(line);
+      const evaluation = parseUciInfoLine(line, this.currentFen);
       if (evaluation) {
         this.currentEvaluation = evaluation;
         this.currentDepth = evaluation.depth;
@@ -161,81 +166,11 @@ export class StockfishService {
     }
   }
 
-  private parseEvaluation(line: string): StockfishEvaluation | null {
-    const depthMatch = line.match(/depth (\d+)/);
-    const seldepthMatch = line.match(/seldepth (\d+)/);
-    const scoreMatch = line.match(/score (cp|mate) (-?\d+)/);
-    const nodesMatch = line.match(/nodes (\d+)/);
-    const npsMatch = line.match(/nps (\d+)/);
-    const timeMatch = line.match(/time (\d+)/);
-    const pvMatch = line.match(/ pv (.+)$/);
-    const multipvMatch = line.match(/multipv (\d+)/);
-
-    if (!depthMatch || !scoreMatch) return null;
-
-    const hasUpperbound = line.includes("upperbound");
-    const hasLowerbound = line.includes("lowerbound");
-    if (hasUpperbound || hasLowerbound) return null;
-
-    const depth = parseInt(depthMatch[1]);
-    const seldepth = seldepthMatch ? parseInt(seldepthMatch[1]) : undefined;
-    const scoreType = scoreMatch[1];
-    let scoreValue = parseInt(scoreMatch[2]);
-    const nodes = nodesMatch ? parseInt(nodesMatch[1]) : 0;
-    const nps = npsMatch ? parseInt(npsMatch[1]) : 0;
-    const time = timeMatch ? parseInt(timeMatch[1]) : 0;
-    const pvString = pvMatch ? pvMatch[1] : "";
-    const pv = pvString
-      ? pvString
-          .split(" ")
-          .filter(
-            (m) => m.length >= 4 && /^[a-h][1-8][a-h][1-8][qrbn]?$/.test(m),
-          )
-      : [];
-    const multipv = multipvMatch ? parseInt(multipvMatch[1]) : undefined;
-
-    const isBlackToMove = this.currentFen?.includes(" b ") || false;
-    if (isBlackToMove) {
-      scoreValue = -scoreValue;
-    }
-
-    const evaluation: StockfishEvaluation = {
-      depth,
-      seldepth,
-      nodes,
-      nps,
-      time,
-      pv,
-      multipv,
-    };
-
-    if (scoreType === "cp") {
-      evaluation.cp = scoreValue;
-    } else if (scoreType === "mate") {
-      evaluation.mate = scoreValue;
-    }
-
-    return evaluation;
-  }
-
   private configureEngine(): void {
     if (!this.engine) return;
 
-    const availableThreads =
-      typeof navigator !== "undefined" ? navigator.hardwareConcurrency || 4 : 4;
-
-    const threads = Math.min(this.config.threads, availableThreads, 32);
-
-    const availableMemory =
-      typeof navigator !== "undefined"
-        ? // @ts-expect-error - deviceMemory is not in all browsers
-          navigator.deviceMemory
-          ? // @ts-expect-error - deviceMemory is not in all browsers
-            Math.min(navigator.deviceMemory * 1024, 1024)
-          : 128
-        : 128;
-
-    const hashSize = Math.min(this.config.hashSize, availableMemory);
+    const threads = calculateThreadCount(this.config.threads);
+    const hashSize = calculateHashSize(this.config.hashSize);
 
     this.engine.postMessage(`setoption name Threads value ${threads}`);
     this.engine.postMessage(`setoption name Hash value ${hashSize}`);
