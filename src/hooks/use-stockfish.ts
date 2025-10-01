@@ -143,10 +143,7 @@ export function useStockfish(options: UseStockfishOptions = {}) {
         setEvaluation(null);
         setProgress(0);
       } else if (currentFenRef.current && serviceRef.current && isReady) {
-        serviceRef.current.analyzePosition(
-          currentFenRef.current,
-          maxDepth,
-        );
+        serviceRef.current.analyzePosition(currentFenRef.current, maxDepth);
       }
       return newState;
     });
