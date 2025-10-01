@@ -2,6 +2,7 @@
 
 import clsx from "clsx";
 import { useEffect, useRef } from "react";
+import { Chess } from "chess.js";
 import { Button } from "@/components/ui/button";
 import {
   Tooltip,
@@ -9,6 +10,7 @@ import {
   TooltipTrigger,
 } from "@/components/ui/tooltip";
 import { Save, Download, Upload } from "lucide-react";
+import { useStockfish } from "@/hooks/use-stockfish";
 
 type Props = {
   history: { san: string }[];
@@ -21,6 +23,7 @@ type Props = {
   showSave?: boolean;
   showUpload?: boolean;
   hasUnsavedChanges?: boolean;
+  fen?: string;
 };
 
 export function MoveHistory({
@@ -34,9 +37,54 @@ export function MoveHistory({
   showSave = false,
   showUpload = false,
   hasUnsavedChanges = false,
+  fen,
 }: Props) {
   const scrollContainerRef = useRef<HTMLDivElement>(null);
   const currentMoveRef = useRef<HTMLTableCellElement>(null);
+
+  const {
+    isReady,
+    evaluation,
+    analyzePosition,
+    formatEvaluation,
+    wasmSupported,
+  } = useStockfish({ maxDepth: 30, debounceMs: 300 });
+
+  useEffect(() => {
+    if (isReady && fen) {
+      analyzePosition(fen);
+    }
+  }, [fen, isReady, analyzePosition]);
+
+  const convertPvToSan = (pvMoves: string[], fenPosition: string): string[] => {
+    try {
+      const chess = new Chess(fenPosition);
+      const sanMoves: string[] = [];
+      
+      for (const uciMove of pvMoves) {
+        if (uciMove.length < 4) break;
+        
+        const from = uciMove.substring(0, 2);
+        const to = uciMove.substring(2, 4);
+        const promotion = uciMove.length > 4 ? uciMove.substring(4, 5) : undefined;
+        
+        try {
+          const move = chess.move({ from, to, promotion });
+          if (move) {
+            sanMoves.push(move.san);
+          } else {
+            break;
+          }
+        } catch {
+          break;
+        }
+      }
+      
+      return sanMoves;
+    } catch {
+      return [];
+    }
+  };
 
   useEffect(() => {
     if (scrollContainerRef.current) {
@@ -112,9 +160,35 @@ export function MoveHistory({
     <div className="w-full flex flex-col h-full max-h-[570px]">
       <div className="h-full rounded-lg border border-gray-200 bg-card text-card-foreground shadow-sm flex flex-col">
         <div className="flex flex-col space-y-1.5 p-4 pb-3 flex-shrink-0">
-          <div className="font-semibold leading-none tracking-tight flex items-center">
+          <div className="font-semibold leading-none tracking-tight flex items-center justify-between">
             <div className="flex items-center gap-2">Notation</div>
+            {wasmSupported && evaluation && (
+              <div
+                className={`text-sm font-mono px-2 py-1 rounded-md text-center min-w-[60px] font-semibold ${
+                  evaluation.mate !== undefined
+                    ? evaluation.mate > 0
+                      ? "bg-green-100 text-green-900"
+                      : "bg-red-100 text-red-900"
+                    : evaluation.cp !== undefined && evaluation.cp > 0
+                      ? "bg-green-50 text-green-800"
+                      : "bg-red-50 text-red-800"
+                }`}
+              >
+                {formatEvaluation(evaluation)}
+              </div>
+            )}
           </div>
+          {wasmSupported && evaluation && evaluation.pv && evaluation.pv.length > 0 && fen && (() => {
+            const bestLine = convertPvToSan(evaluation.pv.slice(0, 5), fen);
+            return bestLine.length > 0 ? (
+              <div className="text-xs text-muted-foreground mt-1">
+                <span className="font-medium">Beste Linie:</span>{" "}
+                <span className="font-mono">
+                  {bestLine.join(" ")}
+                </span>
+              </div>
+            ) : null;
+          })()}
         </div>
         <div className="flex-1 overflow-hidden">
           <div className="h-full px-4 pb-4">

@@ -21,11 +21,8 @@ export function PositionEvaluation({
     evaluation,
     isAnalyzing,
     error,
-    progress,
     analyzePosition,
     formatEvaluation,
-    formatNodes,
-    formatNps,
     wasmSupported,
   } = useStockfish({ maxDepth, debounceMs: 300 });
 
@@ -89,38 +86,16 @@ export function PositionEvaluation({
         >
           {evalText}
         </div>
-
-        {isAnalyzing && (
-          <div className="flex items-center gap-1 text-xs text-blue-600">
-            <div className="animate-pulse">⚡</div>
-            <span>Analysiert...</span>
-          </div>
-        )}
       </div>
 
       {showDetails && (
         <div className="space-y-1">
           <div className="flex items-center justify-between text-xs text-gray-600">
-            <span>Tiefe:</span>
             <span className="font-mono font-medium">
               {evaluation.depth}
               {evaluation.seldepth && ` / ${evaluation.seldepth}`}
             </span>
           </div>
-
-          {evaluation.nodes > 0 && (
-            <div className="flex items-center justify-between text-xs text-gray-600">
-              <span>Knoten:</span>
-              <span className="font-mono">{formatNodes(evaluation.nodes)}</span>
-            </div>
-          )}
-
-          {evaluation.nps > 0 && (
-            <div className="flex items-center justify-between text-xs text-gray-600">
-              <span>Geschw.:</span>
-              <span className="font-mono">{formatNps(evaluation.nps)}</span>
-            </div>
-          )}
 
           {evaluation.bestMove && (
             <div className="flex items-center justify-between text-xs text-gray-600">
@@ -128,20 +103,6 @@ export function PositionEvaluation({
               <span className="font-mono font-medium text-blue-700">
                 {evaluation.bestMove}
               </span>
-            </div>
-          )}
-
-          {isAnalyzing && progress > 0 && (
-            <div className="mt-2">
-              <div className="h-1 bg-gray-200 rounded-full overflow-hidden">
-                <div
-                  className="h-full bg-blue-500 transition-all duration-300"
-                  style={{ width: `${progress}%` }}
-                />
-              </div>
-              <div className="text-xs text-gray-500 text-right mt-0.5">
-                {Math.round(progress)}%
-              </div>
             </div>
           )}
         </div>

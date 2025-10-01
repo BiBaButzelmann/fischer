@@ -14,7 +14,6 @@ import { savePGN } from "@/actions/pgn";
 import { toast } from "sonner";
 import { MoveHistory } from "./move-history";
 import { PlayerDisplay } from "./player-display";
-import { PositionEvaluation } from "./position-evaluation";
 import { ParticipantWithName } from "@/db/types/participant";
 import { getIndividualPlayerResult } from "@/lib/game-result-utils";
 import { GameResult } from "@/db/types/game";
@@ -230,13 +229,6 @@ export default function PgnViewer({
           />
         </div>
 
-        <div className="px-4 py-2 bg-gray-50 border-t border-gray-200">
-          <div className="flex items-center justify-between">
-            <span className="text-sm text-gray-600">Evaluation:</span>
-            <PositionEvaluation fen={fen} />
-          </div>
-        </div>
-
         <PlayerDisplay
           participant={whitePlayer}
           result={getIndividualPlayerResult(gameResult, true)}
@@ -256,6 +248,7 @@ export default function PgnViewer({
           showSave={allowEdit}
           showUpload={allowEdit}
           hasUnsavedChanges={hasUnsavedChanges}
+          fen={fen}
         />
       </div>
     </div>
