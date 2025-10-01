@@ -2,7 +2,10 @@
 
 import { useState, useEffect, useCallback, useRef } from "react";
 import { StockfishService } from "@/services/stockfish-service";
-import { formatEvaluationScore } from "@/lib/stockfish-utils";
+import {
+  formatEvaluationScore,
+  getOptimalEngineConfig,
+} from "@/lib/stockfish-utils";
 import type { StockfishEvaluation } from "@/types/stockfish";
 
 type UseStockfishOptions = {
@@ -11,7 +14,11 @@ type UseStockfishOptions = {
 };
 
 export function useStockfish(options: UseStockfishOptions = {}) {
-  const { debounceMs = 500, maxDepth = 30 } = options;
+  const optimalConfig = getOptimalEngineConfig();
+  const {
+    debounceMs = optimalConfig.debounceMs,
+    maxDepth = optimalConfig.maxDepth,
+  } = options;
 
   const [isReady, setIsReady] = useState(false);
   const [evaluation, setEvaluation] = useState<StockfishEvaluation | null>(

@@ -83,8 +83,67 @@ export function calculateHashSize(configuredSize: number): number {
       ? // @ts-expect-error - deviceMemory is not in all browsers
         navigator.deviceMemory
         ? // @ts-expect-error - deviceMemory is not in all browsers
-          Math.min(navigator.deviceMemory * 1024, 1024)
-        : 128
-      : 128;
+          Math.min(navigator.deviceMemory * 256, 2048)
+        : 256
+      : 256;
   return Math.min(configuredSize, availableMemory);
+}
+
+export function getOptimalEngineConfig() {
+  if (typeof navigator === "undefined") {
+    return {
+      threads: 4,
+      hashSize: 128,
+      minDepth: 10,
+      maxDepth: 25,
+      debounceMs: 300,
+      tier: "server",
+    };
+  }
+
+  const cores = navigator.hardwareConcurrency || 4;
+  // @ts-expect-error - deviceMemory is not in all browsers
+  const memory = navigator.deviceMemory || 4;
+
+  if (cores >= 16 && memory >= 16) {
+    return {
+      threads: 16,
+      hashSize: 512,
+      minDepth: 14,
+      maxDepth: 40,
+      debounceMs: 100,
+      tier: "high-end",
+    };
+  }
+
+  if (cores >= 8 && memory >= 8) {
+    return {
+      threads: 8,
+      hashSize: 256,
+      minDepth: 12,
+      maxDepth: 35,
+      debounceMs: 150,
+      tier: "mid-range",
+    };
+  }
+
+  if (cores >= 4 && memory >= 4) {
+    return {
+      threads: 4,
+      hashSize: 128,
+      minDepth: 10,
+      maxDepth: 30,
+      debounceMs: 250,
+      tier: "standard",
+    };
+  }
+
+  return {
+    threads: 2,
+    hashSize: 64,
+    minDepth: 8,
+    maxDepth: 25,
+    debounceMs: 350,
+    tier: "low-end",
+  };
 }

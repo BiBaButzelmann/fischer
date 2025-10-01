@@ -52,7 +52,7 @@ export function MoveHistory({
     analyzePosition,
     formatEvaluation,
     wasmSupported,
-  } = useStockfish({ maxDepth: 30, debounceMs: 300 });
+  } = useStockfish();
 
   useEffect(() => {
     if (isReady && fen) {

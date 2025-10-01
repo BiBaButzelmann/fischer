@@ -7,14 +7,12 @@ type Props = {
   fen: string;
   className?: string;
   showDetails?: boolean;
-  maxDepth?: number;
 };
 
 export function PositionEvaluation({
   fen,
   className = "",
   showDetails = true,
-  maxDepth = 30,
 }: Props) {
   const {
     isReady,
@@ -24,7 +22,7 @@ export function PositionEvaluation({
     analyzePosition,
     formatEvaluation,
     wasmSupported,
-  } = useStockfish({ maxDepth, debounceMs: 300 });
+  } = useStockfish();
 
   useEffect(() => {
     if (isReady && fen) {

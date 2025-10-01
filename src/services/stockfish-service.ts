@@ -3,6 +3,7 @@ import {
   parseUciInfoLine,
   calculateThreadCount,
   calculateHashSize,
+  getOptimalEngineConfig,
 } from "@/lib/stockfish-utils";
 
 type StockfishInstance = {
@@ -25,15 +26,18 @@ export class StockfishService {
   private currentFen: string | null = null;
   private currentDepth = 0;
   private maxDepth = 30;
-  private config: EngineConfig = {
-    threads: 4,
-    hashSize: 128,
-    multiPv: 1,
-    minDepth: 10,
-    maxDepth: 30,
-  };
+  private config: EngineConfig;
 
-  private constructor() {}
+  private constructor() {
+    const optimal = getOptimalEngineConfig();
+    this.config = {
+      threads: optimal.threads,
+      hashSize: optimal.hashSize,
+      multiPv: 1,
+      minDepth: optimal.minDepth,
+      maxDepth: optimal.maxDepth,
+    };
+  }
 
   static getInstance(): StockfishService {
     if (!StockfishService.instance) {
@@ -177,6 +181,9 @@ export class StockfishService {
     this.engine.postMessage(
       `setoption name MultiPV value ${this.config.multiPv}`,
     );
+    this.engine.postMessage("setoption name Contempt value 0");
+    this.engine.postMessage("setoption name Ponder value false");
+    this.engine.postMessage("setoption name Move Overhead value 10");
     this.engine.postMessage("isready");
   }
 
@@ -199,20 +206,21 @@ export class StockfishService {
         this.engine.postMessage(`position fen ${fen}`);
         this.engine.postMessage(`go depth ${this.config.minDepth}`);
       }
-    }, 50);
+    }, 10);
   }
 
   private continueAnalysis(): void {
     if (!this.engine || !this.currentFen || !this.isAnalyzing) return;
 
-    const nextDepth = Math.min(this.currentDepth + 5, this.maxDepth);
+    const increment = this.currentDepth < 20 ? 4 : 3;
+    const nextDepth = Math.min(this.currentDepth + increment, this.maxDepth);
 
     setTimeout(() => {
       if (this.engine && this.currentFen && this.isAnalyzing) {
         this.engine.postMessage(`position fen ${this.currentFen}`);
         this.engine.postMessage(`go depth ${nextDepth}`);
       }
-    }, 10);
+    }, 0);
   }
 
   stopAnalysis(): void {
