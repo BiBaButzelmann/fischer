@@ -60,14 +60,15 @@ export function MoveHistory({
     try {
       const chess = new Chess(fenPosition);
       const sanMoves: string[] = [];
-      
+
       for (const uciMove of pvMoves) {
         if (uciMove.length < 4) break;
-        
+
         const from = uciMove.substring(0, 2);
         const to = uciMove.substring(2, 4);
-        const promotion = uciMove.length > 4 ? uciMove.substring(4, 5) : undefined;
-        
+        const promotion =
+          uciMove.length > 4 ? uciMove.substring(4, 5) : undefined;
+
         try {
           const move = chess.move({ from, to, promotion });
           if (move) {
@@ -79,7 +80,7 @@ export function MoveHistory({
           break;
         }
       }
-      
+
       return sanMoves;
     } catch {
       return [];
@@ -178,17 +179,20 @@ export function MoveHistory({
               </div>
             )}
           </div>
-          {wasmSupported && evaluation && evaluation.pv && evaluation.pv.length > 0 && fen && (() => {
-            const bestLine = convertPvToSan(evaluation.pv.slice(0, 5), fen);
-            return bestLine.length > 0 ? (
-              <div className="text-xs text-muted-foreground mt-1">
-                <span className="font-medium">Beste Linie:</span>{" "}
-                <span className="font-mono">
-                  {bestLine.join(" ")}
-                </span>
-              </div>
-            ) : null;
-          })()}
+          {wasmSupported &&
+            evaluation &&
+            evaluation.pv &&
+            evaluation.pv.length > 0 &&
+            fen &&
+            (() => {
+              const bestLine = convertPvToSan(evaluation.pv.slice(0, 5), fen);
+              return bestLine.length > 0 ? (
+                <div className="text-xs text-muted-foreground mt-1">
+                  <span className="font-medium">Beste Linie:</span>{" "}
+                  <span className="font-mono">{bestLine.join(" ")}</span>
+                </div>
+              ) : null;
+            })()}
         </div>
         <div className="flex-1 overflow-hidden">
           <div className="h-full px-4 pb-4">

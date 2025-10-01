@@ -185,7 +185,13 @@ export class StockfishService {
     const nps = npsMatch ? parseInt(npsMatch[1]) : 0;
     const time = timeMatch ? parseInt(timeMatch[1]) : 0;
     const pvString = pvMatch ? pvMatch[1] : "";
-    const pv = pvString ? pvString.split(" ").filter(m => m.length >= 4 && /^[a-h][1-8][a-h][1-8][qrbn]?$/.test(m)) : [];
+    const pv = pvString
+      ? pvString
+          .split(" ")
+          .filter(
+            (m) => m.length >= 4 && /^[a-h][1-8][a-h][1-8][qrbn]?$/.test(m),
+          )
+      : [];
     const multipv = multipvMatch ? parseInt(multipvMatch[1]) : undefined;
 
     const isBlackToMove = this.currentFen?.includes(" b ") || false;
