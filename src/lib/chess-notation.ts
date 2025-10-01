@@ -1,24 +1,16 @@
 import { Chess } from "chess.js";
 
-const PIECE_MAP: Record<string, string> = {
-  n: "s",
-  b: "l",
-  r: "t",
-  q: "d",
-  k: "k",
-  N: "S",
-  B: "L",
-  R: "T",
-  Q: "D",
-  K: "K",
-};
-
 export function toGermanNotation(san: string): string {
-  let result = san;
-  for (const [english, german] of Object.entries(PIECE_MAP)) {
-    result = result.replace(new RegExp(english, "g"), german);
-  }
-  return result;
+  return san
+    .replace(/^N/, "S")
+    .replace(/^B/, "L")
+    .replace(/^R/, "T")
+    .replace(/^Q/, "D")
+    .replace(/^K/, "K")
+    .replace(/=N/, "=S")
+    .replace(/=B/, "=L")
+    .replace(/=R/, "=T")
+    .replace(/=Q/, "=D");
 }
 
 export function convertUciToSan(
