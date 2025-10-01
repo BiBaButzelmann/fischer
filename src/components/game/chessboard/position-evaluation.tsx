@@ -17,11 +17,11 @@ export function PositionEvaluation({
   const {
     isReady,
     evaluation,
-    isAnalyzing,
-    error,
     analyzePosition,
     formatEvaluation,
     wasmSupported,
+    isEnabled,
+    toggleEngine,
   } = useStockfish();
 
   useEffect(() => {
@@ -31,62 +31,51 @@ export function PositionEvaluation({
   }, [fen, isReady, analyzePosition]);
 
   if (!wasmSupported) {
-    return (
-      <div className={`text-xs text-gray-500 ${className}`}>
-        WASM Threading nicht unterstützt
-      </div>
-    );
+    return null;
   }
 
-  if (error) {
-    return (
-      <div className={`text-xs text-red-500 ${className}`}>Engine Fehler</div>
-    );
-  }
-
-  if (!isReady) {
-    return (
-      <div className={`text-xs text-gray-500 ${className}`}>Engine lädt...</div>
-    );
-  }
-
-  if (!evaluation && isAnalyzing) {
-    return (
-      <div className={`text-xs text-blue-500 ${className}`}>Analysiert...</div>
-    );
-  }
-
-  if (!evaluation) {
-    return <div className={`text-xs text-gray-500 ${className}`}>-</div>;
-  }
-
-  const evalText = formatEvaluation(evaluation);
-  const isPositive = evaluation.cp
+  const evalText = evaluation ? formatEvaluation(evaluation) : "";
+  const isPositive = evaluation?.cp
     ? evaluation.cp > 0
-    : evaluation.mate
+    : evaluation?.mate
       ? evaluation.mate > 0
       : false;
-  const isMate = evaluation.mate !== undefined;
+  const isMate = evaluation?.mate !== undefined;
 
   return (
     <div className={`space-y-2 ${className}`}>
       <div className="flex items-center gap-2">
-        <div
-          className={`text-sm font-mono px-3 py-1.5 rounded-md text-center min-w-[70px] font-semibold ${
-            isMate
-              ? isPositive
-                ? "bg-green-100 text-green-900"
-                : "bg-red-100 text-red-900"
-              : isPositive
-                ? "bg-green-50 text-green-800"
-                : "bg-red-50 text-red-800"
+        <button
+          onClick={toggleEngine}
+          className={`relative w-11 h-6 rounded-full transition-colors ${
+            isEnabled ? "bg-green-500" : "bg-red-500"
           }`}
+          title={isEnabled ? "Engine ausschalten" : "Engine einschalten"}
         >
-          {evalText}
-        </div>
+          <span
+            className={`absolute top-0.5 left-0.5 w-5 h-5 bg-white rounded-full transition-transform ${
+              isEnabled ? "translate-x-5" : "translate-x-0"
+            }`}
+          />
+        </button>
+        {isEnabled && evaluation && (
+          <div
+            className={`text-sm font-mono px-3 py-1.5 rounded-md text-center min-w-[70px] font-semibold ${
+              isMate
+                ? isPositive
+                  ? "bg-green-100 text-green-900"
+                  : "bg-red-100 text-red-900"
+                : isPositive
+                  ? "bg-green-50 text-green-800"
+                  : "bg-red-50 text-red-800"
+            }`}
+          >
+            {evalText}
+          </div>
+        )}
       </div>
 
-      {showDetails && (
+      {isEnabled && showDetails && evaluation && (
         <div className="space-y-1">
           <div className="flex items-center justify-between text-xs text-gray-600">
             <span className="font-mono font-medium">

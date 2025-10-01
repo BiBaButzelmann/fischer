@@ -27,10 +27,12 @@ export function useStockfish(options: UseStockfishOptions = {}) {
   const [isAnalyzing, setIsAnalyzing] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [progress, setProgress] = useState(0);
+  const [isEnabled, setIsEnabled] = useState(false);
 
   const serviceRef = useRef<StockfishService | null>(null);
   const debounceTimerRef = useRef<NodeJS.Timeout | null>(null);
   const mountedRef = useRef(true);
+  const currentFenRef = useRef<string | null>(null);
 
   useEffect(() => {
     mountedRef.current = true;
@@ -91,7 +93,9 @@ export function useStockfish(options: UseStockfishOptions = {}) {
 
   const analyzePosition = useCallback(
     (fen: string, depth?: number) => {
-      if (!serviceRef.current || !isReady) return;
+      if (!serviceRef.current || !isReady || !isEnabled) return;
+
+      currentFenRef.current = fen;
 
       if (debounceTimerRef.current) {
         clearTimeout(debounceTimerRef.current);
@@ -104,12 +108,14 @@ export function useStockfish(options: UseStockfishOptions = {}) {
         serviceRef.current?.analyzePosition(fen, depth ?? maxDepth);
       }, debounceMs);
     },
-    [isReady, debounceMs, maxDepth],
+    [isReady, isEnabled, debounceMs, maxDepth],
   );
 
   const analyzePositionImmediate = useCallback(
     (fen: string, depth?: number) => {
-      if (!serviceRef.current || !isReady) return;
+      if (!serviceRef.current || !isReady || !isEnabled) return;
+
+      currentFenRef.current = fen;
 
       if (debounceTimerRef.current) {
         clearTimeout(debounceTimerRef.current);
@@ -119,7 +125,7 @@ export function useStockfish(options: UseStockfishOptions = {}) {
       setProgress(0);
       serviceRef.current.analyzePosition(fen, depth ?? maxDepth);
     },
-    [isReady, maxDepth],
+    [isReady, isEnabled, maxDepth],
   );
 
   const stopAnalysis = useCallback(() => {
@@ -128,6 +134,23 @@ export function useStockfish(options: UseStockfishOptions = {}) {
     }
     serviceRef.current?.stopAnalysis();
   }, []);
+
+  const toggleEngine = useCallback(() => {
+    setIsEnabled((prev) => {
+      const newState = !prev;
+      if (!newState) {
+        stopAnalysis();
+        setEvaluation(null);
+        setProgress(0);
+      } else if (currentFenRef.current && serviceRef.current && isReady) {
+        serviceRef.current.analyzePosition(
+          currentFenRef.current,
+          maxDepth,
+        );
+      }
+      return newState;
+    });
+  }, [stopAnalysis, isReady, maxDepth]);
 
   const formatEvaluation = useCallback(
     (evaluation: StockfishEvaluation): string => {
@@ -147,5 +170,7 @@ export function useStockfish(options: UseStockfishOptions = {}) {
     stopAnalysis,
     formatEvaluation,
     wasmSupported: StockfishService.wasmThreadsSupported(),
+    isEnabled,
+    toggleEngine,
   };
 }
