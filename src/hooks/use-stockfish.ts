@@ -39,8 +39,8 @@ export function useStockfish({ fen, isEnabled }: UseStockfishParams) {
         }
       });
 
-      const unsubscribeStatus = service.subscribeStatus((status) => {
-        if (mountedRef.current && status === "ready") {
+      const unsubscribeReady = service.onReady(() => {
+        if (mountedRef.current) {
           setIsReady(true);
         }
       });
@@ -49,7 +49,7 @@ export function useStockfish({ fen, isEnabled }: UseStockfishParams) {
 
       return () => {
         unsubscribe();
-        unsubscribeStatus();
+        unsubscribeReady();
       };
     };
 

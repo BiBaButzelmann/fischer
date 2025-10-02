@@ -10,7 +10,7 @@ type StockfishInstance = {
 };
 
 type MessageCallback = (evaluation: StockfishEvaluation | null) => void;
-type StatusCallback = (status: "ready" | "analyzing" | "idle") => void;
+type ReadyCallback = () => void;
 
 export class StockfishService {
   private static instance: StockfishService | null = null;
@@ -18,7 +18,7 @@ export class StockfishService {
   private isInitialized = false;
   private isReady = false;
   private messageCallbacks: Set<MessageCallback> = new Set();
-  private statusCallbacks: Set<StatusCallback> = new Set();
+  private readyCallbacks: Set<ReadyCallback> = new Set();
   private currentEvaluation: StockfishEvaluation | null = null;
   private isAnalyzing = false;
   private currentFen: string | null = null;
@@ -130,7 +130,7 @@ export class StockfishService {
 
     if (line.includes("readyok")) {
       this.isReady = true;
-      this.notifyStatusChange("ready");
+      this.notifyReady();
       return;
     }
 
@@ -163,7 +163,6 @@ export class StockfishService {
         this.continueAnalysis();
       } else {
         this.isAnalyzing = false;
-        this.notifyStatusChange("idle");
       }
     }
   }
@@ -198,7 +197,6 @@ export class StockfishService {
     this.currentDepth = 0;
     this.currentEvaluation = null;
     this.isAnalyzing = true;
-    this.notifyStatusChange("analyzing");
 
     setTimeout(() => {
       if (this.engine && this.currentFen === fen) {
@@ -233,7 +231,6 @@ export class StockfishService {
     this.isAnalyzing = false;
     this.currentEvaluation = null;
     this.currentDepth = 0;
-    this.notifyStatusChange("idle");
   }
 
   subscribe(callback: MessageCallback): () => void {
@@ -243,10 +240,10 @@ export class StockfishService {
     };
   }
 
-  subscribeStatus(callback: StatusCallback): () => void {
-    this.statusCallbacks.add(callback);
+  onReady(callback: ReadyCallback): () => void {
+    this.readyCallbacks.add(callback);
     return () => {
-      this.statusCallbacks.delete(callback);
+      this.readyCallbacks.delete(callback);
     };
   }
 
@@ -256,9 +253,9 @@ export class StockfishService {
     });
   }
 
-  private notifyStatusChange(status: "ready" | "analyzing" | "idle"): void {
-    this.statusCallbacks.forEach((callback) => {
-      callback(status);
+  private notifyReady(): void {
+    this.readyCallbacks.forEach((callback) => {
+      callback();
     });
   }
 }
