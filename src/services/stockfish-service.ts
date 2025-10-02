@@ -171,8 +171,12 @@ export class StockfishService {
   private configureEngine(): void {
     if (!this.engine) return;
 
-    this.engine.postMessage(`setoption name Threads value ${this.config.threads}`);
-    this.engine.postMessage(`setoption name Hash value ${this.config.hashSize}`);
+    this.engine.postMessage(
+      `setoption name Threads value ${this.config.threads}`,
+    );
+    this.engine.postMessage(
+      `setoption name Hash value ${this.config.hashSize}`,
+    );
     this.engine.postMessage(
       `setoption name MultiPV value ${this.config.multiPv}`,
     );
