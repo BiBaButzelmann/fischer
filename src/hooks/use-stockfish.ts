@@ -8,17 +8,10 @@ import {
 } from "@/lib/stockfish-utils";
 import type { StockfishEvaluation } from "@/types/stockfish";
 
-type UseStockfishOptions = {
-  debounceMs?: number;
-  maxDepth?: number;
-};
-
-export function useStockfish(options: UseStockfishOptions = {}) {
-  const optimalConfig = getOptimalEngineConfig();
-  const {
-    debounceMs = optimalConfig.debounceMs,
-    maxDepth = optimalConfig.maxDepth,
-  } = options;
+export function useStockfish() {
+  const config = getOptimalEngineConfig();
+  const debounceMs = config.debounceMs;
+  const maxDepth = config.maxDepth;
 
   const [isReady, setIsReady] = useState(false);
   const [evaluation, setEvaluation] = useState<StockfishEvaluation | null>(
