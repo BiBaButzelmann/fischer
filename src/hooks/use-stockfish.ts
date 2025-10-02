@@ -24,8 +24,6 @@ export function useStockfish(options: UseStockfishOptions = {}) {
   const [evaluation, setEvaluation] = useState<StockfishEvaluation | null>(
     null,
   );
-  const [isAnalyzing, setIsAnalyzing] = useState(false);
-  const [error, setError] = useState<string | null>(null);
   const [isEnabled, setIsEnabled] = useState(false);
 
   const serviceRef = useRef<StockfishService | null>(null);
@@ -39,7 +37,6 @@ export function useStockfish(options: UseStockfishOptions = {}) {
     const initEngine = async () => {
       try {
         if (!StockfishService.wasmThreadsSupported()) {
-          setError("WASM Threading wird nicht unterstützt");
           return;
         }
 
@@ -57,10 +54,6 @@ export function useStockfish(options: UseStockfishOptions = {}) {
 
           if (status === "ready") {
             setIsReady(true);
-          } else if (status === "analyzing") {
-            setIsAnalyzing(true);
-          } else if (status === "idle") {
-            setIsAnalyzing(false);
           }
         });
 
@@ -70,10 +63,8 @@ export function useStockfish(options: UseStockfishOptions = {}) {
           unsubscribe();
           unsubscribeStatus();
         };
-      } catch (err) {
-        if (mountedRef.current) {
-          setError(err instanceof Error ? err.message : "Engine-Fehler");
-        }
+      } catch {
+        return undefined;
       }
     };
 
@@ -107,25 +98,21 @@ export function useStockfish(options: UseStockfishOptions = {}) {
     [isReady, isEnabled, debounceMs, maxDepth],
   );
 
-  const stopAnalysis = useCallback(() => {
-    if (debounceTimerRef.current) {
-      clearTimeout(debounceTimerRef.current);
-    }
-    serviceRef.current?.stopAnalysis();
-  }, []);
-
   const toggleEngine = useCallback(() => {
     setIsEnabled((prev) => {
       const newState = !prev;
       if (!newState) {
-        stopAnalysis();
+        if (debounceTimerRef.current) {
+          clearTimeout(debounceTimerRef.current);
+        }
+        serviceRef.current?.stopAnalysis();
         setEvaluation(null);
       } else if (currentFenRef.current && serviceRef.current && isReady) {
         serviceRef.current.analyzePosition(currentFenRef.current, maxDepth);
       }
       return newState;
     });
-  }, [stopAnalysis, isReady, maxDepth]);
+  }, [isReady, maxDepth]);
 
   const formatEvaluation = useCallback(
     (evaluation: StockfishEvaluation): string => {
@@ -137,12 +124,8 @@ export function useStockfish(options: UseStockfishOptions = {}) {
   return {
     isReady,
     evaluation,
-    isAnalyzing,
-    error,
     analyzePosition,
-    stopAnalysis,
     formatEvaluation,
-    wasmSupported: StockfishService.wasmThreadsSupported(),
     isEnabled,
     toggleEngine,
   };
