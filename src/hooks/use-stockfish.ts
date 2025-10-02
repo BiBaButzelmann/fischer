@@ -2,81 +2,70 @@
 
 import { useState, useEffect, useCallback, useRef } from "react";
 import { StockfishService } from "@/services/stockfish-service";
-import {
-  formatEvaluationScore,
-  getOptimalEngineConfig,
-} from "@/lib/stockfish-utils";
+import { getOptimalEngineConfig } from "@/lib/stockfish-utils";
 import type { StockfishEvaluation } from "@/types/stockfish";
 
-export function useStockfish() {
-  const config = getOptimalEngineConfig();
-  const debounceMs = config.debounceMs;
-  const maxDepth = config.maxDepth;
+type UseStockfishParams = {
+  fen: string;
+  isEnabled: boolean;
+};
+
+export function useStockfish({ fen, isEnabled }: UseStockfishParams) {
+  const { debounceMs, maxDepth } = getOptimalEngineConfig();
 
   const [isReady, setIsReady] = useState(false);
   const [evaluation, setEvaluation] = useState<StockfishEvaluation | null>(
     null,
   );
-  const [isEnabled, setIsEnabled] = useState(false);
 
   const serviceRef = useRef<StockfishService | null>(null);
   const debounceTimerRef = useRef<NodeJS.Timeout | null>(null);
   const mountedRef = useRef(true);
-  const currentFenRef = useRef<string | null>(null);
 
   useEffect(() => {
     mountedRef.current = true;
 
     const initEngine = async () => {
-      try {
-        if (!StockfishService.wasmThreadsSupported()) {
-          return;
-        }
-
-        const service = StockfishService.getInstance();
-        serviceRef.current = service;
-
-        const unsubscribe = service.subscribe((evaluation) => {
-          if (mountedRef.current && evaluation) {
-            setEvaluation(evaluation);
-          }
-        });
-
-        const unsubscribeStatus = service.subscribeStatus((status) => {
-          if (!mountedRef.current) return;
-
-          if (status === "ready") {
-            setIsReady(true);
-          }
-        });
-
-        await service.initialize();
-
-        return () => {
-          unsubscribe();
-          unsubscribeStatus();
-        };
-      } catch {
-        return undefined;
+      if (!StockfishService.wasmThreadsSupported()) {
+        return;
       }
+
+      const service = StockfishService.getInstance();
+      serviceRef.current = service;
+
+      const unsubscribe = service.subscribe((evaluation) => {
+        if (mountedRef.current && evaluation) {
+          setEvaluation(evaluation);
+        }
+      });
+
+      const unsubscribeStatus = service.subscribeStatus((status) => {
+        if (mountedRef.current && status === "ready") {
+          setIsReady(true);
+        }
+      });
+
+      await service.initialize();
+
+      return () => {
+        unsubscribe();
+        unsubscribeStatus();
+      };
     };
 
-    const cleanup = initEngine();
+    initEngine().catch(() => {});
 
     return () => {
       mountedRef.current = false;
-      cleanup.then((fn) => fn?.());
       if (debounceTimerRef.current) {
         clearTimeout(debounceTimerRef.current);
       }
     };
-  }, [maxDepth]);
+  }, []);
 
-  const analyzePosition = useCallback(
-    (fen: string, depth?: number) => {
-      if (!serviceRef.current || !isReady || !isEnabled) return;
-
-      currentFenRef.current = fen;
+  const startAnalysis = useCallback(
+    (fen: string) => {
+      if (!serviceRef.current || !isReady) return;
 
       if (debounceTimerRef.current) {
         clearTimeout(debounceTimerRef.current);
@@ -85,41 +74,30 @@ export function useStockfish() {
       serviceRef.current.stopAnalysis();
 
       debounceTimerRef.current = setTimeout(() => {
-        serviceRef.current?.analyzePosition(fen, depth ?? maxDepth);
+        serviceRef.current?.analyzePosition(fen, maxDepth);
       }, debounceMs);
     },
-    [isReady, isEnabled, debounceMs, maxDepth],
+    [isReady, debounceMs, maxDepth],
   );
 
-  const toggleEngine = useCallback(() => {
-    setIsEnabled((prev) => {
-      const newState = !prev;
-      if (!newState) {
-        if (debounceTimerRef.current) {
-          clearTimeout(debounceTimerRef.current);
-        }
-        serviceRef.current?.stopAnalysis();
-        setEvaluation(null);
-      } else if (currentFenRef.current && serviceRef.current && isReady) {
-        serviceRef.current.analyzePosition(currentFenRef.current, maxDepth);
-      }
-      return newState;
-    });
-  }, [isReady, maxDepth]);
+  const stopAnalysis = useCallback(() => {
+    if (debounceTimerRef.current) {
+      clearTimeout(debounceTimerRef.current);
+    }
+    serviceRef.current?.stopAnalysis();
+    setEvaluation(null);
+  }, []);
 
-  const formatEvaluation = useCallback(
-    (evaluation: StockfishEvaluation): string => {
-      return formatEvaluationScore(evaluation);
-    },
-    [],
-  );
+  useEffect(() => {
+    if (!isEnabled) {
+      stopAnalysis();
+      return;
+    }
 
-  return {
-    isReady,
-    evaluation,
-    analyzePosition,
-    formatEvaluation,
-    isEnabled,
-    toggleEngine,
-  };
+    if (isReady && fen) {
+      startAnalysis(fen);
+    }
+  }, [fen, isReady, isEnabled, startAnalysis, stopAnalysis]);
+
+  return { evaluation };
 }

@@ -1,38 +1,25 @@
 "use client";
 
-import { useEffect } from "react";
+import { useState } from "react";
 import { useStockfish } from "@/hooks/use-stockfish";
-import {
-  convertUciToSan,
-  formatBestLineWithMoveNumbers,
-} from "@/lib/chess-notation";
+import { formatUciMovesAsNotation } from "@/lib/chess-notation";
+import { formatEvaluationScore } from "@/lib/stockfish-utils";
 
 type Props = {
   fen: string;
 };
 
 export function EnginePanel({ fen }: Props) {
-  const {
-    isReady,
-    isEnabled,
-    toggleEngine,
-    evaluation,
-    analyzePosition,
-    formatEvaluation,
-  } = useStockfish();
+  const [isEnabled, setIsEnabled] = useState(false);
+  const { evaluation } = useStockfish({ fen, isEnabled });
 
-  useEffect(() => {
-    if (isReady && isEnabled && fen) {
-      analyzePosition(fen);
-    }
-  }, [fen, isReady, isEnabled, analyzePosition]);
   return (
     <div className="flex flex-col space-y-1.5 p-4 pb-3 flex-shrink-0">
       <div className="font-semibold leading-none tracking-tight flex items-center justify-between">
         <div className="flex items-center gap-2">
           <span>Notation</span>
           <button
-            onClick={toggleEngine}
+            onClick={() => setIsEnabled(!isEnabled)}
             className={`relative w-11 h-6 rounded-full transition-colors ${
               isEnabled ? "bg-green-500" : "bg-red-500"
             }`}
@@ -57,24 +44,17 @@ export function EnginePanel({ fen }: Props) {
                   : "bg-red-50 text-red-800"
             }`}
           >
-            {formatEvaluation(evaluation)}
+            {formatEvaluationScore(evaluation)}
           </div>
         )}
       </div>
       {isEnabled && (
         <div className="text-xs mt-2 px-2 py-1.5 rounded-md bg-muted/50 border border-border/30 min-h-[2.5rem] h-[2.5rem]">
-          {evaluation &&
-            evaluation.pv &&
-            evaluation.pv.length > 0 &&
-            fen &&
-            (() => {
-              const bestLine = convertUciToSan(evaluation.pv.slice(0, 8), fen);
-              return bestLine.length > 0 ? (
-                <span className="font-mono text-foreground">
-                  {formatBestLineWithMoveNumbers(bestLine, fen)}
-                </span>
-              ) : null;
-            })()}
+          {evaluation && evaluation.pv && evaluation.pv.length > 0 && (
+            <span className="font-mono text-foreground">
+              {formatUciMovesAsNotation(evaluation.pv.slice(0, 8), fen)}
+            </span>
+          )}
         </div>
       )}
     </div>
