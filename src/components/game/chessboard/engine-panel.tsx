@@ -1,26 +1,31 @@
 "use client";
 
-import type { StockfishEvaluation } from "@/types/stockfish";
+import { useEffect } from "react";
+import { useStockfish } from "@/hooks/use-stockfish";
 import {
   convertUciToSan,
   formatBestLineWithMoveNumbers,
 } from "@/lib/chess-notation";
 
 type Props = {
-  isEnabled: boolean;
-  toggleEngine: () => void;
-  evaluation: StockfishEvaluation | null;
-  formatEvaluation: (evaluation: StockfishEvaluation) => string;
-  fen?: string;
+  fen: string;
 };
 
-export function EnginePanel({
-  isEnabled,
-  toggleEngine,
-  evaluation,
-  formatEvaluation,
-  fen,
-}: Props) {
+export function EnginePanel({ fen }: Props) {
+  const {
+    isReady,
+    isEnabled,
+    toggleEngine,
+    evaluation,
+    analyzePosition,
+    formatEvaluation,
+  } = useStockfish();
+
+  useEffect(() => {
+    if (isReady && isEnabled && fen) {
+      analyzePosition(fen);
+    }
+  }, [fen, isReady, isEnabled, analyzePosition]);
   return (
     <div className="flex flex-col space-y-1.5 p-4 pb-3 flex-shrink-0">
       <div className="font-semibold leading-none tracking-tight flex items-center justify-between">

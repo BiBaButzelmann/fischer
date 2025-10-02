@@ -9,7 +9,6 @@ import {
   TooltipTrigger,
 } from "@/components/ui/tooltip";
 import { Save, Download, Upload } from "lucide-react";
-import { useStockfish } from "@/hooks/use-stockfish";
 import { toGermanNotation } from "@/lib/chess-notation";
 import { EnginePanel } from "./engine-panel";
 
@@ -42,21 +41,6 @@ export function MoveHistory({
 }: Props) {
   const scrollContainerRef = useRef<HTMLDivElement>(null);
   const currentMoveRef = useRef<HTMLTableCellElement>(null);
-
-  const {
-    isReady,
-    evaluation,
-    analyzePosition,
-    formatEvaluation,
-    isEnabled,
-    toggleEngine,
-  } = useStockfish();
-
-  useEffect(() => {
-    if (isReady && isEnabled && fen) {
-      analyzePosition(fen);
-    }
-  }, [fen, isReady, isEnabled, analyzePosition]);
 
   useEffect(() => {
     if (scrollContainerRef.current) {
@@ -131,13 +115,7 @@ export function MoveHistory({
   return (
     <div className="w-full flex flex-col h-full max-h-[570px]">
       <div className="h-full rounded-lg border border-gray-200 bg-card text-card-foreground shadow-sm flex flex-col">
-        <EnginePanel
-          isEnabled={isEnabled}
-          toggleEngine={toggleEngine}
-          evaluation={evaluation}
-          formatEvaluation={formatEvaluation}
-          fen={fen}
-        />
+        {fen && <EnginePanel fen={fen} />}
         <div className="flex-1 overflow-hidden">
           <div className="h-full px-4 pb-4">
             <div
