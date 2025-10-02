@@ -7,18 +7,6 @@ export type StockfishEvaluation = {
   bestMove?: string;
 };
 
-export type EngineStatus =
-  | "idle"
-  | "initializing"
-  | "ready"
-  | "analyzing"
-  | "error";
-
-export type StockfishMessage = {
-  type: "uciok" | "readyok" | "info" | "bestmove" | "error";
-  line: string;
-};
-
 export type EngineConfig = {
   threads: number;
   hashSize: number;

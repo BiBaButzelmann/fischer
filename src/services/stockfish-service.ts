@@ -236,18 +236,6 @@ export class StockfishService {
     this.notifyStatusChange("idle");
   }
 
-  getCurrentEvaluation(): StockfishEvaluation | null {
-    return this.currentEvaluation;
-  }
-
-  getIsAnalyzing(): boolean {
-    return this.isAnalyzing;
-  }
-
-  getIsReady(): boolean {
-    return this.isReady;
-  }
-
   subscribe(callback: MessageCallback): () => void {
     this.messageCallbacks.add(callback);
     return () => {
@@ -264,41 +252,13 @@ export class StockfishService {
 
   private notifyCallbacks(evaluation: StockfishEvaluation | null): void {
     this.messageCallbacks.forEach((callback) => {
-      try {
-        callback(evaluation);
-      } catch (err) {
-        console.error("Error in evaluation callback:", err);
-      }
+      callback(evaluation);
     });
   }
 
   private notifyStatusChange(status: "ready" | "analyzing" | "idle"): void {
     this.statusCallbacks.forEach((callback) => {
-      try {
-        callback(status);
-      } catch (err) {
-        console.error("Error in status callback:", err);
-      }
+      callback(status);
     });
-  }
-
-  setConfig(config: Partial<EngineConfig>): void {
-    this.config = { ...this.config, ...config };
-    if (this.isReady) {
-      this.configureEngine();
-    }
-  }
-
-  getConfig(): EngineConfig {
-    return { ...this.config };
-  }
-
-  destroy(): void {
-    this.stopAnalysis();
-    this.messageCallbacks.clear();
-    this.statusCallbacks.clear();
-    this.engine = null;
-    this.isInitialized = false;
-    this.isReady = false;
   }
 }
