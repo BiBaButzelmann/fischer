@@ -13,13 +13,16 @@ export function toGermanNotation(san: string): string {
     .replace(/=Q/, "=D");
 }
 
-export function convertUciToSan(
+export function formatUciMovesAsNotation(
   uciMoves: string[],
   fenPosition: string,
-): string[] {
+): string {
   try {
     const chess = new Chess(fenPosition);
-    const sanMoves: string[] = [];
+    const isBlackToMove = chess.turn() === "b";
+    const startingMoveNumber = chess.moveNumber();
+
+    const formatted: string[] = [];
 
     for (const uciMove of uciMoves) {
       if (uciMove.length < 4) break;
@@ -31,50 +34,31 @@ export function convertUciToSan(
 
       try {
         const move = chess.move({ from, to, promotion });
-        if (move) {
-          sanMoves.push(toGermanNotation(move.san));
+        if (!move) break;
+
+        const germanSan = toGermanNotation(move.san);
+        const moveIndex = formatted.length;
+        const isWhiteMove = isBlackToMove
+          ? moveIndex % 2 === 1
+          : moveIndex % 2 === 0;
+
+        if (moveIndex === 0 && isBlackToMove) {
+          formatted.push(`${startingMoveNumber}...${germanSan}`);
+        } else if (isWhiteMove) {
+          const actualMoveNum =
+            startingMoveNumber +
+            Math.floor((isBlackToMove ? moveIndex - 1 : moveIndex) / 2);
+          formatted.push(`${actualMoveNum}.${germanSan}`);
         } else {
-          break;
+          formatted.push(germanSan);
         }
       } catch {
         break;
       }
     }
 
-    return sanMoves;
-  } catch {
-    return [];
-  }
-}
-
-export function formatBestLineWithMoveNumbers(
-  sanMoves: string[],
-  fenPosition: string,
-): string {
-  try {
-    const chess = new Chess(fenPosition);
-    const isBlackToMove = chess.turn() === "b";
-    const startingMoveNumber = chess.moveNumber();
-
-    const formatted: string[] = [];
-
-    sanMoves.forEach((move, index) => {
-      const isWhiteMove = isBlackToMove ? index % 2 === 1 : index % 2 === 0;
-
-      if (index === 0 && isBlackToMove) {
-        formatted.push(`${startingMoveNumber}...${move}`);
-      } else if (isWhiteMove) {
-        const actualMoveNum =
-          startingMoveNumber +
-          Math.floor((isBlackToMove ? index - 1 : index) / 2);
-        formatted.push(`${actualMoveNum}.${move}`);
-      } else {
-        formatted.push(move);
-      }
-    });
-
     return formatted.join(" ");
   } catch {
-    return sanMoves.join(" ");
+    return "";
   }
 }
