@@ -3,11 +3,7 @@ export type StockfishEvaluation = {
   mate?: number;
   depth: number;
   seldepth?: number;
-  nodes: number;
-  nps: number;
-  time: number;
   pv: string[];
-  multipv?: number;
   bestMove?: string;
 };
 

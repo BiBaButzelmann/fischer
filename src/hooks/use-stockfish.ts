@@ -26,7 +26,6 @@ export function useStockfish(options: UseStockfishOptions = {}) {
   );
   const [isAnalyzing, setIsAnalyzing] = useState(false);
   const [error, setError] = useState<string | null>(null);
-  const [progress, setProgress] = useState(0);
   const [isEnabled, setIsEnabled] = useState(false);
 
   const serviceRef = useRef<StockfishService | null>(null);
@@ -50,8 +49,6 @@ export function useStockfish(options: UseStockfishOptions = {}) {
         const unsubscribe = service.subscribe((evaluation) => {
           if (mountedRef.current && evaluation) {
             setEvaluation(evaluation);
-            const progressPercent = (evaluation.depth / maxDepth) * 100;
-            setProgress(Math.min(progressPercent, 100));
           }
         });
 
@@ -102,30 +99,12 @@ export function useStockfish(options: UseStockfishOptions = {}) {
       }
 
       serviceRef.current.stopAnalysis();
-      setProgress(0);
 
       debounceTimerRef.current = setTimeout(() => {
         serviceRef.current?.analyzePosition(fen, depth ?? maxDepth);
       }, debounceMs);
     },
     [isReady, isEnabled, debounceMs, maxDepth],
-  );
-
-  const analyzePositionImmediate = useCallback(
-    (fen: string, depth?: number) => {
-      if (!serviceRef.current || !isReady || !isEnabled) return;
-
-      currentFenRef.current = fen;
-
-      if (debounceTimerRef.current) {
-        clearTimeout(debounceTimerRef.current);
-      }
-
-      serviceRef.current.stopAnalysis();
-      setProgress(0);
-      serviceRef.current.analyzePosition(fen, depth ?? maxDepth);
-    },
-    [isReady, isEnabled, maxDepth],
   );
 
   const stopAnalysis = useCallback(() => {
@@ -141,7 +120,6 @@ export function useStockfish(options: UseStockfishOptions = {}) {
       if (!newState) {
         stopAnalysis();
         setEvaluation(null);
-        setProgress(0);
       } else if (currentFenRef.current && serviceRef.current && isReady) {
         serviceRef.current.analyzePosition(currentFenRef.current, maxDepth);
       }
@@ -161,9 +139,7 @@ export function useStockfish(options: UseStockfishOptions = {}) {
     evaluation,
     isAnalyzing,
     error,
-    progress,
     analyzePosition,
-    analyzePositionImmediate,
     stopAnalysis,
     formatEvaluation,
     wasmSupported: StockfishService.wasmThreadsSupported(),

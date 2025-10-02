@@ -1,8 +1,6 @@
 import type { StockfishEvaluation, EngineConfig } from "@/types/stockfish";
 import {
   parseUciInfoLine,
-  calculateThreadCount,
-  calculateHashSize,
   getOptimalEngineConfig,
 } from "@/lib/stockfish-utils";
 
@@ -173,11 +171,8 @@ export class StockfishService {
   private configureEngine(): void {
     if (!this.engine) return;
 
-    const threads = calculateThreadCount(this.config.threads);
-    const hashSize = calculateHashSize(this.config.hashSize);
-
-    this.engine.postMessage(`setoption name Threads value ${threads}`);
-    this.engine.postMessage(`setoption name Hash value ${hashSize}`);
+    this.engine.postMessage(`setoption name Threads value ${this.config.threads}`);
+    this.engine.postMessage(`setoption name Hash value ${this.config.hashSize}`);
     this.engine.postMessage(
       `setoption name MultiPV value ${this.config.multiPv}`,
     );

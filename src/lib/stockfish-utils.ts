@@ -7,11 +7,7 @@ export function parseUciInfoLine(
   const depthMatch = line.match(/depth (\d+)/);
   const seldepthMatch = line.match(/seldepth (\d+)/);
   const scoreMatch = line.match(/score (cp|mate) (-?\d+)/);
-  const nodesMatch = line.match(/nodes (\d+)/);
-  const npsMatch = line.match(/nps (\d+)/);
-  const timeMatch = line.match(/time (\d+)/);
   const pvMatch = line.match(/ pv (.+)$/);
-  const multipvMatch = line.match(/multipv (\d+)/);
 
   if (!depthMatch || !scoreMatch) return null;
 
@@ -23,14 +19,10 @@ export function parseUciInfoLine(
   const seldepth = seldepthMatch ? parseInt(seldepthMatch[1]) : undefined;
   const scoreType = scoreMatch[1];
   let scoreValue = parseInt(scoreMatch[2]);
-  const nodes = nodesMatch ? parseInt(nodesMatch[1]) : 0;
-  const nps = npsMatch ? parseInt(npsMatch[1]) : 0;
-  const time = timeMatch ? parseInt(timeMatch[1]) : 0;
   const pvString = pvMatch ? pvMatch[1] : "";
   const pv = pvString
     ? pvString.split(" ").filter((m) => /^[a-h][1-8][a-h][1-8][qrbn]?$/.test(m))
     : [];
-  const multipv = multipvMatch ? parseInt(multipvMatch[1]) : undefined;
 
   const isBlackToMove = currentFen?.includes(" b ") || false;
   if (isBlackToMove) {
@@ -40,11 +32,7 @@ export function parseUciInfoLine(
   const evaluation: StockfishEvaluation = {
     depth,
     seldepth,
-    nodes,
-    nps,
-    time,
     pv,
-    multipv,
   };
 
   if (scoreType === "cp") {
@@ -63,30 +51,8 @@ export function formatEvaluationScore(evaluation: StockfishEvaluation): string {
       : `M${Math.abs(evaluation.mate)}`;
   }
 
-  if (evaluation.cp !== undefined) {
-    const pawns = evaluation.cp / 100;
-    return pawns > 0 ? `+${pawns.toFixed(2)}` : pawns.toFixed(2);
-  }
-
-  return "0.00";
-}
-
-export function calculateThreadCount(maxThreads: number): number {
-  const availableThreads =
-    typeof navigator !== "undefined" ? navigator.hardwareConcurrency || 4 : 4;
-  return Math.min(maxThreads, availableThreads, 32);
-}
-
-export function calculateHashSize(configuredSize: number): number {
-  const availableMemory =
-    typeof navigator !== "undefined"
-      ? // @ts-expect-error - deviceMemory is not in all browsers
-        navigator.deviceMemory
-        ? // @ts-expect-error - deviceMemory is not in all browsers
-          Math.min(navigator.deviceMemory * 256, 2048)
-        : 256
-      : 256;
-  return Math.min(configuredSize, availableMemory);
+  const pawns = (evaluation.cp ?? 0) / 100;
+  return pawns > 0 ? `+${pawns.toFixed(2)}` : pawns.toFixed(2);
 }
 
 export function getOptimalEngineConfig() {
