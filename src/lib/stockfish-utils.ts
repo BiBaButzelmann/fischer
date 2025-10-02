@@ -97,7 +97,6 @@ export function getOptimalEngineConfig() {
       minDepth: 10,
       maxDepth: 25,
       debounceMs: 300,
-      tier: "server",
     };
   }
 
@@ -112,7 +111,6 @@ export function getOptimalEngineConfig() {
       minDepth: 14,
       maxDepth: 40,
       debounceMs: 100,
-      tier: "high-end",
     };
   }
 
@@ -123,7 +121,6 @@ export function getOptimalEngineConfig() {
       minDepth: 12,
       maxDepth: 35,
       debounceMs: 150,
-      tier: "mid-range",
     };
   }
 
@@ -134,7 +131,6 @@ export function getOptimalEngineConfig() {
       minDepth: 10,
       maxDepth: 30,
       debounceMs: 250,
-      tier: "standard",
     };
   }
 
@@ -144,6 +140,5 @@ export function getOptimalEngineConfig() {
     minDepth: 8,
     maxDepth: 25,
     debounceMs: 350,
-    tier: "low-end",
   };
 }
