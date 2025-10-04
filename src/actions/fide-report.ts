@@ -193,7 +193,7 @@ export const generateFideReportFile = action(
         startingGroupPosition: groupPosition,
         gender: participant.gender,
         title: participant.title ?? "",
-        name: `${participant.profile.firstName.trim()} ${participant.profile.lastName.trim()}`,
+        name: `${participant.profile.lastName.trim()},${participant.profile.firstName.trim()}`,
         fideRating: participant.fideRating!,
         fideNation: participant.nationality!,
         fideId: participant.fideId,
