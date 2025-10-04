@@ -248,6 +248,7 @@ export default function PgnViewer({
           showSave={allowEdit}
           showUpload={allowEdit}
           hasUnsavedChanges={hasUnsavedChanges}
+          fen={fen}
         />
       </div>
     </div>

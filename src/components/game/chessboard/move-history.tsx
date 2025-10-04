@@ -9,6 +9,9 @@ import {
   TooltipTrigger,
 } from "@/components/ui/tooltip";
 import { Save, Download, Upload } from "lucide-react";
+import { toGermanNotation } from "@/lib/chess-notation";
+import { EnginePanel } from "./engine-panel";
+import { useIsMobile } from "@/hooks/use-mobile";
 
 type Props = {
   history: { san: string }[];
@@ -21,6 +24,7 @@ type Props = {
   showSave?: boolean;
   showUpload?: boolean;
   hasUnsavedChanges?: boolean;
+  fen?: string;
 };
 
 export function MoveHistory({
@@ -34,9 +38,11 @@ export function MoveHistory({
   showSave = false,
   showUpload = false,
   hasUnsavedChanges = false,
+  fen,
 }: Props) {
   const scrollContainerRef = useRef<HTMLDivElement>(null);
   const currentMoveRef = useRef<HTMLTableCellElement>(null);
+  const isMobile = useIsMobile();
 
   useEffect(() => {
     if (scrollContainerRef.current) {
@@ -87,7 +93,7 @@ export function MoveHistory({
           )}
           onClick={() => goToMove(whitePly)}
         >
-          {white ? white.san : "…"}
+          {white ? toGermanNotation(white.san) : "…"}
         </td>
         <td
           ref={currentMoveIndex === blackPly && black ? currentMoveRef : null}
@@ -102,7 +108,7 @@ export function MoveHistory({
           )}
           onClick={black ? () => goToMove(blackPly) : undefined}
         >
-          {black ? black.san : "…"}
+          {black ? toGermanNotation(black.san) : "…"}
         </td>
       </tr>,
     );
@@ -111,13 +117,11 @@ export function MoveHistory({
   return (
     <div className="w-full flex flex-col h-full max-h-[570px]">
       <div className="h-full rounded-lg border border-gray-200 bg-card text-card-foreground shadow-sm flex flex-col">
-        <div className="flex flex-col space-y-1.5 p-4 pb-3 flex-shrink-0">
-          <div className="font-semibold leading-none tracking-tight flex items-center">
-            <div className="flex items-center gap-2">Notation</div>
-          </div>
-        </div>
-        <div className="flex-1 overflow-hidden">
-          <div className="h-full px-4 pb-4">
+        {fen && !isMobile && <EnginePanel fen={fen} />}
+        <div
+          className={`flex-1 overflow-hidden ${fen && !isMobile ? "border-t" : ""}`}
+        >
+          <div className="h-full px-4 pt-4 pb-4">
             <div
               ref={scrollContainerRef}
               className="h-full overflow-y-auto rounded-md border bg-background/50 scrollbar-thin scrollbar-thumb-gray-400 scrollbar-track-gray-100"
