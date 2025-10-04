@@ -8,7 +8,14 @@ import {
   TooltipContent,
   TooltipTrigger,
 } from "@/components/ui/tooltip";
-import { Save, Download, Upload } from "lucide-react";
+import {
+  Save,
+  Download,
+  Upload,
+  ChevronLeft,
+  ChevronRight,
+} from "lucide-react";
+import { useIsMobile } from "@/hooks/use-mobile";
 
 type Props = {
   history: { san: string }[];
@@ -37,6 +44,7 @@ export function MoveHistory({
 }: Props) {
   const scrollContainerRef = useRef<HTMLDivElement>(null);
   const currentMoveRef = useRef<HTMLTableCellElement>(null);
+  const isMobile = useIsMobile();
 
   useEffect(() => {
     if (scrollContainerRef.current) {
@@ -109,18 +117,29 @@ export function MoveHistory({
   }
 
   return (
-    <div className="w-full flex flex-col h-full max-h-[570px]">
-      <div className="h-full rounded-lg border border-gray-200 bg-card text-card-foreground shadow-sm flex flex-col">
-        <div className="flex flex-col space-y-1.5 p-4 pb-3 flex-shrink-0">
-          <div className="font-semibold leading-none tracking-tight flex items-center">
-            <div className="flex items-center gap-2">Notation</div>
+    <div
+      className={`w-full flex flex-col h-full ${isMobile ? "max-h-[180px]" : "max-h-[570px]"}`}
+    >
+      <div
+        className={`h-full flex flex-col ${isMobile ? "bg-transparent border-0 shadow-none rounded-none" : "rounded-lg border border-gray-200 bg-card text-card-foreground shadow-sm"}`}
+      >
+        {!isMobile && (
+          <div className="flex flex-col space-y-1.5 p-4 pb-3 flex-shrink-0">
+            <div className="font-semibold leading-none tracking-tight flex items-center">
+              <div className="flex items-center gap-2">Notation</div>
+            </div>
           </div>
-        </div>
+        )}
         <div className="flex-1 overflow-hidden">
-          <div className="h-full px-4 pb-4">
+          <div className={`h-full ${isMobile ? "px-0 pb-0" : "px-4 pb-4"}`}>
             <div
               ref={scrollContainerRef}
-              className="h-full overflow-y-auto rounded-md border bg-background/50 scrollbar-thin scrollbar-thumb-gray-400 scrollbar-track-gray-100"
+              className={clsx(
+                "overflow-y-auto scrollbar-thin scrollbar-thumb-gray-400 scrollbar-track-gray-100",
+                isMobile
+                  ? "max-h-[120px] rounded-none border-0 bg-transparent"
+                  : "h-full rounded-md border bg-background/50",
+              )}
             >
               <table className="w-full">
                 <tbody className="divide-y divide-border/30">
@@ -141,71 +160,119 @@ export function MoveHistory({
             </div>
           </div>
         </div>
-        <div className="px-4 pb-4 border-t flex-shrink-0">
-          <div className="flex items-center mt-4">
-            <div className="flex-1 flex justify-center">
-              {showSave && onSave && (
-                <Tooltip>
-                  <TooltipTrigger asChild>
+        {((showSave && onSave) ||
+          onDownload ||
+          (showUpload && onUpload) ||
+          isMobile) && (
+          <div
+            className={`flex-shrink-0 ${isMobile ? "px-0 pt-1 pb-0 border-t-0 bg-white" : "px-4 pb-4 border-t"}`}
+          >
+            <div
+              className={`flex items-center ${isMobile ? "mt-0 px-4" : "mt-4"}`}
+            >
+              {isMobile && (
+                <>
+                  {showSave && onSave && (
                     <Button
                       variant={hasUnsavedChanges ? "default" : "outline"}
-                      size="icon"
                       onClick={onSave}
                       disabled={isSaving}
+                      className="h-12 w-12 mr-2 flex-shrink-0"
                     >
                       <Save className="h-4 w-4" />
                     </Button>
-                  </TooltipTrigger>
-                  <TooltipContent>
-                    <p>{isSaving ? "Speichern..." : "Speichern"}</p>
-                  </TooltipContent>
-                </Tooltip>
-              )}
-            </div>
-
-            {(onDownload || (showUpload && onUpload)) && showSave && onSave && (
-              <div className="w-px h-8 bg-border" />
-            )}
-
-            <div className="flex-1 flex justify-center gap-2">
-              {onDownload && (
-                <Tooltip>
-                  <TooltipTrigger asChild>
-                    <Button
-                      variant="outline"
-                      size="icon"
-                      onClick={onDownload}
-                      disabled={isSaving}
-                    >
-                      <Download className="h-4 w-4" />
-                    </Button>
-                  </TooltipTrigger>
-                  <TooltipContent>
-                    <p>PGN herunterladen</p>
-                  </TooltipContent>
-                </Tooltip>
+                  )}
+                  <Button
+                    variant="outline"
+                    onClick={() => goToMove(Math.max(-1, currentMoveIndex - 1))}
+                    disabled={currentMoveIndex <= -1}
+                    className="flex-1 h-12 mr-1"
+                  >
+                    <ChevronLeft className="h-5 w-5" />
+                  </Button>
+                  <Button
+                    variant="outline"
+                    onClick={() =>
+                      goToMove(
+                        Math.min(history.length - 1, currentMoveIndex + 1),
+                      )
+                    }
+                    disabled={currentMoveIndex >= history.length - 1}
+                    className="flex-1 h-12 ml-1"
+                  >
+                    <ChevronRight className="h-5 w-5" />
+                  </Button>
+                </>
               )}
 
-              {showUpload && onUpload && (
-                <Tooltip>
-                  <TooltipTrigger asChild>
-                    <Button
-                      variant="outline"
-                      size="icon"
-                      onClick={onUpload}
-                      disabled={isSaving}
-                    >
-                      <Upload className="h-4 w-4" />
-                    </Button>
-                  </TooltipTrigger>
-                  <TooltipContent>
-                    <p>PGN hochladen</p>
-                  </TooltipContent>
-                </Tooltip>
+              {!isMobile && (
+                <>
+                  <div className="flex-1 flex justify-center">
+                    {showSave && onSave && (
+                      <Tooltip>
+                        <TooltipTrigger asChild>
+                          <Button
+                            variant={hasUnsavedChanges ? "default" : "outline"}
+                            size="icon"
+                            onClick={onSave}
+                            disabled={isSaving}
+                          >
+                            <Save className="h-4 w-4" />
+                          </Button>
+                        </TooltipTrigger>
+                        <TooltipContent>
+                          <p>{isSaving ? "Speichern..." : "Speichern"}</p>
+                        </TooltipContent>
+                      </Tooltip>
+                    )}
+                  </div>
+
+                  {(onDownload || (showUpload && onUpload)) &&
+                    showSave &&
+                    onSave && <div className="w-px h-8 bg-border" />}
+
+                  <div className="flex-1 flex justify-center gap-2">
+                    {onDownload && (
+                      <Tooltip>
+                        <TooltipTrigger asChild>
+                          <Button
+                            variant="outline"
+                            size="icon"
+                            onClick={onDownload}
+                            disabled={isSaving}
+                          >
+                            <Download className="h-4 w-4" />
+                          </Button>
+                        </TooltipTrigger>
+                        <TooltipContent>
+                          <p>PGN herunterladen</p>
+                        </TooltipContent>
+                      </Tooltip>
+                    )}
+
+                    {showUpload && onUpload && (
+                      <Tooltip>
+                        <TooltipTrigger asChild>
+                          <Button
+                            variant="outline"
+                            size="icon"
+                            onClick={onUpload}
+                            disabled={isSaving}
+                          >
+                            <Upload className="h-4 w-4" />
+                          </Button>
+                        </TooltipTrigger>
+                        <TooltipContent>
+                          <p>PGN hochladen</p>
+                        </TooltipContent>
+                      </Tooltip>
+                    )}
+                  </div>
+                </>
               )}
             </div>
           </div>
-        </div>
+        )}
       </div>
     </div>
   );
