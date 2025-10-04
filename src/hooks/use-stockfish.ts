@@ -53,7 +53,7 @@ export function useStockfish({ fen, isEnabled }: UseStockfishParams) {
       };
     };
 
-    initEngine().catch(() => {});
+    initEngine();
 
     return () => {
       mountedRef.current = false;
@@ -94,6 +94,7 @@ export function useStockfish({ fen, isEnabled }: UseStockfishParams) {
       return;
     }
 
+    // Only start analysis if both engine is ready and we have a FEN
     if (isReady && fen) {
       startAnalysis(fen);
     }

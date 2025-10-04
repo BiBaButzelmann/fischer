@@ -103,6 +103,7 @@ export class StockfishService {
           sf.postMessage("uci");
 
           this.isInitialized = true;
+          resolve();
         } catch {
           reject(new Error("Fehler beim Initialisieren der Engine"));
         }
