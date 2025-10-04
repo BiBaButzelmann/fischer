@@ -11,26 +11,35 @@ type Props = {
 
 export function EnginePanel({ fen }: Props) {
   const [isEnabled, setIsEnabled] = useState(false);
-  const { evaluation } = useStockfish({ fen, isEnabled });
+  const { evaluation } = useStockfish({
+    fen,
+    isEnabled,
+  });
+
+  const handleToggle = () => {
+    setIsEnabled(!isEnabled);
+  };
 
   return (
-    <div className="flex flex-col space-y-1.5 p-4 pb-3 flex-shrink-0">
-      <div className="font-semibold leading-none tracking-tight flex items-center justify-between">
+    <div className="flex flex-col space-y-3 p-4 pb-3 flex-shrink-0">
+      <div className="flex items-center justify-between">
         <div className="flex items-center gap-2">
-          <span>Notation</span>
           <button
-            onClick={() => setIsEnabled(!isEnabled)}
-            className={`relative w-11 h-6 rounded-full transition-colors ${
-              isEnabled ? "bg-green-500" : "bg-red-500"
+            onClick={handleToggle}
+            className={`relative w-9 h-5 rounded-full transition-colors ${
+              isEnabled ? "bg-primary" : "bg-input"
             }`}
             title={isEnabled ? "Engine ausschalten" : "Engine einschalten"}
           >
             <span
-              className={`absolute top-0.5 left-0.5 w-5 h-5 bg-white rounded-full transition-transform ${
-                isEnabled ? "translate-x-5" : "translate-x-0"
+              className={`absolute top-0.5 left-0.5 w-4 h-4 bg-background rounded-full transition-transform shadow-sm ${
+                isEnabled ? "translate-x-4" : "translate-x-0"
               }`}
             />
           </button>
+          <span className="text-sm font-medium text-muted-foreground">
+            Stockfish 17.1
+          </span>
         </div>
         {evaluation && isEnabled && (
           <div
@@ -49,7 +58,7 @@ export function EnginePanel({ fen }: Props) {
         )}
       </div>
       {isEnabled && (
-        <div className="text-xs mt-2 px-2 py-1.5 rounded-md bg-muted/50 border border-border/30 min-h-[2.5rem] h-[2.5rem]">
+        <div className="text-xs px-2 py-1.5 rounded-md bg-muted/50 border border-border/30 min-h-[2.5rem] h-[2.5rem] border-t">
           {evaluation && evaluation.pv && evaluation.pv.length > 0 && (
             <span className="font-mono text-foreground">
               {formatUciMovesAsNotation(evaluation.pv.slice(0, 8), fen)}

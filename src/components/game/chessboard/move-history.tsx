@@ -11,6 +11,7 @@ import {
 import { Save, Download, Upload } from "lucide-react";
 import { toGermanNotation } from "@/lib/chess-notation";
 import { EnginePanel } from "./engine-panel";
+import { useIsMobile } from "@/hooks/use-mobile";
 
 type Props = {
   history: { san: string }[];
@@ -41,6 +42,7 @@ export function MoveHistory({
 }: Props) {
   const scrollContainerRef = useRef<HTMLDivElement>(null);
   const currentMoveRef = useRef<HTMLTableCellElement>(null);
+  const isMobile = useIsMobile();
 
   useEffect(() => {
     if (scrollContainerRef.current) {
@@ -115,9 +117,11 @@ export function MoveHistory({
   return (
     <div className="w-full flex flex-col h-full max-h-[570px]">
       <div className="h-full rounded-lg border border-gray-200 bg-card text-card-foreground shadow-sm flex flex-col">
-        {fen && <EnginePanel fen={fen} />}
-        <div className="flex-1 overflow-hidden">
-          <div className="h-full px-4 pb-4">
+        {fen && !isMobile && <EnginePanel fen={fen} />}
+        <div
+          className={`flex-1 overflow-hidden ${fen && !isMobile ? "border-t" : ""}`}
+        >
+          <div className="h-full px-4 pt-4 pb-4">
             <div
               ref={scrollContainerRef}
               className="h-full overflow-y-auto rounded-md border bg-background/50 scrollbar-thin scrollbar-thumb-gray-400 scrollbar-track-gray-100"
