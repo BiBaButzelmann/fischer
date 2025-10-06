@@ -236,7 +236,7 @@ export class StockfishService {
     this.isAnalyzing = false;
     this.currentEvaluation = null;
     this.currentDepth = 0;
-    this.pendingAnalysis = null; // Clear any pending analysis
+    this.pendingAnalysis = null; 
   }
 
   subscribe(callback: MessageCallback): () => void {
@@ -251,6 +251,10 @@ export class StockfishService {
     return () => {
       this.readyCallbacks.delete(callback);
     };
+  }
+
+  getIsReady(): boolean {
+    return this.isReady;
   }
 
   private notifyCallbacks(evaluation: StockfishEvaluation | null): void {

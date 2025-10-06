@@ -44,6 +44,10 @@ export function useStockfish({ fen, isEnabled }: UseStockfishParams) {
       });
 
       await service.initialize();
+
+      if (service.getIsReady() && mountedRef.current) {
+        setIsReady(true);
+      }
     };
 
     initEngine();
@@ -65,8 +69,6 @@ export function useStockfish({ fen, isEnabled }: UseStockfishParams) {
       if (debounceTimerRef.current) {
         clearTimeout(debounceTimerRef.current);
       }
-
-      serviceRef.current.stopAnalysis();
 
       debounceTimerRef.current = setTimeout(() => {
         serviceRef.current?.analyzePosition(fen, maxDepth);
