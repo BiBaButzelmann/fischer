@@ -4,6 +4,7 @@ import { useState } from "react";
 import { useStockfish } from "@/hooks/use-stockfish";
 import { formatUciMovesAsNotation } from "@/lib/chess-notation";
 import { formatEvaluationScore } from "@/lib/stockfish-utils";
+import { Switch } from "@/components/ui/switch";
 
 type Props = {
   fen: string;
@@ -16,27 +17,11 @@ export function EnginePanel({ fen }: Props) {
     isEnabled,
   });
 
-  const handleToggle = () => {
-    setIsEnabled(!isEnabled);
-  };
-
   return (
     <div className="flex flex-col space-y-3 p-4 pb-3 flex-shrink-0">
       <div className="flex items-center justify-between">
         <div className="flex items-center gap-2">
-          <button
-            onClick={handleToggle}
-            className={`relative w-9 h-5 rounded-full transition-colors ${
-              isEnabled ? "bg-primary" : "bg-input"
-            }`}
-            title={isEnabled ? "Engine ausschalten" : "Engine einschalten"}
-          >
-            <span
-              className={`absolute top-0.5 left-0.5 w-4 h-4 bg-background rounded-full transition-transform shadow-sm ${
-                isEnabled ? "translate-x-4" : "translate-x-0"
-              }`}
-            />
-          </button>
+          <Switch checked={isEnabled} onCheckedChange={setIsEnabled} />
           <span className="text-sm font-medium text-muted-foreground">
             Stockfish 17.1
           </span>
