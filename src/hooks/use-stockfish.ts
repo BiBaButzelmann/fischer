@@ -57,6 +57,7 @@ export function useStockfish({ fen, isEnabled }: UseStockfishParams) {
       if (debounceTimerRef.current) {
         clearTimeout(debounceTimerRef.current);
       }
+      serviceRef.current?.stopAnalysis();
       unsubscribe?.();
       unsubscribeReady?.();
     };
