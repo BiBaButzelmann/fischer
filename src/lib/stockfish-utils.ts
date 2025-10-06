@@ -66,7 +66,7 @@ export function getOptimalEngineConfig() {
     };
   }
 
-  const cores = navigator.hardwareConcurrency || 4;
+  const cores = navigator.hardwareConcurrency ?? 4;
   let memory = 4;
   if ("deviceMemory" in navigator) {
     memory = navigator.deviceMemory as number;
