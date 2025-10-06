@@ -24,6 +24,8 @@ export function useStockfish({ fen, isEnabled }: UseStockfishParams) {
 
   useEffect(() => {
     mountedRef.current = true;
+    let unsubscribe: (() => void) | undefined;
+    let unsubscribeReady: (() => void) | undefined;
 
     const initEngine = async () => {
       if (!StockfishService.wasmThreadsSupported()) {
@@ -33,24 +35,19 @@ export function useStockfish({ fen, isEnabled }: UseStockfishParams) {
       const service = StockfishService.getInstance();
       serviceRef.current = service;
 
-      const unsubscribe = service.subscribe((evaluation) => {
+      unsubscribe = service.subscribe((evaluation) => {
         if (mountedRef.current && evaluation) {
           setEvaluation(evaluation);
         }
       });
 
-      const unsubscribeReady = service.onReady(() => {
+      unsubscribeReady = service.onReady(() => {
         if (mountedRef.current) {
           setIsReady(true);
         }
       });
 
       await service.initialize();
-
-      return () => {
-        unsubscribe();
-        unsubscribeReady();
-      };
     };
 
     initEngine();
@@ -60,6 +57,8 @@ export function useStockfish({ fen, isEnabled }: UseStockfishParams) {
       if (debounceTimerRef.current) {
         clearTimeout(debounceTimerRef.current);
       }
+      unsubscribe?.();
+      unsubscribeReady?.();
     };
   }, []);
 
