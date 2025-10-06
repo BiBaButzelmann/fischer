@@ -25,15 +25,6 @@ const nextConfig: NextConfig = {
           },
         ],
       },
-      {
-        source: "/stockfish.(js|wasm|worker.js)",
-        headers: [
-          {
-            key: "Cross-Origin-Embedder-Policy",
-            value: "require-corp",
-          },
-        ],
-      },
     ];
   },
 };
