@@ -85,10 +85,10 @@ export function MoveHistory({ history, currentMoveIndex, goToMove }: Props) {
   }
 
   return (
-    <div className="h-full px-4 pt-4 pb-4">
+    <div className="h-full flex flex-col border-t">
       <div
         ref={scrollContainerRef}
-        className="h-full overflow-y-auto rounded-md border bg-background/50 scrollbar-thin scrollbar-thumb-gray-400 scrollbar-track-gray-100"
+        className="flex-1 overflow-y-auto scrollbar-thin scrollbar-thumb-gray-400 scrollbar-track-gray-100"
       >
         <table className="w-full">
           <tbody className="divide-y divide-border/30">
