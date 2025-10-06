@@ -25,6 +25,7 @@ export class StockfishService {
   private currentDepth = 0;
   private maxDepth = 30;
   private config: EngineConfig;
+  private pendingAnalysis: { fen: string; maxDepth: number } | null = null;
 
   private constructor() {
     const config = getOptimalEngineConfig();
@@ -148,6 +149,13 @@ export class StockfishService {
     }
 
     if (line.startsWith("bestmove")) {
+      if (this.pendingAnalysis) {
+        const { fen, maxDepth } = this.pendingAnalysis;
+        this.pendingAnalysis = null;
+        this.startNewAnalysis(fen, maxDepth);
+        return;
+      }
+
       if (!this.isAnalyzing || !this.currentFen) return;
 
       const bestMove = line.split(" ")[1];
@@ -190,21 +198,22 @@ export class StockfishService {
     if (!this.engine || !this.isReady) return;
 
     if (this.isAnalyzing) {
+      this.pendingAnalysis = { fen, maxDepth };
       this.engine.postMessage("stop");
+    } else {
+      this.startNewAnalysis(fen, maxDepth);
     }
+  }
 
+  private startNewAnalysis(fen: string, maxDepth: number): void {
     this.currentFen = fen;
     this.maxDepth = maxDepth;
     this.currentDepth = 0;
     this.currentEvaluation = null;
     this.isAnalyzing = true;
 
-    setTimeout(() => {
-      if (this.engine && this.currentFen === fen) {
-        this.engine.postMessage(`position fen ${fen}`);
-        this.engine.postMessage(`go depth ${this.config.minDepth}`);
-      }
-    }, 10);
+    this.engine!.postMessage(`position fen ${fen}`);
+    this.engine!.postMessage(`go depth ${this.config.minDepth}`);
   }
 
   private continueAnalysis(): void {
@@ -213,12 +222,8 @@ export class StockfishService {
     const increment = this.currentDepth < 20 ? 4 : 3;
     const nextDepth = Math.min(this.currentDepth + increment, this.maxDepth);
 
-    setTimeout(() => {
-      if (this.engine && this.currentFen && this.isAnalyzing) {
-        this.engine.postMessage(`position fen ${this.currentFen}`);
-        this.engine.postMessage(`go depth ${nextDepth}`);
-      }
-    }, 0);
+    this.engine.postMessage(`position fen ${this.currentFen}`);
+    this.engine.postMessage(`go depth ${nextDepth}`);
   }
 
   stopAnalysis(): void {
@@ -232,6 +237,7 @@ export class StockfishService {
     this.isAnalyzing = false;
     this.currentEvaluation = null;
     this.currentDepth = 0;
+    this.pendingAnalysis = null; // Clear any pending analysis
   }
 
   subscribe(callback: MessageCallback): () => void {
