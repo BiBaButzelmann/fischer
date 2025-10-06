@@ -29,7 +29,7 @@ export class StockfishService {
   private constructor() {
     this.config = {
       ...getOptimalEngineConfig(),
-      multiPv: 1,
+      multiPv: 1, //TODO: add multi-line support in the future
     };
   }
 
