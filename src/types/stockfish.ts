@@ -4,7 +4,6 @@ export type StockfishEvaluation = {
   depth: number;
   seldepth?: number;
   pv: string[];
-  bestMove?: string;
 };
 
 export type EngineConfig = {

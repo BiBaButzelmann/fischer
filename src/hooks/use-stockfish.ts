@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect, useCallback, useRef } from "react";
+import { useState, useEffect, useCallback, useRef, useMemo } from "react";
 import { StockfishService } from "@/services/stockfish-service";
 import { getOptimalEngineConfig } from "@/lib/stockfish-utils";
 import type { StockfishEvaluation } from "@/types/stockfish";
@@ -11,7 +11,7 @@ type UseStockfishParams = {
 };
 
 export function useStockfish({ fen, isEnabled }: UseStockfishParams) {
-  const { debounceMs, maxDepth } = getOptimalEngineConfig();
+  const config = useMemo(() => getOptimalEngineConfig(), []);
 
   const [isReady, setIsReady] = useState(false);
   const [evaluation, setEvaluation] = useState<StockfishEvaluation | null>(
@@ -72,10 +72,10 @@ export function useStockfish({ fen, isEnabled }: UseStockfishParams) {
       }
 
       debounceTimerRef.current = setTimeout(() => {
-        serviceRef.current?.analyzePosition(fen, maxDepth);
-      }, debounceMs);
+        serviceRef.current?.analyzePosition(fen, config.maxDepth);
+      }, config.debounceMs);
     },
-    [isReady, debounceMs, maxDepth],
+    [isReady, config.debounceMs, config.maxDepth],
   );
 
   const stopAnalysis = useCallback(() => {

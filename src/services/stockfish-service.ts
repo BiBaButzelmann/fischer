@@ -19,7 +19,6 @@ export class StockfishService {
   private isReady = false;
   private messageCallbacks: Set<MessageCallback> = new Set();
   private readyCallbacks: Set<ReadyCallback> = new Set();
-  private currentEvaluation: StockfishEvaluation | null = null;
   private isAnalyzing = false;
   private currentFen: string | null = null;
   private currentDepth = 0;
@@ -28,13 +27,9 @@ export class StockfishService {
   private pendingAnalysis: { fen: string; maxDepth: number } | null = null;
 
   private constructor() {
-    const config = getOptimalEngineConfig();
     this.config = {
-      threads: config.threads,
-      hashSize: config.hashSize,
+      ...getOptimalEngineConfig(),
       multiPv: 1,
-      minDepth: config.minDepth,
-      maxDepth: config.maxDepth,
     };
   }
 
@@ -140,7 +135,6 @@ export class StockfishService {
 
       const evaluation = parseUciInfoLine(line, this.currentFen);
       if (evaluation) {
-        this.currentEvaluation = evaluation;
         this.currentDepth = evaluation.depth;
         this.notifyCallbacks(evaluation);
       }
@@ -155,19 +149,9 @@ export class StockfishService {
         return;
       }
 
-      if (!this.isAnalyzing || !this.currentFen) return;
+      if (!this.isAnalyzing) return;
 
-      const bestMove = line.split(" ")[1];
-      if (this.currentEvaluation) {
-        this.currentEvaluation.bestMove = bestMove;
-        this.notifyCallbacks(this.currentEvaluation);
-      }
-
-      if (
-        this.currentDepth < this.maxDepth &&
-        this.currentFen &&
-        this.isAnalyzing
-      ) {
+      if (this.currentDepth < this.maxDepth) {
         this.continueAnalysis();
       } else {
         this.isAnalyzing = false;
@@ -193,7 +177,7 @@ export class StockfishService {
     this.engine.postMessage("isready");
   }
 
-  analyzePosition(fen: string, maxDepth = 30): void {
+  analyzePosition(fen: string, maxDepth: number): void {
     if (!this.engine || !this.isReady) return;
 
     if (this.isAnalyzing) {
@@ -205,23 +189,23 @@ export class StockfishService {
   }
 
   private startNewAnalysis(fen: string, maxDepth: number): void {
+    if (!this.engine) return;
+
     this.currentFen = fen;
     this.maxDepth = maxDepth;
     this.currentDepth = 0;
-    this.currentEvaluation = null;
     this.isAnalyzing = true;
 
-    this.engine!.postMessage(`position fen ${fen}`);
-    this.engine!.postMessage(`go depth ${this.config.minDepth}`);
+    this.engine.postMessage(`position fen ${fen}`);
+    this.engine.postMessage(`go depth ${this.config.minDepth}`);
   }
 
   private continueAnalysis(): void {
-    if (!this.engine || !this.currentFen || !this.isAnalyzing) return;
+    if (!this.engine) return;
 
     const increment = this.currentDepth < 20 ? 4 : 3;
     const nextDepth = Math.min(this.currentDepth + increment, this.maxDepth);
 
-    this.engine.postMessage(`position fen ${this.currentFen}`);
     this.engine.postMessage(`go depth ${nextDepth}`);
   }
 
@@ -234,9 +218,8 @@ export class StockfishService {
 
     this.currentFen = null;
     this.isAnalyzing = false;
-    this.currentEvaluation = null;
     this.currentDepth = 0;
-    this.pendingAnalysis = null; 
+    this.pendingAnalysis = null;
   }
 
   subscribe(callback: MessageCallback): () => void {
