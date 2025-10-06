@@ -21,7 +21,7 @@ export function PgnViewerSidepanel({
   fen,
 }: Props) {
   const header = <EnginePanel fen={fen} />;
-  
+
   const content = (
     <MoveHistory
       history={history}
@@ -30,9 +30,7 @@ export function PgnViewerSidepanel({
     />
   );
 
-  const footer = (
-    <PgnViewerActions onDownload={onDownload} />
-  );
+  const footer = <PgnViewerActions onDownload={onDownload} />;
 
   return <Sidepanel header={header} content={content} footer={footer} />;
 }

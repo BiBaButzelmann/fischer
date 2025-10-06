@@ -29,7 +29,7 @@ export function PgnEditorSidepanel({
   fen,
 }: Props) {
   const header = <EnginePanel fen={fen} />;
-  
+
   const content = (
     <MoveHistory
       history={history}

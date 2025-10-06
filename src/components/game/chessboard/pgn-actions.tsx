@@ -17,11 +17,7 @@ export function PgnViewerActions({ onDownload }: PgnViewerActionsProps) {
     <div className="flex items-center mt-4 justify-center">
       <Tooltip>
         <TooltipTrigger asChild>
-          <Button
-            variant="outline"
-            size="icon"
-            onClick={onDownload}
-          >
+          <Button variant="outline" size="icon" onClick={onDownload}>
             <Download className="h-4 w-4" />
           </Button>
         </TooltipTrigger>
