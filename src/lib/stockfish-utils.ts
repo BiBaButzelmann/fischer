@@ -56,7 +56,7 @@ export function formatEvaluationScore(evaluation: StockfishEvaluation): string {
 }
 
 export function getOptimalEngineConfig() {
-  if (typeof navigator === "undefined") {
+  if (typeof window === "undefined") {
     return {
       threads: 4,
       hashSize: 128,
@@ -67,8 +67,10 @@ export function getOptimalEngineConfig() {
   }
 
   const cores = navigator.hardwareConcurrency || 4;
-  // @ts-expect-error - deviceMemory is not in all browsers
-  const memory = navigator.deviceMemory || 4;
+  let memory = 4;
+  if ("deviceMemory" in navigator) {
+    memory = navigator.deviceMemory as number;
+  }
 
   if (cores >= 16 && memory >= 16) {
     return {
