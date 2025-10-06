@@ -93,7 +93,6 @@ export class StockfishService {
 
       script.onload = async () => {
         try {
-          // @ts-expect-error - Stockfish is loaded from script
           const sf = await window.Stockfish();
           this.engine = sf;
 
