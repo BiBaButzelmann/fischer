@@ -12,7 +12,8 @@ import { Chess, Move, Square } from "chess.js";
 import { Chessboard } from "react-chessboard";
 import { savePGN } from "@/actions/pgn";
 import { toast } from "sonner";
-import { MoveHistory } from "./move-history";
+import { PgnViewerSidepanel } from "./pgn-viewer-sidepanel";
+import { PgnEditorSidepanel } from "./pgn-editor-sidepanel";
 import { PlayerDisplay } from "./player-display";
 import { ParticipantWithName } from "@/db/types/participant";
 import { getIndividualPlayerResult } from "@/lib/game-result-utils";
@@ -237,19 +238,27 @@ export default function PgnViewer({
       </div>
 
       <div className="w-full lg:w-80 flex-shrink-0">
-        <MoveHistory
-          history={moves}
-          currentMoveIndex={currentIndex}
-          goToMove={setCurrentIndex}
-          onSave={allowEdit ? handleSave : undefined}
-          onDownload={handleDownload}
-          onUpload={allowEdit ? handleUpload : undefined}
-          isSaving={isPending}
-          showSave={allowEdit}
-          showUpload={allowEdit}
-          hasUnsavedChanges={hasUnsavedChanges}
-          fen={fen}
-        />
+        {allowEdit ? (
+          <PgnEditorSidepanel
+            history={moves}
+            currentMoveIndex={currentIndex}
+            goToMove={setCurrentIndex}
+            onSave={handleSave}
+            onDownload={handleDownload}
+            onUpload={handleUpload}
+            isSaving={isPending}
+            hasUnsavedChanges={hasUnsavedChanges}
+            fen={fen}
+          />
+        ) : (
+          <PgnViewerSidepanel
+            history={moves}
+            currentMoveIndex={currentIndex}
+            goToMove={setCurrentIndex}
+            onDownload={handleDownload}
+            fen={fen}
+          />
+        )}
       </div>
     </div>
   );

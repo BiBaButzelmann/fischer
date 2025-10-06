@@ -2,47 +2,17 @@
 
 import clsx from "clsx";
 import { useEffect, useRef } from "react";
-import { Button } from "@/components/ui/button";
-import {
-  Tooltip,
-  TooltipContent,
-  TooltipTrigger,
-} from "@/components/ui/tooltip";
-import { Save, Download, Upload } from "lucide-react";
 import { toGermanNotation } from "@/lib/chess-notation";
-import { EnginePanel } from "./engine-panel";
-import { useIsMobile } from "@/hooks/use-mobile";
 
 type Props = {
   history: { san: string }[];
   currentMoveIndex: number;
   goToMove: (ply: number) => void;
-  onSave?: () => void;
-  onDownload?: () => void;
-  onUpload?: () => void;
-  isSaving?: boolean;
-  showSave?: boolean;
-  showUpload?: boolean;
-  hasUnsavedChanges?: boolean;
-  fen?: string;
 };
 
-export function MoveHistory({
-  history,
-  currentMoveIndex,
-  goToMove,
-  onSave,
-  onDownload,
-  onUpload,
-  isSaving = false,
-  showSave = false,
-  showUpload = false,
-  hasUnsavedChanges = false,
-  fen,
-}: Props) {
+export function MoveHistory({ history, currentMoveIndex, goToMove }: Props) {
   const scrollContainerRef = useRef<HTMLDivElement>(null);
   const currentMoveRef = useRef<HTMLTableCellElement>(null);
-  const isMobile = useIsMobile();
 
   useEffect(() => {
     if (scrollContainerRef.current) {
@@ -115,101 +85,27 @@ export function MoveHistory({
   }
 
   return (
-    <div className="w-full flex flex-col h-full max-h-[570px]">
-      <div className="h-full rounded-lg border border-gray-200 bg-card text-card-foreground shadow-sm flex flex-col">
-        {fen && !isMobile && <EnginePanel fen={fen} />}
-        <div
-          className={`flex-1 overflow-hidden ${fen && !isMobile ? "border-t" : ""}`}
-        >
-          <div className="h-full px-4 pt-4 pb-4">
-            <div
-              ref={scrollContainerRef}
-              className="h-full overflow-y-auto rounded-md border bg-background/50 scrollbar-thin scrollbar-thumb-gray-400 scrollbar-track-gray-100"
-            >
-              <table className="w-full">
-                <tbody className="divide-y divide-border/30">
-                  {rows.length > 0 ? (
-                    rows
-                  ) : (
-                    <tr>
-                      <td
-                        colSpan={3}
-                        className="py-8 text-center text-muted-foreground text-sm"
-                      >
-                        Noch keine Züge
-                      </td>
-                    </tr>
-                  )}
-                </tbody>
-              </table>
-            </div>
-          </div>
-        </div>
-        <div className="px-4 pb-4 border-t flex-shrink-0">
-          <div className="flex items-center mt-4">
-            <div className="flex-1 flex justify-center">
-              {showSave && onSave && (
-                <Tooltip>
-                  <TooltipTrigger asChild>
-                    <Button
-                      variant={hasUnsavedChanges ? "default" : "outline"}
-                      size="icon"
-                      onClick={onSave}
-                      disabled={isSaving}
-                    >
-                      <Save className="h-4 w-4" />
-                    </Button>
-                  </TooltipTrigger>
-                  <TooltipContent>
-                    <p>{isSaving ? "Speichern..." : "Speichern"}</p>
-                  </TooltipContent>
-                </Tooltip>
-              )}
-            </div>
-
-            {(onDownload || (showUpload && onUpload)) && showSave && onSave && (
-              <div className="w-px h-8 bg-border" />
+    <div className="h-full px-4 pt-4 pb-4">
+      <div
+        ref={scrollContainerRef}
+        className="h-full overflow-y-auto rounded-md border bg-background/50 scrollbar-thin scrollbar-thumb-gray-400 scrollbar-track-gray-100"
+      >
+        <table className="w-full">
+          <tbody className="divide-y divide-border/30">
+            {rows.length > 0 ? (
+              rows
+            ) : (
+              <tr>
+                <td
+                  colSpan={3}
+                  className="py-8 text-center text-muted-foreground text-sm"
+                >
+                  Noch keine Züge
+                </td>
+              </tr>
             )}
-
-            <div className="flex-1 flex justify-center gap-2">
-              {onDownload && (
-                <Tooltip>
-                  <TooltipTrigger asChild>
-                    <Button
-                      variant="outline"
-                      size="icon"
-                      onClick={onDownload}
-                      disabled={isSaving}
-                    >
-                      <Download className="h-4 w-4" />
-                    </Button>
-                  </TooltipTrigger>
-                  <TooltipContent>
-                    <p>PGN herunterladen</p>
-                  </TooltipContent>
-                </Tooltip>
-              )}
-
-              {showUpload && onUpload && (
-                <Tooltip>
-                  <TooltipTrigger asChild>
-                    <Button
-                      variant="outline"
-                      size="icon"
-                      onClick={onUpload}
-                      disabled={isSaving}
-                    >
-                      <Upload className="h-4 w-4" />
-                    </Button>
-                  </TooltipTrigger>
-                  <TooltipContent>
-                    <p>PGN hochladen</p>
-                  </TooltipContent>
-                </Tooltip>
-              )}
-            </div>
-          </div>
-        </div>
+          </tbody>
+        </table>
       </div>
     </div>
   );
