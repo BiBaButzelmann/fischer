@@ -28,10 +28,6 @@ export function useStockfish({ fen, isEnabled }: UseStockfishParams) {
     let unsubscribeReady: (() => void) | undefined;
 
     const initEngine = async () => {
-      if (!StockfishService.wasmThreadsSupported()) {
-        return;
-      }
-
       const service = StockfishService.getInstance();
       serviceRef.current = service;
 
