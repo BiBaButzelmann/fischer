@@ -27,13 +27,13 @@ export class StockfishService {
   private config: EngineConfig;
 
   private constructor() {
-    const optimal = getOptimalEngineConfig();
+    const config = getOptimalEngineConfig();
     this.config = {
-      threads: optimal.threads,
-      hashSize: optimal.hashSize,
+      threads: config.threads,
+      hashSize: config.hashSize,
       multiPv: 1,
-      minDepth: optimal.minDepth,
-      maxDepth: optimal.maxDepth,
+      minDepth: config.minDepth,
+      maxDepth: config.maxDepth,
     };
   }
 
