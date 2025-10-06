@@ -114,7 +114,7 @@ export class StockfishService {
         if (!this.isReady) {
           reject(new Error("Engine-Initialisierung Timeout"));
         }
-      }, 3000);
+      }, 6000);
     });
   }
 
