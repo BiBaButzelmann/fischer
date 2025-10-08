@@ -6,6 +6,7 @@ import { auth } from "@/auth/utils";
 import { redirect } from "next/navigation";
 import { getUserGameRights, isGameActuallyPlayed } from "@/lib/game-auth";
 import PgnViewer from "@/components/game/chessboard/pgn-viewer";
+import PgnEditor from "@/components/game/chessboard/pgn-editor";
 import { Suspense } from "react";
 import { DateTime } from "luxon";
 import { getGameTimeFromGame } from "@/lib/game-time";
@@ -94,14 +95,23 @@ async function PgnContainer({
 
   return (
     <div className="mt-2">
-      <PgnViewer
-        gameId={game.id}
-        initialPGN={pgn}
-        allowEdit={allowEdit}
-        whitePlayer={game.whiteParticipant}
-        blackPlayer={game.blackParticipant}
-        gameResult={game.result!}
-      />
+      {allowEdit ? (
+        <PgnEditor
+          gameId={game.id}
+          initialPGN={pgn}
+          whitePlayer={game.whiteParticipant}
+          blackPlayer={game.blackParticipant}
+          gameResult={game.result!}
+        />
+      ) : (
+        <PgnViewer
+          gameId={game.id}
+          initialPGN={pgn}
+          whitePlayer={game.whiteParticipant}
+          blackPlayer={game.blackParticipant}
+          gameResult={game.result!}
+        />
+      )}
     </div>
   );
 }

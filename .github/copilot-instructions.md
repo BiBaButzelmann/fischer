@@ -25,6 +25,8 @@ This project is a web application that manages a round robin chess tournament. I
   - PascalCase for components/types/interfaces
   - kebab-case for filenames
 - **Server Actions:** Use `"use server"` at top of server action files
+- **Single Responsibility:** Each component manages only its own concerns
+- **Encapsulation:** Keep related logic together, avoid prop drilling
 
 ## General Guideline:
 
