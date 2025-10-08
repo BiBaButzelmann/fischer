@@ -62,7 +62,7 @@ export function UserRow({
           await createTrainer(tournamentId, user.id);
           toast.success("Trainer-Rolle zugewiesen");
         }
-      } catch (error) {
+      } catch {
         toast.error("Fehler beim Ändern der Trainer-Rolle");
       }
     });

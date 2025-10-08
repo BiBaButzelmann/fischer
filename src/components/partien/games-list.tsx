@@ -47,6 +47,7 @@ export function GamesList({
   const isReferee = userRoles.includes("referee");
   const isParticipant = userRoles.includes("participant");
   const isMatchEnteringHelper = userRoles.includes("matchEnteringHelper");
+  const isTrainer = userRoles.includes("trainer");
 
   const gameParticipantsMap = useMemo(
     () =>
@@ -79,7 +80,12 @@ export function GamesList({
         : false;
 
       return {
-        canView: isParticipant || isReferee || isMatchEnteringHelper || isAdmin,
+        canView:
+          isParticipant ||
+          isReferee ||
+          isMatchEnteringHelper ||
+          isAdmin ||
+          isTrainer,
         canSubmitResult:
           (isGameParticipant || isReferee || isAdmin) && isGameInPastOrToday,
         canPostpone: isGameParticipant || isAdmin,
