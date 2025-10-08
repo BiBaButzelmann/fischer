@@ -86,6 +86,17 @@ export async function getAllSetupHelpersByTournamentId(tournamentId: number) {
   });
 }
 
+export async function getAllTrainersByTournamentId(tournamentId: number) {
+  return await db.query.trainer.findMany({
+    where: (trainer, { eq, and }) =>
+      and(eq(trainer.tournamentId, tournamentId), isNull(trainer.deletedAt)),
+    with: {
+      profile: true,
+    },
+    orderBy: (trainer, { asc }) => [asc(trainer.id)],
+  });
+}
+
 export async function getAllDisabledProfiles() {
   return await db.query.profile.findMany({
     where: (profile, { isNotNull }) => isNotNull(profile.deletedAt),
