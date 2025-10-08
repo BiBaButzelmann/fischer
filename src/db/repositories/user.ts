@@ -10,6 +10,7 @@ import { matchEnteringHelper } from "../schema/matchEnteringHelper";
 import { participant } from "../schema/participant";
 import { referee } from "../schema/referee";
 import { setupHelper } from "../schema/setupHelper";
+import { trainer } from "../schema/trainer";
 import { tournament } from "../schema/tournament";
 import { profile } from "../schema/profile";
 import { getProfileByUserId } from "./profile";
@@ -182,6 +183,7 @@ export async function hardDeleteUser(userId: string) {
     await tx.delete(juror).where(eq(juror.profileId, profileId));
     await tx.delete(referee).where(eq(referee.profileId, profileId));
     await tx.delete(setupHelper).where(eq(setupHelper.profileId, profileId));
+    await tx.delete(trainer).where(eq(trainer.profileId, profileId));
     await tx
       .delete(matchEnteringHelper)
       .where(eq(matchEnteringHelper.profileId, profileId));
