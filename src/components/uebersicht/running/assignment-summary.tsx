@@ -6,6 +6,7 @@ import {
   Check,
   ClipboardList,
   ChevronRight,
+  Volleyball,
 } from "lucide-react";
 import Link from "next/link";
 
@@ -59,6 +60,7 @@ export async function AssignmentSummary({
             />
           )}
           {rolesData.juror && <JurorSection />}
+          {rolesData.trainer && <TrainerSection />}
         </div>
       </div>
     </div>
@@ -282,5 +284,26 @@ function JurorSection() {
         </div>
       </div>
     </div>
+  );
+}
+
+function TrainerSection() {
+  return (
+    <Link href="/partien" className="block">
+      <div className="flex items-center gap-4 p-4 bg-white dark:bg-card border border-gray-200 dark:border-card-border rounded-xl shadow-sm transition-all hover:shadow-md cursor-pointer hover:opacity-80">
+        <div className="flex-shrink-0 p-3 rounded-full bg-orange-100 dark:bg-orange-900/30">
+          <Volleyball className="w-6 h-6 text-orange-600 dark:text-orange-400" />
+        </div>
+        <div className="flex-grow">
+          <p className="font-bold text-gray-800 dark:text-gray-100">Trainer</p>
+          <div className="flex items-center gap-2 text-sm text-gray-500 dark:text-gray-400 mt-1">
+            <span>Berechtigt, alle Partien anzuschauen</span>
+          </div>
+        </div>
+        <div className="flex-shrink-0">
+          <ChevronRight className="w-5 h-5 text-gray-400 dark:text-gray-500" />
+        </div>
+      </div>
+    </Link>
   );
 }
