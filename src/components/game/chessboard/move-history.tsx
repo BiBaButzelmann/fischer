@@ -5,12 +5,12 @@ import { useEffect, useRef } from "react";
 import { toGermanNotation } from "@/lib/chess-notation";
 
 type Props = {
-  history: { san: string }[];
-  currentMoveIndex: number;
-  goToMove: (ply: number) => void;
+  moves: { san: string }[];
+  currentIndex: number;
+  setCurrentIndex: (ply: number) => void;
 };
 
-export function MoveHistory({ history, currentMoveIndex, goToMove }: Props) {
+export function MoveHistory({ moves, currentIndex, setCurrentIndex }: Props) {
   const scrollContainerRef = useRef<HTMLDivElement>(null);
   const currentMoveRef = useRef<HTMLTableCellElement>(null);
 
@@ -18,7 +18,7 @@ export function MoveHistory({ history, currentMoveIndex, goToMove }: Props) {
     if (scrollContainerRef.current) {
       const container = scrollContainerRef.current;
 
-      if (currentMoveIndex === -1) {
+      if (currentIndex === -1) {
         container.scrollTo({
           top: 0,
           behavior: "smooth",
@@ -37,12 +37,12 @@ export function MoveHistory({ history, currentMoveIndex, goToMove }: Props) {
         });
       }
     }
-  }, [currentMoveIndex]);
+  }, [currentIndex]);
 
   const rows: React.ReactNode[] = [];
-  for (let i = 0; i < history.length; i += 2) {
-    const white = history[i];
-    const black = history[i + 1];
+  for (let i = 0; i < moves.length; i += 2) {
+    const white = moves[i];
+    const black = moves[i + 1];
 
     const whitePly = i;
     const blackPly = i + 1;
@@ -53,30 +53,30 @@ export function MoveHistory({ history, currentMoveIndex, goToMove }: Props) {
           {i / 2 + 1}.
         </td>
         <td
-          ref={currentMoveIndex === whitePly ? currentMoveRef : null}
+          ref={currentIndex === whitePly ? currentMoveRef : null}
           className={clsx(
             "px-2 py-1.5 cursor-pointer rounded-sm transition-all duration-150 font-mono text-sm min-w-[3rem]",
             "hover:bg-accent hover:text-accent-foreground hover:shadow-sm",
-            currentMoveIndex === whitePly
+            currentIndex === whitePly
               ? "bg-primary text-primary-foreground font-semibold shadow-sm"
               : "text-foreground",
           )}
-          onClick={() => goToMove(whitePly)}
+          onClick={() => setCurrentIndex(whitePly)}
         >
           {white ? toGermanNotation(white.san) : "…"}
         </td>
         <td
-          ref={currentMoveIndex === blackPly && black ? currentMoveRef : null}
+          ref={currentIndex === blackPly && black ? currentMoveRef : null}
           className={clsx(
             "px-2 py-1.5 rounded-sm transition-all duration-150 font-mono text-sm min-w-[3rem]",
             black
               ? "cursor-pointer hover:bg-accent hover:text-accent-foreground hover:shadow-sm"
               : "cursor-default",
-            currentMoveIndex === blackPly && black
+            currentIndex === blackPly && black
               ? "bg-primary text-primary-foreground font-semibold shadow-sm"
               : "text-foreground",
           )}
-          onClick={black ? () => goToMove(blackPly) : undefined}
+          onClick={black ? () => setCurrentIndex(blackPly) : undefined}
         >
           {black ? toGermanNotation(black.san) : "…"}
         </td>

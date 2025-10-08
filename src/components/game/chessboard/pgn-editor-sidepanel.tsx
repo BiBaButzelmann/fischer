@@ -7,9 +7,9 @@ import { PgnEditorActions } from "./pgn-actions";
 import { Move } from "chess.js";
 
 type Props = {
-  history: { san: string }[];
-  currentMoveIndex: number;
-  goToMove: (ply: number) => void;
+  moves: { san: string }[];
+  currentIndex: number;
+  setCurrentIndex: (ply: number) => void;
   setMoves: (moves: Move[]) => void;
   pgn: string;
   gameId: number;
@@ -17,9 +17,9 @@ type Props = {
 };
 
 export function PgnEditorSidepanel({
-  history,
-  currentMoveIndex,
-  goToMove,
+  moves,
+  currentIndex,
+  setCurrentIndex,
   setMoves,
   pgn,
   gameId,
@@ -30,9 +30,9 @@ export function PgnEditorSidepanel({
       header={<EnginePanel fen={fen} />}
       content={
         <MoveHistory
-          history={history}
-          currentMoveIndex={currentMoveIndex}
-          goToMove={goToMove}
+          moves={moves}
+          currentIndex={currentIndex}
+          setCurrentIndex={setCurrentIndex}
         />
       }
       footer={
@@ -40,7 +40,7 @@ export function PgnEditorSidepanel({
           pgn={pgn}
           gameId={gameId}
           setMoves={setMoves}
-          setCurrentIndex={goToMove}
+          setCurrentIndex={setCurrentIndex}
         />
       }
     />

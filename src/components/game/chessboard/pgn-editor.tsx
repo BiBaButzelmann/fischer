@@ -1,14 +1,12 @@
 "use client";
 
-import { useMemo } from "react";
 import { Chessboard } from "react-chessboard";
-import { PgnViewerSidepanel } from "./pgn-viewer-sidepanel";
+import { PgnEditorSidepanel } from "./pgn-editor-sidepanel";
 import { PlayerDisplay } from "./player-display";
 import { ParticipantWithName } from "@/db/types/participant";
 import { getIndividualPlayerResult } from "@/lib/game-result-utils";
 import { GameResult } from "@/db/types/game";
-import { movesFromPGN } from "./pgn-actions";
-import { useChessNavigation } from "@/hooks/use-chess-navigation";
+import { useChessEditor } from "@/hooks/use-chess-editor";
 
 type Props = {
   gameId: number;
@@ -18,15 +16,24 @@ type Props = {
   gameResult: GameResult;
 };
 
-export default function PgnViewer({
+export default function PgnEditor({
   gameId,
   initialPGN,
   whitePlayer,
   blackPlayer,
   gameResult,
 }: Props) {
-  const moves = useMemo(() => movesFromPGN(initialPGN), [initialPGN]);
-  const { currentIndex, setCurrentIndex, fen, pgn } = useChessNavigation(moves);
+  const {
+    fen,
+    onPieceDrop,
+    onSquareClick,
+    selectedSquare,
+    moves,
+    currentIndex,
+    setCurrentIndex,
+    setMoves,
+    pgn,
+  } = useChessEditor(initialPGN, gameId);
 
   return (
     <div className="flex flex-col lg:flex-row gap-6 w-full">
@@ -40,8 +47,17 @@ export default function PgnViewer({
         <div className="aspect-square w-full">
           <Chessboard
             position={fen}
-            arePiecesDraggable={false}
+            arePiecesDraggable={true}
+            onPieceDrop={onPieceDrop}
+            onSquareClick={onSquareClick}
             animationDuration={0}
+            customSquareStyles={{
+              ...(selectedSquare && {
+                [selectedSquare]: {
+                  boxShadow: "inset 0 0 1px 6px rgba(255,255,255,0.75)",
+                },
+              }),
+            }}
           />
         </div>
 
@@ -53,10 +69,11 @@ export default function PgnViewer({
       </div>
 
       <div className="w-full lg:w-80 flex-shrink-0">
-        <PgnViewerSidepanel
+        <PgnEditorSidepanel
           moves={moves}
           currentIndex={currentIndex}
           setCurrentIndex={setCurrentIndex}
+          setMoves={setMoves}
           pgn={pgn}
           gameId={gameId}
           fen={fen}

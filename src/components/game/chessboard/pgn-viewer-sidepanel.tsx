@@ -6,18 +6,18 @@ import { MoveHistory } from "./move-history";
 import { PgnViewerActions } from "./pgn-actions";
 
 type Props = {
-  history: { san: string }[];
-  currentMoveIndex: number;
-  goToMove: (ply: number) => void;
+  moves: { san: string }[];
+  currentIndex: number;
+  setCurrentIndex: (ply: number) => void;
   pgn: string;
   gameId: number;
   fen: string;
 };
 
 export function PgnViewerSidepanel({
-  history,
-  currentMoveIndex,
-  goToMove,
+  moves,
+  currentIndex,
+  setCurrentIndex,
   pgn,
   gameId,
   fen,
@@ -27,9 +27,9 @@ export function PgnViewerSidepanel({
       header={<EnginePanel fen={fen} />}
       content={
         <MoveHistory
-          history={history}
-          currentMoveIndex={currentMoveIndex}
-          goToMove={goToMove}
+          moves={moves}
+          currentIndex={currentIndex}
+          setCurrentIndex={setCurrentIndex}
         />
       }
       footer={<PgnViewerActions pgn={pgn} gameId={gameId} />}
