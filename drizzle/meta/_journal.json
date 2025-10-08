@@ -120,6 +120,13 @@
       "when": 1757670954285,
       "tag": "0016_oval_eddie_brock",
       "breakpoints": true
+    },
+    {
+      "idx": 17,
+      "version": "7",
+      "when": 1759922721930,
+      "tag": "0017_jittery_james_howlett",
+      "breakpoints": true
     }
   ]
 }
