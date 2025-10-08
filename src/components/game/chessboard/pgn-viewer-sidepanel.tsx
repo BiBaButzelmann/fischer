@@ -9,7 +9,8 @@ type Props = {
   history: { san: string }[];
   currentMoveIndex: number;
   goToMove: (ply: number) => void;
-  onDownload: () => void;
+  pgn: string;
+  gameId: number;
   fen: string;
 };
 
@@ -17,7 +18,8 @@ export function PgnViewerSidepanel({
   history,
   currentMoveIndex,
   goToMove,
-  onDownload,
+  pgn,
+  gameId,
   fen,
 }: Props) {
   return (
@@ -30,7 +32,7 @@ export function PgnViewerSidepanel({
           goToMove={goToMove}
         />
       }
-      footer={<PgnViewerActions onDownload={onDownload} />}
+      footer={<PgnViewerActions pgn={pgn} gameId={gameId} />}
     />
   );
 }

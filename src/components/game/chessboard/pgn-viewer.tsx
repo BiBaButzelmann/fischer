@@ -1,23 +1,15 @@
 "use client";
 
-import {
-  useState,
-  useEffect,
-  useCallback,
-  useMemo,
-  useTransition,
-  useRef,
-} from "react";
+import { useState, useEffect, useCallback, useMemo } from "react";
 import { Chess, Move, Square } from "chess.js";
 import { Chessboard } from "react-chessboard";
-import { savePGN } from "@/actions/pgn";
-import { toast } from "sonner";
 import { PgnViewerSidepanel } from "./pgn-viewer-sidepanel";
 import { PgnEditorSidepanel } from "./pgn-editor-sidepanel";
 import { PlayerDisplay } from "./player-display";
 import { ParticipantWithName } from "@/db/types/participant";
 import { getIndividualPlayerResult } from "@/lib/game-result-utils";
 import { GameResult } from "@/db/types/game";
+import { movesFromPGN } from "./pgn-actions";
 
 export type Props = {
   gameId: number;
@@ -37,11 +29,8 @@ export default function PgnViewer({
   gameResult,
 }: Props) {
   const [moves, setMoves] = useState(() => movesFromPGN(initialPGN));
-  const [savedPGN, setSavedPGN] = useState(initialPGN);
   const [currentIndex, setCurrentIndex] = useState(moves.length - 1);
-  const [isPending, startTransition] = useTransition();
   const [selectedSquare, setSelectedSquare] = useState<string | null>(null);
-  const fileInputRef = useRef<HTMLInputElement>(null);
 
   useChessboardControls({
     onArrowLeft: () => setCurrentIndex((i) => Math.max(-1, i - 1)),
@@ -57,79 +46,6 @@ export default function PgnViewer({
   );
 
   const fullPGN = useMemo(() => computePGNFromMoves(moves), [moves]);
-
-  const hasUnsavedChanges = useMemo(() => {
-    return fullPGN !== savedPGN;
-  }, [fullPGN, savedPGN]);
-
-  const handleSave = useCallback(() => {
-    startTransition(async () => {
-      const result = await savePGN(fullPGN, gameId);
-
-      if (result?.error) {
-        toast.error("Fehler beim Speichern der Partie");
-      } else {
-        toast.success("Partie erfolgreich gespeichert");
-        setSavedPGN(fullPGN);
-      }
-    });
-  }, [fullPGN, gameId]);
-
-  const handleDownload = useCallback(() => {
-    const blob = new Blob([fullPGN], { type: "text/plain" });
-    const url = URL.createObjectURL(blob);
-    const link = document.createElement("a");
-    link.href = url;
-    link.download = `game-${gameId}.pgn`;
-    document.body.appendChild(link);
-    link.click();
-    document.body.removeChild(link);
-    URL.revokeObjectURL(url);
-    toast.success("PGN erfolgreich heruntergeladen");
-  }, [fullPGN, gameId]);
-
-  const handleUpload = useCallback(() => {
-    fileInputRef.current?.click();
-  }, []);
-
-  const handleFileChange = useCallback(
-    (event: React.ChangeEvent<HTMLInputElement>) => {
-      const file = event.target.files?.[0];
-      if (!file) return;
-
-      if (!file.name.toLowerCase().endsWith(".pgn")) {
-        toast.error("Bitte wähle eine .pgn Datei aus.");
-        return;
-      }
-
-      const reader = new FileReader();
-      reader.onload = (e) => {
-        const content = e.target?.result as string;
-        if (content) {
-          const trimmedContent = content.trim();
-          if (!trimmedContent) {
-            toast.error("PGN darf nicht leer sein.");
-            return;
-          }
-
-          try {
-            const newMoves = movesFromPGN(trimmedContent);
-            setMoves(newMoves);
-            setCurrentIndex(newMoves.length - 1);
-            toast.success("PGN erfolgreich hochgeladen");
-          } catch {
-            toast.error("Ungültige PGN-Datei");
-          }
-        }
-      };
-      reader.readAsText(file);
-
-      if (fileInputRef.current) {
-        fileInputRef.current.value = "";
-      }
-    },
-    [setMoves, setCurrentIndex],
-  );
 
   const makeMove = useCallback(
     (from: string, to: string, promotion?: string): boolean => {
@@ -198,14 +114,6 @@ export default function PgnViewer({
 
   return (
     <div className="flex flex-col lg:flex-row gap-6 w-full">
-      <input
-        ref={fileInputRef}
-        type="file"
-        accept=".pgn"
-        className="hidden"
-        aria-hidden="true"
-        onChange={handleFileChange}
-      />
       <div className="flex-shrink-0 w-full max-w-lg mx-auto lg:mx-0 border border-gray-200 rounded-lg shadow-sm overflow-hidden">
         <PlayerDisplay
           participant={blackPlayer}
@@ -243,11 +151,9 @@ export default function PgnViewer({
             history={moves}
             currentMoveIndex={currentIndex}
             goToMove={setCurrentIndex}
-            onSave={handleSave}
-            onDownload={handleDownload}
-            onUpload={handleUpload}
-            isSaving={isPending}
-            hasUnsavedChanges={hasUnsavedChanges}
+            setMoves={setMoves}
+            pgn={fullPGN}
+            gameId={gameId}
             fen={fen}
           />
         ) : (
@@ -255,19 +161,14 @@ export default function PgnViewer({
             history={moves}
             currentMoveIndex={currentIndex}
             goToMove={setCurrentIndex}
-            onDownload={handleDownload}
+            pgn={fullPGN}
+            gameId={gameId}
             fen={fen}
           />
         )}
       </div>
     </div>
   );
-}
-
-function movesFromPGN(pgn: string): Move[] {
-  const game = new Chess();
-  game.loadPgn(pgn);
-  return game.history({ verbose: true });
 }
 
 function currentBoardState(moves: Move[], index: number): Chess {

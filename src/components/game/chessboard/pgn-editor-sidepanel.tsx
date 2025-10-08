@@ -4,16 +4,15 @@ import { Sidepanel } from "./sidepanel";
 import { EnginePanel } from "./engine-panel";
 import { MoveHistory } from "./move-history";
 import { PgnEditorActions } from "./pgn-actions";
+import { Move } from "chess.js";
 
 type Props = {
   history: { san: string }[];
   currentMoveIndex: number;
   goToMove: (ply: number) => void;
-  onSave: () => void;
-  onDownload: () => void;
-  onUpload: () => void;
-  isSaving?: boolean;
-  hasUnsavedChanges?: boolean;
+  setMoves: (moves: Move[]) => void;
+  pgn: string;
+  gameId: number;
   fen: string;
 };
 
@@ -21,32 +20,29 @@ export function PgnEditorSidepanel({
   history,
   currentMoveIndex,
   goToMove,
-  onSave,
-  onDownload,
-  onUpload,
-  isSaving = false,
-  hasUnsavedChanges = false,
+  setMoves,
+  pgn,
+  gameId,
   fen,
 }: Props) {
-  const header = <EnginePanel fen={fen} />;
-
-  const content = (
-    <MoveHistory
-      history={history}
-      currentMoveIndex={currentMoveIndex}
-      goToMove={goToMove}
+  return (
+    <Sidepanel
+      header={<EnginePanel fen={fen} />}
+      content={
+        <MoveHistory
+          history={history}
+          currentMoveIndex={currentMoveIndex}
+          goToMove={goToMove}
+        />
+      }
+      footer={
+        <PgnEditorActions
+          pgn={pgn}
+          gameId={gameId}
+          setMoves={setMoves}
+          setCurrentIndex={goToMove}
+        />
+      }
     />
   );
-
-  const footer = (
-    <PgnEditorActions
-      onSave={onSave}
-      onDownload={onDownload}
-      onUpload={onUpload}
-      isSaving={isSaving}
-      hasUnsavedChanges={hasUnsavedChanges}
-    />
-  );
-
-  return <Sidepanel header={header} content={content} footer={footer} />;
 }

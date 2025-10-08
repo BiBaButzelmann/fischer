@@ -7,17 +7,61 @@ import {
   TooltipTrigger,
 } from "@/components/ui/tooltip";
 import { Save, Download, Upload } from "lucide-react";
-import { useCallback, useRef } from "react";
-import { Move } from "chess.js";
-import { downloadPGN, uploadPGN } from "@/lib/pgn-utils";
+import { useCallback, useRef, useTransition, useState, useMemo } from "react";
+import { Chess, Move } from "chess.js";
+import { savePGN } from "@/actions/pgn";
+import { toast } from "sonner";
+
+export function movesFromPGN(pgn: string): Move[] {
+  const game = new Chess();
+  game.loadPgn(pgn);
+  return game.history({ verbose: true });
+}
+
+function downloadPGN(pgn: string, gameId: number) {
+  const blob = new Blob([pgn], { type: "text/plain" });
+  const url = URL.createObjectURL(blob);
+  const link = document.createElement("a");
+  link.href = url;
+  link.download = `game-${gameId}.pgn`;
+  document.body.appendChild(link);
+  link.click();
+  document.body.removeChild(link);
+  URL.revokeObjectURL(url);
+  toast.success("PGN erfolgreich heruntergeladen");
+}
+
+function uploadPGN(file: File, onSuccess: (moves: Move[]) => void): void {
+  if (!file.name.toLowerCase().endsWith(".pgn")) {
+    toast.error("Bitte wähle eine .pgn Datei aus.");
+    return;
+  }
+
+  const reader = new FileReader();
+  reader.onload = (e) => {
+    const content = e.target?.result as string;
+    if (!content?.trim()) {
+      toast.error("PGN darf nicht leer sein.");
+      return;
+    }
+
+    try {
+      const newMoves = movesFromPGN(content.trim());
+      onSuccess(newMoves);
+      toast.success("PGN erfolgreich hochgeladen");
+    } catch {
+      toast.error("Ungültige PGN-Datei");
+    }
+  };
+  reader.readAsText(file);
+}
 
 type DownloadButtonProps = {
   pgn: string;
   gameId: number;
-  disabled?: boolean;
 };
 
-function DownloadButton({ pgn, gameId, disabled = false }: DownloadButtonProps) {
+function DownloadButton({ pgn, gameId }: DownloadButtonProps) {
   const handleDownload = useCallback(() => {
     downloadPGN(pgn, gameId);
   }, [pgn, gameId]);
@@ -25,12 +69,7 @@ function DownloadButton({ pgn, gameId, disabled = false }: DownloadButtonProps) 
   return (
     <Tooltip>
       <TooltipTrigger asChild>
-        <Button
-          variant="outline"
-          size="icon"
-          onClick={handleDownload}
-          disabled={disabled}
-        >
+        <Button variant="outline" size="icon" onClick={handleDownload}>
           <Download className="h-4 w-4" />
         </Button>
       </TooltipTrigger>
@@ -42,18 +81,11 @@ function DownloadButton({ pgn, gameId, disabled = false }: DownloadButtonProps) 
 }
 
 type UploadButtonProps = {
-  pgn: string;
-  gameId: number;
   setMoves: (moves: Move[]) => void;
   setCurrentIndex: (index: number) => void;
-  disabled?: boolean;
 };
 
-function UploadButton({
-  setMoves,
-  setCurrentIndex,
-  disabled = false,
-}: UploadButtonProps) {
+function UploadButton({ setMoves, setCurrentIndex }: UploadButtonProps) {
   const fileInputRef = useRef<HTMLInputElement>(null);
 
   const handleUpload = useCallback(() => {
@@ -89,12 +121,7 @@ function UploadButton({
       />
       <Tooltip>
         <TooltipTrigger asChild>
-          <Button
-            variant="outline"
-            size="icon"
-            onClick={handleUpload}
-            disabled={disabled}
-          >
+          <Button variant="outline" size="icon" onClick={handleUpload}>
             <Upload className="h-4 w-4" />
           </Button>
         </TooltipTrigger>
@@ -107,26 +134,45 @@ function UploadButton({
 }
 
 type SaveButtonProps = {
-  onSave: () => void;
-  isSaving: boolean;
-  hasUnsavedChanges: boolean;
+  pgn: string;
+  gameId: number;
 };
 
-function SaveButton({ onSave, isSaving, hasUnsavedChanges }: SaveButtonProps) {
+function SaveButton({ pgn, gameId }: SaveButtonProps) {
+  const [isPending, startTransition] = useTransition();
+  const [savedPGN, setSavedPGN] = useState(pgn);
+
+  const hasUnsavedChanges = useMemo(() => {
+    return pgn !== savedPGN;
+  }, [pgn, savedPGN]);
+
+  const handleSave = useCallback(() => {
+    startTransition(async () => {
+      const result = await savePGN(pgn, gameId);
+
+      if (result?.error) {
+        toast.error("Fehler beim Speichern der Partie");
+      } else {
+        toast.success("Partie erfolgreich gespeichert");
+        setSavedPGN(pgn);
+      }
+    });
+  }, [pgn, gameId]);
+
   return (
     <Tooltip>
       <TooltipTrigger asChild>
         <Button
           variant={hasUnsavedChanges ? "default" : "outline"}
           size="icon"
-          onClick={onSave}
-          disabled={isSaving}
+          onClick={handleSave}
+          disabled={isPending}
         >
           <Save className="h-4 w-4" />
         </Button>
       </TooltipTrigger>
       <TooltipContent>
-        <p>{isSaving ? "Speichern..." : "Speichern"}</p>
+        <p>{isPending ? "Speichern..." : "Speichern"}</p>
       </TooltipContent>
     </Tooltip>
   );
@@ -146,45 +192,29 @@ export function PgnViewerActions({ pgn, gameId }: PgnViewerActionsProps) {
 }
 
 type PgnEditorActionsProps = {
-  onSave: () => void;
   pgn: string;
   gameId: number;
   setMoves: (moves: Move[]) => void;
   setCurrentIndex: (index: number) => void;
-  isSaving?: boolean;
-  hasUnsavedChanges?: boolean;
 };
 
 export function PgnEditorActions({
-  onSave,
   pgn,
   gameId,
   setMoves,
   setCurrentIndex,
-  isSaving = false,
-  hasUnsavedChanges = false,
 }: PgnEditorActionsProps) {
   return (
     <div className="flex items-center mt-4">
       <div className="flex-1 flex justify-center">
-        <SaveButton
-          onSave={onSave}
-          isSaving={isSaving}
-          hasUnsavedChanges={hasUnsavedChanges}
-        />
+        <SaveButton pgn={pgn} gameId={gameId} />
       </div>
 
       <div className="w-px h-8 bg-border" />
 
       <div className="flex-1 flex justify-center gap-2">
-        <DownloadButton pgn={pgn} gameId={gameId} disabled={isSaving} />
-        <UploadButton
-          pgn={pgn}
-          gameId={gameId}
-          setMoves={setMoves}
-          setCurrentIndex={setCurrentIndex}
-          disabled={isSaving}
-        />
+        <DownloadButton pgn={pgn} gameId={gameId} />
+        <UploadButton setMoves={setMoves} setCurrentIndex={setCurrentIndex} />
       </div>
     </div>
   );
