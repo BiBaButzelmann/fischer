@@ -17,6 +17,7 @@ import { useCallback, useRef, useTransition, useState, useMemo } from "react";
 import { Chess, Move } from "chess.js";
 import { savePGN } from "@/actions/pgn";
 import { toast } from "sonner";
+import { useIsMobile } from "@/hooks/use-mobile";
 
 export function movesFromPGN(pgn: string): Move[] {
   const game = new Chess();
@@ -142,10 +143,10 @@ function UploadButton({ setMoves, setCurrentIndex }: UploadButtonProps) {
 type SaveButtonProps = {
   pgn: string;
   gameId: number;
-  size: "default" | "mobile";
 };
 
-function SaveButton({ pgn, gameId, size = "default" }: SaveButtonProps) {
+function SaveButton({ pgn, gameId }: SaveButtonProps) {
+  const isMobile = useIsMobile();
   const [isPending, startTransition] = useTransition();
   const [savedPGN, setSavedPGN] = useState(pgn);
 
@@ -171,8 +172,8 @@ function SaveButton({ pgn, gameId, size = "default" }: SaveButtonProps) {
       <TooltipTrigger asChild>
         <Button
           variant={hasUnsavedChanges ? "default" : "outline"}
-          size={size === "mobile" ? "default" : "icon"}
-          className={size === "mobile" ? "h-12 px-4" : ""}
+          size={isMobile ? "default" : "icon"}
+          className={isMobile ? "h-12 px-4" : ""}
           onClick={handleSave}
           disabled={isPending}
         >
@@ -276,7 +277,7 @@ export function PgnEditorActions({
   return (
     <div className="flex items-center mt-4">
       <div className="flex-1 flex justify-center">
-        <SaveButton pgn={pgn} gameId={gameId} size="default" />
+        <SaveButton pgn={pgn} gameId={gameId} />
       </div>
 
       <div className="w-px h-8 bg-border" />
@@ -306,7 +307,7 @@ export function PgnEditorMobileActions({
 }: PgnEditorMobileActionsProps) {
   return (
     <div className="flex items-center gap-2 ">
-      <SaveButton pgn={pgn} gameId={gameId} size="mobile" />
+      <SaveButton pgn={pgn} gameId={gameId} />
 
       <NavigationButtons
         moves={moves}
