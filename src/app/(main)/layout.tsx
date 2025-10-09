@@ -16,7 +16,7 @@ export default function RootLayout({
           <SidebarTrigger className="hover:bg-secondary hover:text-current" />
           <NotificationCenter />
         </div>
-        <div className="min-h-[calc(100vh-92px)] px-4 md:px-10 pb-4 max-w-6xl mx-auto">
+        <div className="min-h-[calc(100vh-69px)] px-4 md:px-10 pb-4 max-w-6xl mx-auto">
           {children}
         </div>
         <footer>
