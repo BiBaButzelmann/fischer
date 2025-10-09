@@ -8,6 +8,7 @@ import { referee } from "../schema/referee";
 import { juror } from "../schema/juror";
 import { matchEnteringHelper } from "../schema/matchEnteringHelper";
 import { setupHelper } from "../schema/setupHelper";
+import { trainer } from "../schema/trainer";
 import { auth } from "@/auth";
 import { headers } from "next/headers";
 import { Role, RolesData } from "../types/role";
@@ -17,6 +18,7 @@ import { getMatchEnteringHelperByProfileIdAndTournamentId } from "./match-enteri
 import { getParticipantByProfileIdAndTournamentId } from "./participant";
 import { getRefereeByProfileIdAndTournamentId } from "./referee";
 import { getSetupHelperByProfileIdAndTournamentId } from "./setup-helper";
+import { getTrainerByProfileIdAndTournamentId } from "./trainer";
 
 export async function getRolesByProfileId(profileId: number): Promise<Role[]> {
   const participantQuery = db
@@ -41,6 +43,10 @@ export async function getRolesByProfileId(profileId: number): Promise<Role[]> {
     .select({ tableName: sql<Role>`'setupHelper'::text`.as("tableName") })
     .from(setupHelper)
     .where(eq(setupHelper.profileId, profileId));
+  const trainerQuery = db
+    .select({ tableName: sql<Role>`'trainer'::text`.as("tableName") })
+    .from(trainer)
+    .where(eq(trainer.profileId, profileId));
 
   const [unionResult, sessionResult] = await Promise.all([
     unionAll(
@@ -49,6 +55,7 @@ export async function getRolesByProfileId(profileId: number): Promise<Role[]> {
       jurorQuery,
       matchEnteringHelperQuery,
       setupHelperQuery,
+      trainerQuery,
     ),
     auth.api.getSession({
       headers: await headers(),
@@ -73,13 +80,14 @@ export async function getRolesDataByProfileIdAndTournamentId(
   profileId: number,
   tournamentId: number,
 ): Promise<RolesData> {
-  const [participant, referee, matchEnteringHelper, setupHelper, juror] =
+  const [participant, referee, matchEnteringHelper, setupHelper, juror, trainer] =
     await Promise.all([
       getParticipantByProfileIdAndTournamentId(profileId, tournamentId),
       getRefereeByProfileIdAndTournamentId(profileId, tournamentId),
       getMatchEnteringHelperByProfileIdAndTournamentId(profileId, tournamentId),
       getSetupHelperByProfileIdAndTournamentId(profileId, tournamentId),
       getJurorByProfileIdAndTournamentId(profileId, tournamentId),
+      getTrainerByProfileIdAndTournamentId(profileId, tournamentId),
     ]);
 
   return {
@@ -88,5 +96,6 @@ export async function getRolesDataByProfileIdAndTournamentId(
     matchEnteringHelper: matchEnteringHelper ?? undefined,
     setupHelper: setupHelper ?? undefined,
     juror: juror ?? undefined,
+    trainer: trainer ?? undefined,
   };
 }

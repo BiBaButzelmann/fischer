@@ -17,6 +17,7 @@ import {
   RotateCcw,
   Phone,
   Mail,
+  Volleyball,
 } from "lucide-react";
 import { useState, useTransition } from "react";
 import {
@@ -28,19 +29,43 @@ import { toast } from "sonner";
 import { Badge } from "@/components/ui/badge";
 import { matchDaysShort } from "@/constants/constants";
 import { ProfileWithName } from "@/db/types/profile";
+import { createTrainer, deleteTrainer } from "@/actions/trainer";
 
 type Props = {
   user: ProfileWithName;
   showDeleteActions?: boolean;
+  tournamentId: number;
+  trainerId?: number;
 };
 
-export function UserRow({ user, showDeleteActions = false }: Props) {
+export function UserRow({
+  user,
+  showDeleteActions = false,
+  tournamentId,
+  trainerId,
+}: Props) {
   const [softDeleteOpen, setSoftDeleteOpen] = useState(false);
   const [hardDeleteOpen, setHardDeleteOpen] = useState(false);
   const [isPending, startTransition] = useTransition();
 
   const getDisplayName = (user: ProfileWithName) => {
     return `${user.firstName} ${user.lastName}`;
+  };
+
+  const handleTrainerToggle = async () => {
+    startTransition(async () => {
+      try {
+        if (trainerId) {
+          await deleteTrainer(tournamentId, trainerId);
+          toast.success("Trainer-Rolle entfernt");
+        } else {
+          await createTrainer(tournamentId, user.id);
+          toast.success("Trainer-Rolle zugewiesen");
+        }
+      } catch {
+        toast.error("Fehler beim Ändern der Trainer-Rolle");
+      }
+    });
   };
 
   const handleSoftDelete = () => {
@@ -164,7 +189,6 @@ export function UserRow({ user, showDeleteActions = false }: Props) {
       </div>
       <div className="flex items-center gap-2">
         <div className="text-xs text-gray-500">ID: {user.id}</div>
-        {/* Show restore button for disabled users, delete buttons for active users */}
         {user.deletedAt != null ? (
           <Button
             variant="outline"
@@ -178,7 +202,16 @@ export function UserRow({ user, showDeleteActions = false }: Props) {
           </Button>
         ) : showDeleteActions ? (
           <div className="flex items-center gap-1">
-            {/* Soft Delete Button */}
+            <Button
+              variant={trainerId ? "default" : "outline"}
+              size="sm"
+              className="h-7 w-7 p-0"
+              onClick={handleTrainerToggle}
+              disabled={isPending}
+              title="Trainer"
+            >
+              <Volleyball className="h-4 w-4" />
+            </Button>
             <Dialog open={softDeleteOpen} onOpenChange={setSoftDeleteOpen}>
               <DialogTrigger asChild>
                 <Button

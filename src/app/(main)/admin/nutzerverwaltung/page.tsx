@@ -14,9 +14,10 @@ import {
   getAllJurorsByTournamentId,
   getAllMatchEnteringHelpersByTournamentId,
   getAllSetupHelpersByTournamentId,
+  getAllTrainersByTournamentId,
   getAllDisabledProfiles,
 } from "@/db/repositories/admin";
-import { getActiveTournament } from "@/db/repositories/tournament";
+import { getLatestTournament } from "@/db/repositories/tournament";
 import {
   User,
   Users,
@@ -26,6 +27,7 @@ import {
   Wrench,
   UserX,
   LucideIcon,
+  Volleyball,
 } from "lucide-react";
 import { UserRow } from "@/components/admin/user-row";
 import { ParticipantRow } from "@/components/admin/participant-row";
@@ -42,7 +44,7 @@ export default async function Page() {
   }
 
   const [tournament, allProfiles, disabledProfiles] = await Promise.all([
-    getActiveTournament(),
+    getLatestTournament(),
     getAllProfiles(),
     getAllDisabledProfiles(),
   ]);
@@ -70,14 +72,21 @@ export default async function Page() {
     );
   }
 
-  const [participants, referees, jurors, matchEnteringHelpers, setupHelpers] =
-    await Promise.all([
-      getAllParticipantsByTournamentId(tournament.id),
-      getAllRefereesByTournamentId(tournament.id),
-      getAllJurorsByTournamentId(tournament.id),
-      getAllMatchEnteringHelpersByTournamentId(tournament.id),
-      getAllSetupHelpersByTournamentId(tournament.id),
-    ]);
+  const [
+    participants,
+    referees,
+    jurors,
+    matchEnteringHelpers,
+    setupHelpers,
+    trainers,
+  ] = await Promise.all([
+    getAllParticipantsByTournamentId(tournament.id),
+    getAllRefereesByTournamentId(tournament.id),
+    getAllJurorsByTournamentId(tournament.id),
+    getAllMatchEnteringHelpersByTournamentId(tournament.id),
+    getAllSetupHelpersByTournamentId(tournament.id),
+    getAllTrainersByTournamentId(tournament.id),
+  ]);
 
   return (
     <div className="space-y-6">
@@ -92,7 +101,7 @@ export default async function Page() {
       </div>
 
       <Tabs defaultValue="profiles" className="space-y-4">
-        <TabsList className="grid w-full grid-cols-7">
+        <TabsList className="grid w-full grid-cols-8">
           <TabsTrigger value="profiles" className="flex items-center gap-2">
             <Users className="h-4 w-4" />
             Profile
@@ -117,6 +126,10 @@ export default async function Page() {
             <Wrench className="h-4 w-4" />
             Aufbauhelfer
           </TabsTrigger>
+          <TabsTrigger value="trainers" className="flex items-center gap-2">
+            <Volleyball className="h-4 w-4" />
+            Trainer
+          </TabsTrigger>
           <TabsTrigger value="disabled" className="flex items-center gap-2">
             <UserX className="h-4 w-4" />
             Deaktiviert
@@ -130,6 +143,8 @@ export default async function Page() {
             description={`Gesamtübersicht aller ${allProfiles.length} registrierten Benutzerprofile`}
             icon={Users}
             emptyMessage="Keine Profile gefunden."
+            tournamentId={tournament.id}
+            trainers={trainers}
           />
         </TabsContent>
 
@@ -151,6 +166,8 @@ export default async function Page() {
             description={`${referees.length} Schiedsrichter sind für das Turnier verfügbar`}
             icon={Shield}
             emptyMessage="Keine Schiedsrichter für dieses Turnier gefunden."
+            tournamentId={tournament.id}
+            trainers={[]}
           />
         </TabsContent>
 
@@ -161,6 +178,8 @@ export default async function Page() {
             description={`${jurors.length} Juroren sind Teil des Turniergerichts`}
             icon={Gavel}
             emptyMessage="Keine Juroren für dieses Turnier gefunden."
+            tournamentId={tournament.id}
+            trainers={[]}
           />
         </TabsContent>
 
@@ -171,6 +190,8 @@ export default async function Page() {
             description={`${matchEnteringHelpers.length} Eingabehelfer unterstützen bei der Spieleingabe`}
             icon={ClipboardEdit}
             emptyMessage="Keine Eingabehelfer für dieses Turnier gefunden."
+            tournamentId={tournament.id}
+            trainers={[]}
           />
         </TabsContent>
 
@@ -181,6 +202,20 @@ export default async function Page() {
             description={`${setupHelpers.length} Aufbauhelfer helfen bei der Turniervorbereitung`}
             icon={Wrench}
             emptyMessage="Keine Aufbauhelfer für dieses Turnier gefunden."
+            tournamentId={tournament.id}
+            trainers={[]}
+          />
+        </TabsContent>
+
+        <TabsContent value="trainers" className="space-y-4">
+          <UserList
+            users={trainers.map((t) => t.profile)}
+            title="Trainer"
+            description={`${trainers.length} Trainer können alle Partien sehen`}
+            icon={Volleyball}
+            emptyMessage="Keine Trainer für dieses Turnier gefunden."
+            tournamentId={tournament.id}
+            trainers={[]}
           />
         </TabsContent>
 
@@ -192,6 +227,8 @@ export default async function Page() {
             icon={UserX}
             emptyMessage="Keine deaktivierten Benutzer gefunden."
             isDisabledUsers={true}
+            tournamentId={tournament.id}
+            trainers={[]}
           />
         </TabsContent>
       </Tabs>
@@ -206,6 +243,8 @@ function UserList({
   icon: Icon,
   emptyMessage,
   isDisabledUsers = false,
+  tournamentId,
+  trainers,
 }: {
   users: ProfileWithName[];
   title: string;
@@ -213,6 +252,8 @@ function UserList({
   icon: LucideIcon;
   emptyMessage: string;
   isDisabledUsers?: boolean;
+  tournamentId: number;
+  trainers: { profile: { id: number }; id: number }[];
 }) {
   return (
     <Card>
@@ -232,13 +273,18 @@ function UserList({
           <p className="text-gray-500 text-sm italic">{emptyMessage}</p>
         ) : (
           <div className="space-y-1">
-            {users.map((user) => (
-              <UserRow
-                key={user.id}
-                user={user}
-                showDeleteActions={!isDisabledUsers}
-              />
-            ))}
+            {users.map((user) => {
+              const trainer = trainers.find((t) => t.profile.id === user.id);
+              return (
+                <UserRow
+                  key={user.id}
+                  user={user}
+                  showDeleteActions={!isDisabledUsers}
+                  tournamentId={tournamentId}
+                  trainerId={trainer?.id}
+                />
+              );
+            })}
           </div>
         )}
       </CardContent>

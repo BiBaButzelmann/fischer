@@ -11,6 +11,7 @@ import * as tournamentWeekSchema from "./schema/tournamentWeek";
 import * as setupHelperSchema from "./schema/setupHelper";
 import * as refereeSchema from "./schema/referee";
 import * as jurorSchema from "./schema/juror";
+import * as trainerSchema from "./schema/trainer";
 import * as matchEnteringHelperSchema from "./schema/matchEnteringHelper";
 import * as matchdaySchema from "./schema/matchday";
 import * as gamePostponementSchema from "./schema/gamePostponement";
@@ -30,6 +31,7 @@ export const db = drizzle(pool, {
     ...setupHelperSchema,
     ...refereeSchema,
     ...jurorSchema,
+    ...trainerSchema,
     ...matchEnteringHelperSchema,
     ...matchdaySchema,
     ...gamePostponementSchema,
