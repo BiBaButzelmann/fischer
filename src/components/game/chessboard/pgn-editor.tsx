@@ -9,6 +9,7 @@ import { getIndividualPlayerResult } from "@/lib/game-result-utils";
 import { GameResult } from "@/db/types/game";
 import { useChessEditor } from "@/hooks/use-chess-editor";
 import { useIsMobile } from "@/hooks/use-mobile";
+import { MoveHistory } from "./move-history";
 
 type Props = {
   gameId: number;
@@ -72,27 +73,12 @@ export default function PgnEditor({
           />
         </div>
 
-        <div className="flex-1 min-h-0 overflow-auto bg-blue-200 p-4">
-          Lorem ipsum dolor sit amet consectetur adipisicing elit. Quibusdam
-          delectus quas cumque omnis repellat vitae voluptate facilis rem minus
-          recusandae, ad nihil sunt. Dicta suscipit exercitationem qui culpa!
-          Fugiat, neque. Lorem ipsum dolor sit amet consectetur adipisicing
-          elit. Sequi ducimus explicabo excepturi inventore nihil voluptate
-          fugit sed quaerat amet repellendus dolorem, quam molestias minus,
-          aperiam at! Saepe nam sequi excepturi? Lorem ipsum, dolor sit amet
-          consectetur adipisicing elit. Sit unde nisi sunt illo, beatae omnis
-          earum ad possimus ipsum neque eum soluta minima id sint ratione.
-          Nesciunt aperiam itaque repudiandae. Lorem ipsum dolor sit amet
-          consectetur adipisicing elit. Voluptates, dolore impedit. Perferendis
-          dolorem fugit repudiandae ex molestias amet incidunt, deleniti
-          accusantium nostrum voluptates voluptas corporis repellendus
-          dignissimos, ratione saepe id? Lorem ipsum dolor sit amet consectetur
-          adipisicing elit. Nobis, incidunt porro animi dicta impedit nesciunt
-          quod ex obcaecati repellat itaque voluptatum ea nam inventore deleniti
-          eaque eveniet qui ullam dolorem! Lorem ipsum, dolor sit amet
-          consectetur adipisicing elit. Veritatis ea, voluptas distinctio earum
-          unde natus illum neque illo possimus? Repudiandae saepe voluptatem
-          fugit unde quos non earum, voluptatibus dolorum dolores.
+        <div className="flex-1 min-h-0 overflow-auto ">
+          <MoveHistory
+            moves={moves}
+            currentIndex={currentIndex}
+            setCurrentIndex={setCurrentIndex}
+          />
         </div>
 
         <div className="flex-shrink-0">
