@@ -167,6 +167,7 @@ export default async function Page() {
             icon={Shield}
             emptyMessage="Keine Schiedsrichter für dieses Turnier gefunden."
             tournamentId={tournament.id}
+            trainers={[]}
           />
         </TabsContent>
 
@@ -178,6 +179,7 @@ export default async function Page() {
             icon={Gavel}
             emptyMessage="Keine Juroren für dieses Turnier gefunden."
             tournamentId={tournament.id}
+            trainers={[]}
           />
         </TabsContent>
 
@@ -189,6 +191,7 @@ export default async function Page() {
             icon={ClipboardEdit}
             emptyMessage="Keine Eingabehelfer für dieses Turnier gefunden."
             tournamentId={tournament.id}
+            trainers={[]}
           />
         </TabsContent>
 
@@ -200,6 +203,7 @@ export default async function Page() {
             icon={Wrench}
             emptyMessage="Keine Aufbauhelfer für dieses Turnier gefunden."
             tournamentId={tournament.id}
+            trainers={[]}
           />
         </TabsContent>
 
@@ -211,6 +215,7 @@ export default async function Page() {
             icon={Volleyball}
             emptyMessage="Keine Trainer für dieses Turnier gefunden."
             tournamentId={tournament.id}
+            trainers={[]}
           />
         </TabsContent>
 
@@ -223,6 +228,7 @@ export default async function Page() {
             emptyMessage="Keine deaktivierten Benutzer gefunden."
             isDisabledUsers={true}
             tournamentId={tournament.id}
+            trainers={[]}
           />
         </TabsContent>
       </Tabs>
@@ -238,7 +244,7 @@ function UserList({
   emptyMessage,
   isDisabledUsers = false,
   tournamentId,
-  trainers = [],
+  trainers,
 }: {
   users: ProfileWithName[];
   title: string;
@@ -247,7 +253,7 @@ function UserList({
   emptyMessage: string;
   isDisabledUsers?: boolean;
   tournamentId: number;
-  trainers?: { profile: { id: number }; id: number }[];
+  trainers: { profile: { id: number }; id: number }[];
 }) {
   return (
     <Card>
