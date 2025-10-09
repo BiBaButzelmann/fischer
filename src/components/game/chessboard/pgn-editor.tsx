@@ -40,7 +40,7 @@ export default function PgnEditor({
 
   if (isMobile) {
     return (
-            <div className="flex flex-col h-[calc(100vh-92px)] gap-4">
+      <div className="flex flex-col h-[calc(100vh-92px)] gap-4">
         <div className="flex-shrink-0 border border-gray-200 rounded-lg shadow-sm overflow-hidden">
           <PlayerDisplay
             participant={blackPlayer}
