@@ -6,11 +6,18 @@ import {
   TooltipContent,
   TooltipTrigger,
 } from "@/components/ui/tooltip";
-import { Save, Download, Upload } from "lucide-react";
+import {
+  Save,
+  Download,
+  Upload,
+  ChevronLeft,
+  ChevronRight,
+} from "lucide-react";
 import { useCallback, useRef, useTransition, useState, useMemo } from "react";
 import { Chess, Move } from "chess.js";
 import { savePGN } from "@/actions/pgn";
 import { toast } from "sonner";
+import { useIsMobile } from "@/hooks/use-mobile";
 
 export function movesFromPGN(pgn: string): Move[] {
   const game = new Chess();
@@ -139,6 +146,7 @@ type SaveButtonProps = {
 };
 
 function SaveButton({ pgn, gameId }: SaveButtonProps) {
+  const isMobile = useIsMobile();
   const [isPending, startTransition] = useTransition();
   const [savedPGN, setSavedPGN] = useState(pgn);
 
@@ -164,7 +172,8 @@ function SaveButton({ pgn, gameId }: SaveButtonProps) {
       <TooltipTrigger asChild>
         <Button
           variant={hasUnsavedChanges ? "default" : "outline"}
-          size="icon"
+          size={isMobile ? "default" : "icon"}
+          className={isMobile ? "h-12 px-4" : ""}
           onClick={handleSave}
           disabled={isPending}
         >
@@ -178,6 +187,45 @@ function SaveButton({ pgn, gameId }: SaveButtonProps) {
   );
 }
 
+type NavigationButtonsProps = {
+  moves: Move[];
+  currentIndex: number;
+  setCurrentIndex: (index: number) => void;
+};
+
+function NavigationButtons({
+  moves,
+  currentIndex,
+  setCurrentIndex,
+}: NavigationButtonsProps) {
+  return (
+    <div className="flex gap-2 ml-auto flex-1">
+      <Button
+        type="button"
+        variant="outline"
+        onClick={() => setCurrentIndex(Math.max(-1, currentIndex - 1))}
+        disabled={currentIndex <= -1}
+        className="w-full h-12 touch-manipulation"
+        style={{ touchAction: "manipulation" }}
+      >
+        <ChevronLeft className="h-5 w-5" />
+      </Button>
+      <Button
+        type="button"
+        variant="outline"
+        onClick={() =>
+          setCurrentIndex(Math.min(moves.length - 1, currentIndex + 1))
+        }
+        disabled={currentIndex >= moves.length - 1}
+        className="w-full h-12 touch-manipulation"
+        style={{ touchAction: "manipulation" }}
+      >
+        <ChevronRight className="h-5 w-5" />
+      </Button>
+    </div>
+  );
+}
+
 type PgnViewerActionsProps = {
   pgn: string;
   gameId: number;
@@ -187,6 +235,28 @@ export function PgnViewerActions({ pgn, gameId }: PgnViewerActionsProps) {
   return (
     <div className="flex items-center mt-4 justify-center">
       <DownloadButton pgn={pgn} gameId={gameId} />
+    </div>
+  );
+}
+
+type PgnViewerMobileActionsProps = {
+  moves: Move[];
+  currentIndex: number;
+  setCurrentIndex: (index: number) => void;
+};
+
+export function PgnViewerMobileActions({
+  moves,
+  currentIndex,
+  setCurrentIndex,
+}: PgnViewerMobileActionsProps) {
+  return (
+    <div className="flex items-center gap-2 ">
+      <NavigationButtons
+        moves={moves}
+        currentIndex={currentIndex}
+        setCurrentIndex={setCurrentIndex}
+      />
     </div>
   );
 }
@@ -216,6 +286,34 @@ export function PgnEditorActions({
         <DownloadButton pgn={pgn} gameId={gameId} />
         <UploadButton setMoves={setMoves} setCurrentIndex={setCurrentIndex} />
       </div>
+    </div>
+  );
+}
+
+type PgnEditorMobileActionsProps = {
+  pgn: string;
+  gameId: number;
+  moves: Move[];
+  currentIndex: number;
+  setCurrentIndex: (index: number) => void;
+};
+
+export function PgnEditorMobileActions({
+  pgn,
+  gameId,
+  moves,
+  currentIndex,
+  setCurrentIndex,
+}: PgnEditorMobileActionsProps) {
+  return (
+    <div className="flex items-center gap-2 ">
+      <SaveButton pgn={pgn} gameId={gameId} />
+
+      <NavigationButtons
+        moves={moves}
+        currentIndex={currentIndex}
+        setCurrentIndex={setCurrentIndex}
+      />
     </div>
   );
 }

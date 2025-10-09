@@ -85,7 +85,7 @@ export function MoveHistory({ moves, currentIndex, setCurrentIndex }: Props) {
   }
 
   return (
-    <div className="h-full flex flex-col border-t">
+    <div className="h-full flex flex-col">
       <div
         ref={scrollContainerRef}
         className="flex-1 overflow-y-auto scrollbar-thin scrollbar-thumb-gray-400 scrollbar-track-gray-100"

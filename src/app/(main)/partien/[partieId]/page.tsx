@@ -94,7 +94,7 @@ async function PgnContainer({
         );
 
   return (
-    <div className="mt-2">
+    <div>
       {allowEdit ? (
         <PgnEditor
           gameId={game.id}

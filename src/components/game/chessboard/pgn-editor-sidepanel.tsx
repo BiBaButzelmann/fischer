@@ -7,7 +7,7 @@ import { PgnEditorActions } from "./pgn-actions";
 import { Move } from "chess.js";
 
 type Props = {
-  moves: { san: string }[];
+  moves: Move[];
   currentIndex: number;
   setCurrentIndex: (ply: number) => void;
   setMoves: (moves: Move[]) => void;
