@@ -187,14 +187,14 @@ function SaveButton({ pgn, gameId, size = "default" }: SaveButtonProps) {
 }
 
 type NavigationButtonsProps = {
-  currentIndex: number;
   moves: Move[];
+  currentIndex: number;
   setCurrentIndex: (index: number) => void;
 };
 
 function NavigationButtons({
-  currentIndex,
   moves,
+  currentIndex,
   setCurrentIndex,
 }: NavigationButtonsProps) {
   return (
@@ -239,21 +239,21 @@ export function PgnViewerActions({ pgn, gameId }: PgnViewerActionsProps) {
 }
 
 type PgnViewerMobileActionsProps = {
-  currentIndex: number;
   moves: Move[];
+  currentIndex: number;
   setCurrentIndex: (index: number) => void;
 };
 
 export function PgnViewerMobileActions({
-  currentIndex,
   moves,
+  currentIndex,
   setCurrentIndex,
 }: PgnViewerMobileActionsProps) {
   return (
     <div className="flex items-center gap-2 ">
       <NavigationButtons
-        currentIndex={currentIndex}
         moves={moves}
+        currentIndex={currentIndex}
         setCurrentIndex={setCurrentIndex}
       />
     </div>
@@ -292,16 +292,16 @@ export function PgnEditorActions({
 type PgnEditorMobileActionsProps = {
   pgn: string;
   gameId: number;
-  currentIndex: number;
   moves: Move[];
+  currentIndex: number;
   setCurrentIndex: (index: number) => void;
 };
 
 export function PgnEditorMobileActions({
   pgn,
   gameId,
-  currentIndex,
   moves,
+  currentIndex,
   setCurrentIndex,
 }: PgnEditorMobileActionsProps) {
   return (
@@ -309,8 +309,8 @@ export function PgnEditorMobileActions({
       <SaveButton pgn={pgn} gameId={gameId} size="mobile" />
 
       <NavigationButtons
-        currentIndex={currentIndex}
         moves={moves}
+        currentIndex={currentIndex}
         setCurrentIndex={setCurrentIndex}
       />
     </div>
