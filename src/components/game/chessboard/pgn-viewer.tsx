@@ -30,7 +30,7 @@ export default function PgnViewer({
 }: Props) {
   const moves = useMemo(() => movesFromPGN(initialPGN), [initialPGN]);
   const { currentIndex, setCurrentIndex, fen, pgn } = useChessNavigation(moves);
-  
+
   const isMobile = useIsMobile();
   if (isMobile) {
     return (
