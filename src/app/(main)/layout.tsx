@@ -12,11 +12,11 @@ export default function RootLayout({
     <>
       <AppSidebarWrapper />
       <main className="w-full">
-        <div className="flex items-center justify-between px-4 md:px-10 pt-3">
+        <div className="flex items-center justify-between px-4 md:px-10 pt-3 pb-2 md:py-4">
           <SidebarTrigger className="hover:bg-secondary hover:text-current" />
           <NotificationCenter />
         </div>
-        <div className="min-h-[calc(100vh-69px)] px-4 md:px-10 pb-4 max-w-6xl mx-auto">
+        <div className="min-h-[calc(100vh-69px)] px-4 md:px-10 pb-2 md:pb-4 max-w-6xl mx-auto">
           {children}
         </div>
         <footer>
