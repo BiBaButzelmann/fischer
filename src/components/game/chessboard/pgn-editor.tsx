@@ -3,7 +3,7 @@
 import { Chessboard } from "react-chessboard";
 import { PgnEditorSidepanel } from "./pgn-editor-sidepanel";
 import { PlayerDisplay } from "./player-display";
-import { PgnEditorActions } from "./pgn-actions";
+import { PgnEditorMobileActions } from "./pgn-actions";
 import { ParticipantWithName } from "@/db/types/participant";
 import { getIndividualPlayerResult } from "@/lib/game-result-utils";
 import { GameResult } from "@/db/types/game";
@@ -26,7 +26,6 @@ export default function PgnEditor({
   blackPlayer,
   gameResult,
 }: Props) {
-  const isMobile = useIsMobile();
   const {
     fen,
     onPieceDrop,
@@ -39,6 +38,7 @@ export default function PgnEditor({
     pgn,
   } = useChessEditor(initialPGN, gameId);
 
+  const isMobile = useIsMobile();
   if (isMobile) {
     return (
       <div className="flex flex-col h-[calc(100dvh-4rem)] space-y-2">
@@ -82,10 +82,9 @@ export default function PgnEditor({
         </div>
 
         <div className="flex-shrink-0">
-          <PgnEditorActions
+          <PgnEditorMobileActions
             pgn={pgn}
             gameId={gameId}
-            setMoves={setMoves}
             setCurrentIndex={setCurrentIndex}
             currentIndex={currentIndex}
             moves={moves}

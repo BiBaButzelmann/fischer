@@ -17,7 +17,6 @@ import { useCallback, useRef, useTransition, useState, useMemo } from "react";
 import { Chess, Move } from "chess.js";
 import { savePGN } from "@/actions/pgn";
 import { toast } from "sonner";
-import { useIsMobile } from "@/hooks/use-mobile";
 
 export function movesFromPGN(pgn: string): Move[] {
   const game = new Chess();
@@ -187,6 +186,45 @@ function SaveButton({ pgn, gameId, size = "default" }: SaveButtonProps) {
   );
 }
 
+type NavigationButtonsProps = {
+  currentIndex: number;
+  moves: Move[];
+  setCurrentIndex: (index: number) => void;
+};
+
+function NavigationButtons({
+  currentIndex,
+  moves,
+  setCurrentIndex,
+}: NavigationButtonsProps) {
+  return (
+    <div className="flex gap-2 ml-auto flex-1">
+      <Button
+        type="button"
+        variant="outline"
+        onClick={() => setCurrentIndex(Math.max(-1, currentIndex - 1))}
+        disabled={currentIndex <= -1}
+        className="w-full h-12 touch-manipulation"
+        style={{ touchAction: "manipulation" }}
+      >
+        <ChevronLeft className="h-5 w-5" />
+      </Button>
+      <Button
+        type="button"
+        variant="outline"
+        onClick={() =>
+          setCurrentIndex(Math.min(moves.length - 1, currentIndex + 1))
+        }
+        disabled={currentIndex >= moves.length - 1}
+        className="w-full h-12 touch-manipulation"
+        style={{ touchAction: "manipulation" }}
+      >
+        <ChevronRight className="h-5 w-5" />
+      </Button>
+    </div>
+  );
+}
+
 type PgnViewerActionsProps = {
   pgn: string;
   gameId: number;
@@ -200,13 +238,33 @@ export function PgnViewerActions({ pgn, gameId }: PgnViewerActionsProps) {
   );
 }
 
+type PgnViewerMobileActionsProps = {
+  currentIndex: number;
+  moves: Move[];
+  setCurrentIndex: (index: number) => void;
+};
+
+export function PgnViewerMobileActions({
+  currentIndex,
+  moves,
+  setCurrentIndex,
+}: PgnViewerMobileActionsProps) {
+  return (
+    <div className="flex items-center gap-2 ">
+      <NavigationButtons
+        currentIndex={currentIndex}
+        moves={moves}
+        setCurrentIndex={setCurrentIndex}
+      />
+    </div>
+  );
+}
+
 type PgnEditorActionsProps = {
   pgn: string;
   gameId: number;
   setMoves: (moves: Move[]) => void;
   setCurrentIndex: (index: number) => void;
-  currentIndex: number;
-  moves: Move[];
 };
 
 export function PgnEditorActions({
@@ -214,44 +272,7 @@ export function PgnEditorActions({
   gameId,
   setMoves,
   setCurrentIndex,
-  currentIndex = -1,
-  moves = [],
 }: PgnEditorActionsProps) {
-  const isMobile = useIsMobile();
-
-  if (isMobile) {
-    return (
-      <div className="flex items-center gap-2 ">
-        <SaveButton pgn={pgn} gameId={gameId} size="mobile" />
-
-        <div className="flex gap-2 ml-auto flex-1">
-          <Button
-            type="button"
-            variant="outline"
-            onClick={() => setCurrentIndex(Math.max(-1, currentIndex - 1))}
-            disabled={currentIndex <= -1}
-            className="w-full h-12 touch-manipulation"
-            style={{ touchAction: "manipulation" }}
-          >
-            <ChevronLeft className="h-5 w-5" />
-          </Button>
-          <Button
-            type="button"
-            variant="outline"
-            onClick={() =>
-              setCurrentIndex(Math.min(moves.length - 1, currentIndex + 1))
-            }
-            disabled={currentIndex >= moves.length - 1}
-            className="w-full h-12 touch-manipulation"
-            style={{ touchAction: "manipulation" }}
-          >
-            <ChevronRight className="h-5 w-5" />
-          </Button>
-        </div>
-      </div>
-    );
-  }
-
   return (
     <div className="flex items-center mt-4">
       <div className="flex-1 flex justify-center">
@@ -264,6 +285,34 @@ export function PgnEditorActions({
         <DownloadButton pgn={pgn} gameId={gameId} />
         <UploadButton setMoves={setMoves} setCurrentIndex={setCurrentIndex} />
       </div>
+    </div>
+  );
+}
+
+type PgnEditorMobileActionsProps = {
+  pgn: string;
+  gameId: number;
+  currentIndex: number;
+  moves: Move[];
+  setCurrentIndex: (index: number) => void;
+};
+
+export function PgnEditorMobileActions({
+  pgn,
+  gameId,
+  currentIndex,
+  moves,
+  setCurrentIndex,
+}: PgnEditorMobileActionsProps) {
+  return (
+    <div className="flex items-center gap-2 ">
+      <SaveButton pgn={pgn} gameId={gameId} size="mobile" />
+
+      <NavigationButtons
+        currentIndex={currentIndex}
+        moves={moves}
+        setCurrentIndex={setCurrentIndex}
+      />
     </div>
   );
 }
