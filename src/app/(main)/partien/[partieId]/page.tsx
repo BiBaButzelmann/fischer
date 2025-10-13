@@ -8,9 +8,9 @@ import { getUserGameRights, isGameActuallyPlayed } from "@/lib/game-auth";
 import PgnViewer from "@/components/game/chessboard/pgn-viewer";
 import PgnEditor from "@/components/game/chessboard/pgn-editor";
 import { Suspense } from "react";
-import { DateTime } from "luxon";
 import { getGameTimeFromGame } from "@/lib/game-time";
 import { toDateString } from "@/lib/date";
+import { ChessProvider, PgnHeader } from "@/contexts/chess-context";
 
 type Props = {
   params: Promise<{ partieId: string }>;
@@ -82,23 +82,21 @@ async function PgnContainer({
 
   const gameDateTime = getGameTimeFromGame(game, game.tournament.gameStartTime);
 
-  const pgn =
-    game.pgn != null
-      ? game.pgn.value
-      : getInitialPGN(
-          game.tournament.name,
-          gameDateTime,
-          game.round,
-          getParticipantFullName(game.whiteParticipant),
-          getParticipantFullName(game.blackParticipant),
-        );
+  const header: PgnHeader = {
+    event: game.tournament.name,
+    site: "https://klubturnier.hsk1830.de",
+    date: toDateString(gameDateTime),
+    round: game.round.toString(),
+    white: getParticipantFullName(game.whiteParticipant),
+    black: getParticipantFullName(game.blackParticipant),
+    result: game.result!,
+  };
 
   return (
-    <div>
+    <ChessProvider headers={header} initialPgn={game.pgn?.value}>
       {allowEdit ? (
         <PgnEditor
           gameId={game.id}
-          initialPGN={pgn}
           whitePlayer={game.whiteParticipant}
           blackPlayer={game.blackParticipant}
           gameResult={game.result!}
@@ -106,22 +104,11 @@ async function PgnContainer({
       ) : (
         <PgnViewer
           gameId={game.id}
-          initialPGN={pgn}
           whitePlayer={game.whiteParticipant}
           blackPlayer={game.blackParticipant}
           gameResult={game.result!}
         />
       )}
-    </div>
+    </ChessProvider>
   );
-}
-
-function getInitialPGN(
-  tournamentName: string,
-  date: DateTime,
-  round: number,
-  whiteParticipant: string,
-  blackParticipant: string,
-) {
-  return `[Event "${tournamentName}"]\n[Site "https://klubturnier.hsk1830.de"]\n[Date "${toDateString(date)}"]\n[Round "${round}"]\n[White "${whiteParticipant}"]\n[Black "${blackParticipant}"]\n[Result "*"]\n\n*`;
 }

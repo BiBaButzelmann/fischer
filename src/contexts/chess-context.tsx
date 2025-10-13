@@ -11,8 +11,9 @@ import React, {
 } from "react";
 import { Move, Piece, Chess, Square } from "chess.js";
 import invariant from "tiny-invariant";
+import { computeFenForIndex, computePGNFromMoves } from "@/lib/chess-utils";
 
-export type PgnHeaders = {
+export type PgnHeader = {
   event: string;
   site: string;
   date: string;
@@ -27,9 +28,13 @@ type ChessContextType = {
   fen: string;
   forward: () => void;
   back: () => void;
+  goToStart: () => void;
+  goToEnd: () => void;
   undo: () => void;
   goToMove: (index: number) => void;
-  makeMove: (move: Move, idx: number) => boolean;
+
+  addMove: (move: Move) => boolean;
+  insertAtMove: (move: Move, idx: number) => boolean;
   getPgn: () => string;
   getAllMoves: () => Move[];
   getPiece: (square: string) => Piece | null;
@@ -40,7 +45,7 @@ const ChessContext = createContext<ChessContextType | null>(null);
 
 type Props = {
   children: ReactNode;
-  headers: PgnHeaders;
+  headers: PgnHeader;
   initialPgn?: string;
 };
 
@@ -63,38 +68,14 @@ export function ChessProvider({ children, headers, initialPgn }: Props) {
       chess.loadPgn(initialPgn);
       return chess.history({ verbose: true });
     }
-
     return [];
   });
 
   const [currentIndex, setCurrentIndex] = useState(() => moves.length - 1);
 
-  const syncChessToPosition = useCallback(
-    (targetIndex: number) => {
-      const chess = chessRef.current!;
-      chess.reset();
-
-      chess.setHeader("Event", headers.event);
-      chess.setHeader("Site", headers.site);
-      chess.setHeader("Date", headers.date);
-      chess.setHeader("Round", headers.round);
-      chess.setHeader("White", headers.white);
-      chess.setHeader("Black", headers.black);
-      chess.setHeader("Result", headers.result);
-
-      for (let i = 0; i <= targetIndex; i++) {
-        if (moves[i]) {
-          chess.move(moves[i].san);
-        }
-      }
-    },
-    [moves, headers],
-  );
-
   const fen = useMemo(() => {
-    syncChessToPosition(currentIndex);
-    return chessRef.current!.fen();
-  }, [currentIndex, syncChessToPosition]);
+    return computeFenForIndex(moves, currentIndex);
+  }, [moves, currentIndex]);
 
   const forward = useCallback(() => {
     setCurrentIndex((prev) => Math.min(prev + 1, moves.length - 1));
@@ -103,6 +84,14 @@ export function ChessProvider({ children, headers, initialPgn }: Props) {
   const back = useCallback(() => {
     setCurrentIndex((prev) => Math.max(prev - 1, -1));
   }, []);
+
+  const goToStart = useCallback(() => {
+    setCurrentIndex(-1);
+  }, []);
+
+  const goToEnd = useCallback(() => {
+    setCurrentIndex(moves.length - 1);
+  }, [moves.length]);
 
   const goToMove = useCallback(
     (index: number) => {
@@ -119,14 +108,37 @@ export function ChessProvider({ children, headers, initialPgn }: Props) {
     }
   }, [moves]);
 
-  const makeMove = useCallback(
+  const addMove = useCallback(
+    (move: Move) => {
+      const chess = chessRef.current!;
+
+      if (chess.isGameOver()) {
+        return false;
+      }
+
+      try {
+        const madeMove = chess.move(move);
+        if (madeMove) {
+          const newMoves = [...moves, madeMove];
+          setMoves(newMoves);
+          setCurrentIndex(newMoves.length - 1);
+          return true;
+        }
+        return false;
+      } catch {
+        return false;
+      }
+    },
+    [moves],
+  );
+
+  const insertAtMove = useCallback(
     (move: Move, idx: number) => {
       invariant(
         idx <= moves.length,
         `Index ${idx} cannot be greater than ${moves.length}`,
       );
 
-      syncChessToPosition(idx - 1);
       const chess = chessRef.current!;
 
       if (chess.isGameOver()) {
@@ -146,35 +158,34 @@ export function ChessProvider({ children, headers, initialPgn }: Props) {
         return false;
       }
     },
-    [moves, syncChessToPosition],
+    [moves],
   );
 
   const getPgn = useCallback(() => {
-    syncChessToPosition(currentIndex);
-    return chessRef.current!.pgn();
-  }, [currentIndex, syncChessToPosition]);
+    return computePGNFromMoves(moves);
+  }, [moves]);
 
   const getAllMoves = useMemo(() => moves, [moves]);
 
   const getPiece = useCallback(
     (square: string) => {
-      syncChessToPosition(currentIndex);
-      return chessRef.current!.get(square as Square) || null;
+      const tempChess = new Chess();
+      for (let i = 0; i <= currentIndex && i < moves.length; i++) {
+        tempChess.move(moves[i]);
+      }
+      return tempChess.get(square as Square) || null;
     },
-    [currentIndex, syncChessToPosition],
+    [moves, currentIndex],
   );
 
-  const loadPgn = useCallback(
-    (pgn: string) => {
-      const chess = chessRef.current!;
-      chess.clear({ preserveHeaders: true });
-      chess.loadPgn(pgn);
-      const newMoves = chess.history({ verbose: true });
-      setMoves(newMoves);
-      setCurrentIndex(newMoves.length - 1);
-    },
-    [headers],
-  );
+  const loadPgn = useCallback((pgn: string) => {
+    const chess = chessRef.current!;
+    chess.clear({ preserveHeaders: true });
+    chess.loadPgn(pgn);
+    const newMoves = chess.history({ verbose: true });
+    setMoves(newMoves);
+    setCurrentIndex(newMoves.length - 1);
+  }, []);
 
   const contextValue = useMemo(
     (): ChessContextType => ({
@@ -182,9 +193,12 @@ export function ChessProvider({ children, headers, initialPgn }: Props) {
       fen,
       forward,
       back,
+      goToStart,
+      goToEnd,
       undo,
       goToMove,
-      makeMove,
+      addMove,
+      insertAtMove,
       getPgn,
       getAllMoves: () => getAllMoves,
       getPiece,
@@ -195,9 +209,12 @@ export function ChessProvider({ children, headers, initialPgn }: Props) {
       fen,
       forward,
       back,
+      goToStart,
+      goToEnd,
       undo,
       goToMove,
-      makeMove,
+      addMove,
+      insertAtMove,
       getPgn,
       getAllMoves,
       getPiece,
