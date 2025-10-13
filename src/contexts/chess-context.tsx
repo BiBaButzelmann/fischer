@@ -30,11 +30,8 @@ type ChessContextType = {
   back: () => void;
   goToStart: () => void;
   goToEnd: () => void;
-  undo: () => void;
-  goToMove: (index: number) => void;
-
-  addMove: (move: Move) => boolean;
-  insertAtMove: (move: Move, idx: number) => boolean;
+  setCurrentIndex: (index: number) => void;
+  makeMove: (from: string, to: string, promotion?: string) => boolean;
   getPgn: () => string;
   getAllMoves: () => Move[];
   getPiece: (square: string) => Piece | null;
@@ -93,47 +90,10 @@ export function ChessProvider({ children, headers, initialPgn }: Props) {
     setCurrentIndex(moves.length - 1);
   }, [moves.length]);
 
-  const goToMove = useCallback(
-    (index: number) => {
-      setCurrentIndex(Math.max(-1, Math.min(index, moves.length - 1)));
-    },
-    [moves.length],
-  );
+  const makeMove = useCallback(
+    (from: string, to: string, promotion?: string): boolean => {
+      const idx = currentIndex + 1;
 
-  const undo = useCallback(() => {
-    if (moves.length > 0) {
-      const newMoves = moves.slice(0, -1);
-      setMoves(newMoves);
-      setCurrentIndex((prev) => Math.min(prev, newMoves.length - 1));
-    }
-  }, [moves]);
-
-  const addMove = useCallback(
-    (move: Move) => {
-      const chess = chessRef.current!;
-
-      if (chess.isGameOver()) {
-        return false;
-      }
-
-      try {
-        const madeMove = chess.move(move);
-        if (madeMove) {
-          const newMoves = [...moves, madeMove];
-          setMoves(newMoves);
-          setCurrentIndex(newMoves.length - 1);
-          return true;
-        }
-        return false;
-      } catch {
-        return false;
-      }
-    },
-    [moves],
-  );
-
-  const insertAtMove = useCallback(
-    (move: Move, idx: number) => {
       invariant(
         idx <= moves.length,
         `Index ${idx} cannot be greater than ${moves.length}`,
@@ -141,14 +101,27 @@ export function ChessProvider({ children, headers, initialPgn }: Props) {
 
       const chess = chessRef.current!;
 
+      chess.clear();
+      for (let i = 0; i <= currentIndex && i < moves.length; i++) {
+        chess.move(moves[i]);
+      }
+
       if (chess.isGameOver()) {
         return false;
       }
 
       try {
-        const madeMove = chess.move(move);
-        if (madeMove) {
-          const newMoves = [...moves.slice(0, idx), madeMove];
+        const moveOptions: { from: string; to: string; promotion?: string } = {
+          from,
+          to,
+        };
+        if (promotion) {
+          moveOptions.promotion = promotion;
+        }
+
+        const move = chess.move(moveOptions);
+        if (move) {
+          const newMoves = [...moves.slice(0, idx), move];
           setMoves(newMoves);
           setCurrentIndex(idx);
           return true;
@@ -158,7 +131,7 @@ export function ChessProvider({ children, headers, initialPgn }: Props) {
         return false;
       }
     },
-    [moves],
+    [moves, currentIndex],
   );
 
   const getPgn = useCallback(() => {
@@ -195,10 +168,8 @@ export function ChessProvider({ children, headers, initialPgn }: Props) {
       back,
       goToStart,
       goToEnd,
-      undo,
-      goToMove,
-      addMove,
-      insertAtMove,
+      setCurrentIndex,
+      makeMove,
       getPgn,
       getAllMoves: () => getAllMoves,
       getPiece,
@@ -211,10 +182,8 @@ export function ChessProvider({ children, headers, initialPgn }: Props) {
       back,
       goToStart,
       goToEnd,
-      undo,
-      goToMove,
-      addMove,
-      insertAtMove,
+      setCurrentIndex,
+      makeMove,
       getPgn,
       getAllMoves,
       getPiece,

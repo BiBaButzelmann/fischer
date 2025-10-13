@@ -10,7 +10,6 @@ type Props = {
   moves: Move[];
   currentIndex: number;
   setCurrentIndex: (ply: number) => void;
-  setMoves: (moves: Move[]) => void;
   pgn: string;
   gameId: number;
   fen: string;
@@ -20,7 +19,6 @@ export function PgnEditorSidepanel({
   moves,
   currentIndex,
   setCurrentIndex,
-  setMoves,
   pgn,
   gameId,
   fen,
@@ -35,14 +33,7 @@ export function PgnEditorSidepanel({
           setCurrentIndex={setCurrentIndex}
         />
       }
-      footer={
-        <PgnEditorActions
-          pgn={pgn}
-          gameId={gameId}
-          setMoves={setMoves}
-          setCurrentIndex={setCurrentIndex}
-        />
-      }
+      footer={<PgnEditorActions gameId={gameId} pgn={pgn} />}
     />
   );
 }

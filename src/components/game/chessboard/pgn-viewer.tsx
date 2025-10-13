@@ -1,6 +1,5 @@
 "use client";
 
-import { useMemo } from "react";
 import { Chessboard } from "react-chessboard";
 import { PgnViewerSidepanel } from "./pgn-viewer-sidepanel";
 import { PlayerDisplay } from "./player-display";
@@ -8,14 +7,13 @@ import { PgnViewerMobileActions } from "./pgn-actions";
 import { ParticipantWithName } from "@/db/types/participant";
 import { getIndividualPlayerResult } from "@/lib/game-result-utils";
 import { GameResult } from "@/db/types/game";
-import { movesFromPGN } from "./pgn-actions";
 import { useChessNavigation } from "@/hooks/use-chess-navigation";
+import { useChess } from "@/contexts/chess-context";
 import { useIsMobile } from "@/hooks/use-mobile";
 import { MoveHistory } from "./move-history";
 
 type Props = {
   gameId: number;
-  initialPGN: string;
   whitePlayer: ParticipantWithName;
   blackPlayer: ParticipantWithName;
   gameResult: GameResult;
@@ -23,13 +21,15 @@ type Props = {
 
 export default function PgnViewer({
   gameId,
-  initialPGN,
   whitePlayer,
   blackPlayer,
   gameResult,
 }: Props) {
-  const moves = useMemo(() => movesFromPGN(initialPGN), [initialPGN]);
-  const { currentIndex, setCurrentIndex, fen, pgn } = useChessNavigation(moves);
+  const { currentIndex, setCurrentIndex, fen, getAllMoves, getPgn } =
+    useChess();
+  const moves = getAllMoves();
+  const pgn = getPgn();
+  useChessNavigation();
 
   const isMobile = useIsMobile();
   if (isMobile) {

@@ -10,10 +10,10 @@ import { GameResult } from "@/db/types/game";
 import { useChessEditor } from "@/hooks/use-chess-editor";
 import { useIsMobile } from "@/hooks/use-mobile";
 import { MoveHistory } from "./move-history";
+import { useChess } from "@/contexts/chess-context";
 
 type Props = {
   gameId: number;
-  initialPGN: string;
   whitePlayer: ParticipantWithName;
   blackPlayer: ParticipantWithName;
   gameResult: GameResult;
@@ -21,7 +21,6 @@ type Props = {
 
 export default function PgnEditor({
   gameId,
-  initialPGN,
   whitePlayer,
   blackPlayer,
   gameResult,
@@ -34,10 +33,10 @@ export default function PgnEditor({
     moves,
     currentIndex,
     setCurrentIndex,
-    setMoves,
-    pgn,
-  } = useChessEditor(initialPGN, gameId);
+  } = useChessEditor(gameId);
 
+  const { getPgn } = useChess();
+  const pgn = getPgn();
   const isMobile = useIsMobile();
   if (isMobile) {
     return (
@@ -132,7 +131,6 @@ export default function PgnEditor({
           moves={moves}
           currentIndex={currentIndex}
           setCurrentIndex={setCurrentIndex}
-          setMoves={setMoves}
           pgn={pgn}
           gameId={gameId}
           fen={fen}

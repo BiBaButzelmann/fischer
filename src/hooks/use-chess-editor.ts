@@ -1,45 +1,13 @@
-import { Square } from "chess.js";
-import { useCallback, useEffect, useState } from "react";
-import { movesFromPGN } from "@/components/game/chessboard/pgn-actions";
-import { currentBoardState } from "@/lib/chess-utils";
+import { useCallback, useState } from "react";
 import { useChessNavigation } from "./use-chess-navigation";
+import { useChess } from "@/contexts/chess-context";
 
-export function useChessEditor(initialPGN: string, gameId: number) {
-  const [moves, setMoves] = useState(() => movesFromPGN(initialPGN));
+export function useChessEditor(gameId: number) {
   const [selectedSquare, setSelectedSquare] = useState<string | null>(null);
-
-  useEffect(() => {
-    const newMoves = movesFromPGN(initialPGN);
-    setMoves(newMoves);
-  }, [initialPGN]);
-
-  const { currentIndex, setCurrentIndex, fen, pgn } =
-    useChessNavigation(moves);
-
-  const makeMove = useCallback(
-    (from: string, to: string, promotion?: string): boolean => {
-      const boardState = currentBoardState(moves, currentIndex);
-
-      try {
-        const moveOptions: { from: string; to: string; promotion?: string } = {
-          from,
-          to,
-        };
-        if (promotion) {
-          moveOptions.promotion = promotion;
-        }
-
-        const move = boardState.move(moveOptions);
-        const updatedMoves = moves.slice(0, currentIndex + 1).concat(move);
-        setMoves(updatedMoves);
-        setCurrentIndex(updatedMoves.length - 1);
-        return true;
-      } catch {
-        return false;
-      }
-    },
-    [moves, currentIndex, setMoves, setCurrentIndex],
-  );
+  const { currentIndex, setCurrentIndex, fen, getAllMoves, makeMove, getPiece } = useChess();
+  const moves = getAllMoves();
+  
+  useChessNavigation();
 
   const handleDrop = useCallback(
     (sourceSquare: string, targetSquare: string, piece?: string): boolean => {
@@ -58,8 +26,7 @@ export function useChessEditor(initialPGN: string, gameId: number) {
 
   const handleSquareClick = useCallback(
     (square: string) => {
-      const boardState = currentBoardState(moves, currentIndex);
-      const piece = boardState.get(square as Square);
+      const piece = getPiece(square);
 
       if (selectedSquare) {
         if (selectedSquare === square) {
@@ -74,7 +41,7 @@ export function useChessEditor(initialPGN: string, gameId: number) {
         }
       }
     },
-    [moves, currentIndex, selectedSquare, makeMove],
+    [selectedSquare, makeMove, getPiece],
   );
 
   return {
@@ -85,8 +52,6 @@ export function useChessEditor(initialPGN: string, gameId: number) {
     moves,
     currentIndex,
     setCurrentIndex,
-    setMoves,
-    pgn,
     gameId,
   };
 }
