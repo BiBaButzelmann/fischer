@@ -18,6 +18,7 @@ import { Chess, Move } from "chess.js";
 import { savePGN } from "@/actions/pgn";
 import { toast } from "sonner";
 import { useIsMobile } from "@/hooks/use-mobile";
+import { useChess } from "@/contexts/chess-context";
 
 export function movesFromPGN(pgn: string): Move[] {
   const game = new Chess();
@@ -36,31 +37,6 @@ function downloadPGN(pgn: string, gameId: number) {
   document.body.removeChild(link);
   URL.revokeObjectURL(url);
   toast.success("PGN erfolgreich heruntergeladen");
-}
-
-function uploadPGN(file: File, onSuccess: (moves: Move[]) => void): void {
-  if (!file.name.toLowerCase().endsWith(".pgn")) {
-    toast.error("Bitte wähle eine .pgn Datei aus.");
-    return;
-  }
-
-  const reader = new FileReader();
-  reader.onload = (e) => {
-    const content = e.target?.result as string;
-    if (!content?.trim()) {
-      toast.error("PGN darf nicht leer sein.");
-      return;
-    }
-
-    try {
-      const newMoves = movesFromPGN(content.trim());
-      onSuccess(newMoves);
-      toast.success("PGN erfolgreich hochgeladen");
-    } catch {
-      toast.error("Ungültige PGN-Datei");
-    }
-  };
-  reader.readAsText(file);
 }
 
 type DownloadButtonProps = {
@@ -87,13 +63,9 @@ function DownloadButton({ pgn, gameId }: DownloadButtonProps) {
   );
 }
 
-type UploadButtonProps = {
-  setMoves: (moves: Move[]) => void;
-  setCurrentIndex: (index: number) => void;
-};
-
-function UploadButton({ setMoves, setCurrentIndex }: UploadButtonProps) {
+function UploadButton() {
   const fileInputRef = useRef<HTMLInputElement>(null);
+  const { loadPgn } = useChess();
 
   const handleUpload = useCallback(() => {
     fileInputRef.current?.click();
@@ -104,16 +76,20 @@ function UploadButton({ setMoves, setCurrentIndex }: UploadButtonProps) {
       const file = event.target.files?.[0];
       if (!file) return;
 
-      uploadPGN(file, (newMoves) => {
-        setMoves(newMoves);
-        setCurrentIndex(newMoves.length - 1);
-      });
+      const reader = new FileReader();
+      reader.onload = (e) => {
+        const pgn = e.target?.result as string;
+        if (pgn) {
+          loadPgn(pgn);
+        }
+      };
+      reader.readAsText(file);
 
       if (fileInputRef.current) {
         fileInputRef.current.value = "";
       }
     },
-    [setMoves, setCurrentIndex],
+    [loadPgn],
   );
 
   return (
@@ -227,11 +203,11 @@ function NavigationButtons({
 }
 
 type PgnViewerActionsProps = {
-  pgn: string;
   gameId: number;
+  pgn: string;
 };
 
-export function PgnViewerActions({ pgn, gameId }: PgnViewerActionsProps) {
+export function PgnViewerActions({ gameId, pgn }: PgnViewerActionsProps) {
   return (
     <div className="flex items-center mt-4 justify-center">
       <DownloadButton pgn={pgn} gameId={gameId} />
@@ -262,18 +238,11 @@ export function PgnViewerMobileActions({
 }
 
 type PgnEditorActionsProps = {
-  pgn: string;
   gameId: number;
-  setMoves: (moves: Move[]) => void;
-  setCurrentIndex: (index: number) => void;
+  pgn: string;
 };
 
-export function PgnEditorActions({
-  pgn,
-  gameId,
-  setMoves,
-  setCurrentIndex,
-}: PgnEditorActionsProps) {
+export function PgnEditorActions({ gameId, pgn }: PgnEditorActionsProps) {
   return (
     <div className="flex items-center mt-4">
       <div className="flex-1 flex justify-center">
@@ -284,23 +253,23 @@ export function PgnEditorActions({
 
       <div className="flex-1 flex justify-center gap-2">
         <DownloadButton pgn={pgn} gameId={gameId} />
-        <UploadButton setMoves={setMoves} setCurrentIndex={setCurrentIndex} />
+        <UploadButton />
       </div>
     </div>
   );
 }
 
 type PgnEditorMobileActionsProps = {
-  pgn: string;
   gameId: number;
+  pgn: string;
   moves: Move[];
   currentIndex: number;
   setCurrentIndex: (index: number) => void;
 };
 
 export function PgnEditorMobileActions({
-  pgn,
   gameId,
+  pgn,
   moves,
   currentIndex,
   setCurrentIndex,
