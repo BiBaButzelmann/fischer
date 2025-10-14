@@ -7,7 +7,6 @@ import { PgnViewerMobileActions } from "./pgn-actions";
 import { ParticipantWithName } from "@/db/types/participant";
 import { getIndividualPlayerResult } from "@/lib/game-result-utils";
 import { GameResult } from "@/db/types/game";
-import { useChessNavigation } from "@/hooks/use-chess-navigation";
 import { useChess } from "@/contexts/chess-context";
 import { useIsMobile } from "@/hooks/use-mobile";
 import { MoveHistory } from "./move-history";
@@ -26,7 +25,6 @@ export default function PgnViewer({
   gameResult,
 }: Props) {
   const { fen } = useChess();
-  useChessNavigation();
 
   const isMobile = useIsMobile();
   if (isMobile) {
