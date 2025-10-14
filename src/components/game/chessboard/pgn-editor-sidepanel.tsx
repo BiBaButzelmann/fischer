@@ -4,28 +4,17 @@ import { Sidepanel } from "./sidepanel";
 import { EnginePanel } from "./engine-panel";
 import { MoveHistory } from "./move-history";
 import { PgnEditorActions } from "./pgn-actions";
-import { Move } from "chess.js";
+import { useChess } from "@/contexts/chess-context";
 
 type Props = {
-  moves: Move[];
-  currentIndex: number;
-  setCurrentIndex: (ply: number) => void;
-  pgn: string;
   gameId: number;
-  fen: string;
 };
 
-export function PgnEditorSidepanel({
-  moves,
-  currentIndex,
-  setCurrentIndex,
-  pgn,
-  gameId,
-  fen,
-}: Props) {
+export function PgnEditorSidepanel({ gameId }: Props) {
+  const { moves, currentIndex, setCurrentIndex } = useChess();
   return (
     <Sidepanel
-      header={<EnginePanel fen={fen} />}
+      header={<EnginePanel />}
       content={
         <MoveHistory
           moves={moves}
@@ -33,7 +22,7 @@ export function PgnEditorSidepanel({
           setCurrentIndex={setCurrentIndex}
         />
       }
-      footer={<PgnEditorActions pgn={pgn} gameId={gameId} />}
+      footer={<PgnEditorActions gameId={gameId} />}
     />
   );
 }

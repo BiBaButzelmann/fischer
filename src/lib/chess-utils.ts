@@ -13,8 +13,20 @@ export function computeFenForIndex(moves: Move[], index: number): string {
   return currentState.fen();
 }
 
-export function computePGNFromMoves(moves: Move[]): string {
+export function computePGNFromMoves(
+  moves: Move[],
+  headers?: Record<string, string>,
+): string {
   const chess = new Chess();
+
+  if (headers) {
+    for (const [key, value] of Object.entries(headers)) {
+      if (value) {
+        chess.setHeader(key, value);
+      }
+    }
+  }
+
   for (const move of moves) {
     chess.move(move);
   }

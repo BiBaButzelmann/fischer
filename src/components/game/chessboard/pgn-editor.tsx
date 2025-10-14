@@ -10,7 +10,6 @@ import { GameResult } from "@/db/types/game";
 import { useChessEditor } from "@/hooks/use-chess-editor";
 import { useIsMobile } from "@/hooks/use-mobile";
 import { MoveHistory } from "./move-history";
-import { useChess } from "@/contexts/chess-context";
 
 type Props = {
   gameId: number;
@@ -33,10 +32,7 @@ export default function PgnEditor({
     moves,
     currentIndex,
     setCurrentIndex,
-  } = useChessEditor(gameId);
-
-  const { getPgn } = useChess();
-  const pgn = getPgn();
+  } = useChessEditor();
   const isMobile = useIsMobile();
   if (isMobile) {
     return (
@@ -81,13 +77,7 @@ export default function PgnEditor({
         </div>
 
         <div className="flex-shrink-0">
-          <PgnEditorMobileActions
-            pgn={pgn}
-            gameId={gameId}
-            setCurrentIndex={setCurrentIndex}
-            currentIndex={currentIndex}
-            moves={moves}
-          />
+          <PgnEditorMobileActions gameId={gameId} />
         </div>
       </div>
     );
@@ -127,14 +117,7 @@ export default function PgnEditor({
       </div>
 
       <div className="w-full lg:w-80 flex-shrink-0">
-        <PgnEditorSidepanel
-          moves={moves}
-          currentIndex={currentIndex}
-          setCurrentIndex={setCurrentIndex}
-          pgn={pgn}
-          gameId={gameId}
-          fen={fen}
-        />
+        <PgnEditorSidepanel gameId={gameId} />
       </div>
     </div>
   );

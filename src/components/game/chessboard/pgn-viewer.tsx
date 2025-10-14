@@ -25,10 +25,7 @@ export default function PgnViewer({
   blackPlayer,
   gameResult,
 }: Props) {
-  const { currentIndex, setCurrentIndex, fen, getAllMoves, getPgn } =
-    useChess();
-  const moves = getAllMoves();
-  const pgn = getPgn();
+  const { currentIndex, setCurrentIndex, fen, moves } = useChess();
   useChessNavigation();
 
   const isMobile = useIsMobile();
@@ -66,11 +63,7 @@ export default function PgnViewer({
         </div>
 
         <div className="flex-shrink-0">
-          <PgnViewerMobileActions
-            currentIndex={currentIndex}
-            moves={moves}
-            setCurrentIndex={setCurrentIndex}
-          />
+          <PgnViewerMobileActions />
         </div>
       </div>
     );
@@ -101,14 +94,7 @@ export default function PgnViewer({
       </div>
 
       <div className="w-full lg:w-80 flex-shrink-0">
-        <PgnViewerSidepanel
-          moves={moves}
-          currentIndex={currentIndex}
-          setCurrentIndex={setCurrentIndex}
-          pgn={pgn}
-          gameId={gameId}
-          fen={fen}
-        />
+        <PgnViewerSidepanel gameId={gameId} />
       </div>
     </div>
   );

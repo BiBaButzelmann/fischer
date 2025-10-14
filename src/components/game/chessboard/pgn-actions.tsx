@@ -13,18 +13,18 @@ import {
   ChevronLeft,
   ChevronRight,
 } from "lucide-react";
-import { useCallback, useRef, useTransition, useState, useMemo } from "react";
-import { Chess, Move } from "chess.js";
+import {
+  useCallback,
+  useRef,
+  useTransition,
+  useState,
+  useMemo,
+  useEffect,
+} from "react";
 import { savePGN } from "@/actions/pgn";
 import { toast } from "sonner";
 import { useIsMobile } from "@/hooks/use-mobile";
 import { useChess } from "@/contexts/chess-context";
-
-export function movesFromPGN(pgn: string): Move[] {
-  const game = new Chess();
-  game.loadPgn(pgn);
-  return game.history({ verbose: true });
-}
 
 function downloadPGN(pgn: string, gameId: number) {
   const blob = new Blob([pgn], { type: "text/plain" });
@@ -40,11 +40,11 @@ function downloadPGN(pgn: string, gameId: number) {
 }
 
 type DownloadButtonProps = {
-  pgn: string;
   gameId: number;
 };
 
-function DownloadButton({ pgn, gameId }: DownloadButtonProps) {
+function DownloadButton({ gameId }: DownloadButtonProps) {
+  const { pgn } = useChess();
   const handleDownload = useCallback(() => {
     downloadPGN(pgn, gameId);
   }, [pgn, gameId]);
@@ -117,14 +117,22 @@ function UploadButton() {
 }
 
 type SaveButtonProps = {
-  pgn: string;
   gameId: number;
 };
 
-function SaveButton({ pgn, gameId }: SaveButtonProps) {
+function SaveButton({ gameId }: SaveButtonProps) {
+  const { pgn } = useChess();
   const isMobile = useIsMobile();
   const [isPending, startTransition] = useTransition();
   const [savedPGN, setSavedPGN] = useState(pgn);
+  const prevGameIdRef = useRef(gameId);
+
+  useEffect(() => {
+    if (prevGameIdRef.current !== gameId) {
+      setSavedPGN(pgn);
+      prevGameIdRef.current = gameId;
+    }
+  }, [gameId, pgn]);
 
   const hasUnsavedChanges = useMemo(() => {
     return pgn !== savedPGN;
@@ -163,23 +171,14 @@ function SaveButton({ pgn, gameId }: SaveButtonProps) {
   );
 }
 
-type NavigationButtonsProps = {
-  moves: Move[];
-  currentIndex: number;
-  setCurrentIndex: (index: number) => void;
-};
-
-function NavigationButtons({
-  moves,
-  currentIndex,
-  setCurrentIndex,
-}: NavigationButtonsProps) {
+function NavigationButtons() {
+  const { moves, currentIndex, back, forward } = useChess();
   return (
     <div className="flex gap-2 ml-auto flex-1">
       <Button
         type="button"
         variant="outline"
-        onClick={() => setCurrentIndex(Math.max(-1, currentIndex - 1))}
+        onClick={back}
         disabled={currentIndex <= -1}
         className="w-full h-12 touch-manipulation"
         style={{ touchAction: "manipulation" }}
@@ -189,9 +188,7 @@ function NavigationButtons({
       <Button
         type="button"
         variant="outline"
-        onClick={() =>
-          setCurrentIndex(Math.min(moves.length - 1, currentIndex + 1))
-        }
+        onClick={forward}
         disabled={currentIndex >= moves.length - 1}
         className="w-full h-12 touch-manipulation"
         style={{ touchAction: "manipulation" }}
@@ -203,56 +200,40 @@ function NavigationButtons({
 }
 
 type PgnViewerActionsProps = {
-  pgn: string;
   gameId: number;
 };
 
-export function PgnViewerActions({ pgn, gameId }: PgnViewerActionsProps) {
+export function PgnViewerActions({ gameId }: PgnViewerActionsProps) {
   return (
     <div className="flex items-center mt-4 justify-center">
-      <DownloadButton pgn={pgn} gameId={gameId} />
+      <DownloadButton gameId={gameId} />
     </div>
   );
 }
 
-type PgnViewerMobileActionsProps = {
-  moves: Move[];
-  currentIndex: number;
-  setCurrentIndex: (index: number) => void;
-};
-
-export function PgnViewerMobileActions({
-  moves,
-  currentIndex,
-  setCurrentIndex,
-}: PgnViewerMobileActionsProps) {
+export function PgnViewerMobileActions() {
   return (
     <div className="flex items-center gap-2 ">
-      <NavigationButtons
-        moves={moves}
-        currentIndex={currentIndex}
-        setCurrentIndex={setCurrentIndex}
-      />
+      <NavigationButtons />
     </div>
   );
 }
 
 type PgnEditorActionsProps = {
-  pgn: string;
   gameId: number;
 };
 
-export function PgnEditorActions({ pgn, gameId }: PgnEditorActionsProps) {
+export function PgnEditorActions({ gameId }: PgnEditorActionsProps) {
   return (
     <div className="flex items-center mt-4">
       <div className="flex-1 flex justify-center">
-        <SaveButton pgn={pgn} gameId={gameId} />
+        <SaveButton gameId={gameId} />
       </div>
 
       <div className="w-px h-8 bg-border" />
 
       <div className="flex-1 flex justify-center gap-2">
-        <DownloadButton pgn={pgn} gameId={gameId} />
+        <DownloadButton gameId={gameId} />
         <UploadButton />
       </div>
     </div>
@@ -260,29 +241,17 @@ export function PgnEditorActions({ pgn, gameId }: PgnEditorActionsProps) {
 }
 
 type PgnEditorMobileActionsProps = {
-  pgn: string;
   gameId: number;
-  moves: Move[];
-  currentIndex: number;
-  setCurrentIndex: (index: number) => void;
 };
 
 export function PgnEditorMobileActions({
-  pgn,
   gameId,
-  moves,
-  currentIndex,
-  setCurrentIndex,
 }: PgnEditorMobileActionsProps) {
   return (
     <div className="flex items-center gap-2 ">
-      <SaveButton pgn={pgn} gameId={gameId} />
+      <SaveButton gameId={gameId} />
 
-      <NavigationButtons
-        moves={moves}
-        currentIndex={currentIndex}
-        setCurrentIndex={setCurrentIndex}
-      />
+      <NavigationButtons />
     </div>
   );
 }

@@ -2,10 +2,11 @@
 
 import clsx from "clsx";
 import { useEffect, useRef } from "react";
+import { Move } from "chess.js";
 import { toGermanNotation } from "@/lib/chess-notation";
 
 type Props = {
-  moves: { san: string }[];
+  moves: Move[];
   currentIndex: number;
   setCurrentIndex: (ply: number) => void;
 };
