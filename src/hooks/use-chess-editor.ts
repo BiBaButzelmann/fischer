@@ -4,7 +4,7 @@ import { useChess } from "@/contexts/chess-context";
 
 export function useChessEditor() {
   const [selectedSquare, setSelectedSquare] = useState<string | null>(null);
-  const { currentIndex, setCurrentIndex, fen, makeMove, getPiece, moves } = useChess();
+  const { fen, makeMove, getPiece } = useChess();
 
   const handleDrop = useCallback(
     (sourceSquare: string, targetSquare: string, piece?: string): boolean => {
@@ -53,8 +53,5 @@ export function useChessEditor() {
     onPieceDrop: handleDrop,
     onSquareClick: handleSquareClick,
     selectedSquare,
-    moves,
-    currentIndex,
-    setCurrentIndex,
   };
 }
