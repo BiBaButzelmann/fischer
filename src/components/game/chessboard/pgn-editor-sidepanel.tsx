@@ -33,7 +33,7 @@ export function PgnEditorSidepanel({
           setCurrentIndex={setCurrentIndex}
         />
       }
-      footer={<PgnEditorActions gameId={gameId} pgn={pgn} />}
+      footer={<PgnEditorActions pgn={pgn} gameId={gameId} />}
     />
   );
 }

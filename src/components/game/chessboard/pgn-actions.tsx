@@ -203,11 +203,11 @@ function NavigationButtons({
 }
 
 type PgnViewerActionsProps = {
-  gameId: number;
   pgn: string;
+  gameId: number;
 };
 
-export function PgnViewerActions({ gameId, pgn }: PgnViewerActionsProps) {
+export function PgnViewerActions({ pgn, gameId }: PgnViewerActionsProps) {
   return (
     <div className="flex items-center mt-4 justify-center">
       <DownloadButton pgn={pgn} gameId={gameId} />
@@ -238,11 +238,11 @@ export function PgnViewerMobileActions({
 }
 
 type PgnEditorActionsProps = {
-  gameId: number;
   pgn: string;
+  gameId: number;
 };
 
-export function PgnEditorActions({ gameId, pgn }: PgnEditorActionsProps) {
+export function PgnEditorActions({ pgn, gameId }: PgnEditorActionsProps) {
   return (
     <div className="flex items-center mt-4">
       <div className="flex-1 flex justify-center">
@@ -260,16 +260,16 @@ export function PgnEditorActions({ gameId, pgn }: PgnEditorActionsProps) {
 }
 
 type PgnEditorMobileActionsProps = {
-  gameId: number;
   pgn: string;
+  gameId: number;
   moves: Move[];
   currentIndex: number;
   setCurrentIndex: (index: number) => void;
 };
 
 export function PgnEditorMobileActions({
-  gameId,
   pgn,
+  gameId,
   moves,
   currentIndex,
   setCurrentIndex,
