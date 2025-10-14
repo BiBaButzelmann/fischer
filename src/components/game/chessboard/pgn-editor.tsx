@@ -24,12 +24,7 @@ export default function PgnEditor({
   blackPlayer,
   gameResult,
 }: Props) {
-  const {
-    fen,
-    onPieceDrop,
-    onSquareClick,
-    selectedSquare,
-  } = useChessEditor();
+  const { fen, onPieceDrop, onSquareClick, selectedSquare } = useChessEditor();
 
   const isMobile = useIsMobile();
   if (isMobile) {

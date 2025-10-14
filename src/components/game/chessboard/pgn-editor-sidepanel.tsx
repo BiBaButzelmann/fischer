@@ -13,9 +13,7 @@ export function PgnEditorSidepanel({ gameId }: Props) {
   return (
     <Sidepanel
       header={<EnginePanel />}
-      content={
-        <MoveHistory />
-      }
+      content={<MoveHistory />}
       footer={<PgnEditorActions gameId={gameId} />}
     />
   );

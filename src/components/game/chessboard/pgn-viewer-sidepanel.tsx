@@ -13,9 +13,7 @@ export function PgnViewerSidepanel({ gameId }: Props) {
   return (
     <Sidepanel
       header={<EnginePanel />}
-      content={
-        <MoveHistory />
-      }
+      content={<MoveHistory />}
       footer={<PgnViewerActions gameId={gameId} />}
     />
   );
