@@ -80,7 +80,12 @@ function UploadButton() {
       reader.onload = (e) => {
         const pgn = e.target?.result as string;
         if (pgn) {
-          loadPgn(pgn);
+          const success = loadPgn(pgn);
+          if (success) {
+            toast.success("PGN erfolgreich geladen");
+          } else {
+            toast.error("Ungültige PGN-Datei");
+          }
         }
       };
       reader.readAsText(file);

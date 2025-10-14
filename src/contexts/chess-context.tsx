@@ -39,7 +39,7 @@ type ChessContextType = {
   setCurrentIndex: (index: number) => void;
   makeMove: (move: Pick<Move, "from" | "to" | "promotion">) => boolean;
   getPiece: (square: string) => Piece | null;
-  loadPgn: (pgn: string) => void;
+  loadPgn: (pgn: string) => boolean;
 };
 
 const ChessContext = createContext<ChessContextType | null>(null);
@@ -52,10 +52,15 @@ function toHeaderRecord(headers: PgnHeader): Record<string, string> {
     Round: headers.round,
     White: headers.white,
     Black: headers.black,
-    Result: headers.result,
+    Result: normalizeResult(headers.result),
   };
 }
 
+//TODO: cleanup db entries, all results shall be stored with a "-"
+function normalizeResult(result: string): string {
+  const trimmed = result.trim();
+  return trimmed.includes(":") ? trimmed.replace(/:/g, "-") : trimmed;
+}
 function applyHeaders(chess: Chess, headerRecord: Record<string, string>) {
   for (const [key, value] of Object.entries(headerRecord)) {
     if (value) {
@@ -80,7 +85,12 @@ export function ChessProvider({ children, headers, initialPgn }: Props) {
 
     const chess = new Chess();
     applyHeaders(chess, headersRef.current);
-    chess.loadPgn(initialPgn);
+    try {
+      chess.loadPgn(initialPgn);
+    } catch (error) {
+      console.error("Failed to load initial PGN", error);
+      return [];
+    }
     return chess.history({ verbose: true });
   });
 
@@ -176,10 +186,18 @@ export function ChessProvider({ children, headers, initialPgn }: Props) {
   const loadPgn = useCallback((pgn: string) => {
     const chess = new Chess();
     applyHeaders(chess, headersRef.current);
-    chess.loadPgn(pgn);
+
+    try {
+      chess.loadPgn(pgn);
+    } catch (error) {
+      console.error("Failed to load PGN", error);
+      return false;
+    }
+
     const newMoves = chess.history({ verbose: true });
     setMoves(newMoves);
     setCurrentIndexState(newMoves.length > 0 ? newMoves.length - 1 : -1);
+    return true;
   }, []);
 
   const contextValue = useMemo(
