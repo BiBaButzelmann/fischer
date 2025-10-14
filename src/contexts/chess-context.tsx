@@ -11,11 +11,8 @@ import React, {
 } from "react";
 import { Move, Piece, Chess, Square } from "chess.js";
 import invariant from "tiny-invariant";
-import {
-  computeFenForIndex,
-  computePGNFromMoves,
-  currentBoardState,
-} from "@/lib/chess-utils";
+import { computePGNFromMoves } from "@/lib/chess-utils";
+import { toast } from "sonner";
 
 export type PgnHeader = {
   event: string;
@@ -38,7 +35,7 @@ type ChessContextType = {
   goToEnd: () => void;
   setCurrentIndex: (index: number) => void;
   makeMove: (move: Pick<Move, "from" | "to" | "promotion">) => boolean;
-  getPiece: (square: string) => Piece | null;
+  getPiece: (square: Square) => Piece | null;
   loadPgn: (pgn: string) => boolean;
 };
 
@@ -79,17 +76,14 @@ export function ChessProvider({ children, headers, initialPgn }: Props) {
   const headersRef = useRef<Record<string, string>>(toHeaderRecord(headers));
 
   const [moves, setMoves] = useState<Move[]>(() => {
-    if (!initialPgn) {
-      return [];
-    }
-
     const chess = new Chess();
     applyHeaders(chess, headersRef.current);
-    try {
-      chess.loadPgn(initialPgn);
-    } catch (error) {
-      console.error("Failed to load initial PGN", error);
-      return [];
+    if (initialPgn) {
+      try {
+        chess.loadPgn(initialPgn);
+      } catch {
+        toast.error("Fehler beim Laden der gespeicherten PGN");
+      }
     }
     return chess.history({ verbose: true });
   });
@@ -99,7 +93,10 @@ export function ChessProvider({ children, headers, initialPgn }: Props) {
   );
 
   const fen = useMemo(() => {
-    return computeFenForIndex(moves, currentIndex);
+    if (currentIndex < 0) {
+      return new Chess().fen();
+    }
+    return moves[currentIndex].after;
   }, [moves, currentIndex]);
 
   const pgn = useMemo(() => {
@@ -145,9 +142,9 @@ export function ChessProvider({ children, headers, initialPgn }: Props) {
         `Index ${idx} cannot be greater than ${moves.length}`,
       );
 
-      const board = currentBoardState(moves, currentIndex);
+      const chess = new Chess(fen);
 
-      if (board.isGameOver()) {
+      if (chess.isGameOver()) {
         return false;
       }
 
@@ -160,7 +157,7 @@ export function ChessProvider({ children, headers, initialPgn }: Props) {
           moveOptions.promotion = promotion;
         }
 
-        const move = board.move(moveOptions);
+        const move = chess.move(moveOptions);
         if (move) {
           const newMoves = [...moves.slice(0, idx), move];
           setMoves(newMoves);
@@ -172,15 +169,15 @@ export function ChessProvider({ children, headers, initialPgn }: Props) {
         return false;
       }
     },
-    [moves, currentIndex],
+    [moves, currentIndex, fen],
   );
 
   const getPiece = useCallback(
-    (square: string) => {
-      const board = currentBoardState(moves, currentIndex);
+    (square: Square) => {
+      const board = new Chess(fen);
       return board.get(square as Square) || null;
     },
-    [moves, currentIndex],
+    [fen],
   );
 
   const loadPgn = useCallback((pgn: string) => {
@@ -189,8 +186,7 @@ export function ChessProvider({ children, headers, initialPgn }: Props) {
 
     try {
       chess.loadPgn(pgn);
-    } catch (error) {
-      console.error("Failed to load PGN", error);
+    } catch {
       return false;
     }
 

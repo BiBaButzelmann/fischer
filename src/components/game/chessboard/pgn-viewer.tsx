@@ -25,7 +25,7 @@ export default function PgnViewer({
   blackPlayer,
   gameResult,
 }: Props) {
-  const { currentIndex, setCurrentIndex, fen, moves } = useChess();
+  const { fen } = useChess();
   useChessNavigation();
 
   const isMobile = useIsMobile();
@@ -55,11 +55,7 @@ export default function PgnViewer({
         </div>
 
         <div className="flex-1 min-h-0 overflow-auto ">
-          <MoveHistory
-            moves={moves}
-            currentIndex={currentIndex}
-            setCurrentIndex={setCurrentIndex}
-          />
+          <MoveHistory />
         </div>
 
         <div className="flex-shrink-0">

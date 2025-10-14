@@ -29,7 +29,7 @@ export function useChessEditor() {
   );
 
   const handleSquareClick = useCallback(
-    (square: string) => {
+    (square: Square) => {
       const piece = getPiece(square);
 
       if (selectedSquare) {

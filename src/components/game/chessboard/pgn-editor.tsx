@@ -29,10 +29,8 @@ export default function PgnEditor({
     onPieceDrop,
     onSquareClick,
     selectedSquare,
-    moves,
-    currentIndex,
-    setCurrentIndex,
   } = useChessEditor();
+
   const isMobile = useIsMobile();
   if (isMobile) {
     return (
@@ -69,11 +67,7 @@ export default function PgnEditor({
         </div>
 
         <div className="flex-1 min-h-0 overflow-auto ">
-          <MoveHistory
-            moves={moves}
-            currentIndex={currentIndex}
-            setCurrentIndex={setCurrentIndex}
-          />
+          <MoveHistory />
         </div>
 
         <div className="flex-shrink-0">
