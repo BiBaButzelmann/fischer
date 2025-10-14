@@ -8,11 +8,13 @@ import React, {
   useRef,
   useMemo,
   useState,
+  useEffect,
 } from "react";
 import { Move, Piece, Chess, Square } from "chess.js";
 import invariant from "tiny-invariant";
 import { computePGNFromMoves } from "@/lib/chess-utils";
 import { toast } from "sonner";
+import { START_FEN } from "@/constants/constants";
 
 export type PgnHeader = {
   event: string;
@@ -75,6 +77,10 @@ type Props = {
 export function ChessProvider({ children, headers, initialPgn }: Props) {
   const headersRef = useRef<Record<string, string>>(toHeaderRecord(headers));
 
+  useEffect(() => {
+    headersRef.current = toHeaderRecord(headers);
+  }, [headers]);
+
   const [moves, setMoves] = useState<Move[]>(() => {
     const chess = new Chess();
     applyHeaders(chess, headersRef.current);
@@ -92,42 +98,43 @@ export function ChessProvider({ children, headers, initialPgn }: Props) {
     moves.length > 0 ? moves.length - 1 : -1,
   );
 
+  const lastIndex = moves.length - 1;
+
   const fen = useMemo(() => {
     if (currentIndex < 0) {
-      return new Chess().fen();
+      return START_FEN;
     }
     return moves[currentIndex].after;
   }, [moves, currentIndex]);
 
   const pgn = useMemo(() => {
     return computePGNFromMoves(moves, headersRef.current);
-  }, [moves]);
+  }, [moves, headers]);
 
   const setCurrentIndex = useCallback(
     (index: number) => {
       setCurrentIndexState(() => {
-        const maxIndex = moves.length - 1;
-        return Math.max(-1, Math.min(index, maxIndex));
+        return Math.max(-1, Math.min(index, lastIndex));
       });
     },
-    [moves.length],
+    [lastIndex],
   );
 
   const forward = useCallback(() => {
-    setCurrentIndexState((prev) => Math.min(prev + 1, moves.length - 1));
-  }, [moves.length]);
+    setCurrentIndexState((prev) => Math.min(prev + 1, lastIndex));
+  }, [lastIndex]);
 
   const back = useCallback(() => {
     setCurrentIndexState((prev) => Math.max(prev - 1, -1));
   }, []);
 
   const goToStart = useCallback(() => {
-    setCurrentIndexState(-1);
-  }, []);
+    setCurrentIndex(-1);
+  }, [setCurrentIndex]);
 
   const goToEnd = useCallback(() => {
-    setCurrentIndexState(moves.length - 1);
-  }, [moves.length]);
+    setCurrentIndex(lastIndex);
+  }, [setCurrentIndex, lastIndex]);
 
   const makeMove = useCallback(
     ({
