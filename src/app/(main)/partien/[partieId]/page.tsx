@@ -1,5 +1,4 @@
 import z from "zod";
-import { getParticipantFullName } from "@/lib/participant";
 import { GameWithParticipantsAndPGNAndDate } from "@/db/types/game";
 import { getGameById } from "@/db/repositories/game";
 import { auth } from "@/auth/utils";
@@ -8,9 +7,7 @@ import { getUserGameRights, isGameActuallyPlayed } from "@/lib/game-auth";
 import PgnViewer from "@/components/game/chessboard/pgn-viewer";
 import PgnEditor from "@/components/game/chessboard/pgn-editor";
 import { Suspense } from "react";
-import { getGameTimeFromGame } from "@/lib/game-time";
-import { toDateString } from "@/lib/date";
-import { ChessProvider, PgnHeader } from "@/contexts/chess-context";
+import { ChessProvider } from "@/contexts/chess-context";
 
 type Props = {
   params: Promise<{ partieId: string }>;
@@ -80,20 +77,8 @@ async function PgnContainer({
     );
   }
 
-  const gameDateTime = getGameTimeFromGame(game, game.tournament.gameStartTime);
-
-  const header: PgnHeader = {
-    event: game.tournament.name,
-    site: "https://klubturnier.hsk1830.de",
-    date: toDateString(gameDateTime),
-    round: game.round.toString(),
-    white: getParticipantFullName(game.whiteParticipant),
-    black: getParticipantFullName(game.blackParticipant),
-    result: game.result!,
-  };
-
   return (
-    <ChessProvider headers={header} initialPgn={game.pgn?.value}>
+    <ChessProvider game={game}>
       {allowEdit ? (
         <PgnEditor
           gameId={game.id}
