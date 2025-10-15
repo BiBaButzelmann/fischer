@@ -292,6 +292,11 @@ export async function getGamesByTournamentId(
           },
         },
       },
+      pgn: {
+        columns: {
+          value: true,
+        },
+      },
     },
   });
 
