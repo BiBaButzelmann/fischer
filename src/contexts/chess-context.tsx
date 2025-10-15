@@ -57,9 +57,12 @@ function toHeaderRecord(headers: PgnHeader): Record<string, string> {
 
 //TODO: cleanup db entries, all results shall be stored with a "-"
 function normalizeResult(result: string): string {
-  const trimmed = result.trim();
-  return trimmed.includes(":") ? trimmed.replace(/:/g, "-") : trimmed;
+  return result
+    .trim()
+    .replace(/\u00BD/g, "1/2")
+    .replace(/:/g, "-");
 }
+
 function applyHeaders(chess: Chess, headerRecord: Record<string, string>) {
   for (const [key, value] of Object.entries(headerRecord)) {
     if (value) {
