@@ -5,16 +5,15 @@ import React, {
   useContext,
   useCallback,
   ReactNode,
-  useRef,
   useMemo,
   useState,
-  useEffect,
 } from "react";
 import { Move, Piece, Chess, Square } from "chess.js";
 import invariant from "tiny-invariant";
-import { computePGNFromMoves } from "@/lib/chess-utils";
+import { computePGNFromMoves, getHeadersFromGame } from "@/lib/chess-utils";
 import { toast } from "sonner";
 import { START_FEN } from "@/constants/constants";
+import { GameWithParticipantsAndPGNAndDate } from "@/db/types/game";
 
 export type PgnHeader = {
   event: string;
@@ -42,27 +41,6 @@ type ChessContextType = {
 };
 
 const ChessContext = createContext<ChessContextType | null>(null);
-
-function toHeaderRecord(headers: PgnHeader): Record<string, string> {
-  return {
-    Event: headers.event,
-    Site: headers.site,
-    Date: headers.date,
-    Round: headers.round,
-    White: headers.white,
-    Black: headers.black,
-    Result: normalizeResult(headers.result),
-  };
-}
-
-//TODO: cleanup db entries, all results shall be stored with a "-"
-function normalizeResult(result: string): string {
-  return result
-    .trim()
-    .replace(/\u00BD/g, "1/2")
-    .replace(/:/g, "-");
-}
-
 function applyHeaders(chess: Chess, headerRecord: Record<string, string>) {
   for (const [key, value] of Object.entries(headerRecord)) {
     if (value) {
@@ -73,23 +51,18 @@ function applyHeaders(chess: Chess, headerRecord: Record<string, string>) {
 
 type Props = {
   children: ReactNode;
-  headers: PgnHeader;
-  initialPgn?: string;
+  game: GameWithParticipantsAndPGNAndDate;
 };
 
-export function ChessProvider({ children, headers, initialPgn }: Props) {
-  const headersRef = useRef<Record<string, string>>(toHeaderRecord(headers));
-
-  useEffect(() => {
-    headersRef.current = toHeaderRecord(headers);
-  }, [headers]);
+export function ChessProvider({ children, game }: Props) {
+  const headers = useMemo(() => getHeadersFromGame(game), [game]);
 
   const [moves, setMoves] = useState<Move[]>(() => {
     const chess = new Chess();
-    applyHeaders(chess, headersRef.current);
-    if (initialPgn) {
+    applyHeaders(chess, headers);
+    if (game.pgn?.value) {
       try {
-        chess.loadPgn(initialPgn);
+        chess.loadPgn(game.pgn.value);
       } catch {
         toast.error("Fehler beim Laden der gespeicherten PGN");
       }
@@ -111,7 +84,7 @@ export function ChessProvider({ children, headers, initialPgn }: Props) {
   }, [moves, currentIndex]);
 
   const pgn = useMemo(() => {
-    return computePGNFromMoves(moves, headersRef.current);
+    return computePGNFromMoves(moves, headers);
   }, [moves, headers]);
 
   const setCurrentIndex = useCallback(
@@ -190,21 +163,24 @@ export function ChessProvider({ children, headers, initialPgn }: Props) {
     [fen],
   );
 
-  const loadPgn = useCallback((pgn: string) => {
-    const chess = new Chess();
-    applyHeaders(chess, headersRef.current);
+  const loadPgn = useCallback(
+    (pgn: string) => {
+      const chess = new Chess();
+      applyHeaders(chess, headers);
 
-    try {
-      chess.loadPgn(pgn);
-    } catch {
-      return false;
-    }
+      try {
+        chess.loadPgn(pgn);
+      } catch {
+        return false;
+      }
 
-    const newMoves = chess.history({ verbose: true });
-    setMoves(newMoves);
-    setCurrentIndexState(newMoves.length > 0 ? newMoves.length - 1 : -1);
-    return true;
-  }, []);
+      const newMoves = chess.history({ verbose: true });
+      setMoves(newMoves);
+      setCurrentIndexState(newMoves.length > 0 ? newMoves.length - 1 : -1);
+      return true;
+    },
+    [headers],
+  );
 
   const contextValue = useMemo(
     (): ChessContextType => ({

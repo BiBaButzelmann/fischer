@@ -13,14 +13,7 @@ import {
   ChevronLeft,
   ChevronRight,
 } from "lucide-react";
-import {
-  useCallback,
-  useRef,
-  useTransition,
-  useState,
-  useMemo,
-  useEffect,
-} from "react";
+import { useCallback, useRef, useTransition, useState, useMemo } from "react";
 import { savePGN } from "@/actions/pgn";
 import { toast } from "sonner";
 import { useIsMobile } from "@/hooks/use-mobile";
@@ -130,14 +123,6 @@ function SaveButton({ gameId }: SaveButtonProps) {
   const isMobile = useIsMobile();
   const [isPending, startTransition] = useTransition();
   const [savedPGN, setSavedPGN] = useState(pgn);
-  const prevGameIdRef = useRef(gameId);
-
-  useEffect(() => {
-    if (prevGameIdRef.current !== gameId) {
-      setSavedPGN(pgn);
-      prevGameIdRef.current = gameId;
-    }
-  }, [gameId, pgn]);
 
   const hasUnsavedChanges = useMemo(() => {
     return pgn !== savedPGN;
