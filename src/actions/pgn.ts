@@ -6,6 +6,7 @@ import { getUserGameRights } from "@/lib/game-auth";
 import { authWithRedirect } from "@/auth/utils";
 import { action } from "@/lib/actions";
 import invariant from "tiny-invariant";
+import { revalidatePath } from "next/cache";
 
 export const savePGN = action(async (newValue: string, gameId: number) => {
   const session = await authWithRedirect();
@@ -23,4 +24,5 @@ export const savePGN = action(async (newValue: string, gameId: number) => {
       target: pgn.gameId,
       set: { value: newValue },
     });
+  revalidatePath("/partien")
 });
