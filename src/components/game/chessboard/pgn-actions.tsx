@@ -19,7 +19,6 @@ import {
   useTransition,
   useState,
   useMemo,
-  useEffect,
 } from "react";
 import { savePGN } from "@/actions/pgn";
 import { toast } from "sonner";
@@ -130,14 +129,6 @@ function SaveButton({ gameId }: SaveButtonProps) {
   const isMobile = useIsMobile();
   const [isPending, startTransition] = useTransition();
   const [savedPGN, setSavedPGN] = useState(pgn);
-  const prevGameIdRef = useRef(gameId);
-
-  useEffect(() => {
-    if (prevGameIdRef.current !== gameId) {
-      setSavedPGN(pgn);
-      prevGameIdRef.current = gameId;
-    }
-  }, [gameId, pgn]);
 
   const hasUnsavedChanges = useMemo(() => {
     return pgn !== savedPGN;
