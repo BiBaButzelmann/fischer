@@ -13,13 +13,7 @@ import {
   ChevronLeft,
   ChevronRight,
 } from "lucide-react";
-import {
-  useCallback,
-  useRef,
-  useTransition,
-  useState,
-  useMemo,
-} from "react";
+import { useCallback, useRef, useTransition, useState, useMemo } from "react";
 import { savePGN } from "@/actions/pgn";
 import { toast } from "sonner";
 import { useIsMobile } from "@/hooks/use-mobile";
