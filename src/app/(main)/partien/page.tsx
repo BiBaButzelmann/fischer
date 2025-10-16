@@ -13,6 +13,7 @@ import { ScrollArea, ScrollBar } from "@/components/ui/scroll-area";
 import { getAllMatchdaysByTournamentId } from "@/db/repositories/match-day";
 import { auth } from "@/auth/utils";
 import { MassPgnDownloadButton } from "@/components/partien/mass-pgn-download-button";
+import { canUserViewGames } from "@/lib/game-auth";
 
 export default async function Page({
   searchParams,
@@ -102,7 +103,9 @@ export default async function Page({
           Partien
         </h1>
         <div className="flex items-center gap-2 mb-4">
-          <MassPgnDownloadButton games={games} query={queryData} />
+          {session?.user.id && canUserViewGames(userRoles) && (
+            <MassPgnDownloadButton games={games} query={queryData} />
+          )}
           <PrintGamesButton
             tournamentId={queryData.tournamentId}
             groupId={queryData.groupId}

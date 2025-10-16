@@ -9,12 +9,25 @@ import {
   PLAYED_GAME_RESULTS,
 } from "@/db/types/game";
 import { getRolesByUserId } from "@/db/repositories/role";
+import { Role } from "@/db/types/role";
 
 export const isGameActuallyPlayed = (
   result: GameResult | null,
 ): result is PlayedGameResult => {
   if (!result) return false;
   return PLAYED_GAME_RESULTS.includes(result as PlayedGameResult);
+};
+
+export const canUserViewGames = (userRoles: Role[]): boolean => {
+  const isParticipant = userRoles.includes("participant");
+  const isAdmin = userRoles.includes("admin");
+  const isReferee = userRoles.includes("referee");
+  const isTrainer = userRoles.includes("trainer");
+  const isMatchEnteringHelper = userRoles.includes("matchEnteringHelper");
+
+  return (
+    isAdmin || isReferee || isMatchEnteringHelper || isParticipant || isTrainer
+  );
 };
 
 export const isParticipantInGame = (
