@@ -13,7 +13,6 @@ import { MoveHistory } from "./move-history";
 
 type Props = {
   gameId: number;
-  initialPGN: string;
   whitePlayer: ParticipantWithName;
   blackPlayer: ParticipantWithName;
   gameResult: GameResult;
@@ -21,22 +20,11 @@ type Props = {
 
 export default function PgnEditor({
   gameId,
-  initialPGN,
   whitePlayer,
   blackPlayer,
   gameResult,
 }: Props) {
-  const {
-    fen,
-    onPieceDrop,
-    onSquareClick,
-    selectedSquare,
-    moves,
-    currentIndex,
-    setCurrentIndex,
-    setMoves,
-    pgn,
-  } = useChessEditor(initialPGN, gameId);
+  const { fen, onPieceDrop, onSquareClick, selectedSquare } = useChessEditor();
 
   const isMobile = useIsMobile();
   if (isMobile) {
@@ -74,21 +62,11 @@ export default function PgnEditor({
         </div>
 
         <div className="flex-1 min-h-0 overflow-auto ">
-          <MoveHistory
-            moves={moves}
-            currentIndex={currentIndex}
-            setCurrentIndex={setCurrentIndex}
-          />
+          <MoveHistory />
         </div>
 
         <div className="flex-shrink-0">
-          <PgnEditorMobileActions
-            pgn={pgn}
-            gameId={gameId}
-            setCurrentIndex={setCurrentIndex}
-            currentIndex={currentIndex}
-            moves={moves}
-          />
+          <PgnEditorMobileActions gameId={gameId} />
         </div>
       </div>
     );
@@ -128,15 +106,7 @@ export default function PgnEditor({
       </div>
 
       <div className="w-full lg:w-80 flex-shrink-0">
-        <PgnEditorSidepanel
-          moves={moves}
-          currentIndex={currentIndex}
-          setCurrentIndex={setCurrentIndex}
-          setMoves={setMoves}
-          pgn={pgn}
-          gameId={gameId}
-          fen={fen}
-        />
+        <PgnEditorSidepanel gameId={gameId} />
       </div>
     </div>
   );

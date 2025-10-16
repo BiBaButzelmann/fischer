@@ -5,12 +5,10 @@ import { useStockfish } from "@/hooks/use-stockfish";
 import { formatUciMovesAsNotation } from "@/lib/chess-notation";
 import { formatEvaluationScore } from "@/lib/stockfish-utils";
 import { Switch } from "@/components/ui/switch";
+import { useChess } from "@/contexts/chess-context";
 
-type Props = {
-  fen: string;
-};
-
-export function EnginePanel({ fen }: Props) {
+export function EnginePanel() {
+  const { fen } = useChess();
   const [isEnabled, setIsEnabled] = useState(false);
   const { evaluation } = useStockfish({
     fen,

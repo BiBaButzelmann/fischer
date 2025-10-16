@@ -98,6 +98,7 @@ export function GamesList({
       isReferee,
       isMatchEnteringHelper,
       isAdmin,
+      isTrainer,
       games,
     ],
   );

@@ -37,3 +37,5 @@ export const CALENDAR_EXPORT_DURATIONS = {
   REFEREE: 5 * 60 * 60 * 1000,
   SETUP_HELPER: 30 * 60 * 1000,
 } as const;
+
+export const START_FEN = "rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1";

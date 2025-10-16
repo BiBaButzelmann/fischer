@@ -3,16 +3,15 @@
 import clsx from "clsx";
 import { useEffect, useRef } from "react";
 import { toGermanNotation } from "@/lib/chess-notation";
+import { useChess } from "@/contexts/chess-context";
+import { useChessNavigation } from "@/hooks/use-chess-navigation";
 
-type Props = {
-  moves: { san: string }[];
-  currentIndex: number;
-  setCurrentIndex: (ply: number) => void;
-};
-
-export function MoveHistory({ moves, currentIndex, setCurrentIndex }: Props) {
+export function MoveHistory() {
+  const { moves, currentIndex, setCurrentIndex } = useChess();
   const scrollContainerRef = useRef<HTMLDivElement>(null);
   const currentMoveRef = useRef<HTMLTableCellElement>(null);
+
+  useChessNavigation();
 
   useEffect(() => {
     if (scrollContainerRef.current) {
