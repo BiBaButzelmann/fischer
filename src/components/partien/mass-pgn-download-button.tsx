@@ -5,13 +5,14 @@ import { Button } from "@/components/ui/button";
 import { Download } from "lucide-react";
 import { toast } from "sonner";
 import { GameWithParticipantProfilesAndGroupAndMatchday } from "@/db/types/game";
+import { toLocalDateTime, toDateString } from "@/lib/date";
 
 type ExportQuery = {
-  tournamentId: number;
-  groupId?: number;
+  tournamentName: string;
+  groupName?: string;
   round?: number;
-  participantId?: number;
-  matchdayId?: number;
+  participantName?: string;
+  matchdayDate?: Date;
 };
 
 type Props = {
@@ -20,28 +21,32 @@ type Props = {
 };
 
 function buildFileName({
-  tournamentId,
-  groupId,
+  tournamentName,
+  groupName,
   round,
-  participantId,
-  matchdayId,
+  participantName,
+  matchdayDate,
 }: ExportQuery) {
-  const parts = ["partien", String(tournamentId)];
+  const parts = [tournamentName];
 
-  if (groupId) {
-    parts.push(`gruppe-${groupId}`);
+  if (groupName && !participantName) {
+    parts.push(groupName);
   }
   if (round) {
-    parts.push(`runde-${round}`);
+    parts.push(`Runde-${round}`);
   }
-  if (matchdayId) {
-    parts.push(`spieltag-${matchdayId}`);
+  if (matchdayDate) {
+    const dateStr = toDateString(toLocalDateTime(matchdayDate)).replace(
+      /\./g,
+      "-",
+    );
+    parts.push(dateStr);
   }
-  if (participantId) {
-    parts.push(`spieler-${participantId}`);
+  if (participantName) {
+    parts.push(participantName);
   }
 
-  return `${parts.join("-")}.pgn`;
+  return `${parts.join("_")}.pgn`;
 }
 
 export function MassPgnDownloadButton({ games, query }: Props) {
@@ -53,18 +58,18 @@ export function MassPgnDownloadButton({ games, query }: Props) {
   const fileName = useMemo(
     () =>
       buildFileName({
-        tournamentId: query.tournamentId,
-        groupId: query.groupId,
+        tournamentName: query.tournamentName,
+        groupName: query.groupName,
         round: query.round,
-        participantId: query.participantId,
-        matchdayId: query.matchdayId,
+        participantName: query.participantName,
+        matchdayDate: query.matchdayDate,
       }),
     [
-      query.tournamentId,
-      query.groupId,
+      query.tournamentName,
+      query.groupName,
       query.round,
-      query.participantId,
-      query.matchdayId,
+      query.participantName,
+      query.matchdayDate,
     ],
   );
 
@@ -108,8 +113,8 @@ export function MassPgnDownloadButton({ games, query }: Props) {
       disabled={!hasPgns || isDownloading}
       title="PGNs herunterladen"
     >
-      <Download className="mr-2 h-4 w-4" />
-      PGNs herunterladen
+      <Download className="h-4 w-4 md:mr-2" />
+      <span className="hidden md:inline">PGNs herunterladen</span>
     </Button>
   );
 }

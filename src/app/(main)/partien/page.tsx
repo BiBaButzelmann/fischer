@@ -96,6 +96,22 @@ export default async function Page({
     session?.user.id ? getRolesByUserId(session.user.id) : Promise.resolve([]),
   ]);
 
+  const participant = participants.find(
+    (p) => p.id.toString() === participantId,
+  );
+
+  const exportQuery = {
+    tournamentName:
+      tournamentNames.find((t) => t.id.toString() === selectedTournamentId)
+        ?.name ?? "",
+    groupName: groups.find((g) => g.id.toString() === selectedGroup)?.groupName,
+    round: queryData.round,
+    participantName: participant
+      ? `${participant.profile.firstName}-${participant.profile.lastName}`
+      : undefined,
+    matchdayDate: matchdays.find((m) => m.id.toString() === matchdayId)?.date,
+  };
+
   return (
     <div>
       <div className="flex items-center w-full gap-2">
@@ -104,7 +120,7 @@ export default async function Page({
         </h1>
         <div className="flex items-center gap-2 mb-4">
           {session?.user.id && canUserViewGames(userRoles) && (
-            <MassPgnDownloadButton games={games} query={queryData} />
+            <MassPgnDownloadButton games={games} query={exportQuery} />
           )}
           <PrintGamesButton
             tournamentId={queryData.tournamentId}
