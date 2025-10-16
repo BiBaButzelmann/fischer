@@ -104,7 +104,9 @@ export default async function Page({
     tournamentName:
       tournamentNames.find((t) => t.id.toString() === selectedTournamentId)
         ?.name ?? "",
-    groupName: groupId ? groups.find((g) => g.id.toString() === selectedGroup)?.groupName : undefined,
+    groupName: groupId
+      ? groups.find((g) => g.id.toString() === selectedGroup)?.groupName
+      : undefined,
     round: queryData.round,
     participant: participant
       ? {

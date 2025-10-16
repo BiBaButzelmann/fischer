@@ -47,7 +47,10 @@ function buildFileName({
     parts.push(dateStr);
   }
   if (participant) {
-    const participantName = getFullName(participant.firstName, participant.lastName);
+    const participantName = getFullName(
+      participant.firstName,
+      participant.lastName,
+    );
     parts.push(participantName.replace(/\s+/g, "_"));
   }
   return `${parts.join("_")}.pgn`;
