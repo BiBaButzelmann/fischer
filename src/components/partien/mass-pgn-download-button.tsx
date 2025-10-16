@@ -6,12 +6,16 @@ import { Download } from "lucide-react";
 import { toast } from "sonner";
 import { GameWithParticipantProfilesAndGroupAndMatchday } from "@/db/types/game";
 import { toLocalDateTime, toDateString } from "@/lib/date";
+import { getFullName } from "@/lib/participant";
 
 type ExportQuery = {
   tournamentName: string;
   groupName?: string;
   round?: number;
-  participantName?: string;
+  participant?: {
+    firstName: string;
+    lastName: string;
+  };
   matchdayDate?: Date;
 };
 
@@ -24,28 +28,28 @@ function buildFileName({
   tournamentName,
   groupName,
   round,
-  participantName,
+  participant,
   matchdayDate,
 }: ExportQuery) {
-  const parts = [tournamentName];
+  const parts = [tournamentName.replace(/\s+/g, "_")];
 
-  if (groupName && !participantName) {
-    parts.push(groupName);
+  if (groupName && !participant) {
+    parts.push(groupName.replace(/\s+/g, "_"));
   }
   if (round) {
-    parts.push(`Runde-${round}`);
+    parts.push(`Runde_${round}`);
   }
   if (matchdayDate) {
     const dateStr = toDateString(toLocalDateTime(matchdayDate)).replace(
       /\./g,
-      "-",
+      "_",
     );
     parts.push(dateStr);
   }
-  if (participantName) {
-    parts.push(participantName);
+  if (participant) {
+    const participantName = getFullName(participant.firstName, participant.lastName);
+    parts.push(participantName.replace(/\s+/g, "_"));
   }
-
   return `${parts.join("_")}.pgn`;
 }
 
@@ -61,14 +65,14 @@ export function MassPgnDownloadButton({ games, query }: Props) {
         tournamentName: query.tournamentName,
         groupName: query.groupName,
         round: query.round,
-        participantName: query.participantName,
+        participant: query.participant,
         matchdayDate: query.matchdayDate,
       }),
     [
       query.tournamentName,
       query.groupName,
       query.round,
-      query.participantName,
+      query.participant,
       query.matchdayDate,
     ],
   );
