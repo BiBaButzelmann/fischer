@@ -5,82 +5,36 @@ import { Button } from "@/components/ui/button";
 import { Download } from "lucide-react";
 import { toast } from "sonner";
 import { GameWithParticipantProfilesAndGroupAndMatchday } from "@/db/types/game";
-import { toLocalDateTime, toDateString } from "@/lib/date";
-import { getFullName } from "@/lib/participant";
+import { buildPgnFileName } from "@/actions/pgn";
+import { isError } from "@/lib/actions";
 
-type ExportQuery = {
-  tournamentName: string;
-  groupName?: string;
+export type SearchParamsNumbers = {
+  tournamentId: number;
+  groupId?: number;
   round?: number;
-  participant?: {
-    firstName: string;
-    lastName: string;
-  };
-  matchdayDate?: Date;
+  participantId?: number;
+  matchdayId?: number;
 };
 
 type Props = {
   games: GameWithParticipantProfilesAndGroupAndMatchday[];
-  query: ExportQuery;
-};
+} & SearchParamsNumbers;
 
-function buildFileName({
-  tournamentName,
-  groupName,
+export function MassPgnDownloadButton({
+  games,
+  tournamentId,
+  groupId,
   round,
-  participant,
-  matchdayDate,
-}: ExportQuery) {
-  const parts = [tournamentName.replace(/\s+/g, "_")];
-
-  if (groupName && !participant) {
-    parts.push(groupName.replace(/\s+/g, "_"));
-  }
-  if (round) {
-    parts.push(`Runde_${round}`);
-  }
-  if (matchdayDate) {
-    const dateStr = toDateString(toLocalDateTime(matchdayDate)).replace(
-      /\./g,
-      "_",
-    );
-    parts.push(dateStr);
-  }
-  if (participant) {
-    const participantName = getFullName(
-      participant.firstName,
-      participant.lastName,
-    );
-    parts.push(participantName.replace(/\s+/g, "_"));
-  }
-  return `${parts.join("_")}.pgn`;
-}
-
-export function MassPgnDownloadButton({ games, query }: Props) {
+  participantId,
+  matchdayId,
+}: Props) {
   const [isDownloading, setIsDownloading] = useState(false);
   const hasPgns = useMemo(
     () => games.some((game) => game.pgn?.value?.trim()),
     [games],
   );
-  const fileName = useMemo(
-    () =>
-      buildFileName({
-        tournamentName: query.tournamentName,
-        groupName: query.groupName,
-        round: query.round,
-        participant: query.participant,
-        matchdayDate: query.matchdayDate,
-      }),
-    [
-      query.tournamentName,
-      query.groupName,
-      query.round,
-      query.participant,
-      query.matchdayDate,
-    ],
-  );
 
-  const handleDownload = () => {
+  const handleDownload = async () => {
     if (isDownloading || !hasPgns) return;
 
     setIsDownloading(true);
@@ -93,6 +47,19 @@ export function MassPgnDownloadButton({ games, query }: Props) {
 
       if (!content) {
         toast.error("Keine PGNs verfügbar.");
+        return;
+      }
+
+      const fileName = await buildPgnFileName({
+        tournamentId,
+        groupId,
+        round,
+        participantId,
+        matchdayId,
+      });
+
+      if (isError(fileName)) {
+        toast.error("Fehler beim Erstellen des Dateinamens.");
         return;
       }
 

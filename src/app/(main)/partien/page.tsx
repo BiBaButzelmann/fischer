@@ -15,16 +15,18 @@ import { auth } from "@/auth/utils";
 import { MassPgnDownloadButton } from "@/components/partien/mass-pgn-download-button";
 import { canUserViewGames } from "@/lib/game-auth";
 
+export type SearchParams = {
+  tournamentId: string;
+  groupId?: string;
+  round?: string;
+  participantId?: string;
+  matchdayId?: string;
+};
+
 export default async function Page({
   searchParams,
 }: {
-  searchParams: Promise<{
-    tournamentId: string;
-    groupId?: string;
-    round?: string;
-    participantId?: string;
-    matchdayId?: string;
-  }>;
+  searchParams: Promise<SearchParams>;
 }) {
   const { tournamentId, groupId, round, participantId, matchdayId } =
     await searchParams;
@@ -96,27 +98,6 @@ export default async function Page({
     session?.user.id ? getRolesByUserId(session.user.id) : Promise.resolve([]),
   ]);
 
-  const participant = participants.find(
-    (p) => p.id.toString() === participantId,
-  );
-
-  const exportQuery = {
-    tournamentName:
-      tournamentNames.find((t) => t.id.toString() === selectedTournamentId)
-        ?.name ?? "",
-    groupName: groupId
-      ? groups.find((g) => g.id.toString() === selectedGroup)?.groupName
-      : undefined,
-    round: queryData.round,
-    participant: participant
-      ? {
-          firstName: participant.profile.firstName,
-          lastName: participant.profile.lastName,
-        }
-      : undefined,
-    matchdayDate: matchdays.find((m) => m.id.toString() === matchdayId)?.date,
-  };
-
   return (
     <div>
       <div className="flex items-center w-full gap-2">
@@ -125,7 +106,14 @@ export default async function Page({
         </h1>
         <div className="flex items-center gap-2 mb-4">
           {session?.user.id && canUserViewGames(userRoles) && (
-            <MassPgnDownloadButton games={games} query={exportQuery} />
+            <MassPgnDownloadButton
+              games={games}
+              tournamentId={queryData.tournamentId}
+              groupId={queryData.groupId}
+              round={queryData.round}
+              participantId={queryData.participantId}
+              matchdayId={queryData.matchdayId}
+            />
           )}
           <PrintGamesButton
             tournamentId={queryData.tournamentId}
