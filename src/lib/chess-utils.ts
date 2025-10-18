@@ -5,10 +5,9 @@ import { getParticipantFullName } from "@/lib/participant";
 import { getGameTimeFromGame } from "@/lib/game-time";
 import { toDateString } from "@/lib/date";
 
-//TODO: cleanup db entries, all results shall be stored with a "-"
+//TODO: cleanup db entries, all results shall be stored with a "-", also remove "½" and replace with "1/2"
 function normalizeResult(result: string): string {
-  const trimmed = result.trim();
-  return trimmed.includes(":") ? trimmed.replace(/:/g, "-") : trimmed;
+  return result.trim().replace(/:/g, "-").replace(/½/g, "1/2");
 }
 
 export function getHeadersFromGame(
