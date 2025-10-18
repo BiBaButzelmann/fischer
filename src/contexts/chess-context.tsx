@@ -62,7 +62,9 @@ export function ChessProvider({ children, game }: Props) {
     applyHeaders(chess, headers);
     if (game.pgn?.value) {
       try {
-        chess.loadPgn(game.pgn.value);
+        //TODO: normalize PGN stored in DB
+        const normalizedPgn = game.pgn.value.replace(/½/g, "1/2");
+        chess.loadPgn(normalizedPgn);
       } catch {
         toast.error("Fehler beim Laden der gespeicherten PGN");
       }
@@ -169,7 +171,8 @@ export function ChessProvider({ children, game }: Props) {
       applyHeaders(chess, headers);
 
       try {
-        chess.loadPgn(pgn);
+        const normalizedPgn = pgn.replace(/½/g, "1/2");
+        chess.loadPgn(normalizedPgn);
       } catch {
         return false;
       }
