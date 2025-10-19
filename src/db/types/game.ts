@@ -54,6 +54,9 @@ export type GameWithParticipantProfilesAndGroupAndMatchday = Game & {
       date: Date;
     };
   };
+  pgn: {
+    value: string;
+  } | null;
 };
 
 export type GameWithMatchday = Game & {

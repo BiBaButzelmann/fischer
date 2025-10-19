@@ -12,17 +12,21 @@ import { getRolesByUserId } from "@/db/repositories/role";
 import { ScrollArea, ScrollBar } from "@/components/ui/scroll-area";
 import { getAllMatchdaysByTournamentId } from "@/db/repositories/match-day";
 import { auth } from "@/auth/utils";
+import { MassPgnDownloadButton } from "@/components/partien/mass-pgn-download-button";
+import { canUserViewGames } from "@/lib/game-auth";
+
+export type SearchParams = {
+  tournamentId: string;
+  groupId?: string;
+  round?: string;
+  participantId?: string;
+  matchdayId?: string;
+};
 
 export default async function Page({
   searchParams,
 }: {
-  searchParams: Promise<{
-    tournamentId: string;
-    groupId?: string;
-    round?: string;
-    participantId?: string;
-    matchdayId?: string;
-  }>;
+  searchParams: Promise<SearchParams>;
 }) {
   const { tournamentId, groupId, round, participantId, matchdayId } =
     await searchParams;
@@ -96,17 +100,29 @@ export default async function Page({
 
   return (
     <div>
-      <div className="flex items-center w-full">
+      <div className="flex items-center w-full gap-2">
         <h1 className="flex-1 text-3xl font-bold text-gray-900 mb-4">
           Partien
         </h1>
-        <PrintGamesButton
-          tournamentId={queryData.tournamentId}
-          groupId={queryData.groupId}
-          round={queryData.round}
-          participantId={queryData.participantId}
-          matchdayId={queryData.matchdayId}
-        />
+        <div className="flex items-center gap-2 mb-4">
+          {session?.user.id && canUserViewGames(userRoles) && (
+            <MassPgnDownloadButton
+              games={games}
+              tournamentId={queryData.tournamentId}
+              groupId={queryData.groupId}
+              round={queryData.round}
+              participantId={queryData.participantId}
+              matchdayId={queryData.matchdayId}
+            />
+          )}
+          <PrintGamesButton
+            tournamentId={queryData.tournamentId}
+            groupId={queryData.groupId}
+            round={queryData.round}
+            participantId={queryData.participantId}
+            matchdayId={queryData.matchdayId}
+          />
+        </div>
       </div>
       <div className="flex flex-col gap-1 md:gap-2">
         <PartienSelector
