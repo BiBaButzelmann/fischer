@@ -9,7 +9,7 @@ export type TournamentSectionData = {
   numberOfPlayers: number;
   numberOfRatedPlayers: number;
   tournamentType: string;
-  organizer: string;
+  referee: string;
   timeLimit: string;
 };
 

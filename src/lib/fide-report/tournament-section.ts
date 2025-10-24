@@ -22,7 +22,7 @@ export function generateTournamentSection(
 062 ${tournamentSectionData.numberOfPlayers}\r
 072 ${tournamentSectionData.numberOfRatedPlayers}\r
 092 ${tournamentSectionData.tournamentType}\r
-102 ${tournamentSectionData.organizer}\r
+102 ${tournamentSectionData.referee}\r
 122 ${tournamentSectionData.timeLimit}\r
 132                                                                                       ${gameDates}\r`;
 }

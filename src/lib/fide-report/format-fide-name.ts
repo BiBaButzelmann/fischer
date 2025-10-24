@@ -2,6 +2,10 @@ export function formatPlayerName(firstName: string, lastName: string) {
   return `${removeAccentsEnhanced(lastName.trim())},${removeAccentsEnhanced(firstName.trim())}`;
 }
 
+export function formatRefereeName(firstName: string, lastName: string) {
+  return `${removeAccentsEnhanced(firstName.trim())} ${removeAccentsEnhanced(lastName.trim())}`;
+}
+
 function removeAccentsEnhanced(str: string): string {
   const pre = str.replace(
     /[äÄöÖüÜ]/g,
