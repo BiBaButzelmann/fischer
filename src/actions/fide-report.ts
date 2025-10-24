@@ -7,6 +7,7 @@ import { getGamesInMonth } from "@/db/repositories/game";
 import { GameResult } from "@/db/types/game";
 import { action } from "@/lib/actions";
 import { generateFideReport } from "@/lib/fide-report";
+import { formatPlayerName } from "@/lib/fide-report/format-name";
 import { PlayerEntry, Result } from "@/lib/fide-report/types";
 import { calculateStandings } from "@/lib/standings";
 import { DateTime } from "luxon";
@@ -193,7 +194,10 @@ export const generateFideReportFile = action(
         startingGroupPosition: groupPosition,
         gender: participant.gender,
         title: participant.title ?? "",
-        name: `${participant.profile.lastName.trim()},${participant.profile.firstName.trim()}`,
+        name: formatPlayerName(
+          participant.profile.firstName,
+          participant.profile.lastName,
+        ),
         fideRating: participant.fideRating!,
         fideNation: participant.nationality!,
         fideId: participant.fideId,
