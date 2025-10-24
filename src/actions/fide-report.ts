@@ -4,11 +4,20 @@ import { authWithRedirect } from "@/auth/utils";
 import { monthLabels } from "@/constants/constants";
 import { db } from "@/db/client";
 import { getGamesInMonth } from "@/db/repositories/game";
+import { game } from "@/db/schema/game";
+import { matchdayReferee, matchday, matchdayGame } from "@/db/schema/matchday";
+import { profile } from "@/db/schema/profile";
+import { referee } from "@/db/schema/referee";
 import { GameResult } from "@/db/types/game";
 import { action } from "@/lib/actions";
 import { generateFideReport } from "@/lib/fide-report";
+import {
+  formatPlayerName,
+  formatRefereeName,
+} from "@/lib/fide-report/format-fide-name";
 import { PlayerEntry, Result } from "@/lib/fide-report/types";
 import { calculateStandings } from "@/lib/standings";
+import { and, desc, eq, isNull, sql } from "drizzle-orm";
 import { DateTime } from "luxon";
 import invariant from "tiny-invariant";
 import { match } from "ts-pattern";
@@ -35,20 +44,9 @@ export const generateFideReportFile = action(
       },
     });
     invariant(data, "Group not found");
-    invariant(
-      data.tournament.organizerProfileId != null,
-      "Organizer profile id not found",
-    );
 
-    const organizerProfile = await db.query.profile.findFirst({
-      where: (profile, { eq }) =>
-        eq(profile.id, data.tournament.organizerProfileId!),
-      columns: {
-        firstName: true,
-        lastName: true,
-      },
-    });
-    invariant(organizerProfile, "Organizer profile not found");
+    const groupReferee = await getRefereeOfGroup(groupId, month);
+    invariant(groupReferee, "Referee not found for the specified month");
 
     const gamesInMonth = await getGamesInMonth(groupId, month);
 
@@ -193,7 +191,10 @@ export const generateFideReportFile = action(
         startingGroupPosition: groupPosition,
         gender: participant.gender,
         title: participant.title ?? "",
-        name: `${participant.profile.lastName.trim()},${participant.profile.firstName.trim()}`,
+        name: formatPlayerName(
+          participant.profile.firstName,
+          participant.profile.lastName,
+        ),
         fideRating: participant.fideRating!,
         fideNation: participant.nationality!,
         fideId: participant.fideId,
@@ -241,7 +242,10 @@ export const generateFideReportFile = action(
     // 092
     const tournamentType = "Individual round robin";
     // 102
-    const organizer = `${organizerProfile.firstName} ${organizerProfile.lastName}`;
+    const referee = formatRefereeName(
+      groupReferee.firstName,
+      groupReferee.lastName,
+    );
     // 122
     const timeLimit = data.tournament.timeLimit;
 
@@ -255,7 +259,7 @@ export const generateFideReportFile = action(
         numberOfPlayers,
         numberOfRatedPlayers,
         tournamentType,
-        organizer,
+        referee,
         timeLimit,
       },
       entries,
@@ -270,6 +274,35 @@ export const generateFideReportFile = action(
     };
   },
 );
+
+async function getRefereeOfGroup(groupId: number, month: number) {
+  const countExpr = sql<number>`COUNT(*)`;
+  const rows = await db
+    .select({
+      refereeId: referee.id,
+      firstName: profile.firstName,
+      lastName: profile.lastName,
+      occurrences: countExpr,
+    })
+    .from(matchdayReferee)
+    .innerJoin(matchday, eq(matchday.id, matchdayReferee.matchdayId))
+    .innerJoin(matchdayGame, eq(matchdayGame.matchdayId, matchday.id))
+    .innerJoin(game, eq(game.id, matchdayGame.gameId))
+    .innerJoin(referee, eq(referee.id, matchdayReferee.refereeId))
+    .innerJoin(profile, eq(profile.id, referee.profileId))
+    .where(
+      and(
+        eq(game.groupId, groupId),
+        isNull(matchdayReferee.canceledAt),
+        sql`EXTRACT(MONTH FROM ${matchday.date}) = ${month}`,
+      ),
+    )
+    .groupBy(referee.id, profile.firstName, profile.lastName)
+    .orderBy(desc(countExpr))
+    .limit(1);
+
+  return rows[0] ?? null;
+}
 
 function mapResult(result: GameResult, isWhite: boolean): Result["result"] {
   return match<GameResult, Result["result"]>(result)
