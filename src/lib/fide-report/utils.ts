@@ -66,5 +66,7 @@ export function getGamesGroupedByScheduledDate(
     });
   });
 
-  return gamesByDate;
+  return Array.from(gamesByDate.entries()).sort((a, b) =>
+    a[0].localeCompare(b[0]),
+  );
 }

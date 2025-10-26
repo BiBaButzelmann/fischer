@@ -8,7 +8,7 @@ export function generateTournamentSection(
 ): string {
   const games = getGamesGroupedByScheduledDate(playerSectionData);
   const gameDates = Array.from(
-    games.keys().map((dateString) => {
+    games.map(([dateString]) => {
       const date = DateTime.fromISO(dateString);
       return ` ${date.toFormat("yy/MM/dd")} `;
     }),

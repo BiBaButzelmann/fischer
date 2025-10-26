@@ -42,7 +42,7 @@ function generateGamesTable(playerSectionData: PlayerSectionData): string {
   tableGenerator.addColumn("birthYear", "BBBB/BB/BB", 10, "left");
   tableGenerator.addColumn("currentPoints", "PPPP", 4, "right");
   tableGenerator.addColumn("currentGroupPosition", "RRRR", 4, "right");
-  games.keys().forEach((date, index) => {
+  games.forEach(([date], index) => {
     tableGenerator.addColumn(
       getGameColumnIdentifier(date),
       `${index + 1}${index + 1}${index + 1}${index + 1} ${index + 1} ${index + 1}`,
@@ -78,7 +78,7 @@ function generateColumnHeaders(playerSectionData: PlayerSectionData): string {
 
   const games = getGamesGroupedByScheduledDate(playerSectionData);
 
-  const columnsCount = 9 + games.size;
+  const columnsCount = 9 + games.length;
   Array.from({ length: columnsCount }, (_, i) => i + 1).forEach((i) => {
     tableGenerator.addColumn(i.toString(), i.toString(), 10, "right", true);
   });
