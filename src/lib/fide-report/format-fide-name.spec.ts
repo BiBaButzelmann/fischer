@@ -10,6 +10,10 @@ describe("formatPlayerName", () => {
     expect(formatPlayerName("  Magnus  ", "  Carlsen ")).toBe("Carlsen,Magnus");
   });
 
+  it("appends the academic title when provided", () => {
+    expect(formatPlayerName("Kai", "Mueller", "Dr.")).toBe("Mueller,Kai,Dr.");
+  });
+
   it("removes generic accents (NFD diacritics)", () => {
     expect(formatPlayerName("José", "García")).toBe("Garcia,Jose");
     expect(formatPlayerName("Fränz", "Schröder")).toBe("Schroeder,Fraenz");
@@ -25,6 +29,10 @@ describe("formatPlayerName", () => {
 
   it("maps German sharp s to ss", () => {
     expect(formatPlayerName("Max", "Weiß")).toBe("Weiss,Max");
+  });
+
+  it("appends academic title when provided", () => {
+    expect(formatPlayerName("Kai", "Mueller", "Dr.")).toBe("Mueller,Kai,Dr.");
   });
 
   it("maps German umlauts to digraphs", () => {

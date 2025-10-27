@@ -1,5 +1,6 @@
-export function formatPlayerName(firstName: string, lastName: string) {
-  return `${removeAccentsEnhanced(lastName.trim())},${removeAccentsEnhanced(firstName.trim())}`;
+export function formatPlayerName(firstName: string, lastName: string, title?: string | null) {
+  const formattedName = `${removeAccentsEnhanced(lastName.trim())},${removeAccentsEnhanced(firstName.trim())}`;
+  return title ? `${formattedName},${title}` : formattedName;
 }
 
 export function formatRefereeName(firstName: string, lastName: string) {

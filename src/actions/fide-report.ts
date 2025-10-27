@@ -194,6 +194,7 @@ export const generateFideReportFile = action(
         name: formatPlayerName(
           participant.profile.firstName,
           participant.profile.lastName,
+          participant.profile.academicTitle,
         ),
         fideRating: participant.fideRating!,
         fideNation: participant.nationality!,
