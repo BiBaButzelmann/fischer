@@ -9,6 +9,7 @@ export type ProfileWithName = {
   userId: string;
   firstName: string;
   lastName: string;
+  academicTitle: Profile["academicTitle"];
   deletedAt: Date | null;
   phoneNumber: string;
   email: string;

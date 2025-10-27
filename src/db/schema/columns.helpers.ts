@@ -28,3 +28,5 @@ export const gameResults = [
 export const gameResult = pgEnum("result", gameResults);
 
 export const gender = pgEnum("gender", ["m", "f"]);
+// Currently I have only seen "Dr." as an academic title in use on ratings.fide.com
+export const academicTitle = pgEnum("academic_title", ["Dr."]);
