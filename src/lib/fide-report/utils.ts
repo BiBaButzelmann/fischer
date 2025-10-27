@@ -38,7 +38,7 @@ export function getStringRepresentationForValue(value: TableEntryKeyValue) {
       return data.toString();
     })
     .with({ id: "results" }, () => {
-      throw new Error("Results have there own mapping");
+      throw new Error("Results have their own mapping");
     })
     .exhaustive();
 }
