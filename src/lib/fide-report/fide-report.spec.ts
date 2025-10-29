@@ -36,7 +36,7 @@ const playerSectionData = [
     startingGroupPosition: 1,
     gender: "m",
     title: "",
-    name: "Mueller,Kai",
+    name: "Mueller,Kai,Dr.",
     fideRating: 1960,
     fideNation: "GER",
     fideId: "12939455",
@@ -97,7 +97,7 @@ const tournamentSectionData = {
 const expectedPlayerSection = `         1         2         3         4         5         6         7         8         9        10        11\r
 12345678901234567890123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890\r
 DDD SSSS sTTT NNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNN RRRR FFF IIIIIIIIIII BBBB/BB/BB PPPP RRRR  1111 1 1  2222 2 2 \r
-001    1 m    Mueller,Kai                       1960 GER    12939455 1996/00/00  2.0    1    10 w 1     2 w 1 \r
+001    1 m    Mueller,Kai,Dr.                   1960 GER    12939455 1996/00/00  2.0    1    10 w 1     2 w 1 \r
 001    3 m    Stejskal,Manfred                  1917 GER    12926620 1952/00/00  0.0    8               9 b 0 \r`;
 
 const expectedTournamentSection = `012 HSK Klubturnier 2024 - B1-Gruppe\r

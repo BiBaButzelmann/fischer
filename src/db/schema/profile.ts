@@ -1,7 +1,7 @@
 import { relations } from "drizzle-orm";
 import { integer, pgTable, text } from "drizzle-orm/pg-core";
 import { user } from "./auth";
-import { timestamps } from "./columns.helpers";
+import { academicTitle, timestamps } from "./columns.helpers";
 
 export const profile = pgTable("profile", {
   id: integer("id").generatedAlwaysAsIdentity().primaryKey(),
@@ -9,6 +9,7 @@ export const profile = pgTable("profile", {
   lastName: text("last_name").notNull(),
   email: text("email").notNull().unique(),
   phoneNumber: text("phone_number").notNull(),
+  academicTitle: academicTitle("academic_title"),
 
   userId: text("user_id").notNull(),
 
