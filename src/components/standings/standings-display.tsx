@@ -50,29 +50,26 @@ export async function StandingsDisplay({
     {} as Record<number, GameWithMatchday[]>,
   );
 
+  const activeParticipants = participants.filter((p) => p.deletedAt == null);
+  const inactiveParticipants = participants.filter((p) => p.deletedAt != null);
+
   // participants that are relevant for the standings calculation
   // participant is relevant if they are active
   // or when they are deactivated but have played at least 50% of their games
-  const relevantParticipantIds: Set<number> = new Set();
+  const relevantParticipantIds: Set<number> = new Set(
+    activeParticipants.map((p) => p.id),
+  );
 
-  for (const participant of participants) {
-    const { deletedAt } = participant;
-
-    if (deletedAt == null) {
-      relevantParticipantIds.add(participant.id);
-      continue;
-    }
-
-    const totalGamesToPlay = rounds.length;
-    const gamesPlayed = gamesPlayedPerParticipant[participant.id] || [];
+  for (const inactiveParticipant of inactiveParticipants) {
+    const totalGamesToPlay = activeParticipants.length - 1;
+    const gamesPlayed = gamesPlayedPerParticipant[inactiveParticipant.id] || [];
     const gamesPlayedBeforeDisabling = gamesPlayed.filter((g) => {
-      return g.matchdayGame.matchday.date < participant.deletedAt!;
+      return g.matchdayGame.matchday.date < inactiveParticipant.deletedAt!;
     });
     const gamesPlayedCount = gamesPlayedBeforeDisabling.length;
 
     if (gamesPlayedCount / totalGamesToPlay >= 0.5) {
-      relevantParticipantIds.add(participant.id);
-      continue;
+      relevantParticipantIds.add(inactiveParticipant.id);
     }
   }
 
