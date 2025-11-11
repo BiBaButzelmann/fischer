@@ -170,8 +170,6 @@ export async function getGamesByTournamentId(
     eq(game.tournamentId, tournamentId),
     isNotNull(game.whiteParticipantId),
     isNotNull(game.blackParticipantId),
-    isNull(whiteParticipant.deletedAt),
-    isNull(blackParticipant.deletedAt),
   ];
 
   if (groupId !== undefined) {
@@ -241,6 +239,7 @@ export async function getGamesByTournamentId(
         columns: {
           fideRating: true,
           dwzRating: true,
+          deletedAt: true,
         },
         with: {
           profile: {
@@ -258,6 +257,7 @@ export async function getGamesByTournamentId(
         columns: {
           fideRating: true,
           dwzRating: true,
+          deletedAt: true,
         },
         with: {
           profile: {
@@ -311,7 +311,22 @@ export async function getGamesByTournamentId(
     ).toJSDate(),
   }));
 
-  return gamesWithTime;
+  // filter out games where at least one of the participants was deactivated before the game was played
+  const actuallyPlayedGames = gamesWithTime.filter((game) => {
+    const whiteDeletedAt = game.whiteParticipant?.deletedAt;
+    const blackDeletedAt = game.blackParticipant?.deletedAt;
+    const gameDate = game.matchdayGame.matchday.date;
+
+    if (whiteDeletedAt && whiteDeletedAt <= gameDate) {
+      return false;
+    }
+    if (blackDeletedAt && blackDeletedAt <= gameDate) {
+      return false;
+    }
+    return true;
+  });
+
+  return actuallyPlayedGames;
 }
 
 export async function getCompletedGames(groupId: number, maxRound?: number) {
