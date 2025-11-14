@@ -114,7 +114,7 @@ export async function getParticipantsByGroupId(groupId: number) {
     .innerJoin(group, eq(participantGroup.groupId, group.id))
     .innerJoin(participant, eq(participantGroup.participantId, participant.id))
     .innerJoin(profile, eq(participant.profileId, profile.id))
-    .where(and(eq(group.id, groupId), isNull(participant.deletedAt)));
+    .where(and(eq(group.id, groupId)));
 }
 
 export async function getParticipantsWithProfileByGroupId(groupId: number) {

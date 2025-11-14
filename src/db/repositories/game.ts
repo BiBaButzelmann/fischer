@@ -311,22 +311,7 @@ export async function getGamesByTournamentId(
     ).toJSDate(),
   }));
 
-  // filter out games where at least one of the participants was deactivated before the game was played
-  const actuallyPlayedGames = gamesWithTime.filter((game) => {
-    const whiteDeletedAt = game.whiteParticipant?.deletedAt;
-    const blackDeletedAt = game.blackParticipant?.deletedAt;
-    const gameDate = game.matchdayGame.matchday.date;
-
-    if (whiteDeletedAt && whiteDeletedAt <= gameDate) {
-      return false;
-    }
-    if (blackDeletedAt && blackDeletedAt <= gameDate) {
-      return false;
-    }
-    return true;
-  });
-
-  return actuallyPlayedGames;
+  return gamesWithTime;
 }
 
 export async function getCompletedGames(groupId: number, maxRound?: number) {
