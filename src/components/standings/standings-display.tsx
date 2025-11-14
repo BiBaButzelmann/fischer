@@ -8,7 +8,7 @@ import { calculateStandings } from "@/lib/standings";
 import type { TournamentNames } from "@/db/types/tournament";
 import type { GroupSummary } from "@/db/types/group";
 import { Game, GameWithMatchday } from "@/db/types/game";
-import { getCurrentLocalDateTime, toLocalDateTime } from "@/lib/date";
+import invariant from "tiny-invariant";
 
 type Props = {
   tournamentNames: TournamentNames[];
@@ -33,77 +33,93 @@ export async function StandingsDisplay({
     selectedRound ? Number(selectedRound) : undefined,
   );
 
+  const participantsMap = Object.fromEntries(
+    participants.map((p) => [p.id, p]),
+  );
   const gamesPlayedPerParticipant = games.reduce(
     (acc, game) => {
       const { whiteParticipantId, blackParticipantId } = game;
 
-      if (whiteParticipantId != null) {
-        acc[whiteParticipantId] = acc[whiteParticipantId] || [];
+      if (whiteParticipantId == null || blackParticipantId == null) {
+        return acc;
+      }
+
+      const whiteParticipant = participantsMap[whiteParticipantId];
+      const blackParticipant = participantsMap[blackParticipantId];
+
+      // consider a game not played for deleted participants based on the result
+      if (
+        whiteParticipant.deletedAt == null ||
+        !forfeitedGame(whiteParticipantId, game)
+      ) {
+        if (!acc[whiteParticipantId]) {
+          acc[whiteParticipantId] = [];
+        }
         acc[whiteParticipantId].push(game);
       }
-      if (blackParticipantId != null) {
-        acc[blackParticipantId] = acc[blackParticipantId] || [];
+      if (
+        blackParticipant.deletedAt == null ||
+        !forfeitedGame(blackParticipantId, game)
+      ) {
+        if (!acc[blackParticipantId]) {
+          acc[blackParticipantId] = [];
+        }
         acc[blackParticipantId].push(game);
       }
+
       return acc;
     },
     {} as Record<number, GameWithMatchday[]>,
   );
 
-  const activeParticipants = participants.filter((p) => p.deletedAt == null);
-  const inactiveParticipants = participants.filter((p) => p.deletedAt != null);
-
-  // participants that are relevant for the standings calculation
-  // participant is relevant if they are active
-  // or when they are deactivated but have played at least 50% of their games
-  const relevantParticipantIds: Set<number> = new Set(
-    activeParticipants.map((p) => p.id),
+  const activeParticipants = new Set(
+    participants.filter((p) => p.deletedAt == null).map((p) => p.id),
+  );
+  const inactiveParticipants = new Set(
+    participants.filter((p) => p.deletedAt != null).map((p) => p.id),
   );
 
-  for (const inactiveParticipant of inactiveParticipants) {
-    const totalGamesToPlay = activeParticipants.length - 1;
-    const gamesPlayed = gamesPlayedPerParticipant[inactiveParticipant.id] || [];
-    const gamesPlayedBeforeDisabling = gamesPlayed.filter((g) => {
-      return g.matchdayGame.matchday.date < inactiveParticipant.deletedAt!;
-    });
-    const gamesPlayedCount = gamesPlayedBeforeDisabling.length;
-
-    if (gamesPlayedCount / totalGamesToPlay >= 0.5) {
-      relevantParticipantIds.add(inactiveParticipant.id);
-    }
-  }
-
-  // game is relevant if neither participant is "irrelevant"
-  // and the game is not in the future
+  const totalGamesToPlay = participants.length - 1;
   const relevantGames: Set<Game> = new Set();
 
-  const now = getCurrentLocalDateTime();
+  // add all games to list except if one of the participants is inactive and has played less than 50% of their games
   for (const game of games) {
-    if (toLocalDateTime(game.matchdayGame.matchday.date) > now) {
+    const { whiteParticipantId, blackParticipantId } = game;
+    invariant(
+      whiteParticipantId != null && blackParticipantId != null,
+      "Both participants must be defined",
+    );
+
+    if (
+      activeParticipants.has(whiteParticipantId) &&
+      activeParticipants.has(blackParticipantId)
+    ) {
+      relevantGames.add(game);
       continue;
     }
 
-    const { whiteParticipantId, blackParticipantId } = game;
+    let isRelevant = true;
+    if (inactiveParticipants.has(whiteParticipantId)) {
+      const gamesPlayed = gamesPlayedPerParticipant[whiteParticipantId] || [];
+      const gamesPlayedCount = gamesPlayed.length;
+      if (gamesPlayedCount / totalGamesToPlay < 0.5) {
+        isRelevant = false;
+      }
+    }
+    if (inactiveParticipants.has(blackParticipantId)) {
+      const gamesPlayed = gamesPlayedPerParticipant[blackParticipantId] || [];
+      const gamesPlayedCount = gamesPlayed.length;
+      if (gamesPlayedCount / totalGamesToPlay < 0.5) {
+        isRelevant = false;
+      }
+    }
 
-    const isRelevantWhiteParticipant =
-      whiteParticipantId == null ||
-      relevantParticipantIds.has(whiteParticipantId);
-    const isRelevantBlackParticipant =
-      blackParticipantId == null ||
-      relevantParticipantIds.has(blackParticipantId);
-
-    if (isRelevantWhiteParticipant && isRelevantBlackParticipant) {
+    if (isRelevant) {
       relevantGames.add(game);
     }
   }
 
-  const relevantParticipants = participants.filter((p) =>
-    relevantParticipantIds.has(p.id),
-  );
-  const standings = calculateStandings(
-    Array.from(relevantGames),
-    relevantParticipants,
-  );
+  const standings = calculateStandings(Array.from(relevantGames), participants);
 
   const selectedGroup = groups.find((g) => g.id.toString() === selectedGroupId);
 
@@ -128,4 +144,13 @@ export async function StandingsDisplay({
       />
     </>
   );
+}
+
+function forfeitedGame(participantId: number, game: Game) {
+  if (game.whiteParticipantId === participantId) {
+    return game.result === "-:+" || game.result === "-:-";
+  }
+  if (game.blackParticipantId === participantId) {
+    return game.result === "+:-" || game.result === "-:-";
+  }
 }
