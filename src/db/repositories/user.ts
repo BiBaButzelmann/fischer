@@ -119,7 +119,7 @@ export async function softDeleteUser(userId: string) {
         .set({ result: "-:-" })
         .where(
           and(
-            isNull(game.result),
+            or(eq(game.result, "+:-"), eq(game.result, "-:+")),
             or(
               and(
                 eq(game.whiteParticipantId, participantId),
