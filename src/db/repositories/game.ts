@@ -170,8 +170,6 @@ export async function getGamesByTournamentId(
     eq(game.tournamentId, tournamentId),
     isNotNull(game.whiteParticipantId),
     isNotNull(game.blackParticipantId),
-    isNull(whiteParticipant.deletedAt),
-    isNull(blackParticipant.deletedAt),
   ];
 
   if (groupId !== undefined) {
@@ -241,6 +239,7 @@ export async function getGamesByTournamentId(
         columns: {
           fideRating: true,
           dwzRating: true,
+          deletedAt: true,
         },
         with: {
           profile: {
@@ -258,6 +257,7 @@ export async function getGamesByTournamentId(
         columns: {
           fideRating: true,
           dwzRating: true,
+          deletedAt: true,
         },
         with: {
           profile: {

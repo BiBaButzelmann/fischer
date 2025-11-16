@@ -1,7 +1,16 @@
 "use server";
 
 import { authWithRedirect } from "@/auth/utils";
-import { and, count, eq, isNull, or } from "drizzle-orm";
+import {
+  and,
+  count,
+  eq,
+  inArray,
+  isNotNull,
+  isNull,
+  notInArray,
+  or,
+} from "drizzle-orm";
 import { db } from "../client";
 import { game } from "../schema/game";
 import { gamePostponement } from "../schema/gamePostponement";
@@ -77,21 +86,53 @@ export async function softDeleteUser(userId: string) {
       .set({ deletedAt })
       .where(eq(tournament.organizerProfileId, profileId));
 
+    const deletedParticipants = await tx.query.participant.findMany({
+      where: isNotNull(participant.deletedAt),
+    });
+    const deletedParticipantIds = deletedParticipants.map((p) => p.id);
+
     if (participantData.length > 0) {
-      const participantId = participantData[0].id;
+      const [{ id: participantId }] = participantData;
 
       await tx
         .update(game)
         .set({ result: "-:+" })
         .where(
-          and(eq(game.whiteParticipantId, participantId), isNull(game.result)),
+          and(
+            isNull(game.result),
+            eq(game.whiteParticipantId, participantId),
+            notInArray(game.blackParticipantId, deletedParticipantIds),
+          ),
         );
       await tx
         .update(game)
         .set({ result: "+:-" })
         .where(
-          and(eq(game.blackParticipantId, participantId), isNull(game.result)),
+          and(
+            isNull(game.result),
+            eq(game.blackParticipantId, participantId),
+            notInArray(game.whiteParticipantId, deletedParticipantIds),
+          ),
         );
+      await tx
+        .update(game)
+        .set({ result: "-:-" })
+        .where(
+          and(
+            or(eq(game.result, "+:-"), eq(game.result, "-:+")),
+            or(
+              and(
+                eq(game.whiteParticipantId, participantId),
+                inArray(game.blackParticipantId, deletedParticipantIds),
+              ),
+              and(
+                eq(game.blackParticipantId, participantId),
+                inArray(game.whiteParticipantId, deletedParticipantIds),
+              ),
+            ),
+          ),
+        );
+
       // set all bye games to -:-
       // consider all games without a board number to be a bye game
       await tx
