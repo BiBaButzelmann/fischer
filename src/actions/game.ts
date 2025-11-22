@@ -319,7 +319,10 @@ export async function rescheduleGamesForGroup(
   return await scheduleGamesForGroup(tournamentId, groupId);
 }
 
-export async function updateGameResult(gameId: number, result: GameResult) {
+export async function updateGameResult(
+  gameId: number,
+  result: GameResult | null,
+) {
   const session = await authWithRedirect();
 
   const gameData = await db.query.game.findFirst({
@@ -351,6 +354,13 @@ export async function updateGameResult(gameId: number, result: GameResult) {
     isUserParticipating || isAdmin || isReferee,
     "User is not authorized to update this game result",
   );
+
+  if (result === null) {
+    invariant(
+      isAdmin || isReferee,
+      "Only admins or referees can set result to null",
+    );
+  }
 
   const gameDateTime = getGameTimeFromGame(
     gameData,

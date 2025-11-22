@@ -32,7 +32,7 @@ import { authClient } from "@/auth-client";
 type Props = {
   gameId: number;
   currentResult: GameResult | null;
-  onResultChange: (gameId: number, result: GameResult) => Promise<void>;
+  onResultChange: (gameId: number, result: GameResult | null) => Promise<void>;
   isReferee?: boolean;
 };
 
@@ -51,7 +51,9 @@ export function ReportResultDialog({
   ) => {
     event.preventDefault();
     const formData = new FormData(event.currentTarget);
-    const result = formData.get("result") as GameResult;
+    const resultValue = formData.get("result") as string;
+    const result =
+      resultValue === "NO_RESULT" ? null : (resultValue as GameResult);
     startTransition(async () => {
       await onResultChange(gameId, result);
       setIsOpen(false);
@@ -85,7 +87,11 @@ export function ReportResultDialog({
             <Label htmlFor={`result-select-${gameId}`} className="font-medium">
               Ergebnis
             </Label>
-            <Select name="result" defaultValue={currentResult ?? ""} required>
+            <Select
+              name="result"
+              defaultValue={currentResult ?? "NO_RESULT"}
+              required
+            >
               <SelectTrigger id={`result-select-${gameId}`} className="w-full">
                 <SelectValue placeholder="Ergebnis wählen" />
               </SelectTrigger>
@@ -108,6 +114,7 @@ export function ReportResultDialog({
                       Schwarz verliert durch Regelverstoß, aber Weiß hat
                       unzureichendes Material zum Matt setzen.
                     </SelectItem>
+                    <SelectItem value="NO_RESULT">Kein Ergebnis</SelectItem>
                   </>
                 )}
               </SelectContent>

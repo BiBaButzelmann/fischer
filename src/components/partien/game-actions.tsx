@@ -15,7 +15,7 @@ import { DateTime } from "luxon";
 type Props = {
   gameId: number;
   currentResult: GameResult | null;
-  onResultChange: (gameId: number, result: GameResult) => Promise<void>;
+  onResultChange: (gameId: number, result: GameResult | null) => Promise<void>;
   availableMatchdays: MatchDay[];
   currentGameDate: DateTime;
   game: GameWithParticipantProfilesAndGroupAndMatchday;
