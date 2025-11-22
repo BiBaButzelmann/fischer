@@ -27,7 +27,9 @@ export default async function Page({
     participantId != null ? Number(participantId) : undefined,
   );
 
-  const gamesWithDates = games.map((game) => ({
+  const gamesWithoutResults = games.filter((game) => game.result == null);
+
+  const gamesWithDates = gamesWithoutResults.map((game) => ({
     ...game,
     gameDateTime: getDateTimeFromTournamentTime(
       game.matchdayGame.matchday.date,
@@ -39,6 +41,7 @@ export default async function Page({
     <div className="flex gap-4 p-4 print:p-0">
       <div className="w-[210mm] text-sm">
         <div className="flex items-center text-muted-foreground py-1.5 border-b font-medium">
+          <div className="basis-14 text-center"></div>
           <div className="basis-[8rem] text-center">Datum</div>
           <div className="basis-16 text-center">Gruppe</div>
           <div className="basis-20 text-center">Brett</div>
@@ -47,11 +50,14 @@ export default async function Page({
           <div className="flex-1 text-right pr-8">Schwarz</div>
         </div>
         <div>
-          {gamesWithDates.map((game) => (
+          {gamesWithDates.map((game, index) => (
             <div
               key={game.id}
               className="flex items-center py-1 even:bg-gray-100 h-[15mm]"
             >
+              <div className="basis-14 text-center">
+                <Badge variant="outline">{index + 1}</Badge>
+              </div>
               <div className="basis-[8rem] text-center">
                 {toDateString(game.gameDateTime)}
               </div>
