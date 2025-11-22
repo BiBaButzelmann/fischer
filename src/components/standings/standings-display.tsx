@@ -9,6 +9,7 @@ import type { TournamentNames } from "@/db/types/tournament";
 import type { GroupSummary } from "@/db/types/group";
 import { Game, GameWithMatchday } from "@/db/types/game";
 import invariant from "tiny-invariant";
+import { didParticipantForfeitGame } from "@/lib/game";
 
 type Props = {
   tournamentNames: TournamentNames[];
@@ -50,7 +51,7 @@ export async function StandingsDisplay({
       // consider a game not played for deleted participants based on the result
       if (
         whiteParticipant.deletedAt == null ||
-        !forfeitedGame(whiteParticipantId, game)
+        !didParticipantForfeitGame(whiteParticipantId, game)
       ) {
         if (!acc[whiteParticipantId]) {
           acc[whiteParticipantId] = [];
@@ -59,7 +60,7 @@ export async function StandingsDisplay({
       }
       if (
         blackParticipant.deletedAt == null ||
-        !forfeitedGame(blackParticipantId, game)
+        !didParticipantForfeitGame(blackParticipantId, game)
       ) {
         if (!acc[blackParticipantId]) {
           acc[blackParticipantId] = [];
@@ -144,13 +145,4 @@ export async function StandingsDisplay({
       />
     </>
   );
-}
-
-function forfeitedGame(participantId: number, game: Game) {
-  if (game.whiteParticipantId === participantId) {
-    return game.result === "-:+" || game.result === "-:-";
-  }
-  if (game.blackParticipantId === participantId) {
-    return game.result === "+:-" || game.result === "-:-";
-  }
 }
