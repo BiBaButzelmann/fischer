@@ -13,7 +13,7 @@ export const timestamps = {
 export const availableMatchDays = ["tuesday", "thursday", "friday"] as const;
 
 export const matchDay = pgEnum("match_day", availableMatchDays);
-
+//TODO: proper format of game results required
 export const gameResults = [
   "1:0",
   "0:1",
