@@ -22,7 +22,7 @@ import { and, desc, eq, isNull, sql } from "drizzle-orm";
 import { DateTime } from "luxon";
 import invariant from "tiny-invariant";
 import { match } from "ts-pattern";
-import { getDwzAndEloByZpsNumber } from "./participant";
+import { getDwzAndEloByZps } from "./participant";
 
 export const generateFideReportFile = action(
   async (groupId: number, month: number) => {
@@ -310,11 +310,14 @@ async function getRefereeOfGroup(groupId: number, month: number) {
 }
 
 async function getCurrentElo(participant: Participant) {
-  if (participant.zpsPlayerId == null) {
+  if (participant.zpsPlayerId == null || participant.zpsClubId == null) {
     invariant(participant.fideRating != null, "FIDE rating cannot be null");
     return participant.fideRating;
   }
-  const result = await getDwzAndEloByZpsNumber(participant.zpsPlayerId);
+  const result = await getDwzAndEloByZps(
+    participant.zpsPlayerId,
+    participant.zpsClubId,
+  );
   invariant(result != null, "Current FIDE rating could not be retrieved");
   invariant(result.fideRating != null, "Retrieved FIDE rating cannot be null");
   return result.fideRating;
