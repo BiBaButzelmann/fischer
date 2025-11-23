@@ -184,7 +184,7 @@ export async function getDwzAndEloByZps(
   zpsClubId: string,
 ) {
   const clubData = await fetch(
-    "https://www.schachbund.de/php/dewis/verein.php?zps=${zpsClubId}&format=csv",
+    `https://www.schachbund.de/php/dewis/verein.php?zps=${zpsClubId}&format=csv`,
   );
   const clubCsv = await clubData.text();
 
