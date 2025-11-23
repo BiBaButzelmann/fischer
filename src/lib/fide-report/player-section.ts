@@ -43,9 +43,10 @@ function generateGamesTable(playerSectionData: PlayerSectionData): string {
   tableGenerator.addColumn("currentPoints", "PPPP", 4, "right");
   tableGenerator.addColumn("currentGroupPosition", "RRRR", 4, "right");
   games.forEach(([date], index) => {
+    const columnIndex = (index + 1) % 10;
     tableGenerator.addColumn(
       getGameColumnIdentifier(date),
-      `${index + 1}${index + 1}${index + 1}${index + 1} ${index + 1} ${index + 1}`,
+      `${columnIndex}${columnIndex}${columnIndex}${columnIndex} ${columnIndex} ${columnIndex}`,
       10,
       "center",
       true,

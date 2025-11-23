@@ -9,6 +9,7 @@ import { matchdayReferee, matchday, matchdayGame } from "@/db/schema/matchday";
 import { profile } from "@/db/schema/profile";
 import { referee } from "@/db/schema/referee";
 import { GameResult } from "@/db/types/game";
+import { Participant } from "@/db/types/participant";
 import { action } from "@/lib/actions";
 import { generateFideReport } from "@/lib/fide-report";
 import {
@@ -21,6 +22,7 @@ import { and, desc, eq, isNull, sql } from "drizzle-orm";
 import { DateTime } from "luxon";
 import invariant from "tiny-invariant";
 import { match } from "ts-pattern";
+import { getDwzAndEloByZpsNumber } from "./participant";
 
 export const generateFideReportFile = action(
   async (groupId: number, month: number) => {
@@ -158,71 +160,73 @@ export const generateFideReportFile = action(
       return currentGroupPosition + 1;
     };
 
-    const entries = data.participants.map(({ groupPosition, participant }) => {
-      const whiteGameIds = gamesAsWhiteParticipant[participant.id] ?? [];
-      const blackGameIds = gamesAsBlackParticipant[participant.id] ?? [];
-      const participantGames = actuallyPlayedGames.filter(
-        (game) =>
-          whiteGameIds.includes(game.id) || blackGameIds.includes(game.id),
-      );
+    const entries = data.participants.map(
+      async ({ groupPosition, participant }) => {
+        const whiteGameIds = gamesAsWhiteParticipant[participant.id] ?? [];
+        const blackGameIds = gamesAsBlackParticipant[participant.id] ?? [];
+        const participantGames = actuallyPlayedGames.filter(
+          (game) =>
+            whiteGameIds.includes(game.id) || blackGameIds.includes(game.id),
+        );
 
-      invariant(
-        participant.fideId != null,
-        `Participant ${participant.id} does not have a FIDE ID`,
-      );
-      invariant(
-        participant.fideRating != null,
-        `Participant ${participant.id} does not have a FIDE rating`,
-      );
-      invariant(
-        participant.birthYear != null,
-        `Participant ${participant.id} does not have a birth year`,
-      );
-      invariant(
-        participant.nationality != null,
-        `Participant ${participant.id} does not have a nationality`,
-      );
+        invariant(
+          participant.fideId != null,
+          `Participant ${participant.id} does not have a FIDE ID`,
+        );
+        invariant(
+          participant.fideRating != null,
+          `Participant ${participant.id} does not have a FIDE rating`,
+        );
+        invariant(
+          participant.birthYear != null,
+          `Participant ${participant.id} does not have a birth year`,
+        );
+        invariant(
+          participant.nationality != null,
+          `Participant ${participant.id} does not have a nationality`,
+        );
 
-      const currentGroupPosition = getGroupPositionOfPlayer(participant.id);
-      const currentPoints = getPointsOfPlayer(participant.id);
+        const currentGroupPosition = getGroupPositionOfPlayer(participant.id);
+        const currentPoints = getPointsOfPlayer(participant.id);
 
-      return {
-        index: 1,
-        startingGroupPosition: groupPosition,
-        gender: participant.gender,
-        title: participant.title ?? "",
-        name: formatPlayerName(
-          participant.profile.firstName,
-          participant.profile.lastName,
-          participant.profile.academicTitle,
-        ),
-        fideRating: participant.fideRating!,
-        fideNation: participant.nationality!,
-        fideId: participant.fideId,
-        birthYear: DateTime.local(participant.birthYear),
-        currentPoints,
-        currentGroupPosition,
-        results: participantGames
-          .filter(
-            (game) =>
-              game.whiteParticipantId !== null &&
-              game.blackParticipantId !== null,
-          )
-          .map((game) => {
-            invariant(game.result, `Game ${game.id} does not have a result`);
-            const isWhite = whiteGameIds.includes(game.id);
+        return {
+          index: 1,
+          startingGroupPosition: groupPosition,
+          gender: participant.gender,
+          title: participant.title ?? "",
+          name: formatPlayerName(
+            participant.profile.firstName,
+            participant.profile.lastName,
+            participant.profile.academicTitle,
+          ),
+          fideRating: await getCurrentElo(participant),
+          fideNation: participant.nationality!,
+          fideId: participant.fideId,
+          birthYear: DateTime.local(participant.birthYear),
+          currentPoints,
+          currentGroupPosition,
+          results: participantGames
+            .filter(
+              (game) =>
+                game.whiteParticipantId !== null &&
+                game.blackParticipantId !== null,
+            )
+            .map((game) => {
+              invariant(game.result, `Game ${game.id} does not have a result`);
+              const isWhite = whiteGameIds.includes(game.id);
 
-            return {
-              scheduled: DateTime.fromJSDate(game.matchday.date),
-              opponentGroupPosition: getInitialGroupPositionOfPlayer(
-                isWhite ? game.blackParticipantId! : game.whiteParticipantId!,
-              ),
-              pieceColor: isWhite ? "w" : "b",
-              result: mapResult(game.result, isWhite),
-            };
-          }),
-      } as PlayerEntry;
-    });
+              return {
+                scheduled: DateTime.fromJSDate(game.matchday.date),
+                opponentGroupPosition: getInitialGroupPositionOfPlayer(
+                  isWhite ? game.blackParticipantId! : game.whiteParticipantId!,
+                ),
+                pieceColor: isWhite ? "w" : "b",
+                result: mapResult(game.result, isWhite),
+              };
+            }),
+        } as PlayerEntry;
+      },
+    );
 
     // 012
     const tournamentName = `${data.tournament.name} - ${data.groupName}`;
@@ -263,7 +267,7 @@ export const generateFideReportFile = action(
         referee,
         timeLimit,
       },
-      entries,
+      await Promise.all(entries),
     );
 
     const monthName = monthLabels[month - 1];
@@ -303,6 +307,17 @@ async function getRefereeOfGroup(groupId: number, month: number) {
     .limit(1);
 
   return rows[0] ?? null;
+}
+
+async function getCurrentElo(participant: Participant) {
+  if (participant.zpsPlayerId == null) {
+    invariant(participant.fideRating != null, "FIDE rating cannot be null");
+    return participant.fideRating;
+  }
+  const result = await getDwzAndEloByZpsNumber(participant.zpsPlayerId);
+  invariant(result != null, "Current FIDE rating could not be retrieved");
+  invariant(result.fideRating != null, "Retrieved FIDE rating cannot be null");
+  return result.fideRating;
 }
 
 function mapResult(result: GameResult, isWhite: boolean): Result["result"] {
