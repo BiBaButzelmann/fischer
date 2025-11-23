@@ -29,6 +29,8 @@ import { Handshake } from "lucide-react";
 import { useTransition, useState } from "react";
 import { authClient } from "@/auth-client";
 
+const NO_RESULT = "NO_RESULT";
+
 type Props = {
   gameId: number;
   currentResult: GameResult | null;
@@ -53,7 +55,7 @@ export function ReportResultDialog({
     const formData = new FormData(event.currentTarget);
     const resultValue = formData.get("result") as string;
     const result =
-      resultValue === "NO_RESULT" ? null : (resultValue as GameResult);
+      resultValue === NO_RESULT ? null : (resultValue as GameResult);
     startTransition(async () => {
       await onResultChange(gameId, result);
       setIsOpen(false);
@@ -89,7 +91,7 @@ export function ReportResultDialog({
             </Label>
             <Select
               name="result"
-              defaultValue={currentResult ?? "NO_RESULT"}
+              defaultValue={currentResult ?? NO_RESULT}
               required
             >
               <SelectTrigger id={`result-select-${gameId}`} className="w-full">
@@ -114,7 +116,7 @@ export function ReportResultDialog({
                       Schwarz verliert durch Regelverstoß, aber Weiß hat
                       unzureichendes Material zum Matt setzen.
                     </SelectItem>
-                    <SelectItem value="NO_RESULT">Kein Ergebnis</SelectItem>
+                    <SelectItem value={NO_RESULT}>Kein Ergebnis</SelectItem>
                   </>
                 )}
               </SelectContent>
