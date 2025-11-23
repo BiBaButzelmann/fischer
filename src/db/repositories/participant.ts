@@ -131,7 +131,7 @@ export async function getParticipantsWithProfileByGroupId(groupId: number) {
     .orderBy(profile.lastName, profile.firstName);
 }
 
-export async function getParticipantsWithZpsPlayerIdByTournamentId(
+export async function getParticipantsWithZpsIdsByTournamentId(
   tournamentId: number,
 ) {
   return await db.query.participant.findMany({
@@ -139,10 +139,12 @@ export async function getParticipantsWithZpsPlayerIdByTournamentId(
       and(
         eq(participant.tournamentId, tournamentId),
         isNotNull(participant.zpsPlayerId),
+        isNotNull(participant.zpsClubId),
       ),
     columns: {
       id: true,
       zpsPlayerId: true,
+      zpsClubId: true,
     },
   });
 }
