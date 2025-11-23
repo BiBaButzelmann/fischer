@@ -29,7 +29,7 @@ import { getParticipantFullName } from "@/lib/participant";
 
 type Props = {
   games: GameWithParticipantProfilesAndGroupAndMatchday[];
-  onResultChange: (gameId: number, result: GameResult) => Promise<void>;
+  onResultChange: (gameId: number, result: GameResult | null) => Promise<void>;
   availableMatchdays: MatchDay[];
   userRoles: Role[];
 };
