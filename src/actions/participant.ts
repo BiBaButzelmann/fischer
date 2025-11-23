@@ -8,7 +8,7 @@ import { participantFormSchema } from "@/schema/participant";
 import { authWithRedirect } from "@/auth/utils";
 import { getTournamentById } from "@/db/repositories/tournament";
 import { getProfileByUserId } from "@/db/repositories/profile";
-import { getParticipantsWithZpsPlayerIdByTournamentId } from "@/db/repositories/participant";
+import { getParticipantsWithZpsIdsByTournamentId } from "@/db/repositories/participant";
 import { and, eq } from "drizzle-orm";
 import { DEFAULT_CLUB_LABEL } from "@/constants/constants";
 import { revalidatePath } from "next/cache";
@@ -179,9 +179,12 @@ export async function getParticipantEloData(
   };
 }
 
-export async function getDwzAndEloByZpsNumber(zps: string) {
+export async function getDwzAndEloByZps(
+  zpsPlayerId: string,
+  zpsClubId: string,
+) {
   const clubData = await fetch(
-    "https://www.schachbund.de/php/dewis/verein.php?zps=40023&format=csv",
+    `https://www.schachbund.de/php/dewis/verein.php?zps=${zpsClubId}&format=csv`,
   );
   const clubCsv = await clubData.text();
 
@@ -190,7 +193,7 @@ export async function getDwzAndEloByZpsNumber(zps: string) {
     const fields = line.split("|");
     const rowZps = fields[5]?.trim() || "";
 
-    return rowZps === zps;
+    return rowZps === zpsPlayerId;
   });
   if (!matchingClubLine) {
     return null;
@@ -227,7 +230,7 @@ export const updateAllParticipantRatings = action(
     );
 
     const participants =
-      await getParticipantsWithZpsPlayerIdByTournamentId(tournamentId);
+      await getParticipantsWithZpsIdsByTournamentId(tournamentId);
 
     if (participants.length === 0) {
       throw new Error(
@@ -240,8 +243,9 @@ export const updateAllParticipantRatings = action(
 
     for (const participantData of participants) {
       try {
-        const eloData = await getDwzAndEloByZpsNumber(
+        const eloData = await getDwzAndEloByZps(
           participantData.zpsPlayerId!,
+          participantData.zpsClubId!,
         );
         if (!eloData) {
           failed++;
