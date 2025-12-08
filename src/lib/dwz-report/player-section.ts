@@ -32,7 +32,7 @@ export function generatePlayerSection(
   const maxResults = Math.max(
     ...playerSectionData.map((player) => player.results.length),
   );
-  for (let i = 0; i < maxResults; i++) {
+  for (let i = 1; i <= maxResults; i++) {
     tableGenerator.addColumn(`game${i}`, "", 5, "right");
   }
   // // Add rows for each player
@@ -48,8 +48,8 @@ export function generatePlayerSection(
       { id: "fideId", data: player.fideId ?? "" },
       { id: "zpsClubId", data: player.zpsClubId ?? "" },
       { id: "zpsPlayerId", data: player.zpsPlayerId ?? "" },
-      ...player.results.map((result, index) => ({
-        id: `game${index}`,
+      ...player.results.map((result) => ({
+        id: `game${result.round}`,
         data: formatResult(result),
       })),
     ];

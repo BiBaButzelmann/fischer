@@ -33,8 +33,7 @@ export function GenerateDwzReportButton({
       const element = document.createElement("a");
       element.setAttribute(
         "href",
-        "data:text/plain;charset=utf-8," +
-          encodeURIComponent(result.dwzReport),
+        "data:text/plain;charset=utf-8," + encodeURIComponent(result.dwzReport),
       );
       element.setAttribute("download", result.fileName);
 

@@ -9,6 +9,7 @@ export type Result = {
   pieceColor: "W" | "B";
   result: "1" | "0" | "R";
   opponentEndGroupPosition: number;
+  round: number;
 };
 
 export type PlayerEntry = {
