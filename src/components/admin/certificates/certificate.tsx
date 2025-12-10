@@ -22,10 +22,12 @@ export function Certificate({
     : `${position}. Platz Gruppe ${group.groupName}`;
 
   const maxPoints = participant.gamesPlayed;
-  const formattedPoints = participant.points % 1 === 0
-    ? participant.points.toString()
-    : participant.points.toFixed(1);
-  const pointsText = `${formattedPoints}/${maxPoints} Punkte`;  return (
+  const formattedPoints =
+    participant.points % 1 === 0
+      ? participant.points.toString()
+      : participant.points.toFixed(1);
+  const pointsText = `${formattedPoints}/${maxPoints} Punkte`;
+  return (
     <div className="w-[210mm] h-[297mm] bg-white border shadow-lg relative print:border-0 print:shadow-none print:break-after-page">
       <div className="absolute inset-[10mm] border-[2px] border-red-700 pointer-events-none" />
       <div className="absolute inset-[11mm] border border-red-700 pointer-events-none" />
@@ -45,17 +47,14 @@ export function Certificate({
           <h1 className="text-7xl font-bold tracking-wide">
             {isKlubmeister ? "Klubmeister" : "Urkunde"}
           </h1>
-
           <div className="text-5xl font-bold">
             {getParticipantFullName(participant)}
-          </div>          <div className="text-4xl font-bold tracking-wide mt-4">
+          </div>{" "}
+          <div className="text-4xl font-bold tracking-wide mt-4">
             HSK Klubturnier
           </div>
-
           <div className="text-3xl mt-2">{placementText}</div>
-
           <div className="mt-4 text-2xl">{pointsText}</div>
-
           <div className="mt-16 text-xl text-muted-foreground">
             {tournamentYear}
           </div>
