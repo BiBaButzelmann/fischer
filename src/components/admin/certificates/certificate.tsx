@@ -35,7 +35,7 @@ export function Certificate({
       <div className="absolute inset-0 flex items-center justify-center pointer-events-none overflow-hidden">
         <Image
           src="/king_icon.webp"
-          alt="Schach König"
+          alt=""
           width={500}
           height={500}
           className="opacity-[0.08] grayscale object-contain"
@@ -49,7 +49,8 @@ export function Certificate({
           </h1>
           <div className="text-5xl font-bold">
             {getParticipantFullName(participant)}
-          </div>{" "}
+          </div>
+
           <div className="text-4xl font-bold tracking-wide mt-4">
             HSK Klubturnier
           </div>
