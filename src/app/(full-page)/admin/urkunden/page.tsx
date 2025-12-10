@@ -3,6 +3,7 @@ import { Certificate } from "@/components/admin/certificates/certificate";
 import { PrintButton } from "@/components/partien/print/print-button";
 import { getGroupsWithTopParticipants } from "@/db/repositories/certificate";
 import { getLatestTournament } from "@/db/repositories/tournament";
+import { toLocalDateTime } from "@/lib/date";
 import { redirect } from "next/navigation";
 import invariant from "tiny-invariant";
 
@@ -19,7 +20,7 @@ export default async function Page() {
 
   return (
     <div className="flex gap-4 p-4 print:p-0">
-      <div className="flex flex-col gap-8">
+      <div className="flex flex-col gap-8 print:gap-0">
         {groupsWithWinners.map((group) =>
           group.topParticipants.map((participant, index) => (
             <Certificate
@@ -27,7 +28,7 @@ export default async function Page() {
               participant={participant}
               group={group}
               position={index + 1}
-              tournamentYear={new Date(tournament.createdAt).getFullYear()}
+              tournamentYear={toLocalDateTime(tournament.createdAt).year}
             />
           )),
         )}

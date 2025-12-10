@@ -26,7 +26,7 @@ export function Certificate({
     ? participant.points.toString()
     : participant.points.toFixed(1);
   const pointsText = `${formattedPoints}/${maxPoints} Punkte`;  return (
-    <div className="w-[210mm] h-[297mm] bg-white border shadow-lg page-break-after relative">
+    <div className="w-[210mm] h-[297mm] bg-white border shadow-lg relative print:border-0 print:shadow-none print:break-after-page">
       <div className="absolute inset-[10mm] border-[2px] border-red-700 pointer-events-none" />
       <div className="absolute inset-[11mm] border border-red-700 pointer-events-none" />
 
