@@ -28,7 +28,11 @@ export const generateDwzReportFile = action(async (groupId: number) => {
           },
         },
       },
-      tournament: true,
+      tournament: {
+        with: {
+          organizer: true,
+        },
+      },
       games: {
         with: {
           matchdayGame: {
@@ -149,9 +153,16 @@ export const generateDwzReportFile = action(async (groupId: number) => {
       startDate: data.tournament.startDate,
       endDate: data.tournament.endDate,
       timeLimit: data.tournament.timeLimit,
+      tournamentOrganizer:
+        data.tournament.organizer != null
+          ? formatName(
+              data.tournament.organizer.firstName,
+              data.tournament.organizer.lastName,
+            )
+          : undefined,
       mainReferee:
         groupReferee != null
-          ? formatRefereeName(groupReferee.firstName, groupReferee.lastName)
+          ? formatName(groupReferee.firstName, groupReferee.lastName)
           : undefined,
     },
   );
@@ -164,7 +175,7 @@ export const generateDwzReportFile = action(async (groupId: number) => {
   };
 });
 
-function formatRefereeName(firstName: string, lastName: string) {
+function formatName(firstName: string, lastName: string) {
   return `${firstName} ${lastName}`;
 }
 
