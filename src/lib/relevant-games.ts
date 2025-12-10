@@ -22,6 +22,7 @@ export function filterRelevantGames(
       const whiteParticipant = participantsMap[whiteParticipantId];
       const blackParticipant = participantsMap[blackParticipantId];
 
+      // consider a game not played for deleted participants based on the result
       if (
         whiteParticipant.deletedAt == null ||
         !didParticipantForfeitGame(whiteParticipantId, game)
@@ -56,6 +57,7 @@ export function filterRelevantGames(
   const totalGamesToPlay = participants.length - 1;
   const relevantGames: Set<Game> = new Set();
 
+  // add all games to list except if one of the participants is inactive and has played less than 50% of their games
   for (const game of games) {
     const { whiteParticipantId, blackParticipantId } = game;
     invariant(
