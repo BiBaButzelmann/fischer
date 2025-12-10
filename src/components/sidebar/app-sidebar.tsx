@@ -15,6 +15,7 @@ import Link from "next/link";
 import { SidebarUserMenu } from "./sidebar-user-menu";
 import { SidebarLink } from "./sidebar-link";
 import {
+  Award,
   BinocularsIcon,
   BookTextIcon,
   CalendarIcon,
@@ -194,6 +195,9 @@ export function AppSidebar({ session, tournament, userRoles }: Props) {
               </SidebarLink>
               <SidebarLink href="/admin/namensschilder" icon={LayoutDashboard}>
                 Namensschilder
+              </SidebarLink>
+              <SidebarLink href="/admin/urkunden" icon={Award}>
+                Urkunden
               </SidebarLink>
             </SidebarGroupContent>
           </SidebarGroup>
