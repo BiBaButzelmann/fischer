@@ -7,6 +7,7 @@ import { action } from "@/lib/actions";
 import { generateDwzReport } from "@/lib/dwz-report/dwz-report";
 import { PlayerEntry, Result } from "@/lib/dwz-report/types";
 import { formatPlayerName } from "@/lib/fide-report/format-fide-name";
+import { getRefereeOfGroup } from "@/services/referee";
 import { getStandings } from "@/services/standings";
 import invariant from "tiny-invariant";
 import { match } from "ts-pattern";
@@ -41,54 +42,20 @@ export const generateDwzReportFile = action(async (groupId: number) => {
   });
   invariant(data, "Group not found");
 
+  const groupReferee = await getRefereeOfGroup(groupId);
+
   const completedGames = data.games.filter((game) => {
     return game.result != null;
   });
 
   const actuallyPlayedGames = completedGames.filter((game) => {
-    const isByeGame =
-      game.whiteParticipantId == null || game.blackParticipantId == null;
-    if (isByeGame) {
-      return false;
-    }
-
-    // check for disabled participants
-    const date = game.matchdayGame.matchday.date;
-    const whiteParticipant = data.participants.find(
-      (p) => p.participant.id === game.whiteParticipantId,
-    );
-    const blackParticipant = data.participants.find(
-      (p) => p.participant.id === game.blackParticipantId,
-    );
-    invariant(
-      whiteParticipant,
-      `White participant ${game.whiteParticipantId} not found`,
-    );
-    invariant(
-      blackParticipant,
-      `Black participant ${game.blackParticipantId} not found`,
-    );
-
-    const isWhiteParticipantDisabled =
-      whiteParticipant.participant.deletedAt != null &&
-      whiteParticipant.participant.deletedAt <= date;
-    const isBlackParticipantDisabled =
-      blackParticipant.participant.deletedAt != null &&
-      blackParticipant.participant.deletedAt <= date;
-
-    return !isWhiteParticipantDisabled && !isBlackParticipantDisabled;
+    return game.whiteParticipantId != null && game.blackParticipantId != null;
   });
 
   const gamesAsWhiteParticipant = actuallyPlayedGames.reduce(
     (acc, game) => {
-      if (
-        game.whiteParticipantId === null ||
-        game.blackParticipantId === null
-      ) {
-        return acc;
-      }
-      acc[game.whiteParticipantId] ??= [];
-      acc[game.whiteParticipantId].push(game.id);
+      acc[game.whiteParticipantId!] ??= [];
+      acc[game.whiteParticipantId!].push(game.id);
       return acc;
     },
     {} as Record<number, number[]>,
@@ -96,14 +63,8 @@ export const generateDwzReportFile = action(async (groupId: number) => {
 
   const gamesAsBlackParticipant = actuallyPlayedGames.reduce(
     (acc, game) => {
-      if (
-        game.whiteParticipantId === null ||
-        game.blackParticipantId === null
-      ) {
-        return acc;
-      }
-      acc[game.blackParticipantId] ??= [];
-      acc[game.blackParticipantId].push(game.id);
+      acc[game.blackParticipantId!] ??= [];
+      acc[game.blackParticipantId!].push(game.id);
       return acc;
     },
     {} as Record<number, number[]>,
@@ -183,9 +144,15 @@ export const generateDwzReportFile = action(async (groupId: number) => {
     },
     sortedEntries,
     {
-      user: "",
+      tournamentName: data.tournament.name,
+      location: data.tournament.location,
       startDate: data.tournament.startDate,
       endDate: data.tournament.endDate,
+      timeLimit: data.tournament.timeLimit,
+      mainReferee:
+        groupReferee != null
+          ? formatRefereeName(groupReferee.firstName, groupReferee.lastName)
+          : undefined,
     },
   );
 
@@ -197,12 +164,16 @@ export const generateDwzReportFile = action(async (groupId: number) => {
   };
 });
 
+function formatRefereeName(firstName: string, lastName: string) {
+  return `${firstName} ${lastName}`;
+}
+
 function mapResult(result: GameResult, isWhite: boolean): Result["result"] {
   // TODO: wie mit -/+ spielen umgehen
   return match<GameResult, Result["result"]>(result)
-    .with("+:-", () => (isWhite ? "1" : "0"))
-    .with("-:-", () => (isWhite ? "0" : "0"))
-    .with("-:+", () => (isWhite ? "0" : "1"))
+    .with("+:-", () => (isWhite ? "+:" : "-:"))
+    .with("-:-", () => (isWhite ? "-:" : "-:"))
+    .with("-:+", () => (isWhite ? "-:" : "+:"))
     .with("0-½", () => (isWhite ? "0" : "R"))
     .with("0:1", () => (isWhite ? "0" : "1"))
     .with("1:0", () => (isWhite ? "1" : "0"))

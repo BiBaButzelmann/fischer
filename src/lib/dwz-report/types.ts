@@ -7,7 +7,7 @@ export type HeaderSectionData = {
 
 export type Result = {
   pieceColor: "W" | "B";
-  result: "1" | "0" | "R";
+  result: "1" | "0" | "R" | "+:" | "-:";
   opponentEndGroupPosition: number;
   round: number;
 };
@@ -26,16 +26,13 @@ export type PlayerEntry = {
 export type PlayerSectionData = PlayerEntry[];
 
 export type TournamentSectionData = {
-  name?: string;
-  place?: string;
+  tournamentName?: string;
+  location?: string;
   fideFederation?: string;
   startDate: Date;
   endDate: Date;
-  moves1?: string;
-  moves2?: string;
-  moves3?: string;
+  timeLimit?: string;
   tournamentOrganizer?: string;
   mainReferee?: string;
   otherReferees?: string;
-  user: string;
 };

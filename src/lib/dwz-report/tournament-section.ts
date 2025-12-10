@@ -4,15 +4,12 @@ export function generateTournamentSection(
   tournamentSectionData: TournamentSectionData,
 ) {
   return `###\r
-Name:\r
-Ort:\r
-FIDE-Land:\r
+Name: ${tournamentSectionData.tournamentName}\r
+Ort: ${tournamentSectionData.location}\r
 Datum(S):   ${formatDate(tournamentSectionData.startDate)}           Datum(E):   ${formatDate(tournamentSectionData.endDate)}\r
-ZÅge(1):                         ZÅge(2):                         ZÅge(3):\r
-Turnierorganisator:\r
-Hauptschiedsrichter:\r
-Weitere Schiedsrichter:\r
-Anwender:        ${tournamentSectionData.user}\r`;
+Z¸ge: ${tournamentSectionData.timeLimit}
+Turnierorganisator: ${tournamentSectionData.tournamentOrganizer}\r
+Hauptschiedsrichter: ${tournamentSectionData.mainReferee}\r`;
 }
 
 function formatDate(date: Date) {

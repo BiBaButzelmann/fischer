@@ -1,5 +1,5 @@
 import { TableGenerator } from "../table-generator";
-import type { PlayerSectionData } from "./types";
+import type { PlayerSectionData, Result } from "./types";
 
 export function generatePlayerSection(
   playerSectionData: PlayerSectionData,
@@ -59,10 +59,9 @@ export function generatePlayerSection(
   return tableGenerator.generateTable();
 }
 
-function formatResult(result: {
-  pieceColor: string;
-  result: string;
-  opponentEndGroupPosition: number;
-}): string {
+function formatResult(result: Result): string {
+  if (result.result === "+:" || result.result === "-:") {
+    return `${result.result} ${result.opponentEndGroupPosition.toString().padStart(2, " ")}`;
+  }
   return `${result.result}${result.pieceColor} ${result.opponentEndGroupPosition.toString().padStart(2, " ")}`;
 }
