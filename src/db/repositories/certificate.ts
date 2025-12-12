@@ -1,7 +1,6 @@
 import { db } from "@/db/client";
-import { calculateStandings } from "@/lib/standings";
-import { filterRelevantGames } from "@/lib/relevant-games";
-import { getCompletedGames, getParticipantsInGroup } from "./game";
+import { getStandings } from "@/services/standings";
+import { getParticipantsInGroup } from "./game";
 import type { GroupWithTopParticipants } from "@/db/types/certificate";
 
 export async function getGroupsWithTopParticipants(
@@ -15,9 +14,7 @@ export async function getGroupsWithTopParticipants(
   const groupsWithTopParticipants = await Promise.all(
     groups.map(async (group) => {
       const participants = await getParticipantsInGroup(group.id);
-      const games = await getCompletedGames(group.id);
-      const relevantGames = filterRelevantGames(games, participants);
-      const standings = calculateStandings(relevantGames, participants);
+      const standings = await getStandings(group.id);
 
       const topThree = standings.slice(0, 3).map((standing) => {
         const participant = participants.find(
