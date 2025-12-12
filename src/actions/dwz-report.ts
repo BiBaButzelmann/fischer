@@ -167,7 +167,7 @@ export const generateDwzReportFile = action(async (groupId: number) => {
     },
   );
 
-  const fileName = `DWZ_Export_Group_${groupId}.txt`;
+  const fileName = `Eloref_${data.groupName}-Gruppe.txt`;
 
   const reportWithoutNonAscii = dwzReport.replace(/[^\x00-\x7F]/g, "");
 
