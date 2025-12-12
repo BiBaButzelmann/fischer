@@ -190,6 +190,9 @@ export function AppSidebar({ session, tournament, userRoles }: Props) {
               <SidebarLink href="/admin/fide-bericht" icon={FileCheck}>
                 Fide Bericht
               </SidebarLink>
+              <SidebarLink href="/admin/dwz-bericht" icon={FileCheck}>
+                DWZ Bericht
+              </SidebarLink>
               <SidebarLink href="/admin/startgeld" icon={Euro}>
                 Startgeld verwalten
               </SidebarLink>

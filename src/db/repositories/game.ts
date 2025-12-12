@@ -382,6 +382,25 @@ export async function getUncompletedGamesInMonth(
     .then((games) => games.map((row) => row.id));
 }
 
+export async function getUncompletedGamesByGroup(groupId: number) {
+  return await db
+    .select({
+      id: game.id,
+      date: matchday.date,
+    })
+    .from(game)
+    .innerJoin(matchdayGame, eq(game.id, matchdayGame.gameId))
+    .innerJoin(matchday, eq(matchdayGame.matchdayId, matchday.id))
+    .where(
+      and(
+        eq(game.groupId, groupId),
+        isNull(game.result),
+      ),
+    )
+    .orderBy(asc(matchday.date))
+    .then((games) => games.map((row) => row.id));
+}
+
 export async function getPendingGamesByParticipantId(participantId: number) {
   return await db
     .select({

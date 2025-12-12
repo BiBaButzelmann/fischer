@@ -1,13 +1,9 @@
 import { StandingsSelector } from "./standings-selector";
 import { StandingsTable } from "./standings-table";
-import {
-  getParticipantsInGroup,
-  getCompletedGames,
-} from "@/db/repositories/game";
-import { calculateStandings } from "@/lib/standings";
-import { filterRelevantGames } from "@/lib/relevant-games";
+import { getParticipantsInGroup } from "@/db/repositories/game";
 import type { TournamentNames } from "@/db/types/tournament";
 import type { GroupSummary } from "@/db/types/group";
+import { getStandings } from "@/services/standings";
 
 type Props = {
   tournamentNames: TournamentNames[];
@@ -26,14 +22,11 @@ export async function StandingsDisplay({
   selectedGroupId,
   selectedRound,
 }: Props) {
-  const participants = await getParticipantsInGroup(Number(selectedGroupId));
-  const games = await getCompletedGames(
-    Number(selectedGroupId),
-    selectedRound ? Number(selectedRound) : undefined,
-  );
+  const groupId = Number(selectedGroupId);
+  const round = selectedRound != null ? Number(selectedRound) : undefined;
 
-  const relevantGames = filterRelevantGames(games, participants);
-  const standings = calculateStandings(relevantGames, participants);
+  const participants = await getParticipantsInGroup(groupId);
+  const standings = await getStandings(groupId, round);
 
   const selectedGroup = groups.find((g) => g.id.toString() === selectedGroupId);
 
