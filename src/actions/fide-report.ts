@@ -4,10 +4,6 @@ import { authWithRedirect } from "@/auth/utils";
 import { monthLabels } from "@/constants/constants";
 import { db } from "@/db/client";
 import { getGamesInMonth } from "@/db/repositories/game";
-import { game } from "@/db/schema/game";
-import { matchdayReferee, matchday, matchdayGame } from "@/db/schema/matchday";
-import { profile } from "@/db/schema/profile";
-import { referee } from "@/db/schema/referee";
 import { GameResult } from "@/db/types/game";
 import { Participant } from "@/db/types/participant";
 import { action } from "@/lib/actions";
@@ -18,11 +14,11 @@ import {
 } from "@/lib/fide-report/format-fide-name";
 import { PlayerEntry, Result } from "@/lib/fide-report/types";
 import { calculateStandings } from "@/lib/standings";
-import { and, desc, eq, isNull, sql } from "drizzle-orm";
 import { DateTime } from "luxon";
 import invariant from "tiny-invariant";
 import { match } from "ts-pattern";
 import { getDwzAndEloByZps } from "./participant";
+import { getRefereeOfGroup } from "@/services/referee";
 
 export const generateFideReportFile = action(
   async (groupId: number, month: number) => {
@@ -62,7 +58,6 @@ export const generateFideReportFile = action(
     const actuallyPlayedGames = completedGames.filter((game) => {
       const isByeGame =
         game.whiteParticipantId == null || game.blackParticipantId == null;
-
       if (isByeGame) {
         return false;
       }
@@ -279,35 +274,6 @@ export const generateFideReportFile = action(
     };
   },
 );
-
-async function getRefereeOfGroup(groupId: number, month: number) {
-  const countExpr = sql<number>`COUNT(*)`;
-  const rows = await db
-    .select({
-      refereeId: referee.id,
-      firstName: profile.firstName,
-      lastName: profile.lastName,
-      occurrences: countExpr,
-    })
-    .from(matchdayReferee)
-    .innerJoin(matchday, eq(matchday.id, matchdayReferee.matchdayId))
-    .innerJoin(matchdayGame, eq(matchdayGame.matchdayId, matchday.id))
-    .innerJoin(game, eq(game.id, matchdayGame.gameId))
-    .innerJoin(referee, eq(referee.id, matchdayReferee.refereeId))
-    .innerJoin(profile, eq(profile.id, referee.profileId))
-    .where(
-      and(
-        eq(game.groupId, groupId),
-        isNull(matchdayReferee.canceledAt),
-        sql`EXTRACT(MONTH FROM ${matchday.date}) = ${month}`,
-      ),
-    )
-    .groupBy(referee.id, profile.firstName, profile.lastName)
-    .orderBy(desc(countExpr))
-    .limit(1);
-
-  return rows[0] ?? null;
-}
 
 async function getCurrentElo(participant: Participant) {
   if (participant.zpsPlayerId == null || participant.zpsClubId == null) {
