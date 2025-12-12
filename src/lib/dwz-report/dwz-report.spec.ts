@@ -115,9 +115,14 @@ const headerSectionData: HeaderSectionData = {
 };
 
 const tournamentSectionData: TournamentSectionData = {
-  startDate: new Date("2018-11-30"),
-  endDate: new Date("2018-11-30"),
-  user: "Nils Altenburg",
+  tournamentName: "Klubturnier 2025",
+  location: "Hamburg",
+  startDate: new Date("2025-09-16"),
+  endDate: new Date("2025-12-12"),
+  timeLimit:
+    "40 Züge in 90 Minuten, danach 0 Züge in 0 Minuten, 30 Minuten für die letzte Phase, Zugabe pro Zug in Sekunden: 30",
+  tournamentOrganizer: "Arne Alpers",
+  mainReferee: "Thomas Stark",
 };
 
 const expectedPlayerSection = ` ttt. rrr nnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnn vvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvv lll ffffffffff pppppppppp gggggggg eeee dddd  zzzzz mmmm\u0020\u0020\u0020\u0020\u0020\u0020\u0020\u0020\u0020\u0020\u0020\u0020\u0020\u0020\u0020\u0020\u0020\u0020\u0020\u0020\u0020\u0020\u0020\u0020\u0020\r
@@ -126,32 +131,16 @@ const expectedPlayerSection = ` ttt. rrr nnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnn vvvvvv
 
 const expectedHeaderSection = `HSK Klubturnier 2018 A-Gruppe\r
 \r
-ER  10  9  1 #910#\r`;
+ER  10  9  1\r`;
 
 const expectedTournamentSection = `###\r
-Name:\r
-Ort:\r
-FIDE-Land:\r
-Datum(S):   30.11.2018           Datum(E):   30.11.2018\r
-ZÅge(1):                         ZÅge(2):                         ZÅge(3):\r
-Turnierorganisator:\r
-Hauptschiedsrichter:\r
-Weitere Schiedsrichter:\r
-Anwender:        Nils Altenburg\r`;
+Name: Klubturnier 2025\r
+Ort: Hamburg\r
+Datum(S):   16.9.2025           Datum(E):   12.12.2025\r
+Z¸ge: 40 Züge in 90 Minuten, danach 0 Züge in 0 Minuten, 30 Minuten für die letzte Phase, Zugabe pro Zug in Sekunden: 30\r
+Turnierorganisator: Arne Alpers\r
+Hauptschiedsrichter: Thomas Stark\r`;
 
 const expectedDwzReport = `${expectedHeaderSection}\r
 ${expectedPlayerSection}\r
 ${expectedTournamentSection}\r`;
-
-/**
- * TODO: Offene Fragen:
- * - Dürfen nach mmmm auffüllende Leerzeichen folgen?
- * - Ist \r als line separator erlaubt?
- * - Vereinsname? Zwingend Abkürzungen? Woher kennen wir diese?
- * - "ER  10  9  1 #910#" -> "?Erfassungsreport? 10 Spieler ?Gruppe Nummer 1? ?9 Runden? ???"
- * - Welche Rundenzahl wenn Spieler aus dem Turnier ausgeschieden sind?
- * - Tournament Informationen sehr unvollständig?
- * - Wer ist der Anwender?
- * - Whitespaces random platziert in der Datei? Egal?
- * - Start und Enddatum sind das gleiche Datum?
- */

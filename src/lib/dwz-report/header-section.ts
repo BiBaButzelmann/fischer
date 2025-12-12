@@ -5,5 +5,5 @@ export function generatHeaderSection(
 ): string {
   return `${headerSectionData.tournamentName}\r
 \r
-ER  ${headerSectionData.numberOfPlayers}  ${headerSectionData.numberOfRounds}  ${headerSectionData.groupNumber}`;
+ER  ${headerSectionData.numberOfPlayers}  ${headerSectionData.numberOfRounds}  ${headerSectionData.groupNumber}\r`;
 }

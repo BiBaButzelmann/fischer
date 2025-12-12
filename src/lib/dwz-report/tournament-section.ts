@@ -7,7 +7,7 @@ export function generateTournamentSection(
 Name: ${tournamentSectionData.tournamentName}\r
 Ort: ${tournamentSectionData.location}\r
 Datum(S):   ${formatDate(tournamentSectionData.startDate)}           Datum(E):   ${formatDate(tournamentSectionData.endDate)}\r
-Z¸ge: ${tournamentSectionData.timeLimit}
+Z¸ge: ${tournamentSectionData.timeLimit}\r
 Turnierorganisator: ${tournamentSectionData.tournamentOrganizer}\r
 Hauptschiedsrichter: ${tournamentSectionData.mainReferee}\r`;
 }
