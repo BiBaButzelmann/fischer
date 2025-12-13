@@ -16,6 +16,7 @@ export type PlayerEntry = {
   endGroupPosition: number;
   startingGroupPosition: number;
   name: string;
+  birthYear?: number;
   club: string;
   fideId?: string;
   zpsClubId?: string;
