@@ -23,7 +23,7 @@ export function generatePlayerSection(
   tableGenerator.addColumn("lll", "lll", 3, "left");
   tableGenerator.addColumn("fideId", "ffffffffff", 10, "right");
   tableGenerator.addColumn("pppppppppp", "pppppppppp", 10, "left");
-  tableGenerator.addColumn("gggggggg", "gggggggg", 8, "left");
+  tableGenerator.addColumn("birthYear", "gggggggg", 8, "right");
   tableGenerator.addColumn("eeee", "eeee", 4, "left");
   tableGenerator.addColumn("dddd", "dddd", 4, "left");
   tableGenerator.addColumn("zpsClubId", " zzzzz", 6, "right");
@@ -44,6 +44,7 @@ export function generatePlayerSection(
         data: player.startingGroupPosition.toString(),
       },
       { id: "name", data: player.name },
+      { id: "birthYear", data: player.birthYear?.toString() ?? "" },
       { id: "club", data: player.club },
       { id: "fideId", data: player.fideId ?? "" },
       { id: "zpsClubId", data: player.zpsClubId ?? "" },

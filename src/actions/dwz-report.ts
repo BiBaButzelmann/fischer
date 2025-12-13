@@ -114,6 +114,7 @@ export const generateDwzReportFile = action(async (groupId: number) => {
         participant.profile.lastName,
         participant.profile.academicTitle,
       ),
+      birthYear: participant.birthYear ?? undefined,
       club: participant.chessClub.slice(0, 32),
       fideId: participant.fideId ?? undefined,
       zpsClubId: participant.zpsClubId ?? undefined,
@@ -139,16 +140,17 @@ export const generateDwzReportFile = action(async (groupId: number) => {
     (entry1, entry2) => entry1.endGroupPosition - entry2.endGroupPosition,
   );
 
+  const tournamentName = `${data.tournament.name} - ${data.groupName} Gruppe`;
   const dwzReport = generateDwzReport(
     {
       groupNumber: data.groupNumber,
       numberOfPlayers: data.participants.length,
       numberOfRounds: data.participants.length - 1,
-      tournamentName: `${data.tournament.name} - ${data.groupName}`,
+      tournamentName,
     },
     sortedEntries,
     {
-      tournamentName: data.tournament.name,
+      tournamentName,
       location: data.tournament.location,
       startDate: data.tournament.startDate,
       endDate: data.tournament.endDate,
