@@ -8,11 +8,12 @@ import { z } from "zod";
 import { createTournamentFormSchema } from "@/schema/tournament";
 import { authWithRedirect } from "@/auth/utils";
 import invariant from "tiny-invariant";
-import { eq } from "drizzle-orm";
+import { and, eq, ne } from "drizzle-orm";
 import { TournamentStage } from "@/db/types/tournament";
 import { matchday } from "@/db/schema/matchday";
 import { isHoliday } from "@/lib/holidays";
 import { getCurrentLocalDateTime } from "@/lib/date";
+import { getTournamentBySlug } from "@/db/repositories/tournament";
 
 export async function createTournament(
   formData: z.infer<typeof createTournamentFormSchema>,
@@ -22,9 +23,15 @@ export async function createTournament(
 
   const data = createTournamentFormSchema.parse(formData);
 
+  const existing = await getTournamentBySlug(data.slug);
+  if (existing) {
+    return { error: `Der Slug "${data.slug}" ist bereits vergeben.` };
+  }
+
   await db.transaction(async (tx) => {
     const newTournament: typeof tournament.$inferInsert = {
-      name: "Klubturnier 2025",
+      name: data.name,
+      slug: data.slug,
       allClocksDigital: true,
       club: data.clubName,
       startDate: new Date(data.startDate),
@@ -69,7 +76,7 @@ export async function createTournament(
     await tx.insert(matchday).values(matchDays);
   });
 
-  revalidatePath("/admin/tournament");
+  revalidatePath("/", "layout");
 }
 
 export async function updateTournament(
@@ -81,7 +88,16 @@ export async function updateTournament(
 
   const data = createTournamentFormSchema.parse(formData);
 
+  const slugOwner = await db.query.tournament.findFirst({
+    where: and(eq(tournament.slug, data.slug), ne(tournament.id, tournamentId)),
+  });
+  if (slugOwner) {
+    return { error: `Der Slug "${data.slug}" ist bereits vergeben.` };
+  }
+
   const updateData: Partial<typeof tournament.$inferInsert> = {
+    name: data.name,
+    slug: data.slug,
     club: data.clubName,
     startDate: new Date(data.startDate),
     endDate: new Date(data.endDate),
@@ -131,7 +147,7 @@ export async function updateTournament(
     await tx.insert(matchday).values(matchDays);
   });
 
-  revalidatePath("/admin/tournament");
+  revalidatePath("/", "layout");
 }
 
 export async function updateTournamentStage(
@@ -146,8 +162,7 @@ export async function updateTournamentStage(
     .set({ stage })
     .where(eq(tournament.id, tournamentId));
 
-  revalidatePath("/admin/tournament");
-  revalidatePath("/uebersicht");
+  revalidatePath("/", "layout");
 }
 
 function getMatchDays(

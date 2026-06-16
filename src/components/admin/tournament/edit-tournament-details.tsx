@@ -29,6 +29,8 @@ import { createTournamentFormSchema } from "@/schema/tournament";
 import { z } from "zod";
 import { DEFAULT_CLUB_LABEL } from "@/constants/constants";
 import { updateTournament } from "@/actions/tournament";
+import { isError } from "@/lib/actions";
+import { toast } from "sonner";
 
 type Props = {
   profiles: Profile[];
@@ -60,6 +62,8 @@ export default function EditTournamentDetails({
   const form = useForm({
     resolver: zodResolver(createTournamentFormSchema),
     defaultValues: {
+      name: tournament?.name ?? "",
+      slug: tournament?.slug ?? "",
       clubName: tournament?.club ?? DEFAULT_CLUB_LABEL,
       tournamentType: tournament?.type ?? "Rundenturnier",
       numberOfRounds: tournament?.numberOfRounds ?? 9,
@@ -95,7 +99,12 @@ export default function EditTournamentDetails({
     }
 
     startTransition(async () => {
-      await updateTournament(tournament.id, data);
+      const result = await updateTournament(tournament.id, data);
+      if (isError(result)) {
+        toast.error(result.error);
+        return;
+      }
+      toast.success("Turnier aktualisiert");
     });
   };
 
@@ -108,6 +117,34 @@ export default function EditTournamentDetails({
             Turnierinformationen
           </span>
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+            <FormField
+              control={form.control}
+              name="name"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel required>Turniername</FormLabel>
+                  <FormControl>
+                    <Input {...field} placeholder="z.B. Klubturnier 2026" />
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+
+            <FormField
+              control={form.control}
+              name="slug"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel required>Slug (URL)</FormLabel>
+                  <FormControl>
+                    <Input {...field} placeholder="z.B. klubturnier-2026" />
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+
             <FormField
               control={form.control}
               name="clubName"
