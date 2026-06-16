@@ -1,8 +1,27 @@
+import { cache } from "react";
 import { db } from "../client";
 
-export async function getTournamentById(tournamentId: number) {
+export const getTournamentById = cache(async (tournamentId: number) => {
   return await db.query.tournament.findFirst({
     where: (tournament, { eq }) => eq(tournament.id, tournamentId),
+  });
+});
+
+export const getTournamentBySlug = cache(async (slug: string) => {
+  return await db.query.tournament.findFirst({
+    where: (tournament, { eq }) => eq(tournament.slug, slug),
+  });
+});
+
+export async function getAllTournaments() {
+  return await db.query.tournament.findMany({
+    columns: {
+      id: true,
+      name: true,
+      slug: true,
+      stage: true,
+    },
+    orderBy: (tournament, { desc }) => [desc(tournament.startDate)],
   });
 }
 
@@ -17,18 +36,5 @@ export async function getActiveTournament() {
 export async function getLatestTournament() {
   return await db.query.tournament.findFirst({
     orderBy: (tournament, { desc }) => [desc(tournament.createdAt)],
-  });
-}
-
-export async function getAllActiveTournamentNames() {
-  return await db.query.tournament.findMany({
-    columns: {
-      id: true,
-      name: true,
-      numberOfRounds: true,
-    },
-    where: (tournament, { or, eq }) =>
-      or(eq(tournament.stage, "running"), eq(tournament.stage, "done")),
-    orderBy: (tournament, { desc }) => [desc(tournament.startDate)],
   });
 }

@@ -24,6 +24,7 @@ export const tournament = pgTable("tournament", {
   id: integer("id").generatedAlwaysAsIdentity().primaryKey(),
   club: text("organizer").notNull(),
   name: text("name").notNull(),
+  slug: text("slug").notNull().unique(),
   type: text("type").notNull(),
   numberOfRounds: smallint("number_of_rounds").notNull(),
   endRegistrationDate: date("end_registration_date", {
