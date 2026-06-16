@@ -4,14 +4,19 @@ import { Button } from "@/components/ui/button";
 import Link from "next/link";
 import { buildGameViewUrl } from "@/lib/navigation";
 import { getAllPostponements } from "@/db/repositories/postponement";
-import { getLatestTournament } from "@/db/repositories/tournament";
+import { getTournamentBySlug } from "@/db/repositories/tournament";
 import { getParticipantWithGroupByProfileIdAndTournamentId } from "@/db/repositories/participant";
 import { getProfileByUserId } from "@/db/repositories/profile";
 import { ArrowRight } from "lucide-react";
 import invariant from "tiny-invariant";
 
-export default async function PostponementPage() {
-  const tournament = await getLatestTournament();
+export default async function PostponementPage({
+  params,
+}: {
+  params: Promise<{ slug: string }>;
+}) {
+  const { slug } = await params;
+  const tournament = await getTournamentBySlug(slug);
 
   if (!tournament) {
     return (
@@ -62,13 +67,19 @@ export default async function PostponementPage() {
   return (
     <div>
       <div className="space-y-6">
-        <PostponementContent tournamentId={tournament.id} />
+        <PostponementContent tournamentId={tournament.id} slug={slug} />
       </div>
     </div>
   );
 }
 
-async function PostponementContent({ tournamentId }: { tournamentId: number }) {
+async function PostponementContent({
+  tournamentId,
+  slug,
+}: {
+  tournamentId: number;
+  slug: string;
+}) {
   const session = await authWithRedirect();
   const isAdmin = session.user.role === "admin";
 
@@ -122,11 +133,11 @@ async function PostponementContent({ tournamentId }: { tournamentId: number }) {
 
   const partienUrl = userParticipantId
     ? buildGameViewUrl({
-        tournamentId,
+        slug,
         participantId: userParticipantId,
         groupId: userGroupId,
       })
-    : buildGameViewUrl({ tournamentId });
+    : buildGameViewUrl({ slug });
 
   return (
     <div>
@@ -142,10 +153,7 @@ async function PostponementContent({ tournamentId }: { tournamentId: number }) {
         </Button>
       </div>
 
-      <PostponementGrid
-        postponements={postponements}
-        tournamentId={tournamentId}
-      />
+      <PostponementGrid postponements={postponements} />
     </div>
   );
 }

@@ -1,16 +1,22 @@
 import { authWithRedirect } from "@/auth/utils";
 import { EditGroups } from "@/components/admin/groups/edit-groups";
-import { getLatestTournament } from "@/db/repositories/tournament";
+import { getTournamentBySlug } from "@/db/repositories/tournament";
+import { tournamentPath } from "@/lib/navigation";
 import { redirect } from "next/navigation";
 
-export default async function Page() {
+export default async function Page({
+  params,
+}: {
+  params: Promise<{ slug: string }>;
+}) {
   const session = await authWithRedirect();
+  const { slug } = await params;
 
   if (session.user.role !== "admin") {
-    redirect("/uebersicht");
+    redirect(tournamentPath(slug, "/uebersicht"));
   }
 
-  const tournament = await getLatestTournament();
+  const tournament = await getTournamentBySlug(slug);
   return (
     <div>
       <div className="mb-8">

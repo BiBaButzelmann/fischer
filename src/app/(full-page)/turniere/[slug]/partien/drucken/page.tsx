@@ -1,26 +1,34 @@
 import { PrintButton } from "@/components/partien/print/print-button";
 import { Badge } from "@/components/ui/badge";
 import { getGamesByTournamentId } from "@/db/repositories/game";
+import { getTournamentBySlug } from "@/db/repositories/tournament";
 import { toDateString } from "@/lib/date";
 import { getDateTimeFromTournamentTime } from "@/lib/game-time";
 import { getParticipantFullName } from "@/lib/participant";
+import { notFound } from "next/navigation";
 
 export default async function Page({
+  params,
   searchParams,
 }: {
+  params: Promise<{ slug: string }>;
   searchParams: Promise<{
-    tournamentId: string;
     groupId?: string;
     round?: string;
     participantId?: string;
     matchdayId?: string;
   }>;
 }) {
-  const { tournamentId, groupId, round, participantId, matchdayId } =
-    await searchParams;
+  const { slug } = await params;
+  const { groupId, round, participantId, matchdayId } = await searchParams;
+
+  const tournament = await getTournamentBySlug(slug);
+  if (!tournament) {
+    notFound();
+  }
 
   const games = await getGamesByTournamentId(
-    Number(tournamentId),
+    tournament.id,
     groupId ? Number(groupId) : undefined,
     matchdayId ? Number(matchdayId) : undefined,
     round != null ? Number(round) : undefined,

@@ -1,4 +1,4 @@
-import { getAllActiveTournamentNames } from "@/db/repositories/tournament";
+import { getTournamentBySlug } from "@/db/repositories/tournament";
 import {
   getAllGroupNamesByTournamentId,
   getGamesByTournamentId,
@@ -14,9 +14,9 @@ import { getAllMatchdaysByTournamentId } from "@/db/repositories/match-day";
 import { auth } from "@/auth/utils";
 import { MassPgnDownloadButton } from "@/components/partien/mass-pgn-download-button";
 import { canUserViewGames } from "@/lib/game-auth";
+import { notFound } from "next/navigation";
 
 export type SearchParams = {
-  tournamentId: string;
   groupId?: string;
   round?: string;
   participantId?: string;
@@ -24,15 +24,21 @@ export type SearchParams = {
 };
 
 export default async function Page({
+  params,
   searchParams,
 }: {
+  params: Promise<{ slug: string }>;
   searchParams: Promise<SearchParams>;
 }) {
-  const { tournamentId, groupId, round, participantId, matchdayId } =
-    await searchParams;
+  const { slug } = await params;
+  const { groupId, round, participantId, matchdayId } = await searchParams;
 
-  const tournamentNames = await getAllActiveTournamentNames();
-  if (tournamentNames.length === 0) {
+  const tournament = await getTournamentBySlug(slug);
+  if (!tournament) {
+    notFound();
+  }
+
+  if (tournament.stage === "registration") {
     return (
       <div className="text-center p-6 bg-gray-50 rounded-lg">
         <div className="mb-4">
@@ -58,25 +64,21 @@ export default async function Page({
     );
   }
 
-  const selectedTournamentId = tournamentId
-    ? tournamentId
-    : tournamentNames[0].id.toString();
-
   const [groups, matchdays, session] = await Promise.all([
-    getAllGroupNamesByTournamentId(Number(selectedTournamentId)),
-    getAllMatchdaysByTournamentId(Number(selectedTournamentId)),
+    getAllGroupNamesByTournamentId(tournament.id),
+    getAllMatchdaysByTournamentId(tournament.id),
     auth(),
   ]);
 
   const selectedGroup = groupId ?? groups[0]?.id.toString();
 
   const rounds = Array.from(
-    { length: tournamentNames[0].numberOfRounds },
+    { length: tournament.numberOfRounds },
     (_, i) => i + 1,
   );
 
   const queryData = {
-    tournamentId: parseInt(selectedTournamentId),
+    tournamentId: tournament.id,
     groupId: groupId ? parseInt(selectedGroup) : undefined,
     round: round ? parseInt(round) : undefined,
     participantId: participantId ? parseInt(participantId) : undefined,
@@ -116,7 +118,7 @@ export default async function Page({
             />
           )}
           <PrintGamesButton
-            tournamentId={queryData.tournamentId}
+            slug={slug}
             groupId={queryData.groupId}
             round={queryData.round}
             participantId={queryData.participantId}
@@ -126,8 +128,6 @@ export default async function Page({
       </div>
       <div className="flex flex-col gap-1 md:gap-2">
         <PartienSelector
-          selectedTournamentId={selectedTournamentId}
-          tournamentNames={tournamentNames}
           selectedGroupId={groupId}
           groups={groups}
           selectedRound={round}

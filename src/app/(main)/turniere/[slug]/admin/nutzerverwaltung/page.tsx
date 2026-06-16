@@ -17,7 +17,8 @@ import {
   getAllTrainersByTournamentId,
   getAllDisabledProfiles,
 } from "@/db/repositories/admin";
-import { getLatestTournament } from "@/db/repositories/tournament";
+import { getTournamentBySlug } from "@/db/repositories/tournament";
+import { tournamentPath } from "@/lib/navigation";
 import {
   User,
   Users,
@@ -36,15 +37,20 @@ import { redirect } from "next/navigation";
 import { ProfileWithName } from "@/db/types/profile";
 import { ParticipantWithProfile } from "@/db/types/participant";
 
-export default async function Page() {
+export default async function Page({
+  params,
+}: {
+  params: Promise<{ slug: string }>;
+}) {
   const session = await authWithRedirect();
+  const { slug } = await params;
 
   if (session.user.role !== "admin") {
-    redirect("/uebersicht");
+    redirect(tournamentPath(slug, "/uebersicht"));
   }
 
   const [tournament, allProfiles, disabledProfiles] = await Promise.all([
-    getLatestTournament(),
+    getTournamentBySlug(slug),
     getAllProfiles(),
     getAllDisabledProfiles(),
   ]);

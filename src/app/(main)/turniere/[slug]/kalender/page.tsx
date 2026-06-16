@@ -9,9 +9,14 @@ import { getParticipantByUserId } from "@/db/repositories/participant";
 import { getRefereeByUserId } from "@/db/repositories/referee";
 import { getSetupHelperByUserId } from "@/db/repositories/setup-helper";
 import { getAllMatchdaysByTournamentId } from "@/db/repositories/match-day";
-import { getActiveTournament } from "@/db/repositories/tournament";
+import { getTournamentBySlug } from "@/db/repositories/tournament";
 
-export default async function Page() {
+export default async function Page({
+  params,
+}: {
+  params: Promise<{ slug: string }>;
+}) {
+  const { slug } = await params;
   const session = await auth();
 
   const [
@@ -23,7 +28,7 @@ export default async function Page() {
     session ? getParticipantByUserId(session.user.id) : Promise.resolve(null),
     session ? getRefereeByUserId(session.user.id) : Promise.resolve(null),
     session ? getSetupHelperByUserId(session.user.id) : Promise.resolve(null),
-    getActiveTournament(),
+    getTournamentBySlug(slug),
   ]);
 
   const [participantEvents, refereeEvents, setupHelperEvents, matchdays] =

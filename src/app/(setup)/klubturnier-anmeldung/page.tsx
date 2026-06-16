@@ -2,22 +2,31 @@ import { authWithRedirect } from "@/auth/utils";
 import { RolesManager } from "@/components/klubturnier-anmeldung/roles-manager";
 import { getProfileByUserId } from "@/db/repositories/profile";
 import { getRolesDataByProfileIdAndTournamentId } from "@/db/repositories/role";
-import { getLatestTournament } from "@/db/repositories/tournament";
+import {
+  getLatestTournament,
+  getTournamentBySlug,
+} from "@/db/repositories/tournament";
+import { tournamentPath } from "@/lib/navigation";
 import { redirect } from "next/navigation";
 
-export default async function RolesPage() {
+export default async function RolesPage({
+  searchParams,
+}: {
+  searchParams: Promise<{ turnier?: string }>;
+}) {
   const session = await authWithRedirect();
+  const { turnier } = await searchParams;
 
   const [profile, tournament] = await Promise.all([
     getProfileByUserId(session.user.id),
-    getLatestTournament(),
+    turnier ? getTournamentBySlug(turnier) : getLatestTournament(),
   ]);
   if (!profile || !tournament) {
     redirect("/willkommen");
   }
 
   if (tournament.stage !== "registration") {
-    redirect("/uebersicht");
+    redirect(tournamentPath(tournament.slug, "/uebersicht"));
   }
 
   const initialValues = await getRolesDataByProfileIdAndTournamentId(

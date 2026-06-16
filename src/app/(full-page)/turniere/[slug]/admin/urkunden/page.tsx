@@ -2,19 +2,26 @@ import { authWithRedirect } from "@/auth/utils";
 import { Certificate } from "@/components/admin/certificates/certificate";
 import { PrintButton } from "@/components/partien/print/print-button";
 import { getGroupsWithTopParticipants } from "@/db/repositories/certificate";
-import { getLatestTournament } from "@/db/repositories/tournament";
+import { getTournamentBySlug } from "@/db/repositories/tournament";
 import { toLocalDateTime } from "@/lib/date";
-import { redirect } from "next/navigation";
-import invariant from "tiny-invariant";
+import { notFound, redirect } from "next/navigation";
+import { tournamentPath } from "@/lib/navigation";
 
-export default async function Page() {
+export default async function Page({
+  params,
+}: {
+  params: Promise<{ slug: string }>;
+}) {
   const session = await authWithRedirect();
+  const { slug } = await params;
   if (session?.user.role !== "admin") {
-    redirect("/uebersicht");
+    redirect(tournamentPath(slug, "/uebersicht"));
   }
 
-  const tournament = await getLatestTournament();
-  invariant(tournament != null, "No active tournament found");
+  const tournament = await getTournamentBySlug(slug);
+  if (!tournament) {
+    notFound();
+  }
 
   const groupsWithWinners = await getGroupsWithTopParticipants(tournament.id);
 

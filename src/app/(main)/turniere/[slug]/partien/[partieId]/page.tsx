@@ -8,17 +8,18 @@ import PgnViewer from "@/components/game/chessboard/pgn-viewer";
 import PgnEditor from "@/components/game/chessboard/pgn-editor";
 import { Suspense } from "react";
 import { ChessProvider } from "@/contexts/chess-context";
+import { tournamentPath } from "@/lib/navigation";
 
 type Props = {
-  params: Promise<{ partieId: string }>;
+  params: Promise<{ slug: string; partieId: string }>;
 };
 
 export default async function GamePage({ params }: Props) {
-  const { partieId: gameIdParam } = await params;
+  const { slug, partieId: gameIdParam } = await params;
 
   const session = await auth();
   if (session == null) {
-    redirect("/partien");
+    redirect(tournamentPath(slug, "/partien"));
   }
 
   const parsedGameIdResult = z.coerce.number().safeParse(gameIdParam);

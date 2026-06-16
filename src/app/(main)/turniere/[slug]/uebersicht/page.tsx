@@ -3,27 +3,28 @@ import { TournamentDone } from "@/components/uebersicht/tournament-done";
 import { TournamentRegistration } from "@/components/uebersicht/registration/tournament-registration";
 import { TournamentRunning } from "@/components/uebersicht/running/tournament-running";
 import { getRolesByUserId } from "@/db/repositories/role";
-import { getLatestTournament } from "@/db/repositories/tournament";
+import { getTournamentBySlug } from "@/db/repositories/tournament";
 import React from "react";
 
-import { redirect } from "next/navigation";
+import { notFound, redirect } from "next/navigation";
 
-export default async function Page() {
-  const tournament = await getLatestTournament();
+export default async function Page({
+  params,
+}: {
+  params: Promise<{ slug: string }>;
+}) {
+  const { slug } = await params;
+  const tournament = await getTournamentBySlug(slug);
   const session = await auth();
 
   if (tournament == null) {
-    return (
-      <p className="mt-2 text-lg text-muted-foreground">
-        Aktuell ist kein Turnier verfügbar.
-      </p>
-    );
+    notFound();
   }
 
   if (session) {
     const rolesData = await getRolesByUserId(session.user.id);
     if (rolesData.length === 0 && tournament.stage === "registration") {
-      redirect("/klubturnier-anmeldung");
+      redirect(`/klubturnier-anmeldung?turnier=${slug}`);
     }
   }
 
@@ -32,7 +33,7 @@ export default async function Page() {
   }
 
   if (tournament.stage === "running") {
-    return <TournamentRunning tournamentId={tournament.id} />;
+    return <TournamentRunning tournamentId={tournament.id} slug={slug} />;
   }
 
   if (tournament.stage === "done") {

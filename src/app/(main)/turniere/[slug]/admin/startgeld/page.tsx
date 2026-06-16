@@ -3,18 +3,24 @@ import { EntryFeeManagement } from "@/components/admin/entry-fee-management";
 import { EmailReminderButton } from "@/components/admin/email-reminder-button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { getNonDefaultClubParticipantsByTournamentId } from "@/db/repositories/admin";
-import { getActiveTournament } from "@/db/repositories/tournament";
+import { getTournamentBySlug } from "@/db/repositories/tournament";
+import { tournamentPath } from "@/lib/navigation";
 import { Euro, Users } from "lucide-react";
 import { redirect } from "next/navigation";
 
-export default async function Page() {
+export default async function Page({
+  params,
+}: {
+  params: Promise<{ slug: string }>;
+}) {
   const session = await authWithRedirect();
+  const { slug } = await params;
 
   if (session.user.role !== "admin") {
-    redirect("/uebersicht");
+    redirect(tournamentPath(slug, "/uebersicht"));
   }
 
-  const tournament = await getActiveTournament();
+  const tournament = await getTournamentBySlug(slug);
 
   if (!tournament) {
     return (
@@ -83,7 +89,10 @@ export default async function Page() {
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
             <CardTitle className="text-sm font-medium">Offen</CardTitle>
             <div className="flex items-center gap-2">
-              <EmailReminderButton unpaidCount={unpaidParticipants.length} />
+              <EmailReminderButton
+                tournamentId={tournament.id}
+                unpaidCount={unpaidParticipants.length}
+              />
               <Euro className="h-4 w-4 text-red-500" />
             </div>
           </CardHeader>

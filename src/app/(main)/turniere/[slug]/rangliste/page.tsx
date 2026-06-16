@@ -1,70 +1,28 @@
 import { Card, CardHeader, CardTitle } from "@/components/ui/card";
-import {
-  getAllActiveTournamentNames,
-  getTournamentById,
-} from "@/db/repositories/tournament";
+import { getTournamentBySlug } from "@/db/repositories/tournament";
 import { getAllGroupNamesByTournamentId } from "@/db/repositories/game";
 import { StandingsDisplay } from "@/components/standings/standings-display";
+import { notFound } from "next/navigation";
 
 export default async function Page({
+  params,
   searchParams,
 }: {
+  params: Promise<{ slug: string }>;
   searchParams: Promise<{
-    tournamentId?: string;
     groupId?: string;
     round?: string;
   }>;
 }) {
-  const { tournamentId, groupId, round } = await searchParams;
-  const tournamentNames = await getAllActiveTournamentNames();
+  const { slug } = await params;
+  const { groupId, round } = await searchParams;
 
-  if (tournamentNames.length === 0) {
-    return (
-      <div className="text-center p-6 bg-gray-50 rounded-lg">
-        <div className="mb-4">
-          Das Turnier befindet sich noch in der Anmeldephase.
-        </div>
-        <div className="text-sm text-gray-600">
-          <p className="mb-2">
-            Du findest die Turniere der vorherigen Jahre unter:{" "}
-            <a
-              href="https://hsk1830.de/spielbetrieb/turniere/klubturnier"
-              target="_blank"
-              rel="noopener noreferrer"
-              className="text-blue-600 hover:text-blue-800 underline"
-            >
-              hsk1830.de/spielbetrieb/turniere/klubturnier
-            </a>
-          </p>
-          <p>Diese Seite wird die Rangliste ab dem 02.09.2025 hier anzeigen.</p>
-        </div>
-      </div>
-    );
-  }
-
-  const selectedTournamentId = tournamentId
-    ? tournamentId
-    : tournamentNames[0].id.toString();
-
-  const groups = await getAllGroupNamesByTournamentId(
-    Number(selectedTournamentId),
-  );
-
-  const selectedTournamentName =
-    tournamentNames.find((t) => t.id.toString() === selectedTournamentId) ||
-    tournamentNames[0];
-
-  const tournament = await getTournamentById(selectedTournamentName.id);
-
+  const tournament = await getTournamentBySlug(slug);
   if (!tournament) {
-    return (
-      <div className="bg-background text-foreground h-full p-4 sm:p-6 md:p-8 flex items-center justify-center">
-        <div className="text-center text-lg text-muted-foreground">
-          Turnier nicht gefunden.
-        </div>
-      </div>
-    );
+    notFound();
   }
+
+  const groups = await getAllGroupNamesByTournamentId(tournament.id);
 
   if (groups.length === 0) {
     return (
@@ -94,7 +52,7 @@ export default async function Page({
   const selectedRound = round;
 
   const rounds = Array.from(
-    { length: selectedTournamentName.numberOfRounds },
+    { length: tournament.numberOfRounds },
     (_, i) => i + 1,
   );
 
@@ -108,10 +66,8 @@ export default async function Page({
         </p>
       </div>
       <StandingsDisplay
-        tournamentNames={tournamentNames}
         groups={groups}
         rounds={rounds}
-        selectedTournamentId={selectedTournamentId}
         selectedGroupId={selectedGroupId}
         selectedRound={selectedRound}
       />

@@ -1,13 +1,19 @@
 import { authWithRedirect } from "@/auth/utils";
-import { getLatestTournament } from "@/db/repositories/tournament";
+import { getTournamentBySlug } from "@/db/repositories/tournament";
 import { getRefereeByUserId } from "@/db/repositories/referee";
 import { getSetupHelperByUserId } from "@/db/repositories/setup-helper";
 import { redirect } from "next/navigation";
 import { AppointmentsList } from "@/components/terminuebersicht/appointments-list";
 import { getMatchdayAppointmentsByUserId } from "@/services/appointment";
+import { tournamentPath } from "@/lib/navigation";
 
-export default async function Page() {
-  const tournament = await getLatestTournament();
+export default async function Page({
+  params,
+}: {
+  params: Promise<{ slug: string }>;
+}) {
+  const { slug } = await params;
+  const tournament = await getTournamentBySlug(slug);
   const session = await authWithRedirect();
 
   const [referee, setupHelper] = await Promise.all([
@@ -16,11 +22,11 @@ export default async function Page() {
   ]);
 
   if (!referee && !setupHelper) {
-    redirect("/uebersicht");
+    redirect(tournamentPath(slug, "/uebersicht"));
   }
 
   if (tournament?.stage !== "running") {
-    redirect("/uebersicht");
+    redirect(tournamentPath(slug, "/uebersicht"));
   }
 
   const appointments = await getMatchdayAppointmentsByUserId(session.user.id);

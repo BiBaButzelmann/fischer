@@ -10,7 +10,7 @@ import {
 } from "@/components/ui/collapsible";
 import { ChevronDownIcon } from "lucide-react";
 import { getProfilesByUserRole } from "@/db/repositories/profile";
-import { getLatestTournament } from "@/db/repositories/tournament";
+import { getTournamentBySlug } from "@/db/repositories/tournament";
 import {
   getGroupsWithParticipantsByTournamentId,
   getGroupsByTournamentId,
@@ -18,9 +18,14 @@ import {
 import { Tournament } from "@/db/types/tournament";
 import { getTournamentWeeksByTournamentId } from "@/db/repositories/tournamentWeek";
 
-export default async function Page() {
+export default async function Page({
+  params,
+}: {
+  params: Promise<{ slug: string }>;
+}) {
   await authWithRedirect();
-  const tournament = await getLatestTournament();
+  const { slug } = await params;
+  const tournament = await getTournamentBySlug(slug);
 
   return (
     <div>

@@ -16,21 +16,22 @@ import invariant from "tiny-invariant";
 import { APIError } from "better-auth/api";
 import { headers } from "next/headers";
 import { revalidatePath } from "next/cache";
+import { tournamentPath } from "@/lib/navigation";
 
 export async function loginRedirect(userId: string): Promise<never> {
   const tournament = await getLatestTournament();
   if (!tournament) {
-    redirect("/uebersicht");
+    redirect("/");
   }
   if (tournament.stage === "registration") {
     const roles = await getRolesByUserId(userId);
     if (roles.length > 0) {
-      redirect("/uebersicht");
+      redirect(tournamentPath(tournament.slug, "/uebersicht"));
     } else {
-      redirect("/klubturnier-anmeldung");
+      redirect(`/klubturnier-anmeldung?turnier=${tournament.slug}`);
     }
   }
-  throw new Error("Error during login redirect");
+  redirect(tournamentPath(tournament.slug, "/uebersicht"));
 }
 
 export type LoginResponse = { error: string };
@@ -59,12 +60,12 @@ export async function login(data: z.infer<typeof loginFormSchema>) {
 export async function signupRedirect() {
   const tournament = await getActiveTournament();
   if (!tournament) {
-    redirect("/uebersicht");
+    redirect("/");
   }
   if (tournament.stage === "registration") {
-    redirect("/klubturnier-anmeldung");
+    redirect(`/klubturnier-anmeldung?turnier=${tournament.slug}`);
   } else {
-    redirect("/uebersicht");
+    redirect(tournamentPath(tournament.slug, "/uebersicht"));
   }
 }
 

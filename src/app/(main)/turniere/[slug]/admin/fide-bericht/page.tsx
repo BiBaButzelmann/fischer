@@ -15,22 +15,26 @@ import {
   getAllGroupNamesByTournamentId,
   getUncompletedGamesInMonth,
 } from "@/db/repositories/game";
-import { getLatestTournament } from "@/db/repositories/tournament";
+import { getTournamentBySlug } from "@/db/repositories/tournament";
+import { tournamentPath } from "@/lib/navigation";
 import { redirect } from "next/navigation";
 
 export default async function Page({
+  params,
   searchParams,
 }: {
+  params: Promise<{ slug: string }>;
   searchParams: Promise<{ groupId?: string; month?: string }>;
 }) {
   const session = await auth();
+  const { slug } = await params;
   if (session?.user.role !== "admin") {
-    redirect("/uebersicht");
+    redirect(tournamentPath(slug, "/uebersicht"));
   }
 
   const { groupId, month } = await searchParams;
 
-  const tournament = await getLatestTournament();
+  const tournament = await getTournamentBySlug(slug);
   if (!tournament) {
     return (
       <div>

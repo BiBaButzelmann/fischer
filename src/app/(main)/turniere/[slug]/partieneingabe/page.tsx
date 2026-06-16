@@ -7,9 +7,15 @@ import { getMatchEnteringHelperIdByUserId } from "@/db/repositories/match-enteri
 import { getUserGameRights } from "@/lib/game-auth";
 import { redirect } from "next/navigation";
 import { Card, CardContent } from "@/components/ui/card";
+import { tournamentPath } from "@/lib/navigation";
 
-export default async function Page() {
+export default async function Page({
+  params,
+}: {
+  params: Promise<{ slug: string }>;
+}) {
   const session = await authWithRedirect();
+  const { slug } = await params;
 
   const userRoles = await getRolesByUserId(session.user.id);
   const canEnterAnyGame = userRoles.some((role) =>
@@ -17,7 +23,7 @@ export default async function Page() {
   );
 
   if (!canEnterAnyGame) {
-    redirect("/uebersicht");
+    redirect(tournamentPath(slug, "/uebersicht"));
   }
 
   const [allGames, matchEnteringHelperId] = await Promise.all([

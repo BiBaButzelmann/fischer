@@ -1,14 +1,19 @@
 import { authWithRedirect } from "@/auth/utils";
-import { getLatestTournament } from "@/db/repositories/tournament";
+import { getTournamentBySlug } from "@/db/repositories/tournament";
 import { getRefereesByTournamentId } from "@/db/repositories/referee";
 import { getMatchdaysWithRefereeAndSetupHelpersByTournamentId } from "@/db/repositories/match-day";
 import { getAllSetupHelpersByTournamentId } from "@/db/repositories/setup-helper";
 import { MatchdayAssignmentForm } from "@/components/admin/matchday/matchday-assignment-form";
 
-export default async function Page() {
+export default async function Page({
+  params,
+}: {
+  params: Promise<{ slug: string }>;
+}) {
   await authWithRedirect();
 
-  const tournament = await getLatestTournament();
+  const { slug } = await params;
+  const tournament = await getTournamentBySlug(slug);
 
   if (!tournament) {
     return (

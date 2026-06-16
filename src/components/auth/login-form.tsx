@@ -18,6 +18,7 @@ import { Mail, Lock } from "lucide-react";
 import { authClient } from "@/auth-client";
 import { Tournament } from "@/db/types/tournament";
 import { Role } from "@/db/types/role";
+import { tournamentPath } from "@/lib/navigation";
 
 export const loginFormSchema = z.object({
   email: z.string().email("Ungültige E-Mail-Adresse"),
@@ -42,13 +43,14 @@ export function LoginForm({ tournament, roles }: Props) {
 
   const buildCallbackURL = () => {
     if (!tournament) {
-      return "/uebersicht";
+      return "/";
     }
     if (tournament.stage === "registration") {
       return roles && roles.length > 0
-        ? "/uebersicht"
-        : "/klubturnier-anmeldung";
+        ? tournamentPath(tournament.slug, "/uebersicht")
+        : `/klubturnier-anmeldung?turnier=${tournament.slug}`;
     }
+    return tournamentPath(tournament.slug, "/uebersicht");
   };
 
   const handleSubmit = async (data: z.infer<typeof loginFormSchema>) => {
