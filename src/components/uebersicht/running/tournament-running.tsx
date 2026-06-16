@@ -18,12 +18,14 @@ import { ProfileWithName } from "@/db/types/profile";
 import { TournamentWeeksSection } from "../tournament-weeks-section";
 import { ParticipantsSection } from "../participants-section";
 import { hasAnyRole } from "@/db/types/role";
+import { tournamentPath } from "@/lib/navigation";
 
 type Props = {
   tournamentId: number;
+  slug: string;
 };
 
-export async function TournamentRunning({ tournamentId }: Props) {
+export async function TournamentRunning({ tournamentId, slug }: Props) {
   const session = await auth();
   const profile =
     session != null ? await getProfileByUserId(session.user.id) : null;
@@ -35,6 +37,7 @@ export async function TournamentRunning({ tournamentId }: Props) {
           <AuthedGreetingSection
             profile={profile}
             tournamentId={tournamentId}
+            slug={slug}
           />
         ) : (
           <GuestGreetingSection />
@@ -89,9 +92,11 @@ function GuestGreetingSection() {
 async function AuthedGreetingSection({
   profile,
   tournamentId,
+  slug,
 }: {
   profile: ProfileWithName;
   tournamentId: number;
+  slug: string;
 }) {
   const [upcomingEvents, rolesData] = await Promise.all([
     getUpcomingEventsByProfileAndTournament(profile.id, tournamentId),
@@ -145,7 +150,7 @@ async function AuthedGreetingSection({
                 Infos.
               </CardDescription>
             </div>
-            <Link href="/kalender">
+            <Link href={tournamentPath(slug, "/kalender")}>
               <Button variant="outline" className="group w-full sm:w-auto">
                 Hier geht&apos;s zum Kalender
                 <ArrowRight className="w-4 h-4 ml-2 transition-transform group-hover:translate-x-1" />
@@ -160,7 +165,7 @@ async function AuthedGreetingSection({
               <p className="text-lg">Keine anstehenden Termine</p>
             </div>
           ) : (
-            <UpcomingEventsList events={upcomingEvents} />
+            <UpcomingEventsList events={upcomingEvents} slug={slug} />
           )}
         </CardContent>
       </Card>
@@ -168,6 +173,7 @@ async function AuthedGreetingSection({
       <AssignmentSummary
         profileId={profile.id}
         tournamentId={tournamentId}
+        slug={slug}
         rolesData={rolesData}
       />
     </div>

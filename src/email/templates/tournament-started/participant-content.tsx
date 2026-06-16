@@ -5,18 +5,18 @@ import { ParticipantTable } from "./participant-table";
 import { ParticipantGroupData } from "./index";
 
 type Props = {
-  tournamentId: number;
+  slug: string;
   participantGroup: ParticipantGroupData;
 };
 
-export function ParticipantContent({ tournamentId, participantGroup }: Props) {
+export function ParticipantContent({ slug, participantGroup }: Props) {
   const gameUrl = buildGameViewUrl({
-    tournamentId,
+    slug,
     groupId: participantGroup.groupId,
   });
 
   const standingsUrl = buildResultsViewUrl({
-    tournamentId: tournamentId.toString(),
+    slug,
     groupId: participantGroup.groupId.toString(),
   });
 

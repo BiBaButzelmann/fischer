@@ -16,6 +16,7 @@ import { Clock, ChevronRight, X, Undo2 } from "lucide-react";
 import { formatEventDateTime, toLocalDateTime } from "@/lib/date";
 import { getDateTimeFromTournamentTime } from "@/lib/game-time";
 import { buildGameViewUrl } from "@/lib/navigation";
+import { useTournamentSlug } from "@/hooks/use-tournament-slug";
 import Link from "next/link";
 import { PrintGamesButton } from "@/components/partien/print-games-button";
 import { MatchdayAppointment } from "@/services/appointment";
@@ -33,18 +34,13 @@ type Props = {
 export function MatchdayAppointmentCard({ appointment }: Props) {
   const [isPending, startTransition] = useTransition();
   const [isDialogOpen, setIsDialogOpen] = useState(false);
+  const slug = useTournamentSlug() ?? "";
 
-  const {
-    matchdayId,
-    matchdayDate,
-    tournamentId,
-    gameStartTime,
-    cancelledAt,
-    appointments,
-  } = appointment;
+  const { matchdayId, matchdayDate, gameStartTime, cancelledAt, appointments } =
+    appointment;
 
   const gameUrl = buildGameViewUrl({
-    tournamentId,
+    slug,
     matchdayId,
   });
 
@@ -93,10 +89,7 @@ export function MatchdayAppointmentCard({ appointment }: Props) {
                 <ChevronRight className="w-4 h-4 ml-1 transition-transform group-hover:translate-x-1" />
               </Button>
             </Link>
-            <PrintGamesButton
-              tournamentId={tournamentId}
-              matchdayId={matchdayId}
-            />
+            <PrintGamesButton slug={slug} matchdayId={matchdayId} />
           </div>
         </div>
         <div className="flex items-center gap-2 text-sm text-muted-foreground mt-2">

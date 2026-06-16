@@ -7,9 +7,10 @@ import { UpcomingSetupHelperEvent } from "./upcoming-setup-helper-event";
 
 type Props = {
   events: CalendarEvent[];
+  slug: string;
 };
 
-export function UpcomingEventsList({ events }: Props) {
+export function UpcomingEventsList({ events, slug }: Props) {
   return (
     <>
       <div className="mb-4 flex items-center gap-2 text-sm text-muted-foreground">
@@ -26,7 +27,7 @@ export function UpcomingEventsList({ events }: Props) {
                 <UpcomingGameEvent
                   key={index}
                   start={event.start}
-                  tournamentId={data.tournamentId}
+                  slug={slug}
                   groupId={data.groupId}
                   round={data.round}
                   participantId={data.participantId}
