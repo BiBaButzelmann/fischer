@@ -13,7 +13,10 @@ import { TournamentStage } from "@/db/types/tournament";
 import { matchday } from "@/db/schema/matchday";
 import { isHoliday } from "@/lib/holidays";
 import { getCurrentLocalDateTime } from "@/lib/date";
-import { getTournamentBySlug } from "@/db/repositories/tournament";
+import {
+  getOpenRegistrationTournament,
+  getTournamentBySlug,
+} from "@/db/repositories/tournament";
 
 export async function createTournament(
   formData: z.infer<typeof createTournamentFormSchema>,
@@ -26,6 +29,14 @@ export async function createTournament(
   const existing = await getTournamentBySlug(data.slug);
   if (existing) {
     return { error: `Der Slug "${data.slug}" ist bereits vergeben.` };
+  }
+
+  const openRegistration = await getOpenRegistrationTournament();
+  if (openRegistration) {
+    return {
+      error:
+        "Es gibt bereits ein Turnier in der Anmeldephase. Schließe dessen Anmeldung, bevor du ein neues Turnier anlegst.",
+    };
   }
 
   await db.transaction(async (tx) => {
@@ -156,6 +167,15 @@ export async function updateTournamentStage(
 ) {
   const session = await authWithRedirect();
   invariant(session?.user.role === "admin", "Unauthorized");
+
+  if (stage === "registration") {
+    const openRegistration = await getOpenRegistrationTournament();
+    if (openRegistration && openRegistration.id !== tournamentId) {
+      return {
+        error: "Ein anderes Turnier befindet sich bereits in der Anmeldephase.",
+      };
+    }
+  }
 
   await db
     .update(tournament)

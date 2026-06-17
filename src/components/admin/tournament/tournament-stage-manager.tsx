@@ -4,6 +4,8 @@ import { Button } from "@/components/ui/button";
 import { Tournament, TournamentStage } from "@/db/types/tournament";
 import { updateTournamentStage } from "@/actions/tournament";
 import { useTransition, useState } from "react";
+import { isError } from "@/lib/actions";
+import { toast } from "sonner";
 
 type Props = {
   tournament: Tournament;
@@ -37,7 +39,11 @@ export function TournamentStageManager({ tournament }: Props) {
   const handleSaveStageChange = () => {
     if (selectedStage) {
       startTransition(async () => {
-        await updateTournamentStage(tournament.id, selectedStage);
+        const result = await updateTournamentStage(tournament.id, selectedStage);
+        if (isError(result)) {
+          toast.error(result.error);
+          return;
+        }
         setSelectedStage(null);
       });
     }

@@ -1,4 +1,4 @@
-import { relations } from "drizzle-orm";
+import { relations, sql } from "drizzle-orm";
 import {
   boolean,
   date,
@@ -8,6 +8,7 @@ import {
   smallint,
   text,
   time,
+  uniqueIndex,
 } from "drizzle-orm/pg-core";
 import { profile } from "./profile";
 import { timestamps } from "./columns.helpers";
@@ -46,7 +47,11 @@ export const tournament = pgTable("tournament", {
   organizerProfileId: integer("organizer_profile_id"),
 
   ...timestamps,
-});
+}, (table) => [
+  uniqueIndex("one_tournament_in_registration")
+    .on(table.stage)
+    .where(sql`${table.stage} = 'registration'`),
+]);
 
 export const tournamentRelations = relations(tournament, ({ one, many }) => ({
   organizer: one(profile, {

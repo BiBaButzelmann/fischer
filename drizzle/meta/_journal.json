@@ -141,6 +141,13 @@
       "when": 1781634802945,
       "tag": "0019_kind_ulik",
       "breakpoints": true
+    },
+    {
+      "idx": 20,
+      "version": "7",
+      "when": 1781703482987,
+      "tag": "0020_absent_silverclaw",
+      "breakpoints": true
     }
   ]
 }

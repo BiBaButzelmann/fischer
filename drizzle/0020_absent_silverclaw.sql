@@ -1,0 +1,1 @@
+CREATE UNIQUE INDEX "one_tournament_in_registration" ON "tournament" USING btree ("stage") WHERE "tournament"."stage" = 'registration';

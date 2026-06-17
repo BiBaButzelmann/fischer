@@ -33,6 +33,12 @@ export async function getActiveTournament() {
   });
 }
 
+export async function getOpenRegistrationTournament() {
+  return await db.query.tournament.findFirst({
+    where: (tournament, { eq }) => eq(tournament.stage, "registration"),
+  });
+}
+
 export async function getLatestTournament() {
   return await db.query.tournament.findFirst({
     orderBy: (tournament, { desc }) => [desc(tournament.createdAt)],
