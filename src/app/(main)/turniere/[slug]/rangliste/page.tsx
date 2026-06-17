@@ -2,7 +2,7 @@ import { Card, CardHeader, CardTitle } from "@/components/ui/card";
 import { getTournamentBySlug } from "@/db/repositories/tournament";
 import { getAllGroupNamesByTournamentId } from "@/db/repositories/game";
 import { StandingsDisplay } from "@/components/standings/standings-display";
-import { toDateString, toLocalDateTime } from "@/lib/date";
+import { getGroupAnnouncementDate } from "@/lib/tournament-schedule";
 import { notFound } from "next/navigation";
 
 export default async function Page({
@@ -25,9 +25,7 @@ export default async function Page({
 
   const groups = await getAllGroupNamesByTournamentId(tournament.id);
 
-  const groupsAnnouncedAt = toDateString(
-    toLocalDateTime(tournament.endRegistrationDate).plus({ days: 1 }),
-  );
+  const groupsAnnouncedAt = getGroupAnnouncementDate(tournament);
 
   if (groups.length === 0) {
     return (

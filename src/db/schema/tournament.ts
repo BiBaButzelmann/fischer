@@ -31,6 +31,9 @@ export const tournament = pgTable("tournament", {
   endRegistrationDate: date("end_registration_date", {
     mode: "date",
   }).notNull(),
+  groupAnnouncementOffsetDays: smallint("group_announcement_offset_days")
+    .notNull()
+    .default(2),
 
   startDate: date("start_date", { mode: "date" }).notNull(),
   endDate: date("end_date", { mode: "date" }).notNull(),

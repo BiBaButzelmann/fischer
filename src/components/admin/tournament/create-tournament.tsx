@@ -46,6 +46,7 @@ export default function CreateTournament({ profiles, onCancel }: Props) {
       clubName: DEFAULT_CLUB_LABEL,
       tournamentType: "Rundenturnier",
       numberOfRounds: 9,
+      groupAnnouncementOffsetDays: 2,
       timeLimit:
         "40 Züge in 90 Minuten, danach 0 Züge in 0 Minuten, 30 Minuten für die letzte Phase, Zugabe pro Zug in Sekunden: 30",
       location: "Hamburg",
@@ -165,6 +166,22 @@ export default function CreateTournament({ profiles, onCancel }: Props) {
                       placeholder="Anzahl der Runden eingeben"
                       {...field}
                     />
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+
+            <FormField
+              control={form.control}
+              name="groupAnnouncementOffsetDays"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel required>
+                    Tage bis Gruppenbekanntgabe (nach Anmeldeschluss)
+                  </FormLabel>
+                  <FormControl>
+                    <Input type="number" min="0" placeholder="z.B. 2" {...field} />
                   </FormControl>
                   <FormMessage />
                 </FormItem>

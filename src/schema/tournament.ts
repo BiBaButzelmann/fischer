@@ -15,6 +15,9 @@ export const createTournamentFormSchema = z.object({
   endRegistrationDate: z
     .string()
     .min(1, "Enddatum der Anmeldung ist erforderlich"),
+  groupAnnouncementOffsetDays: z.coerce
+    .number()
+    .min(0, "Wert darf nicht negativ sein"),
   startDate: z.string().min(1, "Startdatum ist erforderlich"),
   endDate: z.string().min(1, "Enddatum ist erforderlich"),
   timeLimit: z.string().min(1, "Bedenkzeit ist erforderlich"),

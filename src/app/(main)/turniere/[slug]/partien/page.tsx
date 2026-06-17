@@ -14,7 +14,7 @@ import { getAllMatchdaysByTournamentId } from "@/db/repositories/match-day";
 import { auth } from "@/auth/utils";
 import { MassPgnDownloadButton } from "@/components/partien/mass-pgn-download-button";
 import { canUserViewGames } from "@/lib/game-auth";
-import { toDateString, toLocalDateTime } from "@/lib/date";
+import { getGroupAnnouncementDate } from "@/lib/tournament-schedule";
 import { notFound } from "next/navigation";
 
 export type SearchParams = {
@@ -40,9 +40,7 @@ export default async function Page({
   }
 
   if (tournament.stage === "registration") {
-    const pairingsAvailableAt = toDateString(
-      toLocalDateTime(tournament.endRegistrationDate).plus({ days: 1 }),
-    );
+    const pairingsAvailableAt = getGroupAnnouncementDate(tournament);
     return (
       <div className="text-center p-6 bg-gray-50 rounded-lg">
         <div className="mb-4">
