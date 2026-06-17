@@ -38,7 +38,7 @@ export default async function RolesPage() {
     <div className="space-y-8">
       <header className="text-center">
         <h1 className="text-3xl sm:text-4xl font-bold tracking-tight">
-          Anmeldung zum Klubturnier
+          Anmeldung zum {tournament.name}
         </h1>
         <p className="text-muted-foreground mt-2">
           Führe eine oder mehrere Anmeldungen durch und gib deine Informationen
