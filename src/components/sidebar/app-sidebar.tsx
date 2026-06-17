@@ -283,10 +283,7 @@ export function AppSidebar({
       <SidebarFooter>
         {isRegistrationOpen && session ? (
           <Button asChild>
-            <Link
-              href={`/klubturnier-anmeldung?turnier=${slug}`}
-              onClick={handleMobileMenuClick}
-            >
+            <Link href="/klubturnier-anmeldung" onClick={handleMobileMenuClick}>
               Anmeldung anpassen
             </Link>
           </Button>

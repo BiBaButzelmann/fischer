@@ -48,7 +48,7 @@ export function LoginForm({ tournament, roles }: Props) {
     if (tournament.stage === "registration") {
       return roles && roles.length > 0
         ? tournamentPath(tournament.slug, "/uebersicht")
-        : `/klubturnier-anmeldung?turnier=${tournament.slug}`;
+        : "/klubturnier-anmeldung";
     }
     return tournamentPath(tournament.slug, "/uebersicht");
   };

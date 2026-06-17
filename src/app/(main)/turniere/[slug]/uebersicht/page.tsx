@@ -24,7 +24,7 @@ export default async function Page({
   if (session) {
     const rolesData = await getRolesByUserId(session.user.id);
     if (rolesData.length === 0 && tournament.stage === "registration") {
-      redirect(`/klubturnier-anmeldung?turnier=${slug}`);
+      redirect("/klubturnier-anmeldung");
     }
   }
 

@@ -28,7 +28,7 @@ export async function loginRedirect(userId: string): Promise<never> {
     if (roles.length > 0) {
       redirect(tournamentPath(tournament.slug, "/uebersicht"));
     } else {
-      redirect(`/klubturnier-anmeldung?turnier=${tournament.slug}`);
+      redirect("/klubturnier-anmeldung");
     }
   }
   redirect(tournamentPath(tournament.slug, "/uebersicht"));
@@ -63,7 +63,7 @@ export async function signupRedirect() {
     redirect("/");
   }
   if (tournament.stage === "registration") {
-    redirect(`/klubturnier-anmeldung?turnier=${tournament.slug}`);
+    redirect("/klubturnier-anmeldung");
   } else {
     redirect(tournamentPath(tournament.slug, "/uebersicht"));
   }
