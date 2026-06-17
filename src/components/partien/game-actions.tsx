@@ -10,10 +10,12 @@ import { NotebookPen } from "lucide-react";
 import { PostponeGameDialog } from "./postpone-game-dialog";
 import { ReportResultDialog } from "./report-result-dialog";
 import { isGameActuallyPlayed } from "@/lib/game-auth";
+import { tournamentPath } from "@/lib/navigation";
 import { DateTime } from "luxon";
 
 type Props = {
   gameId: number;
+  slug: string;
   currentResult: GameResult | null;
   onResultChange: (gameId: number, result: GameResult | null) => Promise<void>;
   availableMatchdays: MatchDay[];
@@ -27,6 +29,7 @@ type Props = {
 
 export function GameActions({
   gameId,
+  slug,
   currentResult,
   onResultChange,
   availableMatchdays,
@@ -58,7 +61,7 @@ export function GameActions({
       {canView && isGameActuallyPlayed(currentResult) && (
         <Tooltip>
           <TooltipTrigger asChild>
-            <Link href={`/partien/${gameId}`}>
+            <Link href={tournamentPath(slug, `/partien/${gameId}`)}>
               <Button
                 aria-label="Partie eingeben"
                 variant="outline"

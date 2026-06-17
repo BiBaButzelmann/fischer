@@ -7,6 +7,8 @@ import { Clock, CheckCircle2, ArrowRight } from "lucide-react";
 import Link from "next/link";
 import { GameWithParticipantsAndPGN } from "@/db/types/game";
 import { getParticipantFullName } from "@/lib/participant";
+import { useTournamentSlug } from "@/hooks/use-tournament-slug";
+import { tournamentPath } from "@/lib/navigation";
 import invariant from "tiny-invariant";
 
 type Props = {
@@ -15,6 +17,8 @@ type Props = {
 };
 
 export function MatchEntryDashboard({ pendingGames, completedGames }: Props) {
+  const slug = useTournamentSlug() ?? "";
+
   const getPlayerNames = (game: GameWithParticipantsAndPGN) => {
     invariant(game.whiteParticipant, "White participant should not be null");
     invariant(game.blackParticipant, "Black participant should not be null");
@@ -39,7 +43,7 @@ export function MatchEntryDashboard({ pendingGames, completedGames }: Props) {
               {pendingGames.map((game) => (
                 <Link
                   key={game.id}
-                  href={`/partien/${game.id}`}
+                  href={tournamentPath(slug, `/partien/${game.id}`)}
                   className="group border rounded-lg p-4 hover:bg-slate-50 hover:border-slate-300 transition-all cursor-pointer block"
                 >
                   <div className="flex items-center justify-between">
@@ -83,7 +87,7 @@ export function MatchEntryDashboard({ pendingGames, completedGames }: Props) {
               {completedGames.map((game) => (
                 <Link
                   key={game.id}
-                  href={`/partien/${game.id}`}
+                  href={tournamentPath(slug, `/partien/${game.id}`)}
                   className="border rounded-lg p-4 block hover:bg-slate-50 transition-colors"
                 >
                   <div className="flex items-center justify-between">

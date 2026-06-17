@@ -8,6 +8,7 @@ import {
   ChangePasswordCard,
 } from "@daveyplate/better-auth-ui";
 import { ArrowLeft } from "lucide-react";
+import Link from "next/link";
 import invariant from "tiny-invariant";
 
 export default async function Page() {
@@ -18,9 +19,9 @@ export default async function Page() {
   return (
     <div className="flex flex-col gap-6">
       <Button variant="ghost" asChild className="self-start">
-        <a href="/uebersicht" className="flex items-center gap-2">
+        <Link href="/" className="flex items-center gap-2">
           <ArrowLeft className="h-4 w-4" /> Zurück zur Übersicht
-        </a>
+        </Link>
       </Button>
       <ChangeNameCard
         firstName={profile.firstName}

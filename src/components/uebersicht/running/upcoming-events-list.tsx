@@ -21,7 +21,11 @@ export function UpcomingEventsList({ events, slug }: Props) {
           {events.map((event, index) =>
             match(event.extendedProps)
               .with({ eventType: "referee" }, () => (
-                <UpcomingRefereeEvent key={index} start={event.start} />
+                <UpcomingRefereeEvent
+                  key={index}
+                  start={event.start}
+                  slug={slug}
+                />
               ))
               .with({ eventType: "game" }, (data) => (
                 <UpcomingGameEvent
@@ -34,7 +38,11 @@ export function UpcomingEventsList({ events, slug }: Props) {
                 />
               ))
               .with({ eventType: "setupHelper" }, () => (
-                <UpcomingSetupHelperEvent key={index} start={event.start} />
+                <UpcomingSetupHelperEvent
+                  key={index}
+                  start={event.start}
+                  slug={slug}
+                />
               ))
               .exhaustive(),
           )}

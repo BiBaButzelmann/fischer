@@ -15,6 +15,8 @@ import {
 } from "@/db/types/game";
 import { useMemo, useCallback } from "react";
 import { useRouter } from "next/navigation";
+import { useTournamentSlug } from "@/hooks/use-tournament-slug";
+import { tournamentPath } from "@/lib/navigation";
 import { MatchDay } from "@/db/types/match-day";
 import { authClient } from "@/auth-client";
 import { Role } from "@/db/types/role";
@@ -41,6 +43,7 @@ export function GamesList({
   userRoles = [],
 }: Props) {
   const router = useRouter();
+  const slug = useTournamentSlug() ?? "";
   const { data: session } = authClient.useSession();
   const userId = session?.user?.id;
   const isAdmin = userRoles.includes("admin");
@@ -112,7 +115,7 @@ export function GamesList({
   }, [games, getGameActionPermissions]);
 
   const handleNavigate = (gameId: number) => {
-    router.push(`/partien/${gameId}`);
+    router.push(tournamentPath(slug, `/partien/${gameId}`));
   };
 
   return (
@@ -193,6 +196,7 @@ export function GamesList({
                   <TableCell className="flex items-center gap-2">
                     <GameActions
                       gameId={game.id}
+                      slug={slug}
                       currentResult={game.result}
                       onResultChange={onResultChange}
                       availableMatchdays={availableMatchdays}
@@ -280,6 +284,7 @@ export function GamesList({
                   <div className="flex gap-1 pt-1">
                     <GameActions
                       gameId={game.id}
+                      slug={slug}
                       currentResult={game.result}
                       onResultChange={onResultChange}
                       availableMatchdays={availableMatchdays}

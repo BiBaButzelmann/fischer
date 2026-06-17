@@ -10,6 +10,8 @@ import {
 } from "@/components/ui/select";
 import { GroupSummary } from "@/db/types/group";
 import { useRouter } from "next/navigation";
+import { useTournamentSlug } from "@/hooks/use-tournament-slug";
+import { tournamentPath } from "@/lib/navigation";
 
 type Props = {
   groups: GroupSummary[];
@@ -21,6 +23,7 @@ export function GenerateDwzReportSelector({
   selectedGroupId,
 }: Props) {
   const router = useRouter();
+  const slug = useTournamentSlug() ?? "";
 
   const buildUrl = (params: { groupId?: string }) => {
     const searchParams = new URLSearchParams();
@@ -29,7 +32,7 @@ export function GenerateDwzReportSelector({
       searchParams.set("groupId", params.groupId);
     }
 
-    return `/admin/dwz-bericht?${searchParams.toString()}`;
+    return tournamentPath(slug, `/admin/dwz-bericht?${searchParams.toString()}`);
   };
 
   const handleGroupChange = (groupId: string) => {

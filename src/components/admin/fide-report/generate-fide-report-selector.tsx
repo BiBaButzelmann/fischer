@@ -11,6 +11,8 @@ import {
 import { monthLabels } from "@/constants/constants";
 import { GroupSummary } from "@/db/types/group";
 import { useRouter } from "next/navigation";
+import { useTournamentSlug } from "@/hooks/use-tournament-slug";
+import { tournamentPath } from "@/lib/navigation";
 import { useMemo } from "react";
 
 type Props = {
@@ -25,6 +27,7 @@ export function GenerateFideReportSelector({
   selectedMonth,
 }: Props) {
   const router = useRouter();
+  const slug = useTournamentSlug() ?? "";
   const months = useMemo(() => Array.from({ length: 12 }, (_, i) => i + 1), []);
 
   const buildUrl = (params: { groupId?: string; month?: string }) => {
@@ -38,7 +41,10 @@ export function GenerateFideReportSelector({
       searchParams.set("month", params.month);
     }
 
-    return `/admin/fide-bericht?${searchParams.toString()}`;
+    return tournamentPath(
+      slug,
+      `/admin/fide-bericht?${searchParams.toString()}`,
+    );
   };
 
   const handleGroupChange = (groupId: string) => {
