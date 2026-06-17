@@ -14,6 +14,7 @@ import { getAllMatchdaysByTournamentId } from "@/db/repositories/match-day";
 import { auth } from "@/auth/utils";
 import { MassPgnDownloadButton } from "@/components/partien/mass-pgn-download-button";
 import { canUserViewGames } from "@/lib/game-auth";
+import { toDateString, toLocalDateTime } from "@/lib/date";
 import { notFound } from "next/navigation";
 
 export type SearchParams = {
@@ -39,6 +40,9 @@ export default async function Page({
   }
 
   if (tournament.stage === "registration") {
+    const pairingsAvailableAt = toDateString(
+      toLocalDateTime(tournament.endRegistrationDate).plus({ days: 1 }),
+    );
     return (
       <div className="text-center p-6 bg-gray-50 rounded-lg">
         <div className="mb-4">
@@ -57,7 +61,8 @@ export default async function Page({
             </a>
           </p>
           <p>
-            Diese Seite wird deine Paarungen ab dem 02.09.2025 hier anzeigen.
+            Diese Seite wird deine Paarungen ab dem {pairingsAvailableAt} hier
+            anzeigen.
           </p>
         </div>
       </div>

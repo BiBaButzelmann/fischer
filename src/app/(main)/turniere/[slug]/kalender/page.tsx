@@ -10,6 +10,7 @@ import { getRefereeByUserId } from "@/db/repositories/referee";
 import { getSetupHelperByUserId } from "@/db/repositories/setup-helper";
 import { getAllMatchdaysByTournamentId } from "@/db/repositories/match-day";
 import { getTournamentBySlug } from "@/db/repositories/tournament";
+import { toDateString, toLocalDateTime } from "@/lib/date";
 
 export default async function Page({
   params,
@@ -59,6 +60,11 @@ export default async function Page({
     currentSetupHelper != null;
   const isRunning = activeTournament?.stage === "running";
   const shouldShowInfoBox = session && (!isRunning || hasAnyRoleWithEvents);
+  const eventsAvailableAt = activeTournament
+    ? toDateString(
+        toLocalDateTime(activeTournament.endRegistrationDate).plus({ days: 1 }),
+      )
+    : "";
 
   return (
     <div>
@@ -125,8 +131,8 @@ export default async function Page({
                 </>
               ) : (
                 <p className="text-blue-800 text-sm">
-                  Deine Termine werden hier ab dem <strong>02.09.2025</strong>{" "}
-                  angezeigt.
+                  Deine Termine werden hier ab dem{" "}
+                  <strong>{eventsAvailableAt}</strong> angezeigt.
                 </p>
               )}
             </div>

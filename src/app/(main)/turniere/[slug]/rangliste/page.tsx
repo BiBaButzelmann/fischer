@@ -2,6 +2,7 @@ import { Card, CardHeader, CardTitle } from "@/components/ui/card";
 import { getTournamentBySlug } from "@/db/repositories/tournament";
 import { getAllGroupNamesByTournamentId } from "@/db/repositories/game";
 import { StandingsDisplay } from "@/components/standings/standings-display";
+import { toDateString, toLocalDateTime } from "@/lib/date";
 import { notFound } from "next/navigation";
 
 export default async function Page({
@@ -24,6 +25,10 @@ export default async function Page({
 
   const groups = await getAllGroupNamesByTournamentId(tournament.id);
 
+  const groupsAnnouncedAt = toDateString(
+    toLocalDateTime(tournament.endRegistrationDate).plus({ days: 1 }),
+  );
+
   if (groups.length === 0) {
     return (
       <div className="bg-background text-foreground h-full p-4 sm:p-6 md:p-8">
@@ -37,8 +42,8 @@ export default async function Page({
             <div className="p-6">
               <div className="bg-blue-50 border border-blue-200 rounded-lg p-4">
                 <p className="text-blue-800 text-sm text-center">
-                  Die Gruppen werden am <strong>02.09.2025</strong> bekannt
-                  gegeben.
+                  Die Gruppen werden am <strong>{groupsAnnouncedAt}</strong>{" "}
+                  bekannt gegeben.
                 </p>
               </div>
             </div>
