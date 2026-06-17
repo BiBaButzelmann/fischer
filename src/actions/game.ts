@@ -192,7 +192,7 @@ export async function scheduleGamesForGroup(
     await tx.insert(matchdayGame).values(matchdayGameRelations);
   });
 
-  revalidatePath("/admin/paarungen");
+  revalidatePath("/turniere/[slug]/admin/paarungen", "page");
 }
 
 export async function updateGameMatchdayAndBoardNumber(
@@ -307,8 +307,8 @@ export async function updateGameMatchdayAndBoardNumber(
     );
   }
 
-  revalidatePath("/kalender");
-  revalidatePath("/partien");
+  revalidatePath("/turniere/[slug]/kalender", "page");
+  revalidatePath("/turniere/[slug]/partien", "page");
 }
 
 export async function rescheduleGamesForGroup(
@@ -378,6 +378,6 @@ export async function updateGameResult(
       result,
     })
     .where(eq(game.id, gameId));
-  revalidatePath("/partien");
-  revalidatePath(`/partien/${gameId}`);
+  revalidatePath("/turniere/[slug]/partien", "page");
+  revalidatePath("/turniere/[slug]/partien/[partieId]", "page");
 }
