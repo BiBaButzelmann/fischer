@@ -44,6 +44,12 @@ export default async function Page() {
   const uebersichtHref = tournament
     ? tournamentPath(tournament.slug, "/uebersicht")
     : "/";
+  const ausschreibungHref = tournament
+    ? tournamentPath(tournament.slug, "/ausschreibung")
+    : "/";
+  const turnierordnungHref = tournament
+    ? tournamentPath(tournament.slug, "/turnierordnung")
+    : "/";
   if (session != null) {
     if (tournament?.stage !== "registration") {
       redirect(uebersichtHref);
@@ -52,7 +58,7 @@ export default async function Page() {
     if (userRoles.length > 0) {
       redirect(uebersichtHref);
     }
-    redirect(`/klubturnier-anmeldung?turnier=${tournament.slug}`);
+    redirect("/klubturnier-anmeldung");
   }
 
   return (
@@ -66,7 +72,7 @@ export default async function Page() {
         {/* Document Links */}
         <div className="flex flex-col sm:flex-row gap-4 justify-center">
           <Link
-            href="/ausschreibung"
+            href={ausschreibungHref}
             target="_blank"
             rel="noopener noreferrer"
             className="group flex items-center gap-3 px-4 py-3 border border-border rounded-lg hover:border-primary hover:bg-primary/5 transition-all duration-200"
@@ -77,7 +83,7 @@ export default async function Page() {
           </Link>
 
           <Link
-            href="/turnierordnung"
+            href={turnierordnungHref}
             target="_blank"
             rel="noopener noreferrer"
             className="group flex items-center gap-3 px-4 py-3 border border-border rounded-lg hover:border-primary hover:bg-primary/5 transition-all duration-200"

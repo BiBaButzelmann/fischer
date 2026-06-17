@@ -185,14 +185,14 @@ export function AppSidebar({
             <SidebarGroupContent>
               <SidebarMenu>
                 <SidebarLink
-                  href="/ausschreibung"
+                  href={tournamentPath(slug, "/ausschreibung")}
                   icon={BookTextIcon}
                   target="_blank"
                 >
                   Ausschreibung
                 </SidebarLink>
                 <SidebarLink
-                  href="/turnierordnung"
+                  href={tournamentPath(slug, "/turnierordnung")}
                   icon={BookTextIcon}
                   target="_blank"
                 >
