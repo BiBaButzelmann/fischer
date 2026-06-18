@@ -72,6 +72,7 @@ export default function CreateTournament({ profiles, onCancel }: Props) {
         toast.error(result.error);
         return;
       }
+      toast.success("Turnier erstellt");
       onCancel();
     });
   };
