@@ -13,7 +13,7 @@ export const getTournamentBySlug = cache(async (slug: string) => {
   });
 });
 
-export async function getAllTournaments() {
+export const getAllTournaments = cache(async () => {
   return await db.query.tournament.findMany({
     columns: {
       id: true,
@@ -23,7 +23,7 @@ export async function getAllTournaments() {
     },
     orderBy: (tournament, { desc }) => [desc(tournament.startDate)],
   });
-}
+});
 
 export async function getActiveTournament() {
   return await db.query.tournament.findFirst({
