@@ -16,20 +16,21 @@ import { getRefereeAssignmentCountByProfileIdAndTournamentId } from "@/db/reposi
 import { getMatchEnteringHelperAssignmentCountByProfileIdAndTournamentId } from "@/db/repositories/match-entering-helper";
 import { getSetupHelperAssignmentCountByProfileIdAndTournamentId } from "@/db/repositories/setup-helper";
 import { RolesData } from "@/db/types/role";
+import { Tournament } from "@/db/types/tournament";
 import { buildResultsViewUrl, tournamentPath } from "@/lib/navigation";
 import { GroupBadge } from "@/components/ui/group-badge";
 
+type TournamentRef = Pick<Tournament, "id" | "slug">;
+
 type Props = {
   profileId: number;
-  tournamentId: number;
-  slug: string;
+  tournament: TournamentRef;
   rolesData: RolesData;
 };
 
 export async function AssignmentSummary({
   profileId,
-  tournamentId,
-  slug,
+  tournament,
   rolesData,
 }: Props) {
   return (
@@ -41,35 +42,22 @@ export async function AssignmentSummary({
       <div className="space-y-4">
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
           {rolesData.participant && (
-            <ParticipantSection
-              profileId={profileId}
-              tournamentId={tournamentId}
-              slug={slug}
-            />
+            <ParticipantSection profileId={profileId} tournament={tournament} />
           )}
           {rolesData.setupHelper && (
-            <SetupHelperSection
-              profileId={profileId}
-              tournamentId={tournamentId}
-              slug={slug}
-            />
+            <SetupHelperSection profileId={profileId} tournament={tournament} />
           )}
           {rolesData.referee && (
-            <RefereeSection
-              profileId={profileId}
-              tournamentId={tournamentId}
-              slug={slug}
-            />
+            <RefereeSection profileId={profileId} tournament={tournament} />
           )}
           {rolesData.matchEnteringHelper && (
             <MatchEnteringHelperSection
               profileId={profileId}
-              tournamentId={tournamentId}
-              slug={slug}
+              tournament={tournament}
             />
           )}
           {rolesData.juror && <JurorSection />}
-          {rolesData.trainer && <TrainerSection slug={slug} />}
+          {rolesData.trainer && <TrainerSection tournament={tournament} />}
         </div>
       </div>
     </div>
@@ -78,16 +66,14 @@ export async function AssignmentSummary({
 
 async function ParticipantSection({
   profileId,
-  tournamentId,
-  slug,
+  tournament,
 }: {
   profileId: number;
-  tournamentId: number;
-  slug: string;
+  tournament: TournamentRef;
 }) {
   const playerGroup = await getGroupNameAndDayOfWeekByProfileIdAndTournamentId(
     profileId,
-    tournamentId,
+    tournament.id,
   );
 
   if (!playerGroup) {
@@ -109,7 +95,7 @@ async function ParticipantSection({
   }
 
   const ranglisteUrl = buildResultsViewUrl({
-    slug,
+    slug: tournament.slug,
     groupId: playerGroup.id.toString(),
   });
 
@@ -137,17 +123,15 @@ async function ParticipantSection({
 
 async function SetupHelperSection({
   profileId,
-  tournamentId,
-  slug,
+  tournament,
 }: {
   profileId: number;
-  tournamentId: number;
-  slug: string;
+  tournament: TournamentRef;
 }) {
   const assignedDaysCount =
     await getSetupHelperAssignmentCountByProfileIdAndTournamentId(
       profileId,
-      tournamentId,
+      tournament.id,
     );
 
   if (assignedDaysCount === 0) {
@@ -155,7 +139,10 @@ async function SetupHelperSection({
   }
 
   return (
-    <Link href={tournamentPath(slug, "/terminuebersicht")} className="block">
+    <Link
+      href={tournamentPath(tournament.slug, "/terminuebersicht")}
+      className="block"
+    >
       <div className="flex items-center gap-4 p-4 bg-white dark:bg-card border border-gray-200 dark:border-card-border rounded-xl shadow-sm transition-all hover:shadow-md cursor-pointer hover:opacity-80">
         <div className="flex-shrink-0 p-3 rounded-full bg-green-100 dark:bg-green-900/30">
           <Wrench className="w-6 h-6 text-green-600 dark:text-green-400" />
@@ -186,17 +173,15 @@ async function SetupHelperSection({
 
 async function RefereeSection({
   profileId,
-  tournamentId,
-  slug,
+  tournament,
 }: {
   profileId: number;
-  tournamentId: number;
-  slug: string;
+  tournament: TournamentRef;
 }) {
   const assignedDaysCount =
     await getRefereeAssignmentCountByProfileIdAndTournamentId(
       profileId,
-      tournamentId,
+      tournament.id,
     );
 
   if (assignedDaysCount === 0) {
@@ -204,7 +189,10 @@ async function RefereeSection({
   }
 
   return (
-    <Link href={tournamentPath(slug, "/terminuebersicht")} className="block">
+    <Link
+      href={tournamentPath(tournament.slug, "/terminuebersicht")}
+      className="block"
+    >
       <div className="flex items-center gap-4 p-4 bg-white dark:bg-card border border-gray-200 dark:border-card-border rounded-xl shadow-sm transition-all hover:shadow-md cursor-pointer hover:opacity-80">
         <div className="flex-shrink-0 p-3 rounded-full bg-red-100 dark:bg-red-900/30">
           <Gavel className="w-6 h-6 text-red-600 dark:text-red-400" />
@@ -235,17 +223,15 @@ async function RefereeSection({
 
 async function MatchEnteringHelperSection({
   profileId,
-  tournamentId,
-  slug,
+  tournament,
 }: {
   profileId: number;
-  tournamentId: number;
-  slug: string;
+  tournament: TournamentRef;
 }) {
   const assignedGroupsCount =
     await getMatchEnteringHelperAssignmentCountByProfileIdAndTournamentId(
       profileId,
-      tournamentId,
+      tournament.id,
     );
 
   if (assignedGroupsCount === 0) {
@@ -253,7 +239,10 @@ async function MatchEnteringHelperSection({
   }
 
   return (
-    <Link href={tournamentPath(slug, "/partieneingabe")} className="block">
+    <Link
+      href={tournamentPath(tournament.slug, "/partieneingabe")}
+      className="block"
+    >
       <div className="flex items-center gap-4 p-4 bg-white dark:bg-card border border-gray-200 dark:border-card-border rounded-xl shadow-sm transition-all hover:shadow-md cursor-pointer hover:opacity-80">
         <div className="flex-shrink-0 p-3 rounded-full bg-purple-100 dark:bg-purple-900/30">
           <Hash className="w-6 h-6 text-purple-600 dark:text-purple-400" />
@@ -304,9 +293,9 @@ function JurorSection() {
   );
 }
 
-function TrainerSection({ slug }: { slug: string }) {
+function TrainerSection({ tournament }: { tournament: TournamentRef }) {
   return (
-    <Link href={tournamentPath(slug, "/partien")} className="block">
+    <Link href={tournamentPath(tournament.slug, "/partien")} className="block">
       <div className="flex items-center gap-4 p-4 bg-white dark:bg-card border border-gray-200 dark:border-card-border rounded-xl shadow-sm transition-all hover:shadow-md cursor-pointer hover:opacity-80">
         <div className="flex-shrink-0 p-3 rounded-full bg-orange-100 dark:bg-orange-900/30">
           <Volleyball className="w-6 h-6 text-orange-600 dark:text-orange-400" />
