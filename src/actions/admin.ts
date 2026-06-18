@@ -9,18 +9,18 @@ import { revalidatePath } from "next/cache";
 
 export async function softDeleteUserProfile(userId: string) {
   const result = await softDeleteUser(userId);
-  revalidatePath("/admin/nutzerverwaltung");
+  revalidatePath("/turniere/[slug]/admin/nutzerverwaltung", "page");
   return result;
 }
 
 export async function hardDeleteUserProfile(userId: string) {
   const result = await hardDeleteUser(userId);
-  revalidatePath("/admin/nutzerverwaltung");
+  revalidatePath("/turniere/[slug]/admin/nutzerverwaltung", "page");
   return result;
 }
 
 export async function restoreUserProfile(userId: string) {
   const result = await restoreUser(userId);
-  revalidatePath("/admin/nutzerverwaltung");
+  revalidatePath("/turniere/[slug]/admin/nutzerverwaltung", "page");
   return result;
 }

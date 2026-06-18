@@ -27,7 +27,7 @@ export async function updateRefereeAssignments(
     }
   });
 
-  revalidatePath("/admin/spieltage");
+  revalidatePath("/turniere/[slug]/admin/spieltage", "page");
 }
 
 export async function updateSetupHelperAssignments(
@@ -52,5 +52,5 @@ export async function updateSetupHelperAssignments(
     }
   });
 
-  revalidatePath("/admin/spieltage");
+  revalidatePath("/turniere/[slug]/admin/spieltage", "page");
 }

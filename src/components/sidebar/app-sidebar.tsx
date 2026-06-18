@@ -14,6 +14,7 @@ import {
 import Link from "next/link";
 import { SidebarUserMenu } from "./sidebar-user-menu";
 import { SidebarLink } from "./sidebar-link";
+import { TournamentSwitcher } from "./tournament-switcher";
 import {
   Award,
   BinocularsIcon,
@@ -32,16 +33,25 @@ import {
 import { Button } from "../ui/button";
 import Image from "next/image";
 import { Session } from "@/types/auth";
-import { Tournament } from "@/db/types/tournament";
+import { TournamentStage } from "@/db/types/tournament";
 import { Role } from "@/db/types/role";
+import { tournamentPath } from "@/lib/navigation";
+import { useTournamentSlug } from "@/hooks/use-tournament-slug";
+
+type TournamentItem = {
+  id: number;
+  name: string;
+  slug: string;
+  stage: TournamentStage;
+};
 
 type Props = {
   session: Session | null;
-  tournament?: Tournament;
+  tournaments: TournamentItem[];
   userRoles: Role[];
 };
 
-export function AppSidebar({ session, tournament, userRoles }: Props) {
+export function AppSidebar({ session, tournaments, userRoles }: Props) {
   const { setOpenMobile, isMobile } = useSidebar();
 
   const handleMobileMenuClick = () => {
@@ -50,7 +60,10 @@ export function AppSidebar({ session, tournament, userRoles }: Props) {
     }
   };
 
-  const stage = tournament?.stage;
+  const slug = useTournamentSlug();
+  const selectedTournament =
+    tournaments.find((tournament) => tournament.slug === slug) ?? tournaments[0];
+  const stage = selectedTournament?.stage;
 
   const isRegistrationOpen = stage === "registration";
   const isRunning = stage === "running";
@@ -70,7 +83,7 @@ export function AppSidebar({ session, tournament, userRoles }: Props) {
       <SidebarHeader>
         <Link
           className="inline-flex items-center gap-2"
-          href="/uebersicht"
+          href={tournamentPath(slug, "/uebersicht")}
           onClick={handleMobileMenuClick}
         >
           <Image
@@ -87,21 +100,39 @@ export function AppSidebar({ session, tournament, userRoles }: Props) {
         <SidebarGroup>
           <SidebarGroupLabel>Turnier</SidebarGroupLabel>
           <SidebarGroupContent>
+            <div className="px-2 pb-2">
+              <TournamentSwitcher tournaments={tournaments} />
+            </div>
             <SidebarMenu>
-              <SidebarLink href="/uebersicht" icon={LayoutDashboard}>
+              <SidebarLink
+                href={tournamentPath(slug, "/uebersicht")}
+                icon={LayoutDashboard}
+              >
                 Übersicht
               </SidebarLink>
-              <SidebarLink href="/partien" icon={SwordsIcon}>
+              <SidebarLink
+                href={tournamentPath(slug, "/partien")}
+                icon={SwordsIcon}
+              >
                 Partien
               </SidebarLink>
-              <SidebarLink href="/rangliste" icon={Medal}>
+              <SidebarLink
+                href={tournamentPath(slug, "/rangliste")}
+                icon={Medal}
+              >
                 Rangliste
               </SidebarLink>
-              <SidebarLink href="/kalender" icon={CalendarIcon}>
+              <SidebarLink
+                href={tournamentPath(slug, "/kalender")}
+                icon={CalendarIcon}
+              >
                 Kalender
               </SidebarLink>
               {isRunning && (isSetupHelper || isReferee) && (
-                <SidebarLink href="/terminuebersicht" icon={CalendarClock}>
+                <SidebarLink
+                  href={tournamentPath(slug, "/terminuebersicht")}
+                  icon={CalendarClock}
+                >
                   Terminübersicht
                 </SidebarLink>
               )}
@@ -113,7 +144,10 @@ export function AppSidebar({ session, tournament, userRoles }: Props) {
             <SidebarGroupLabel>Spieler</SidebarGroupLabel>
             <SidebarGroupContent>
               <SidebarMenu>
-                <SidebarLink href="/partienverlegung" icon={CalendarClock}>
+                <SidebarLink
+                  href={tournamentPath(slug, "/partienverlegung")}
+                  icon={CalendarClock}
+                >
                   Partienverlegungen
                 </SidebarLink>
               </SidebarMenu>
@@ -125,7 +159,10 @@ export function AppSidebar({ session, tournament, userRoles }: Props) {
             <SidebarGroupLabel>Eingabehelfer</SidebarGroupLabel>
             <SidebarGroupContent>
               <SidebarMenu>
-                <SidebarLink href="/partieneingabe" icon={ClipboardEdit}>
+                <SidebarLink
+                  href={tournamentPath(slug, "/partieneingabe")}
+                  icon={ClipboardEdit}
+                >
                   Partieneingabe
                 </SidebarLink>
               </SidebarMenu>
@@ -138,14 +175,14 @@ export function AppSidebar({ session, tournament, userRoles }: Props) {
             <SidebarGroupContent>
               <SidebarMenu>
                 <SidebarLink
-                  href="/ausschreibung"
+                  href={tournamentPath(slug, "/ausschreibung")}
                   icon={BookTextIcon}
                   target="_blank"
                 >
                   Ausschreibung
                 </SidebarLink>
                 <SidebarLink
-                  href="/turnierordnung"
+                  href={tournamentPath(slug, "/turnierordnung")}
                   icon={BookTextIcon}
                   target="_blank"
                 >
@@ -169,37 +206,64 @@ export function AppSidebar({ session, tournament, userRoles }: Props) {
           <SidebarGroup>
             <SidebarGroupLabel>Admin</SidebarGroupLabel>
             <SidebarGroupContent>
-              <SidebarLink href="/admin/tournament" icon={BinocularsIcon}>
+              <SidebarLink
+                href={tournamentPath(slug, "/admin/tournament")}
+                icon={BinocularsIcon}
+              >
                 Turnier verwalten
               </SidebarLink>
               <SidebarLink
-                href="/admin/nutzerverwaltung"
+                href={tournamentPath(slug, "/admin/nutzerverwaltung")}
                 icon={UserRoundCogIcon}
               >
                 Nutzer verwalten
               </SidebarLink>
-              <SidebarLink href="/admin/gruppen" icon={Users}>
+              <SidebarLink
+                href={tournamentPath(slug, "/admin/gruppen")}
+                icon={Users}
+              >
                 Gruppen verwalten
               </SidebarLink>
-              <SidebarLink href="/admin/paarungen" icon={Users}>
+              <SidebarLink
+                href={tournamentPath(slug, "/admin/paarungen")}
+                icon={Users}
+              >
                 Paarungen verwalten
               </SidebarLink>
-              <SidebarLink href="/admin/spieltage" icon={CalendarIcon}>
+              <SidebarLink
+                href={tournamentPath(slug, "/admin/spieltage")}
+                icon={CalendarIcon}
+              >
                 Spieltage verwalten
               </SidebarLink>
-              <SidebarLink href="/admin/fide-bericht" icon={FileCheck}>
+              <SidebarLink
+                href={tournamentPath(slug, "/admin/fide-bericht")}
+                icon={FileCheck}
+              >
                 Fide Bericht
               </SidebarLink>
-              <SidebarLink href="/admin/dwz-bericht" icon={FileCheck}>
+              <SidebarLink
+                href={tournamentPath(slug, "/admin/dwz-bericht")}
+                icon={FileCheck}
+              >
                 DWZ Bericht
               </SidebarLink>
-              <SidebarLink href="/admin/startgeld" icon={Euro}>
+              <SidebarLink
+                href={tournamentPath(slug, "/admin/startgeld")}
+                icon={Euro}
+              >
                 Startgeld verwalten
               </SidebarLink>
-              <SidebarLink href="/admin/namensschilder" icon={LayoutDashboard}>
+              <SidebarLink
+                href={tournamentPath(slug, "/admin/namensschilder")}
+                icon={LayoutDashboard}
+              >
                 Namensschilder
               </SidebarLink>
-              <SidebarLink href="/admin/urkunden" icon={Award}>
+              <SidebarLink
+                href={tournamentPath(slug, "/admin/urkunden")}
+                icon={Award}
+              >
                 Urkunden
               </SidebarLink>
             </SidebarGroupContent>

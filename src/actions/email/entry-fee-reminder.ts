@@ -2,19 +2,19 @@
 
 import { authWithRedirect } from "@/auth/utils";
 import { getNonDefaultClubParticipantsWithEmailByTournamentId } from "@/db/repositories/admin";
-import { getActiveTournament } from "@/db/repositories/tournament";
+import { getTournamentById } from "@/db/repositories/tournament";
 import { sendEntryFeeReminderEmail } from "@/email/entryFeeReminder";
 import invariant from "tiny-invariant";
 
-export async function sendEntryFeeReminderEmails() {
+export async function sendEntryFeeReminderEmails(tournamentId: number) {
   const session = await authWithRedirect();
 
   if (session.user.role !== "admin") {
     throw new Error("Unauthorized: Admin access required");
   }
 
-  const tournament = await getActiveTournament();
-  invariant(tournament, "No active tournament found");
+  const tournament = await getTournamentById(tournamentId);
+  invariant(tournament, "Tournament not found");
 
   const participants =
     await getNonDefaultClubParticipantsWithEmailByTournamentId(tournament.id);

@@ -31,6 +31,7 @@ import {
 } from "lucide-react";
 import Link from "next/link";
 import { redirect } from "next/navigation";
+import { tournamentPath } from "@/lib/navigation";
 
 export default async function Page() {
   const [session, tournament] = await Promise.all([
@@ -40,13 +41,16 @@ export default async function Page() {
   const tournamentWeeks = tournament
     ? await getTournamentWeeksByTournamentId(tournament.id)
     : [];
+  const uebersichtHref = tournament
+    ? tournamentPath(tournament.slug, "/uebersicht")
+    : "/";
   if (session != null) {
     if (tournament?.stage !== "registration") {
-      redirect("/uebersicht");
+      redirect(uebersichtHref);
     }
     const userRoles = await getRolesByUserId(session.user.id);
     if (userRoles.length > 0) {
-      redirect("/uebersicht");
+      redirect(uebersichtHref);
     }
     redirect("/klubturnier-anmeldung");
   }
@@ -60,9 +64,10 @@ export default async function Page() {
       </section>
       <div className="text-center mb-8">
         {/* Document Links */}
-        <div className="flex flex-col sm:flex-row gap-4 justify-center">
-          <Link
-            href="/ausschreibung"
+        {tournament && (
+          <div className="flex flex-col sm:flex-row gap-4 justify-center">
+            <Link
+            href={tournamentPath(tournament.slug, "/ausschreibung")}
             target="_blank"
             rel="noopener noreferrer"
             className="group flex items-center gap-3 px-4 py-3 border border-border rounded-lg hover:border-primary hover:bg-primary/5 transition-all duration-200"
@@ -73,7 +78,7 @@ export default async function Page() {
           </Link>
 
           <Link
-            href="/turnierordnung"
+            href={tournamentPath(tournament.slug, "/turnierordnung")}
             target="_blank"
             rel="noopener noreferrer"
             className="group flex items-center gap-3 px-4 py-3 border border-border rounded-lg hover:border-primary hover:bg-primary/5 transition-all duration-200"
@@ -104,7 +109,8 @@ export default async function Page() {
               </ScrollArea>
             </DialogContent>
           </Dialog>
-        </div>
+          </div>
+        )}
       </div>
       <section className="grid gap-4 md:gap-8 md:grid-cols-3 max-w-5xl mx-auto">
         <Card className="shadow-md h-full flex flex-col">
@@ -178,7 +184,7 @@ export default async function Page() {
           </CardContent>
           <CardFooter className="mt-auto">
             <Button className="w-full text-lg py-6" asChild variant="default">
-              <Link href="/uebersicht">
+              <Link href={uebersichtHref}>
                 Zuschauen
                 <ChevronRight className="ml-2 h-5 w-5" />
               </Link>

@@ -9,13 +9,11 @@ import {
   SelectValue,
 } from "../ui/select";
 import { Label } from "../ui/label";
-import type { TournamentNames } from "@/db/types/tournament";
 import type { GroupSummary } from "@/db/types/group";
 import { buildResultsViewUrl } from "@/lib/navigation";
+import { useTournamentSlug } from "@/hooks/use-tournament-slug";
 
 export type Props = {
-  selectedTournamentId: string;
-  tournamentNames: TournamentNames[];
   selectedGroupId?: string;
   groups: GroupSummary[];
   selectedRound?: string;
@@ -23,29 +21,18 @@ export type Props = {
 };
 
 export function StandingsSelector({
-  tournamentNames,
   groups,
   rounds,
-  selectedTournamentId,
   selectedGroupId,
   selectedRound,
 }: Props) {
   const router = useRouter();
-
-  const handleTournamentChange = (tournamentId: string) => {
-    router.push(
-      buildResultsViewUrl({
-        tournamentId,
-        groupId: selectedGroupId,
-        round: selectedRound,
-      }),
-    );
-  };
+  const slug = useTournamentSlug();
 
   const handleGroupChange = (groupId: string) => {
     router.push(
       buildResultsViewUrl({
-        tournamentId: selectedTournamentId,
+        slug,
         groupId,
         round: selectedRound,
       }),
@@ -55,7 +42,7 @@ export function StandingsSelector({
   const handleRoundChange = (round: string | undefined) => {
     router.push(
       buildResultsViewUrl({
-        tournamentId: selectedTournamentId,
+        slug,
         groupId: selectedGroupId,
         round,
       }),
@@ -63,26 +50,6 @@ export function StandingsSelector({
   };
   return (
     <div className="flex flex-nowrap gap-2 md:gap-4 mb-4">
-      <div className="flex max-w-48 flex-1 flex-col gap-1">
-        <Label htmlFor="tournament-select" className="text-sm font-medium">
-          Ausgabe
-        </Label>
-        <Select
-          value={selectedTournamentId}
-          onValueChange={handleTournamentChange}
-        >
-          <SelectTrigger id="tournament-select" className="w-full">
-            <SelectValue />
-          </SelectTrigger>
-          <SelectContent>
-            {tournamentNames.map((t) => (
-              <SelectItem key={t.id} value={t.id.toString()}>
-                {t.name}
-              </SelectItem>
-            ))}
-          </SelectContent>
-        </Select>
-      </div>
       <div className="flex max-w-48 flex-1 flex-col gap-1">
         <Label htmlFor="group-select" className="text-sm font-medium">
           Gruppe

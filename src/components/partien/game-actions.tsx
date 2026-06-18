@@ -1,3 +1,5 @@
+"use client";
+
 import {
   GameResult,
   GameWithParticipantProfilesAndGroupAndMatchday,
@@ -10,6 +12,8 @@ import { NotebookPen } from "lucide-react";
 import { PostponeGameDialog } from "./postpone-game-dialog";
 import { ReportResultDialog } from "./report-result-dialog";
 import { isGameActuallyPlayed } from "@/lib/game-auth";
+import { tournamentPath } from "@/lib/navigation";
+import { useTournamentSlug } from "@/hooks/use-tournament-slug";
 import { DateTime } from "luxon";
 
 type Props = {
@@ -37,6 +41,8 @@ export function GameActions({
   canSubmitResult,
   canPostpone,
 }: Props) {
+  const slug = useTournamentSlug();
+
   return (
     <>
       {canSubmitResult && (
@@ -58,7 +64,7 @@ export function GameActions({
       {canView && isGameActuallyPlayed(currentResult) && (
         <Tooltip>
           <TooltipTrigger asChild>
-            <Link href={`/partien/${gameId}`}>
+            <Link href={tournamentPath(slug, `/partien/${gameId}`)}>
               <Button
                 aria-label="Partie eingeben"
                 variant="outline"

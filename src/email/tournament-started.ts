@@ -9,7 +9,7 @@ type Props = {
   name: string;
   email: string;
   roles: RolesData;
-  tournamentId: number;
+  slug: string;
   participantData?: ParticipantGroupData;
   isGroupUpdate?: boolean;
 };
@@ -23,7 +23,7 @@ export async function sendTournamentStartedMail(data: Props) {
     react: TournamentStartedMail({
       name: data.name,
       roles: data.roles,
-      tournamentId: data.tournamentId,
+      slug: data.slug,
       participantData: data.participantData,
       isGroupUpdate: data.isGroupUpdate,
     }),

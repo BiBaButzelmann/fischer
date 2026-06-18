@@ -1,4 +1,4 @@
-import { relations } from "drizzle-orm";
+import { relations, sql } from "drizzle-orm";
 import {
   boolean,
   date,
@@ -8,6 +8,7 @@ import {
   smallint,
   text,
   time,
+  uniqueIndex,
 } from "drizzle-orm/pg-core";
 import { profile } from "./profile";
 import { timestamps } from "./columns.helpers";
@@ -24,11 +25,15 @@ export const tournament = pgTable("tournament", {
   id: integer("id").generatedAlwaysAsIdentity().primaryKey(),
   club: text("organizer").notNull(),
   name: text("name").notNull(),
+  slug: text("slug").notNull().unique(),
   type: text("type").notNull(),
   numberOfRounds: smallint("number_of_rounds").notNull(),
   endRegistrationDate: date("end_registration_date", {
     mode: "date",
   }).notNull(),
+  groupAnnouncementOffsetDays: smallint("group_announcement_offset_days")
+    .notNull()
+    .default(2),
 
   startDate: date("start_date", { mode: "date" }).notNull(),
   endDate: date("end_date", { mode: "date" }).notNull(),
@@ -45,7 +50,11 @@ export const tournament = pgTable("tournament", {
   organizerProfileId: integer("organizer_profile_id"),
 
   ...timestamps,
-});
+}, (table) => [
+  uniqueIndex("one_tournament_in_registration")
+    .on(table.stage)
+    .where(sql`${table.stage} = 'registration'`),
+]);
 
 export const tournamentRelations = relations(tournament, ({ one, many }) => ({
   organizer: one(profile, {

@@ -1,12 +1,14 @@
+export function tournamentPath(slug: string, subPath = ""): string {
+  return `/turniere/${slug}${subPath}`;
+}
+
 export function buildGameViewParams(params: {
-  tournamentId: number;
   groupId?: number;
   round?: number;
   participantId?: number;
   matchdayId?: number;
 }) {
   const searchParams = new URLSearchParams();
-  searchParams.set("tournamentId", params.tournamentId.toString());
 
   if (params.groupId) {
     searchParams.set("groupId", params.groupId.toString());
@@ -27,38 +29,37 @@ export function buildGameViewParams(params: {
   return searchParams;
 }
 
-/**
- * Builds a URL for navigating to the game view page with the specified parameters
- */
-export function buildGameViewUrl(params: {
-  tournamentId: number;
+export function buildGameViewUrl({
+  slug,
+  ...params
+}: {
+  slug: string;
   groupId?: number;
   round?: number;
   participantId?: number;
   matchdayId?: number;
 }): string {
-  const searchParams = buildGameViewParams(params);
-  return `/partien?${searchParams.toString()}`;
+  const query = buildGameViewParams(params).toString();
+  return tournamentPath(slug, query ? `/partien?${query}` : "/partien");
 }
 
-/**
- * Builds URL for results page with query parameters
- */
 export function buildResultsViewUrl(params: {
-  tournamentId: string;
+  slug: string;
   groupId?: string;
   round?: string;
 }): string {
   const searchParams = new URLSearchParams();
-  searchParams.set("tournamentId", params.tournamentId);
 
   if (params.groupId) {
     searchParams.set("groupId", params.groupId);
   }
-
   if (params.round) {
     searchParams.set("round", params.round);
   }
 
-  return `/rangliste?${searchParams.toString()}`;
+  const query = searchParams.toString();
+  return tournamentPath(
+    params.slug,
+    query ? `/rangliste?${query}` : "/rangliste",
+  );
 }

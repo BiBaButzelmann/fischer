@@ -31,7 +31,7 @@ export const savePGN = action(async (newValue: string, gameId: number) => {
       target: pgn.gameId,
       set: { value: newValue },
     });
-  revalidatePath("/partien");
+  revalidatePath("/turniere/[slug]/partien", "page");
 });
 
 export const buildPgnFileName = action(

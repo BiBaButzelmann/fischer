@@ -1,0 +1,1 @@
+ALTER TABLE "tournament" ADD COLUMN "group_announcement_offset_days" smallint DEFAULT 2 NOT NULL;

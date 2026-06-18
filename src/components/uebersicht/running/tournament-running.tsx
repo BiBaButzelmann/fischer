@@ -15,15 +15,17 @@ import { UpcomingEventsList } from "./upcoming-events-list";
 import { ArrowRight, CalendarIcon } from "lucide-react";
 import { AssignmentSummary } from "./assignment-summary";
 import { ProfileWithName } from "@/db/types/profile";
+import { Tournament } from "@/db/types/tournament";
 import { TournamentWeeksSection } from "../tournament-weeks-section";
 import { ParticipantsSection } from "../participants-section";
 import { hasAnyRole } from "@/db/types/role";
+import { tournamentPath } from "@/lib/navigation";
 
 type Props = {
-  tournamentId: number;
+  tournament: Pick<Tournament, "id" | "slug">;
 };
 
-export async function TournamentRunning({ tournamentId }: Props) {
+export async function TournamentRunning({ tournament }: Props) {
   const session = await auth();
   const profile =
     session != null ? await getProfileByUserId(session.user.id) : null;
@@ -32,22 +34,19 @@ export async function TournamentRunning({ tournamentId }: Props) {
     <div className="grid grid-cols-1 items-stretch gap-4 md:gap-8 lg:grid-cols-6">
       <div className="lg:col-span-6">
         {profile != null ? (
-          <AuthedGreetingSection
-            profile={profile}
-            tournamentId={tournamentId}
-          />
+          <AuthedGreetingSection profile={profile} tournament={tournament} />
         ) : (
           <GuestGreetingSection />
         )}
       </div>
 
       <div className="lg:col-span-3">
-        <TournamentWeeksSection tournamentId={tournamentId} />
+        <TournamentWeeksSection tournamentId={tournament.id} />
       </div>
 
       <div className="lg:col-span-3">
         <ParticipantsSection
-          tournamentId={tournamentId}
+          tournamentId={tournament.id}
           profileId={profile?.id}
         />
       </div>
@@ -88,14 +87,14 @@ function GuestGreetingSection() {
 
 async function AuthedGreetingSection({
   profile,
-  tournamentId,
+  tournament,
 }: {
   profile: ProfileWithName;
-  tournamentId: number;
+  tournament: Pick<Tournament, "id" | "slug">;
 }) {
   const [upcomingEvents, rolesData] = await Promise.all([
-    getUpcomingEventsByProfileAndTournament(profile.id, tournamentId),
-    getRolesDataByProfileIdAndTournamentId(profile.id, tournamentId),
+    getUpcomingEventsByProfileAndTournament(profile.id, tournament.id),
+    getRolesDataByProfileIdAndTournamentId(profile.id, tournament.id),
   ]);
 
   if (!hasAnyRole(rolesData)) {
@@ -145,7 +144,7 @@ async function AuthedGreetingSection({
                 Infos.
               </CardDescription>
             </div>
-            <Link href="/kalender">
+            <Link href={tournamentPath(tournament.slug, "/kalender")}>
               <Button variant="outline" className="group w-full sm:w-auto">
                 Hier geht&apos;s zum Kalender
                 <ArrowRight className="w-4 h-4 ml-2 transition-transform group-hover:translate-x-1" />
@@ -160,14 +159,17 @@ async function AuthedGreetingSection({
               <p className="text-lg">Keine anstehenden Termine</p>
             </div>
           ) : (
-            <UpcomingEventsList events={upcomingEvents} />
+            <UpcomingEventsList
+              events={upcomingEvents}
+              slug={tournament.slug}
+            />
           )}
         </CardContent>
       </Card>
 
       <AssignmentSummary
         profileId={profile.id}
-        tournamentId={tournamentId}
+        tournament={tournament}
         rolesData={rolesData}
       />
     </div>

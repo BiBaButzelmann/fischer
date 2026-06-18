@@ -27,6 +27,8 @@ import { createTournamentFormSchema } from "@/schema/tournament";
 import { z } from "zod";
 import { DEFAULT_CLUB_LABEL } from "@/constants/constants";
 import { createTournament } from "@/actions/tournament";
+import { isError } from "@/lib/actions";
+import { toast } from "sonner";
 
 type Props = {
   profiles: Profile[];
@@ -39,9 +41,12 @@ export default function CreateTournament({ profiles, onCancel }: Props) {
   const form = useForm({
     resolver: zodResolver(createTournamentFormSchema),
     defaultValues: {
+      name: "",
+      slug: "",
       clubName: DEFAULT_CLUB_LABEL,
       tournamentType: "Rundenturnier",
       numberOfRounds: 9,
+      groupAnnouncementOffsetDays: 2,
       timeLimit:
         "40 Züge in 90 Minuten, danach 0 Züge in 0 Minuten, 30 Minuten für die letzte Phase, Zugabe pro Zug in Sekunden: 30",
       location: "Hamburg",
@@ -62,8 +67,13 @@ export default function CreateTournament({ profiles, onCancel }: Props) {
     data: z.infer<typeof createTournamentFormSchema>,
   ) => {
     startTransition(async () => {
-      await createTournament(data);
-      onCancel(); // Close the create form after successful creation
+      const result = await createTournament(data);
+      if (isError(result)) {
+        toast.error(result.error);
+        return;
+      }
+      toast.success("Turnier erstellt");
+      onCancel();
     });
   };
 
@@ -85,6 +95,34 @@ export default function CreateTournament({ profiles, onCancel }: Props) {
             Turnierinformationen
           </span>
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+            <FormField
+              control={form.control}
+              name="name"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel required>Turniername</FormLabel>
+                  <FormControl>
+                    <Input {...field} placeholder="z.B. Klubturnier 2026" />
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+
+            <FormField
+              control={form.control}
+              name="slug"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel required>Slug (URL)</FormLabel>
+                  <FormControl>
+                    <Input {...field} placeholder="z.B. klubturnier-2026" />
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+
             <FormField
               control={form.control}
               name="clubName"
@@ -129,6 +167,22 @@ export default function CreateTournament({ profiles, onCancel }: Props) {
                       placeholder="Anzahl der Runden eingeben"
                       {...field}
                     />
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+
+            <FormField
+              control={form.control}
+              name="groupAnnouncementOffsetDays"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel required>
+                    Tage bis Gruppenbekanntgabe (nach Anmeldeschluss)
+                  </FormLabel>
+                  <FormControl>
+                    <Input type="number" min="0" placeholder="z.B. 2" {...field} />
                   </FormControl>
                   <FormMessage />
                 </FormItem>

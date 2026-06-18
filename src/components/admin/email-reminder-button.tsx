@@ -7,16 +7,17 @@ import { toast } from "sonner";
 import { sendEntryFeeReminderEmails } from "@/actions/email/entry-fee-reminder";
 
 type Props = {
+  tournamentId: number;
   unpaidCount: number;
 };
 
-export function EmailReminderButton({ unpaidCount }: Props) {
+export function EmailReminderButton({ tournamentId, unpaidCount }: Props) {
   const [isPending, startTransition] = useTransition();
 
   const handleSendReminders = () => {
     startTransition(async () => {
       try {
-        const result = await sendEntryFeeReminderEmails();
+        const result = await sendEntryFeeReminderEmails(tournamentId);
         toast.success(result.message);
       } catch {
         toast.error("Fehler beim Versenden der E-Mails");

@@ -266,7 +266,7 @@ export const updateAllParticipantRatings = action(
       }
     }
 
-    revalidatePath("/admin/nutzerverwaltung");
+    revalidatePath("/turniere/[slug]/admin/nutzerverwaltung", "page");
 
     return { updated, failed, total: participants.length };
   },
@@ -290,5 +290,5 @@ export async function updateEntryFeeStatus(
     })
     .where(eq(participant.id, participantId));
 
-  revalidatePath("/admin/startgeld");
+  revalidatePath("/turniere/[slug]/admin/startgeld", "page");
 }
