@@ -29,30 +29,18 @@ export function buildGameViewParams(params: {
   return searchParams;
 }
 
-export function buildGameViewUrl(params: {
+export function buildGameViewUrl({
+  slug,
+  ...params
+}: {
   slug: string;
   groupId?: number;
   round?: number;
   participantId?: number;
   matchdayId?: number;
 }): string {
-  const searchParams = new URLSearchParams();
-
-  if (params.groupId) {
-    searchParams.set("groupId", params.groupId.toString());
-  }
-  if (params.round) {
-    searchParams.set("round", params.round.toString());
-  }
-  if (params.participantId) {
-    searchParams.set("participantId", params.participantId.toString());
-  }
-  if (params.matchdayId) {
-    searchParams.set("matchdayId", params.matchdayId.toString());
-  }
-
-  const query = searchParams.toString();
-  return tournamentPath(params.slug, query ? `/partien?${query}` : "/partien");
+  const query = buildGameViewParams(params).toString();
+  return tournamentPath(slug, query ? `/partien?${query}` : "/partien");
 }
 
 export function buildResultsViewUrl(params: {
