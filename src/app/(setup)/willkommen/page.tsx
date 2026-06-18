@@ -44,12 +44,6 @@ export default async function Page() {
   const uebersichtHref = tournament
     ? tournamentPath(tournament.slug, "/uebersicht")
     : "/";
-  const ausschreibungHref = tournament
-    ? tournamentPath(tournament.slug, "/ausschreibung")
-    : "/";
-  const turnierordnungHref = tournament
-    ? tournamentPath(tournament.slug, "/turnierordnung")
-    : "/";
   if (session != null) {
     if (tournament?.stage !== "registration") {
       redirect(uebersichtHref);
@@ -70,9 +64,10 @@ export default async function Page() {
       </section>
       <div className="text-center mb-8">
         {/* Document Links */}
-        <div className="flex flex-col sm:flex-row gap-4 justify-center">
-          <Link
-            href={ausschreibungHref}
+        {tournament && (
+          <div className="flex flex-col sm:flex-row gap-4 justify-center">
+            <Link
+            href={tournamentPath(tournament.slug, "/ausschreibung")}
             target="_blank"
             rel="noopener noreferrer"
             className="group flex items-center gap-3 px-4 py-3 border border-border rounded-lg hover:border-primary hover:bg-primary/5 transition-all duration-200"
@@ -83,7 +78,7 @@ export default async function Page() {
           </Link>
 
           <Link
-            href={turnierordnungHref}
+            href={tournamentPath(tournament.slug, "/turnierordnung")}
             target="_blank"
             rel="noopener noreferrer"
             className="group flex items-center gap-3 px-4 py-3 border border-border rounded-lg hover:border-primary hover:bg-primary/5 transition-all duration-200"
@@ -114,7 +109,8 @@ export default async function Page() {
               </ScrollArea>
             </DialogContent>
           </Dialog>
-        </div>
+          </div>
+        )}
       </div>
       <section className="grid gap-4 md:gap-8 md:grid-cols-3 max-w-5xl mx-auto">
         <Card className="shadow-md h-full flex flex-col">
