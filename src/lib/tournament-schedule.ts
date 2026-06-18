@@ -1,10 +1,11 @@
-import { getCurrentLocalDateTime } from "./date";
+import { getCurrentLocalDateTime, toLocalDateTime } from "./date";
 
 export function generateTournamentWeeksSchedule(
   tournamentWeeks: Array<{
     id: number;
     weekNumber: number;
     status: "regular" | "catch-up";
+    matchdays: Array<{ date: Date }>;
   }>,
 ) {
   let regularWeekCount = 0;
@@ -16,9 +17,12 @@ export function generateTournamentWeeksSchedule(
         ? `Woche ${++regularWeekCount}`
         : `Verlegungswoche ${++catchUpWeekCount}`;
 
-    const weekStart = getCurrentLocalDateTime()
-      .set({ weekNumber: week.weekNumber })
-      .startOf("week");
+    const reference = week.matchdays[0]?.date;
+    const weekStart = (
+      reference
+        ? toLocalDateTime(reference)
+        : getCurrentLocalDateTime().set({ weekNumber: week.weekNumber })
+    ).startOf("week");
 
     return {
       id: week.id,
@@ -31,7 +35,7 @@ export function generateTournamentWeeksSchedule(
 }
 
 export function generateRefereeAssignmentSchedule<
-  TMatchday,
+  TMatchday extends { date: Date },
   TWeek extends { weekNumber: number; status: "regular" | "catch-up" },
 >(
   groupedMatchdays: Record<
@@ -57,9 +61,12 @@ export function generateRefereeAssignmentSchedule<
         ? `Woche ${++regularWeekCount}`
         : `Verlegungswoche ${++catchUpWeekCount}`;
 
-    const weekStart = getCurrentLocalDateTime()
-      .set({ weekNumber: week.weekNumber })
-      .startOf("week");
+    const reference = entry.matchdays[0]?.date;
+    const weekStart = (
+      reference
+        ? toLocalDateTime(reference)
+        : getCurrentLocalDateTime().set({ weekNumber: week.weekNumber })
+    ).startOf("week");
 
     const tuesday = weekStart.plus({ days: 1 });
     const thursday = weekStart.plus({ days: 3 });
