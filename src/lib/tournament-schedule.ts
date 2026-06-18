@@ -1,9 +1,9 @@
-import { getCurrentLocalDateTime, toLocalDateTime } from "./date";
+import invariant from "tiny-invariant";
+import { toLocalDateTime } from "./date";
 
 export function generateTournamentWeeksSchedule(
   tournamentWeeks: Array<{
     id: number;
-    weekNumber: number;
     status: "regular" | "catch-up";
     matchdays: Array<{ date: Date }>;
   }>,
@@ -17,12 +17,11 @@ export function generateTournamentWeeksSchedule(
         ? `Woche ${++regularWeekCount}`
         : `Verlegungswoche ${++catchUpWeekCount}`;
 
-    const reference = week.matchdays[0]?.date;
-    const weekStart = (
-      reference
-        ? toLocalDateTime(reference)
-        : getCurrentLocalDateTime().set({ weekNumber: week.weekNumber })
-    ).startOf("week");
+    invariant(
+      week.matchdays[0],
+      `Tournament week ${week.id} has no matchdays`,
+    );
+    const weekStart = toLocalDateTime(week.matchdays[0].date).startOf("week");
 
     return {
       id: week.id,
@@ -61,12 +60,11 @@ export function generateRefereeAssignmentSchedule<
         ? `Woche ${++regularWeekCount}`
         : `Verlegungswoche ${++catchUpWeekCount}`;
 
-    const reference = entry.matchdays[0]?.date;
-    const weekStart = (
-      reference
-        ? toLocalDateTime(reference)
-        : getCurrentLocalDateTime().set({ weekNumber: week.weekNumber })
-    ).startOf("week");
+    invariant(
+      entry.matchdays[0],
+      `Tournament week ${week.weekNumber} has no matchdays`,
+    );
+    const weekStart = toLocalDateTime(entry.matchdays[0].date).startOf("week");
 
     const tuesday = weekStart.plus({ days: 1 });
     const thursday = weekStart.plus({ days: 3 });
