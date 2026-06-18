@@ -27,7 +27,7 @@ export function GenerateFideReportSelector({
   selectedMonth,
 }: Props) {
   const router = useRouter();
-  const slug = useTournamentSlug() ?? "";
+  const slug = useTournamentSlug();
   const months = useMemo(() => Array.from({ length: 12 }, (_, i) => i + 1), []);
 
   const buildUrl = (params: { groupId?: string; month?: string }) => {

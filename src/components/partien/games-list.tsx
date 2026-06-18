@@ -43,7 +43,7 @@ export function GamesList({
   userRoles = [],
 }: Props) {
   const router = useRouter();
-  const slug = useTournamentSlug() ?? "";
+  const slug = useTournamentSlug();
   const { data: session } = authClient.useSession();
   const userId = session?.user?.id;
   const isAdmin = userRoles.includes("admin");
@@ -196,7 +196,6 @@ export function GamesList({
                   <TableCell className="flex items-center gap-2">
                     <GameActions
                       gameId={game.id}
-                      slug={slug}
                       currentResult={game.result}
                       onResultChange={onResultChange}
                       availableMatchdays={availableMatchdays}
@@ -284,7 +283,6 @@ export function GamesList({
                   <div className="flex gap-1 pt-1">
                     <GameActions
                       gameId={game.id}
-                      slug={slug}
                       currentResult={game.result}
                       onResultChange={onResultChange}
                       availableMatchdays={availableMatchdays}

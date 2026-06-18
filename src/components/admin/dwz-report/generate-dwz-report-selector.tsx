@@ -23,7 +23,7 @@ export function GenerateDwzReportSelector({
   selectedGroupId,
 }: Props) {
   const router = useRouter();
-  const slug = useTournamentSlug() ?? "";
+  const slug = useTournamentSlug();
 
   const buildUrl = (params: { groupId?: string }) => {
     const searchParams = new URLSearchParams();

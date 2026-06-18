@@ -1,3 +1,5 @@
+"use client";
+
 import {
   GameResult,
   GameWithParticipantProfilesAndGroupAndMatchday,
@@ -11,11 +13,11 @@ import { PostponeGameDialog } from "./postpone-game-dialog";
 import { ReportResultDialog } from "./report-result-dialog";
 import { isGameActuallyPlayed } from "@/lib/game-auth";
 import { tournamentPath } from "@/lib/navigation";
+import { useTournamentSlug } from "@/hooks/use-tournament-slug";
 import { DateTime } from "luxon";
 
 type Props = {
   gameId: number;
-  slug: string;
   currentResult: GameResult | null;
   onResultChange: (gameId: number, result: GameResult | null) => Promise<void>;
   availableMatchdays: MatchDay[];
@@ -29,7 +31,6 @@ type Props = {
 
 export function GameActions({
   gameId,
-  slug,
   currentResult,
   onResultChange,
   availableMatchdays,
@@ -40,6 +41,8 @@ export function GameActions({
   canSubmitResult,
   canPostpone,
 }: Props) {
+  const slug = useTournamentSlug();
+
   return (
     <>
       {canSubmitResult && (

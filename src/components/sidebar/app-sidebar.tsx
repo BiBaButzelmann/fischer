@@ -48,16 +48,10 @@ type TournamentItem = {
 type Props = {
   session: Session | null;
   tournaments: TournamentItem[];
-  defaultSlug?: string;
   userRoles: Role[];
 };
 
-export function AppSidebar({
-  session,
-  tournaments,
-  defaultSlug,
-  userRoles,
-}: Props) {
+export function AppSidebar({ session, tournaments, userRoles }: Props) {
   const { setOpenMobile, isMobile } = useSidebar();
 
   const handleMobileMenuClick = () => {
@@ -66,8 +60,7 @@ export function AppSidebar({
     }
   };
 
-  const routeSlug = useTournamentSlug();
-  const slug = routeSlug ?? defaultSlug ?? tournaments[0]?.slug ?? "";
+  const slug = useTournamentSlug();
   const selectedTournament =
     tournaments.find((tournament) => tournament.slug === slug) ?? tournaments[0];
   const stage = selectedTournament?.stage;
@@ -108,10 +101,7 @@ export function AppSidebar({
           <SidebarGroupLabel>Turnier</SidebarGroupLabel>
           <SidebarGroupContent>
             <div className="px-2 pb-2">
-              <TournamentSwitcher
-                tournaments={tournaments}
-                defaultSlug={defaultSlug}
-              />
+              <TournamentSwitcher tournaments={tournaments} />
             </div>
             <SidebarMenu>
               <SidebarLink

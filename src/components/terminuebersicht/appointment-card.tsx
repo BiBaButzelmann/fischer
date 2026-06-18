@@ -34,7 +34,7 @@ type Props = {
 export function MatchdayAppointmentCard({ appointment }: Props) {
   const [isPending, startTransition] = useTransition();
   const [isDialogOpen, setIsDialogOpen] = useState(false);
-  const slug = useTournamentSlug() ?? "";
+  const slug = useTournamentSlug();
 
   const { matchdayId, matchdayDate, gameStartTime, cancelledAt, appointments } =
     appointment;

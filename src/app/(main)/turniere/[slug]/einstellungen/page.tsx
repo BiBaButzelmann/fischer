@@ -10,16 +10,25 @@ import {
 import { ArrowLeft } from "lucide-react";
 import Link from "next/link";
 import invariant from "tiny-invariant";
+import { tournamentPath } from "@/lib/navigation";
 
-export default async function Page() {
+export default async function Page({
+  params,
+}: {
+  params: Promise<{ slug: string }>;
+}) {
   const session = await authWithRedirect();
+  const { slug } = await params;
   const profile = await getProfileByUserId(session.user.id);
   invariant(profile, "Profile not found");
 
   return (
     <div className="flex flex-col gap-6">
       <Button variant="ghost" asChild className="self-start">
-        <Link href="/" className="flex items-center gap-2">
+        <Link
+          href={tournamentPath(slug, "/uebersicht")}
+          className="flex items-center gap-2"
+        >
           <ArrowLeft className="h-4 w-4" /> Zurück zur Übersicht
         </Link>
       </Button>

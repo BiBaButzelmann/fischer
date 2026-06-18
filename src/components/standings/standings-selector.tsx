@@ -27,7 +27,7 @@ export function StandingsSelector({
   selectedRound,
 }: Props) {
   const router = useRouter();
-  const slug = useTournamentSlug() ?? "";
+  const slug = useTournamentSlug();
 
   const handleGroupChange = (groupId: string) => {
     router.push(

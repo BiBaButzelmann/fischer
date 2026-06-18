@@ -17,7 +17,7 @@ type Props = {
 };
 
 export function MatchEntryDashboard({ pendingGames, completedGames }: Props) {
-  const slug = useTournamentSlug() ?? "";
+  const slug = useTournamentSlug();
 
   const getPlayerNames = (game: GameWithParticipantsAndPGN) => {
     invariant(game.whiteParticipant, "White participant should not be null");

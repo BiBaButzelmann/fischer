@@ -17,5 +17,5 @@ export async function updateProfile(
     .where(eq(profile.userId, session.user.id))
     .returning();
 
-  revalidatePath("/einstellungen");
+  revalidatePath("/turniere/[slug]/einstellungen", "page");
 }

@@ -33,7 +33,7 @@ export function StandingsTable({
   selectedRound,
 }: Props) {
   const router = useRouter();
-  const slug = useTournamentSlug() ?? "";
+  const slug = useTournamentSlug();
 
   const handlePlayerClick = (participantId: number) => {
     const url = buildGameViewUrl({

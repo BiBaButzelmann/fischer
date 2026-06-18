@@ -44,7 +44,7 @@ export function PartienSelector({
   matchdays,
 }: Props) {
   const router = useRouter();
-  const slug = useTournamentSlug() ?? "";
+  const slug = useTournamentSlug();
 
   const handleGroupChange = (group: string | undefined) => {
     router.push(

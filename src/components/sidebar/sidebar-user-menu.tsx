@@ -13,9 +13,12 @@ import {
 import { Button } from "../ui/button";
 import { useSidebar } from "../ui/sidebar";
 import { Session } from "@/types/auth";
+import { useTournamentSlug } from "@/hooks/use-tournament-slug";
+import { tournamentPath } from "@/lib/navigation";
 
 export function SidebarUserMenu({ session }: { session: Session }) {
   const { setOpenMobile, isMobile } = useSidebar();
+  const slug = useTournamentSlug();
 
   const handleMobileMenuClick = () => {
     if (isMobile) {
@@ -46,7 +49,10 @@ export function SidebarUserMenu({ session }: { session: Session }) {
 
           <DropdownMenuSeparator />
 
-          <Link href="/einstellungen" onClick={handleMobileMenuClick}>
+          <Link
+            href={tournamentPath(slug, "/einstellungen")}
+            onClick={handleMobileMenuClick}
+          >
             <DropdownMenuItem>
               <>
                 <SettingsIcon />

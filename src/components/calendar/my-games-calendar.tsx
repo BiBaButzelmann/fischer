@@ -28,7 +28,7 @@ type Props = {
 export function MyGamesCalendar({ events, matchdays = [] }: Props) {
   const [isPending, startTransition] = useTransition();
   const router = useRouter();
-  const slug = useTournamentSlug() ?? "";
+  const slug = useTournamentSlug();
 
   const calendarEvents: EventInput[] = events.map((event) => ({
     id: event.id,

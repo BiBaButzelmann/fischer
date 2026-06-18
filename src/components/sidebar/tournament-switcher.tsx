@@ -13,13 +13,11 @@ import { useTournamentSlug } from "@/hooks/use-tournament-slug";
 
 type Props = {
   tournaments: { id: number; name: string; slug: string }[];
-  defaultSlug?: string;
 };
 
-export function TournamentSwitcher({ tournaments, defaultSlug }: Props) {
+export function TournamentSwitcher({ tournaments }: Props) {
   const router = useRouter();
-  const routeSlug = useTournamentSlug();
-  const slug = routeSlug ?? defaultSlug;
+  const slug = useTournamentSlug();
 
   if (tournaments.length === 0) {
     return null;

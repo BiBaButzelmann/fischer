@@ -24,7 +24,7 @@ type Props = {
 
 export function PostponementGrid({ postponements }: Props) {
   const router = useRouter();
-  const slug = useTournamentSlug() ?? "";
+  const slug = useTournamentSlug();
   const { data: session } = authClient.useSession();
   const isAdmin = session?.user?.role === "admin";
 
