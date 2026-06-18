@@ -17,5 +17,5 @@ export async function updateUserName(firstName: string, lastName: string) {
     .where(eq(user.id, session.user.id))
     .returning();
 
-  revalidatePath("/einstellungen");
+  revalidatePath("/turniere/[slug]/einstellungen", "page");
 }

@@ -36,7 +36,7 @@ export const createTrainer = action(
           tournamentId: tournament.id,
         },
       });
-    revalidatePath("/admin/nutzerverwaltung");
+    revalidatePath("/turniere/[slug]/admin/nutzerverwaltung", "page");
   },
 );
 
@@ -59,6 +59,6 @@ export const deleteTrainer = action(
           eq(trainer.tournamentId, tournament.id),
         ),
       );
-    revalidatePath("/admin/nutzerverwaltung");
+    revalidatePath("/turniere/[slug]/admin/nutzerverwaltung", "page");
   },
 );

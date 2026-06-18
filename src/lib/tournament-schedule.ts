@@ -1,5 +1,19 @@
 import invariant from "tiny-invariant";
-import { toLocalDateTime } from "./date";
+import { Tournament } from "@/db/types/tournament";
+import { toDateString, toLocalDateTime } from "./date";
+
+export function getGroupAnnouncementDate(
+  tournament: Pick<
+    Tournament,
+    "endRegistrationDate" | "groupAnnouncementOffsetDays"
+  >,
+): string {
+  return toDateString(
+    toLocalDateTime(tournament.endRegistrationDate).plus({
+      days: tournament.groupAnnouncementOffsetDays,
+    }),
+  );
+}
 
 export function generateTournamentWeeksSchedule(
   tournamentWeeks: Array<{

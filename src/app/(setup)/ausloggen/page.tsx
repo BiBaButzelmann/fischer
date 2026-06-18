@@ -12,7 +12,7 @@ export default function Page() {
       if (result.success) {
         router.push("/willkommen");
       } else {
-        router.push("/uebersicht");
+        router.push("/");
       }
     });
   }, [router]);

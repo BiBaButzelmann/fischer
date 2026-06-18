@@ -8,6 +8,10 @@ import { sendConfirmRegistrationEmail } from "@/email/confirmRegistration";
 import { sendPasswordResetEmail } from "./email/passwordReset";
 
 export const auth = betterAuth({
+  trustedOrigins: [
+    "http://localhost:3000",
+    "fischer-*-bibabutzelmanns-projects.vercel.app",
+  ],
   database: drizzleAdapter(db, {
     provider: "pg", //postgres
   }),

@@ -24,6 +24,7 @@ describe("Sonneborn-Berger Calculation", () => {
         profile: {
           id: 1,
           userId: "a",
+          academicTitle: null,
           firstName: "Spieler",
           lastName: "A",
           deletedAt: null,
@@ -38,6 +39,7 @@ describe("Sonneborn-Berger Calculation", () => {
         profile: {
           id: 2,
           userId: "b",
+          academicTitle: null,
           firstName: "Spieler",
           lastName: "B",
           deletedAt: null,
@@ -52,6 +54,7 @@ describe("Sonneborn-Berger Calculation", () => {
         profile: {
           id: 3,
           userId: "c",
+          academicTitle: null,
           firstName: "Spieler",
           lastName: "C",
           deletedAt: null,
@@ -66,6 +69,7 @@ describe("Sonneborn-Berger Calculation", () => {
         profile: {
           id: 4,
           userId: "d",
+          academicTitle: null,
           firstName: "Spieler",
           lastName: "D",
           deletedAt: null,
@@ -80,6 +84,7 @@ describe("Sonneborn-Berger Calculation", () => {
         profile: {
           id: 5,
           userId: "e",
+          academicTitle: null,
           firstName: "Spieler",
           lastName: "E",
           deletedAt: null,
@@ -94,6 +99,7 @@ describe("Sonneborn-Berger Calculation", () => {
         profile: {
           id: 6,
           userId: "f",
+          academicTitle: null,
           firstName: "Spieler",
           lastName: "F",
           deletedAt: null,
@@ -108,6 +114,7 @@ describe("Sonneborn-Berger Calculation", () => {
         profile: {
           id: 7,
           userId: "g",
+          academicTitle: null,
           firstName: "Spieler",
           lastName: "G",
           deletedAt: null,

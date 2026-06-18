@@ -16,15 +16,13 @@ import { CalendarIcon } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { format } from "date-fns";
 import { de } from "date-fns/locale";
-import type { TournamentNames } from "@/db/types/tournament";
 import type { GroupSummary } from "@/db/types/group";
 import type { ParticipantWithName } from "@/db/types/participant";
 import type { MatchDay } from "@/db/types/match-day";
 import { buildGameViewUrl } from "@/lib/navigation";
+import { useTournamentSlug } from "@/hooks/use-tournament-slug";
 
 export type Props = {
-  selectedTournamentId: string;
-  tournamentNames: TournamentNames[];
   selectedGroupId?: string;
   groups: GroupSummary[];
   selectedRound?: string;
@@ -36,8 +34,6 @@ export type Props = {
 };
 
 export function PartienSelector({
-  selectedTournamentId,
-  tournamentNames,
   selectedGroupId,
   groups,
   selectedRound,
@@ -48,27 +44,12 @@ export function PartienSelector({
   matchdays,
 }: Props) {
   const router = useRouter();
-
-  const handleTournamentChange = (tournamentId: string) => {
-    router.push(
-      buildGameViewUrl({
-        tournamentId: parseInt(tournamentId),
-        groupId: selectedGroupId ? parseInt(selectedGroupId) : undefined,
-        round: selectedRound ? parseInt(selectedRound) : undefined,
-        participantId: selectedParticipantId
-          ? parseInt(selectedParticipantId)
-          : undefined,
-        matchdayId: selectedMatchdayId
-          ? parseInt(selectedMatchdayId)
-          : undefined,
-      }),
-    );
-  };
+  const slug = useTournamentSlug();
 
   const handleGroupChange = (group: string | undefined) => {
     router.push(
       buildGameViewUrl({
-        tournamentId: parseInt(selectedTournamentId),
+        slug,
         groupId: group ? parseInt(group) : undefined,
         round: selectedRound ? parseInt(selectedRound) : undefined,
         participantId: selectedParticipantId
@@ -84,7 +65,7 @@ export function PartienSelector({
   const handleRoundChange = (round: string | undefined) => {
     router.push(
       buildGameViewUrl({
-        tournamentId: parseInt(selectedTournamentId),
+        slug,
         groupId: selectedGroupId ? parseInt(selectedGroupId) : undefined,
         round: round ? parseInt(round) : undefined,
         participantId: selectedParticipantId
@@ -100,7 +81,7 @@ export function PartienSelector({
   const handleParticipantChange = (participantId: string | undefined) => {
     router.push(
       buildGameViewUrl({
-        tournamentId: parseInt(selectedTournamentId),
+        slug,
         groupId: selectedGroupId ? parseInt(selectedGroupId) : undefined,
         round: selectedRound ? parseInt(selectedRound) : undefined,
         participantId: participantId ? parseInt(participantId) : undefined,
@@ -114,7 +95,7 @@ export function PartienSelector({
   const handleMatchdayChange = (matchdayId: string | undefined) => {
     router.push(
       buildGameViewUrl({
-        tournamentId: parseInt(selectedTournamentId),
+        slug,
         groupId: selectedGroupId ? parseInt(selectedGroupId) : undefined,
         round: selectedRound ? parseInt(selectedRound) : undefined,
         participantId: selectedParticipantId
@@ -147,26 +128,6 @@ export function PartienSelector({
 
   return (
     <div className="flex flex-wrap gap-2 md:gap-4 mb-4">
-      <div className="flex flex-col gap-1">
-        <Label htmlFor="tournament-select" className="text-sm font-medium">
-          Ausgabe
-        </Label>
-        <Select
-          value={selectedTournamentId}
-          onValueChange={handleTournamentChange}
-        >
-          <SelectTrigger id="tournament-select" className="w-48">
-            <SelectValue />
-          </SelectTrigger>
-          <SelectContent>
-            {tournamentNames.map((t) => (
-              <SelectItem key={t.id} value={t.id.toString()}>
-                {t.name}
-              </SelectItem>
-            ))}
-          </SelectContent>
-        </Select>
-      </div>
       <div className="flex flex-col gap-1">
         <Label className="text-sm font-medium">Spieltag</Label>
         <div className="relative">

@@ -15,13 +15,13 @@ import type { GroupSummary } from "@/db/types/group";
 import type { PlayerStats } from "@/db/types/standings";
 import { ParticipantWithName } from "@/db/types/participant";
 import invariant from "tiny-invariant";
+import { useTournamentSlug } from "@/hooks/use-tournament-slug";
 
 type Props = {
   standings: PlayerStats[];
   participants: ParticipantWithName[];
   selectedGroup?: GroupSummary;
   selectedGroupId: string;
-  selectedTournamentId: string;
   selectedRound?: string;
 };
 
@@ -30,14 +30,14 @@ export function StandingsTable({
   participants,
   selectedGroup,
   selectedGroupId,
-  selectedTournamentId,
   selectedRound,
 }: Props) {
   const router = useRouter();
+  const slug = useTournamentSlug();
 
   const handlePlayerClick = (participantId: number) => {
     const url = buildGameViewUrl({
-      tournamentId: Number(selectedTournamentId),
+      slug,
       groupId: Number(selectedGroupId),
       participantId,
     });

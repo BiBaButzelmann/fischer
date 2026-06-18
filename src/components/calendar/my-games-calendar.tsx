@@ -16,7 +16,8 @@ import { MatchDay } from "@/db/types/match-day";
 import { toast } from "sonner";
 import { Skeleton } from "@/components/ui/skeleton";
 import { useRouter } from "next/navigation";
-import { buildGameViewUrl } from "@/lib/navigation";
+import { buildGameViewUrl, tournamentPath } from "@/lib/navigation";
+import { useTournamentSlug } from "@/hooks/use-tournament-slug";
 import { isSameDate, toLocalDateTime } from "@/lib/date";
 
 type Props = {
@@ -27,6 +28,7 @@ type Props = {
 export function MyGamesCalendar({ events, matchdays = [] }: Props) {
   const [isPending, startTransition] = useTransition();
   const router = useRouter();
+  const slug = useTournamentSlug();
 
   const calendarEvents: EventInput[] = events.map((event) => ({
     id: event.id,
@@ -98,12 +100,12 @@ export function MyGamesCalendar({ events, matchdays = [] }: Props) {
   const handleEventClick = useCallback(
     (info: EventClickArg) => {
       if (info.event.extendedProps.eventType === "referee") {
-        router.push("/terminuebersicht");
+        router.push(tournamentPath(slug, "/terminuebersicht"));
         return;
       }
 
       if (info.event.extendedProps.eventType === "setupHelper") {
-        router.push("/terminuebersicht");
+        router.push(tournamentPath(slug, "/terminuebersicht"));
         return;
       }
 
@@ -118,7 +120,7 @@ export function MyGamesCalendar({ events, matchdays = [] }: Props) {
       }
 
       const url = buildGameViewUrl({
-        tournamentId,
+        slug,
         groupId,
         round,
         participantId,
@@ -126,7 +128,7 @@ export function MyGamesCalendar({ events, matchdays = [] }: Props) {
 
       router.push(url);
     },
-    [router],
+    [router, slug],
   );
 
   const handleEventAllow: AllowFunc = useCallback(
@@ -201,14 +203,14 @@ export function MyGamesCalendar({ events, matchdays = [] }: Props) {
 
       if (matchday) {
         const url = buildGameViewUrl({
-          tournamentId: matchday.tournamentId,
+          slug,
           matchdayId: matchday.id,
         });
 
         router.push(url);
       }
     },
-    [validDropDates, matchdays, router],
+    [validDropDates, matchdays, router, slug],
   );
 
   return (
