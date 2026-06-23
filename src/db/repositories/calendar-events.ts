@@ -1,6 +1,5 @@
 import { CalendarEvent } from "../types/calendar";
 import {
-  getGameTimeFromGame,
   getDateTimeFromTournamentTime,
   getSetupHelperTimeFromTournamentTime,
 } from "@/lib/game-time";
@@ -22,8 +21,13 @@ export async function getCalendarEventsForParticipant(
   const games = await getParticipantGames(participantId);
   const events: CalendarEvent[] = [];
   for (const game of games) {
-    const gameDateTime = getGameTimeFromGame(
-      game,
+    const matchdayDate = game.matchdayGame?.matchday?.date;
+    if (!matchdayDate) {
+      continue;
+    }
+
+    const gameDateTime = getDateTimeFromTournamentTime(
+      matchdayDate,
       game.tournament.gameStartTime,
     );
 

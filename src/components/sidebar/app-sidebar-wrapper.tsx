@@ -1,17 +1,19 @@
-import { getActiveTournament } from "@/db/repositories/tournament";
+import { getAllTournaments } from "@/db/repositories/tournament";
 import { getRolesByUserId } from "@/db/repositories/role";
 import { auth } from "@/auth/utils";
 import { AppSidebar } from "./app-sidebar";
 
 export async function AppSidebarWrapper() {
   const session = await auth();
-  const userRoles = session ? await getRolesByUserId(session.user.id) : [];
-  const tournament = await getActiveTournament();
+  const [userRoles, tournaments] = await Promise.all([
+    session ? getRolesByUserId(session.user.id) : Promise.resolve([]),
+    getAllTournaments(),
+  ]);
 
   return (
     <AppSidebar
       session={session}
-      tournament={tournament}
+      tournaments={tournaments}
       userRoles={userRoles}
     />
   );

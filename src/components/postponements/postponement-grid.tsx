@@ -14,16 +14,17 @@ import type { GamePostponementWithDetails } from "@/db/types/game-postponement";
 import { CalendarDays } from "lucide-react";
 import { useRouter } from "next/navigation";
 import { buildGameViewUrl } from "@/lib/navigation";
+import { useTournamentSlug } from "@/hooks/use-tournament-slug";
 import invariant from "tiny-invariant";
 import { authClient } from "@/auth-client";
 
 type Props = {
   postponements: GamePostponementWithDetails[];
-  tournamentId: number;
 };
 
-export function PostponementGrid({ postponements, tournamentId }: Props) {
+export function PostponementGrid({ postponements }: Props) {
   const router = useRouter();
+  const slug = useTournamentSlug();
   const { data: session } = authClient.useSession();
   const isAdmin = session?.user?.role === "admin";
 
@@ -89,7 +90,7 @@ export function PostponementGrid({ postponements, tournamentId }: Props) {
             invariant(matchday, "Game must have a matchday");
 
             const gameUrl = buildGameViewUrl({
-              tournamentId,
+              slug,
               groupId: postponement.game.group.id,
               round: postponement.game.round,
               participantId,

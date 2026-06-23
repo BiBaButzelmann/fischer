@@ -2,6 +2,7 @@ import Link from "next/link";
 import { buildGameViewUrl } from "@/lib/navigation";
 import { ParticipatingPlayerDisplay } from "./participating-player-display";
 import { getGameWithParticipantsAndMatchday } from "@/db/repositories/game";
+import { getTournamentById } from "@/db/repositories/tournament";
 import invariant from "tiny-invariant";
 import { toDateString, toLocalDateTime } from "@/lib/date";
 
@@ -19,6 +20,9 @@ export async function PendingResultItem({
   const game = await getGameWithParticipantsAndMatchday(gameId);
 
   invariant(game, "Game not found");
+
+  const tournament = await getTournamentById(game.tournamentId);
+  invariant(tournament, "Tournament not found");
   invariant(
     game.whiteParticipant && game.blackParticipant,
     "Game should have both participants for pending results",
@@ -31,7 +35,7 @@ export async function PendingResultItem({
   return (
     <Link
       href={buildGameViewUrl({
-        tournamentId: game.tournamentId,
+        slug: tournament.slug,
         groupId: game.groupId,
         round: game.round,
         participantId: game.whiteParticipant.id,

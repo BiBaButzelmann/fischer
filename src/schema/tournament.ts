@@ -1,12 +1,23 @@
 import z from "zod";
 
 export const createTournamentFormSchema = z.object({
+  name: z.string().min(1, "Turniername ist erforderlich"),
+  slug: z
+    .string()
+    .min(1, "Slug ist erforderlich")
+    .regex(
+      /^[a-z0-9]+(?:-[a-z0-9]+)*$/,
+      "Nur Kleinbuchstaben, Zahlen und Bindestriche erlaubt",
+    ),
   clubName: z.string().min(1, "Vereinsname ist erforderlich"),
   tournamentType: z.string().min(1, "Turnierart ist erforderlich"),
   numberOfRounds: z.coerce.number().min(1, "Mindestens 1 Runde erforderlich"),
   endRegistrationDate: z
     .string()
     .min(1, "Enddatum der Anmeldung ist erforderlich"),
+  groupAnnouncementOffsetDays: z.coerce
+    .number()
+    .min(0, "Wert darf nicht negativ sein"),
   startDate: z.string().min(1, "Startdatum ist erforderlich"),
   endDate: z.string().min(1, "Enddatum ist erforderlich"),
   timeLimit: z.string().min(1, "Bedenkzeit ist erforderlich"),

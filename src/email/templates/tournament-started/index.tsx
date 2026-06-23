@@ -19,7 +19,7 @@ export type ParticipantGroupData = {
 type Props = {
   name: string;
   roles: RolesData;
-  tournamentId: number;
+  slug: string;
   participantData: ParticipantGroupData | undefined;
   isGroupUpdate?: boolean;
 };
@@ -27,7 +27,7 @@ type Props = {
 export function TournamentStartedMail({
   name,
   roles,
-  tournamentId,
+  slug,
   participantData,
   isGroupUpdate = false,
 }: Props) {
@@ -75,14 +75,14 @@ export function TournamentStartedMail({
 
       {roles.participant && (
         <ParticipantContent
-          tournamentId={tournamentId}
+          slug={slug}
           participantGroup={participantData!}
         />
       )}
 
-      {roles.setupHelper && <SetupHelperContent tournamentId={tournamentId} />}
+      {roles.setupHelper && <SetupHelperContent slug={slug} />}
 
-      {roles.referee && <RefereeContent tournamentId={tournamentId} />}
+      {roles.referee && <RefereeContent slug={slug} />}
 
       {roles.matchEnteringHelper && <MatchEnteringHelperContent />}
 

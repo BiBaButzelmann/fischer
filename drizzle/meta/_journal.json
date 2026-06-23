@@ -134,6 +134,27 @@
       "when": 1761578794714,
       "tag": "0018_misty_impossible_man",
       "breakpoints": true
+    },
+    {
+      "idx": 19,
+      "version": "7",
+      "when": 1781634802945,
+      "tag": "0019_kind_ulik",
+      "breakpoints": true
+    },
+    {
+      "idx": 20,
+      "version": "7",
+      "when": 1781703482987,
+      "tag": "0020_absent_silverclaw",
+      "breakpoints": true
+    },
+    {
+      "idx": 21,
+      "version": "7",
+      "when": 1781708091478,
+      "tag": "0021_lethal_landau",
+      "breakpoints": true
     }
   ]
 }

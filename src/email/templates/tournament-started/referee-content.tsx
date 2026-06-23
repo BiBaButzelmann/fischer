@@ -2,11 +2,11 @@ import * as React from "react";
 import { buildGameViewUrl } from "@/lib/navigation";
 
 type Props = {
-  tournamentId: number;
+  slug: string;
 };
 
-export function RefereeContent({ tournamentId }: Props) {
-  const gameUrl = buildGameViewUrl({ tournamentId });
+export function RefereeContent({ slug }: Props) {
+  const gameUrl = buildGameViewUrl({ slug });
 
   return (
     <div style={{ marginBottom: "20px" }}>

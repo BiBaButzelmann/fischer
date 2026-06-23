@@ -61,7 +61,7 @@ export const cancelMatchdayAppointments = action(async (matchdayId: number) => {
   }
 
   await Promise.all(promises);
-  revalidatePath("/terminuebersicht");
+  revalidatePath("/turniere/[slug]/terminuebersicht", "page");
 });
 
 export const uncancelMatchdayAppointments = action(
@@ -111,6 +111,6 @@ export const uncancelMatchdayAppointments = action(
     }
 
     await Promise.all(promises);
-    revalidatePath("/terminuebersicht");
+    revalidatePath("/turniere/[slug]/terminuebersicht", "page");
   },
 );

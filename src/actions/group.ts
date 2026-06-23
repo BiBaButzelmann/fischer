@@ -39,10 +39,10 @@ export const saveGroups = action(
       }
     });
 
-    revalidatePath("/admin/gruppen");
-    revalidatePath("/admin/paarungen");
-    revalidatePath("/partien");
-    revalidatePath("/kalender");
+    revalidatePath("/turniere/[slug]/admin/gruppen", "page");
+    revalidatePath("/turniere/[slug]/admin/paarungen", "page");
+    revalidatePath("/turniere/[slug]/partien", "page");
+    revalidatePath("/turniere/[slug]/kalender", "page");
   },
 );
 
@@ -267,6 +267,6 @@ export async function updateGroupPositions(
     );
   });
 
-  revalidatePath("/admin/gruppen");
-  revalidatePath("/admin/paarungen");
+  revalidatePath("/turniere/[slug]/admin/gruppen", "page");
+  revalidatePath("/turniere/[slug]/admin/paarungen", "page");
 }

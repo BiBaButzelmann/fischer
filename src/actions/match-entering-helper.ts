@@ -95,5 +95,5 @@ export async function updateMatchEnteringHelpers(
     }
   });
 
-  revalidatePath("/admin/gruppen");
+  revalidatePath("/turniere/[slug]/admin/gruppen", "page");
 }
