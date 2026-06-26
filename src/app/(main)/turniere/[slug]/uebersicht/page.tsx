@@ -10,10 +10,13 @@ import { notFound, redirect } from "next/navigation";
 
 export default async function Page({
   params,
+  searchParams,
 }: {
   params: Promise<{ slug: string }>;
+  searchParams: Promise<{ groupId?: string; round?: string }>;
 }) {
   const { slug } = await params;
+  const { groupId, round } = await searchParams;
   const tournament = await getTournamentBySlug(slug);
   const session = await auth();
 
@@ -37,6 +40,12 @@ export default async function Page({
   }
 
   if (tournament.stage === "done") {
-    return <TournamentDone />;
+    return (
+      <TournamentDone
+        tournament={tournament}
+        selectedGroupId={groupId}
+        selectedRound={round}
+      />
+    );
   }
 }

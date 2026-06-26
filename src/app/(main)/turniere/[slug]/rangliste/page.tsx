@@ -3,7 +3,8 @@ import { getTournamentBySlug } from "@/db/repositories/tournament";
 import { getAllGroupNamesByTournamentId } from "@/db/repositories/game";
 import { StandingsDisplay } from "@/components/standings/standings-display";
 import { getGroupAnnouncementDate } from "@/lib/tournament-schedule";
-import { notFound } from "next/navigation";
+import { tournamentPath } from "@/lib/navigation";
+import { notFound, redirect } from "next/navigation";
 
 export default async function Page({
   params,
@@ -21,6 +22,10 @@ export default async function Page({
   const tournament = await getTournamentBySlug(slug);
   if (!tournament) {
     notFound();
+  }
+
+  if (tournament.stage === "done") {
+    redirect(tournamentPath(slug, "/uebersicht"));
   }
 
   const groups = await getAllGroupNamesByTournamentId(tournament.id);

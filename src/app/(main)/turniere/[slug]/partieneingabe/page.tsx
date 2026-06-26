@@ -4,6 +4,7 @@ import { AssignedGroups } from "@/components/partieneingabe/assigned-groups";
 import { getGamesToEnterByUserId } from "@/db/repositories/game";
 import { getRolesByUserId } from "@/db/repositories/role";
 import { getMatchEnteringHelperIdByUserId } from "@/db/repositories/match-entering-helper";
+import { getTournamentBySlug } from "@/db/repositories/tournament";
 import { getUserGameRights } from "@/lib/game-auth";
 import { redirect } from "next/navigation";
 import { Card, CardContent } from "@/components/ui/card";
@@ -16,6 +17,11 @@ export default async function Page({
 }) {
   const session = await authWithRedirect();
   const { slug } = await params;
+
+  const tournament = await getTournamentBySlug(slug);
+  if (tournament?.stage === "done") {
+    redirect(tournamentPath(slug, "/uebersicht"));
+  }
 
   const userRoles = await getRolesByUserId(session.user.id);
   const canEnterAnyGame = userRoles.some((role) =>

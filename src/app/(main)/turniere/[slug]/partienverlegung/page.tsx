@@ -2,7 +2,8 @@ import { PostponementGrid } from "@/components/postponements/postponement-grid";
 import { authWithRedirect } from "@/auth/utils";
 import { Button } from "@/components/ui/button";
 import Link from "next/link";
-import { buildGameViewUrl } from "@/lib/navigation";
+import { buildGameViewUrl, tournamentPath } from "@/lib/navigation";
+import { redirect } from "next/navigation";
 import { getAllPostponements } from "@/db/repositories/postponement";
 import { getTournamentBySlug } from "@/db/repositories/tournament";
 import { getParticipantWithGroupByProfileIdAndTournamentId } from "@/db/repositories/participant";
@@ -36,6 +37,10 @@ export default async function PostponementPage({
         </div>
       </div>
     );
+  }
+
+  if (tournament.stage === "done") {
+    redirect(tournamentPath(slug, "/uebersicht"));
   }
 
   if (tournament.stage !== "running") {

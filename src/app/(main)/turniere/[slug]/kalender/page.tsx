@@ -11,6 +11,8 @@ import { getSetupHelperByUserId } from "@/db/repositories/setup-helper";
 import { getAllMatchdaysByTournamentId } from "@/db/repositories/match-day";
 import { getTournamentBySlug } from "@/db/repositories/tournament";
 import { getGroupAnnouncementDate } from "@/lib/tournament-schedule";
+import { tournamentPath } from "@/lib/navigation";
+import { redirect } from "next/navigation";
 
 export default async function Page({
   params,
@@ -31,6 +33,10 @@ export default async function Page({
     session ? getSetupHelperByUserId(session.user.id) : Promise.resolve(null),
     getTournamentBySlug(slug),
   ]);
+
+  if (activeTournament?.stage === "done") {
+    redirect(tournamentPath(slug, "/uebersicht"));
+  }
 
   const [participantEvents, refereeEvents, setupHelperEvents, matchdays] =
     await Promise.all([
