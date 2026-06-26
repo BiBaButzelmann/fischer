@@ -14,6 +14,7 @@ import { matchday } from "@/db/schema/matchday";
 import { isHoliday } from "@/lib/holidays";
 import { getCurrentLocalDateTime } from "@/lib/date";
 import {
+  getActiveTournament,
   getOpenRegistrationTournament,
   getTournamentBySlug,
 } from "@/db/repositories/tournament";
@@ -31,11 +32,11 @@ export async function createTournament(
     return { error: `Der Slug "${data.slug}" ist bereits vergeben.` };
   }
 
-  const openRegistration = await getOpenRegistrationTournament();
-  if (openRegistration) {
+  const activeTournament = await getActiveTournament();
+  if (activeTournament) {
     return {
       error:
-        "Es gibt bereits ein Turnier in der Anmeldephase. Schließe dessen Anmeldung, bevor du ein neues Turnier anlegst.",
+        "Es gibt noch ein nicht abgeschlossenes Turnier. Alle bestehenden Turniere müssen abgeschlossen sein, bevor du ein neues Turnier anlegst.",
     };
   }
 
