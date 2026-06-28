@@ -6,13 +6,13 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
-import { TournamentWeek } from "@/db/types/tournamentWeek";
+import { TournamentWeekWithMatchdays } from "@/db/types/tournamentWeek";
 
 import { displayShortDateOrHoliday } from "@/lib/date";
 import { generateTournamentWeeksSchedule } from "@/lib/tournament-schedule";
 
 type Props = {
-  tournamentWeeks: TournamentWeek[];
+  tournamentWeeks: TournamentWeekWithMatchdays[];
 };
 
 export function TournamentWeeks({ tournamentWeeks }: Props) {
