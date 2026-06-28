@@ -32,6 +32,7 @@ import {
 import Link from "next/link";
 import { redirect } from "next/navigation";
 import { tournamentPath } from "@/lib/navigation";
+import { getTournamentDocumentAvailability } from "@/actions/document";
 
 export default async function Page() {
   const [session, tournament] = await Promise.all([
@@ -55,6 +56,10 @@ export default async function Page() {
     redirect("/klubturnier-anmeldung");
   }
 
+  const documentAvailability = tournament
+    ? await getTournamentDocumentAvailability(tournament.slug)
+    : { ausschreibung: false, turnierordnung: false };
+
   return (
     <div>
       <section className="text-center mb-8 md:mb-16 max-w-3xl mx-auto">
@@ -66,29 +71,33 @@ export default async function Page() {
         {/* Document Links */}
         {tournament && (
           <div className="flex flex-col sm:flex-row gap-4 justify-center">
-            <Link
-            href={tournamentPath(tournament.slug, "/ausschreibung")}
-            target="_blank"
-            rel="noopener noreferrer"
-            className="group flex items-center gap-3 px-4 py-3 border border-border rounded-lg hover:border-primary hover:bg-primary/5 transition-all duration-200"
-          >
-            <BookTextIcon className="h-5 w-5" />
-            <span className="font-medium">Ausschreibung</span>
-            <ExternalLinkIcon className="h-4 w-4 text-muted-foreground group-hover:text-primary transition-colors" />
-          </Link>
+            {documentAvailability.ausschreibung && (
+              <Link
+                href={tournamentPath(tournament.slug, "/ausschreibung")}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="group flex items-center gap-3 px-4 py-3 border border-border rounded-lg hover:border-primary hover:bg-primary/5 transition-all duration-200"
+              >
+                <BookTextIcon className="h-5 w-5" />
+                <span className="font-medium">Ausschreibung</span>
+                <ExternalLinkIcon className="h-4 w-4 text-muted-foreground group-hover:text-primary transition-colors" />
+              </Link>
+            )}
 
-          <Link
-            href={tournamentPath(tournament.slug, "/turnierordnung")}
-            target="_blank"
-            rel="noopener noreferrer"
-            className="group flex items-center gap-3 px-4 py-3 border border-border rounded-lg hover:border-primary hover:bg-primary/5 transition-all duration-200"
-          >
-            <BookTextIcon className="h-5 w-5" />
-            <span className="font-medium">Turnierordnung</span>
-            <ExternalLinkIcon className="h-4 w-4 text-muted-foreground group-hover:text-primary transition-colors" />
-          </Link>
+            {documentAvailability.turnierordnung && (
+              <Link
+                href={tournamentPath(tournament.slug, "/turnierordnung")}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="group flex items-center gap-3 px-4 py-3 border border-border rounded-lg hover:border-primary hover:bg-primary/5 transition-all duration-200"
+              >
+                <BookTextIcon className="h-5 w-5" />
+                <span className="font-medium">Turnierordnung</span>
+                <ExternalLinkIcon className="h-4 w-4 text-muted-foreground group-hover:text-primary transition-colors" />
+              </Link>
+            )}
 
-          <Dialog>
+            <Dialog>
             <DialogTrigger asChild>
               <div className="group flex items-center gap-3 px-4 py-3 border border-border rounded-lg hover:border-primary hover:bg-primary/5 transition-all duration-200 cursor-pointer">
                 <BookTextIcon className="h-5 w-5" />
