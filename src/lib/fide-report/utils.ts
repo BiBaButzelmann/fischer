@@ -29,8 +29,6 @@ export function getStringRepresentationForValue(value: TableEntryKeyValue) {
       return data;
     })
     .with({ id: "birthYear" }, ({ data }) => {
-      // TODO(separater PR): exaktes participant.birthDate als YYYY/MM/DD ausgeben,
-      // wenn vorhanden (vereinslose/neue Spieler brauchen das volle Datum für die FIDE-Wertung).
       return `${data.year}/00/00`;
     })
     .with({ id: "currentPoints" }, ({ data }) => {

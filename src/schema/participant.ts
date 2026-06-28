@@ -115,4 +115,16 @@ export const participantFormSchema = z
       message: "Geburtsdatum ist für vereinslose Spieler erforderlich",
       path: ["birthDate"],
     },
+  )
+  .refine(
+    (data) => {
+      if (data.chessClubType === CLUBLESS_KEY) {
+        return data.gender != null;
+      }
+      return true;
+    },
+    {
+      message: "Geschlecht ist für vereinslose Spieler erforderlich",
+      path: ["gender"],
+    },
   );

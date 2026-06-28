@@ -44,8 +44,7 @@ export function generatePlayerSection(
         data: player.startingGroupPosition.toString(),
       },
       { id: "name", data: player.name },
-      // TODO(separater PR): exaktes participant.birthDate als YYYYMMDD ausgeben, wenn vorhanden;
-      // DWZ-Auswertung verlangt für neue/vereinslose Spieler das volle Geburtsdatum (DSB-TRF-Pflicht ab 07.06.2026).
+      // TODO(separater PR): exaktes participant.birthDate als YYYYMMDD ausgeben (DSB verlangt volles Datum für neue Spieler)
       { id: "birthYear", data: player.birthYear?.toString() ?? "" },
       { id: "club", data: player.club },
       { id: "fideId", data: player.fideId ?? "" },

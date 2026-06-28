@@ -18,9 +18,6 @@ import { ChevronDown, CheckIcon } from "lucide-react";
 import { CircleFlag } from "react-circle-flags";
 import { countries } from "country-data-list";
 
-// Die Default-CDN von react-circle-flags sendet keinen Cross-Origin-Resource-Policy-Header
-// und wird daher von COEP: require-corp (next.config.ts, für Stockfish/SharedArrayBuffer)
-// blockiert. jsdelivr liefert CORP: cross-origin und funktioniert unter COEP.
 const FLAG_CDN_URL = "https://cdn.jsdelivr.net/npm/circle-flags/flags/";
 
 export interface Country {

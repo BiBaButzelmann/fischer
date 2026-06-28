@@ -263,34 +263,59 @@ export function ParticipateForm({
         )}
 
         {chessClubType === CLUBLESS_KEY && (
-          <FormField
-            control={form.control}
-            name="birthDate"
-            render={({ field }) => (
-              <FormItem className="w-full sm:w-64">
-                <FormLabel required>Geburtsdatum</FormLabel>
-                <FormControl>
-                  <Input
-                    type="date"
-                    max={format(new Date(), "yyyy-MM-dd")}
-                    value={field.value ? format(field.value, "yyyy-MM-dd") : ""}
-                    onChange={(e) =>
-                      field.onChange(
-                        e.target.value
-                          ? new Date(`${e.target.value}T00:00:00`)
-                          : undefined,
-                      )
-                    }
-                  />
-                </FormControl>
-                <FormDescription>
-                  Für vereinslose Spieler benötigt der DSB das exakte
-                  Geburtsdatum für die FIDE- und DWZ-Wertung.
-                </FormDescription>
-                <FormMessage />
-              </FormItem>
-            )}
-          />
+          <div className="flex gap-4">
+            <FormField
+              control={form.control}
+              name="gender"
+              render={({ field }) => (
+                <FormItem className="w-32">
+                  <FormLabel required>Geschlecht</FormLabel>
+                  <FormControl>
+                    <Select value={field.value} onValueChange={field.onChange}>
+                      <SelectTrigger>
+                        <SelectValue placeholder="Geschlecht" />
+                      </SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value="m">Männlich</SelectItem>
+                        <SelectItem value="f">Weiblich</SelectItem>
+                      </SelectContent>
+                    </Select>
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+            <FormField
+              control={form.control}
+              name="birthDate"
+              render={({ field }) => (
+                <FormItem className="flex-1">
+                  <FormLabel required>Geburtsdatum</FormLabel>
+                  <FormControl>
+                    <Input
+                      type="date"
+                      max={format(new Date(), "yyyy-MM-dd")}
+                      value={
+                        field.value ? format(field.value, "yyyy-MM-dd") : ""
+                      }
+                      onChange={(e) =>
+                        field.onChange(
+                          e.target.value
+                            ? new Date(`${e.target.value}T00:00:00`)
+                            : undefined,
+                        )
+                      }
+                    />
+                  </FormControl>
+                  <FormDescription>
+                    Für vereinslose Spieler benötigt der DSB das exakte
+                    Geburtsdatum für die FIDE- und DWZ-Wertung.
+                  </FormDescription>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+          </div>
         )}
 
         {chessClubType != null ? (
@@ -320,30 +345,6 @@ export function ParticipateForm({
                         <SelectItem value="WIM">WIM </SelectItem>
                         <SelectItem value="WFM">WFM </SelectItem>
                         <SelectItem value="WCM">WCM </SelectItem>
-                      </SelectContent>
-                    </Select>
-                  </FormControl>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
-            <FormField
-              control={form.control}
-              name="gender"
-              render={({ field }) => (
-                <FormItem className="w-32">
-                  <FormLabel>Geschlecht</FormLabel>
-                  <FormControl>
-                    <Select
-                      value={field.value}
-                      onValueChange={field.onChange}
-                    >
-                      <SelectTrigger>
-                        <SelectValue placeholder="Geschlecht" />
-                      </SelectTrigger>
-                      <SelectContent>
-                        <SelectItem value="m">Männlich</SelectItem>
-                        <SelectItem value="f">Weiblich</SelectItem>
                       </SelectContent>
                     </Select>
                   </FormControl>
