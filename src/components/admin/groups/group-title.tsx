@@ -63,10 +63,10 @@ export function GroupTitle({
       ) : (
         <span className="flex-1">{groupName}</span>
       )}
-      {tierControl}
       <Button size="icon" variant="ghost" onClick={handleEditClick}>
         <Pen className="h-4 w-4" />
       </Button>
+      {tierControl}
     </div>
   );
 }
