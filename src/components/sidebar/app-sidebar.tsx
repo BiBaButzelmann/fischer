@@ -37,6 +37,8 @@ import { TournamentStage } from "@/db/types/tournament";
 import { Role } from "@/db/types/role";
 import { tournamentPath } from "@/lib/navigation";
 import { useTournamentSlug } from "@/hooks/use-tournament-slug";
+import { useEffect, useState } from "react";
+import { getTournamentDocumentAvailability } from "@/actions/document";
 
 type TournamentItem = {
   id: number;
@@ -69,6 +71,27 @@ export function AppSidebar({ session, tournaments, userRoles }: Props) {
   const isRunning = stage === "running";
   const isActive = stage === "registration" || stage === "running";
   const isDone = stage === "done";
+
+  const documentSlug = selectedTournament?.slug;
+  const [documents, setDocuments] = useState({
+    ausschreibung: false,
+    turnierordnung: false,
+  });
+  useEffect(() => {
+    if (!isActive || !documentSlug) {
+      setDocuments({ ausschreibung: false, turnierordnung: false });
+      return;
+    }
+    let cancelled = false;
+    getTournamentDocumentAvailability(documentSlug).then((result) => {
+      if (!cancelled) {
+        setDocuments(result);
+      }
+    });
+    return () => {
+      cancelled = true;
+    };
+  }, [isActive, documentSlug]);
 
   const isAdmin = userRoles.includes("admin");
   const isParticipant = userRoles.includes("participant");
@@ -177,20 +200,24 @@ export function AppSidebar({ session, tournaments, userRoles }: Props) {
             <SidebarGroupLabel>Dokumente</SidebarGroupLabel>
             <SidebarGroupContent>
               <SidebarMenu>
-                <SidebarLink
-                  href={tournamentPath(slug, "/ausschreibung")}
-                  icon={BookTextIcon}
-                  target="_blank"
-                >
-                  Ausschreibung
-                </SidebarLink>
-                <SidebarLink
-                  href={tournamentPath(slug, "/turnierordnung")}
-                  icon={BookTextIcon}
-                  target="_blank"
-                >
-                  Turnierordnung
-                </SidebarLink>
+                {documents.ausschreibung ? (
+                  <SidebarLink
+                    href={tournamentPath(slug, "/ausschreibung")}
+                    icon={BookTextIcon}
+                    target="_blank"
+                  >
+                    Ausschreibung
+                  </SidebarLink>
+                ) : null}
+                {documents.turnierordnung ? (
+                  <SidebarLink
+                    href={tournamentPath(slug, "/turnierordnung")}
+                    icon={BookTextIcon}
+                    target="_blank"
+                  >
+                    Turnierordnung
+                  </SidebarLink>
+                ) : null}
                 <SidebarLink
                   href="/anleitung"
                   icon={BookTextIcon}
