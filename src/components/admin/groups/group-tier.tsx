@@ -15,7 +15,7 @@ import {
 import { GridGroup } from "./types";
 import { tierLetter } from "@/lib/groups";
 
-const TIER_OPTIONS = [0, 1, 2, 3, 4];
+const TIER_OPTIONS = Array.from({ length: 26 }, (_, i) => i);
 
 type Props = {
   group: GridGroup;
@@ -42,7 +42,7 @@ export function GroupTier({ group, onChangeGroupTier }: Props) {
           <p>Spielstärke auswählen</p>
         </TooltipContent>
       </Tooltip>
-      <DropdownMenuContent align="end">
+      <DropdownMenuContent align="end" className="max-h-72 overflow-y-auto">
         {TIER_OPTIONS.map((tier) => (
           <DropdownMenuItem
             key={tier}
