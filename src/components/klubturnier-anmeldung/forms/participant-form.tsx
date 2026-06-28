@@ -263,59 +263,63 @@ export function ParticipateForm({
         )}
 
         {chessClubType === CLUBLESS_KEY && (
-          <div className="flex gap-4">
-            <FormField
-              control={form.control}
-              name="gender"
-              render={({ field }) => (
-                <FormItem className="w-32">
-                  <FormLabel required>Geschlecht</FormLabel>
-                  <FormControl>
-                    <Select value={field.value} onValueChange={field.onChange}>
-                      <SelectTrigger>
-                        <SelectValue placeholder="Geschlecht" />
-                      </SelectTrigger>
-                      <SelectContent>
-                        <SelectItem value="m">Männlich</SelectItem>
-                        <SelectItem value="f">Weiblich</SelectItem>
-                      </SelectContent>
-                    </Select>
-                  </FormControl>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
-            <FormField
-              control={form.control}
-              name="birthDate"
-              render={({ field }) => (
-                <FormItem className="flex-1">
-                  <FormLabel required>Geburtsdatum</FormLabel>
-                  <FormControl>
-                    <Input
-                      type="date"
-                      max={format(new Date(), "yyyy-MM-dd")}
-                      value={
-                        field.value ? format(field.value, "yyyy-MM-dd") : ""
-                      }
-                      onChange={(e) =>
-                        field.onChange(
-                          e.target.value
-                            ? new Date(`${e.target.value}T00:00:00`)
-                            : undefined,
-                        )
-                      }
-                    />
-                  </FormControl>
-                  <FormDescription>
-                    Für vereinslose Spieler benötigt der DSB das exakte
-                    Geburtsdatum und das Geschlecht für die FIDE- und
-                    DWZ-Wertung.
-                  </FormDescription>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
+          <div className="space-y-2">
+            <div className="flex gap-4">
+              <FormField
+                control={form.control}
+                name="gender"
+                render={({ field }) => (
+                  <FormItem className="w-32">
+                    <FormLabel required>Geschlecht</FormLabel>
+                    <FormControl>
+                      <Select
+                        value={field.value}
+                        onValueChange={field.onChange}
+                      >
+                        <SelectTrigger>
+                          <SelectValue placeholder="Geschlecht" />
+                        </SelectTrigger>
+                        <SelectContent>
+                          <SelectItem value="m">Männlich</SelectItem>
+                          <SelectItem value="f">Weiblich</SelectItem>
+                        </SelectContent>
+                      </Select>
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+              <FormField
+                control={form.control}
+                name="birthDate"
+                render={({ field }) => (
+                  <FormItem className="flex-1">
+                    <FormLabel required>Geburtsdatum</FormLabel>
+                    <FormControl>
+                      <Input
+                        type="date"
+                        max={format(new Date(), "yyyy-MM-dd")}
+                        value={
+                          field.value ? format(field.value, "yyyy-MM-dd") : ""
+                        }
+                        onChange={(e) =>
+                          field.onChange(
+                            e.target.value
+                              ? new Date(`${e.target.value}T00:00:00`)
+                              : undefined,
+                          )
+                        }
+                      />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+            </div>
+            <p className="text-sm text-muted-foreground">
+              Für vereinslose Spieler benötigt der DSB das exakte Geburtsdatum
+              und das Geschlecht für die FIDE- und DWZ-Wertung.
+            </p>
           </div>
         )}
 
@@ -397,8 +401,8 @@ export function ParticipateForm({
                   </FormControl>
                   <FormMessage />
                   <FormDescription>
-                    Wer in den A- und B-Gruppen spielen möchte, muss seine Elo
-                    angeben.
+                    Wer in den A-, B- und C-Gruppen spielen möchte, muss seine
+                    Elo angeben.
                   </FormDescription>
                 </FormItem>
               )}
@@ -520,7 +524,8 @@ export function ParticipateForm({
               <FormMessage />
               <FormDescription>
                 Wer nicht flexibel ist, könnte unter Umständen bei dem Turnier
-                nicht berücksichtigt werden.
+                nicht berücksichtigt werden oder landet in einer niedrigeren
+                Gruppe.
               </FormDescription>
             </FormItem>
           )}
