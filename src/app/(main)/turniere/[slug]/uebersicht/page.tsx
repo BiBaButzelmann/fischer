@@ -37,6 +37,6 @@ export default async function Page({
   }
 
   if (tournament.stage === "done") {
-    return <TournamentDone />;
+    return <TournamentDone tournament={tournament} />;
   }
 }

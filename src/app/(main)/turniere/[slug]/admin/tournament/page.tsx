@@ -3,18 +3,12 @@ import { TournamentStageManager } from "@/components/admin/tournament/tournament
 import TournamentDetailsManager from "@/components/admin/tournament/tournament-details-manager";
 import { AssignmentMailButton } from "@/components/admin/tournament/assignment-mail-button";
 import { GroupMailButton } from "@/components/admin/tournament/group-mail-button";
-import {
-  Collapsible,
-  CollapsibleContent,
-  CollapsibleTrigger,
-} from "@/components/ui/collapsible";
-import { ChevronDownIcon } from "lucide-react";
 import { getProfilesByUserRole } from "@/db/repositories/profile";
-import { getTournamentBySlug } from "@/db/repositories/tournament";
 import {
-  getGroupsWithParticipantsByTournamentId,
-  getGroupsByTournamentId,
-} from "@/db/repositories/group";
+  getActiveTournament,
+  getTournamentBySlug,
+} from "@/db/repositories/tournament";
+import { getGroupsByTournamentId } from "@/db/repositories/group";
 import { Tournament } from "@/db/types/tournament";
 import { getTournamentWeeksByTournamentId } from "@/db/repositories/tournamentWeek";
 
@@ -42,9 +36,7 @@ export default async function Page({
 
 async function ManageTournament({ tournament }: { tournament?: Tournament }) {
   const adminProfiles = await getProfilesByUserRole("admin");
-  const groups = tournament
-    ? await getGroupsWithParticipantsByTournamentId(tournament.id)
-    : [];
+  const activeTournament = await getActiveTournament();
   const groupNames = tournament
     ? await getGroupsByTournamentId(tournament.id)
     : [];
@@ -52,31 +44,15 @@ async function ManageTournament({ tournament }: { tournament?: Tournament }) {
     ? await getTournamentWeeksByTournamentId(tournament.id)
     : [];
 
-  const openCollapsible =
-    tournament == null ? "details" : groups.length > 0 ? "pairings" : "groups";
-
   return (
     <div className="space-y-4">
-      <Collapsible
-        defaultOpen={openCollapsible === "details"}
-        className="border border-primary rounded-md p-4"
-      >
-        <CollapsibleTrigger className="w-full">
-          <div className="flex">
-            <span className="flex-grow text-left">
-              Turnierdetails bearbeiten
-            </span>
-            <ChevronDownIcon />
-          </div>
-        </CollapsibleTrigger>
-        <CollapsibleContent className="mt-4">
-          <TournamentDetailsManager
-            adminProfiles={adminProfiles}
-            tournament={tournament}
-            tournamentWeeks={tournamentWeeks}
-          />
-        </CollapsibleContent>
-      </Collapsible>
+      <TournamentDetailsManager
+        adminProfiles={adminProfiles}
+        tournament={tournament}
+        tournamentWeeks={tournamentWeeks}
+        activeTournamentName={activeTournament?.name}
+        defaultOpen={tournament == null}
+      />
 
       <div className="border border-primary rounded-md p-4">
         <div className="flex items-center justify-between mb-4">

@@ -68,6 +68,7 @@ export function AppSidebar({ session, tournaments, userRoles }: Props) {
   const isRegistrationOpen = stage === "registration";
   const isRunning = stage === "running";
   const isActive = stage === "registration" || stage === "running";
+  const isDone = stage === "done";
 
   const isAdmin = userRoles.includes("admin");
   const isParticipant = userRoles.includes("participant");
@@ -122,12 +123,14 @@ export function AppSidebar({ session, tournaments, userRoles }: Props) {
               >
                 Rangliste
               </SidebarLink>
-              <SidebarLink
-                href={tournamentPath(slug, "/kalender")}
-                icon={CalendarIcon}
-              >
-                Kalender
-              </SidebarLink>
+              {!isDone && (
+                <SidebarLink
+                  href={tournamentPath(slug, "/kalender")}
+                  icon={CalendarIcon}
+                >
+                  Kalender
+                </SidebarLink>
+              )}
               {isRunning && (isSetupHelper || isReferee) && (
                 <SidebarLink
                   href={tournamentPath(slug, "/terminuebersicht")}

@@ -17,7 +17,8 @@ export async function StandingsDisplay({
   selectedGroupId,
   selectedRound,
 }: Props) {
-  const groupId = Number(selectedGroupId);
+  const parsedGroupId = Number(selectedGroupId);
+  const groupId = Number.isNaN(parsedGroupId) ? groups[0].id : parsedGroupId;
   const round = selectedRound != null ? Number(selectedRound) : undefined;
 
   const participants = await getParticipantsInGroup(groupId);
