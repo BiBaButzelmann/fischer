@@ -19,7 +19,11 @@ export async function TournamentDone({
 
   const groups = await getGroupsByTournamentId(tournament.id);
   const topGroup = groups.reduce<(typeof groups)[number] | null>(
-    (best, group) => (best == null || group.tier < best.tier ? group : best),
+    (best, group) => {
+      if (group.tier == null) return best;
+      if (best?.tier == null || group.tier < best.tier) return group;
+      return best;
+    },
     null,
   );
   const champion = await getChampionName(topGroup?.id);

@@ -24,7 +24,7 @@ export const getPromotionTargetsForPreviousEdition = cache(
 
     const groups = await getGroupsByTournamentId(previousTournament.id);
     for (const group of groups) {
-      if (group.tier < 1) {
+      if (group.tier == null || group.tier < 1) {
         continue;
       }
 

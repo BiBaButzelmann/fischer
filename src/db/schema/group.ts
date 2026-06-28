@@ -13,7 +13,7 @@ export const group = pgTable(
 
     groupNumber: integer("group_number").notNull(),
     groupName: text("group_name").notNull(),
-    tier: integer("tier").notNull().default(0),
+    tier: integer("tier"),
     dayOfWeek: matchDay("day_of_week"),
     tournamentId: integer("tournament_id").notNull(),
 

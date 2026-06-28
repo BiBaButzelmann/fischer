@@ -102,7 +102,7 @@ async function updateGroup(
     .set({
       groupName: groupData.groupName,
       groupNumber: groupData.groupNumber,
-      tier: groupData.tier ?? 0,
+      tier: groupData.tier,
       dayOfWeek: groupData.dayOfWeek,
     })
     .where(eq(group.id, groupData.id));
@@ -220,7 +220,7 @@ async function insertGroup(
       tournamentId,
       groupName: data.groupName,
       groupNumber: data.groupNumber,
-      tier: data.tier ?? 0,
+      tier: data.tier,
       dayOfWeek: data.dayOfWeek,
     })
     .returning();
