@@ -8,17 +8,20 @@ import { Plus } from "lucide-react";
 import { Profile } from "@/db/types/profile";
 import { Tournament } from "@/db/types/tournament";
 import { TournamentWeekWithMatchdays } from "@/db/types/tournamentWeek";
+import { toast } from "sonner";
 
 type Props = {
   adminProfiles: Profile[];
   tournament?: Tournament;
   tournamentWeeks: TournamentWeekWithMatchdays[];
+  activeTournamentName?: string;
 };
 
 export default function TournamentDetailsManager({
   adminProfiles,
   tournament,
   tournamentWeeks,
+  activeTournamentName,
 }: Props) {
   const [showCreateForm, setShowCreateForm] = useState(false);
 
@@ -38,7 +41,15 @@ export default function TournamentDetailsManager({
           {tournament ? "Turnier bearbeiten" : "Kein Turnier gefunden"}
         </h3>
         <Button
-          onClick={() => setShowCreateForm(true)}
+          onClick={() => {
+            if (activeTournamentName) {
+              toast.error(
+                `„${activeTournamentName}" ist noch nicht abgeschlossen. Alle bestehenden Turniere müssen abgeschlossen sein, bevor du ein neues anlegst.`,
+              );
+              return;
+            }
+            setShowCreateForm(true);
+          }}
           size="sm"
           className="flex items-center gap-2"
         >

@@ -10,7 +10,10 @@ import {
 } from "@/components/ui/collapsible";
 import { ChevronDownIcon } from "lucide-react";
 import { getProfilesByUserRole } from "@/db/repositories/profile";
-import { getTournamentBySlug } from "@/db/repositories/tournament";
+import {
+  getActiveTournament,
+  getTournamentBySlug,
+} from "@/db/repositories/tournament";
 import {
   getGroupsWithParticipantsByTournamentId,
   getGroupsByTournamentId,
@@ -42,6 +45,7 @@ export default async function Page({
 
 async function ManageTournament({ tournament }: { tournament?: Tournament }) {
   const adminProfiles = await getProfilesByUserRole("admin");
+  const activeTournament = await getActiveTournament();
   const groups = tournament
     ? await getGroupsWithParticipantsByTournamentId(tournament.id)
     : [];
@@ -74,6 +78,7 @@ async function ManageTournament({ tournament }: { tournament?: Tournament }) {
             adminProfiles={adminProfiles}
             tournament={tournament}
             tournamentWeeks={tournamentWeeks}
+            activeTournamentName={activeTournament?.name}
           />
         </CollapsibleContent>
       </Collapsible>
