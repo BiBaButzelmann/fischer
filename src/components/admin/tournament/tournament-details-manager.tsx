@@ -43,9 +43,7 @@ export default function TournamentDetailsManager({
         <Button
           onClick={() => {
             if (activeTournamentName) {
-              toast.error(
-                `„${activeTournamentName}" ist noch nicht abgeschlossen. Alle bestehenden Turniere müssen abgeschlossen sein, bevor du ein neues anlegst.`,
-              );
+              toast.error(`${activeTournamentName} ist noch nicht abgeschlossen.`);
               return;
             }
             setShowCreateForm(true);
