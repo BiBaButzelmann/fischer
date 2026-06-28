@@ -1,12 +1,12 @@
 "use client";
 
+import { Button } from "@/components/ui/button";
 import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select";
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
 import { GridGroup } from "./types";
 import { tierLetter } from "@/lib/groups";
 
@@ -18,25 +18,28 @@ type Props = {
 };
 
 export function GroupTier({ group, onChangeGroupTier }: Props) {
-  const handleTierChange = (value: string) => {
-    onChangeGroupTier(group.id, Number(value));
-  };
-
   return (
-    <Select
-      value={group.tier != null ? group.tier.toString() : undefined}
-      onValueChange={handleTierChange}
-    >
-      <SelectTrigger className="w-full">
-        <SelectValue placeholder="Stufe" />
-      </SelectTrigger>
-      <SelectContent>
+    <DropdownMenu>
+      <DropdownMenuTrigger asChild>
+        <Button
+          size="icon"
+          variant="outline"
+          className="font-semibold"
+          aria-label="Stufe wählen"
+        >
+          {group.tier != null ? tierLetter(group.tier) : "?"}
+        </Button>
+      </DropdownMenuTrigger>
+      <DropdownMenuContent align="end">
         {TIER_OPTIONS.map((tier) => (
-          <SelectItem key={tier} value={tier.toString()}>
+          <DropdownMenuItem
+            key={tier}
+            onClick={() => onChangeGroupTier(group.id, tier)}
+          >
             Stufe {tierLetter(tier)}
-          </SelectItem>
+          </DropdownMenuItem>
         ))}
-      </SelectContent>
-    </Select>
+      </DropdownMenuContent>
+    </DropdownMenu>
   );
 }

@@ -299,12 +299,18 @@ export function GroupContainer({
     >
       <CardHeader>
         <CardTitle>
-          <div className="flex gap-2">
+          <div className="flex items-center gap-2">
             <div className="flex-1">
               <GroupTitle
                 onChangeGroupName={onChangeGroupName}
                 groupId={group.id}
                 groupName={group.groupName}
+                tierControl={
+                  <GroupTier
+                    group={group}
+                    onChangeGroupTier={onChangeGroupTier}
+                  />
+                }
               />
             </div>
             <Button
@@ -323,10 +329,6 @@ export function GroupContainer({
         className="p-0 pl-4 pb-4 pr-4 md:p-0 md:pl-6 md:pb-6 md:pr-6 flex flex-col h-full"
       >
         <div className="space-y-4 flex-1 flex flex-col">
-          <div className="px-2">
-            <GroupTier group={group} onChangeGroupTier={onChangeGroupTier} />
-          </div>
-
           <div className="px-2">
             <GroupMatchDay
               group={group}
