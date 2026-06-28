@@ -9,7 +9,6 @@ type Props = {
   rounds: number[];
   selectedGroupId: string;
   selectedRound?: string;
-  basePath?: string;
 };
 
 export async function StandingsDisplay({
@@ -17,7 +16,6 @@ export async function StandingsDisplay({
   rounds,
   selectedGroupId,
   selectedRound,
-  basePath,
 }: Props) {
   const parsedGroupId = Number(selectedGroupId);
   const groupId = Number.isNaN(parsedGroupId) ? groups[0].id : parsedGroupId;
@@ -35,7 +33,6 @@ export async function StandingsDisplay({
         rounds={rounds}
         selectedGroupId={selectedGroupId}
         selectedRound={selectedRound}
-        basePath={basePath}
       />
 
       <StandingsTable

@@ -47,7 +47,6 @@ export function buildResultsViewUrl(params: {
   slug: string;
   groupId?: string;
   round?: string;
-  basePath?: string;
 }): string {
   const searchParams = new URLSearchParams();
 
@@ -59,6 +58,8 @@ export function buildResultsViewUrl(params: {
   }
 
   const query = searchParams.toString();
-  const basePath = params.basePath ?? "/rangliste";
-  return tournamentPath(params.slug, query ? `${basePath}?${query}` : basePath);
+  return tournamentPath(
+    params.slug,
+    query ? `/rangliste?${query}` : "/rangliste",
+  );
 }

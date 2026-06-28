@@ -18,7 +18,6 @@ export type Props = {
   groups: GroupSummary[];
   selectedRound?: string;
   rounds: number[];
-  basePath?: string;
 };
 
 export function StandingsSelector({
@@ -26,7 +25,6 @@ export function StandingsSelector({
   rounds,
   selectedGroupId,
   selectedRound,
-  basePath,
 }: Props) {
   const router = useRouter();
   const slug = useTournamentSlug();
@@ -37,7 +35,6 @@ export function StandingsSelector({
         slug,
         groupId,
         round: selectedRound,
-        basePath,
       }),
     );
   };
@@ -48,7 +45,6 @@ export function StandingsSelector({
         slug,
         groupId: selectedGroupId,
         round,
-        basePath,
       }),
     );
   };
