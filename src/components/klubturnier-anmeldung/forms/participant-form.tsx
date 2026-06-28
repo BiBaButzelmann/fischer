@@ -309,7 +309,8 @@ export function ParticipateForm({
                   </FormControl>
                   <FormDescription>
                     Für vereinslose Spieler benötigt der DSB das exakte
-                    Geburtsdatum für die FIDE- und DWZ-Wertung.
+                    Geburtsdatum und das Geschlecht für die FIDE- und
+                    DWZ-Wertung.
                   </FormDescription>
                   <FormMessage />
                 </FormItem>
