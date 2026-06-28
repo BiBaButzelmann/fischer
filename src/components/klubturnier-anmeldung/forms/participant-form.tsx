@@ -33,6 +33,7 @@ import { cn } from "@/lib/utils";
 import { isHoliday } from "@/lib/holidays";
 import { Tournament } from "@/db/types/tournament";
 import { getParticipantEloData } from "@/actions/participant";
+import { toast } from "sonner";
 import { Profile } from "@/db/types/profile";
 import {
   CLUBLESS_KEY,
@@ -111,41 +112,49 @@ export function ParticipateForm({
     }
 
     startTransition(async () => {
-      const eloData = await getParticipantEloData(
-        profile.firstName,
-        profile.lastName,
-      );
-      if (!eloData) {
-        console.warn(
-          `No Elo data found for ${profile.firstName} ${profile.lastName}`,
+      try {
+        const eloData = await getParticipantEloData(
+          profile.firstName,
+          profile.lastName,
         );
-        return;
-      }
+        if (!eloData) {
+          toast.info(
+            `Keine Einträge zu ${profile.firstName} ${profile.lastName} im HSK-Verzeichnis gefunden. Bitte trage deine Daten manuell ein.`,
+          );
+          return;
+        }
 
-      form.setValue("title", eloData.title ?? "noTitle");
+        form.setValue("title", eloData.title ?? "noTitle");
 
-      if (eloData.gender) {
-        form.setValue("gender", eloData.gender);
-      }
-      if (eloData.dwzRating) {
-        form.setValue("dwzRating", eloData.dwzRating);
-      }
-      if (eloData.birthYear) {
-        form.setValue("birthYear", eloData.birthYear);
-      }
-      if (eloData.zpsClub) {
-        form.setValue("zpsClub", eloData.zpsClub);
-      }
-      if (eloData.zpsPlayer) {
-        form.setValue("zpsPlayer", eloData.zpsPlayer);
-      }
+        if (eloData.gender) {
+          form.setValue("gender", eloData.gender);
+        }
+        if (eloData.dwzRating) {
+          form.setValue("dwzRating", eloData.dwzRating);
+        }
+        if (eloData.birthYear) {
+          form.setValue("birthYear", eloData.birthYear);
+        }
+        if (eloData.zpsClub) {
+          form.setValue("zpsClub", eloData.zpsClub);
+        }
+        if (eloData.zpsPlayer) {
+          form.setValue("zpsPlayer", eloData.zpsPlayer);
+        }
 
-      if (eloData.fideRating && eloData.fideId) {
-        form.setValue("fideRating", eloData.fideRating);
-        form.setValue("fideId", eloData.fideId);
-        form.setValue(
-          "nationality",
-          eloData.nationality !== "?" ? eloData.nationality : undefined,
+        if (eloData.fideRating && eloData.fideId) {
+          form.setValue("fideRating", eloData.fideRating);
+          form.setValue("fideId", eloData.fideId);
+          form.setValue(
+            "nationality",
+            eloData.nationality !== "?" ? eloData.nationality : undefined,
+          );
+        }
+
+        toast.success("Deine Daten wurden aus der DSB-Datenbank übernommen.");
+      } catch {
+        toast.error(
+          "Daten konnten nicht aus der DSB-Datenbank geladen werden. Bitte trage sie manuell ein.",
         );
       }
     });
