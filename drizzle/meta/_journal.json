@@ -155,6 +155,13 @@
       "when": 1781708091478,
       "tag": "0021_lethal_landau",
       "breakpoints": true
+    },
+    {
+      "idx": 22,
+      "version": "7",
+      "when": 1782643511298,
+      "tag": "0022_spotty_darwin",
+      "breakpoints": true
     }
   ]
 }
