@@ -169,6 +169,13 @@
       "when": 1782664183364,
       "tag": "0023_silent_wither",
       "breakpoints": true
+    },
+    {
+      "idx": 24,
+      "version": "7",
+      "when": 1782669876082,
+      "tag": "0024_large_medusa",
+      "breakpoints": true
     }
   ]
 }

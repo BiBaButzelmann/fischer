@@ -11,9 +11,24 @@ import { getProfileByUserId } from "@/db/repositories/profile";
 import { getParticipantsWithZpsIdsByTournamentId } from "@/db/repositories/participant";
 import { getPromotionEligibility } from "@/services/promotion";
 import { and, eq } from "drizzle-orm";
-import { DEFAULT_CLUB_LABEL } from "@/constants/constants";
+import {
+  CLUBLESS_KEY,
+  CLUBLESS_LABEL,
+  DEFAULT_CLUB_KEY,
+  DEFAULT_CLUB_LABEL,
+} from "@/constants/constants";
 import { revalidatePath } from "next/cache";
 import { action } from "@/lib/actions";
+import { getFideProfile } from "@/lib/fide/profile";
+
+function parseRating(value: string | undefined): number | null {
+  const trimmed = value?.trim();
+  if (!trimmed) {
+    return null;
+  }
+  const rating = Number(trimmed);
+  return Number.isFinite(rating) && rating > 0 ? rating : null;
+}
 
 export async function createParticipant(
   tournamentId: number,
@@ -27,9 +42,16 @@ export async function createParticipant(
       throw new Error("Schachverein ist erforderlich");
     }
     chessClub = data.chessClub;
+  } else if (data.chessClubType === CLUBLESS_KEY) {
+    chessClub = CLUBLESS_LABEL;
   } else {
     chessClub = DEFAULT_CLUB_LABEL;
   }
+
+  const entryFeePayed = data.chessClubType === DEFAULT_CLUB_KEY ? null : false;
+  const birthYear = data.birthDate
+    ? data.birthDate.getFullYear()
+    : data.birthYear;
 
   const tournament = await getTournamentById(tournamentId);
   invariant(
@@ -52,35 +74,39 @@ export async function createParticipant(
       tournamentId: tournament.id,
       chessClub,
       title: data.title === "noTitle" ? null : data.title,
+      gender: data.gender,
       dwzRating: data.dwzRating,
       fideRating: data.fideRating,
       fideId: data.fideId,
       nationality: data.nationality,
-      birthYear: data.birthYear,
+      birthYear,
+      birthDate: data.birthDate,
       preferredMatchDay: data.preferredMatchDay,
       secondaryMatchDays: data.secondaryMatchDays,
       notAvailableDays: data.notAvailableDays,
       zpsClubId: data.zpsClub,
       zpsPlayerId: data.zpsPlayer,
-      entryFeePayed: data.chessClubType === "other" ? false : null,
+      entryFeePayed,
       exercisePromotionRight,
     })
     .onConflictDoUpdate({
       target: [participant.tournamentId, participant.profileId],
       set: {
         chessClub,
+        gender: data.gender,
         dwzRating: data.dwzRating,
         fideRating: data.fideRating,
         fideId: data.fideId,
         nationality: data.nationality,
         title: data.title === "noTitle" ? null : data.title,
-        birthYear: data.birthYear,
+        birthYear,
+        birthDate: data.birthDate,
         preferredMatchDay: data.preferredMatchDay,
         secondaryMatchDays: data.secondaryMatchDays,
         notAvailableDays: data.notAvailableDays,
         zpsClubId: data.zpsClub,
         zpsPlayerId: data.zpsPlayer,
-        entryFeePayed: data.chessClubType === "other" ? false : null,
+        entryFeePayed,
         exercisePromotionRight,
       },
     });
@@ -124,6 +150,8 @@ export async function getParticipantEloData(
   fideId: string | null;
   zpsClub: string;
   zpsPlayer: string;
+  gender: "m" | "f" | null;
+  birthYear: number | null;
 } | null> {
   await authWithRedirect();
 
@@ -172,25 +200,28 @@ export async function getParticipantEloData(
     return null;
   }
 
-  const ratingSchema = z.coerce.number();
-  const fideRating = ratingSchema.safeParse(playerFields[7]);
-  const dwzRating = ratingSchema.safeParse(playerFields[4]);
+  const dwzRating = parseRating(playerFields[4]);
+  const fideId = playerFields[6] || null;
+
+  const fideProfile = fideId ? await getFideProfile(fideId) : null;
 
   return {
-    title: playerFields[8] || null,
+    title: fideProfile?.title ?? (playerFields[8] || null),
     nationality: playerFields[9],
-    fideRating: fideRating.success ? fideRating.data : null,
-    dwzRating: dwzRating.success ? dwzRating.data : null,
-    fideId: playerFields[6] || null,
+    fideRating: fideProfile?.fideRating ?? null,
+    dwzRating,
+    fideId,
     zpsClub: clubFields[4],
     zpsPlayer: clubFields[5],
+    gender: fideProfile?.gender ?? null,
+    birthYear: fideProfile?.birthYear ?? null,
   };
 }
 
-export async function getDwzAndEloByZps(
+export async function getDwzAndFideIdByZps(
   zpsPlayerId: string,
   zpsClubId: string,
-) {
+): Promise<{ dwzRating: number | null; fideId: string | null } | null> {
   const clubData = await fetch(
     `https://www.schachbund.de/php/dewis/verein.php?zps=${zpsClubId}&format=csv`,
   );
@@ -212,13 +243,9 @@ export async function getDwzAndEloByZps(
     return null;
   }
 
-  const ratingSchema = z.coerce.number();
-  const dwzRating = ratingSchema.safeParse(clubFields[7]);
-  const fideRating = ratingSchema.safeParse(clubFields[12]);
-
   return {
-    dwzRating: dwzRating.success ? dwzRating.data : null,
-    fideRating: fideRating.success ? fideRating.data : null,
+    dwzRating: parseRating(clubFields[7]),
+    fideId: clubFields[11]?.trim() || null,
   };
 }
 
@@ -251,21 +278,32 @@ export const updateAllParticipantRatings = action(
 
     for (const participantData of participants) {
       try {
-        const eloData = await getDwzAndEloByZps(
+        const dewisData = await getDwzAndFideIdByZps(
           participantData.zpsPlayerId!,
           participantData.zpsClubId!,
         );
-        if (!eloData) {
+
+        const fideId = participantData.fideId ?? dewisData?.fideId ?? null;
+        const fideRating = fideId
+          ? ((await getFideProfile(fideId))?.fideRating ?? null)
+          : null;
+
+        const values: { dwzRating?: number; fideRating?: number } = {};
+        if (dewisData?.dwzRating != null) {
+          values.dwzRating = dewisData.dwzRating;
+        }
+        if (fideRating != null) {
+          values.fideRating = fideRating;
+        }
+
+        if (Object.keys(values).length === 0) {
           failed++;
           continue;
         }
 
         await db
           .update(participant)
-          .set({
-            dwzRating: eloData.dwzRating,
-            fideRating: eloData.fideRating,
-          })
+          .set(values)
           .where(eq(participant.id, participantData.id));
 
         updated++;

@@ -34,7 +34,12 @@ import { isHoliday } from "@/lib/holidays";
 import { Tournament } from "@/db/types/tournament";
 import { getParticipantEloData } from "@/actions/participant";
 import { Profile } from "@/db/types/profile";
-import { DEFAULT_CLUB_KEY, DEFAULT_CLUB_LABEL } from "@/constants/constants";
+import {
+  CLUBLESS_KEY,
+  CLUBLESS_LABEL,
+  DEFAULT_CLUB_KEY,
+  DEFAULT_CLUB_LABEL,
+} from "@/constants/constants";
 import { Switch } from "@/components/ui/switch";
 import type { PromotionEligibility } from "@/services/promotion";
 
@@ -64,11 +69,13 @@ export function ParticipateForm({
       chessClubType: initialValues?.chessClubType,
       chessClub: initialValues?.chessClub,
       title: initialValues?.title,
+      gender: initialValues?.gender,
       dwzRating: initialValues?.dwzRating,
       fideRating: initialValues?.fideRating,
       fideId: initialValues?.fideId,
       nationality: initialValues?.nationality,
       birthYear: initialValues?.birthYear,
+      birthDate: initialValues?.birthDate,
       zpsClub: initialValues?.zpsClub,
       zpsPlayer: initialValues?.zpsPlayer,
       preferredMatchDay: initialValues?.preferredMatchDay,
@@ -86,11 +93,20 @@ export function ParticipateForm({
     return isDateDisabled(date, tournament.startDate, tournament.endDate);
   };
 
-  const handleChessClubTypeChange = (value: "hsk" | "other") => {
+  const handleChessClubTypeChange = (
+    value: "hsk" | "other" | "vereinslos",
+  ) => {
     form.setValue("chessClubType", value);
 
     if (value === "other") {
       form.setValue("chessClub", "");
+      return;
+    }
+
+    if (value === CLUBLESS_KEY) {
+      form.setValue("chessClub", "");
+      form.setValue("zpsClub", undefined);
+      form.setValue("zpsPlayer", undefined);
       return;
     }
 
@@ -108,8 +124,14 @@ export function ParticipateForm({
 
       form.setValue("title", eloData.title ?? "noTitle");
 
+      if (eloData.gender) {
+        form.setValue("gender", eloData.gender);
+      }
       if (eloData.dwzRating) {
         form.setValue("dwzRating", eloData.dwzRating);
+      }
+      if (eloData.birthYear) {
+        form.setValue("birthYear", eloData.birthYear);
       }
       if (eloData.zpsClub) {
         form.setValue("zpsClub", eloData.zpsClub);
@@ -202,6 +224,9 @@ export function ParticipateForm({
                         {DEFAULT_CLUB_LABEL}
                       </SelectItem>
                       <SelectItem value="other">Anderer Verein</SelectItem>
+                      <SelectItem value={CLUBLESS_KEY}>
+                        {CLUBLESS_LABEL}
+                      </SelectItem>
                     </SelectContent>
                   </Select>
                 </FormControl>
@@ -237,6 +262,37 @@ export function ParticipateForm({
           />
         )}
 
+        {chessClubType === CLUBLESS_KEY && (
+          <FormField
+            control={form.control}
+            name="birthDate"
+            render={({ field }) => (
+              <FormItem className="w-full sm:w-64">
+                <FormLabel required>Geburtsdatum</FormLabel>
+                <FormControl>
+                  <Input
+                    type="date"
+                    max={format(new Date(), "yyyy-MM-dd")}
+                    value={field.value ? format(field.value, "yyyy-MM-dd") : ""}
+                    onChange={(e) =>
+                      field.onChange(
+                        e.target.value
+                          ? new Date(`${e.target.value}T00:00:00`)
+                          : undefined,
+                      )
+                    }
+                  />
+                </FormControl>
+                <FormDescription>
+                  Für vereinslose Spieler benötigt der DSB das exakte
+                  Geburtsdatum für die FIDE- und DWZ-Wertung.
+                </FormDescription>
+                <FormMessage />
+              </FormItem>
+            )}
+          />
+        )}
+
         {chessClubType != null ? (
           <div className="flex gap-4">
             <FormField
@@ -264,6 +320,30 @@ export function ParticipateForm({
                         <SelectItem value="WIM">WIM </SelectItem>
                         <SelectItem value="WFM">WFM </SelectItem>
                         <SelectItem value="WCM">WCM </SelectItem>
+                      </SelectContent>
+                    </Select>
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+            <FormField
+              control={form.control}
+              name="gender"
+              render={({ field }) => (
+                <FormItem className="w-32">
+                  <FormLabel>Geschlecht</FormLabel>
+                  <FormControl>
+                    <Select
+                      value={field.value}
+                      onValueChange={field.onChange}
+                    >
+                      <SelectTrigger>
+                        <SelectValue placeholder="Geschlecht" />
+                      </SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value="m">Männlich</SelectItem>
+                        <SelectItem value="f">Weiblich</SelectItem>
                       </SelectContent>
                     </Select>
                   </FormControl>

@@ -27,7 +27,12 @@ import { createSetupHelper, deleteSetupHelper } from "@/actions/setup-helper";
 import { createJuror, deleteJuror } from "@/actions/juror";
 import { sendRolesSelectionSummaryEmail } from "@/actions/email/roles";
 import { Profile } from "@/db/types/profile";
-import { DEFAULT_CLUB_KEY, DEFAULT_CLUB_LABEL } from "@/constants/constants";
+import {
+  CLUBLESS_KEY,
+  CLUBLESS_LABEL,
+  DEFAULT_CLUB_KEY,
+  DEFAULT_CLUB_LABEL,
+} from "@/constants/constants";
 import { createReferee, deleteReferee } from "@/actions/referee";
 import { Participant } from "@/db/types/participant";
 import type { PromotionEligibility } from "@/services/promotion";
@@ -247,21 +252,34 @@ export function RolesManager({
   );
 }
 
+function chessClubTypeForLabel(
+  chessClub: string,
+): z.infer<typeof participantFormSchema>["chessClubType"] {
+  if (chessClub === DEFAULT_CLUB_LABEL) {
+    return DEFAULT_CLUB_KEY;
+  }
+  if (chessClub === CLUBLESS_LABEL) {
+    return CLUBLESS_KEY;
+  }
+  return "other";
+}
+
 function buildParticipantInitialValues(
   current: RolesData["participant"],
   previous: Participant | null,
 ): z.infer<typeof participantFormSchema> | undefined {
   if (current) {
     return {
-      chessClubType:
-        current.chessClub === DEFAULT_CLUB_LABEL ? DEFAULT_CLUB_KEY : "other",
+      chessClubType: chessClubTypeForLabel(current.chessClub),
       chessClub: current.chessClub,
       title: current.title ?? "noTitle",
+      gender: current.gender ?? undefined,
       nationality: current.nationality ?? undefined,
       dwzRating: current.dwzRating ?? undefined,
       fideRating: current.fideRating ?? undefined,
       fideId: current.fideId ?? undefined,
       birthYear: current.birthYear ?? undefined,
+      birthDate: current.birthDate ?? undefined,
       preferredMatchDay: current.preferredMatchDay,
       secondaryMatchDays: current.secondaryMatchDays,
       notAvailableDays: current.notAvailableDays ?? [],
@@ -271,13 +289,14 @@ function buildParticipantInitialValues(
 
   if (previous) {
     return {
-      chessClubType:
-        previous.chessClub === DEFAULT_CLUB_LABEL ? DEFAULT_CLUB_KEY : "other",
+      chessClubType: chessClubTypeForLabel(previous.chessClub),
       chessClub: previous.chessClub,
       title: previous.title ?? "noTitle",
+      gender: previous.gender ?? undefined,
       nationality: previous.nationality ?? undefined,
       fideId: previous.fideId ?? undefined,
       birthYear: previous.birthYear ?? undefined,
+      birthDate: previous.birthDate ?? undefined,
       preferredMatchDay: previous.preferredMatchDay,
       secondaryMatchDays: previous.secondaryMatchDays,
       zpsClub: previous.zpsClubId ?? undefined,

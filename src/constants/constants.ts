@@ -15,6 +15,9 @@ export const matchDaysShort: Record<DayOfWeek, string> = {
 export const DEFAULT_CLUB_KEY = "hsk";
 export const DEFAULT_CLUB_LABEL = "Hamburger Schachklub von 1830 e.V.";
 
+export const CLUBLESS_KEY = "vereinslos";
+export const CLUBLESS_LABEL = "Vereinslos";
+
 export const monthLabels = [
   "Januar",
   "Februar",
