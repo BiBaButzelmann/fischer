@@ -147,6 +147,41 @@ export function ParticipateForm({
         onSubmit={form.handleSubmit(handleSubmit)}
         className="space-y-6 pt-4"
       >
+        {promotionEligibility != null ? (
+          <FormField
+            control={form.control}
+            name="exercisePromotionRight"
+            render={({ field }) => (
+              <FormItem className="space-y-3 rounded-md border border-amber-200 bg-amber-50/60 p-4 dark:border-amber-900/40 dark:bg-amber-950/20">
+                <div className="flex flex-row items-center justify-between gap-3 space-y-0">
+                  <div className="space-y-1">
+                    <FormLabel>
+                      Möchtest du dein Aufstiegsrecht wahrnehmen?
+                    </FormLabel>
+                    <FormDescription>
+                      Als Sieger der Gruppe {promotionEligibility.wonGroupName}{" "}
+                      hast du das Recht, in die Gruppe{" "}
+                      {promotionEligibility.targetTierLetter} aufzusteigen.
+                    </FormDescription>
+                  </div>
+                  <FormControl>
+                    <Switch
+                      checked={field.value ?? false}
+                      onCheckedChange={field.onChange}
+                    />
+                  </FormControl>
+                </div>
+                {promotionEligibility.targetIsAGroup ? (
+                  <p className="text-sm font-medium text-amber-700 dark:text-amber-400">
+                    Beachte: Die A-Gruppe spielt nur freitags.
+                  </p>
+                ) : null}
+                <FormMessage />
+              </FormItem>
+            )}
+          />
+        ) : null}
+
         <div className="flex gap-4">
           <FormField
             control={form.control}
@@ -469,41 +504,6 @@ export function ParticipateForm({
             </FormItem>
           )}
         />
-
-        {promotionEligibility != null ? (
-          <FormField
-            control={form.control}
-            name="exercisePromotionRight"
-            render={({ field }) => (
-              <FormItem className="space-y-3 rounded-md border p-4">
-                <div className="flex flex-row items-center justify-between gap-3 space-y-0">
-                  <div className="space-y-1">
-                    <FormLabel>
-                      Möchtest du dein Aufstiegsrecht wahrnehmen?
-                    </FormLabel>
-                    <FormDescription>
-                      Als Sieger der Gruppe {promotionEligibility.wonGroupName}{" "}
-                      hast du das Recht, in die Gruppe{" "}
-                      {promotionEligibility.targetTierLetter} aufzusteigen.
-                    </FormDescription>
-                  </div>
-                  <FormControl>
-                    <Switch
-                      checked={field.value ?? false}
-                      onCheckedChange={field.onChange}
-                    />
-                  </FormControl>
-                </div>
-                {promotionEligibility.targetIsAGroup ? (
-                  <p className="text-sm font-medium text-amber-700 dark:text-amber-400">
-                    Beachte: Die A-Gruppe spielt nur freitags.
-                  </p>
-                ) : null}
-                <FormMessage />
-              </FormItem>
-            )}
-          />
-        ) : null}
 
         <div className="flex items-center gap-2">
           <Button
