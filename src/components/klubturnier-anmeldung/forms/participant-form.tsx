@@ -502,7 +502,7 @@ export function ParticipateForm({
                 </Select>
               </FormControl>
               <FormDescription>
-                Die A-Klasse spielt nur an Freitagen
+                Die A-Gruppe spielt nur an Freitagen
               </FormDescription>
               <FormMessage />
             </FormItem>
