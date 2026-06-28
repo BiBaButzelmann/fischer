@@ -28,6 +28,13 @@ export const saveGroups = action(
       return { error: "Bitte für jede Gruppe eine Stufe angeben." };
     }
 
+    const aGroupCount = groupsData.filter(
+      (g) => !g.isDeleted && g.tier === 0,
+    ).length;
+    if (aGroupCount > 1) {
+      return { error: "Es darf nur eine Gruppe mit Stufe A geben." };
+    }
+
     const groupsToDelete = groupsData.filter((g) => g.isDeleted);
     const groupsToInsert = groupsData.filter((g) => g.isNew && !g.isDeleted);
     const groupsToUpdate = groupsData.filter((g) => !g.isNew && !g.isDeleted);

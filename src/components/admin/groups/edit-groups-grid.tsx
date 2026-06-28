@@ -174,6 +174,14 @@ export function EditGroupsGrid({
       return;
     }
 
+    const aGroupCount = gridGroups.filter(
+      (g) => !g.isDeleted && g.tier === 0,
+    ).length;
+    if (aGroupCount > 1) {
+      toast.error("Es darf nur eine Gruppe mit Stufe A geben.");
+      return;
+    }
+
     startTransition(async () => {
       const result = await saveGroups(tournamentId, gridGroups);
       if (isError(result)) {
