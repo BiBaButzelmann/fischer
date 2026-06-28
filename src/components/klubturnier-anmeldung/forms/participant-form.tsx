@@ -366,6 +366,7 @@ export function ParticipateForm({
                       max="2800"
                       step="1"
                       {...field}
+                      value={field.value ?? ""}
                     />
                   </FormControl>
                   <FormMessage />
@@ -389,6 +390,7 @@ export function ParticipateForm({
                       max="2800"
                       step="1"
                       {...field}
+                      value={field.value ?? ""}
                     />
                   </FormControl>
                   <FormMessage />
@@ -412,7 +414,12 @@ export function ParticipateForm({
                 <FormItem>
                   <FormLabel required>FIDE ID</FormLabel>
                   <FormControl>
-                    <Input id="fideId" placeholder="10245154" {...field} />
+                    <Input
+                      id="fideId"
+                      placeholder="10245154"
+                      {...field}
+                      value={field.value ?? ""}
+                    />
                   </FormControl>
                   <FormDescription>
                     <a
@@ -461,6 +468,7 @@ export function ParticipateForm({
                       max={new Date().getFullYear()}
                       step="1"
                       {...field}
+                      value={field.value ?? ""}
                     />
                   </FormControl>
                   <FormMessage />
