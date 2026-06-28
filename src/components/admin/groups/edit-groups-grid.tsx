@@ -13,6 +13,7 @@ import { NUMBER_OF_GROUPS_WITH_ELO } from "@/constants/constants";
 import invariant from "tiny-invariant";
 import { isError } from "@/lib/actions";
 import { sortParticipantsByElo, sortParticipantsByDwz } from "@/lib/elo";
+import { PromotionTargetsProvider } from "./promotion-targets-context";
 
 export function EditGroupsGrid({
   tournamentId,
@@ -20,12 +21,14 @@ export function EditGroupsGrid({
   unassignedParticipants: initialUnassignedParticipants,
   matchEnteringHelpers,
   currentAssignments,
+  promotionTargets,
 }: {
   tournamentId: number;
   groups: GridGroup[];
   unassignedParticipants: ParticipantWithName[];
   matchEnteringHelpers: MatchEnteringHelperWithName[];
   currentAssignments: Record<number, MatchEnteringHelperWithName[]>;
+  promotionTargets: Record<number, string>;
 }) {
   const [isPending, startTransition] = useTransition();
 
@@ -84,6 +87,7 @@ export function EditGroupsGrid({
       isDeleted: false,
       groupNumber: nextGroupNumber,
       groupName: generateGroupName(nextGroupNumber),
+      tier: null,
       dayOfWeek: null,
       participants: [],
       matchEnteringHelpers: [],
@@ -116,6 +120,13 @@ export function EditGroupsGrid({
   const handleUpdateGroupName = (groupId: number, newName: string) => {
     const updatedGroups = gridGroups.map((g) =>
       g.id === groupId ? { ...g, groupName: newName } : g,
+    );
+    setGridGroups(updatedGroups);
+  };
+
+  const handleUpdateGroupTier = (groupId: number, tier: number) => {
+    const updatedGroups = gridGroups.map((g) =>
+      g.id === groupId ? { ...g, tier } : g,
     );
     setGridGroups(updatedGroups);
   };
@@ -155,6 +166,22 @@ export function EditGroupsGrid({
   };
 
   const handleSaveChanges = () => {
+    const groupWithoutTier = gridGroups.find(
+      (g) => !g.isDeleted && g.tier == null,
+    );
+    if (groupWithoutTier) {
+      toast.error("Bitte für jede Gruppe eine Stufe angeben.");
+      return;
+    }
+
+    const aGroupCount = gridGroups.filter(
+      (g) => !g.isDeleted && g.tier === 0,
+    ).length;
+    if (aGroupCount > 1) {
+      toast.error("Es darf nur eine Gruppe mit Stufe A geben.");
+      return;
+    }
+
     startTransition(async () => {
       const result = await saveGroups(tournamentId, gridGroups);
       if (isError(result)) {
@@ -166,37 +193,40 @@ export function EditGroupsGrid({
   };
 
   return (
-    <div className="flex flex-col gap-4">
-      <div className="flex justify-end gap-4 items-center">
-        <Button
-          variant="outline"
-          onClick={handleAddNewGroup}
-          disabled={isPending}
-        >
-          Gruppe hinzufügen
-        </Button>
-        <Button onClick={handleSaveChanges} disabled={isPending}>
-          Änderungen speichern
-        </Button>
+    <PromotionTargetsProvider value={promotionTargets}>
+      <div className="flex flex-col gap-4">
+        <div className="flex justify-end gap-4 items-center">
+          <Button
+            variant="outline"
+            onClick={handleAddNewGroup}
+            disabled={isPending}
+          >
+            Gruppe hinzufügen
+          </Button>
+          <Button onClick={handleSaveChanges} disabled={isPending}>
+            Änderungen speichern
+          </Button>
+        </div>
+        <div className={isPending ? "opacity-50 pointer-events-none" : ""}>
+          <GroupsGrid
+            tournamentId={tournamentId}
+            groups={gridGroups}
+            unassignedParticipants={unassignedParticipants}
+            matchEnteringHelpers={matchEnteringHelpers}
+            helperAssignedCounts={helperAssignedCounts}
+            helperAssignments={helperAssignments}
+            onChangeGroups={setGridGroups}
+            onChangeUnassignedParticipants={setUnassignedParticipants}
+            onDeleteGroup={handleDeleteGroup}
+            onUpdateGroupName={handleUpdateGroupName}
+            onUpdateGroupTier={handleUpdateGroupTier}
+            onAddHelperToGroup={handleAddHelperToGroup}
+            onRemoveHelperFromGroup={handleRemoveHelperFromGroup}
+            onDistributeParticipants={handleDistributeParticipants}
+          />
+        </div>
       </div>
-      <div className={isPending ? "opacity-50 pointer-events-none" : ""}>
-        <GroupsGrid
-          tournamentId={tournamentId}
-          groups={gridGroups}
-          unassignedParticipants={unassignedParticipants}
-          matchEnteringHelpers={matchEnteringHelpers}
-          helperAssignedCounts={helperAssignedCounts}
-          helperAssignments={helperAssignments}
-          onChangeGroups={setGridGroups}
-          onChangeUnassignedParticipants={setUnassignedParticipants}
-          onDeleteGroup={handleDeleteGroup}
-          onUpdateGroupName={handleUpdateGroupName}
-          onAddHelperToGroup={handleAddHelperToGroup}
-          onRemoveHelperFromGroup={handleRemoveHelperFromGroup}
-          onDistributeParticipants={handleDistributeParticipants}
-        />
-      </div>
-    </div>
+    </PromotionTargetsProvider>
   );
 }
 

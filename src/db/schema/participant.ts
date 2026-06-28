@@ -37,6 +37,8 @@ export const participant = pgTable(
 
     entryFeePayed: boolean("entry_fee_payed"),
 
+    exercisePromotionRight: boolean("exercise_promotion_right"),
+
     ...timestamps,
   },
   (table) => [unique().on(table.tournamentId, table.profileId)],

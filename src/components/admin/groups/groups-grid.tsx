@@ -19,6 +19,7 @@ import invariant from "tiny-invariant";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { GridGroup } from "./types";
 import { GroupMatchDay } from "./group-match-day";
+import { GroupTier } from "./group-tier";
 import { ParticipantEntry } from "./participant-entry";
 import { GroupTitle } from "./group-title";
 import { GroupStats } from "./group-stats";
@@ -35,6 +36,7 @@ import {
 import { Input } from "@/components/ui/input";
 import { cn } from "@/lib/utils";
 import { sortParticipantsByDwz } from "@/lib/elo";
+import { usePromotionTarget } from "./promotion-targets-context";
 
 export const UNASSIGNED_CONTAINER_ID = "unassigned-droppable";
 const UNASSIGNED_CONTAINER_TYPE = "unassigned";
@@ -50,6 +52,7 @@ export function GroupsGrid({
   onChangeUnassignedParticipants,
   onDeleteGroup,
   onUpdateGroupName,
+  onUpdateGroupTier,
   onAddHelperToGroup,
   onRemoveHelperFromGroup,
   onDistributeParticipants,
@@ -64,6 +67,7 @@ export function GroupsGrid({
   onChangeUnassignedParticipants: (participants: ParticipantWithName[]) => void;
   onDeleteGroup: (groupId: number) => void;
   onUpdateGroupName: (groupId: number, newName: string) => void;
+  onUpdateGroupTier: (groupId: number, tier: number) => void;
   onAddHelperToGroup: (groupId: number, helperId: number) => void;
   onRemoveHelperFromGroup: (groupId: number, helperId: number) => void;
   onDistributeParticipants: (participantsPerGroup: number) => void;
@@ -92,6 +96,10 @@ export function GroupsGrid({
 
   const handleChangeGroupName = (groupId: number, newName: string) => {
     onUpdateGroupName(groupId, newName);
+  };
+
+  const handleChangeGroupTier = (groupId: number, tier: number) => {
+    onUpdateGroupTier(groupId, tier);
   };
 
   const handleChangeGroupMatchDay = (
@@ -222,6 +230,7 @@ export function GroupsGrid({
                   key={`${group.id}+${group.participants.length}`}
                   group={group}
                   onChangeGroupName={handleChangeGroupName}
+                  onChangeGroupTier={handleChangeGroupTier}
                   onChangeGroupMatchDay={handleChangeGroupMatchDay}
                   onDeleteGroup={onDeleteGroup}
                   matchEnteringHelpers={matchEnteringHelpers}
@@ -249,6 +258,7 @@ export function GroupsGrid({
 export function GroupContainer({
   group,
   onChangeGroupName,
+  onChangeGroupTier,
   onChangeGroupMatchDay,
   onDeleteGroup,
   matchEnteringHelpers,
@@ -261,6 +271,7 @@ export function GroupContainer({
   matchEnteringHelpers: MatchEnteringHelperWithName[];
   helperAssignedCounts: Record<number, number>;
   onChangeGroupName: (groupId: number, newName: string) => void;
+  onChangeGroupTier: (groupId: number, tier: number) => void;
   onChangeGroupMatchDay: (groupId: number, matchDay: DayOfWeek | null) => void;
   onDeleteGroup: (groupId: number) => void;
   onAddHelperToGroup: (groupId: number, helperId: number) => void;
@@ -288,12 +299,18 @@ export function GroupContainer({
     >
       <CardHeader>
         <CardTitle>
-          <div className="flex gap-2">
+          <div className="flex items-center gap-2">
             <div className="flex-1">
               <GroupTitle
                 onChangeGroupName={onChangeGroupName}
                 groupId={group.id}
                 groupName={group.groupName}
+                tierControl={
+                  <GroupTier
+                    group={group}
+                    onChangeGroupTier={onChangeGroupTier}
+                  />
+                }
               />
             </div>
             <Button
@@ -437,6 +454,8 @@ export function ParticipantItem({
       },
     });
 
+  const promotionTarget = usePromotionTarget(participant.id);
+
   const style = {
     transform: CSS.Translate.toString(transform),
   };
@@ -451,7 +470,10 @@ export function ParticipantItem({
       {...listeners}
       className={`px-2 py-1 rounded-md shadow-sm cursor-grab active:cursor-grabbing ${draggingClasses}`}
     >
-      <ParticipantEntry participant={participant} />
+      <ParticipantEntry
+        participant={participant}
+        promotionTarget={promotionTarget}
+      />
     </div>
   );
 }

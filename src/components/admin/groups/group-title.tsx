@@ -3,18 +3,20 @@
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Pen } from "lucide-react";
-import { ChangeEventHandler, useState } from "react";
+import { ChangeEventHandler, ReactNode, useState } from "react";
 
 type Props = {
   groupId: number;
   groupName: string;
   onChangeGroupName: (groupId: number, groupName: string) => void;
+  tierControl?: ReactNode;
 };
 
 export function GroupTitle({
   groupId,
   groupName: initialGroupName,
   onChangeGroupName,
+  tierControl,
 }: Props) {
   const [isEditing, setIsEditing] = useState(false);
   const [groupName, setGroupName] = useState(initialGroupName);
@@ -64,6 +66,7 @@ export function GroupTitle({
       <Button size="icon" variant="ghost" onClick={handleEditClick}>
         <Pen className="h-4 w-4" />
       </Button>
+      {tierControl}
     </div>
   );
 }

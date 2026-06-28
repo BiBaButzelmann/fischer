@@ -1,7 +1,5 @@
-import {
-  getAllGroupNamesByTournamentId,
-  getParticipantsInGroup,
-} from "@/db/repositories/game";
+import { getParticipantsInGroup } from "@/db/repositories/game";
+import { getGroupsByTournamentId } from "@/db/repositories/group";
 import { getStandings } from "@/services/standings";
 import { Card } from "@/components/ui/card";
 import { Tournament } from "@/db/types/tournament";
@@ -19,11 +17,16 @@ export async function TournamentDone({
     session != null ? await getProfileByUserId(session.user.id) : null;
   const greetingName = profile?.firstName ?? "Gast";
 
-  const groups = await getAllGroupNamesByTournamentId(tournament.id);
-
-  // TODO(next PR): identify the A group via the new group.tier column (0 = A)
-  // instead of relying on groups[0] (first group by groupName).
-  const champion = await getChampionName(groups[0]?.id);
+  const groups = await getGroupsByTournamentId(tournament.id);
+  const topGroup = groups.reduce<(typeof groups)[number] | null>(
+    (best, group) => {
+      if (group.tier == null) return best;
+      if (best?.tier == null || group.tier < best.tier) return group;
+      return best;
+    },
+    null,
+  );
+  const champion = await getChampionName(topGroup?.id);
 
   return (
     <div className="space-y-8">

@@ -44,3 +44,10 @@ export async function getLatestTournament() {
     orderBy: (tournament, { desc }) => [desc(tournament.createdAt)],
   });
 }
+
+export async function getMostRecentDoneTournament() {
+  return await db.query.tournament.findFirst({
+    where: (tournament, { eq }) => eq(tournament.stage, "done"),
+    orderBy: (tournament, { desc }) => [desc(tournament.startDate)],
+  });
+}

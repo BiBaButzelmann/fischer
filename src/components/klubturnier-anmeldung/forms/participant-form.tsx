@@ -35,9 +35,13 @@ import { Tournament } from "@/db/types/tournament";
 import { getParticipantEloData } from "@/actions/participant";
 import { Profile } from "@/db/types/profile";
 import { DEFAULT_CLUB_KEY, DEFAULT_CLUB_LABEL } from "@/constants/constants";
+import { Switch } from "@/components/ui/switch";
+import type { PromotionEligibility } from "@/services/promotion";
 
 type Props = {
   initialValues?: z.infer<typeof participantFormSchema>;
+  canDelete: boolean;
+  promotionEligibility: PromotionEligibility | null;
   onSubmit: (data: z.infer<typeof participantFormSchema>) => Promise<void>;
   onDelete: () => Promise<void>;
   tournament: Tournament;
@@ -46,6 +50,8 @@ type Props = {
 
 export function ParticipateForm({
   initialValues,
+  canDelete,
+  promotionEligibility,
   onSubmit,
   onDelete,
   tournament,
@@ -68,6 +74,7 @@ export function ParticipateForm({
       preferredMatchDay: initialValues?.preferredMatchDay,
       secondaryMatchDays: initialValues?.secondaryMatchDays ?? [],
       notAvailableDays: initialValues?.notAvailableDays ?? [],
+      exercisePromotionRight: initialValues?.exercisePromotionRight ?? false,
     },
   });
 
@@ -140,6 +147,41 @@ export function ParticipateForm({
         onSubmit={form.handleSubmit(handleSubmit)}
         className="space-y-6 pt-4"
       >
+        {promotionEligibility != null ? (
+          <FormField
+            control={form.control}
+            name="exercisePromotionRight"
+            render={({ field }) => (
+              <FormItem className="space-y-3 rounded-md border border-amber-200 bg-amber-50/60 p-4 dark:border-amber-900/40 dark:bg-amber-950/20">
+                <div className="flex flex-row items-center justify-between gap-3 space-y-0">
+                  <div className="space-y-1">
+                    <FormLabel>
+                      Möchtest du dein Aufstiegsrecht wahrnehmen?
+                    </FormLabel>
+                    <FormDescription>
+                      Als Sieger der Gruppe {promotionEligibility.wonGroupName}{" "}
+                      hast du das Recht, in die Gruppe{" "}
+                      {promotionEligibility.targetTierLetter} aufzusteigen.
+                    </FormDescription>
+                  </div>
+                  <FormControl>
+                    <Switch
+                      checked={field.value ?? false}
+                      onCheckedChange={field.onChange}
+                    />
+                  </FormControl>
+                </div>
+                {promotionEligibility.targetIsAGroup ? (
+                  <p className="text-sm font-medium text-amber-700 dark:text-amber-400">
+                    Beachte: Die A-Gruppe spielt nur freitags.
+                  </p>
+                ) : null}
+                <FormMessage />
+              </FormItem>
+            )}
+          />
+        ) : null}
+
         <div className="flex gap-4">
           <FormField
             control={form.control}
@@ -471,8 +513,7 @@ export function ParticipateForm({
           >
             Änderungen speichern
           </Button>
-          {initialValues !== undefined &&
-          tournament.stage === "registration" ? (
+          {canDelete && tournament.stage === "registration" ? (
             <Button
               disabled={isPending}
               className="w-full sm:w-auto "
