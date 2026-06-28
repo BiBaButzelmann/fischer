@@ -19,6 +19,7 @@ import invariant from "tiny-invariant";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { GridGroup } from "./types";
 import { GroupMatchDay } from "./group-match-day";
+import { GroupTier } from "./group-tier";
 import { ParticipantEntry } from "./participant-entry";
 import { GroupTitle } from "./group-title";
 import { GroupStats } from "./group-stats";
@@ -50,6 +51,7 @@ export function GroupsGrid({
   onChangeUnassignedParticipants,
   onDeleteGroup,
   onUpdateGroupName,
+  onUpdateGroupTier,
   onAddHelperToGroup,
   onRemoveHelperFromGroup,
   onDistributeParticipants,
@@ -64,6 +66,7 @@ export function GroupsGrid({
   onChangeUnassignedParticipants: (participants: ParticipantWithName[]) => void;
   onDeleteGroup: (groupId: number) => void;
   onUpdateGroupName: (groupId: number, newName: string) => void;
+  onUpdateGroupTier: (groupId: number, tier: number) => void;
   onAddHelperToGroup: (groupId: number, helperId: number) => void;
   onRemoveHelperFromGroup: (groupId: number, helperId: number) => void;
   onDistributeParticipants: (participantsPerGroup: number) => void;
@@ -92,6 +95,10 @@ export function GroupsGrid({
 
   const handleChangeGroupName = (groupId: number, newName: string) => {
     onUpdateGroupName(groupId, newName);
+  };
+
+  const handleChangeGroupTier = (groupId: number, tier: number) => {
+    onUpdateGroupTier(groupId, tier);
   };
 
   const handleChangeGroupMatchDay = (
@@ -222,6 +229,7 @@ export function GroupsGrid({
                   key={`${group.id}+${group.participants.length}`}
                   group={group}
                   onChangeGroupName={handleChangeGroupName}
+                  onChangeGroupTier={handleChangeGroupTier}
                   onChangeGroupMatchDay={handleChangeGroupMatchDay}
                   onDeleteGroup={onDeleteGroup}
                   matchEnteringHelpers={matchEnteringHelpers}
@@ -249,6 +257,7 @@ export function GroupsGrid({
 export function GroupContainer({
   group,
   onChangeGroupName,
+  onChangeGroupTier,
   onChangeGroupMatchDay,
   onDeleteGroup,
   matchEnteringHelpers,
@@ -261,6 +270,7 @@ export function GroupContainer({
   matchEnteringHelpers: MatchEnteringHelperWithName[];
   helperAssignedCounts: Record<number, number>;
   onChangeGroupName: (groupId: number, newName: string) => void;
+  onChangeGroupTier: (groupId: number, tier: number) => void;
   onChangeGroupMatchDay: (groupId: number, matchDay: DayOfWeek | null) => void;
   onDeleteGroup: (groupId: number) => void;
   onAddHelperToGroup: (groupId: number, helperId: number) => void;
@@ -312,6 +322,10 @@ export function GroupContainer({
         className="p-0 pl-4 pb-4 pr-4 md:p-0 md:pl-6 md:pb-6 md:pr-6 flex flex-col h-full"
       >
         <div className="space-y-4 flex-1 flex flex-col">
+          <div className="px-2">
+            <GroupTier group={group} onChangeGroupTier={onChangeGroupTier} />
+          </div>
+
           <div className="px-2">
             <GroupMatchDay
               group={group}

@@ -21,6 +21,13 @@ export const saveGroups = action(
     const session = await authWithRedirect();
     invariant(session?.user.role === "admin", "Unauthorized");
 
+    const groupWithoutTier = groupsData.find(
+      (g) => !g.isDeleted && g.tier == null,
+    );
+    if (groupWithoutTier) {
+      return { error: "Bitte für jede Gruppe eine Stufe angeben." };
+    }
+
     const groupsToDelete = groupsData.filter((g) => g.isDeleted);
     const groupsToInsert = groupsData.filter((g) => g.isNew && !g.isDeleted);
     const groupsToUpdate = groupsData.filter((g) => !g.isNew && !g.isDeleted);
@@ -88,6 +95,7 @@ async function updateGroup(
     .set({
       groupName: groupData.groupName,
       groupNumber: groupData.groupNumber,
+      tier: groupData.tier ?? 0,
       dayOfWeek: groupData.dayOfWeek,
     })
     .where(eq(group.id, groupData.id));
@@ -205,6 +213,7 @@ async function insertGroup(
       tournamentId,
       groupName: data.groupName,
       groupNumber: data.groupNumber,
+      tier: data.tier ?? 0,
       dayOfWeek: data.dayOfWeek,
     })
     .returning();

@@ -44,6 +44,7 @@ export async function EditGroups({ tournament }: { tournament: Tournament }) {
         isDeleted: false,
         groupName: g.groupName,
         groupNumber: g.groupNumber,
+        tier: g.tier,
         dayOfWeek: g.dayOfWeek,
         participants: g.participants.map(({ groupPosition, participant }) => ({
           groupPosition: groupPosition,

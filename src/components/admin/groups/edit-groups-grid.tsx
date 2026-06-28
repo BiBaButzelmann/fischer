@@ -84,6 +84,7 @@ export function EditGroupsGrid({
       isDeleted: false,
       groupNumber: nextGroupNumber,
       groupName: generateGroupName(nextGroupNumber),
+      tier: null,
       dayOfWeek: null,
       participants: [],
       matchEnteringHelpers: [],
@@ -116,6 +117,13 @@ export function EditGroupsGrid({
   const handleUpdateGroupName = (groupId: number, newName: string) => {
     const updatedGroups = gridGroups.map((g) =>
       g.id === groupId ? { ...g, groupName: newName } : g,
+    );
+    setGridGroups(updatedGroups);
+  };
+
+  const handleUpdateGroupTier = (groupId: number, tier: number) => {
+    const updatedGroups = gridGroups.map((g) =>
+      g.id === groupId ? { ...g, tier } : g,
     );
     setGridGroups(updatedGroups);
   };
@@ -155,6 +163,14 @@ export function EditGroupsGrid({
   };
 
   const handleSaveChanges = () => {
+    const groupWithoutTier = gridGroups.find(
+      (g) => !g.isDeleted && g.tier == null,
+    );
+    if (groupWithoutTier) {
+      toast.error("Bitte für jede Gruppe eine Stufe angeben.");
+      return;
+    }
+
     startTransition(async () => {
       const result = await saveGroups(tournamentId, gridGroups);
       if (isError(result)) {
@@ -191,6 +207,7 @@ export function EditGroupsGrid({
           onChangeUnassignedParticipants={setUnassignedParticipants}
           onDeleteGroup={handleDeleteGroup}
           onUpdateGroupName={handleUpdateGroupName}
+          onUpdateGroupTier={handleUpdateGroupTier}
           onAddHelperToGroup={handleAddHelperToGroup}
           onRemoveHelperFromGroup={handleRemoveHelperFromGroup}
           onDistributeParticipants={handleDistributeParticipants}

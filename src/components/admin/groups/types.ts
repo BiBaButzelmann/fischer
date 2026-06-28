@@ -8,6 +8,7 @@ export type GridGroup = {
   isDeleted: boolean;
   groupNumber: number;
   groupName: string;
+  tier: number | null;
   dayOfWeek: DayOfWeek | null;
   participants: ParticipantWithName[];
   matchEnteringHelpers: MatchEnteringHelperWithName[];
