@@ -9,6 +9,7 @@ import { authWithRedirect } from "@/auth/utils";
 import { getTournamentById } from "@/db/repositories/tournament";
 import { getProfileByUserId } from "@/db/repositories/profile";
 import { getParticipantsWithZpsIdsByTournamentId } from "@/db/repositories/participant";
+import { getPromotionEligibility } from "@/services/promotion";
 import { and, eq } from "drizzle-orm";
 import { DEFAULT_CLUB_LABEL } from "@/constants/constants";
 import { revalidatePath } from "next/cache";
@@ -39,6 +40,11 @@ export async function createParticipant(
   const currentProfile = await getProfileByUserId(session.user.id);
   invariant(currentProfile, "Profile not found");
 
+  const promotionEligibility = await getPromotionEligibility(currentProfile.id);
+  const exercisePromotionRight = promotionEligibility
+    ? (data.exercisePromotionRight ?? false)
+    : null;
+
   await db
     .insert(participant)
     .values({
@@ -57,6 +63,7 @@ export async function createParticipant(
       zpsClubId: data.zpsClub,
       zpsPlayerId: data.zpsPlayer,
       entryFeePayed: data.chessClubType === "other" ? false : null,
+      exercisePromotionRight,
     })
     .onConflictDoUpdate({
       target: [participant.tournamentId, participant.profileId],
@@ -74,6 +81,7 @@ export async function createParticipant(
         zpsClubId: data.zpsClub,
         zpsPlayerId: data.zpsPlayer,
         entryFeePayed: data.chessClubType === "other" ? false : null,
+        exercisePromotionRight,
       },
     });
 }

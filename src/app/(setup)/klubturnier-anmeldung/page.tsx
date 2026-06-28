@@ -2,7 +2,12 @@ import { authWithRedirect } from "@/auth/utils";
 import { RolesManager } from "@/components/klubturnier-anmeldung/roles-manager";
 import { getProfileByUserId } from "@/db/repositories/profile";
 import { getRolesDataByProfileIdAndTournamentId } from "@/db/repositories/role";
-import { getOpenRegistrationTournament } from "@/db/repositories/tournament";
+import {
+  getMostRecentDoneTournament,
+  getOpenRegistrationTournament,
+} from "@/db/repositories/tournament";
+import { getParticipantByProfileIdAndTournamentId } from "@/db/repositories/participant";
+import { getPromotionEligibility } from "@/services/promotion";
 import { redirect } from "next/navigation";
 
 export default async function RolesPage() {
@@ -30,10 +35,19 @@ export default async function RolesPage() {
     );
   }
 
-  const initialValues = await getRolesDataByProfileIdAndTournamentId(
-    profile.id,
-    tournament.id,
-  );
+  const [initialValues, promotionEligibility] = await Promise.all([
+    getRolesDataByProfileIdAndTournamentId(profile.id, tournament.id),
+    getPromotionEligibility(profile.id),
+  ]);
+
+  const previousTournament = await getMostRecentDoneTournament();
+  const previousParticipant = previousTournament
+    ? await getParticipantByProfileIdAndTournamentId(
+        profile.id,
+        previousTournament.id,
+      )
+    : null;
+
   return (
     <div className="space-y-8">
       <header className="text-center">
@@ -51,6 +65,8 @@ export default async function RolesPage() {
         rolesData={initialValues}
         tournament={tournament}
         profile={profile}
+        promotionEligibility={promotionEligibility}
+        previousParticipant={previousParticipant ?? null}
       />
     </div>
   );

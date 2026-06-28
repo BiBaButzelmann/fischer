@@ -41,6 +41,7 @@ export const participantFormSchema = z
     }),
     secondaryMatchDays: z.array(z.enum(availableMatchDays)),
     notAvailableDays: z.array(z.date()).max(5, "Maximal 5 Tage").optional(),
+    exercisePromotionRight: z.boolean().optional(),
   })
   .refine(
     (data) => {

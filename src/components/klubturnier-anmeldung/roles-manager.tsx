@@ -29,12 +29,16 @@ import { sendRolesSelectionSummaryEmail } from "@/actions/email/roles";
 import { Profile } from "@/db/types/profile";
 import { DEFAULT_CLUB_KEY, DEFAULT_CLUB_LABEL } from "@/constants/constants";
 import { createReferee, deleteReferee } from "@/actions/referee";
+import { Participant } from "@/db/types/participant";
+import type { PromotionEligibility } from "@/services/promotion";
 
 type Props = {
   userId: string;
   rolesData: RolesData;
   tournament: Tournament;
   profile: Profile;
+  promotionEligibility: PromotionEligibility | null;
+  previousParticipant: Participant | null;
 };
 
 export function RolesManager({
@@ -42,7 +46,14 @@ export function RolesManager({
   rolesData,
   tournament,
   profile,
+  promotionEligibility,
+  previousParticipant,
 }: Props) {
+  const participantInitialValues = buildParticipantInitialValues(
+    rolesData.participant,
+    previousParticipant,
+  );
+  const canDeleteParticipant = rolesData.participant != null;
   const [isPending, startTransition] = useTransition();
   const router = useRouter();
   const [accordionValue, setAccordionValue] = useState<string>();
@@ -145,28 +156,9 @@ export function RolesManager({
           icon={User}
         >
           <ParticipateForm
-            initialValues={
-              rolesData.participant
-                ? {
-                    chessClubType:
-                      rolesData.participant.chessClub === DEFAULT_CLUB_LABEL
-                        ? DEFAULT_CLUB_KEY
-                        : "other",
-                    chessClub: rolesData.participant.chessClub,
-                    preferredMatchDay: rolesData.participant.preferredMatchDay,
-                    secondaryMatchDays:
-                      rolesData.participant.secondaryMatchDays,
-                    title: rolesData.participant.title ?? "noTitle",
-                    nationality: rolesData.participant.nationality ?? undefined,
-                    dwzRating: rolesData.participant.dwzRating ?? undefined,
-                    fideRating: rolesData.participant.fideRating ?? undefined,
-                    fideId: rolesData.participant.fideId ?? undefined,
-                    birthYear: rolesData.participant.birthYear ?? undefined,
-                    notAvailableDays:
-                      rolesData.participant.notAvailableDays ?? [],
-                  }
-                : undefined
-            }
+            initialValues={participantInitialValues}
+            canDelete={canDeleteParticipant}
+            promotionEligibility={promotionEligibility}
             onSubmit={handleParticipateFormSubmit}
             onDelete={handleDeleteParticipant}
             tournament={tournament}
@@ -253,4 +245,47 @@ export function RolesManager({
       ) : null}
     </div>
   );
+}
+
+function buildParticipantInitialValues(
+  current: RolesData["participant"],
+  previous: Participant | null,
+): z.infer<typeof participantFormSchema> | undefined {
+  if (current) {
+    return {
+      chessClubType:
+        current.chessClub === DEFAULT_CLUB_LABEL ? DEFAULT_CLUB_KEY : "other",
+      chessClub: current.chessClub,
+      title: current.title ?? "noTitle",
+      nationality: current.nationality ?? undefined,
+      dwzRating: current.dwzRating ?? undefined,
+      fideRating: current.fideRating ?? undefined,
+      fideId: current.fideId ?? undefined,
+      birthYear: current.birthYear ?? undefined,
+      preferredMatchDay: current.preferredMatchDay,
+      secondaryMatchDays: current.secondaryMatchDays,
+      notAvailableDays: current.notAvailableDays ?? [],
+      exercisePromotionRight: current.exercisePromotionRight ?? false,
+    };
+  }
+
+  if (previous) {
+    return {
+      chessClubType:
+        previous.chessClub === DEFAULT_CLUB_LABEL ? DEFAULT_CLUB_KEY : "other",
+      chessClub: previous.chessClub,
+      title: previous.title ?? "noTitle",
+      nationality: previous.nationality ?? undefined,
+      fideId: previous.fideId ?? undefined,
+      birthYear: previous.birthYear ?? undefined,
+      preferredMatchDay: previous.preferredMatchDay,
+      secondaryMatchDays: previous.secondaryMatchDays,
+      zpsClub: previous.zpsClubId ?? undefined,
+      zpsPlayer: previous.zpsPlayerId ?? undefined,
+      notAvailableDays: [],
+      exercisePromotionRight: false,
+    };
+  }
+
+  return undefined;
 }

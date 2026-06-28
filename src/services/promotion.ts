@@ -33,13 +33,15 @@ export const getPromotionTargetsForPreviousEdition = cache(
         getStandings(group.id),
       ]);
 
-      const winnerParticipantId = standings[0]?.participantId;
-      if (winnerParticipantId == null) {
+      const winnerStats = standings[0];
+      if (winnerStats == null || winnerStats.gamesPlayed === 0) {
         continue;
       }
 
-      const winner = participants.find((p) => p.id === winnerParticipantId);
-      if (!winner) {
+      const winner = participants.find(
+        (p) => p.id === winnerStats.participantId,
+      );
+      if (winner == null || winner.deletedAt != null) {
         continue;
       }
 

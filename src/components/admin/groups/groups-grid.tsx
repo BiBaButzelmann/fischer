@@ -36,6 +36,7 @@ import {
 import { Input } from "@/components/ui/input";
 import { cn } from "@/lib/utils";
 import { sortParticipantsByDwz } from "@/lib/elo";
+import { usePromotionTarget } from "./promotion-targets-context";
 
 export const UNASSIGNED_CONTAINER_ID = "unassigned-droppable";
 const UNASSIGNED_CONTAINER_TYPE = "unassigned";
@@ -451,6 +452,8 @@ export function ParticipantItem({
       },
     });
 
+  const promotionTarget = usePromotionTarget(participant.id);
+
   const style = {
     transform: CSS.Translate.toString(transform),
   };
@@ -465,7 +468,10 @@ export function ParticipantItem({
       {...listeners}
       className={`px-2 py-1 rounded-md shadow-sm cursor-grab active:cursor-grabbing ${draggingClasses}`}
     >
-      <ParticipantEntry participant={participant} />
+      <ParticipantEntry
+        participant={participant}
+        promotionTarget={promotionTarget}
+      />
     </div>
   );
 }
