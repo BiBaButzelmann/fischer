@@ -142,9 +142,11 @@ export function ParticipateForm({
           form.setValue("zpsPlayer", eloData.zpsPlayer);
         }
 
+        if (eloData.fideId) {
+          form.setValue("fideId", eloData.fideId);
+        }
         if (eloData.fideRating && eloData.fideId) {
           form.setValue("fideRating", eloData.fideRating);
-          form.setValue("fideId", eloData.fideId);
           form.setValue(
             "nationality",
             eloData.nationality !== "?" ? eloData.nationality : undefined,

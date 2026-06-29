@@ -284,16 +284,24 @@ export const updateAllParticipantRatings = action(
         );
 
         const fideId = participantData.fideId ?? dewisData?.fideId ?? null;
-        const fideRating = fideId
-          ? ((await getFideProfile(fideId))?.fideRating ?? null)
-          : null;
 
-        const values: { dwzRating?: number; fideRating?: number } = {};
+        const values: {
+          dwzRating?: number;
+          fideRating?: number;
+          fideId?: string;
+        } = {};
+
         if (dewisData?.dwzRating != null) {
           values.dwzRating = dewisData.dwzRating;
         }
-        if (fideRating != null) {
-          values.fideRating = fideRating;
+        if (fideId != null) {
+          const profile = await getFideProfile(fideId);
+          if (profile?.fideRating != null) {
+            values.fideRating = profile.fideRating;
+          }
+          if (!participantData.fideId) {
+            values.fideId = fideId;
+          }
         }
 
         if (Object.keys(values).length === 0) {

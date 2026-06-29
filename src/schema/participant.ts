@@ -27,14 +27,17 @@ export const participantFormSchema = z
     birthYear: z.coerce
       .number()
       .min(1900, "Geburtsjahr muss mindestens 1900 sein")
-      .max(
-        new Date().getFullYear(),
+      .refine(
+        (y) => y <= new Date().getFullYear(),
         "Geburtsjahr kann nicht in der Zukunft liegen",
       )
       .optional(),
     birthDate: z.coerce
       .date()
-      .max(new Date(), "Geburtsdatum kann nicht in der Zukunft liegen")
+      .refine(
+        (d) => d <= new Date(),
+        "Geburtsdatum kann nicht in der Zukunft liegen",
+      )
       .optional(),
 
     // Will not be used in the form, but can be used in the backend
