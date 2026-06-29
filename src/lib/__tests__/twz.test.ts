@@ -60,7 +60,6 @@ describe("sortParticipantsByTwz", () => {
   });
 
   test("breaks TWZ ties by the second (lower) rating descending", () => {
-    // Alle TWZ = 2000; zweite Wertung: B=1950 > A=1850 > C=keine
     const a = makeParticipant(2000, 1850, "A");
     const b = makeParticipant(1950, 2000, "B");
     const c = makeParticipant(2000, null, "C");

@@ -53,7 +53,6 @@ export function ParticipantEntry({
           <PopoverTrigger asChild>
             <button
               type="button"
-              // verhindert, dass der Klick auf die Zahl einen Drag startet
               onPointerDown={(e) => e.stopPropagation()}
               className="shrink-0 rounded-md focus:outline-none focus-visible:ring-2 focus-visible:ring-ring"
             >

@@ -37,7 +37,6 @@ export function formatTwz(participant: RatingFields, fallback = "-"): string {
 export function sortParticipantsByTwz(
   participants: ParticipantWithName[],
 ): ParticipantWithName[] {
-  // -Infinity = "fehlt" → sortiert nach hinten
   const orMissing = (value: number | null) =>
     value === null ? -Infinity : value;
 
