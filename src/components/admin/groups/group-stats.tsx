@@ -1,12 +1,23 @@
 import { useMemo } from "react";
 import { GridGroup } from "./types";
 import { CircleSlash2, Users } from "lucide-react";
+import { getTwz } from "@/lib/twz";
 
 type Props = {
   group: GridGroup;
 };
 
 export function GroupStats({ group }: Props) {
+  const averageTwz = useMemo(() => {
+    const twzValues = group.participants
+      .map((participant) => getTwz(participant))
+      .filter((twz): twz is number => twz !== null);
+    if (twzValues.length === 0) return 0;
+
+    const twzSum = twzValues.reduce((sum, twz) => sum + twz, 0);
+    return twzSum / twzValues.length;
+  }, [group.participants]);
+
   const averageElo = useMemo(() => {
     const participantsWithElo = group.participants.filter(
       (participant) => participant.fideRating !== null,
@@ -38,6 +49,10 @@ export function GroupStats({ group }: Props) {
       <div className="flex items-center gap-1">
         <Users className="h-3 w-3" />
         <span>{group.participants.length}</span>
+      </div>
+      <div className="flex items-center gap-1">
+        <CircleSlash2 className="h-3 w-3" />
+        <span>TWZ: {Math.round(averageTwz)}</span>
       </div>
       <div className="flex items-center gap-1">
         <CircleSlash2 className="h-3 w-3" />

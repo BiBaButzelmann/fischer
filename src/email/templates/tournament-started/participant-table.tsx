@@ -1,5 +1,6 @@
 import * as React from "react";
 import { ParticipantWithProfile } from "@/db/types/participant";
+import { formatTwz } from "@/lib/twz";
 
 type Props = {
   participants: ParticipantWithProfile[];
@@ -33,16 +34,7 @@ export function ParticipantTable({ participants }: Props) {
               textAlign: "left",
             }}
           >
-            DWZ
-          </th>
-          <th
-            style={{
-              border: "1px solid #dee2e6",
-              padding: "8px",
-              textAlign: "left",
-            }}
-          >
-            Elo
+            TWZ
           </th>
           <th
             style={{
@@ -81,15 +73,7 @@ export function ParticipantTable({ participants }: Props) {
                 padding: "8px",
               }}
             >
-              {participant.dwzRating || "-"}
-            </td>
-            <td
-              style={{
-                border: "1px solid #dee2e6",
-                padding: "8px",
-              }}
-            >
-              {participant.fideRating || "-"}
+              {formatTwz(participant)}
             </td>
             <td
               style={{

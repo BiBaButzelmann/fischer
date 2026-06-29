@@ -21,6 +21,7 @@ import { toast } from "sonner";
 import { Badge } from "@/components/ui/badge";
 import { ProfileWithName } from "@/db/types/profile";
 import { getParticipantFullName } from "@/lib/participant";
+import { getTwz } from "@/lib/twz";
 
 type Props = {
   participant: {
@@ -39,6 +40,12 @@ export function ParticipantRow({
   const [softDeleteOpen, setSoftDeleteOpen] = useState(false);
   const [hardDeleteOpen, setHardDeleteOpen] = useState(false);
   const [isPending, startTransition] = useTransition();
+
+  const twz = getTwz(participant);
+  const fideIsTwz =
+    participant.fideRating !== null && participant.fideRating === twz;
+  const dwzIsTwz =
+    participant.dwzRating !== null && participant.dwzRating === twz;
 
   const handleSoftDelete = () => {
     startTransition(async () => {
@@ -135,10 +142,18 @@ export function ParticipantRow({
           </div>
 
           <div className="flex items-center gap-2">
-            <Badge className="whitespace-nowrap w-[75px]">
+            <Badge
+              variant={fideIsTwz ? "default" : "outline"}
+              title={fideIsTwz ? "Turnierwertungszahl (TWZ)" : undefined}
+              className="whitespace-nowrap w-[75px]"
+            >
               FIDE {participant.fideRating ?? "0"}
             </Badge>
-            <Badge variant="secondary" className="whitespace-nowrap w-[75px]">
+            <Badge
+              variant={dwzIsTwz ? "default" : "secondary"}
+              title={dwzIsTwz ? "Turnierwertungszahl (TWZ)" : undefined}
+              className="whitespace-nowrap w-[75px]"
+            >
               DWZ {participant.dwzRating ?? "0"}
             </Badge>
           </div>

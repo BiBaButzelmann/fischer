@@ -28,6 +28,7 @@ import {
   isSameDate,
 } from "@/lib/date";
 import { getParticipantFullName } from "@/lib/participant";
+import { getTwz } from "@/lib/twz";
 
 type Props = {
   games: GameWithParticipantProfilesAndGroupAndMatchday[];
@@ -162,13 +163,9 @@ export function GamesList({
                 </TableCell>
                 <TableCell className="w-40 truncate">
                   {getParticipantFullName(game.whiteParticipant!)}
-                  {(game.whiteParticipant!.dwzRating !== null ||
-                    game.whiteParticipant!.fideRating !== null) && (
+                  {getTwz(game.whiteParticipant!) !== null && (
                     <span className="ml-2 text-muted-foreground text-sm">
-                      (
-                      {game.whiteParticipant!.dwzRating ??
-                        game.whiteParticipant!.fideRating}
-                      )
+                      ({getTwz(game.whiteParticipant!)})
                     </span>
                   )}
                 </TableCell>
@@ -177,13 +174,9 @@ export function GamesList({
                 </TableCell>
                 <TableCell className="w-40 truncate">
                   {getParticipantFullName(game.blackParticipant!)}
-                  {(game.blackParticipant!.dwzRating !== null ||
-                    game.blackParticipant!.fideRating !== null) && (
+                  {getTwz(game.blackParticipant!) !== null && (
                     <span className="ml-2 text-muted-foreground text-sm">
-                      (
-                      {game.blackParticipant!.dwzRating ??
-                        game.blackParticipant!.fideRating}
-                      )
+                      ({getTwz(game.blackParticipant!)})
                     </span>
                   )}
                 </TableCell>
@@ -249,12 +242,9 @@ export function GamesList({
                     <div className="text-sm font-medium truncate">
                       {getParticipantFullName(game.whiteParticipant!)}
                     </div>
-                    {(game.whiteParticipant!.dwzRating !== null ||
-                      game.whiteParticipant!.fideRating !== null) && (
+                    {getTwz(game.whiteParticipant!) !== null && (
                       <div className="text-[11px] text-muted-foreground">
-                        Elo/DWZ:{" "}
-                        {game.whiteParticipant!.dwzRating ??
-                          game.whiteParticipant!.fideRating}
+                        TWZ: {getTwz(game.whiteParticipant!)}
                       </div>
                     )}
                   </div>
@@ -265,12 +255,9 @@ export function GamesList({
                     <div className="text-sm font-medium truncate">
                       {getParticipantFullName(game.blackParticipant!)}
                     </div>
-                    {(game.blackParticipant!.dwzRating !== null ||
-                      game.blackParticipant!.fideRating !== null) && (
+                    {getTwz(game.blackParticipant!) !== null && (
                       <div className="text-[11px] text-muted-foreground">
-                        Elo/DWZ:{" "}
-                        {game.blackParticipant!.dwzRating ??
-                          game.blackParticipant!.fideRating}
+                        TWZ: {getTwz(game.blackParticipant!)}
                       </div>
                     )}
                   </div>

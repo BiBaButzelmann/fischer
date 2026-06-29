@@ -8,6 +8,7 @@ import {
   TableRow,
 } from "../ui/table";
 import { cn } from "@/lib/utils";
+import { formatTwz } from "@/lib/twz";
 
 type Props = {
   profileId?: number;
@@ -21,8 +22,7 @@ export function Participants({ profileId, participants }: Props) {
         <TableRow>
           <TableHead className="w-[50px] sticky top-0 bg-card">#</TableHead>
           <TableHead className="sticky top-0 bg-card">Name</TableHead>
-          <TableHead className="text-right sticky top-0 bg-card">ELO</TableHead>
-          <TableHead className="text-right sticky top-0 bg-card">DWZ</TableHead>
+          <TableHead className="text-right sticky top-0 bg-card">TWZ</TableHead>
         </TableRow>
       </TableHeader>
       <TableBody>
@@ -39,8 +39,7 @@ export function Participants({ profileId, participants }: Props) {
               {p.title ? `${p.title} ` : ""}
               {p.profile.firstName} {p.profile.lastName}
             </TableCell>
-            <TableCell className="text-right">{p.fideRating}</TableCell>
-            <TableCell className="text-right">{p.dwzRating}</TableCell>
+            <TableCell className="text-right">{formatTwz(p)}</TableCell>
           </TableRow>
         ))}
       </TableBody>

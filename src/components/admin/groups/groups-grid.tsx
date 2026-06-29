@@ -35,7 +35,7 @@ import {
 } from "@/components/ui/popover";
 import { Input } from "@/components/ui/input";
 import { cn } from "@/lib/utils";
-import { sortParticipantsByDwz } from "@/lib/elo";
+import { sortParticipantsByTwz } from "@/lib/twz";
 import { usePromotionTarget } from "./promotion-targets-context";
 
 export const UNASSIGNED_CONTAINER_ID = "unassigned-droppable";
@@ -287,7 +287,7 @@ export function GroupContainer({
   });
 
   const participants = useMemo(() => {
-    return sortParticipantsByDwz(group.participants);
+    return sortParticipantsByTwz(group.participants);
   }, [group.participants]);
 
   return (
@@ -384,7 +384,7 @@ export function UnassignedContainer({
   });
 
   const sortedParticipants = useMemo(() => {
-    return sortParticipantsByDwz(participants);
+    return sortParticipantsByTwz(participants);
   }, [participants]);
 
   const handleSubmit = (event: FormEvent<HTMLFormElement>) => {

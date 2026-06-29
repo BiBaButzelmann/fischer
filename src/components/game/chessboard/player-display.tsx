@@ -2,6 +2,7 @@ import { getParticipantFullName } from "@/lib/participant";
 import { ParticipantWithName } from "@/db/types/participant";
 import { type ClassValue } from "clsx";
 import { cn } from "@/lib/utils";
+import { getTwz } from "@/lib/twz";
 
 type Props = {
   participant: ParticipantWithName;
@@ -11,7 +12,7 @@ type Props = {
 
 export function PlayerDisplay({ participant, result, className }: Props) {
   const titlePrefix = participant.title ? `${participant.title} ` : "";
-  const rating = participant.dwzRating ?? participant.fideRating;
+  const rating = getTwz(participant);
   const displayName = getParticipantFullName(participant);
 
   return (

@@ -11,6 +11,8 @@ import {
 import { getRolesDataByProfileIdAndTournamentId } from "@/db/repositories/role";
 import { PropsWithChildren } from "react";
 import { Participant } from "@/db/types/participant";
+import { getTwz } from "@/lib/twz";
+import { cn } from "@/lib/utils";
 import { MatchEnteringHelper } from "@/db/types/match-entering-helper";
 import { SetupHelper } from "@/db/types/setup-helper";
 import { Referee } from "@/db/types/referee";
@@ -104,7 +106,42 @@ function RoleSection({
   );
 }
 
+function RatingCard({
+  label,
+  value,
+  isTwz,
+}: {
+  label: string;
+  value: number | null;
+  isTwz: boolean;
+}) {
+  return (
+    <div
+      className={cn(
+        "relative rounded-lg p-3 text-center border",
+        isTwz
+          ? "bg-primary/10 border-primary/40 ring-1 ring-primary/30"
+          : "bg-gray-50 border-gray-200",
+      )}
+    >
+      {isTwz && (
+        <span className="absolute top-1 right-1.5 text-[10px] font-semibold uppercase tracking-wide text-primary">
+          TWZ
+        </span>
+      )}
+      <div className="text-xl font-bold text-gray-900">{value ?? "-"}</div>
+      <div className="text-xs font-medium text-gray-500 uppercase tracking-wide">
+        {label}
+      </div>
+    </div>
+  );
+}
+
 function PlayerSection({ participant }: { participant: Participant }) {
+  const twz = getTwz(participant);
+  const dwzIsTwz = participant.dwzRating !== null && participant.dwzRating === twz;
+  const eloIsTwz = participant.fideRating !== null && participant.fideRating === twz;
+
   return (
     <div className="space-y-4">
       <div className="flex items-center gap-2 mb-4">
@@ -114,32 +151,20 @@ function PlayerSection({ participant }: { participant: Participant }) {
         <h3 className="text-lg font-semibold text-gray-900">Spieler</h3>
       </div>
 
-      <div className="grid grid-cols-2 md:grid-cols-3 gap-3 mb-4">
-        <div className="bg-gray-50 rounded-lg p-3 text-center border border-gray-200">
-          <div className="text-xl font-bold text-gray-900">
-            {participant.dwzRating ?? "-"}
-          </div>
-          <div className="text-xs font-medium text-gray-500 uppercase tracking-wide">
-            DWZ
-          </div>
-        </div>
-        <div className="bg-gray-50 rounded-lg p-3 text-center border border-gray-200">
-          <div className="text-xl font-bold text-gray-900">
-            {participant.fideRating ?? "-"}
-          </div>
-          <div className="text-xs font-medium text-gray-500 uppercase tracking-wide">
-            Elo
-          </div>
-        </div>
-        <div className="bg-gray-50 rounded-lg p-3 text-center border border-gray-200 md:col-span-1 col-span-2">
-          <div className="text-xl font-semibold text-gray-900">
-            {participant.fideId ?? "-"}
-          </div>
-          <div className="text-xs font-medium text-gray-500 uppercase tracking-wide">
-            FIDE ID
-          </div>
-        </div>
+      <div className="grid grid-cols-2 gap-3 mb-2">
+        <RatingCard label="DWZ" value={participant.dwzRating} isTwz={dwzIsTwz} />
+        <RatingCard label="Elo" value={participant.fideRating} isTwz={eloIsTwz} />
       </div>
+      <p className="text-xs text-gray-500">
+        Die höhere Wertung zählt als Turnierwertungszahl (TWZ) für die
+        Gruppeneinteilung.
+      </p>
+      {participant.fideId && (
+        <p className="text-xs text-gray-500 mb-4">
+          FIDE-ID:{" "}
+          <span className="font-medium text-gray-700">{participant.fideId}</span>
+        </p>
+      )}
 
       <div className="space-y-2">
         <div className="flex items-center gap-2 mb-2">
