@@ -29,6 +29,18 @@ export function formatTwz(participant: RatingFields, fallback = "-"): string {
 }
 
 /**
+ * Durchschnittliche TWZ der bewerteten Teilnehmer. Gibt null zurück, wenn kein
+ * Teilnehmer eine Wertung hat (Aufrufer wählt den passenden Platzhalter).
+ */
+export function averageTwz(participants: RatingFields[]): number | null {
+  const ratings = participants
+    .map((participant) => getTwz(participant))
+    .filter((twz): twz is number => twz !== null);
+  if (ratings.length === 0) return null;
+  return ratings.reduce((sum, twz) => sum + twz, 0) / ratings.length;
+}
+
+/**
  * Sortiert Teilnehmer absteigend nach TWZ. Tie-Break bei gleicher TWZ:
  * 1. zweite (niedrigere) Wertung absteigend (Spieler mit nur einer Wertung zuletzt),
  * 2. Nachname alphabetisch.
