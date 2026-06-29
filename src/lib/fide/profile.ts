@@ -37,6 +37,10 @@ export async function getFideProfile(
     return null;
   }
 
+  if (html.includes("No record found")) {
+    return null;
+  }
+
   const std = matchRating(html, "standart");
 
   const birthYearRaw = matchInfo(html, "byear");
