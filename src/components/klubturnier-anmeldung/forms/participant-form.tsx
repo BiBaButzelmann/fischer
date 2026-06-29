@@ -335,7 +335,8 @@ export function ParticipateForm({
         )}
 
         {chessClubType != null ? (
-          <div className="flex gap-4">
+          <div className="flex flex-col gap-2">
+            <div className="flex gap-4">
             <FormField
               control={form.control}
               name="title"
@@ -418,6 +419,13 @@ export function ParticipateForm({
                 </FormItem>
               )}
             />
+            </div>
+            <p className="text-sm text-muted-foreground">
+              Die Gruppeneinteilung erfolgt nach der{" "}
+              <span className="font-medium">Turnierwertungszahl (TWZ)</span> –
+              der höheren deiner beiden Wertungszahlen (ELO oder DWZ; Stichtag
+              01.09.2026). Bitte gib beide an, sofern vorhanden.
+            </p>
           </div>
         ) : null}
 

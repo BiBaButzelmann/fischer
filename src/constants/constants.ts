@@ -33,8 +33,6 @@ export const monthLabels = [
   "Dezember",
 ];
 
-export const NUMBER_OF_GROUPS_WITH_ELO = 4;
-
 export const CALENDAR_EXPORT_DURATIONS = {
   GAME: 5 * 60 * 60 * 1000,
   REFEREE: 5 * 60 * 60 * 1000,

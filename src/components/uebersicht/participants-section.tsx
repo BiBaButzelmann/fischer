@@ -1,4 +1,5 @@
 import { getParticipantsByTournamentId } from "@/db/repositories/participant";
+import { sortParticipantsByTwz } from "@/lib/twz";
 import { Participants } from "../participants/participants";
 import {
   Card,
@@ -16,7 +17,9 @@ export async function ParticipantsSection({
   tournamentId: number;
   profileId?: number;
 }) {
-  const participants = await getParticipantsByTournamentId(tournamentId);
+  const participants = sortParticipantsByTwz(
+    await getParticipantsByTournamentId(tournamentId),
+  );
 
   return (
     <Card className="flex h-full flex-col">

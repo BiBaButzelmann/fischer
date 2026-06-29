@@ -1,4 +1,5 @@
 import { ParticipantWithRatingAndChessClub } from "@/db/types/participant";
+import { formatTwz } from "@/lib/twz";
 import Image from "next/image";
 
 type Props = {
@@ -31,8 +32,7 @@ export function NameCard({ tournamentName, groupName, participant }: Props) {
         </span>
         <span className="text-lg">{participant.chessClub}</span>
         <div className="flex flex-col">
-          <span className="text-lg">ELO: {participant.fideRating ?? 0}</span>
-          <span className="text-lg">DWZ: {participant.dwzRating ?? 0}</span>
+          <span className="text-lg">TWZ: {formatTwz(participant)}</span>
         </div>
       </div>
     </div>

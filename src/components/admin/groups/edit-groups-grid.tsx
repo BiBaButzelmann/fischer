@@ -9,10 +9,9 @@ import { saveGroups } from "@/actions/group";
 import { MatchEnteringHelperWithName } from "@/db/types/match-entering-helper";
 import { useHelperAssignments } from "@/hooks/useHelperAssignments";
 import { toast } from "sonner";
-import { NUMBER_OF_GROUPS_WITH_ELO } from "@/constants/constants";
 import invariant from "tiny-invariant";
 import { isError } from "@/lib/actions";
-import { sortParticipantsByElo, sortParticipantsByDwz } from "@/lib/elo";
+import { sortParticipantsByTwz } from "@/lib/twz";
 import { PromotionTargetsProvider } from "./promotion-targets-context";
 
 export function EditGroupsGrid({
@@ -61,7 +60,6 @@ export function EditGroupsGrid({
         groups: gridGroups,
         unassigned: unassignedParticipants,
         participantsPerGroup: targetSize,
-        eloGroupCount: NUMBER_OF_GROUPS_WITH_ELO,
       });
 
     setGridGroups(updatedGroups);
@@ -250,20 +248,17 @@ function distributeParticipants({
   groups,
   unassigned,
   participantsPerGroup,
-  eloGroupCount,
 }: {
   groups: GridGroup[];
   unassigned: ParticipantWithName[];
   participantsPerGroup: number;
-  eloGroupCount: number;
 }) {
   const updatedGroups: GridGroup[] = [];
   const assigned: ParticipantWithName[] = [];
 
   const remainingIds = new Set(unassigned.map((p) => p.id));
 
-  const eloOrderedAll = sortParticipantsByElo(unassigned);
-  const dwzOrderedAll = sortParticipantsByDwz(unassigned);
+  const twzOrdered = sortParticipantsByTwz(unassigned);
 
   function takeFromOrdered(
     source: ParticipantWithName[],
@@ -280,7 +275,6 @@ function distributeParticipants({
     return picked;
   }
 
-  let activeGroupIndex = 0;
   for (const group of groups) {
     if (group.isDeleted) {
       updatedGroups.push(group);
@@ -291,13 +285,10 @@ function distributeParticipants({
     const participantsNeeded = participantsPerGroup - currentParticipantsCount;
     if (participantsNeeded <= 0) {
       updatedGroups.push(group);
-      activeGroupIndex++;
       continue;
     }
 
-    const ordering =
-      activeGroupIndex < eloGroupCount ? eloOrderedAll : dwzOrderedAll;
-    const toAdd = takeFromOrdered(ordering, participantsNeeded);
+    const toAdd = takeFromOrdered(twzOrdered, participantsNeeded);
     if (toAdd.length > 0) {
       assigned.push(...toAdd);
       updatedGroups.push({
@@ -307,7 +298,6 @@ function distributeParticipants({
     } else {
       updatedGroups.push(group);
     }
-    activeGroupIndex++;
   }
 
   const newUnassigned = unassigned.filter((p) => remainingIds.has(p.id));

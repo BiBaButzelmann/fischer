@@ -195,8 +195,7 @@ export function GroupPositionManager({
               <ParticipantEntry
                 participant={activeItem}
                 showMatchDays={false}
-                showFideRating={false}
-                showDwzRating={false}
+                showRating={false}
               />
             </div>
           ) : null}
@@ -249,8 +248,7 @@ function SortableParticipantItem({
         <ParticipantEntry
           participant={participant}
           showMatchDays={false}
-          showFideRating={false}
-          showDwzRating={false}
+          showRating={false}
         />
       </div>
     </div>

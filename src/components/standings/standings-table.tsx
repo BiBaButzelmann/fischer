@@ -16,6 +16,7 @@ import type { PlayerStats } from "@/db/types/standings";
 import { ParticipantWithName } from "@/db/types/participant";
 import invariant from "tiny-invariant";
 import { useTournamentSlug } from "@/hooks/use-tournament-slug";
+import { formatTwz } from "@/lib/twz";
 
 type Props = {
   standings: PlayerStats[];
@@ -51,10 +52,7 @@ export function StandingsTable({
           <TableRow>
             <TableHead className="w-[50px] text-center">#</TableHead>
             <TableHead>Name</TableHead>
-            <TableHead className="text-right">DWZ</TableHead>
-            <TableHead className="hidden md:table-cell text-right">
-              ELO
-            </TableHead>
+            <TableHead className="text-right">TWZ</TableHead>
             <TableHead className="text-right">Punkte</TableHead>
             <TableHead className="text-right">Feinwertung</TableHead>
             <TableHead className="hidden md:table-cell text-right">
@@ -65,7 +63,7 @@ export function StandingsTable({
         <TableBody>
           {standings.length === 0 ? (
             <TableRow>
-              <TableCell colSpan={7} className="text-center h-24">
+              <TableCell colSpan={6} className="text-center h-24">
                 Keine Ergebnisse für Gruppe{" "}
                 {selectedGroup?.groupName || selectedGroupId}
                 {selectedRound && ` bis Runde ${selectedRound}`} gefunden.
@@ -143,12 +141,7 @@ function StandingsRow({
         {participant.title ? `${participant.title} ` : ""}
         {participant.profile.firstName} {participant.profile.lastName}
       </TableCell>
-      <TableCell className="text-right">
-        {participant.dwzRating || "-"}
-      </TableCell>
-      <TableCell className="hidden md:table-cell text-right">
-        {participant.fideRating || "-"}
-      </TableCell>
+      <TableCell className="text-right">{formatTwz(participant)}</TableCell>
       <TableCell className="text-right">
         {playerStats.points.toFixed(1)}
       </TableCell>
