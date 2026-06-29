@@ -5,13 +5,23 @@ import { GroupsGrid } from "./groups-grid";
 import { useEffect, useState, useTransition } from "react";
 import { GridGroup } from "./types";
 import { Button } from "@/components/ui/button";
+import {
+  Dialog,
+  DialogTrigger,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+  DialogDescription,
+  DialogFooter,
+  DialogClose,
+} from "@/components/ui/dialog";
 import { saveGroups } from "@/actions/group";
 import { MatchEnteringHelperWithName } from "@/db/types/match-entering-helper";
 import { useHelperAssignments } from "@/hooks/useHelperAssignments";
 import { toast } from "sonner";
 import invariant from "tiny-invariant";
 import { isError } from "@/lib/actions";
-import { sortParticipantsByTwz } from "@/lib/twz";
+import { distributeParticipantsByTwzAndDay } from "@/lib/group-distribution";
 import { PromotionTargetsProvider } from "./promotion-targets-context";
 
 export function EditGroupsGrid({
@@ -52,6 +62,16 @@ export function EditGroupsGrid({
     const targetSize = Math.floor(participantsPerGroup);
     if (!Number.isFinite(targetSize) || targetSize <= 0) {
       toast.error("Ungültige Zielgröße für Gruppen");
+      return;
+    }
+
+    const hasGroupWithoutDay = gridGroups.some(
+      (g) => !g.isDeleted && g.dayOfWeek == null,
+    );
+    if (hasGroupWithoutDay) {
+      toast.error(
+        "Bitte für jede Gruppe einen Spieltag setzen, bevor automatisch verteilt wird.",
+      );
       return;
     }
 
@@ -190,10 +210,62 @@ export function EditGroupsGrid({
     });
   };
 
+  const handleResetAssignments = () => {
+    const movedBack = gridGroups
+      .filter((g) => !g.isDeleted)
+      .flatMap((g) => g.participants);
+    const resetGroups = gridGroups.map((g) =>
+      g.isDeleted ? g : { ...g, participants: [] },
+    );
+
+    setGridGroups(resetGroups);
+    setUnassignedParticipants((prev) => [...prev, ...movedBack]);
+
+    startTransition(async () => {
+      const result = await saveGroups(tournamentId, resetGroups);
+      if (isError(result)) {
+        toast.error(result.error);
+      } else {
+        toast.success(
+          `${movedBack.length} Spieler zurückgesetzt und gespeichert.`,
+        );
+      }
+    });
+  };
+
   return (
     <PromotionTargetsProvider value={promotionTargets}>
       <div className="flex flex-col gap-4">
         <div className="flex justify-end gap-4 items-center">
+          <Dialog>
+            <DialogTrigger asChild>
+              <Button variant="outline" disabled={isPending}>
+                Gruppen leeren
+              </Button>
+            </DialogTrigger>
+            <DialogContent>
+              <DialogHeader>
+                <DialogTitle>Bist du sicher?</DialogTitle>
+                <DialogDescription>
+                  Alle Spieler werden aus ihren Gruppen entfernt und als nicht
+                  zugewiesen markiert. Die Änderung wird sofort gespeichert.
+                </DialogDescription>
+              </DialogHeader>
+              <DialogFooter>
+                <DialogClose asChild>
+                  <Button variant="outline">Abbrechen</Button>
+                </DialogClose>
+                <DialogClose asChild>
+                  <Button
+                    variant="destructive"
+                    onClick={handleResetAssignments}
+                  >
+                    Zurücksetzen
+                  </Button>
+                </DialogClose>
+              </DialogFooter>
+            </DialogContent>
+          </Dialog>
           <Button
             variant="outline"
             onClick={handleAddNewGroup}
@@ -253,54 +325,28 @@ function distributeParticipants({
   unassigned: ParticipantWithName[];
   participantsPerGroup: number;
 }) {
-  const updatedGroups: GridGroup[] = [];
-  const assigned: ParticipantWithName[] = [];
+  const { assignmentsByGroupId, newUnassigned } =
+    distributeParticipantsByTwzAndDay({
+      groups: groups
+        .filter((g) => !g.isDeleted)
+        .map((g) => ({
+          id: g.id,
+          groupNumber: g.groupNumber,
+          tier: g.tier,
+          dayOfWeek: g.dayOfWeek,
+          participants: g.participants,
+        })),
+      unassigned,
+      participantsPerGroup,
+    });
 
-  const remainingIds = new Set(unassigned.map((p) => p.id));
+  const assignedParticipants: ParticipantWithName[] = [];
+  const updatedGroups = groups.map((group) => {
+    const toAdd = assignmentsByGroupId.get(group.id);
+    if (!toAdd || toAdd.length === 0) return group;
+    assignedParticipants.push(...toAdd);
+    return { ...group, participants: [...group.participants, ...toAdd] };
+  });
 
-  const twzOrdered = sortParticipantsByTwz(unassigned);
-
-  function takeFromOrdered(
-    source: ParticipantWithName[],
-    n: number,
-  ): ParticipantWithName[] {
-    if (n <= 0 || remainingIds.size === 0) return [];
-    const picked: ParticipantWithName[] = [];
-    for (const p of source) {
-      if (!remainingIds.has(p.id)) continue;
-      picked.push(p);
-      remainingIds.delete(p.id);
-      if (picked.length === n) break;
-    }
-    return picked;
-  }
-
-  for (const group of groups) {
-    if (group.isDeleted) {
-      updatedGroups.push(group);
-      continue;
-    }
-
-    const currentParticipantsCount = group.participants.length;
-    const participantsNeeded = participantsPerGroup - currentParticipantsCount;
-    if (participantsNeeded <= 0) {
-      updatedGroups.push(group);
-      continue;
-    }
-
-    const toAdd = takeFromOrdered(twzOrdered, participantsNeeded);
-    if (toAdd.length > 0) {
-      assigned.push(...toAdd);
-      updatedGroups.push({
-        ...group,
-        participants: [...group.participants, ...toAdd],
-      });
-    } else {
-      updatedGroups.push(group);
-    }
-  }
-
-  const newUnassigned = unassigned.filter((p) => remainingIds.has(p.id));
-
-  return { updatedGroups, newUnassigned, assignedParticipants: assigned };
+  return { updatedGroups, newUnassigned, assignedParticipants };
 }
