@@ -34,7 +34,7 @@ export default async function Page({
           <Card>
             <CardHeader>
               <CardTitle className="text-2xl font-bold tracking-tight">
-                Rangliste
+                Tabelle
               </CardTitle>
             </CardHeader>
             <div className="p-6">
@@ -62,9 +62,9 @@ export default async function Page({
   return (
     <div>
       <div className="md:w-2/3 mb-8">
-        <h1 className="text-3xl font-bold text-gray-900 mb-4">Rangliste</h1>
+        <h1 className="text-3xl font-bold text-gray-900 mb-4">Tabelle</h1>
         <p className="text-gray-700">
-          Ohne Rundenauswahl wird die Gesamtrangliste über alle Runden
+          Ohne Rundenauswahl wird die Gesamttabelle über alle Runden
           angezeigt. Zur Feinwertung wird das Sonneborn-Berger-System verwendet.
         </p>
       </div>
