@@ -65,8 +65,7 @@ export function Pairing({ group }: { group: GroupWithParticipantsAndGames }) {
         <ParticipantEntry
           participant={participant}
           showMatchDays={false}
-          showFideRating={false}
-          showDwzRating={false}
+          showRating={false}
         />
       </div>
     );
