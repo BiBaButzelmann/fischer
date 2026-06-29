@@ -145,6 +145,7 @@ export async function getParticipantsWithZpsIdsByTournamentId(
       id: true,
       zpsPlayerId: true,
       zpsClubId: true,
+      fideId: true,
     },
   });
 }

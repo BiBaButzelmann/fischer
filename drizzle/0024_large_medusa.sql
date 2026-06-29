@@ -1,0 +1,1 @@
+ALTER TABLE "participant" ADD COLUMN "birth_date" date;

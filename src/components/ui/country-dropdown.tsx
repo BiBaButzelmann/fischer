@@ -18,6 +18,8 @@ import { ChevronDown, CheckIcon } from "lucide-react";
 import { CircleFlag } from "react-circle-flags";
 import { countries } from "country-data-list";
 
+const FLAG_CDN_URL = "https://cdn.jsdelivr.net/npm/circle-flags/flags/";
+
 export interface Country {
   alpha2: string;
   alpha3: string;
@@ -95,6 +97,7 @@ const CountryDropdownComponent = (
               <CircleFlag
                 countryCode={selectedCountry.alpha2.toLowerCase()}
                 height={20}
+                cdnUrl={FLAG_CDN_URL}
               />
             </div>
             <span className="overflow-hidden text-ellipsis whitespace-nowrap">
@@ -133,6 +136,7 @@ const CountryDropdownComponent = (
                         <CircleFlag
                           countryCode={option.alpha2.toLowerCase()}
                           height={20}
+                          cdnUrl={FLAG_CDN_URL}
                         />
                       </div>
                       <span className="overflow-hidden text-ellipsis whitespace-nowrap">

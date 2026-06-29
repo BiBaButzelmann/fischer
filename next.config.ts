@@ -13,7 +13,8 @@ const nextConfig: NextConfig = {
   async headers() {
     return [
       {
-        source: "/((?!ausschreibung|uhren|anleitung|turnierordnung).*)",
+        source:
+          "/((?!(?:ausschreibung|turnierordnung|uhren|anleitung)(?:\\/|$)|turniere\\/[^\\/]+\\/(?:ausschreibung|turnierordnung)(?:\\/|$)).*)",
         headers: [
           {
             key: "Cross-Origin-Embedder-Policy",

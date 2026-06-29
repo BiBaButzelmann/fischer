@@ -1,14 +1,15 @@
-import { DEFAULT_CLUB_KEY } from "@/constants/constants";
+import { CLUBLESS_KEY, DEFAULT_CLUB_KEY } from "@/constants/constants";
 import { availableMatchDays } from "@/db/schema/columns.helpers";
 import z from "zod";
 
 export const participantFormSchema = z
   .object({
-    chessClubType: z.enum([DEFAULT_CLUB_KEY, "other"], {
+    chessClubType: z.enum([DEFAULT_CLUB_KEY, "other", CLUBLESS_KEY], {
       errorMap: () => ({ message: "Schachverein ist erforderlich" }),
     }),
     chessClub: z.string().optional(),
     title: z.string().optional(),
+    gender: z.enum(["m", "f"]).optional(),
     dwzRating: z.coerce
       .number()
       .min(0, "DWZ-Punktzahl muss mindestens 0 sein")
@@ -26,9 +27,16 @@ export const participantFormSchema = z
     birthYear: z.coerce
       .number()
       .min(1900, "Geburtsjahr muss mindestens 1900 sein")
-      .max(
-        new Date().getFullYear(),
+      .refine(
+        (y) => y <= new Date().getFullYear(),
         "Geburtsjahr kann nicht in der Zukunft liegen",
+      )
+      .optional(),
+    birthDate: z.coerce
+      .date()
+      .refine(
+        (d) => d <= new Date(),
+        "Geburtsdatum kann nicht in der Zukunft liegen",
       )
       .optional(),
 
@@ -83,6 +91,9 @@ export const participantFormSchema = z
   .refine(
     (data) => {
       if (data.fideRating != null && data.fideRating > 0) {
+        if (data.birthDate != null) {
+          return true;
+        }
         return (
           !!data.birthYear &&
           data.birthYear >= 1900 &&
@@ -94,5 +105,29 @@ export const participantFormSchema = z
     {
       message: "Geburtsjahr ist erforderlich, wenn Elo angegeben ist",
       path: ["birthYear"],
+    },
+  )
+  .refine(
+    (data) => {
+      if (data.chessClubType === CLUBLESS_KEY) {
+        return data.birthDate != null;
+      }
+      return true;
+    },
+    {
+      message: "Geburtsdatum ist für vereinslose Spieler erforderlich",
+      path: ["birthDate"],
+    },
+  )
+  .refine(
+    (data) => {
+      if (data.chessClubType === CLUBLESS_KEY) {
+        return data.gender != null;
+      }
+      return true;
+    },
+    {
+      message: "Geschlecht ist für vereinslose Spieler erforderlich",
+      path: ["gender"],
     },
   );

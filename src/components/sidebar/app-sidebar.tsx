@@ -49,9 +49,10 @@ type Props = {
   session: Session | null;
   tournaments: TournamentItem[];
   userRoles: Role[];
+  documentAvailability: { ausschreibung: boolean; turnierordnung: boolean };
 };
 
-export function AppSidebar({ session, tournaments, userRoles }: Props) {
+export function AppSidebar({ session, tournaments, userRoles, documentAvailability }: Props) {
   const { setOpenMobile, isMobile } = useSidebar();
 
   const handleMobileMenuClick = () => {
@@ -177,20 +178,24 @@ export function AppSidebar({ session, tournaments, userRoles }: Props) {
             <SidebarGroupLabel>Dokumente</SidebarGroupLabel>
             <SidebarGroupContent>
               <SidebarMenu>
-                <SidebarLink
-                  href={tournamentPath(slug, "/ausschreibung")}
-                  icon={BookTextIcon}
-                  target="_blank"
-                >
-                  Ausschreibung
-                </SidebarLink>
-                <SidebarLink
-                  href={tournamentPath(slug, "/turnierordnung")}
-                  icon={BookTextIcon}
-                  target="_blank"
-                >
-                  Turnierordnung
-                </SidebarLink>
+                {documentAvailability.ausschreibung ? (
+                  <SidebarLink
+                    href={tournamentPath(slug, "/ausschreibung")}
+                    icon={BookTextIcon}
+                    target="_blank"
+                  >
+                    Ausschreibung
+                  </SidebarLink>
+                ) : null}
+                {documentAvailability.turnierordnung ? (
+                  <SidebarLink
+                    href={tournamentPath(slug, "/turnierordnung")}
+                    icon={BookTextIcon}
+                    target="_blank"
+                  >
+                    Turnierordnung
+                  </SidebarLink>
+                ) : null}
                 <SidebarLink
                   href="/anleitung"
                   icon={BookTextIcon}

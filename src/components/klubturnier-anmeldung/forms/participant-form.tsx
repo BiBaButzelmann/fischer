@@ -33,8 +33,14 @@ import { cn } from "@/lib/utils";
 import { isHoliday } from "@/lib/holidays";
 import { Tournament } from "@/db/types/tournament";
 import { getParticipantEloData } from "@/actions/participant";
+import { toast } from "sonner";
 import { Profile } from "@/db/types/profile";
-import { DEFAULT_CLUB_KEY, DEFAULT_CLUB_LABEL } from "@/constants/constants";
+import {
+  CLUBLESS_KEY,
+  CLUBLESS_LABEL,
+  DEFAULT_CLUB_KEY,
+  DEFAULT_CLUB_LABEL,
+} from "@/constants/constants";
 import { Switch } from "@/components/ui/switch";
 import type { PromotionEligibility } from "@/services/promotion";
 
@@ -64,11 +70,13 @@ export function ParticipateForm({
       chessClubType: initialValues?.chessClubType,
       chessClub: initialValues?.chessClub,
       title: initialValues?.title,
+      gender: initialValues?.gender,
       dwzRating: initialValues?.dwzRating,
       fideRating: initialValues?.fideRating,
       fideId: initialValues?.fideId,
       nationality: initialValues?.nationality,
       birthYear: initialValues?.birthYear,
+      birthDate: initialValues?.birthDate,
       zpsClub: initialValues?.zpsClub,
       zpsPlayer: initialValues?.zpsPlayer,
       preferredMatchDay: initialValues?.preferredMatchDay,
@@ -86,7 +94,9 @@ export function ParticipateForm({
     return isDateDisabled(date, tournament.startDate, tournament.endDate);
   };
 
-  const handleChessClubTypeChange = (value: "hsk" | "other") => {
+  const handleChessClubTypeChange = (
+    value: "hsk" | "other" | "vereinslos",
+  ) => {
     form.setValue("chessClubType", value);
 
     if (value === "other") {
@@ -94,36 +104,59 @@ export function ParticipateForm({
       return;
     }
 
+    if (value === CLUBLESS_KEY) {
+      form.setValue("chessClub", "");
+      form.setValue("zpsClub", undefined);
+      form.setValue("zpsPlayer", undefined);
+      return;
+    }
+
     startTransition(async () => {
-      const eloData = await getParticipantEloData(
-        profile.firstName,
-        profile.lastName,
-      );
-      if (!eloData) {
-        console.warn(
-          `No Elo data found for ${profile.firstName} ${profile.lastName}`,
+      try {
+        const eloData = await getParticipantEloData(
+          profile.firstName,
+          profile.lastName,
         );
-        return;
-      }
+        if (!eloData) {
+          toast.info(
+            `Keine Einträge zu ${profile.firstName} ${profile.lastName} im HSK-Verzeichnis gefunden. Bitte trage deine Daten manuell ein.`,
+          );
+          return;
+        }
 
-      form.setValue("title", eloData.title ?? "noTitle");
+        form.setValue("title", eloData.title ?? "noTitle");
 
-      if (eloData.dwzRating) {
-        form.setValue("dwzRating", eloData.dwzRating);
-      }
-      if (eloData.zpsClub) {
-        form.setValue("zpsClub", eloData.zpsClub);
-      }
-      if (eloData.zpsPlayer) {
-        form.setValue("zpsPlayer", eloData.zpsPlayer);
-      }
+        if (eloData.gender) {
+          form.setValue("gender", eloData.gender);
+        }
+        if (eloData.dwzRating) {
+          form.setValue("dwzRating", eloData.dwzRating);
+        }
+        if (eloData.birthYear) {
+          form.setValue("birthYear", eloData.birthYear);
+        }
+        if (eloData.zpsClub) {
+          form.setValue("zpsClub", eloData.zpsClub);
+        }
+        if (eloData.zpsPlayer) {
+          form.setValue("zpsPlayer", eloData.zpsPlayer);
+        }
 
-      if (eloData.fideRating && eloData.fideId) {
-        form.setValue("fideRating", eloData.fideRating);
-        form.setValue("fideId", eloData.fideId);
-        form.setValue(
-          "nationality",
-          eloData.nationality !== "?" ? eloData.nationality : undefined,
+        if (eloData.fideId) {
+          form.setValue("fideId", eloData.fideId);
+        }
+        if (eloData.fideRating && eloData.fideId) {
+          form.setValue("fideRating", eloData.fideRating);
+          form.setValue(
+            "nationality",
+            eloData.nationality !== "?" ? eloData.nationality : undefined,
+          );
+        }
+
+        toast.success("Deine Daten wurden aus der DSB-Datenbank übernommen.");
+      } catch {
+        toast.error(
+          "Daten konnten nicht aus der DSB-Datenbank geladen werden. Bitte trage sie manuell ein.",
         );
       }
     });
@@ -202,6 +235,9 @@ export function ParticipateForm({
                         {DEFAULT_CLUB_LABEL}
                       </SelectItem>
                       <SelectItem value="other">Anderer Verein</SelectItem>
+                      <SelectItem value={CLUBLESS_KEY}>
+                        {CLUBLESS_LABEL}
+                      </SelectItem>
                     </SelectContent>
                   </Select>
                 </FormControl>
@@ -235,6 +271,67 @@ export function ParticipateForm({
               </FormItem>
             )}
           />
+        )}
+
+        {chessClubType === CLUBLESS_KEY && (
+          <div className="space-y-2">
+            <div className="flex gap-4">
+              <FormField
+                control={form.control}
+                name="gender"
+                render={({ field }) => (
+                  <FormItem className="w-32">
+                    <FormLabel required>Geschlecht</FormLabel>
+                    <FormControl>
+                      <Select
+                        value={field.value}
+                        onValueChange={field.onChange}
+                      >
+                        <SelectTrigger>
+                          <SelectValue placeholder="Geschlecht" />
+                        </SelectTrigger>
+                        <SelectContent>
+                          <SelectItem value="m">Männlich</SelectItem>
+                          <SelectItem value="f">Weiblich</SelectItem>
+                        </SelectContent>
+                      </Select>
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+              <FormField
+                control={form.control}
+                name="birthDate"
+                render={({ field }) => (
+                  <FormItem className="flex-1">
+                    <FormLabel required>Geburtsdatum</FormLabel>
+                    <FormControl>
+                      <Input
+                        type="date"
+                        max={format(new Date(), "yyyy-MM-dd")}
+                        value={
+                          field.value ? format(field.value, "yyyy-MM-dd") : ""
+                        }
+                        onChange={(e) =>
+                          field.onChange(
+                            e.target.value
+                              ? new Date(`${e.target.value}T00:00:00`)
+                              : undefined,
+                          )
+                        }
+                      />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+            </div>
+            <p className="text-sm text-muted-foreground">
+              Für vereinslose Spieler benötigt der DSB das exakte Geburtsdatum
+              und das Geschlecht für die FIDE- und DWZ-Wertung.
+            </p>
+          </div>
         )}
 
         {chessClubType != null ? (
@@ -286,6 +383,7 @@ export function ParticipateForm({
                       max="2800"
                       step="1"
                       {...field}
+                      value={field.value ?? ""}
                     />
                   </FormControl>
                   <FormMessage />
@@ -309,12 +407,13 @@ export function ParticipateForm({
                       max="2800"
                       step="1"
                       {...field}
+                      value={field.value ?? ""}
                     />
                   </FormControl>
                   <FormMessage />
                   <FormDescription>
-                    Wer in den A- und B-Gruppen spielen möchte, muss seine Elo
-                    angeben.
+                    Wer in den A-, B- und C-Gruppen spielen möchte, muss seine
+                    Elo angeben.
                   </FormDescription>
                 </FormItem>
               )}
@@ -332,7 +431,12 @@ export function ParticipateForm({
                 <FormItem>
                   <FormLabel required>FIDE ID</FormLabel>
                   <FormControl>
-                    <Input id="fideId" placeholder="10245154" {...field} />
+                    <Input
+                      id="fideId"
+                      placeholder="10245154"
+                      {...field}
+                      value={field.value ?? ""}
+                    />
                   </FormControl>
                   <FormDescription>
                     <a
@@ -381,6 +485,7 @@ export function ParticipateForm({
                       max={new Date().getFullYear()}
                       step="1"
                       {...field}
+                      value={field.value ?? ""}
                     />
                   </FormControl>
                   <FormMessage />
@@ -408,7 +513,7 @@ export function ParticipateForm({
                 </Select>
               </FormControl>
               <FormDescription>
-                Die A-Klasse spielt nur an Freitagen
+                Die A-Gruppe spielt nur an Freitagen
               </FormDescription>
               <FormMessage />
             </FormItem>
@@ -430,7 +535,8 @@ export function ParticipateForm({
               <FormMessage />
               <FormDescription>
                 Wer nicht flexibel ist, könnte unter Umständen bei dem Turnier
-                nicht berücksichtigt werden.
+                nicht berücksichtigt werden oder landet in einer niedrigeren
+                Gruppe.
               </FormDescription>
             </FormItem>
           )}

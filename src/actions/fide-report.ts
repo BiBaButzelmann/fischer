@@ -17,8 +17,8 @@ import { calculateStandings } from "@/lib/standings";
 import { DateTime } from "luxon";
 import invariant from "tiny-invariant";
 import { match } from "ts-pattern";
-import { getDwzAndEloByZps } from "./participant";
 import { getRefereeOfGroup } from "@/services/referee";
+import { getFideProfile } from "@/lib/fide/profile";
 
 export const generateFideReportFile = action(
   async (groupId: number, month: number) => {
@@ -276,17 +276,14 @@ export const generateFideReportFile = action(
 );
 
 async function getCurrentElo(participant: Participant) {
-  if (participant.zpsPlayerId == null || participant.zpsClubId == null) {
-    invariant(participant.fideRating != null, "FIDE rating cannot be null");
-    return participant.fideRating;
+  if (participant.fideId != null) {
+    const fideProfile = await getFideProfile(participant.fideId);
+    if (fideProfile?.fideRating != null) {
+      return fideProfile.fideRating;
+    }
   }
-  const result = await getDwzAndEloByZps(
-    participant.zpsPlayerId,
-    participant.zpsClubId,
-  );
-  invariant(result != null, "Current FIDE rating could not be retrieved");
-  invariant(result.fideRating != null, "Retrieved FIDE rating cannot be null");
-  return result.fideRating;
+  invariant(participant.fideRating != null, "FIDE rating cannot be null");
+  return participant.fideRating;
 }
 
 function mapResult(result: GameResult, isWhite: boolean): Result["result"] {

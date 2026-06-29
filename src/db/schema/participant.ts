@@ -27,6 +27,7 @@ export const participant = pgTable(
     dwzRating: integer("dwz_rating"),
     fideRating: integer("fide_rating"),
     birthYear: integer("birth_year"),
+    birthDate: date("birth_date", { mode: "date" }),
     fideId: text("fide_id"),
     zpsClubId: text("zps_club_id"),
     zpsPlayerId: text("zps_player_id"),

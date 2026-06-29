@@ -48,7 +48,8 @@ export default async function Page({
         </div>
         <div className="text-sm text-gray-600">
           <p className="mb-2">
-            Du findest die Turniere der vorherigen Jahre unter:{" "}
+            Turniere ab 2025 findest du links über das Dropdown in der
+            Seitenleiste. Die Turniere der vorherigen Jahre findest du unter:{" "}
             <a
               href="https://hsk1830.de/spielbetrieb/turniere/klubturnier"
               target="_blank"
