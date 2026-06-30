@@ -4,6 +4,7 @@ export function getIndividualPlayerResult(
   gameResult: GameResult,
   isWhite: boolean,
 ): string {
+  // TODO: change 1/2-1/2 to 1/2:1/2
   switch (gameResult) {
     case "1:0":
       return isWhite ? "1" : "0";
