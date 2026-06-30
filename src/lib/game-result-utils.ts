@@ -9,13 +9,6 @@ export function getIndividualPlayerResult(
   return isWhite ? whiteScore : blackScore;
 }
 
-/**
- * The symbol shown for a single player in a cross-table cell. Walkover/forfeit
- * games use the "+" (winner) / "−" (loser) convention like the Partien page;
- * regular games show the player's score (1, ½, 0). Unlike
- * {@link getIndividualPlayerResult}, this handles the "+:-" / "-:+" notations
- * correctly (their scores contain the separators).
- */
 export function getIndividualResultSymbol(
   result: GameResult,
   isWhite: boolean,

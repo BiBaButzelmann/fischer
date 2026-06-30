@@ -13,13 +13,6 @@ type GroupParticipants = Awaited<ReturnType<typeof getParticipantsInGroup>>;
 type GroupParticipant = GroupParticipants[number];
 type CompletedGames = Awaited<ReturnType<typeof getCompletedGames>>;
 
-/**
- * The games that count towards the standings ("Wertung"). A game is excluded
- * ("annulled") when it involves an inactive (withdrawn) participant who played
- * less than 50% of their games — matching DWZ/FIDE handling of early
- * withdrawals. The cross-table uses the same set so its cells stay consistent
- * with the displayed points.
- */
 function getRelevantGames(
   participants: GroupParticipants,
   games: CompletedGames,
@@ -133,13 +126,8 @@ export type CrossTableParticipant = {
 export type CrossTableResult = {
   points: number;
   result: GameResult;
-  // Symbol shown in the cell from this player's perspective ("1" | "½" | "0"
-  // for regular games, "+" | "−" for walkovers).
   display: string;
-  // The game's id, so the cell can link to its Partie page.
   gameId: number;
-  // Whether the game was actually played (has a viewable Partie). Walkovers
-  // are not, so their cells are not linked.
   played: boolean;
 };
 
@@ -204,8 +192,6 @@ export async function getCrossTable(
     if (whiteParticipantId == null || blackParticipantId == null || !result) {
       continue;
     }
-    // Annulled games don't count towards the standings, so keep them out of
-    // the cross-table too (cells must agree with the points).
     if (!relevantGames.has(game)) {
       continue;
     }
