@@ -2,10 +2,11 @@ import {
   getCompletedGames,
   getParticipantsInGroup,
 } from "@/db/repositories/game";
-import { Game, GameResult, GameWithMatchday } from "@/db/types/game";
+import { Game, GameWithMatchday } from "@/db/types/game";
+import type { GroupSummary } from "@/db/types/group";
 import { isGameActuallyPlayed } from "@/lib/game-auth";
 import { didParticipantForfeitGame } from "@/lib/game";
-import { getIndividualResultSymbol } from "@/lib/game-result-utils";
+import { getIndividualPlayerResult } from "@/lib/game-result-utils";
 import { calculatePointsFromResult, calculateStandings } from "@/lib/standings";
 import invariant from "tiny-invariant";
 
@@ -115,6 +116,21 @@ export async function getStandings(groupId: number, selectedRound?: number) {
   );
 }
 
+export function resolveStandingsParams(
+  groups: GroupSummary[],
+  selectedGroupId: string,
+  selectedRound?: string,
+): { groupId: number; round: number | undefined } {
+  const parsedGroupId = Number(selectedGroupId);
+  const groupId = Number.isNaN(parsedGroupId) ? groups[0].id : parsedGroupId;
+  const parsedRound = Number(selectedRound);
+  const round =
+    selectedRound && Number.isFinite(parsedRound) && parsedRound > 0
+      ? parsedRound
+      : undefined;
+  return { groupId, round };
+}
+
 export type CrossTableParticipant = {
   id: number;
   title: string | null;
@@ -125,7 +141,6 @@ export type CrossTableParticipant = {
 
 export type CrossTableResult = {
   points: number;
-  result: GameResult;
   display: string;
   gameId: number;
   played: boolean;
@@ -198,15 +213,13 @@ export async function getCrossTable(
     const played = isGameActuallyPlayed(result);
     addResult(whiteParticipantId, blackParticipantId, {
       points: calculatePointsFromResult(result, true),
-      result,
-      display: getIndividualResultSymbol(result, true),
+      display: getIndividualPlayerResult(result, true),
       gameId: game.id,
       played,
     });
     addResult(blackParticipantId, whiteParticipantId, {
       points: calculatePointsFromResult(result, false),
-      result,
-      display: getIndividualResultSymbol(result, false),
+      display: getIndividualPlayerResult(result, false),
       gameId: game.id,
       played,
     });

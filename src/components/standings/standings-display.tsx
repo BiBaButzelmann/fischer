@@ -1,7 +1,7 @@
 import { StandingsTable } from "./standings-table";
 import { getParticipantsInGroup } from "@/db/repositories/game";
 import type { GroupSummary } from "@/db/types/group";
-import { getStandings } from "@/services/standings";
+import { getStandings, resolveStandingsParams } from "@/services/standings";
 
 type Props = {
   groups: GroupSummary[];
@@ -14,9 +14,11 @@ export async function StandingsDisplay({
   selectedGroupId,
   selectedRound,
 }: Props) {
-  const parsedGroupId = Number(selectedGroupId);
-  const groupId = Number.isNaN(parsedGroupId) ? groups[0].id : parsedGroupId;
-  const round = selectedRound != null ? Number(selectedRound) : undefined;
+  const { groupId, round } = resolveStandingsParams(
+    groups,
+    selectedGroupId,
+    selectedRound,
+  );
 
   const participants = await getParticipantsInGroup(groupId);
   const standings = await getStandings(groupId, round);

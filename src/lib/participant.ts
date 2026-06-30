@@ -13,3 +13,11 @@ export function getParticipantFullName(participant: {
 export function getFullName(firstName: string, lastName: string) {
   return `${firstName} ${lastName}`;
 }
+
+export function getFullNameWithTitle(
+  title: string | null,
+  firstName: string,
+  lastName: string,
+) {
+  return `${title ? `${title} ` : ""}${getFullName(firstName, lastName)}`;
+}

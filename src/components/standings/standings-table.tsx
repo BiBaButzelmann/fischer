@@ -17,6 +17,8 @@ import { ParticipantWithName } from "@/db/types/participant";
 import invariant from "tiny-invariant";
 import { useTournamentSlug } from "@/hooks/use-tournament-slug";
 import { formatTwz } from "@/lib/twz";
+import { getFullNameWithTitle } from "@/lib/participant";
+import { RankBadge } from "./rank-badge";
 
 type Props = {
   standings: PlayerStats[];
@@ -125,20 +127,14 @@ function StandingsRow({
       onClick={handleClick}
     >
       <TableCell className="py-2">
-        <div
-          className={cn(
-            "w-7 h-7 flex items-center justify-center rounded-md mx-auto font-bold",
-            position === 1 && "bg-yellow-400 text-yellow-900",
-            position === 2 && "bg-slate-300 text-slate-800",
-            position === 3 && "bg-orange-400 text-orange-900",
-          )}
-        >
-          {position}
-        </div>
+        <RankBadge position={position} />
       </TableCell>
       <TableCell>
-        {participant.title ? `${participant.title} ` : ""}
-        {participant.profile.firstName} {participant.profile.lastName}
+        {getFullNameWithTitle(
+          participant.title,
+          participant.profile.firstName,
+          participant.profile.lastName,
+        )}
       </TableCell>
       <TableCell className="text-right">{formatTwz(participant)}</TableCell>
       <TableCell className="text-right">

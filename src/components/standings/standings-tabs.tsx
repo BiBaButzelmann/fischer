@@ -2,7 +2,7 @@
 
 import { useRouter } from "next/navigation";
 import { Grid3x3, ListOrdered } from "lucide-react";
-import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { Tabs, TabsList, TabsTrigger } from "../ui/tabs";
 import { buildResultsViewUrl, type StandingsView } from "@/lib/navigation";
 import { useTournamentSlug } from "@/hooks/use-tournament-slug";
 

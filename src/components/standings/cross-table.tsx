@@ -8,8 +8,10 @@ import {
   TableHeader,
   TableRow,
 } from "../ui/table";
+import { RankBadge } from "./rank-badge";
 import { cn } from "@/lib/utils";
 import { buildGameViewUrl, tournamentPath } from "@/lib/navigation";
+import { getFullNameWithTitle } from "@/lib/participant";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useTournamentSlug } from "@/hooks/use-tournament-slug";
@@ -26,8 +28,11 @@ type Props = {
 function participantName(
   participant: CrossTableData["participants"][number],
 ): string {
-  const { title, firstName, lastName } = participant;
-  return `${title ? `${title} ` : ""}${firstName} ${lastName}`;
+  return getFullNameWithTitle(
+    participant.title,
+    participant.firstName,
+    participant.lastName,
+  );
 }
 
 function CellContent({ entries }: { entries: CrossTableResult[] }) {
@@ -108,16 +113,7 @@ export function CrossTable({ crossTable, selectedGroupId }: Props) {
                 className={cn(isDeleted && "opacity-50")}
               >
                 <TableCell className="text-center">
-                  <div
-                    className={cn(
-                      "w-7 h-7 flex items-center justify-center rounded-md mx-auto font-bold",
-                      row.position === 1 && "bg-yellow-400 text-yellow-900",
-                      row.position === 2 && "bg-slate-300 text-slate-800",
-                      row.position === 3 && "bg-orange-400 text-orange-900",
-                    )}
-                  >
-                    {row.position}
-                  </div>
+                  <RankBadge position={row.position} />
                 </TableCell>
                 <TableCell
                   className={cn(

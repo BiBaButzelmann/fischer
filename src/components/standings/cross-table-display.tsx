@@ -1,5 +1,5 @@
 import { CrossTable } from "./cross-table";
-import { getCrossTable } from "@/services/standings";
+import { getCrossTable, resolveStandingsParams } from "@/services/standings";
 import type { GroupSummary } from "@/db/types/group";
 
 type Props = {
@@ -13,13 +13,11 @@ export async function CrossTableDisplay({
   selectedGroupId,
   selectedRound,
 }: Props) {
-  const parsedGroupId = Number(selectedGroupId);
-  const groupId = Number.isNaN(parsedGroupId) ? groups[0].id : parsedGroupId;
-  const parsedRound = Number(selectedRound);
-  const round =
-    selectedRound && Number.isFinite(parsedRound) && parsedRound > 0
-      ? parsedRound
-      : undefined;
+  const { groupId, round } = resolveStandingsParams(
+    groups,
+    selectedGroupId,
+    selectedRound,
+  );
 
   const crossTable = await getCrossTable(groupId, round);
 
