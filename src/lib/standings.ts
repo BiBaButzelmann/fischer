@@ -3,7 +3,7 @@ import type { ParticipantWithRating } from "@/db/types/participant";
 import type { Game, GameResult } from "@/db/types/game";
 import invariant from "tiny-invariant";
 
-function calculatePointsFromResult(
+export function calculatePointsFromResult(
   result: GameResult,
   isWhite: boolean,
 ): number {

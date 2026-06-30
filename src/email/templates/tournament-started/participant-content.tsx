@@ -46,7 +46,7 @@ export function ParticipantContent({ slug, participantGroup }: Props) {
         </a>
       </p>
       <p>
-        Die Rangliste deiner Gruppe findest du unter folgendem Link:
+        Die Tabelle deiner Gruppe findest du unter folgendem Link:
         <br />{" "}
         <a
           href={`https://klubturnier.hsk1830.de${standingsUrl}`}

@@ -10,7 +10,7 @@ import {
 } from "../ui/select";
 import { Label } from "../ui/label";
 import type { GroupSummary } from "@/db/types/group";
-import { buildResultsViewUrl } from "@/lib/navigation";
+import { buildResultsViewUrl, type StandingsView } from "@/lib/navigation";
 import { useTournamentSlug } from "@/hooks/use-tournament-slug";
 
 export type Props = {
@@ -18,6 +18,7 @@ export type Props = {
   groups: GroupSummary[];
   selectedRound?: string;
   rounds: number[];
+  selectedView: StandingsView;
 };
 
 export function StandingsSelector({
@@ -25,6 +26,7 @@ export function StandingsSelector({
   rounds,
   selectedGroupId,
   selectedRound,
+  selectedView,
 }: Props) {
   const router = useRouter();
   const slug = useTournamentSlug();
@@ -35,6 +37,7 @@ export function StandingsSelector({
         slug,
         groupId,
         round: selectedRound,
+        view: selectedView,
       }),
     );
   };
@@ -45,11 +48,12 @@ export function StandingsSelector({
         slug,
         groupId: selectedGroupId,
         round,
+        view: selectedView,
       }),
     );
   };
   return (
-    <div className="flex flex-nowrap gap-2 md:gap-4 mb-4">
+    <div className="flex flex-nowrap gap-2 md:gap-4">
       <div className="flex max-w-48 flex-1 flex-col gap-1">
         <Label htmlFor="group-select" className="text-sm font-medium">
           Gruppe

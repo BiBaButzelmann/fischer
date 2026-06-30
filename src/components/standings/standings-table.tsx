@@ -46,7 +46,7 @@ export function StandingsTable({
   };
 
   return (
-    <div className="border rounded-lg overflow-hidden">
+    <div className="overflow-x-auto">
       <Table>
         <TableHeader>
           <TableRow>
@@ -69,8 +69,7 @@ export function StandingsTable({
                 {selectedRound && ` bis Runde ${selectedRound}`} gefunden.
                 <br />
                 <span className="text-sm text-muted-foreground">
-                  Möglicherweise wurden noch keine Spiele eingegeben oder
-                  beendet.
+                  Die Gruppen sind noch nicht ausgelost.
                 </span>
               </TableCell>
             </TableRow>

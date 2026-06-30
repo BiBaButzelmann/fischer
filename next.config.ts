@@ -8,6 +8,14 @@ const nextConfig: NextConfig = {
         destination: "/willkommen",
         permanent: true,
       },
+      {
+        // Backward compatibility: the standings page moved from
+        // /rangliste to /tabelle. Keep old bookmarks and links in
+        // already-sent emails working. Query params are forwarded.
+        source: "/turniere/:slug/rangliste",
+        destination: "/turniere/:slug/tabelle",
+        permanent: true,
+      },
     ];
   },
   async headers() {

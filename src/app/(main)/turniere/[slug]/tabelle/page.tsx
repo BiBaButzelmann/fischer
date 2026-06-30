@@ -2,7 +2,11 @@ import { Card, CardHeader, CardTitle } from "@/components/ui/card";
 import { getTournamentBySlug } from "@/db/repositories/tournament";
 import { getAllGroupNamesByTournamentId } from "@/db/repositories/game";
 import { StandingsDisplay } from "@/components/standings/standings-display";
+import { StandingsSelector } from "@/components/standings/standings-selector";
+import { StandingsTabs } from "@/components/standings/standings-tabs";
+import { CrossTableDisplay } from "@/components/standings/cross-table-display";
 import { getGroupAnnouncementDate } from "@/lib/tournament-schedule";
+import type { StandingsView } from "@/lib/navigation";
 import { notFound } from "next/navigation";
 
 export default async function Page({
@@ -13,10 +17,11 @@ export default async function Page({
   searchParams: Promise<{
     groupId?: string;
     round?: string;
+    view?: string;
   }>;
 }) {
   const { slug } = await params;
-  const { groupId, round } = await searchParams;
+  const { groupId, round, view: viewParam } = await searchParams;
 
   const tournament = await getTournamentBySlug(slug);
   if (!tournament) {
@@ -34,7 +39,7 @@ export default async function Page({
           <Card>
             <CardHeader>
               <CardTitle className="text-2xl font-bold tracking-tight">
-                Rangliste
+                Tabelle
               </CardTitle>
             </CardHeader>
             <div className="p-6">
@@ -53,6 +58,8 @@ export default async function Page({
 
   const selectedGroupId = groupId || groups[0].id.toString();
   const selectedRound = round;
+  const view: StandingsView =
+    viewParam === "kreuztabelle" ? "kreuztabelle" : "tabelle";
 
   const rounds = Array.from(
     { length: tournament.numberOfRounds },
@@ -60,20 +67,46 @@ export default async function Page({
   );
 
   return (
-    <div>
-      <div className="md:w-2/3 mb-8">
-        <h1 className="text-3xl font-bold text-gray-900 mb-4">Rangliste</h1>
+    <div className="space-y-6">
+      <div className="md:w-2/3">
+        <h1 className="text-3xl font-bold text-gray-900 mb-2">Tabelle</h1>
         <p className="text-gray-700">
-          Ohne Rundenauswahl wird die Gesamtrangliste über alle Runden
-          angezeigt. Zur Feinwertung wird das Sonneborn-Berger-System verwendet.
+          Ohne Rundenauswahl wird der Gesamtstand über alle Runden angezeigt.
+          Zur Feinwertung wird das Sonneborn-Berger-System verwendet.
         </p>
       </div>
-      <StandingsDisplay
+
+      <StandingsSelector
         groups={groups}
         rounds={rounds}
         selectedGroupId={selectedGroupId}
         selectedRound={selectedRound}
+        selectedView={view}
       />
+
+      <div className="space-y-3">
+        <StandingsTabs
+          view={view}
+          selectedGroupId={selectedGroupId}
+          selectedRound={selectedRound}
+        />
+
+        <Card className="overflow-hidden">
+          {view === "kreuztabelle" ? (
+            <CrossTableDisplay
+              groups={groups}
+              selectedGroupId={selectedGroupId}
+              selectedRound={selectedRound}
+            />
+          ) : (
+            <StandingsDisplay
+              groups={groups}
+              selectedGroupId={selectedGroupId}
+              selectedRound={selectedRound}
+            />
+          )}
+        </Card>
+      </div>
     </div>
   );
 }
