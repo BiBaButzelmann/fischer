@@ -94,13 +94,13 @@ async function ParticipantSection({
     );
   }
 
-  const ranglisteUrl = buildResultsViewUrl({
+  const standingsUrl = buildResultsViewUrl({
     slug: tournament.slug,
     groupId: playerGroup.id.toString(),
   });
 
   return (
-    <Link href={ranglisteUrl} className="block">
+    <Link href={standingsUrl} className="block">
       <div className="flex items-center gap-4 p-4 bg-white dark:bg-card border border-gray-200 dark:border-card-border rounded-xl shadow-sm transition-all hover:shadow-md cursor-pointer hover:opacity-80">
         <GroupBadge groupName={playerGroup.groupName} />
         <div className="flex-grow">

@@ -119,7 +119,7 @@ export function AppSidebar({ session, tournaments, userRoles, documentAvailabili
                 Partien
               </SidebarLink>
               <SidebarLink
-                href={tournamentPath(slug, "/rangliste")}
+                href={tournamentPath(slug, "/tabelle")}
                 icon={Medal}
               >
                 Tabelle

@@ -43,10 +43,13 @@ export function buildGameViewUrl({
   return tournamentPath(slug, query ? `/partien?${query}` : "/partien");
 }
 
+export type StandingsView = "tabelle" | "kreuztabelle";
+
 export function buildResultsViewUrl(params: {
   slug: string;
   groupId?: string;
   round?: string;
+  view?: StandingsView;
 }): string {
   const searchParams = new URLSearchParams();
 
@@ -56,10 +59,10 @@ export function buildResultsViewUrl(params: {
   if (params.round) {
     searchParams.set("round", params.round);
   }
+  if (params.view && params.view !== "tabelle") {
+    searchParams.set("view", params.view);
+  }
 
   const query = searchParams.toString();
-  return tournamentPath(
-    params.slug,
-    query ? `/rangliste?${query}` : "/rangliste",
-  );
+  return tournamentPath(params.slug, query ? `/tabelle?${query}` : "/tabelle");
 }
