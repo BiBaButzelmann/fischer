@@ -20,6 +20,7 @@ export type FideProfile = {
 
 export async function getFideProfile(
   fideId: string,
+  signal?: AbortSignal,
 ): Promise<FideProfile | null> {
   const id = fideId.trim();
   if (!/^\d+$/.test(id)) {
@@ -28,7 +29,9 @@ export async function getFideProfile(
 
   let html: string;
   try {
-    const response = await fetch(`https://ratings.fide.com/profile/${id}`);
+    const response = await fetch(`https://ratings.fide.com/profile/${id}`, {
+      signal,
+    });
     if (!response.ok) {
       return null;
     }

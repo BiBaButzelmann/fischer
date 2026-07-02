@@ -143,6 +143,7 @@ export async function deleteParticipant(
 export async function getParticipantEloData(
   firstName: string,
   lastName: string,
+  signal?: AbortSignal,
 ): Promise<{
   title: string | null;
   nationality: string;
@@ -158,6 +159,7 @@ export async function getParticipantEloData(
 
   const clubData = await fetch(
     "https://www.schachbund.de/php/dewis/verein.php?zps=40023&format=csv",
+    { signal },
   );
   const clubCsv = await clubData.text();
 
@@ -189,6 +191,7 @@ export async function getParticipantEloData(
 
   const playerData = await fetch(
     `https://www.schachbund.de/php/dewis/spieler.php?pkz=${playerId}&format=csv`,
+    { signal },
   );
   const playerCsv = await playerData.text();
 
@@ -204,7 +207,7 @@ export async function getParticipantEloData(
   const dwzRating = parseRating(playerFields[4]);
   const fideId = playerFields[6] || null;
 
-  const fideProfile = fideId ? await getFideProfile(fideId) : null;
+  const fideProfile = fideId ? await getFideProfile(fideId, signal) : null;
 
   return {
     title: fideProfile?.title ?? (playerFields[8] || null),
@@ -221,10 +224,11 @@ export async function getParticipantEloData(
 
 export async function getFideRatingById(
   fideId: string,
+  signal?: AbortSignal,
 ): Promise<number | null> {
   await authWithRedirect();
 
-  const fideProfile = await getFideProfile(fideId);
+  const fideProfile = await getFideProfile(fideId, signal);
   return fideProfile?.fideRating ?? null;
 }
 
