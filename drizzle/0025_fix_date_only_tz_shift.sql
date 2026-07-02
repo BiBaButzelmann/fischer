@@ -8,7 +8,7 @@
 
 UPDATE "participant"
 SET "not_available_days" = (
-  SELECT array_agg("d" + 1 ORDER BY "d")
+  SELECT array_agg(DISTINCT "d" + 1)
   FROM unnest("not_available_days") AS "d"
 )
 WHERE cardinality("not_available_days") > 0;
