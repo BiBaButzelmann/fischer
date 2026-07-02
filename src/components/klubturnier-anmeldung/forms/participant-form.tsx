@@ -1,7 +1,7 @@
 "use client";
 
 import { zodResolver } from "@hookform/resolvers/zod";
-import { useEffect, useState, useTransition } from "react";
+import { useState, useTransition } from "react";
 import { useForm } from "react-hook-form";
 import { TZDate } from "react-day-picker";
 import { CalendarIcon } from "lucide-react";
@@ -66,7 +66,6 @@ type Props = {
   initialValues?: z.infer<typeof participantFormSchema>;
   canDelete: boolean;
   promotionEligibility: PromotionEligibility | null;
-  prefillFromPreviousParticipant: boolean;
   onSubmit: (data: z.infer<typeof participantFormSchema>) => Promise<void>;
   onDelete: () => Promise<void>;
   tournament: Tournament;
@@ -77,7 +76,6 @@ export function ParticipateForm({
   initialValues,
   canDelete,
   promotionEligibility,
-  prefillFromPreviousParticipant,
   onSubmit,
   onDelete,
   tournament,
@@ -177,15 +175,6 @@ export function ParticipateForm({
       }
     });
   };
-
-  useEffect(() => {
-    if (
-      prefillFromPreviousParticipant &&
-      initialValues?.chessClubType === DEFAULT_CLUB_KEY
-    ) {
-      fetchAndApplyEloData();
-    }
-  }, []);
 
   const handleChessClubTypeChange = (value: "hsk" | "other" | "vereinslos") => {
     form.setValue("chessClubType", value);

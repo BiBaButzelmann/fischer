@@ -2,16 +2,18 @@ import { DateTime } from "luxon";
 import invariant from "tiny-invariant";
 import { isHoliday } from "./holidays";
 
+export const EVENT_TIME_ZONE = "Europe/Berlin";
+
 export function getCurrentLocalDateTime(): DateTime {
-  return DateTime.now().setZone("Europe/Berlin");
+  return DateTime.now().setZone(EVENT_TIME_ZONE);
 }
 
 export function toLocalDateTime(date: Date): DateTime {
-  return DateTime.fromJSDate(date).setZone("Europe/Berlin");
+  return DateTime.fromJSDate(date).setZone(EVENT_TIME_ZONE);
 }
 
 export function parseDateOnly(date: string): DateTime {
-  return DateTime.fromISO(date, { zone: "Europe/Berlin" });
+  return DateTime.fromISO(date, { zone: EVENT_TIME_ZONE });
 }
 
 export function toDateOnly(date: DateTime): string {

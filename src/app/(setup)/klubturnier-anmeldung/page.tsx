@@ -1,5 +1,15 @@
+import {
+  getFideRatingById,
+  getParticipantEloData,
+} from "@/actions/participant";
 import { authWithRedirect } from "@/auth/utils";
-import { RolesManager } from "@/components/klubturnier-anmeldung/roles-manager";
+import {
+  ParticipantEloPrefill,
+  RolesManager,
+} from "@/components/klubturnier-anmeldung/roles-manager";
+import { DEFAULT_CLUB_LABEL } from "@/constants/constants";
+import { Participant } from "@/db/types/participant";
+import { Profile } from "@/db/types/profile";
 import { getProfileByUserId } from "@/db/repositories/profile";
 import { getRolesDataByProfileIdAndTournamentId } from "@/db/repositories/role";
 import {
@@ -9,6 +19,38 @@ import {
 import { getParticipantByProfileIdAndTournamentId } from "@/db/repositories/participant";
 import { getPromotionEligibility } from "@/services/promotion";
 import { redirect } from "next/navigation";
+
+function withTimeout<T>(promise: Promise<T>, ms: number): Promise<T | null> {
+  return Promise.race([
+    promise,
+    new Promise<null>((resolve) => setTimeout(() => resolve(null), ms)),
+  ]);
+}
+
+async function getPrefillEloData(
+  profile: Profile,
+  previousParticipant: Participant,
+): Promise<ParticipantEloPrefill | null> {
+  try {
+    const eloData = await withTimeout(
+      getParticipantEloData(profile.firstName, profile.lastName),
+      5000,
+    );
+    if (eloData) {
+      return eloData;
+    }
+    if (previousParticipant.fideId) {
+      const fideRating = await withTimeout(
+        getFideRatingById(previousParticipant.fideId),
+        5000,
+      );
+      if (fideRating != null) {
+        return { fideRating };
+      }
+    }
+  } catch {}
+  return null;
+}
 
 export default async function RolesPage() {
   const session = await authWithRedirect();
@@ -48,6 +90,13 @@ export default async function RolesPage() {
       )
     : null;
 
+  const prefillEloData =
+    initialValues.participant == null &&
+    previousParticipant != null &&
+    previousParticipant.chessClub === DEFAULT_CLUB_LABEL
+      ? await getPrefillEloData(profile, previousParticipant)
+      : null;
+
   return (
     <div className="space-y-8">
       <header className="text-center">
@@ -67,6 +116,7 @@ export default async function RolesPage() {
         profile={profile}
         promotionEligibility={promotionEligibility}
         previousParticipant={previousParticipant ?? null}
+        prefillEloData={prefillEloData}
       />
     </div>
   );
