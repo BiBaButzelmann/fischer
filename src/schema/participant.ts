@@ -1,7 +1,13 @@
 import { CLUBLESS_KEY, DEFAULT_CLUB_KEY } from "@/constants/constants";
 import { availableMatchDays } from "@/db/schema/columns.helpers";
-import { getCurrentLocalDateTime, todayDateOnly } from "@/lib/date";
+import {
+  getCurrentLocalDateTime,
+  isValidDateOnly,
+  todayDateOnly,
+} from "@/lib/date";
 import z from "zod";
+
+const dateOnlySchema = z.string().refine(isValidDateOnly, "Ungültiges Datum");
 
 export const participantFormSchema = z
   .object({
@@ -33,9 +39,7 @@ export const participantFormSchema = z
         "Geburtsjahr kann nicht in der Zukunft liegen",
       )
       .optional(),
-    birthDate: z
-      .string()
-      .regex(/^\d{4}-\d{2}-\d{2}$/, "Ungültiges Geburtsdatum")
+    birthDate: dateOnlySchema
       .refine(
         (d) => d <= todayDateOnly(),
         "Geburtsdatum kann nicht in der Zukunft liegen",
@@ -51,7 +55,7 @@ export const participantFormSchema = z
     }),
     secondaryMatchDays: z.array(z.enum(availableMatchDays)),
     notAvailableDays: z
-      .array(z.string().regex(/^\d{4}-\d{2}-\d{2}$/))
+      .array(dateOnlySchema)
       .max(5, "Maximal 5 Tage")
       .optional(),
     exercisePromotionRight: z.boolean().optional(),

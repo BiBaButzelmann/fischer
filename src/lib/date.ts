@@ -1,4 +1,5 @@
 import { DateTime } from "luxon";
+import invariant from "tiny-invariant";
 import { isHoliday } from "./holidays";
 
 export function getCurrentLocalDateTime(): DateTime {
@@ -14,7 +15,13 @@ export function parseDateOnly(date: string): DateTime {
 }
 
 export function toDateOnly(date: DateTime): string {
-  return date.toISODate()!;
+  const isoDate = date.toISODate();
+  invariant(isoDate, "Invalid DateTime");
+  return isoDate;
+}
+
+export function isValidDateOnly(date: string): boolean {
+  return /^\d{4}-\d{2}-\d{2}$/.test(date) && parseDateOnly(date).isValid;
 }
 
 export function utcDateToDateOnly(date: Date): string {
@@ -22,11 +29,11 @@ export function utcDateToDateOnly(date: Date): string {
 }
 
 export function todayDateOnly(): string {
-  return getCurrentLocalDateTime().toISODate()!;
+  return toDateOnly(getCurrentLocalDateTime());
 }
 
 export function formatDateOnly(date: string): string {
-  return parseDateOnly(date).toFormat("dd.MM.yyyy");
+  return formatDate(parseDateOnly(date));
 }
 
 /**

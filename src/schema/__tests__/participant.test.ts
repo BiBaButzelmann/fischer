@@ -30,6 +30,16 @@ describe("participantFormSchema birthDate", () => {
     }
   });
 
+  test("rejects calendar-impossible dates", () => {
+    for (const birthDate of ["1990-02-30", "1990-13-01", "1990-11-31"]) {
+      const result = participantFormSchema.safeParse({
+        ...validBase,
+        birthDate,
+      });
+      expect(result.success).toBe(false);
+    }
+  });
+
   test("rejects a birth date in the future (Berlin today)", () => {
     vi.useFakeTimers();
     vi.setSystemTime(new Date("2026-07-02T12:00:00Z"));
