@@ -218,6 +218,15 @@ export async function getParticipantEloData(
   };
 }
 
+export async function getFideRatingById(
+  fideId: string,
+): Promise<number | null> {
+  await authWithRedirect();
+
+  const fideProfile = await getFideProfile(fideId);
+  return fideProfile?.fideRating ?? null;
+}
+
 export async function getDwzAndFideIdByZps(
   zpsPlayerId: string,
   zpsClubId: string,

@@ -1,7 +1,7 @@
 "use client";
 
 import { zodResolver } from "@hookform/resolvers/zod";
-import { useTransition } from "react";
+import { useEffect, useState, useTransition } from "react";
 import { useForm } from "react-hook-form";
 import { format } from "date-fns";
 import { CalendarIcon } from "lucide-react";
@@ -26,13 +26,25 @@ import {
 import { Button } from "../../ui/button";
 import { Calendar } from "../../ui/calendar";
 import { Popover, PopoverContent, PopoverTrigger } from "../../ui/popover";
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+  DialogTrigger,
+} from "../../ui/dialog";
 import { participantFormSchema } from "@/schema/participant";
 import { MatchDaysCheckboxes } from "./matchday-selection";
 import { CountryDropdown } from "@/components/ui/country-dropdown";
 import { cn } from "@/lib/utils";
 import { isHoliday } from "@/lib/holidays";
 import { Tournament } from "@/db/types/tournament";
-import { getParticipantEloData } from "@/actions/participant";
+import {
+  getFideRatingById,
+  getParticipantEloData,
+} from "@/actions/participant";
 import { toast } from "sonner";
 import { Profile } from "@/db/types/profile";
 import {
@@ -48,6 +60,7 @@ type Props = {
   initialValues?: z.infer<typeof participantFormSchema>;
   canDelete: boolean;
   promotionEligibility: PromotionEligibility | null;
+  prefillFromPreviousParticipant: boolean;
   onSubmit: (data: z.infer<typeof participantFormSchema>) => Promise<void>;
   onDelete: () => Promise<void>;
   tournament: Tournament;
@@ -58,12 +71,14 @@ export function ParticipateForm({
   initialValues,
   canDelete,
   promotionEligibility,
+  prefillFromPreviousParticipant,
   onSubmit,
   onDelete,
   tournament,
   profile,
 }: Props) {
   const [isPending, startTransition] = useTransition();
+  const [deleteOpen, setDeleteOpen] = useState(false);
   const form = useForm<z.infer<typeof participantFormSchema>>({
     resolver: zodResolver(participantFormSchema),
     defaultValues: {
@@ -94,23 +109,7 @@ export function ParticipateForm({
     return isDateDisabled(date, tournament.startDate, tournament.endDate);
   };
 
-  const handleChessClubTypeChange = (
-    value: "hsk" | "other" | "vereinslos",
-  ) => {
-    form.setValue("chessClubType", value);
-
-    if (value === "other") {
-      form.setValue("chessClub", "");
-      return;
-    }
-
-    if (value === CLUBLESS_KEY) {
-      form.setValue("chessClub", "");
-      form.setValue("zpsClub", undefined);
-      form.setValue("zpsPlayer", undefined);
-      return;
-    }
-
+  const fetchAndApplyEloData = () => {
     startTransition(async () => {
       try {
         const eloData = await getParticipantEloData(
@@ -118,6 +117,17 @@ export function ParticipateForm({
           profile.lastName,
         );
         if (!eloData) {
+          const fideId = form.getValues("fideId");
+          if (fideId) {
+            const fideRating = await getFideRatingById(fideId);
+            if (fideRating != null) {
+              form.setValue("fideRating", fideRating);
+              toast.success(
+                "Deine Elo wurde anhand deiner gespeicherten FIDE-ID übernommen.",
+              );
+              return;
+            }
+          }
           toast.info(
             `Keine Einträge zu ${profile.firstName} ${profile.lastName} im HSK-Verzeichnis gefunden. Bitte trage deine Daten manuell ein.`,
           );
@@ -162,6 +172,33 @@ export function ParticipateForm({
     });
   };
 
+  useEffect(() => {
+    if (
+      prefillFromPreviousParticipant &&
+      initialValues?.chessClubType === DEFAULT_CLUB_KEY
+    ) {
+      fetchAndApplyEloData();
+    }
+  }, []);
+
+  const handleChessClubTypeChange = (value: "hsk" | "other" | "vereinslos") => {
+    form.setValue("chessClubType", value);
+
+    if (value === "other") {
+      form.setValue("chessClub", "");
+      return;
+    }
+
+    if (value === CLUBLESS_KEY) {
+      form.setValue("chessClub", "");
+      form.setValue("zpsClub", undefined);
+      form.setValue("zpsPlayer", undefined);
+      return;
+    }
+
+    fetchAndApplyEloData();
+  };
+
   const handleSubmit = (data: z.infer<typeof participantFormSchema>) => {
     startTransition(async () => {
       await onSubmit(data);
@@ -198,10 +235,32 @@ export function ParticipateForm({
                     </FormDescription>
                   </div>
                   <FormControl>
-                    <Switch
-                      checked={field.value ?? false}
-                      onCheckedChange={field.onChange}
-                    />
+                    <div className="flex items-center gap-2">
+                      <span
+                        className={cn(
+                          "text-sm font-medium",
+                          field.value
+                            ? "text-muted-foreground"
+                            : "text-foreground",
+                        )}
+                      >
+                        Nein
+                      </span>
+                      <Switch
+                        checked={field.value ?? false}
+                        onCheckedChange={field.onChange}
+                      />
+                      <span
+                        className={cn(
+                          "text-sm font-medium",
+                          field.value
+                            ? "text-foreground"
+                            : "text-muted-foreground",
+                        )}
+                      >
+                        Ja
+                      </span>
+                    </div>
                   </FormControl>
                 </div>
                 {promotionEligibility.targetIsAGroup ? (
@@ -337,88 +396,88 @@ export function ParticipateForm({
         {chessClubType != null ? (
           <div className="flex flex-col gap-2">
             <div className="flex gap-4">
-            <FormField
-              control={form.control}
-              name="title"
-              render={({ field }) => (
-                <FormItem className="w-32">
-                  <FormLabel>Titel</FormLabel>
-                  <FormControl>
-                    <Select
-                      defaultValue="noTitle"
-                      value={field.value}
-                      onValueChange={field.onChange}
-                    >
-                      <SelectTrigger>
-                        <SelectValue placeholder="Titel" />
-                      </SelectTrigger>
-                      <SelectContent>
-                        <SelectItem value="noTitle">Kein Titel</SelectItem>
-                        <SelectItem value="GM">GM </SelectItem>
-                        <SelectItem value="IM">IM </SelectItem>
-                        <SelectItem value="FM">FM </SelectItem>
-                        <SelectItem value="CM">CM </SelectItem>
-                        <SelectItem value="WGM">WGM </SelectItem>
-                        <SelectItem value="WIM">WIM </SelectItem>
-                        <SelectItem value="WFM">WFM </SelectItem>
-                        <SelectItem value="WCM">WCM </SelectItem>
-                      </SelectContent>
-                    </Select>
-                  </FormControl>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
-            <FormField
-              control={form.control}
-              name="dwzRating"
-              render={({ field }) => (
-                <FormItem className="flex-1">
-                  <FormLabel>DWZ</FormLabel>
-                  <FormControl>
-                    <Input
-                      type="number"
-                      id="dwzRating"
-                      placeholder="leer lassen, wenn keine vorhanden"
-                      min="500"
-                      max="2800"
-                      step="1"
-                      {...field}
-                      value={field.value ?? ""}
-                    />
-                  </FormControl>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
-            <FormField
-              control={form.control}
-              name="fideRating"
-              render={({ field }) => (
-                <FormItem className="flex-1">
-                  <FormLabel required={fideRating ? true : false}>
-                    Elo
-                  </FormLabel>
-                  <FormControl>
-                    <Input
-                      type="number"
-                      id="fideRating"
-                      placeholder="leer lassen, wenn keine vorhanden"
-                      min="500"
-                      max="2800"
-                      step="1"
-                      {...field}
-                      value={field.value ?? ""}
-                    />
-                  </FormControl>
-                  <FormMessage />
-                  <FormDescription>
-                    Wer in den A-, B- und C-Gruppen spielen möchte, muss seine
-                    Elo angeben.
-                  </FormDescription>
-                </FormItem>
-              )}
-            />
+              <FormField
+                control={form.control}
+                name="title"
+                render={({ field }) => (
+                  <FormItem className="w-32">
+                    <FormLabel>Titel</FormLabel>
+                    <FormControl>
+                      <Select
+                        defaultValue="noTitle"
+                        value={field.value}
+                        onValueChange={field.onChange}
+                      >
+                        <SelectTrigger>
+                          <SelectValue placeholder="Titel" />
+                        </SelectTrigger>
+                        <SelectContent>
+                          <SelectItem value="noTitle">Kein Titel</SelectItem>
+                          <SelectItem value="GM">GM </SelectItem>
+                          <SelectItem value="IM">IM </SelectItem>
+                          <SelectItem value="FM">FM </SelectItem>
+                          <SelectItem value="CM">CM </SelectItem>
+                          <SelectItem value="WGM">WGM </SelectItem>
+                          <SelectItem value="WIM">WIM </SelectItem>
+                          <SelectItem value="WFM">WFM </SelectItem>
+                          <SelectItem value="WCM">WCM </SelectItem>
+                        </SelectContent>
+                      </Select>
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+              <FormField
+                control={form.control}
+                name="dwzRating"
+                render={({ field }) => (
+                  <FormItem className="flex-1">
+                    <FormLabel>DWZ</FormLabel>
+                    <FormControl>
+                      <Input
+                        type="number"
+                        id="dwzRating"
+                        placeholder="leer lassen, wenn keine vorhanden"
+                        min="500"
+                        max="2800"
+                        step="1"
+                        {...field}
+                        value={field.value ?? ""}
+                      />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+              <FormField
+                control={form.control}
+                name="fideRating"
+                render={({ field }) => (
+                  <FormItem className="flex-1">
+                    <FormLabel required={fideRating ? true : false}>
+                      Elo
+                    </FormLabel>
+                    <FormControl>
+                      <Input
+                        type="number"
+                        id="fideRating"
+                        placeholder="leer lassen, wenn keine vorhanden"
+                        min="500"
+                        max="2800"
+                        step="1"
+                        {...field}
+                        value={field.value ?? ""}
+                      />
+                    </FormControl>
+                    <FormMessage />
+                    <FormDescription>
+                      Wer in den A-, B- und C-Gruppen spielen möchte, muss seine
+                      Elo angeben.
+                    </FormDescription>
+                  </FormItem>
+                )}
+              />
             </div>
             <p className="text-sm text-muted-foreground">
               Die Gruppeneinteilung erfolgt nach der{" "}
@@ -628,14 +687,46 @@ export function ParticipateForm({
             Änderungen speichern
           </Button>
           {canDelete && tournament.stage === "registration" ? (
-            <Button
-              disabled={isPending}
-              className="w-full sm:w-auto "
-              variant={"outline"}
-              onClick={handleDelete}
-            >
-              Änderungen verwerfen
-            </Button>
+            <Dialog open={deleteOpen} onOpenChange={setDeleteOpen}>
+              <DialogTrigger asChild>
+                <Button
+                  disabled={isPending}
+                  type="button"
+                  className="w-full sm:w-auto"
+                  variant={"outline"}
+                >
+                  Anmeldung löschen
+                </Button>
+              </DialogTrigger>
+              <DialogContent>
+                <DialogHeader>
+                  <DialogTitle>Anmeldung löschen</DialogTitle>
+                  <DialogDescription>
+                    Möchtest du deine Anmeldung zum Klubturnier wirklich löschen?
+                    Deine Angaben werden entfernt. Du kannst dich während der
+                    Anmeldephase jederzeit erneut anmelden.
+                  </DialogDescription>
+                </DialogHeader>
+                <DialogFooter>
+                  <Button
+                    type="button"
+                    variant="outline"
+                    disabled={isPending}
+                    onClick={() => setDeleteOpen(false)}
+                  >
+                    Abbrechen
+                  </Button>
+                  <Button
+                    type="button"
+                    variant="destructive"
+                    disabled={isPending}
+                    onClick={handleDelete}
+                  >
+                    {isPending ? "Wird gelöscht..." : "Anmeldung löschen"}
+                  </Button>
+                </DialogFooter>
+              </DialogContent>
+            </Dialog>
           ) : null}
         </div>
       </form>

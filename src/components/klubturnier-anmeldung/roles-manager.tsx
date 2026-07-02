@@ -58,6 +58,8 @@ export function RolesManager({
     rolesData.participant,
     previousParticipant,
   );
+  const prefillFromPreviousParticipant =
+    rolesData.participant == null && previousParticipant != null;
   const canDeleteParticipant = rolesData.participant != null;
   const [isPending, startTransition] = useTransition();
   const router = useRouter();
@@ -164,6 +166,7 @@ export function RolesManager({
             initialValues={participantInitialValues}
             canDelete={canDeleteParticipant}
             promotionEligibility={promotionEligibility}
+            prefillFromPreviousParticipant={prefillFromPreviousParticipant}
             onSubmit={handleParticipateFormSubmit}
             onDelete={handleDeleteParticipant}
             tournament={tournament}
