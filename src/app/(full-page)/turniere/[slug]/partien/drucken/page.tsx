@@ -2,7 +2,7 @@ import { PrintButton } from "@/components/partien/print/print-button";
 import { Badge } from "@/components/ui/badge";
 import { getGamesByTournamentId } from "@/db/repositories/game";
 import { getTournamentBySlug } from "@/db/repositories/tournament";
-import { toDateString } from "@/lib/date";
+import { formatDate } from "@/lib/date";
 import { getDateTimeFromTournamentTime } from "@/lib/game-time";
 import { getParticipantFullName } from "@/lib/participant";
 import { notFound } from "next/navigation";
@@ -67,7 +67,7 @@ export default async function Page({
                 <Badge variant="outline">{index + 1}</Badge>
               </div>
               <div className="basis-[8rem] text-center">
-                {toDateString(game.gameDateTime)}
+                {formatDate(game.gameDateTime)}
               </div>
               <div className="basis-16 text-center">
                 <Badge variant="secondary">{game.group.groupName}</Badge>

@@ -11,7 +11,7 @@ import { getTournamentById } from "@/db/repositories/tournament";
 import { getGroupById } from "@/db/repositories/group";
 import { getMatchdayById } from "@/db/repositories/match-day";
 import { getParticipantsByGroupId } from "@/db/repositories/participant";
-import { toLocalDateTime, toDateString } from "@/lib/date";
+import { formatDateOnly } from "@/lib/date";
 import { getFullName } from "@/lib/participant";
 import { SearchParamsNumbers } from "@/components/partien/mass-pgn-download-button";
 
@@ -61,10 +61,7 @@ export const buildPgnFileName = action(
     if (matchdayId) {
       const matchday = await getMatchdayById(matchdayId);
       if (matchday) {
-        const dateStr = toDateString(toLocalDateTime(matchday.date)).replace(
-          /\./g,
-          "_",
-        );
+        const dateStr = formatDateOnly(matchday.date).replace(/\./g, "_");
         parts.push(dateStr);
       }
     }

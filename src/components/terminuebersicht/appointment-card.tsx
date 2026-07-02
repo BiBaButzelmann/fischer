@@ -13,7 +13,7 @@ import {
   DialogTrigger,
 } from "@/components/ui/dialog";
 import { Clock, ChevronRight, X, Undo2 } from "lucide-react";
-import { formatEventDateTime, toLocalDateTime } from "@/lib/date";
+import { formatEventDateTime, parseDateOnly } from "@/lib/date";
 import { getDateTimeFromTournamentTime } from "@/lib/game-time";
 import { buildGameViewUrl } from "@/lib/navigation";
 import { useTournamentSlug } from "@/hooks/use-tournament-slug";
@@ -80,7 +80,7 @@ export function MatchdayAppointmentCard({ appointment }: Props) {
       <CardHeader className="pb-4">
         <div className="flex items-center justify-between">
           <h2 className="text-2xl font-bold">
-            {toLocalDateTime(matchdayDate).setLocale("de").weekdayLong}
+            {parseDateOnly(matchdayDate).setLocale("de").weekdayLong}
           </h2>
           <div className="flex items-center gap-2">
             <Link href={gameUrl}>

@@ -1,3 +1,4 @@
+import { parseDateOnly } from "@/lib/date";
 import { TournamentSectionData } from "./types";
 
 export function generateTournamentSection(
@@ -12,6 +13,6 @@ Turnierorganisator: ${tournamentSectionData.tournamentOrganizer}\r
 Hauptschiedsrichter: ${tournamentSectionData.mainReferee}\r`;
 }
 
-function formatDate(date: Date) {
-  return date.toLocaleDateString("de-DE");
+function formatDate(date: string) {
+  return parseDateOnly(date).toFormat("d.M.yyyy");
 }

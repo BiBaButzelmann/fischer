@@ -11,7 +11,7 @@ import { MatchDayWithRefereeAndSetupHelpers } from "@/db/types/match-day";
 import { SetupHelperWithName } from "@/db/types/setup-helper";
 import { SetupHelperSelector } from "./setup-helper-selector";
 import { DateTime } from "luxon";
-import { displayShortDateOrHoliday } from "@/lib/date";
+import { formatShortDateOrHoliday } from "@/lib/date";
 import { generateRefereeAssignmentSchedule } from "@/lib/tournament-schedule";
 import {
   Table,
@@ -147,7 +147,7 @@ export function MatchdayAssignmentForm({
   );
 
   const displayDateWithStyling = (date: DateTime) => {
-    const dateText = displayShortDateOrHoliday(date);
+    const dateText = formatShortDateOrHoliday(date);
     if (dateText === "Feiertag") {
       return <span className="text-red-500 italic">Feiertag</span>;
     }

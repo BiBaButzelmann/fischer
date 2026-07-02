@@ -29,14 +29,14 @@ export const tournament = pgTable("tournament", {
   type: text("type").notNull(),
   numberOfRounds: smallint("number_of_rounds").notNull(),
   endRegistrationDate: date("end_registration_date", {
-    mode: "date",
+    mode: "string",
   }).notNull(),
   groupAnnouncementOffsetDays: smallint("group_announcement_offset_days")
     .notNull()
     .default(2),
 
-  startDate: date("start_date", { mode: "date" }).notNull(),
-  endDate: date("end_date", { mode: "date" }).notNull(),
+  startDate: date("start_date", { mode: "string" }).notNull(),
+  endDate: date("end_date", { mode: "string" }).notNull(),
   timeLimit: text("time_limit").notNull(),
   location: text("location").notNull(),
   allClocksDigital: boolean("all_clocks_digital").notNull(),

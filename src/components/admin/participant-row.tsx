@@ -21,6 +21,7 @@ import { toast } from "sonner";
 import { Badge } from "@/components/ui/badge";
 import { ProfileWithName } from "@/db/types/profile";
 import { getParticipantFullName } from "@/lib/participant";
+import { formatDate, toLocalDateTime } from "@/lib/date";
 import { getTwz } from "@/lib/twz";
 
 type Props = {
@@ -169,9 +170,7 @@ export function ParticipantRow({
           {participant.profile.deletedAt && (
             <span className="text-xs text-red-600">
               Deaktiviert:{" "}
-              {new Date(participant.profile.deletedAt).toLocaleDateString(
-                "de-DE",
-              )}
+              {formatDate(toLocalDateTime(participant.profile.deletedAt))}
             </span>
           )}
         </div>

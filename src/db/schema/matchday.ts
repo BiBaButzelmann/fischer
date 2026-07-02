@@ -18,7 +18,7 @@ export const matchday = pgTable("matchday", {
   id: integer("id").generatedAlwaysAsIdentity().primaryKey(),
   tournamentId: integer("tournament_id").notNull(),
   tournamentWeekId: integer("tournament_week_id").notNull(),
-  date: date("date", { mode: "date" }).notNull(),
+  date: date("date", { mode: "string" }).notNull(),
   dayOfWeek: matchDay("day_of_week").notNull(), // tuesday, thursday, friday
   refereeNeeded: boolean("referee_needed").notNull().default(true),
 

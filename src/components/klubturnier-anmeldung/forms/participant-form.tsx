@@ -1,9 +1,9 @@
 "use client";
 
 import { zodResolver } from "@hookform/resolvers/zod";
-import { useEffect, useState, useTransition } from "react";
+import { useState, useTransition } from "react";
 import { useForm } from "react-hook-form";
-import { format } from "date-fns";
+import { TZDate } from "react-day-picker";
 import { CalendarIcon } from "lucide-react";
 import z from "zod";
 import {
@@ -40,6 +40,12 @@ import { MatchDaysCheckboxes } from "./matchday-selection";
 import { CountryDropdown } from "@/components/ui/country-dropdown";
 import { cn } from "@/lib/utils";
 import { isHoliday } from "@/lib/holidays";
+import {
+  formatDateOnly,
+  parseDateOnly,
+  todayDateOnly,
+  utcDateToDateOnly,
+} from "@/lib/date";
 import { Tournament } from "@/db/types/tournament";
 import {
   getFideRatingById,
@@ -60,7 +66,6 @@ type Props = {
   initialValues?: z.infer<typeof participantFormSchema>;
   canDelete: boolean;
   promotionEligibility: PromotionEligibility | null;
-  prefillFromPreviousParticipant: boolean;
   onSubmit: (data: z.infer<typeof participantFormSchema>) => Promise<void>;
   onDelete: () => Promise<void>;
   tournament: Tournament;
@@ -71,7 +76,6 @@ export function ParticipateForm({
   initialValues,
   canDelete,
   promotionEligibility,
-  prefillFromPreviousParticipant,
   onSubmit,
   onDelete,
   tournament,
@@ -171,15 +175,6 @@ export function ParticipateForm({
       }
     });
   };
-
-  useEffect(() => {
-    if (
-      prefillFromPreviousParticipant &&
-      initialValues?.chessClubType === DEFAULT_CLUB_KEY
-    ) {
-      fetchAndApplyEloData();
-    }
-  }, []);
 
   const handleChessClubTypeChange = (value: "hsk" | "other" | "vereinslos") => {
     form.setValue("chessClubType", value);
@@ -368,16 +363,10 @@ export function ParticipateForm({
                     <FormControl>
                       <Input
                         type="date"
-                        max={format(new Date(), "yyyy-MM-dd")}
-                        value={
-                          field.value ? format(field.value, "yyyy-MM-dd") : ""
-                        }
+                        max={todayDateOnly()}
+                        value={field.value ?? ""}
                         onChange={(e) =>
-                          field.onChange(
-                            e.target.value
-                              ? new Date(`${e.target.value}T00:00:00`)
-                              : undefined,
-                          )
+                          field.onChange(e.target.value || undefined)
                         }
                       />
                     </FormControl>
@@ -637,14 +626,21 @@ export function ParticipateForm({
                 <PopoverContent className="w-auto p-0" align="start">
                   <Calendar
                     mode="multiple"
-                    selected={field.value ?? []}
-                    onSelect={(selectedDates) => {
-                      if (selectedDates && selectedDates.length <= 5) {
-                        field.onChange(selectedDates);
+                    timeZone="UTC"
+                    selected={(field.value ?? []).map(
+                      (day) => new TZDate(day, "UTC"),
+                    )}
+                    onSelect={(dates) => {
+                      const days = (dates ?? []).map(utcDateToDateOnly);
+                      if (days.length <= 5) {
+                        field.onChange(days);
                       }
                     }}
                     numberOfMonths={1}
-                    disabled={handleDateDisabled}
+                    disabled={(date) =>
+                      !(field.value ?? []).includes(utcDateToDateOnly(date)) &&
+                      handleDateDisabled(date)
+                    }
                   />
                 </PopoverContent>
               </Popover>
@@ -663,12 +659,12 @@ export function ParticipateForm({
                     Ausgewählte Tage ({field.value.length}):
                   </p>
                   <div className="flex flex-wrap gap-1">
-                    {field.value.map((date, index) => (
+                    {field.value.map((day, index) => (
                       <span
                         key={index}
                         className="inline-flex items-center px-2 py-1 rounded-md bg-secondary text-secondary-foreground text-xs"
                       >
-                        {format(date, "dd.MM.yyyy")}
+                        {formatDateOnly(day)}
                       </span>
                     ))}
                   </div>
@@ -734,31 +730,16 @@ export function ParticipateForm({
   );
 }
 
-function isDateDisabled(date: Date, min: Date, max: Date) {
-  const dateOnly = new Date(
-    date.getFullYear(),
-    date.getMonth(),
-    date.getDate(),
-  );
-  const startDateOnly = new Date(
-    min.getFullYear(),
-    min.getMonth(),
-    min.getDate(),
-  );
-  const endDateOnly = new Date(
-    max.getFullYear(),
-    max.getMonth(),
-    max.getDate(),
-  );
-
-  if (dateOnly < startDateOnly || dateOnly > endDateOnly) {
+function isDateDisabled(date: Date, min: string, max: string) {
+  const day = utcDateToDateOnly(date);
+  if (day < min || day > max) {
     return true;
   }
 
-  if (isHoliday(date)) {
+  const dt = parseDateOnly(day);
+  if (isHoliday(dt.toJSDate())) {
     return true;
   }
 
-  const dayOfWeek = date.getDay();
-  return dayOfWeek !== 2 && dayOfWeek !== 4 && dayOfWeek !== 5;
+  return ![2, 4, 5].includes(dt.weekday);
 }

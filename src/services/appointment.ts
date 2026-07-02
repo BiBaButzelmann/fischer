@@ -6,7 +6,7 @@ import {
 import { getProfileByUserId } from "@/db/repositories/profile";
 import { getRefereeByUserId } from "@/db/repositories/referee";
 import { getSetupHelperByUserId } from "@/db/repositories/setup-helper";
-import { getCurrentLocalDateTime } from "@/lib/date";
+import { todayDateOnly } from "@/lib/date";
 import invariant from "tiny-invariant";
 
 type RefereeAppointment = {
@@ -28,7 +28,7 @@ type Appointment = RefereeAppointment | SetupHelperAppointment;
 
 export type MatchdayAppointment = {
   matchdayId: number;
-  matchdayDate: Date;
+  matchdayDate: string;
   tournamentId: number;
   gameStartTime: string;
   cancelledAt: Date | null;
@@ -47,7 +47,7 @@ export async function getMatchdayAppointmentsByUserId(
     return [];
   }
 
-  const currentDate = getCurrentLocalDateTime().startOf("day").toJSDate();
+  const currentDate = todayDateOnly();
   const appointmentsByMatchday = new Map<number, MatchdayAppointment>();
 
   if (userReferee) {
@@ -123,7 +123,7 @@ export async function getMatchdayAppointmentsByUserId(
     }
   }
 
-  return Array.from(appointmentsByMatchday.values()).sort(
-    (a, b) => a.matchdayDate.getTime() - b.matchdayDate.getTime(),
+  return Array.from(appointmentsByMatchday.values()).sort((a, b) =>
+    a.matchdayDate.localeCompare(b.matchdayDate),
   );
 }

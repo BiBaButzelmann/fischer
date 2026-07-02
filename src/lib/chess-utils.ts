@@ -3,7 +3,7 @@ import invariant from "tiny-invariant";
 import { GameWithParticipantsAndPGNAndDate } from "@/db/types/game";
 import { getParticipantFullName } from "@/lib/participant";
 import { getGameTimeFromGame } from "@/lib/game-time";
-import { toDateString } from "@/lib/date";
+import { formatDate } from "@/lib/date";
 
 //TODO: cleanup db entries, all results shall be stored with a "-", also remove "½" and replace with "1/2"
 function normalizeResult(result: string): string {
@@ -20,7 +20,7 @@ export function getHeadersFromGame(
   return {
     Event: game.tournament.name,
     Site: "https://klubturnier.hsk1830.de",
-    Date: toDateString(
+    Date: formatDate(
       getGameTimeFromGame(game, game.tournament.gameStartTime),
     ),
     Round: game.round.toString(),

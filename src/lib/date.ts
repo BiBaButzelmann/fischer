@@ -1,20 +1,41 @@
 import { DateTime } from "luxon";
+import invariant from "tiny-invariant";
 import { isHoliday } from "./holidays";
 
+export const EVENT_TIME_ZONE = "Europe/Berlin";
+
 export function getCurrentLocalDateTime(): DateTime {
-  return DateTime.now().setZone("Europe/Berlin");
+  return DateTime.now().setZone(EVENT_TIME_ZONE);
 }
 
 export function toLocalDateTime(date: Date): DateTime {
-  return DateTime.fromJSDate(date).setZone("Europe/Berlin");
+  return DateTime.fromJSDate(date).setZone(EVENT_TIME_ZONE);
 }
 
-export function getDatetimeString(date: DateTime) {
-  return date.toFormat("dd.MM.yyyy HH:mm");
+export function parseDateOnly(date: string): DateTime {
+  return DateTime.fromISO(date, { zone: EVENT_TIME_ZONE });
 }
 
-export function isSameDate(date1: DateTime, date2: DateTime): boolean {
-  return date1.hasSame(date2, "day");
+export function toDateOnly(date: DateTime): string {
+  const isoDate = date.toISODate();
+  invariant(isoDate, "Invalid DateTime");
+  return isoDate;
+}
+
+export function isValidDateOnly(date: string): boolean {
+  return /^\d{4}-\d{2}-\d{2}$/.test(date) && parseDateOnly(date).isValid;
+}
+
+export function utcDateToDateOnly(date: Date): string {
+  return date.toISOString().slice(0, 10);
+}
+
+export function todayDateOnly(): string {
+  return toDateOnly(getCurrentLocalDateTime());
+}
+
+export function formatDateOnly(date: string): string {
+  return formatDate(parseDateOnly(date));
 }
 
 /**
@@ -22,7 +43,7 @@ export function isSameDate(date1: DateTime, date2: DateTime): boolean {
  * @param date - The DateTime object to format
  * @returns Formatted date string or "Feiertag"
  */
-export function displayShortDateOrHoliday(date: DateTime): string {
+export function formatShortDateOrHoliday(date: DateTime): string {
   if (isHoliday(date.toJSDate())) {
     return "Feiertag";
   }
@@ -34,7 +55,7 @@ export function displayShortDateOrHoliday(date: DateTime): string {
  * @param date - The date to format
  * @returns A formatted date string like "Donnerstag, 15. August 2024"
  */
-export function displayLongDate(date: DateTime): string {
+export function formatLongDate(date: DateTime): string {
   return date.setLocale("de-DE").toFormat("cccc, d. LLLL yyyy");
 }
 
@@ -50,10 +71,10 @@ export function formatEventDateTime(date: DateTime): string {
 }
 
 /**
- * Formats a game date for display in German locale (DD.MM.YYYY format)
- * @param date - The game date/time to format
+ * Formats a date for display in German locale (DD.MM.YYYY format)
+ * @param date - The date/time to format
  * @returns A formatted date string in German format
  */
-export function toDateString(date: DateTime): string {
+export function formatDate(date: DateTime): string {
   return date.toFormat("dd.MM.yyyy");
 }

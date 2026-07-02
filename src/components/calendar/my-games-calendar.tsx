@@ -18,7 +18,7 @@ import { Skeleton } from "@/components/ui/skeleton";
 import { useRouter } from "next/navigation";
 import { buildGameViewUrl, tournamentPath } from "@/lib/navigation";
 import { useTournamentSlug } from "@/hooks/use-tournament-slug";
-import { isSameDate, toLocalDateTime } from "@/lib/date";
+import { parseDateOnly, toDateOnly, toLocalDateTime } from "@/lib/date";
 
 type Props = {
   events: CalendarEvent[];
@@ -38,12 +38,12 @@ export function MyGamesCalendar({ events, matchdays = [] }: Props) {
     editable: event.extendedProps.eventType === "game",
   }));
 
-  const validDropDates = matchdays.map((matchday) =>
-    toLocalDateTime(matchday.date),
-  );
+  const validDropDates = matchdays.map((matchday) => matchday.date);
 
   const initialDate =
-    validDropDates.length > 0 ? validDropDates[0].toJSDate() : new Date();
+    validDropDates.length > 0
+      ? parseDateOnly(validDropDates[0]).toJSDate()
+      : new Date();
 
   const handleEventDrop = useCallback(
     async (info: EventDropArg) => {
@@ -63,17 +63,15 @@ export function MyGamesCalendar({ events, matchdays = [] }: Props) {
         return;
       }
 
-      const newDate = toLocalDateTime(info.event.start!);
-      const isMatchdayDate = validDropDates.some((validDate) =>
-        isSameDate(validDate, newDate),
-      );
+      const newDate = toDateOnly(toLocalDateTime(info.event.start!));
+      const isMatchdayDate = validDropDates.includes(newDate);
       if (!isMatchdayDate) {
         info.revert();
         return;
       }
 
-      const targetMatchday = matchdays.find((matchday) =>
-        isSameDate(toLocalDateTime(matchday.date), newDate),
+      const targetMatchday = matchdays.find(
+        (matchday) => matchday.date === newDate,
       ) as MatchDay;
 
       startTransition(async () => {
@@ -135,20 +133,16 @@ export function MyGamesCalendar({ events, matchdays = [] }: Props) {
     (dropInfo) => {
       if (validDropDates.length === 0) return true;
 
-      const dropDate = toLocalDateTime(dropInfo.start);
-      return validDropDates.some((validDate) =>
-        isSameDate(validDate, dropDate),
-      );
+      const dropDate = toDateOnly(toLocalDateTime(dropInfo.start));
+      return validDropDates.includes(dropDate);
     },
     [validDropDates],
   );
 
   const handleDayCellDidMount = useCallback(
     (info: DayCellMountArg) => {
-      const cellDate = toLocalDateTime(info.date);
-      const isMatchdayDate = validDropDates.some((validDate) =>
-        isSameDate(validDate, cellDate),
-      );
+      const cellDate = toDateOnly(toLocalDateTime(info.date));
+      const isMatchdayDate = validDropDates.includes(cellDate);
 
       if (isMatchdayDate) {
         info.el.classList.add("drop-zone-valid");
@@ -173,10 +167,7 @@ export function MyGamesCalendar({ events, matchdays = [] }: Props) {
         const htmlElement = cell as HTMLElement;
         const dateStr = htmlElement.getAttribute("data-date");
         if (dateStr) {
-          const cellDate = toLocalDateTime(new Date(dateStr));
-          const isMatchdayDate = validDropDates.some((validDate) =>
-            isSameDate(validDate, cellDate),
-          );
+          const isMatchdayDate = validDropDates.includes(dateStr);
 
           if (isMatchdayDate) {
             htmlElement.classList.add("drop-zone-valid");
@@ -190,16 +181,12 @@ export function MyGamesCalendar({ events, matchdays = [] }: Props) {
 
   const handleDateClick = useCallback(
     (info: DateClickArg) => {
-      const clickedDate = toLocalDateTime(info.date);
-      const isMatchdayDate = validDropDates.some((validDate) =>
-        isSameDate(validDate, clickedDate),
-      );
+      const clickedDate = toDateOnly(toLocalDateTime(info.date));
+      const isMatchdayDate = validDropDates.includes(clickedDate);
 
       if (!isMatchdayDate) return;
 
-      const matchday = matchdays.find((md) =>
-        isSameDate(toLocalDateTime(md.date), clickedDate),
-      );
+      const matchday = matchdays.find((md) => md.date === clickedDate);
 
       if (matchday) {
         const url = buildGameViewUrl({

@@ -8,7 +8,7 @@ import {
   sendSetupHelperAppointmentNotification,
   sendRefereeAppointmentNotification,
 } from "@/email/appointment";
-import { displayLongDate, toLocalDateTime } from "@/lib/date";
+import { formatLongDate, parseDateOnly } from "@/lib/date";
 import { eq } from "drizzle-orm";
 import invariant from "tiny-invariant";
 
@@ -31,7 +31,7 @@ export async function sendSetupHelperAppointmentEmail(
 
   const profile = setupHelperData.profile;
   const setupHelperName = `${profile.firstName} ${profile.lastName}`;
-  const formattedDate = displayLongDate(toLocalDateTime(matchdayInfo.date));
+  const formattedDate = formatLongDate(parseDateOnly(matchdayInfo.date));
 
   const emailData = {
     name: setupHelperName,
@@ -63,7 +63,7 @@ export async function sendRefereeAppointmentEmail(
 
   const profile = refereeData.profile;
   const refereeName = `${profile.firstName} ${profile.lastName}`;
-  const formattedDate = displayLongDate(toLocalDateTime(matchdayInfo.date));
+  const formattedDate = formatLongDate(parseDateOnly(matchdayInfo.date));
 
   const emailData = {
     name: refereeName,

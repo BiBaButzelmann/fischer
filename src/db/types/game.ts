@@ -51,7 +51,7 @@ export type GameWithParticipantProfilesAndGroupAndMatchday = Game & {
   };
   matchdayGame: {
     matchday: {
-      date: Date;
+      date: string;
     };
   };
   pgn: {
@@ -62,7 +62,7 @@ export type GameWithParticipantProfilesAndGroupAndMatchday = Game & {
 export type GameWithMatchday = Game & {
   matchdayGame: {
     matchday: {
-      date: Date;
+      date: string;
     };
   };
 };
@@ -72,7 +72,7 @@ export type GameWithParticipantProfilesAndMatchday = Game & {
   blackParticipant: ParticipantWithProfile | null;
   matchdayGame: {
     matchday: {
-      date: Date;
+      date: string;
     };
   };
 };
@@ -80,7 +80,7 @@ export type GameWithParticipantProfilesAndMatchday = Game & {
 export type GameWithParticipantsAndDate = GameWithParticipants & {
   matchdayGame: {
     matchday: {
-      date: Date;
+      date: string;
     };
   };
 };
@@ -92,7 +92,7 @@ export type GameWithParticipantsAndPGNAndDate = GameWithParticipantsAndPGN & {
   };
   matchdayGame: {
     matchday: {
-      date: Date;
+      date: string;
     };
   };
 };

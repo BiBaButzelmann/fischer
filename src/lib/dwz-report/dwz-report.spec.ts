@@ -117,8 +117,8 @@ const headerSectionData: HeaderSectionData = {
 const tournamentSectionData: TournamentSectionData = {
   tournamentName: "Klubturnier 2025",
   location: "Hamburg",
-  startDate: new Date("2025-09-16"),
-  endDate: new Date("2025-12-12"),
+  startDate: "2025-09-16",
+  endDate: "2025-12-12",
   timeLimit:
     "40 Züge in 90 Minuten, danach 0 Züge in 0 Minuten, 30 Minuten für die letzte Phase, Zugabe pro Zug in Sekunden: 30",
   tournamentOrganizer: "Arne Alpers",

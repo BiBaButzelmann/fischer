@@ -30,8 +30,8 @@ export type TournamentSectionData = {
   tournamentName?: string;
   location?: string;
   fideFederation?: string;
-  startDate: Date;
-  endDate: Date;
+  startDate: string;
+  endDate: string;
   timeLimit?: string;
   tournamentOrganizer?: string;
   mainReferee?: string;

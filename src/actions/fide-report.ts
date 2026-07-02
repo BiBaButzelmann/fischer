@@ -14,6 +14,7 @@ import {
 } from "@/lib/fide-report/format-fide-name";
 import { PlayerEntry, Result } from "@/lib/fide-report/types";
 import { calculateStandings } from "@/lib/standings";
+import { parseDateOnly, toDateOnly, toLocalDateTime } from "@/lib/date";
 import { DateTime } from "luxon";
 import invariant from "tiny-invariant";
 import { match } from "ts-pattern";
@@ -81,10 +82,12 @@ export const generateFideReportFile = action(
 
       const isWhiteParticipantDisabled =
         whiteParticipant.participant.deletedAt != null &&
-        whiteParticipant.participant.deletedAt <= date;
+        toDateOnly(toLocalDateTime(whiteParticipant.participant.deletedAt)) <
+          date;
       const isBlackParticipantDisabled =
         blackParticipant.participant.deletedAt != null &&
-        blackParticipant.participant.deletedAt <= date;
+        toDateOnly(toLocalDateTime(blackParticipant.participant.deletedAt)) <
+          date;
 
       return !isWhiteParticipantDisabled && !isBlackParticipantDisabled;
     });
@@ -211,7 +214,7 @@ export const generateFideReportFile = action(
               const isWhite = whiteGameIds.includes(game.id);
 
               return {
-                scheduled: DateTime.fromJSDate(game.matchday.date),
+                scheduled: parseDateOnly(game.matchday.date),
                 opponentGroupPosition: getInitialGroupPositionOfPlayer(
                   isWhite ? game.blackParticipantId! : game.whiteParticipantId!,
                 ),
@@ -254,8 +257,8 @@ export const generateFideReportFile = action(
         tournamentName,
         location,
         federation,
-        startDate: DateTime.fromJSDate(startDate),
-        endDate: DateTime.fromJSDate(endDate),
+        startDate: parseDateOnly(startDate),
+        endDate: parseDateOnly(endDate),
         numberOfPlayers,
         numberOfRatedPlayers,
         tournamentType,

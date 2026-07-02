@@ -1,6 +1,6 @@
 import invariant from "tiny-invariant";
 import { Tournament } from "@/db/types/tournament";
-import { toDateString, toLocalDateTime } from "./date";
+import { parseDateOnly, formatDate } from "./date";
 
 export function getGroupAnnouncementDate(
   tournament: Pick<
@@ -8,8 +8,8 @@ export function getGroupAnnouncementDate(
     "endRegistrationDate" | "groupAnnouncementOffsetDays"
   >,
 ): string {
-  return toDateString(
-    toLocalDateTime(tournament.endRegistrationDate).plus({
+  return formatDate(
+    parseDateOnly(tournament.endRegistrationDate).plus({
       days: tournament.groupAnnouncementOffsetDays,
     }),
   );
@@ -19,7 +19,7 @@ export function generateTournamentWeeksSchedule(
   tournamentWeeks: Array<{
     id: number;
     status: "regular" | "catch-up";
-    matchdays: Array<{ date: Date }>;
+    matchdays: Array<{ date: string }>;
   }>,
 ) {
   let regularWeekCount = 0;
@@ -35,7 +35,7 @@ export function generateTournamentWeeksSchedule(
       week.matchdays[0],
       `Tournament week ${week.id} has no matchdays`,
     );
-    const weekStart = toLocalDateTime(week.matchdays[0].date).startOf("week");
+    const weekStart = parseDateOnly(week.matchdays[0].date).startOf("week");
 
     return {
       id: week.id,
@@ -48,7 +48,7 @@ export function generateTournamentWeeksSchedule(
 }
 
 export function generateRefereeAssignmentSchedule<
-  TMatchday extends { date: Date },
+  TMatchday extends { date: string },
   TWeek extends { weekNumber: number; status: "regular" | "catch-up" },
 >(
   groupedMatchdays: Record<
@@ -78,7 +78,7 @@ export function generateRefereeAssignmentSchedule<
       entry.matchdays[0],
       `Tournament week ${week.weekNumber} has no matchdays`,
     );
-    const weekStart = toLocalDateTime(entry.matchdays[0].date).startOf("week");
+    const weekStart = parseDateOnly(entry.matchdays[0].date).startOf("week");
 
     const tuesday = weekStart.plus({ days: 1 });
     const thursday = weekStart.plus({ days: 3 });

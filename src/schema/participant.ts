@@ -1,6 +1,13 @@
 import { CLUBLESS_KEY, DEFAULT_CLUB_KEY } from "@/constants/constants";
 import { availableMatchDays } from "@/db/schema/columns.helpers";
+import {
+  getCurrentLocalDateTime,
+  isValidDateOnly,
+  todayDateOnly,
+} from "@/lib/date";
 import z from "zod";
+
+const dateOnlySchema = z.string().refine(isValidDateOnly, "Ungültiges Datum");
 
 export const participantFormSchema = z
   .object({
@@ -28,14 +35,13 @@ export const participantFormSchema = z
       .number()
       .min(1900, "Geburtsjahr muss mindestens 1900 sein")
       .refine(
-        (y) => y <= new Date().getFullYear(),
+        (y) => y <= getCurrentLocalDateTime().year,
         "Geburtsjahr kann nicht in der Zukunft liegen",
       )
       .optional(),
-    birthDate: z.coerce
-      .date()
+    birthDate: dateOnlySchema
       .refine(
-        (d) => d <= new Date(),
+        (d) => d <= todayDateOnly(),
         "Geburtsdatum kann nicht in der Zukunft liegen",
       )
       .optional(),
@@ -48,7 +54,10 @@ export const participantFormSchema = z
       errorMap: () => ({ message: "Bevorzugter Spieltag ist erforderlich" }),
     }),
     secondaryMatchDays: z.array(z.enum(availableMatchDays)),
-    notAvailableDays: z.array(z.date()).max(5, "Maximal 5 Tage").optional(),
+    notAvailableDays: z
+      .array(dateOnlySchema)
+      .max(5, "Maximal 5 Tage")
+      .optional(),
     exercisePromotionRight: z.boolean().optional(),
   })
   .refine(
@@ -97,7 +106,7 @@ export const participantFormSchema = z
         return (
           !!data.birthYear &&
           data.birthYear >= 1900 &&
-          data.birthYear <= new Date().getFullYear()
+          data.birthYear <= getCurrentLocalDateTime().year
         );
       }
       return true;

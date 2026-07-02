@@ -17,7 +17,7 @@ export type GamePostponementWithDetails = GamePostponement & {
     matchdayGame: {
       matchday: {
         id: number;
-        date: Date;
+        date: string;
       };
     } | null;
   };

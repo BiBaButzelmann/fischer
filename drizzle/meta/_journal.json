@@ -176,6 +176,13 @@
       "when": 1782669876082,
       "tag": "0024_large_medusa",
       "breakpoints": true
+    },
+    {
+      "idx": 25,
+      "version": "7",
+      "when": 1783015072822,
+      "tag": "0025_fix_date_only_tz_shift",
+      "breakpoints": true
     }
   ]
 }

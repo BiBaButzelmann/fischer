@@ -19,6 +19,7 @@ import {
 } from "@/constants/constants";
 import { revalidatePath } from "next/cache";
 import { action } from "@/lib/actions";
+import { parseDateOnly } from "@/lib/date";
 import { getFideProfile } from "@/lib/fide/profile";
 
 function parseRating(value: string | undefined): number | null {
@@ -50,7 +51,7 @@ export async function createParticipant(
 
   const entryFeePayed = data.chessClubType === DEFAULT_CLUB_KEY ? null : false;
   const birthYear = data.birthDate
-    ? data.birthDate.getFullYear()
+    ? parseDateOnly(data.birthDate).year
     : data.birthYear;
 
   const tournament = await getTournamentById(tournamentId);

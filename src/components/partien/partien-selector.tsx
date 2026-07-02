@@ -14,8 +14,8 @@ import { Calendar } from "../ui/calendar";
 import { Popover, PopoverContent, PopoverTrigger } from "../ui/popover";
 import { CalendarIcon } from "lucide-react";
 import { cn } from "@/lib/utils";
-import { format } from "date-fns";
-import { de } from "date-fns/locale";
+import { TZDate } from "react-day-picker";
+import { formatDateOnly, utcDateToDateOnly } from "@/lib/date";
 import type { GroupSummary } from "@/db/types/group";
 import type { ParticipantWithName } from "@/db/types/participant";
 import type { MatchDay } from "@/db/types/match-day";
@@ -112,10 +112,9 @@ export function PartienSelector({
       return;
     }
 
-    const matchday = matchdays.find((md) => {
-      const mdDate = new Date(md.date);
-      return mdDate.toDateString() === date.toDateString();
-    });
+    const matchday = matchdays.find(
+      (md) => md.date === utcDateToDateOnly(date),
+    );
 
     if (matchday) {
       handleMatchdayChange(matchday.id.toString());
@@ -142,9 +141,7 @@ export function PartienSelector({
               >
                 <CalendarIcon className="mr-2 h-4 w-4" />
                 {selectedMatchday ? (
-                  format(new Date(selectedMatchday.date), "dd.MM.yyyy", {
-                    locale: de,
-                  })
+                  formatDateOnly(selectedMatchday.date)
                 ) : (
                   <span>Datum wählen</span>
                 )}
@@ -153,16 +150,16 @@ export function PartienSelector({
             <PopoverContent className="w-auto p-0">
               <Calendar
                 mode="single"
+                timeZone="UTC"
                 selected={
-                  selectedMatchday ? new Date(selectedMatchday.date) : undefined
+                  selectedMatchday
+                    ? new TZDate(selectedMatchday.date, "UTC")
+                    : undefined
                 }
                 onSelect={handleDateChange}
-                disabled={(date) => {
-                  return !matchdays.some((md) => {
-                    const mdDate = new Date(md.date);
-                    return mdDate.toDateString() === date.toDateString();
-                  });
-                }}
+                disabled={(date) =>
+                  !matchdays.some((md) => md.date === utcDateToDateOnly(date))
+                }
               />
             </PopoverContent>
           </Popover>

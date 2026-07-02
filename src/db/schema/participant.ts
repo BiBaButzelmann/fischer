@@ -27,14 +27,14 @@ export const participant = pgTable(
     dwzRating: integer("dwz_rating"),
     fideRating: integer("fide_rating"),
     birthYear: integer("birth_year"),
-    birthDate: date("birth_date", { mode: "date" }),
+    birthDate: date("birth_date", { mode: "string" }),
     fideId: text("fide_id"),
     zpsClubId: text("zps_club_id"),
     zpsPlayerId: text("zps_player_id"),
 
     preferredMatchDay: matchDay("preferred_match_day").notNull(),
     secondaryMatchDays: matchDay("secondary_match_days").array().notNull(),
-    notAvailableDays: date("not_available_days", { mode: "date" }).array(),
+    notAvailableDays: date("not_available_days", { mode: "string" }).array(),
 
     entryFeePayed: boolean("entry_fee_payed"),
 

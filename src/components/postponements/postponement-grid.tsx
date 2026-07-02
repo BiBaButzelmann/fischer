@@ -9,7 +9,7 @@ import {
   TableRow,
 } from "@/components/ui/table";
 import { Badge } from "@/components/ui/badge";
-import { toDateString, toLocalDateTime } from "@/lib/date";
+import { formatDate, toLocalDateTime } from "@/lib/date";
 import type { GamePostponementWithDetails } from "@/db/types/game-postponement";
 import { CalendarDays } from "lucide-react";
 import { useRouter } from "next/navigation";
@@ -133,12 +133,12 @@ export function PostponementGrid({ postponements }: Props) {
                 </TableCell>
                 <TableCell className="hidden md:table-cell w-24 text-center align-middle">
                   <span className="text-sm">
-                    {toDateString(toLocalDateTime(postponement.from))}
+                    {formatDate(toLocalDateTime(postponement.from))}
                   </span>
                 </TableCell>
                 <TableCell className="hidden md:table-cell w-24 text-center align-middle">
                   <span className="text-sm font-medium">
-                    {toDateString(toLocalDateTime(postponement.to))}
+                    {formatDate(toLocalDateTime(postponement.to))}
                   </span>
                 </TableCell>
                 <TableCell className="w-32 truncate align-middle">
