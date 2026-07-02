@@ -5,8 +5,7 @@ import { GameWithMatchday } from "@/db/types/game";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { ParticipantEntry } from "../groups/participant-entry";
 import { Bird } from "lucide-react";
-import { isSameDate, toDateString, toLocalDateTime } from "@/lib/date";
-import { DateTime } from "luxon";
+import { formatDateOnly } from "@/lib/date";
 
 export function Pairing({ group }: { group: GroupWithParticipantsAndGames }) {
   if (!group.games || group.games.length === 0) {
@@ -32,7 +31,7 @@ export function Pairing({ group }: { group: GroupWithParticipantsAndGames }) {
     matchdayDate,
   }: {
     participantId: number;
-    matchdayDate: DateTime;
+    matchdayDate: string;
   }) => {
     const participant = findParticipant(participantId);
 
@@ -48,13 +47,7 @@ export function Pairing({ group }: { group: GroupWithParticipantsAndGames }) {
     }
 
     const isNotAvailable =
-      participant.notAvailableDays?.some((notAvailableDate) => {
-        // TODO: HOTFIX: Add 1 day to compensate for timezone offset in existing database data
-        const adjustedDate = toLocalDateTime(notAvailableDate).plus({
-          days: 1,
-        });
-        return isSameDate(adjustedDate, matchdayDate);
-      }) || false;
+      participant.notAvailableDays?.includes(matchdayDate) || false;
 
     return (
       <div
@@ -110,8 +103,8 @@ export function Pairing({ group }: { group: GroupWithParticipantsAndGames }) {
         {rounds.map((round) => {
           const games = gamesByRound.get(round) || [];
 
-          const gameDate = toLocalDateTime(games[0].matchdayGame.matchday.date);
-          const dateDisplay = toDateString(gameDate);
+          const matchdayDate = games[0].matchdayGame.matchday.date;
+          const dateDisplay = formatDateOnly(matchdayDate);
 
           return (
             <TabsContent key={round} value={`round-${round}`} className="mt-0">
@@ -143,13 +136,13 @@ export function Pairing({ group }: { group: GroupWithParticipantsAndGames }) {
                         <div>
                           <ParticipantCell
                             participantId={game.whiteParticipantId!}
-                            matchdayDate={gameDate}
+                            matchdayDate={matchdayDate}
                           />
                         </div>
                         <div>
                           <ParticipantCell
                             participantId={game.blackParticipantId!}
-                            matchdayDate={gameDate}
+                            matchdayDate={matchdayDate}
                           />
                         </div>
                       </div>

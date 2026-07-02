@@ -2,10 +2,10 @@
 
 import { match } from "ts-pattern";
 import { useEffect, useState } from "react";
-import { getCurrentLocalDateTime, toLocalDateTime } from "@/lib/date";
+import { getCurrentLocalDateTime, parseDateOnly } from "@/lib/date";
 
 type Props = {
-  date: Date;
+  date: string;
 };
 
 export function CountdownTimer({ date }: Props) {
@@ -58,12 +58,10 @@ function Timers({ timeLeft }: { timeLeft: TimeLeft }) {
   );
 }
 
-function calculateTimeLeft(date: Date) {
+function calculateTimeLeft(date: string) {
   const currentLocalTime = getCurrentLocalDateTime();
 
-  const endOfRegistrationDate = new Date(date);
-  endOfRegistrationDate.setHours(23, 59, 59, 999);
-  const targetTime = toLocalDateTime(endOfRegistrationDate);
+  const targetTime = parseDateOnly(date).endOf("day");
 
   const diff = targetTime.diff(currentLocalTime, [
     "days",

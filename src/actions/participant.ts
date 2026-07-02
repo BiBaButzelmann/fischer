@@ -50,7 +50,7 @@ export async function createParticipant(
 
   const entryFeePayed = data.chessClubType === DEFAULT_CLUB_KEY ? null : false;
   const birthYear = data.birthDate
-    ? data.birthDate.getFullYear()
+    ? Number(data.birthDate.slice(0, 4))
     : data.birthYear;
 
   const tournament = await getTournamentById(tournamentId);

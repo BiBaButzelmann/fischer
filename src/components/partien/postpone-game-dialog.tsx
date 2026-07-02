@@ -23,7 +23,12 @@ import { toast } from "sonner";
 import { cn } from "@/lib/utils";
 import { Card, CardContent } from "../ui/card";
 import { Mail, Phone } from "lucide-react";
-import { isSameDate, toLocalDateTime, toDateString } from "@/lib/date";
+import {
+  toLocalDateTime,
+  formatDate,
+  toDateOnly,
+  utcDateToDateOnly,
+} from "@/lib/date";
 import invariant from "tiny-invariant";
 import { DateTime } from "luxon";
 
@@ -56,8 +61,8 @@ export function PostponeGameDialog({
 
     if (!selectedDate) return;
 
-    const selectedMatchday = availableMatchdays.find((matchday) =>
-      isSameDate(toLocalDateTime(matchday.date), toLocalDateTime(selectedDate)),
+    const selectedMatchday = availableMatchdays.find(
+      (matchday) => matchday.date === utcDateToDateOnly(selectedDate),
     );
 
     if (!selectedMatchday) return;
@@ -81,14 +86,13 @@ export function PostponeGameDialog({
     });
   };
 
-  const isDateDisabled = (date: DateTime) => {
-    if (isSameDate(date, currentGameDate)) {
+  const isDateDisabled = (date: Date) => {
+    const day = utcDateToDateOnly(date);
+    if (day === toDateOnly(currentGameDate)) {
       return true;
     }
 
-    return !availableMatchdays.some((matchday) =>
-      isSameDate(toLocalDateTime(matchday.date), date),
-    );
+    return !availableMatchdays.some((matchday) => matchday.date === day);
   };
 
   const handleOpenChange = (open: boolean) => {
@@ -174,7 +178,7 @@ export function PostponeGameDialog({
                 >
                   <CalendarIcon className="mr-2 h-4 w-4 opacity-50" />
                   {selectedDate ? (
-                    toDateString(toLocalDateTime(selectedDate))
+                    formatDate(toLocalDateTime(selectedDate))
                   ) : (
                     <span>Datum wählen</span>
                   )}
@@ -183,9 +187,10 @@ export function PostponeGameDialog({
               <PopoverContent className="w-auto p-0" align="start">
                 <Calendar
                   mode="single"
+                  timeZone="UTC"
                   selected={selectedDate}
                   onSelect={setSelectedDate}
-                  disabled={(date) => isDateDisabled(toLocalDateTime(date))}
+                  disabled={isDateDisabled}
                 />
               </PopoverContent>
             </Popover>

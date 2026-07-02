@@ -28,6 +28,7 @@ import {
 import { toast } from "sonner";
 import { Badge } from "@/components/ui/badge";
 import { matchDaysShort } from "@/constants/constants";
+import { formatDate, toLocalDateTime } from "@/lib/date";
 import { ProfileWithName } from "@/db/types/profile";
 import { createTrainer, deleteTrainer } from "@/actions/trainer";
 
@@ -182,7 +183,7 @@ export function UserRow({
           {user.deletedAt && (
             <span className="text-xs text-red-600">
               Deaktiviert:{" "}
-              {new Date(user.deletedAt).toLocaleDateString("de-DE")}
+              {formatDate(toLocalDateTime(user.deletedAt))}
             </span>
           )}
         </div>

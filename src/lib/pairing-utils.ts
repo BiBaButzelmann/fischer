@@ -1,30 +1,3 @@
-const weekdayToIndex = {
-  monday: 1,
-  tuesday: 2,
-  wednesday: 3,
-  thursday: 4,
-  friday: 5,
-  saturday: 6,
-  sunday: 0,
-} as const;
-
-export function addDays(d: Date, days: number) {
-  const out = new Date(d);
-  out.setDate(out.getDate() + days);
-  return out;
-}
-
-/** first date ≥ `start` that falls on the wanted `weekday`              */
-export function firstMatchDate(
-  start: Date,
-  weekday: keyof typeof weekdayToIndex,
-) {
-  const wanted = weekdayToIndex[weekday];
-  const d = new Date(start);
-  while (d.getDay() !== wanted) d.setDate(d.getDate() + 1);
-  return d;
-}
-
 export function bergerFide(n: number): Array<Array<[number, number]>> {
   if (n % 2) {
     throw new Error("n must be even (add a bye for odd n)");
@@ -76,5 +49,3 @@ export function bergerFide(n: number): Array<Array<[number, number]>> {
 export function nextEvenNumber(n: number): number {
   return n + (n % 2);
 }
-
-export type WeekdayKey = keyof typeof weekdayToIndex;

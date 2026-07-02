@@ -12,7 +12,7 @@ import { and, eq, ne } from "drizzle-orm";
 import { TournamentStage } from "@/db/types/tournament";
 import { matchday } from "@/db/schema/matchday";
 import { isHoliday } from "@/lib/holidays";
-import { getCurrentLocalDateTime } from "@/lib/date";
+import { getCurrentLocalDateTime, toDateOnly } from "@/lib/date";
 import {
   getActiveTournament,
   getOpenRegistrationTournament,
@@ -46,9 +46,9 @@ export async function createTournament(
       slug: data.slug,
       allClocksDigital: true,
       club: data.clubName,
-      startDate: new Date(data.startDate),
-      endDate: new Date(data.endDate),
-      endRegistrationDate: new Date(data.endRegistrationDate),
+      startDate: data.startDate,
+      endDate: data.endDate,
+      endRegistrationDate: data.endRegistrationDate,
       groupAnnouncementOffsetDays: data.groupAnnouncementOffsetDays,
       email: data.email,
       location: data.location,
@@ -112,9 +112,9 @@ export async function updateTournament(
     name: data.name,
     slug: data.slug,
     club: data.clubName,
-    startDate: new Date(data.startDate),
-    endDate: new Date(data.endDate),
-    endRegistrationDate: new Date(data.endRegistrationDate),
+    startDate: data.startDate,
+    endDate: data.endDate,
+    endRegistrationDate: data.endRegistrationDate,
     groupAnnouncementOffsetDays: data.groupAnnouncementOffsetDays,
     email: data.email,
     location: data.location,
@@ -196,65 +196,44 @@ function getMatchDays(
   >["selectedCalendarWeeks"],
 ) {
   return insertedTournamentWeeks.flatMap((week, index) => {
-    const tuesday = getCurrentLocalDateTime()
-      .set({
-        weekNumber: week.weekNumber,
-        weekday: 2,
-      })
-      .toJSDate();
-    const thursday = getCurrentLocalDateTime()
-      .set({
-        weekNumber: week.weekNumber,
-        weekday: 4,
-      })
-      .toJSDate();
-    const friday = getCurrentLocalDateTime()
-      .set({
-        weekNumber: week.weekNumber,
-        weekday: 5,
-      })
-      .toJSDate();
+    const tuesday = getCurrentLocalDateTime().set({
+      weekNumber: week.weekNumber,
+      weekday: 2,
+    });
+    const thursday = getCurrentLocalDateTime().set({
+      weekNumber: week.weekNumber,
+      weekday: 4,
+    });
+    const friday = getCurrentLocalDateTime().set({
+      weekNumber: week.weekNumber,
+      weekday: 5,
+    });
 
     const matchDays: (typeof matchday.$inferInsert)[] = [];
-    if (!isHoliday(tuesday)) {
+    if (!isHoliday(tuesday.toJSDate())) {
       matchDays.push({
         tournamentId,
         tournamentWeekId: week.id,
         dayOfWeek: "tuesday",
-        date: getCurrentLocalDateTime()
-          .set({
-            weekNumber: week.weekNumber,
-            weekday: 2,
-          })
-          .toJSDate(),
+        date: toDateOnly(tuesday),
         refereeNeeded: selectedCalendarWeeks[index].tuesday.refereeNeeded,
       });
     }
-    if (!isHoliday(thursday)) {
+    if (!isHoliday(thursday.toJSDate())) {
       matchDays.push({
         tournamentId,
         tournamentWeekId: week.id,
         dayOfWeek: "thursday",
-        date: getCurrentLocalDateTime()
-          .set({
-            weekNumber: week.weekNumber,
-            weekday: 4,
-          })
-          .toJSDate(),
+        date: toDateOnly(thursday),
         refereeNeeded: selectedCalendarWeeks[index].thursday.refereeNeeded,
       });
     }
-    if (!isHoliday(friday)) {
+    if (!isHoliday(friday.toJSDate())) {
       matchDays.push({
         tournamentId,
         tournamentWeekId: week.id,
         dayOfWeek: "friday",
-        date: getCurrentLocalDateTime()
-          .set({
-            weekNumber: week.weekNumber,
-            weekday: 5,
-          })
-          .toJSDate(),
+        date: toDateOnly(friday),
         refereeNeeded: selectedCalendarWeeks[index].friday.refereeNeeded,
       });
     }

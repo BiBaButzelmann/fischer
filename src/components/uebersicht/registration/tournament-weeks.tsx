@@ -8,7 +8,7 @@ import {
 } from "@/components/ui/table";
 import { TournamentWeekWithMatchdays } from "@/db/types/tournamentWeek";
 
-import { displayShortDateOrHoliday } from "@/lib/date";
+import { formatShortDateOrHoliday } from "@/lib/date";
 import { generateTournamentWeeksSchedule } from "@/lib/tournament-schedule";
 
 type Props = {
@@ -43,13 +43,13 @@ export function TournamentWeeks({ tournamentWeeks }: Props) {
               {week.weekLabel}
             </TableCell>
             <TableCell className="text-center">
-              {displayShortDateOrHoliday(week.tuesday)}
+              {formatShortDateOrHoliday(week.tuesday)}
             </TableCell>
             <TableCell className="text-center">
-              {displayShortDateOrHoliday(week.thursday)}
+              {formatShortDateOrHoliday(week.thursday)}
             </TableCell>
             <TableCell className="text-center">
-              {displayShortDateOrHoliday(week.friday)}
+              {formatShortDateOrHoliday(week.friday)}
             </TableCell>
           </TableRow>
         ))}

@@ -21,12 +21,7 @@ import { MatchDay } from "@/db/types/match-day";
 import { authClient } from "@/auth-client";
 import { Role } from "@/db/types/role";
 import { GameActions } from "./game-actions";
-import {
-  getCurrentLocalDateTime,
-  toDateString,
-  toLocalDateTime,
-  isSameDate,
-} from "@/lib/date";
+import { formatDateOnly, parseDateOnly, todayDateOnly } from "@/lib/date";
 import { getParticipantFullName } from "@/lib/participant";
 import { getTwz } from "@/lib/twz";
 
@@ -75,12 +70,7 @@ export function GamesList({
 
       const game = games.find((g) => g.id === gameId);
       const isGameInPastOrToday = game
-        ? toLocalDateTime(game.matchdayGame.matchday.date) <
-            getCurrentLocalDateTime() ||
-          isSameDate(
-            toLocalDateTime(game.matchdayGame.matchday.date),
-            getCurrentLocalDateTime(),
-          )
+        ? game.matchdayGame.matchday.date <= todayDateOnly()
         : false;
 
       return {
@@ -181,9 +171,7 @@ export function GamesList({
                   )}
                 </TableCell>
                 <TableCell className="w-24 text-center">
-                  {toDateString(
-                    toLocalDateTime(game.matchdayGame.matchday.date),
-                  )}
+                  {formatDateOnly(game.matchdayGame.matchday.date)}
                 </TableCell>
                 {hasAnyActions && (
                   <TableCell className="flex items-center gap-2">
@@ -192,7 +180,7 @@ export function GamesList({
                       currentResult={game.result}
                       onResultChange={onResultChange}
                       availableMatchdays={availableMatchdays}
-                      currentGameDate={toLocalDateTime(
+                      currentGameDate={parseDateOnly(
                         game.matchdayGame.matchday.date,
                       )}
                       game={game}
@@ -232,9 +220,7 @@ export function GamesList({
                     </Badge>
                   </span>
                   <span>
-                    {toDateString(
-                      toLocalDateTime(game.matchdayGame.matchday.date),
-                    )}
+                    {formatDateOnly(game.matchdayGame.matchday.date)}
                   </span>
                 </div>
                 <div className="flex items-center gap-2">
@@ -273,7 +259,7 @@ export function GamesList({
                       currentResult={game.result}
                       onResultChange={onResultChange}
                       availableMatchdays={availableMatchdays}
-                      currentGameDate={toLocalDateTime(
+                      currentGameDate={parseDateOnly(
                         game.matchdayGame.matchday.date,
                       )}
                       game={game}

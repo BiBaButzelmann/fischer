@@ -77,15 +77,9 @@ export default function EditTournamentDetails({
       allClocksDigital: tournament?.allClocksDigital ?? true,
       phone: tournament?.phone ?? "040 20981411",
       email: tournament?.email ?? "klubturnier@hsk1830.de",
-      startDate: tournament?.startDate
-        ? tournament.startDate.toISOString().split("T")[0]
-        : "",
-      endDate: tournament?.endDate
-        ? tournament.endDate.toISOString().split("T")[0]
-        : "",
-      endRegistrationDate: tournament?.endRegistrationDate
-        ? tournament.endRegistrationDate.toISOString().split("T")[0]
-        : "",
+      startDate: tournament?.startDate ?? "",
+      endDate: tournament?.endDate ?? "",
+      endRegistrationDate: tournament?.endRegistrationDate ?? "",
       organizerProfileId: tournament?.organizerProfileId?.toString() ?? "",
       selectedCalendarWeeks,
     },

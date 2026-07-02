@@ -14,7 +14,7 @@ import { and, eq, gte, asc, ne, inArray } from "drizzle-orm";
 
 export async function getRefereeAppointmentsByRefereeId(
   refereeId: number,
-  fromDate: Date,
+  fromDate: string,
 ) {
   return db
     .select({
@@ -39,7 +39,7 @@ export async function getRefereeAppointmentsByRefereeId(
 
 export async function getSetupHelperAppointmentsBySetupHelperId(
   setupHelperId: number,
-  fromDate: Date,
+  fromDate: string,
 ) {
   return db
     .select({
