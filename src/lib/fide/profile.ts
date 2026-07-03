@@ -1,3 +1,5 @@
+import { unstable_cache } from "next/cache";
+
 const FIDE_TITLE_MAP: Record<string, string> = {
   grandmaster: "GM",
   "international master": "IM",
@@ -8,6 +10,23 @@ const FIDE_TITLE_MAP: Record<string, string> = {
   "woman fide master": "WFM",
   "woman candidate master": "WCM",
 };
+
+const FIDE_FETCH_TIMEOUT_MS = 5000;
+const FIDE_CACHE_TTL_SECONDS = 60 * 60 * 24;
+
+const fetchFideProfileHtml = unstable_cache(
+  async (id: string): Promise<string> => {
+    const response = await fetch(`https://ratings.fide.com/profile/${id}`, {
+      signal: AbortSignal.timeout(FIDE_FETCH_TIMEOUT_MS),
+    });
+    if (!response.ok) {
+      throw new Error(`FIDE profile request failed: ${response.status}`);
+    }
+    return response.text();
+  },
+  ["fide-profile-html"],
+  { revalidate: FIDE_CACHE_TTL_SECONDS },
+);
 
 export type FideProfile = {
   name: string | null;
@@ -28,11 +47,7 @@ export async function getFideProfile(
 
   let html: string;
   try {
-    const response = await fetch(`https://ratings.fide.com/profile/${id}`);
-    if (!response.ok) {
-      return null;
-    }
-    html = await response.text();
+    html = await fetchFideProfileHtml(id);
   } catch {
     return null;
   }

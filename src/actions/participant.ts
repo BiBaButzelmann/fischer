@@ -17,10 +17,37 @@ import {
   DEFAULT_CLUB_KEY,
   DEFAULT_CLUB_LABEL,
 } from "@/constants/constants";
-import { revalidatePath } from "next/cache";
+import { revalidatePath, unstable_cache } from "next/cache";
 import { action } from "@/lib/actions";
 import { parseDateOnly } from "@/lib/date";
 import { getFideProfile } from "@/lib/fide/profile";
+
+const DSB_FETCH_TIMEOUT_MS = 5000;
+const DSB_CACHE_TTL_SECONDS = 60 * 60 * 24;
+
+const fetchClubCsv = unstable_cache(
+  async (zps: string): Promise<string> => {
+    const response = await fetch(
+      `https://www.schachbund.de/php/dewis/verein.php?zps=${zps}&format=csv`,
+      { signal: AbortSignal.timeout(DSB_FETCH_TIMEOUT_MS) },
+    );
+    return response.text();
+  },
+  ["dsb-club-csv"],
+  { revalidate: DSB_CACHE_TTL_SECONDS },
+);
+
+const fetchPlayerCsv = unstable_cache(
+  async (playerId: string): Promise<string> => {
+    const response = await fetch(
+      `https://www.schachbund.de/php/dewis/spieler.php?pkz=${playerId}&format=csv`,
+      { signal: AbortSignal.timeout(DSB_FETCH_TIMEOUT_MS) },
+    );
+    return response.text();
+  },
+  ["dsb-player-csv"],
+  { revalidate: DSB_CACHE_TTL_SECONDS },
+);
 
 function parseRating(value: string | undefined): number | null {
   const trimmed = value?.trim();
@@ -156,10 +183,7 @@ export async function getParticipantEloData(
 } | null> {
   await authWithRedirect();
 
-  const clubData = await fetch(
-    "https://www.schachbund.de/php/dewis/verein.php?zps=40023&format=csv",
-  );
-  const clubCsv = await clubData.text();
+  const clubCsv = await fetchClubCsv("40023");
 
   const clubCsvLines = clubCsv.split("\n");
   const matchingClubLine = clubCsvLines.find((line) => {
@@ -187,10 +211,7 @@ export async function getParticipantEloData(
     return null;
   }
 
-  const playerData = await fetch(
-    `https://www.schachbund.de/php/dewis/spieler.php?pkz=${playerId}&format=csv`,
-  );
-  const playerCsv = await playerData.text();
+  const playerCsv = await fetchPlayerCsv(playerId);
 
   const playerCsvLines = playerCsv.split("\n");
   const matchingPlayerLine = playerCsvLines[1].replace(/[\n\r\t]/gm, "");
@@ -232,10 +253,7 @@ export async function getDwzAndFideIdByZps(
   zpsPlayerId: string,
   zpsClubId: string,
 ): Promise<{ dwzRating: number | null; fideId: string | null } | null> {
-  const clubData = await fetch(
-    `https://www.schachbund.de/php/dewis/verein.php?zps=${zpsClubId}&format=csv`,
-  );
-  const clubCsv = await clubData.text();
+  const clubCsv = await fetchClubCsv(zpsClubId);
 
   const clubCsvLines = clubCsv.split("\n");
   const matchingClubLine = clubCsvLines.find((line) => {

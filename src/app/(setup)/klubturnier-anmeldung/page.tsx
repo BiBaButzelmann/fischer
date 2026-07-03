@@ -20,30 +20,20 @@ import { getParticipantByProfileIdAndTournamentId } from "@/db/repositories/part
 import { getPromotionEligibility } from "@/services/promotion";
 import { redirect } from "next/navigation";
 
-function withTimeout<T>(promise: Promise<T>, ms: number): Promise<T | null> {
-  return Promise.race([
-    promise,
-    new Promise<null>((resolve) => setTimeout(() => resolve(null), ms)),
-  ]);
-}
-
 async function getPrefillEloData(
   profile: Profile,
   previousParticipant: Participant,
 ): Promise<ParticipantEloPrefill | null> {
   try {
-    const eloData = await withTimeout(
-      getParticipantEloData(profile.firstName, profile.lastName),
-      5000,
+    const eloData = await getParticipantEloData(
+      profile.firstName,
+      profile.lastName,
     );
     if (eloData) {
       return eloData;
     }
     if (previousParticipant.fideId) {
-      const fideRating = await withTimeout(
-        getFideRatingById(previousParticipant.fideId),
-        5000,
-      );
+      const fideRating = await getFideRatingById(previousParticipant.fideId);
       if (fideRating != null) {
         return { fideRating };
       }
