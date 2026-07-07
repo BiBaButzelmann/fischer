@@ -1,6 +1,7 @@
-import { relations } from "drizzle-orm";
+import { relations, sql } from "drizzle-orm";
 import {
   boolean,
+  check,
   integer,
   pgTable,
   text,
@@ -42,7 +43,13 @@ export const participant = pgTable(
 
     ...timestamps,
   },
-  (table) => [unique().on(table.tournamentId, table.profileId)],
+  (table) => [
+    unique().on(table.tournamentId, table.profileId),
+    check(
+      "participant_secondary_match_days_no_preferred",
+      sql`NOT (${table.preferredMatchDay} = ANY(${table.secondaryMatchDays}))`,
+    ),
+  ],
 );
 
 export const participantRelations = relations(participant, ({ one }) => ({

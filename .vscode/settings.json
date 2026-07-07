@@ -1,4 +1,5 @@
 {
   "editor.tabSize": 2,
-  "css.lint.unknownAtRules": "ignore"
+  "css.lint.unknownAtRules": "ignore",
+  "biome.enabled": false
 }

@@ -1,5 +1,6 @@
 import { CLUBLESS_KEY, DEFAULT_CLUB_KEY } from "@/constants/constants";
 import { availableMatchDays } from "@/db/schema/columns.helpers";
+import { hasSecondaryMatchDayConflict } from "@/lib/match-days";
 import {
   getCurrentLocalDateTime,
   isValidDateOnly,
@@ -138,5 +139,17 @@ export const participantFormSchema = z
     {
       message: "Geschlecht ist für vereinslose Spieler erforderlich",
       path: ["gender"],
+    },
+  )
+  .refine(
+    (data) =>
+      !hasSecondaryMatchDayConflict(
+        data.preferredMatchDay,
+        data.secondaryMatchDays,
+      ),
+    {
+      message:
+        "Ein Wochentag kann nicht gleichzeitig bevorzugter und alternativer Spieltag sein.",
+      path: ["secondaryMatchDays"],
     },
   );

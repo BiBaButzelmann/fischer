@@ -1,5 +1,5 @@
-import { relations } from "drizzle-orm";
-import { integer, pgTable, unique } from "drizzle-orm/pg-core";
+import { relations, sql } from "drizzle-orm";
+import { check, integer, pgTable, unique } from "drizzle-orm/pg-core";
 import { profile } from "./profile";
 import { tournament } from "./tournament";
 import { matchDay, timestamps } from "./columns.helpers";
@@ -17,7 +17,13 @@ export const setupHelper = pgTable(
 
     ...timestamps,
   },
-  (table) => [unique().on(table.tournamentId, table.profileId)],
+  (table) => [
+    unique().on(table.tournamentId, table.profileId),
+    check(
+      "setup_helper_secondary_match_days_no_preferred",
+      sql`NOT (${table.preferredMatchDay} = ANY(${table.secondaryMatchDays}))`,
+    ),
+  ],
 );
 
 export const setupHelperRelations = relations(setupHelper, ({ one }) => ({

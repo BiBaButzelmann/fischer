@@ -8,12 +8,22 @@ import { refereeFormSchema } from "@/schema/referee";
 import { getProfileByUserId } from "@/db/repositories/profile";
 import { getTournamentById } from "@/db/repositories/tournament";
 import { authWithRedirect } from "@/auth/utils";
+import { action } from "@/lib/actions";
+import { hasSecondaryMatchDayConflict } from "@/lib/match-days";
 import { and, eq } from "drizzle-orm";
 
-export async function createReferee(
+export const createReferee = action(async (
   tournamentId: number,
   data: z.infer<typeof refereeFormSchema>,
-) {
+) => {
+  invariant(
+    !hasSecondaryMatchDayConflict(
+      data.preferredMatchDay,
+      data.secondaryMatchDays,
+    ),
+    "Preferred match day cannot also be a secondary match day",
+  );
+
   const session = await authWithRedirect();
 
   const tournament = await getTournamentById(tournamentId);
@@ -42,7 +52,7 @@ export async function createReferee(
         fideId: data.fideId,
       },
     });
-}
+});
 
 export async function deleteReferee(tournamentId: number, refereeId: number) {
   const session = await authWithRedirect();
