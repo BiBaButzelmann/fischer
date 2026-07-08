@@ -8,12 +8,22 @@ import { setupHelper } from "@/db/schema/setupHelper";
 import { getProfileByUserId } from "@/db/repositories/profile";
 import { getTournamentById } from "@/db/repositories/tournament";
 import { authWithRedirect } from "@/auth/utils";
+import { action } from "@/lib/actions";
+import { hasSecondaryMatchDayConflict } from "@/lib/match-days";
 import { and, eq } from "drizzle-orm";
 
-export async function createSetupHelper(
+export const createSetupHelper = action(async (
   tournamentId: number,
   data: z.infer<typeof setupHelperFormSchema>,
-) {
+) => {
+  invariant(
+    !hasSecondaryMatchDayConflict(
+      data.preferredMatchDay,
+      data.secondaryMatchDays,
+    ),
+    "Preferred match day cannot also be a secondary match day",
+  );
+
   const session = await authWithRedirect();
 
   const tournament = await getTournamentById(tournamentId);
@@ -40,7 +50,8 @@ export async function createSetupHelper(
         secondaryMatchDays: data.secondaryMatchDays,
       },
     });
-}
+});
+
 export async function deleteSetupHelper(
   tournamentId: number,
   setupHelperId: number,

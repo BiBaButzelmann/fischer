@@ -36,6 +36,8 @@ import {
   DialogTrigger,
 } from "../../ui/dialog";
 import { participantFormSchema } from "@/schema/participant";
+import { removePreferredFromSecondary } from "@/lib/match-days";
+import { DayOfWeek } from "@/db/types/group";
 import { MatchDaysCheckboxes } from "./matchday-selection";
 import { CountryDropdown } from "@/components/ui/country-dropdown";
 import { cn } from "@/lib/utils";
@@ -174,6 +176,14 @@ export function ParticipateForm({
         );
       }
     });
+  };
+
+  const handlePreferredMatchDayChange = (value: DayOfWeek) => {
+    form.setValue("preferredMatchDay", value);
+    form.setValue(
+      "secondaryMatchDays",
+      removePreferredFromSecondary(value, form.getValues("secondaryMatchDays")),
+    );
   };
 
   const handleChessClubTypeChange = (value: "hsk" | "other" | "vereinslos") => {
@@ -557,7 +567,10 @@ export function ParticipateForm({
             <FormItem>
               <FormLabel required>Bevorzugter Spieltag</FormLabel>
               <FormControl>
-                <Select value={field.value} onValueChange={field.onChange}>
+                <Select
+                  value={field.value}
+                  onValueChange={handlePreferredMatchDayChange}
+                >
                   <SelectTrigger>
                     <SelectValue placeholder="Wähle einen Spieltag" />
                   </SelectTrigger>

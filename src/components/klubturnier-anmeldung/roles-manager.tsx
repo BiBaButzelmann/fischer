@@ -40,6 +40,8 @@ import {
 import { createReferee, deleteReferee } from "@/actions/referee";
 import { Participant } from "@/db/types/participant";
 import type { PromotionEligibility } from "@/services/promotion";
+import { isError } from "@/lib/actions";
+import { toast } from "sonner";
 
 export type ParticipantEloPrefill = Partial<
   NonNullable<Awaited<ReturnType<typeof getParticipantEloData>>>
@@ -77,7 +79,11 @@ export function RolesManager({
   const handleParticipateFormSubmit = async (
     data: z.infer<typeof participantFormSchema>,
   ) => {
-    await createParticipant(tournament.id, data);
+    const result = await createParticipant(tournament.id, data);
+    if (isError(result)) {
+      toast.error("Deine Anmeldung konnte nicht gespeichert werden.");
+      return;
+    }
     router.refresh();
   };
 
@@ -91,7 +97,11 @@ export function RolesManager({
   const handleRefereeFormSubmit = async (
     data: z.infer<typeof refereeFormSchema>,
   ) => {
-    await createReferee(tournament.id, data);
+    const result = await createReferee(tournament.id, data);
+    if (isError(result)) {
+      toast.error("Deine Anmeldung konnte nicht gespeichert werden.");
+      return;
+    }
     router.refresh();
   };
 
@@ -121,7 +131,11 @@ export function RolesManager({
   const handleSetupHelperFormSubmit = async (
     data: z.infer<typeof setupHelperFormSchema>,
   ) => {
-    await createSetupHelper(tournament.id, data);
+    const result = await createSetupHelper(tournament.id, data);
+    if (isError(result)) {
+      toast.error("Deine Anmeldung konnte nicht gespeichert werden.");
+      return;
+    }
     router.refresh();
   };
 

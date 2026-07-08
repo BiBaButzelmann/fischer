@@ -24,6 +24,8 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import z from "zod";
 import { useTransition } from "react";
 import { MatchDaysCheckboxes } from "./matchday-selection";
+import { removePreferredFromSecondary } from "@/lib/match-days";
+import { DayOfWeek } from "@/db/types/group";
 
 import { Info, Shield, Users } from "lucide-react";
 import { TournamentStage } from "@/db/types/tournament";
@@ -52,6 +54,14 @@ export function RefereeForm({
   });
 
   const preferredMatchDay = form.watch("preferredMatchDay");
+
+  const handlePreferredMatchDayChange = (value: DayOfWeek) => {
+    form.setValue("preferredMatchDay", value);
+    form.setValue(
+      "secondaryMatchDays",
+      removePreferredFromSecondary(value, form.getValues("secondaryMatchDays")),
+    );
+  };
 
   const handleFormSubmit = (data: z.infer<typeof refereeFormSchema>) => {
     startTransition(async () => {
@@ -108,7 +118,10 @@ export function RefereeForm({
               <FormItem className="flex-1">
                 <FormLabel required>Bevorzugter Spieltag</FormLabel>
                 <FormControl>
-                  <Select value={field.value} onValueChange={field.onChange}>
+                  <Select
+                    value={field.value}
+                    onValueChange={handlePreferredMatchDayChange}
+                  >
                     <SelectTrigger>
                       <SelectValue placeholder="Wähle einen Spieltag" />
                     </SelectTrigger>

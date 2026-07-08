@@ -23,6 +23,8 @@ import z from "zod";
 import { useTransition } from "react";
 import { MatchDaysCheckboxes } from "./matchday-selection";
 import { setupHelperFormSchema } from "@/schema/setupHelper";
+import { removePreferredFromSecondary } from "@/lib/match-days";
+import { DayOfWeek } from "@/db/types/group";
 
 import { Info, Users, Wrench } from "lucide-react";
 import { TournamentStage } from "@/db/types/tournament";
@@ -49,6 +51,14 @@ export function SetupHelperForm({
   });
 
   const preferredMatchDay = form.watch("preferredMatchDay");
+
+  const handlePreferredMatchDayChange = (value: DayOfWeek) => {
+    form.setValue("preferredMatchDay", value);
+    form.setValue(
+      "secondaryMatchDays",
+      removePreferredFromSecondary(value, form.getValues("secondaryMatchDays")),
+    );
+  };
 
   const handleFormSubmit = (data: z.infer<typeof setupHelperFormSchema>) => {
     startTransition(async () => {
@@ -104,7 +114,10 @@ export function SetupHelperForm({
             <FormItem>
               <FormLabel required>Bevorzugter Spieltag</FormLabel>
               <FormControl>
-                <Select value={field.value} onValueChange={field.onChange}>
+                <Select
+                  value={field.value}
+                  onValueChange={handlePreferredMatchDayChange}
+                >
                   <SelectTrigger>
                     <SelectValue placeholder="Wähle einen Spieltag" />
                   </SelectTrigger>

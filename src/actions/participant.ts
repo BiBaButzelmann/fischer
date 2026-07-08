@@ -19,6 +19,7 @@ import {
 } from "@/constants/constants";
 import { revalidatePath, unstable_cache } from "next/cache";
 import { action } from "@/lib/actions";
+import { hasSecondaryMatchDayConflict } from "@/lib/match-days";
 import { parseDateOnly } from "@/lib/date";
 import { getFideProfile } from "@/lib/fide/profile";
 
@@ -58,10 +59,18 @@ function parseRating(value: string | undefined): number | null {
   return Number.isFinite(rating) && rating > 0 ? rating : null;
 }
 
-export async function createParticipant(
+export const createParticipant = action(async (
   tournamentId: number,
   data: z.infer<typeof participantFormSchema>,
-) {
+) => {
+  invariant(
+    !hasSecondaryMatchDayConflict(
+      data.preferredMatchDay,
+      data.secondaryMatchDays,
+    ),
+    "Preferred match day cannot also be a secondary match day",
+  );
+
   const session = await authWithRedirect();
 
   let chessClub: string;
@@ -138,7 +147,7 @@ export async function createParticipant(
         exercisePromotionRight,
       },
     });
-}
+});
 
 export async function deleteParticipant(
   tournamentId: number,
