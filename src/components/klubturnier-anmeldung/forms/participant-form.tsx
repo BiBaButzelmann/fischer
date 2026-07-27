@@ -49,10 +49,9 @@ import {
   utcDateToDateOnly,
 } from "@/lib/date";
 import { Tournament } from "@/db/types/tournament";
-import {
-  getFideRatingById,
-  getParticipantEloData,
-} from "@/actions/participant";
+import { getFideRatingById } from "@/actions/participant";
+import { DwzPlayerSelect } from "./dwz-player-select";
+import type { DsbPlayerCandidate } from "@/lib/dsb/types";
 import { toast } from "sonner";
 import { Profile } from "@/db/types/profile";
 import {
@@ -98,6 +97,7 @@ export function ParticipateForm({
       nationality: initialValues?.nationality,
       birthYear: initialValues?.birthYear,
       birthDate: initialValues?.birthDate,
+      dsbPersonId: initialValues?.dsbPersonId,
       zpsClub: initialValues?.zpsClub,
       zpsPlayer: initialValues?.zpsPlayer,
       preferredMatchDay: initialValues?.preferredMatchDay,
@@ -115,66 +115,30 @@ export function ParticipateForm({
     return isDateDisabled(date, tournament.startDate, tournament.endDate);
   };
 
-  const fetchAndApplyEloData = () => {
+  const handleDsbCandidateSelect = (candidate: DsbPlayerCandidate) => {
     startTransition(async () => {
-      try {
-        const eloData = await getParticipantEloData(
-          profile.firstName,
-          profile.lastName,
-        );
-        if (!eloData) {
-          const fideId = form.getValues("fideId");
-          if (fideId) {
-            const fideRating = await getFideRatingById(fideId);
-            if (fideRating != null) {
-              form.setValue("fideRating", fideRating);
-              toast.success(
-                "Deine Elo wurde anhand deiner gespeicherten FIDE-ID übernommen.",
-              );
-              return;
-            }
-          }
-          toast.info(
-            `Keine Einträge zu ${profile.firstName} ${profile.lastName} im HSK-Verzeichnis gefunden. Bitte trage deine Daten manuell ein.`,
-          );
-          return;
-        }
+      form.setValue("dsbPersonId", candidate.nuLigaPersonId);
 
-        form.setValue("title", eloData.title ?? "noTitle");
-
-        if (eloData.gender) {
-          form.setValue("gender", eloData.gender);
-        }
-        if (eloData.dwzRating) {
-          form.setValue("dwzRating", eloData.dwzRating);
-        }
-        if (eloData.birthYear) {
-          form.setValue("birthYear", eloData.birthYear);
-        }
-        if (eloData.zpsClub) {
-          form.setValue("zpsClub", eloData.zpsClub);
-        }
-        if (eloData.zpsPlayer) {
-          form.setValue("zpsPlayer", eloData.zpsPlayer);
-        }
-
-        if (eloData.fideId) {
-          form.setValue("fideId", eloData.fideId);
-        }
-        if (eloData.fideRating && eloData.fideId) {
-          form.setValue("fideRating", eloData.fideRating);
-          form.setValue(
-            "nationality",
-            eloData.nationality !== "?" ? eloData.nationality : undefined,
-          );
-        }
-
-        toast.success("Deine Daten wurden aus der DSB-Datenbank übernommen.");
-      } catch {
-        toast.error(
-          "Daten konnten nicht aus der DSB-Datenbank geladen werden. Bitte trage sie manuell ein.",
-        );
+      if (candidate.dwzRating != null) {
+        form.setValue("dwzRating", candidate.dwzRating);
       }
+      if (candidate.birthYear != null) {
+        form.setValue("birthYear", candidate.birthYear);
+      }
+      if (candidate.gender != null) {
+        form.setValue("gender", candidate.gender);
+      }
+      if (candidate.fideId != null) {
+        form.setValue("fideId", candidate.fideId);
+        try {
+          const fideRating = await getFideRatingById(candidate.fideId);
+          if (fideRating != null) {
+            form.setValue("fideRating", fideRating);
+          }
+        } catch {}
+      }
+
+      toast.success("Deine Daten wurden aus der DSB-Datenbank übernommen.");
     });
   };
 
@@ -196,12 +160,10 @@ export function ParticipateForm({
 
     if (value === CLUBLESS_KEY) {
       form.setValue("chessClub", "");
+      form.setValue("dsbPersonId", undefined);
       form.setValue("zpsClub", undefined);
       form.setValue("zpsPlayer", undefined);
-      return;
     }
-
-    fetchAndApplyEloData();
   };
 
   const handleSubmit = (data: z.infer<typeof participantFormSchema>) => {
@@ -394,6 +356,16 @@ export function ParticipateForm({
 
         {chessClubType != null ? (
           <div className="flex flex-col gap-2">
+            <DwzPlayerSelect
+              firstName={profile.firstName}
+              lastName={profile.lastName}
+              disabled={isPending}
+              onSelect={handleDsbCandidateSelect}
+            />
+            <p className="text-sm text-muted-foreground">
+              Suche dich in der DSB-Datenbank und übernimm DWZ, FIDE-ID und
+              Geburtsjahr automatisch. Du kannst die Werte anschließend anpassen.
+            </p>
             <div className="flex gap-4">
               <FormField
                 control={form.control}
