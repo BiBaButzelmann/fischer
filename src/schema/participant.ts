@@ -48,6 +48,7 @@ export const participantFormSchema = z
       .optional(),
 
     // Will not be used in the form, but can be used in the backend
+    dsbPersonId: z.string().optional(),
     zpsClub: z.string().optional(),
     zpsPlayer: z.string().optional(),
 

@@ -190,6 +190,13 @@
       "when": 1783460140509,
       "tag": "0026_robust_paibok",
       "breakpoints": true
+    },
+    {
+      "idx": 27,
+      "version": "7",
+      "when": 1785167125779,
+      "tag": "0027_mature_valeria_richards",
+      "breakpoints": true
     }
   ]
 }
