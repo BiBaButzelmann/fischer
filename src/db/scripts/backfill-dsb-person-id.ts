@@ -8,9 +8,8 @@ import { db } from "@/db/client";
 import { participant } from "@/db/schema/participant";
 import { profile } from "@/db/schema/profile";
 import { transliterateGermanUmlauts } from "@/lib/dsb/candidate";
+import { DSB_BASE_URL } from "@/lib/dsb/constants";
 
-const DSB_BASE_URL =
-  "https://schachde-apps.liga.nu/dsbwertungsportal/rs/dwz/dwzliste";
 const REQUEST_TIMEOUT_MS = 8000;
 const REQUEST_DELAY_MS = 150;
 
@@ -46,7 +45,6 @@ async function fetchFromEndpoint(query: string): Promise<DsbPerson[]> {
   return body.data ?? [];
 }
 
-// Namen ASCII-gefaltet (ü→ue, ö→oe, ä→ae, ß→ss); UTF-8-Umlaute liefern 0 Treffer.
 async function fetchPersonsByName(
   firstName: string,
   lastName: string,
@@ -168,9 +166,7 @@ async function main() {
   console.log(`mehrere Treffer:              ${multiple}`);
   console.log(`kein Treffer:                 ${noResult}`);
   console.log(`Fehler:                       ${errors}`);
-  console.log(
-    `→ gesamt gesetzt: ${byFide + byUnique} / ${rows.length}`,
-  );
+  console.log(`→ gesamt gesetzt: ${byFide + byUnique} / ${rows.length}`);
 
   if (skipped.length > 0) {
     console.log("\nManuell nachpflegen:");

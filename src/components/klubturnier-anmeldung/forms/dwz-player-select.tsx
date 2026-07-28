@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useState, type MouseEvent } from "react";
 import {
   Command,
   CommandEmpty,
@@ -66,6 +66,9 @@ export function DwzPlayerSelect({
     };
   }, [debouncedQuery, isFocused]);
 
+  const keepInputFocusedOnSelect = (event: MouseEvent) =>
+    event.preventDefault();
+
   return (
     <Command shouldFilter={false} className="rounded-md border">
       <CommandInput
@@ -77,7 +80,7 @@ export function DwzPlayerSelect({
         onBlur={() => setIsFocused(false)}
       />
       {isFocused ? (
-        <CommandList onMouseDown={(e) => e.preventDefault()}>
+        <CommandList onMouseDown={keepInputFocusedOnSelect}>
           {isLoading ? (
             <div className="space-y-1 p-1">
               <CandidateSkeleton />

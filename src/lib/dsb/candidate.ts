@@ -1,7 +1,10 @@
-import type { DsbGender, DsbMembership, DsbPerson, DsbPlayerCandidate } from "./types";
+import type {
+  DsbGender,
+  DsbMembership,
+  DsbPerson,
+  DsbPlayerCandidate,
+} from "./types";
 
-// Das Wertungsportal matcht Namen ASCII-gefaltet (ü→ue, ö→oe, ä→ae, ß→ss);
-// UTF-8-Umlaute im Query liefern keine Treffer.
 export function transliterateGermanUmlauts(value: string): string {
   return value
     .replace(/ä/g, "ae")

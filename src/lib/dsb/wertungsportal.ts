@@ -1,9 +1,8 @@
 import { unstable_cache } from "next/cache";
 import { transliterateGermanUmlauts } from "./candidate";
+import { DSB_BASE_URL } from "./constants";
 import type { DsbPerson } from "./types";
 
-const DSB_BASE_URL =
-  "https://schachde-apps.liga.nu/dsbwertungsportal/rs/dwz/dwzliste";
 const DSB_FETCH_TIMEOUT_MS = 5000;
 const DSB_CACHE_TTL_SECONDS = 60 * 60 * 24;
 

@@ -358,10 +358,7 @@ export function ParticipateForm({
         {chessClubType != null ? (
           <div className="flex flex-col gap-2">
             <div className="space-y-2">
-              <Label>
-                DSB-Suche
-                <span className="text-destructive ml-1">*</span>
-              </Label>
+              <Label>DSB-Suche</Label>
               <DwzPlayerSelect
                 firstName={profile.firstName}
                 lastName={profile.lastName}
@@ -464,7 +461,6 @@ export function ParticipateForm({
 
         {fideRating ? (
           <div className="flex gap-4">
-            {/* FIDE-ID */}
             <FormField
               control={form.control}
               name="fideId"
@@ -484,7 +480,7 @@ export function ParticipateForm({
                       href="https://www.schachbund.de/fide-identifikationsnummer.html"
                       target="_blank"
                       rel="noopener noreferrer"
-                      className="hover:text-blue-600 transition-colors text-blue-400 text-xs"
+                      className="text-xs text-muted-foreground underline underline-offset-2 transition-colors hover:text-foreground"
                     >
                       Was ist die FIDE ID?
                     </a>{" "}
@@ -493,7 +489,6 @@ export function ParticipateForm({
                 </FormItem>
               )}
             />
-            {/* Nationalität */}{" "}
             <FormField
               control={form.control}
               name="nationality"
@@ -686,9 +681,9 @@ export function ParticipateForm({
                 <DialogHeader>
                   <DialogTitle>Anmeldung löschen</DialogTitle>
                   <DialogDescription>
-                    Möchtest du deine Anmeldung zum Klubturnier wirklich löschen?
-                    Deine Angaben werden entfernt. Du kannst dich während der
-                    Anmeldephase jederzeit erneut anmelden.
+                    Möchtest du deine Anmeldung zum Klubturnier wirklich
+                    löschen? Deine Angaben werden entfernt. Du kannst dich
+                    während der Anmeldephase jederzeit erneut anmelden.
                   </DialogDescription>
                 </DialogHeader>
                 <DialogFooter>
