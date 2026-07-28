@@ -1,4 +1,5 @@
 import { unstable_cache } from "next/cache";
+import { transliterateGermanUmlauts } from "./candidate";
 import type { DsbPerson } from "./types";
 
 const DSB_BASE_URL =
@@ -12,9 +13,11 @@ type DsbPersonsResponse = {
 
 const fetchDsbPersonsByName = unstable_cache(
   async (firstName: string, lastName: string): Promise<DsbPerson[]> => {
-    const params = new URLSearchParams({ lastname: lastName });
+    const params = new URLSearchParams({
+      lastname: transliterateGermanUmlauts(lastName),
+    });
     if (firstName.length > 0) {
-      params.set("firstname", firstName);
+      params.set("firstname", transliterateGermanUmlauts(firstName));
     }
     const response = await fetch(
       `${DSB_BASE_URL}/persons?${params.toString()}`,

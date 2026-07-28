@@ -3,6 +3,7 @@ import {
   mapDsbGender,
   mapDsbPersonToCandidate,
   selectPrimaryMembership,
+  transliterateGermanUmlauts,
 } from "./candidate";
 import type { DsbMembership, DsbPerson } from "./types";
 
@@ -53,6 +54,20 @@ describe("selectPrimaryMembership", () => {
 
   it("returns null when there are no memberships", () => {
     expect(selectPrimaryMembership([])).toBeNull();
+  });
+});
+
+describe("transliterateGermanUmlauts", () => {
+  it("folds umlauts and eszett the way the Wertungsportal matches names", () => {
+    expect(transliterateGermanUmlauts("Müller")).toBe("Mueller");
+    expect(transliterateGermanUmlauts("Köhler")).toBe("Koehler");
+    expect(transliterateGermanUmlauts("Jörg")).toBe("Joerg");
+    expect(transliterateGermanUmlauts("Straß")).toBe("Strass");
+    expect(transliterateGermanUmlauts("Öztürk")).toBe("Oeztuerk");
+  });
+
+  it("leaves names without umlauts unchanged", () => {
+    expect(transliterateGermanUmlauts("Martin")).toBe("Martin");
   });
 });
 
