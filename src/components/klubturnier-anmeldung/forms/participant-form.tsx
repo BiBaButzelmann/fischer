@@ -112,11 +112,20 @@ export function ParticipateForm({
   const chessClubType = form.watch("chessClubType");
   const preferredMatchDay = form.watch("preferredMatchDay");
 
+  const hasInitialRatingData =
+    initialValues?.dsbPersonId != null ||
+    initialValues?.dwzRating != null ||
+    initialValues?.fideRating != null ||
+    (initialValues?.fideId != null && initialValues.fideId.length > 0);
+
   const handleDateDisabled = (date: Date) => {
     return isDateDisabled(date, tournament.startDate, tournament.endDate);
   };
 
-  const handleDsbCandidateSelect = (candidate: DsbPlayerCandidate) => {
+  const handleDsbCandidateSelect = (
+    candidate: DsbPlayerCandidate,
+    options?: { auto?: boolean },
+  ) => {
     startTransition(async () => {
       form.setValue("dsbPersonId", candidate.nuLigaPersonId);
 
@@ -139,7 +148,9 @@ export function ParticipateForm({
         } catch {}
       }
 
-      toast.success("Deine Daten wurden aus der DSB-Datenbank übernommen.");
+      if (!options?.auto) {
+        toast.success("Deine Daten wurden aus der DSB-Datenbank übernommen.");
+      }
     });
   };
 
@@ -363,6 +374,7 @@ export function ParticipateForm({
                 firstName={profile.firstName}
                 lastName={profile.lastName}
                 disabled={isPending}
+                autoApply={!hasInitialRatingData}
                 onSelect={handleDsbCandidateSelect}
               />
             </div>

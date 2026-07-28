@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState, type MouseEvent } from "react";
+import { useEffect, useRef, useState, type MouseEvent } from "react";
 import {
   Command,
   CommandEmpty,
@@ -19,24 +19,33 @@ type Props = {
   firstName: string;
   lastName: string;
   disabled?: boolean;
-  onSelect: (candidate: DsbPlayerCandidate) => void;
+  autoApply?: boolean;
+  onSelect: (
+    candidate: DsbPlayerCandidate,
+    options?: { auto?: boolean },
+  ) => void;
 };
 
 export function DwzPlayerSelect({
   firstName,
   lastName,
   disabled,
+  autoApply,
   onSelect,
 }: Props) {
   const [query, setQuery] = useState(`${firstName} ${lastName}`.trim());
   const [candidates, setCandidates] = useState<DsbPlayerCandidate[]>([]);
   const [isLoading, setIsLoading] = useState(false);
   const [isFocused, setIsFocused] = useState(false);
+  const hasAutoApplied = useRef(false);
+  const onSelectRef = useRef(onSelect);
+  onSelectRef.current = onSelect;
 
   const debouncedQuery = useDebouncedValue(query, SEARCH_DEBOUNCE_MS);
 
   useEffect(() => {
-    if (!isFocused) {
+    const shouldAutoApply = Boolean(autoApply) && !hasAutoApplied.current;
+    if (!isFocused && !shouldAutoApply) {
       return;
     }
 
@@ -51,8 +60,13 @@ export function DwzPlayerSelect({
     setIsLoading(true);
     searchDsbPlayers(searchFirstName, searchLastName)
       .then((results) => {
-        if (active) {
-          setCandidates(results);
+        if (!active) {
+          return;
+        }
+        setCandidates(results);
+        if (shouldAutoApply && results.length > 0) {
+          hasAutoApplied.current = true;
+          onSelectRef.current(results[0], { auto: true });
         }
       })
       .finally(() => {
@@ -64,7 +78,7 @@ export function DwzPlayerSelect({
     return () => {
       active = false;
     };
-  }, [debouncedQuery, isFocused]);
+  }, [debouncedQuery, isFocused, autoApply]);
 
   const keepInputFocusedOnSelect = (event: MouseEvent) =>
     event.preventDefault();
