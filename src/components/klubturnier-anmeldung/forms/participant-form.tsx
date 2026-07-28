@@ -1,7 +1,7 @@
 "use client";
 
 import { zodResolver } from "@hookform/resolvers/zod";
-import { useState, useTransition } from "react";
+import { useCallback, useState, useTransition } from "react";
 import { useForm } from "react-hook-form";
 import { TZDate } from "react-day-picker";
 import { CalendarIcon } from "lucide-react";
@@ -122,32 +122,35 @@ export function ParticipateForm({
     return isDateDisabled(date, tournament.startDate, tournament.endDate);
   };
 
-  const handleDsbCandidateSelect = (candidate: DsbPlayerCandidate) => {
-    startTransition(async () => {
-      form.setValue("dsbPersonId", candidate.nuLigaPersonId);
+  const handleDsbCandidateSelect = useCallback(
+    (candidate: DsbPlayerCandidate) => {
+      startTransition(async () => {
+        form.setValue("dsbPersonId", candidate.nuLigaPersonId);
 
-      if (candidate.dwzRating != null) {
-        form.setValue("dwzRating", candidate.dwzRating);
-      }
-      if (candidate.birthYear != null) {
-        form.setValue("birthYear", candidate.birthYear);
-      }
-      if (candidate.gender != null) {
-        form.setValue("gender", candidate.gender);
-      }
-      if (candidate.fideId != null) {
-        form.setValue("fideId", candidate.fideId);
-        try {
-          const fideRating = await getFideRatingById(candidate.fideId);
-          if (fideRating != null) {
-            form.setValue("fideRating", fideRating);
-          }
-        } catch {}
-      }
+        if (candidate.dwzRating != null) {
+          form.setValue("dwzRating", candidate.dwzRating);
+        }
+        if (candidate.birthYear != null) {
+          form.setValue("birthYear", candidate.birthYear);
+        }
+        if (candidate.gender != null) {
+          form.setValue("gender", candidate.gender);
+        }
+        if (candidate.fideId != null) {
+          form.setValue("fideId", candidate.fideId);
+          try {
+            const fideRating = await getFideRatingById(candidate.fideId);
+            if (fideRating != null) {
+              form.setValue("fideRating", fideRating);
+            }
+          } catch {}
+        }
 
-      toast.success("Deine Daten wurden aus der DSB-Datenbank übernommen.");
-    });
-  };
+        toast.success("Deine Daten wurden aus der DSB-Datenbank übernommen.");
+      });
+    },
+    [form, startTransition],
+  );
 
   const handlePreferredMatchDayChange = (value: DayOfWeek) => {
     form.setValue("preferredMatchDay", value);

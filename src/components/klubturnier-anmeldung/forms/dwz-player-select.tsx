@@ -35,8 +35,6 @@ export function DwzPlayerSelect({
   const [isLoading, setIsLoading] = useState(false);
   const [isFocused, setIsFocused] = useState(false);
   const hasAutoApplied = useRef(false);
-  const onSelectRef = useRef(onSelect);
-  onSelectRef.current = onSelect;
 
   const debouncedQuery = useDebouncedValue(query, SEARCH_DEBOUNCE_MS);
 
@@ -63,7 +61,7 @@ export function DwzPlayerSelect({
         setCandidates(results);
         if (shouldAutoApply && results.length > 0) {
           hasAutoApplied.current = true;
-          onSelectRef.current(results[0]);
+          onSelect(results[0]);
         }
       })
       .finally(() => {
@@ -75,7 +73,7 @@ export function DwzPlayerSelect({
     return () => {
       active = false;
     };
-  }, [debouncedQuery, isFocused, autoApply]);
+  }, [debouncedQuery, isFocused, autoApply, onSelect]);
 
   const keepInputFocusedOnSelect = (event: MouseEvent) =>
     event.preventDefault();
