@@ -31,10 +31,15 @@ export function DwzPlayerSelect({
   const [query, setQuery] = useState(`${firstName} ${lastName}`.trim());
   const [candidates, setCandidates] = useState<DsbPlayerCandidate[]>([]);
   const [isLoading, setIsLoading] = useState(false);
+  const [isFocused, setIsFocused] = useState(false);
 
   const debouncedQuery = useDebouncedValue(query, SEARCH_DEBOUNCE_MS);
 
   useEffect(() => {
+    if (!isFocused) {
+      return;
+    }
+
     const { searchFirstName, searchLastName } = splitName(debouncedQuery);
     if (searchLastName.length === 0) {
       setCandidates([]);
@@ -59,7 +64,7 @@ export function DwzPlayerSelect({
     return () => {
       active = false;
     };
-  }, [debouncedQuery]);
+  }, [debouncedQuery, isFocused]);
 
   return (
     <Command shouldFilter={false} className="rounded-md border">
@@ -68,45 +73,49 @@ export function DwzPlayerSelect({
         value={query}
         onValueChange={setQuery}
         disabled={disabled}
+        onFocus={() => setIsFocused(true)}
+        onBlur={() => setIsFocused(false)}
       />
-      <CommandList>
-        {isLoading ? (
-          <div className="space-y-1 p-1">
-            <CandidateSkeleton />
-            <CandidateSkeleton />
-            <CandidateSkeleton />
-          </div>
-        ) : (
-          <>
-            <CommandEmpty>Keine Treffer gefunden</CommandEmpty>
-            {candidates.map((candidate) => (
-              <CommandItem
-                key={candidate.nuLigaPersonId}
-                value={candidate.nuLigaPersonId}
-                onSelect={() => onSelect(candidate)}
-                className="items-start px-3 py-2.5"
-              >
-                <div className="min-w-0 space-y-1">
-                  <p className="truncate text-sm font-medium">
-                    {candidate.firstName} {candidate.lastName}
-                  </p>
-                  <div className="flex flex-wrap gap-x-3 gap-y-1 text-xs text-muted-foreground">
-                    {candidate.birthYear != null ? (
-                      <span>Jahrgang {candidate.birthYear}</span>
-                    ) : null}
-                    {candidate.clubName != null ? (
-                      <span>{candidate.clubName}</span>
-                    ) : null}
-                    {candidate.dwzRating != null ? (
-                      <span>DWZ {candidate.dwzRating}</span>
-                    ) : null}
+      {isFocused ? (
+        <CommandList onMouseDown={(e) => e.preventDefault()}>
+          {isLoading ? (
+            <div className="space-y-1 p-1">
+              <CandidateSkeleton />
+              <CandidateSkeleton />
+              <CandidateSkeleton />
+            </div>
+          ) : (
+            <>
+              <CommandEmpty>Keine Treffer gefunden</CommandEmpty>
+              {candidates.map((candidate) => (
+                <CommandItem
+                  key={candidate.nuLigaPersonId}
+                  value={candidate.nuLigaPersonId}
+                  onSelect={() => onSelect(candidate)}
+                  className="items-start px-3 py-2.5"
+                >
+                  <div className="min-w-0 space-y-1">
+                    <p className="truncate text-sm font-medium">
+                      {candidate.firstName} {candidate.lastName}
+                    </p>
+                    <div className="flex flex-wrap gap-x-3 gap-y-1 text-xs text-muted-foreground">
+                      {candidate.birthYear != null ? (
+                        <span>Jahrgang {candidate.birthYear}</span>
+                      ) : null}
+                      {candidate.clubName != null ? (
+                        <span>{candidate.clubName}</span>
+                      ) : null}
+                      {candidate.dwzRating != null ? (
+                        <span>DWZ {candidate.dwzRating}</span>
+                      ) : null}
+                    </div>
                   </div>
-                </div>
-              </CommandItem>
-            ))}
-          </>
-        )}
-      </CommandList>
+                </CommandItem>
+              ))}
+            </>
+          )}
+        </CommandList>
+      ) : null}
     </Command>
   );
 }
