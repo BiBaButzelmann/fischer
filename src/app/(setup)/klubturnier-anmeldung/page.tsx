@@ -57,6 +57,27 @@ async function findUniqueDsbPersonByName(firstName: string, lastName: string) {
   return persons.length === 1 ? persons[0] : null;
 }
 
+async function getDsbRatingRefresh(
+  dsbPersonId: string,
+): Promise<ParticipantEloPrefill | null> {
+  try {
+    const person = await getDsbPersonById(dsbPersonId);
+    if (!person) {
+      return null;
+    }
+    const candidate = mapDsbPersonToCandidate(person);
+    return {
+      dsbPersonId: candidate.nuLigaPersonId,
+      dwzRating: candidate.dwzRating,
+      fideId: candidate.fideId,
+      birthYear: candidate.birthYear,
+      gender: candidate.gender,
+    };
+  } catch {
+    return null;
+  }
+}
+
 export default async function RolesPage() {
   const session = await authWithRedirect();
 
@@ -95,8 +116,9 @@ export default async function RolesPage() {
       )
     : null;
 
-  const prefillEloData =
-    initialValues.participant == null && previousParticipant != null
+  const prefillEloData = initialValues.participant?.dsbPersonId
+    ? await getDsbRatingRefresh(initialValues.participant.dsbPersonId)
+    : initialValues.participant == null && previousParticipant != null
       ? await getPrefillEloData(profile, previousParticipant)
       : null;
 
