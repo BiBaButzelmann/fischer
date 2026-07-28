@@ -40,6 +40,7 @@ import { removePreferredFromSecondary } from "@/lib/match-days";
 import { DayOfWeek } from "@/db/types/group";
 import { MatchDaysCheckboxes } from "./matchday-selection";
 import { CountryDropdown } from "@/components/ui/country-dropdown";
+import { Label } from "@/components/ui/label";
 import { cn } from "@/lib/utils";
 import { isHoliday } from "@/lib/holidays";
 import {
@@ -356,16 +357,18 @@ export function ParticipateForm({
 
         {chessClubType != null ? (
           <div className="flex flex-col gap-2">
-            <DwzPlayerSelect
-              firstName={profile.firstName}
-              lastName={profile.lastName}
-              disabled={isPending}
-              onSelect={handleDsbCandidateSelect}
-            />
-            <p className="text-sm text-muted-foreground">
-              Suche dich in der DSB-Datenbank und übernimm DWZ, FIDE-ID und
-              Geburtsjahr automatisch. Du kannst die Werte anschließend anpassen.
-            </p>
+            <div className="space-y-2">
+              <Label>
+                DSB-Suche
+                <span className="text-destructive ml-1">*</span>
+              </Label>
+              <DwzPlayerSelect
+                firstName={profile.firstName}
+                lastName={profile.lastName}
+                disabled={isPending}
+                onSelect={handleDsbCandidateSelect}
+              />
+            </div>
             <div className="flex gap-4">
               <FormField
                 control={form.control}
