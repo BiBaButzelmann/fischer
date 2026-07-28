@@ -66,10 +66,14 @@ async function getDsbRatingRefresh(
       return null;
     }
     const candidate = mapDsbPersonToCandidate(person);
+    const fideProfile = candidate.fideId
+      ? await getFideProfile(candidate.fideId)
+      : null;
     return {
       dsbPersonId: candidate.nuLigaPersonId,
       dwzRating: candidate.dwzRating,
       fideId: candidate.fideId,
+      fideRating: fideProfile?.fideRating ?? null,
       birthYear: candidate.birthYear,
       gender: candidate.gender,
     };

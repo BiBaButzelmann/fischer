@@ -122,10 +122,7 @@ export function ParticipateForm({
     return isDateDisabled(date, tournament.startDate, tournament.endDate);
   };
 
-  const handleDsbCandidateSelect = (
-    candidate: DsbPlayerCandidate,
-    options?: { auto?: boolean },
-  ) => {
+  const handleDsbCandidateSelect = (candidate: DsbPlayerCandidate) => {
     startTransition(async () => {
       form.setValue("dsbPersonId", candidate.nuLigaPersonId);
 
@@ -148,9 +145,7 @@ export function ParticipateForm({
         } catch {}
       }
 
-      if (!options?.auto) {
-        toast.success("Deine Daten wurden aus der DSB-Datenbank übernommen.");
-      }
+      toast.success("Deine Daten wurden aus der DSB-Datenbank übernommen.");
     });
   };
 

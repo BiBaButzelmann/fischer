@@ -20,10 +20,7 @@ type Props = {
   lastName: string;
   disabled?: boolean;
   autoApply?: boolean;
-  onSelect: (
-    candidate: DsbPlayerCandidate,
-    options?: { auto?: boolean },
-  ) => void;
+  onSelect: (candidate: DsbPlayerCandidate) => void;
 };
 
 export function DwzPlayerSelect({
@@ -66,7 +63,7 @@ export function DwzPlayerSelect({
         setCandidates(results);
         if (shouldAutoApply && results.length > 0) {
           hasAutoApplied.current = true;
-          onSelectRef.current(results[0], { auto: true });
+          onSelectRef.current(results[0]);
         }
       })
       .finally(() => {
