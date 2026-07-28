@@ -7,6 +7,7 @@ import { eq, isNull } from "drizzle-orm";
 import { db } from "@/db/client";
 import { participant } from "@/db/schema/participant";
 import { profile } from "@/db/schema/profile";
+import { transliterateGermanUmlauts } from "@/lib/dsb/candidate";
 
 const DSB_BASE_URL =
   "https://schachde-apps.liga.nu/dsbwertungsportal/rs/dwz/dwzliste";
@@ -34,15 +35,8 @@ type Match = {
   reason: "fideId" | "unique+birthYear";
 };
 
-async function fetchPersons(
-  firstName: string,
-  lastName: string,
-): Promise<DsbPerson[]> {
-  const params = new URLSearchParams({ lastname: lastName.trim() });
-  if (firstName.trim().length > 0) {
-    params.set("firstname", firstName.trim());
-  }
-  const response = await fetch(`${DSB_BASE_URL}/persons?${params.toString()}`, {
+async function fetchFromEndpoint(query: string): Promise<DsbPerson[]> {
+  const response = await fetch(`${DSB_BASE_URL}/persons?${query}`, {
     signal: AbortSignal.timeout(REQUEST_TIMEOUT_MS),
   });
   if (!response.ok) {
@@ -52,16 +46,28 @@ async function fetchPersons(
   return body.data ?? [];
 }
 
-function pickMatch(results: DsbPerson[], p: ParticipantRow): Match | null {
-  const fideId = p.fideId?.trim();
-  if (fideId) {
-    const byFide = results.filter(
-      (r) => r.fideId != null && String(r.fideId) === fideId,
-    );
-    if (byFide.length === 1) {
-      return { nuLigaPersonId: byFide[0].nuLigaPersonId, reason: "fideId" };
-    }
+// Namen ASCII-gefaltet (ü→ue, ö→oe, ä→ae, ß→ss); UTF-8-Umlaute liefern 0 Treffer.
+async function fetchPersonsByName(
+  firstName: string,
+  lastName: string,
+): Promise<DsbPerson[]> {
+  const params = new URLSearchParams({
+    lastname: transliterateGermanUmlauts(lastName.trim()),
+  });
+  if (firstName.trim().length > 0) {
+    params.set("firstname", transliterateGermanUmlauts(firstName.trim()));
   }
+  return fetchFromEndpoint(params.toString());
+}
+
+async function fetchPersonByFideId(fideId: string): Promise<DsbPerson | null> {
+  const results = await fetchFromEndpoint(
+    new URLSearchParams({ fideId }).toString(),
+  );
+  return results[0] ?? null;
+}
+
+function pickNameMatch(results: DsbPerson[], p: ParticipantRow): Match | null {
   if (
     results.length === 1 &&
     p.birthYear != null &&
@@ -105,8 +111,21 @@ async function main() {
   for (const p of rows) {
     const label = `${p.firstName} ${p.lastName}`;
     try {
-      const results = await fetchPersons(p.firstName, p.lastName);
-      const match = pickMatch(results, p);
+      let match: Match | null = null;
+
+      const fideId = p.fideId?.trim();
+      if (fideId) {
+        const person = await fetchPersonByFideId(fideId);
+        if (person) {
+          match = { nuLigaPersonId: person.nuLigaPersonId, reason: "fideId" };
+        }
+      }
+
+      let nameResults: DsbPerson[] = [];
+      if (!match) {
+        nameResults = await fetchPersonsByName(p.firstName, p.lastName);
+        match = pickNameMatch(nameResults, p);
+      }
 
       if (match) {
         if (apply) {
@@ -121,18 +140,18 @@ async function main() {
           byUnique++;
         }
         console.log(`✓ ${label} → ${match.nuLigaPersonId} (${match.reason})`);
-      } else if (results.length === 0) {
+      } else if (nameResults.length === 0) {
         noResult++;
         skipped.push(`${label} — kein Treffer`);
-      } else if (results.length === 1) {
+      } else if (nameResults.length === 1) {
         singleUnconfirmed++;
-        const r = results[0];
+        const r = nameResults[0];
         skipped.push(
           `${label} — 1 Treffer ${r.nuLigaPersonId} (Jahrgang ${r.birthyear ?? "?"} vs ${p.birthYear ?? "?"}, FIDE ${r.fideId ?? "-"} vs ${p.fideId ?? "-"})`,
         );
       } else {
         multiple++;
-        skipped.push(`${label} — ${results.length} Treffer, mehrdeutig`);
+        skipped.push(`${label} — ${nameResults.length} Treffer, mehrdeutig`);
       }
     } catch (e) {
       errors++;
