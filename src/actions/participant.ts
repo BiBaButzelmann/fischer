@@ -148,10 +148,11 @@ export async function deleteParticipant(
 export async function searchDsbPlayers(
   firstName: string,
   lastName: string,
+  vkz?: string | null,
 ): Promise<DsbPlayerCandidate[]> {
   await authWithRedirect();
 
-  const persons = await searchDsbPersons(firstName, lastName);
+  const persons = await searchDsbPersons(firstName, lastName, vkz);
   return persons.map(mapDsbPersonToCandidate);
 }
 

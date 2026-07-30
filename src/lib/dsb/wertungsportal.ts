@@ -11,12 +11,19 @@ type DsbPersonsResponse = {
 };
 
 const fetchDsbPersonsByName = unstable_cache(
-  async (firstName: string, lastName: string): Promise<DsbPerson[]> => {
+  async (
+    firstName: string,
+    lastName: string,
+    vkz: string | null,
+  ): Promise<DsbPerson[]> => {
     const params = new URLSearchParams({
       lastname: transliterateGermanUmlauts(lastName),
     });
     if (firstName.length > 0) {
       params.set("firstname", transliterateGermanUmlauts(firstName));
+    }
+    if (vkz != null) {
+      params.set("vkz", vkz);
     }
     const response = await fetch(
       `${DSB_BASE_URL}/persons?${params.toString()}`,
@@ -53,13 +60,27 @@ const fetchDsbPersonById = unstable_cache(
 export async function searchDsbPersons(
   firstName: string,
   lastName: string,
+  vkz?: string | null,
 ): Promise<DsbPerson[]> {
   const trimmedLastName = lastName.trim();
   if (trimmedLastName.length === 0) {
     return [];
   }
+  const trimmedFirstName = firstName.trim();
+  const clubVkz = vkz?.trim() || null;
   try {
-    return await fetchDsbPersonsByName(firstName.trim(), trimmedLastName);
+    if (clubVkz != null) {
+      const membersOfClub = await fetchDsbPersonsByName(
+        trimmedFirstName,
+        trimmedLastName,
+        clubVkz,
+      );
+      // Wer im Portal noch beim alten Verein geführt wird, soll trotzdem wählbar bleiben
+      if (membersOfClub.length > 0) {
+        return membersOfClub;
+      }
+    }
+    return await fetchDsbPersonsByName(trimmedFirstName, trimmedLastName, null);
   } catch {
     return [];
   }

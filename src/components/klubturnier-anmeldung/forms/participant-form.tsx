@@ -52,6 +52,7 @@ import {
 import { Tournament } from "@/db/types/tournament";
 import { getFideRatingById } from "@/actions/participant";
 import { DwzPlayerSelect } from "./dwz-player-select";
+import { HSK_VKZ } from "@/lib/dsb/constants";
 import type { DsbPlayerCandidate } from "@/lib/dsb/types";
 import { toast } from "sonner";
 import { Profile } from "@/db/types/profile";
@@ -371,6 +372,7 @@ export function ParticipateForm({
               <DwzPlayerSelect
                 firstName={profile.firstName}
                 lastName={profile.lastName}
+                vkz={chessClubType === DEFAULT_CLUB_KEY ? HSK_VKZ : null}
                 disabled={isPending}
                 autoApply={!hasInitialRatingData}
                 onSelect={handleDsbCandidateSelect}

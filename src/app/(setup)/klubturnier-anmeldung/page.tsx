@@ -5,6 +5,8 @@ import {
 } from "@/components/klubturnier-anmeldung/roles-manager";
 import { getDsbPersonById, searchDsbPersons } from "@/lib/dsb/wertungsportal";
 import { mapDsbPersonToCandidate } from "@/lib/dsb/candidate";
+import { HSK_VKZ } from "@/lib/dsb/constants";
+import { DEFAULT_CLUB_LABEL } from "@/constants/constants";
 import { getFideProfile } from "@/lib/fide/profile";
 import { Participant } from "@/db/types/participant";
 import { Profile } from "@/db/types/profile";
@@ -25,7 +27,11 @@ async function getPrefillEloData(
   try {
     const person = previousParticipant.dsbPersonId
       ? await getDsbPersonById(previousParticipant.dsbPersonId)
-      : await findUniqueDsbPersonByName(profile.firstName, profile.lastName);
+      : await findUniqueDsbPersonByName(
+          profile.firstName,
+          profile.lastName,
+          previousParticipant.chessClub === DEFAULT_CLUB_LABEL ? HSK_VKZ : null,
+        );
 
     if (person) {
       const candidate = mapDsbPersonToCandidate(person);
@@ -52,8 +58,12 @@ async function getPrefillEloData(
   return null;
 }
 
-async function findUniqueDsbPersonByName(firstName: string, lastName: string) {
-  const persons = await searchDsbPersons(firstName, lastName);
+async function findUniqueDsbPersonByName(
+  firstName: string,
+  lastName: string,
+  vkz: string | null,
+) {
+  const persons = await searchDsbPersons(firstName, lastName, vkz);
   return persons.length === 1 ? persons[0] : null;
 }
 

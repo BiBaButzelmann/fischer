@@ -18,6 +18,7 @@ const SEARCH_DEBOUNCE_MS = 300;
 type Props = {
   firstName: string;
   lastName: string;
+  vkz?: string | null;
   disabled?: boolean;
   autoApply?: boolean;
   onSelect: (candidate: DsbPlayerCandidate) => void;
@@ -26,6 +27,7 @@ type Props = {
 export function DwzPlayerSelect({
   firstName,
   lastName,
+  vkz,
   disabled,
   autoApply,
   onSelect,
@@ -34,6 +36,7 @@ export function DwzPlayerSelect({
   const [candidates, setCandidates] = useState<DsbPlayerCandidate[]>([]);
   const [isLoading, setIsLoading] = useState(false);
   const [isFocused, setIsFocused] = useState(false);
+  const [needsManualChoice, setNeedsManualChoice] = useState(false);
   const hasAutoApplied = useRef(false);
 
   const debouncedQuery = useDebouncedValue(query, SEARCH_DEBOUNCE_MS);
@@ -53,15 +56,19 @@ export function DwzPlayerSelect({
 
     let active = true;
     setIsLoading(true);
-    searchDsbPlayers(searchFirstName, searchLastName)
+    searchDsbPlayers(searchFirstName, searchLastName, vkz)
       .then((results) => {
         if (!active) {
           return;
         }
         setCandidates(results);
-        if (shouldAutoApply && results.length > 0) {
-          hasAutoApplied.current = true;
-          onSelect(results[0]);
+        if (shouldAutoApply) {
+          if (results.length === 1) {
+            hasAutoApplied.current = true;
+            onSelect(results[0]);
+          } else {
+            setNeedsManualChoice(results.length > 1);
+          }
         }
       })
       .finally(() => {
@@ -73,10 +80,16 @@ export function DwzPlayerSelect({
     return () => {
       active = false;
     };
-  }, [debouncedQuery, isFocused, autoApply, onSelect]);
+  }, [debouncedQuery, isFocused, autoApply, vkz, onSelect]);
 
   const keepInputFocusedOnSelect = (event: MouseEvent) =>
     event.preventDefault();
+
+  const handleSelect = (candidate: DsbPlayerCandidate) => {
+    hasAutoApplied.current = true;
+    setNeedsManualChoice(false);
+    onSelect(candidate);
+  };
 
   return (
     <Command shouldFilter={false} className="rounded-md border">
@@ -88,7 +101,12 @@ export function DwzPlayerSelect({
         onFocus={() => setIsFocused(true)}
         onBlur={() => setIsFocused(false)}
       />
-      {isFocused ? (
+      {needsManualChoice && !isLoading ? (
+        <p className="border-b px-3 py-2 text-xs text-muted-foreground">
+          Mehrere Einträge zu diesem Namen – bitte den passenden auswählen.
+        </p>
+      ) : null}
+      {isFocused || needsManualChoice ? (
         <CommandList onMouseDown={keepInputFocusedOnSelect}>
           {isLoading ? (
             <div className="space-y-1 p-1">
@@ -103,7 +121,7 @@ export function DwzPlayerSelect({
                 <CommandItem
                   key={candidate.nuLigaPersonId}
                   value={candidate.nuLigaPersonId}
-                  onSelect={() => onSelect(candidate)}
+                  onSelect={() => handleSelect(candidate)}
                   className="items-start px-3 py-2.5"
                 >
                   <div className="min-w-0 space-y-1">
