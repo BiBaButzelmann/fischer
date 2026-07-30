@@ -75,7 +75,6 @@ export async function searchDsbPersons(
         trimmedLastName,
         clubVkz,
       );
-      // Wer im Portal noch beim alten Verein geführt wird, soll trotzdem wählbar bleiben
       if (membersOfClub.length > 0) {
         return membersOfClub;
       }
