@@ -12,6 +12,9 @@ import { getStandings } from "@/services/standings";
 import invariant from "tiny-invariant";
 import { match } from "ts-pattern";
 
+// TODO: Bericht auf FIDE-TRF bzw. XML-Schema DSB_DWZ_Tournament_2_5.xsd (v2.5.3)
+// neu bauen. Das erzeugte Eloref/SWI-Format ist für Turniere nach 07.06.2026 beim
+// DSB nicht mehr zulässig; zpsClubId/zpsPlayerId können danach entfallen.
 export const generateDwzReportFile = action(async (groupId: number) => {
   const session = await authWithRedirect();
   invariant(session?.user.role === "admin", "Unauthorized");

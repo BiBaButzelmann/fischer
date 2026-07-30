@@ -18,11 +18,7 @@ import { refereeFormSchema } from "@/schema/referee";
 import { matchEnteringHelperFormSchema } from "@/schema/matchEnteringHelper";
 import { setupHelperFormSchema } from "@/schema/setupHelper";
 import { useRouter } from "next/navigation";
-import {
-  createParticipant,
-  deleteParticipant,
-  getParticipantEloData,
-} from "@/actions/participant";
+import { createParticipant, deleteParticipant } from "@/actions/participant";
 import {
   createMatchEnteringHelper,
   deleteMatchEnteringHelper,
@@ -43,9 +39,15 @@ import type { PromotionEligibility } from "@/services/promotion";
 import { isError } from "@/lib/actions";
 import { toast } from "sonner";
 
-export type ParticipantEloPrefill = Partial<
-  NonNullable<Awaited<ReturnType<typeof getParticipantEloData>>>
->;
+export type ParticipantEloPrefill = {
+  dsbPersonId?: string;
+  title?: string | null;
+  gender?: "m" | "f" | null;
+  dwzRating?: number | null;
+  fideRating?: number | null;
+  fideId?: string | null;
+  birthYear?: number | null;
+};
 
 type Props = {
   userId: string;
@@ -315,14 +317,12 @@ function buildParticipantInitialValues(
 
   if (previous) {
     const fideId = prefill?.fideId ?? previous.fideId ?? undefined;
-    const prefillNationality =
-      prefill?.nationality !== "?" ? prefill?.nationality : undefined;
     return {
       chessClubType: chessClubTypeForLabel(previous.chessClub),
       chessClub: previous.chessClub,
       title: prefill?.title ?? previous.title ?? "noTitle",
       gender: prefill?.gender ?? previous.gender ?? undefined,
-      nationality: prefillNationality ?? previous.nationality ?? undefined,
+      nationality: previous.nationality ?? undefined,
       dwzRating: prefill?.dwzRating ?? undefined,
       fideRating: prefill?.fideRating && fideId ? prefill.fideRating : undefined,
       fideId,
@@ -330,8 +330,9 @@ function buildParticipantInitialValues(
       birthDate: previous.birthDate ?? undefined,
       preferredMatchDay: previous.preferredMatchDay,
       secondaryMatchDays: previous.secondaryMatchDays,
-      zpsClub: prefill?.zpsClub ?? previous.zpsClubId ?? undefined,
-      zpsPlayer: prefill?.zpsPlayer ?? previous.zpsPlayerId ?? undefined,
+      dsbPersonId: prefill?.dsbPersonId ?? previous.dsbPersonId ?? undefined,
+      zpsClub: previous.zpsClubId ?? undefined,
+      zpsPlayer: previous.zpsPlayerId ?? undefined,
       notAvailableDays: [],
       exercisePromotionRight: false,
     };

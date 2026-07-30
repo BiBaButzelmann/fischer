@@ -8,7 +8,7 @@ import { participantFormSchema } from "@/schema/participant";
 import { authWithRedirect } from "@/auth/utils";
 import { getTournamentById } from "@/db/repositories/tournament";
 import { getProfileByUserId } from "@/db/repositories/profile";
-import { getParticipantsWithZpsIdsByTournamentId } from "@/db/repositories/participant";
+import { getParticipantsWithDsbPersonIdByTournamentId } from "@/db/repositories/participant";
 import { getPromotionEligibility } from "@/services/promotion";
 import { and, eq } from "drizzle-orm";
 import {
@@ -17,47 +17,14 @@ import {
   DEFAULT_CLUB_KEY,
   DEFAULT_CLUB_LABEL,
 } from "@/constants/constants";
-import { revalidatePath, unstable_cache } from "next/cache";
+import { revalidatePath } from "next/cache";
 import { action } from "@/lib/actions";
 import { hasSecondaryMatchDayConflict } from "@/lib/match-days";
 import { parseDateOnly } from "@/lib/date";
 import { getFideProfile } from "@/lib/fide/profile";
-
-const DSB_FETCH_TIMEOUT_MS = 5000;
-const DSB_CACHE_TTL_SECONDS = 60 * 60 * 24;
-
-const fetchClubCsv = unstable_cache(
-  async (zps: string): Promise<string> => {
-    const response = await fetch(
-      `https://www.schachbund.de/php/dewis/verein.php?zps=${zps}&format=csv`,
-      { signal: AbortSignal.timeout(DSB_FETCH_TIMEOUT_MS) },
-    );
-    return response.text();
-  },
-  ["dsb-club-csv"],
-  { revalidate: DSB_CACHE_TTL_SECONDS },
-);
-
-const fetchPlayerCsv = unstable_cache(
-  async (playerId: string): Promise<string> => {
-    const response = await fetch(
-      `https://www.schachbund.de/php/dewis/spieler.php?pkz=${playerId}&format=csv`,
-      { signal: AbortSignal.timeout(DSB_FETCH_TIMEOUT_MS) },
-    );
-    return response.text();
-  },
-  ["dsb-player-csv"],
-  { revalidate: DSB_CACHE_TTL_SECONDS },
-);
-
-function parseRating(value: string | undefined): number | null {
-  const trimmed = value?.trim();
-  if (!trimmed) {
-    return null;
-  }
-  const rating = Number(trimmed);
-  return Number.isFinite(rating) && rating > 0 ? rating : null;
-}
+import { getDsbPersonById, searchDsbPersons } from "@/lib/dsb/wertungsportal";
+import { mapDsbPersonToCandidate } from "@/lib/dsb/candidate";
+import type { DsbPlayerCandidate } from "@/lib/dsb/types";
 
 export const createParticipant = action(async (
   tournamentId: number,
@@ -121,6 +88,7 @@ export const createParticipant = action(async (
       preferredMatchDay: data.preferredMatchDay,
       secondaryMatchDays: data.secondaryMatchDays,
       notAvailableDays: data.notAvailableDays,
+      dsbPersonId: data.dsbPersonId,
       zpsClubId: data.zpsClub,
       zpsPlayerId: data.zpsPlayer,
       entryFeePayed,
@@ -141,6 +109,7 @@ export const createParticipant = action(async (
         preferredMatchDay: data.preferredMatchDay,
         secondaryMatchDays: data.secondaryMatchDays,
         notAvailableDays: data.notAvailableDays,
+        dsbPersonId: data.dsbPersonId,
         zpsClubId: data.zpsClub,
         zpsPlayerId: data.zpsPlayer,
         entryFeePayed,
@@ -176,77 +145,15 @@ export async function deleteParticipant(
     );
 }
 
-export async function getParticipantEloData(
+export async function searchDsbPlayers(
   firstName: string,
   lastName: string,
-): Promise<{
-  title: string | null;
-  nationality: string;
-  fideRating: number | null;
-  dwzRating: number | null;
-  fideId: string | null;
-  zpsClub: string;
-  zpsPlayer: string;
-  gender: "m" | "f" | null;
-  birthYear: number | null;
-} | null> {
+  vkz?: string | null,
+): Promise<DsbPlayerCandidate[]> {
   await authWithRedirect();
 
-  const clubCsv = await fetchClubCsv("40023");
-
-  const clubCsvLines = clubCsv.split("\n");
-  const matchingClubLine = clubCsvLines.find((line) => {
-    const fields = line.split("|");
-    const rowLastName = fields[1]?.trim() || "";
-    const rowFirstName = fields[2]?.trim() || "";
-
-    return (
-      rowFirstName.toLowerCase() === firstName.toLowerCase() &&
-      rowLastName.toLowerCase() === lastName.toLowerCase()
-    );
-  });
-
-  if (!matchingClubLine) {
-    return null;
-  }
-
-  const clubFields = matchingClubLine.split("|");
-  if (clubFields.length !== 14) {
-    return null;
-  }
-
-  const playerId = clubFields[0];
-  if (playerId.trim() === "") {
-    return null;
-  }
-
-  const playerCsv = await fetchPlayerCsv(playerId);
-
-  const playerCsvLines = playerCsv.split("\n");
-  const matchingPlayerLine = playerCsvLines[1].replace(/[\n\r\t]/gm, "");
-
-  const playerFields = matchingPlayerLine.split("|");
-
-  if (playerFields.length !== 10) {
-    return null;
-  }
-
-  const dwzRating = parseRating(playerFields[4]);
-  const fideId = playerFields[6] || null;
-
-  const fideProfile = fideId ? await getFideProfile(fideId) : null;
-
-  return {
-    title: fideProfile?.title ?? (playerFields[8] || null),
-    nationality: playerFields[9],
-    fideRating: fideProfile?.fideRating ?? null,
-    dwzRating,
-    fideId,
-    zpsClub: clubFields[4],
-    zpsPlayer: clubFields[5],
-    gender: fideProfile?.gender ?? null,
-    birthYear: fideProfile?.birthYear ?? null,
-  };
+  const persons = await searchDsbPersons(firstName, lastName, vkz);
+  return persons.map(mapDsbPersonToCandidate);
 }
 
 export async function getFideRatingById(
@@ -256,34 +163,6 @@ export async function getFideRatingById(
 
   const fideProfile = await getFideProfile(fideId);
   return fideProfile?.fideRating ?? null;
-}
-
-export async function getDwzAndFideIdByZps(
-  zpsPlayerId: string,
-  zpsClubId: string,
-): Promise<{ dwzRating: number | null; fideId: string | null } | null> {
-  const clubCsv = await fetchClubCsv(zpsClubId);
-
-  const clubCsvLines = clubCsv.split("\n");
-  const matchingClubLine = clubCsvLines.find((line) => {
-    const fields = line.split("|");
-    const rowZps = fields[5]?.trim() || "";
-
-    return rowZps === zpsPlayerId;
-  });
-  if (!matchingClubLine) {
-    return null;
-  }
-
-  const clubFields = matchingClubLine.split("|");
-  if (clubFields.length !== 14) {
-    return null;
-  }
-
-  return {
-    dwzRating: parseRating(clubFields[7]),
-    fideId: clubFields[11]?.trim() || null,
-  };
 }
 
 export const updateAllParticipantRatings = action(
@@ -302,11 +181,11 @@ export const updateAllParticipantRatings = action(
     );
 
     const participants =
-      await getParticipantsWithZpsIdsByTournamentId(tournamentId);
+      await getParticipantsWithDsbPersonIdByTournamentId(tournamentId);
 
     if (participants.length === 0) {
       throw new Error(
-        "Keine Teilnehmer mit ZPS-Player-ID zum Aktualisieren vorhanden",
+        "Keine Teilnehmer mit DSB-Personen-ID zum Aktualisieren vorhanden",
       );
     }
 
@@ -315,12 +194,11 @@ export const updateAllParticipantRatings = action(
 
     for (const participantData of participants) {
       try {
-        const dewisData = await getDwzAndFideIdByZps(
-          participantData.zpsPlayerId!,
-          participantData.zpsClubId!,
-        );
+        const person = await getDsbPersonById(participantData.dsbPersonId!);
 
-        const fideId = participantData.fideId ?? dewisData?.fideId ?? null;
+        const fideId =
+          participantData.fideId ??
+          (person?.fideId != null ? String(person.fideId) : null);
 
         const values: {
           dwzRating?: number;
@@ -328,8 +206,8 @@ export const updateAllParticipantRatings = action(
           fideId?: string;
         } = {};
 
-        if (dewisData?.dwzRating != null) {
-          values.dwzRating = dewisData.dwzRating;
+        if (person?.rating != null) {
+          values.dwzRating = person.rating;
         }
         if (fideId != null) {
           const profile = await getFideProfile(fideId);

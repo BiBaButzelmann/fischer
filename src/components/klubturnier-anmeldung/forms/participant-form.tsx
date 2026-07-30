@@ -1,7 +1,7 @@
 "use client";
 
 import { zodResolver } from "@hookform/resolvers/zod";
-import { useState, useTransition } from "react";
+import { useCallback, useState, useTransition } from "react";
 import { useForm } from "react-hook-form";
 import { TZDate } from "react-day-picker";
 import { CalendarIcon } from "lucide-react";
@@ -40,6 +40,7 @@ import { removePreferredFromSecondary } from "@/lib/match-days";
 import { DayOfWeek } from "@/db/types/group";
 import { MatchDaysCheckboxes } from "./matchday-selection";
 import { CountryDropdown } from "@/components/ui/country-dropdown";
+import { Label } from "@/components/ui/label";
 import { cn } from "@/lib/utils";
 import { isHoliday } from "@/lib/holidays";
 import {
@@ -49,10 +50,10 @@ import {
   utcDateToDateOnly,
 } from "@/lib/date";
 import { Tournament } from "@/db/types/tournament";
-import {
-  getFideRatingById,
-  getParticipantEloData,
-} from "@/actions/participant";
+import { getFideRatingById } from "@/actions/participant";
+import { DwzPlayerSelect } from "./dwz-player-select";
+import { HSK_VKZ } from "@/lib/dsb/constants";
+import type { DsbPlayerCandidate } from "@/lib/dsb/types";
 import { toast } from "sonner";
 import { Profile } from "@/db/types/profile";
 import {
@@ -98,6 +99,7 @@ export function ParticipateForm({
       nationality: initialValues?.nationality,
       birthYear: initialValues?.birthYear,
       birthDate: initialValues?.birthDate,
+      dsbPersonId: initialValues?.dsbPersonId,
       zpsClub: initialValues?.zpsClub,
       zpsPlayer: initialValues?.zpsPlayer,
       preferredMatchDay: initialValues?.preferredMatchDay,
@@ -111,72 +113,45 @@ export function ParticipateForm({
   const chessClubType = form.watch("chessClubType");
   const preferredMatchDay = form.watch("preferredMatchDay");
 
+  const hasInitialRatingData =
+    initialValues?.dsbPersonId != null ||
+    initialValues?.dwzRating != null ||
+    initialValues?.fideRating != null ||
+    (initialValues?.fideId != null && initialValues.fideId.length > 0);
+
   const handleDateDisabled = (date: Date) => {
     return isDateDisabled(date, tournament.startDate, tournament.endDate);
   };
 
-  const fetchAndApplyEloData = () => {
-    startTransition(async () => {
-      try {
-        const eloData = await getParticipantEloData(
-          profile.firstName,
-          profile.lastName,
-        );
-        if (!eloData) {
-          const fideId = form.getValues("fideId");
-          if (fideId) {
-            const fideRating = await getFideRatingById(fideId);
+  const handleDsbCandidateSelect = useCallback(
+    (candidate: DsbPlayerCandidate) => {
+      startTransition(async () => {
+        form.setValue("dsbPersonId", candidate.nuLigaPersonId);
+
+        if (candidate.dwzRating != null) {
+          form.setValue("dwzRating", candidate.dwzRating);
+        }
+        if (candidate.birthYear != null) {
+          form.setValue("birthYear", candidate.birthYear);
+        }
+        if (candidate.gender != null) {
+          form.setValue("gender", candidate.gender);
+        }
+        if (candidate.fideId != null) {
+          form.setValue("fideId", candidate.fideId);
+          try {
+            const fideRating = await getFideRatingById(candidate.fideId);
             if (fideRating != null) {
               form.setValue("fideRating", fideRating);
-              toast.success(
-                "Deine Elo wurde anhand deiner gespeicherten FIDE-ID übernommen.",
-              );
-              return;
             }
-          }
-          toast.info(
-            `Keine Einträge zu ${profile.firstName} ${profile.lastName} im HSK-Verzeichnis gefunden. Bitte trage deine Daten manuell ein.`,
-          );
-          return;
-        }
-
-        form.setValue("title", eloData.title ?? "noTitle");
-
-        if (eloData.gender) {
-          form.setValue("gender", eloData.gender);
-        }
-        if (eloData.dwzRating) {
-          form.setValue("dwzRating", eloData.dwzRating);
-        }
-        if (eloData.birthYear) {
-          form.setValue("birthYear", eloData.birthYear);
-        }
-        if (eloData.zpsClub) {
-          form.setValue("zpsClub", eloData.zpsClub);
-        }
-        if (eloData.zpsPlayer) {
-          form.setValue("zpsPlayer", eloData.zpsPlayer);
-        }
-
-        if (eloData.fideId) {
-          form.setValue("fideId", eloData.fideId);
-        }
-        if (eloData.fideRating && eloData.fideId) {
-          form.setValue("fideRating", eloData.fideRating);
-          form.setValue(
-            "nationality",
-            eloData.nationality !== "?" ? eloData.nationality : undefined,
-          );
+          } catch {}
         }
 
         toast.success("Deine Daten wurden aus der DSB-Datenbank übernommen.");
-      } catch {
-        toast.error(
-          "Daten konnten nicht aus der DSB-Datenbank geladen werden. Bitte trage sie manuell ein.",
-        );
-      }
-    });
-  };
+      });
+    },
+    [form, startTransition],
+  );
 
   const handlePreferredMatchDayChange = (value: DayOfWeek) => {
     form.setValue("preferredMatchDay", value);
@@ -196,12 +171,10 @@ export function ParticipateForm({
 
     if (value === CLUBLESS_KEY) {
       form.setValue("chessClub", "");
+      form.setValue("dsbPersonId", undefined);
       form.setValue("zpsClub", undefined);
       form.setValue("zpsPlayer", undefined);
-      return;
     }
-
-    fetchAndApplyEloData();
   };
 
   const handleSubmit = (data: z.infer<typeof participantFormSchema>) => {
@@ -394,6 +367,17 @@ export function ParticipateForm({
 
         {chessClubType != null ? (
           <div className="flex flex-col gap-2">
+            <div className="space-y-2">
+              <Label>DSB-Suche</Label>
+              <DwzPlayerSelect
+                firstName={profile.firstName}
+                lastName={profile.lastName}
+                vkz={chessClubType === DEFAULT_CLUB_KEY ? HSK_VKZ : null}
+                disabled={isPending}
+                autoApply={!hasInitialRatingData}
+                onSelect={handleDsbCandidateSelect}
+              />
+            </div>
             <div className="flex gap-4">
               <FormField
                 control={form.control}
@@ -489,7 +473,6 @@ export function ParticipateForm({
 
         {fideRating ? (
           <div className="flex gap-4">
-            {/* FIDE-ID */}
             <FormField
               control={form.control}
               name="fideId"
@@ -509,7 +492,7 @@ export function ParticipateForm({
                       href="https://www.schachbund.de/fide-identifikationsnummer.html"
                       target="_blank"
                       rel="noopener noreferrer"
-                      className="hover:text-blue-600 transition-colors text-blue-400 text-xs"
+                      className="text-xs text-muted-foreground underline underline-offset-2 transition-colors hover:text-foreground"
                     >
                       Was ist die FIDE ID?
                     </a>{" "}
@@ -518,7 +501,6 @@ export function ParticipateForm({
                 </FormItem>
               )}
             />
-            {/* Nationalität */}{" "}
             <FormField
               control={form.control}
               name="nationality"
@@ -711,9 +693,9 @@ export function ParticipateForm({
                 <DialogHeader>
                   <DialogTitle>Anmeldung löschen</DialogTitle>
                   <DialogDescription>
-                    Möchtest du deine Anmeldung zum Klubturnier wirklich löschen?
-                    Deine Angaben werden entfernt. Du kannst dich während der
-                    Anmeldephase jederzeit erneut anmelden.
+                    Möchtest du deine Anmeldung zum Klubturnier wirklich
+                    löschen? Deine Angaben werden entfernt. Du kannst dich
+                    während der Anmeldephase jederzeit erneut anmelden.
                   </DialogDescription>
                 </DialogHeader>
                 <DialogFooter>

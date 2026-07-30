@@ -1,0 +1,1 @@
+ALTER TABLE "participant" ADD COLUMN "dsb_person_id" text;
