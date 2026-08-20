@@ -1,7 +1,6 @@
 "use client";
 
 import { useForm } from "react-hook-form";
-import { Button } from "@/components/ui/button";
 import {
   Form,
   FormControl,
@@ -12,6 +11,7 @@ import {
 } from "@/components/ui/form";
 import { useTransition } from "react";
 import { jurorFormSchema } from "@/schema/juror";
+import { RoleFormActions } from "./role-form-actions";
 import { zodResolver } from "@hookform/resolvers/zod";
 import z from "zod";
 import { Switch } from "@/components/ui/switch";
@@ -106,26 +106,15 @@ export function JurorForm({
             </FormItem>
           )}
         />
-        <div className="flex items-center gap-2">
-          <Button
-            disabled={isPending}
-            type="submit"
-            className="w-full sm:w-auto"
-          >
-            Antwort speichern
-          </Button>
-          {initiallyParticipating !== undefined &&
-          tournamentStage === "registration" ? (
-            <Button
-              disabled={isPending}
-              onClick={handleDelete}
-              className="w-full sm:w-auto "
-              variant={"outline"}
-            >
-              Änderungen verwerfen
-            </Button>
-          ) : null}
-        </div>
+        <RoleFormActions
+          isPending={isPending}
+          onDelete={
+            initiallyParticipating !== undefined &&
+            tournamentStage === "registration"
+              ? handleDelete
+              : undefined
+          }
+        />
       </form>
     </Form>
   );
