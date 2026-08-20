@@ -1,7 +1,6 @@
 "use client";
 
 import { useForm } from "react-hook-form";
-import { Button } from "@/components/ui/button";
 import {
   Select,
   SelectContent,
@@ -22,6 +21,7 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import z from "zod";
 import { useTransition } from "react";
 import { MatchDaysCheckboxes } from "./matchday-selection";
+import { RoleFormActions } from "./role-form-actions";
 import { setupHelperFormSchema } from "@/schema/setupHelper";
 import { removePreferredFromSecondary } from "@/lib/match-days";
 import { DayOfWeek } from "@/db/types/group";
@@ -155,25 +155,14 @@ export function SetupHelperForm({
             </FormItem>
           )}
         />
-        <div className="flex items-center gap-2">
-          <Button
-            disabled={isPending}
-            type="submit"
-            className="w-full sm:w-auto"
-          >
-            Änderungen speichern
-          </Button>
-          {initialValues !== undefined && tournamentStage === "registration" ? (
-            <Button
-              disabled={isPending}
-              onClick={handleDelete}
-              className="w-full sm:w-auto "
-              variant={"outline"}
-            >
-              Änderungen verwerfen
-            </Button>
-          ) : null}
-        </div>
+        <RoleFormActions
+          isPending={isPending}
+          onDelete={
+            initialValues !== undefined && tournamentStage === "registration"
+              ? handleDelete
+              : undefined
+          }
+        />
       </form>
     </Form>
   );

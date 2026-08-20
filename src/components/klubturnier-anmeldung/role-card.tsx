@@ -5,7 +5,7 @@ import {
   AccordionTrigger,
   AccordionContent,
 } from "@/components/ui/accordion";
-import { CheckCircle2, LucideIcon } from "lucide-react";
+import { LucideIcon } from "lucide-react";
 import React, { PropsWithChildren } from "react";
 
 export function RoleCard({
@@ -43,11 +43,6 @@ export function RoleCard({
             <p className="text-sm text-muted-foreground">{description}</p>
           </div>
         </div>
-        {completed && (
-          <span className="ml-4 flex-shrink-0">
-            <CheckCircle2 className="h-6 w-6 text-green-600" />
-          </span>
-        )}
       </AccordionTrigger>
       <AccordionContent className="md:p-4 md:pt-0">{children}</AccordionContent>
     </AccordionItem>

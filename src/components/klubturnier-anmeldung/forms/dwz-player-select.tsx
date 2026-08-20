@@ -1,10 +1,11 @@
 "use client";
 
 import { useEffect, useRef, useState, type MouseEvent } from "react";
+import { Command as CommandPrimitive } from "cmdk";
+import { Paperclip, Search } from "lucide-react";
 import {
   Command,
   CommandEmpty,
-  CommandInput,
   CommandItem,
   CommandList,
 } from "@/components/ui/command";
@@ -19,7 +20,6 @@ type Props = {
   firstName: string;
   lastName: string;
   vkz?: string | null;
-  disabled?: boolean;
   autoApply?: boolean;
   onSelect: (candidate: DsbPlayerCandidate) => void;
 };
@@ -28,22 +28,53 @@ export function DwzPlayerSelect({
   firstName,
   lastName,
   vkz,
-  disabled,
   autoApply,
   onSelect,
 }: Props) {
+  const [initialSearch] = useState(() => ({
+    firstName,
+    lastName,
+    vkz,
+    autoApply,
+    onSelect,
+  }));
   const [query, setQuery] = useState(`${firstName} ${lastName}`.trim());
   const [candidates, setCandidates] = useState<DsbPlayerCandidate[]>([]);
   const [isLoading, setIsLoading] = useState(false);
   const [isFocused, setIsFocused] = useState(false);
-  const [needsManualChoice, setNeedsManualChoice] = useState(false);
-  const hasAutoApplied = useRef(false);
+  const [isLinked, setIsLinked] = useState(false);
 
   const debouncedQuery = useDebouncedValue(query, SEARCH_DEBOUNCE_MS);
 
   useEffect(() => {
-    const shouldAutoApply = Boolean(autoApply) && !hasAutoApplied.current;
-    if (!isFocused && !shouldAutoApply) {
+    if (!initialSearch.autoApply) {
+      return;
+    }
+
+    const { searchFirstName, searchLastName } = splitName(
+      `${initialSearch.firstName} ${initialSearch.lastName}`.trim(),
+    );
+    if (searchLastName.length === 0) {
+      return;
+    }
+
+    let active = true;
+    searchDsbPlayers(searchFirstName, searchLastName, initialSearch.vkz).then(
+      (results) => {
+        if (active && results.length === 1) {
+          initialSearch.onSelect(results[0]);
+          setIsLinked(true);
+        }
+      },
+    );
+
+    return () => {
+      active = false;
+    };
+  }, [initialSearch]);
+
+  useEffect(() => {
+    if (!isFocused) {
       return;
     }
 
@@ -58,17 +89,8 @@ export function DwzPlayerSelect({
     setIsLoading(true);
     searchDsbPlayers(searchFirstName, searchLastName, vkz)
       .then((results) => {
-        if (!active) {
-          return;
-        }
-        setCandidates(results);
-        if (shouldAutoApply) {
-          if (results.length === 1) {
-            hasAutoApplied.current = true;
-            onSelect(results[0]);
-          } else {
-            setNeedsManualChoice(results.length > 1);
-          }
+        if (active) {
+          setCandidates(results);
         }
       })
       .finally(() => {
@@ -80,33 +102,40 @@ export function DwzPlayerSelect({
     return () => {
       active = false;
     };
-  }, [debouncedQuery, isFocused, autoApply, vkz, onSelect]);
+  }, [debouncedQuery, isFocused, vkz]);
+
+  const inputRef = useRef<HTMLInputElement>(null);
 
   const keepInputFocusedOnSelect = (event: MouseEvent) =>
     event.preventDefault();
 
   const handleSelect = (candidate: DsbPlayerCandidate) => {
-    hasAutoApplied.current = true;
-    setNeedsManualChoice(false);
     onSelect(candidate);
+    setIsLinked(true);
+    inputRef.current?.blur();
   };
 
   return (
     <Command shouldFilter={false} className="rounded-md border">
-      <CommandInput
-        placeholder="Vor- und Nachname eingeben…"
-        value={query}
-        onValueChange={setQuery}
-        disabled={disabled}
-        onFocus={() => setIsFocused(true)}
-        onBlur={() => setIsFocused(false)}
-      />
-      {needsManualChoice && !isLoading ? (
-        <p className="border-b px-3 py-2 text-xs text-muted-foreground">
-          Mehrere Einträge zu diesem Namen – bitte den passenden auswählen.
-        </p>
-      ) : null}
-      {isFocused || needsManualChoice ? (
+      <div className="flex items-center border-b px-3" cmdk-input-wrapper="">
+        <CommandPrimitive.Input
+          ref={inputRef}
+          placeholder="Vor- und Nachname eingeben…"
+          value={query}
+          onValueChange={(value) => {
+            setIsLinked(false);
+            setQuery(value);
+          }}
+          onFocus={() => setIsFocused(true)}
+          onBlur={() => setIsFocused(false)}
+          className="flex h-10 w-full rounded-md bg-transparent py-3 text-sm outline-none placeholder:text-muted-foreground disabled:cursor-not-allowed disabled:opacity-50"
+        />
+        {isLinked ? (
+          <Paperclip className="ml-2 h-4 w-4 shrink-0 opacity-50" />
+        ) : null}
+        <Search className="ml-2 h-4 w-4 shrink-0 opacity-50" />
+      </div>
+      {isFocused ? (
         <CommandList onMouseDown={keepInputFocusedOnSelect}>
           {isLoading ? (
             <div className="space-y-1 p-1">
@@ -122,7 +151,7 @@ export function DwzPlayerSelect({
                   key={candidate.nuLigaPersonId}
                   value={candidate.nuLigaPersonId}
                   onSelect={() => handleSelect(candidate)}
-                  className="items-start px-3 py-2.5"
+                  className="items-start px-3 py-2.5 data-[selected=true]:bg-secondary data-[selected=true]:text-secondary-foreground"
                 >
                   <div className="min-w-0 space-y-1">
                     <p className="truncate text-sm font-medium">
@@ -153,8 +182,8 @@ export function DwzPlayerSelect({
 function CandidateSkeleton() {
   return (
     <div className="space-y-2 rounded-sm px-3 py-2.5">
-      <Skeleton className="h-3.5 w-2/3" />
-      <Skeleton className="h-2.5 w-1/2" />
+      <Skeleton className="h-3.5 w-2/3 bg-foreground/10" />
+      <Skeleton className="h-2.5 w-1/2 bg-foreground/10" />
     </div>
   );
 }

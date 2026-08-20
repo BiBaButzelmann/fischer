@@ -1,7 +1,6 @@
 "use client";
 
 import { useForm } from "react-hook-form";
-import { Button } from "@/components/ui/button";
 import {
   Select,
   SelectContent,
@@ -22,6 +21,7 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import z from "zod";
 import { useTransition } from "react";
 import { matchEnteringHelperFormSchema } from "@/schema/matchEnteringHelper";
+import { RoleFormActions } from "./role-form-actions";
 import { ClipboardEdit, Info, Users } from "lucide-react";
 import { TournamentStage } from "@/db/types/tournament";
 
@@ -132,25 +132,14 @@ export function MatchEnteringForm({
           )}
         />
 
-        <div className="flex items-center gap-2">
-          <Button
-            disabled={isPending}
-            type="submit"
-            className="w-full sm:w-auto"
-          >
-            Änderungen speichern
-          </Button>
-          {initialValues !== undefined && tournamentStage === "registration" ? (
-            <Button
-              disabled={isPending}
-              onClick={handleDelete}
-              className="w-full sm:w-auto "
-              variant={"outline"}
-            >
-              Änderungen verwerfen
-            </Button>
-          ) : null}
-        </div>
+        <RoleFormActions
+          isPending={isPending}
+          onDelete={
+            initialValues !== undefined && tournamentStage === "registration"
+              ? handleDelete
+              : undefined
+          }
+        />
       </form>
     </Form>
   );
