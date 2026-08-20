@@ -13,12 +13,14 @@ import { Profile } from "@/db/types/profile";
 import { getProfileByUserId } from "@/db/repositories/profile";
 import { getRolesDataByProfileIdAndTournamentId } from "@/db/repositories/role";
 import {
+  getAllTournaments,
   getMostRecentDoneTournament,
   getOpenRegistrationTournament,
 } from "@/db/repositories/tournament";
 import { getParticipantByProfileIdAndTournamentId } from "@/db/repositories/participant";
 import { getPromotionEligibility } from "@/services/promotion";
 import { redirect } from "next/navigation";
+import { TournamentSwitcher } from "@/components/sidebar/tournament-switcher";
 
 async function getPrefillEloData(
   profile: Profile,
@@ -70,9 +72,10 @@ async function findUniqueDsbPersonByName(
 export default async function RolesPage() {
   const session = await authWithRedirect();
 
-  const [profile, tournament] = await Promise.all([
+  const [profile, tournament, tournaments] = await Promise.all([
     getProfileByUserId(session.user.id),
     getOpenRegistrationTournament(),
+    getAllTournaments(),
   ]);
   if (!profile) {
     redirect("/willkommen");
@@ -88,6 +91,7 @@ export default async function RolesPage() {
           Aktuell ist keine Anmeldung möglich – es befindet sich kein Turnier in
           der Anmeldephase.
         </p>
+        <PastTournamentsSwitcher tournaments={tournaments} />
       </div>
     );
   }
@@ -131,6 +135,28 @@ export default async function RolesPage() {
         previousParticipant={previousParticipant ?? null}
         prefillEloData={prefillEloData}
       />
+      <PastTournamentsSwitcher
+        tournaments={tournaments.filter((t) => t.id !== tournament.id)}
+      />
+    </div>
+  );
+}
+
+function PastTournamentsSwitcher({
+  tournaments,
+}: {
+  tournaments: { id: number; name: string; slug: string }[];
+}) {
+  if (tournaments.length === 0) {
+    return null;
+  }
+
+  return (
+    <div className="mx-auto max-w-xs space-y-2 text-center">
+      <p className="text-sm text-muted-foreground">
+        Ein vergangenes Turnier ansehen, ohne dich anzumelden:
+      </p>
+      <TournamentSwitcher tournaments={tournaments} />
     </div>
   );
 }
