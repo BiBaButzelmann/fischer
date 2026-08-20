@@ -76,7 +76,7 @@ export function RolesManager({
   const canDeleteParticipant = rolesData.participant != null;
   const [isPending, startTransition] = useTransition();
   const router = useRouter();
-  const [accordionValue, setAccordionValue] = useState<string>();
+  const [accordionValue, setAccordionValue] = useState("");
 
   const handleParticipateFormSubmit = async (
     data: z.infer<typeof participantFormSchema>,
@@ -86,6 +86,8 @@ export function RolesManager({
       toast.error("Deine Anmeldung konnte nicht gespeichert werden.");
       return;
     }
+    toast.success("Deine Anmeldung wurde gespeichert.");
+    setAccordionValue("");
     router.refresh();
   };
 
@@ -99,6 +101,8 @@ export function RolesManager({
         toast.error("Deine Anmeldung konnte nicht gelöscht werden.");
         return;
       }
+      toast.success("Deine Anmeldung wurde gelöscht.");
+      setAccordionValue("");
       router.refresh();
     }
   };

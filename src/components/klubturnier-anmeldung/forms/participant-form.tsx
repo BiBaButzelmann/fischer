@@ -1,7 +1,7 @@
 "use client";
 
 import { zodResolver } from "@hookform/resolvers/zod";
-import { useCallback, useState, useTransition } from "react";
+import { useCallback, useTransition } from "react";
 import { useForm } from "react-hook-form";
 import { TZDate } from "react-day-picker";
 import { CalendarIcon } from "lucide-react";
@@ -26,15 +26,6 @@ import {
 import { Button } from "../../ui/button";
 import { Calendar } from "../../ui/calendar";
 import { Popover, PopoverContent, PopoverTrigger } from "../../ui/popover";
-import {
-  Dialog,
-  DialogContent,
-  DialogDescription,
-  DialogFooter,
-  DialogHeader,
-  DialogTitle,
-  DialogTrigger,
-} from "../../ui/dialog";
 import { participantFormSchema } from "@/schema/participant";
 import { removePreferredFromSecondary } from "@/lib/match-days";
 import { DayOfWeek } from "@/db/types/group";
@@ -52,6 +43,7 @@ import {
 import { Tournament } from "@/db/types/tournament";
 import { getFideRatingById } from "@/actions/participant";
 import { DwzPlayerSelect } from "./dwz-player-select";
+import { RoleFormActions } from "./role-form-actions";
 import { HSK_VKZ } from "@/lib/dsb/constants";
 import type { DsbPlayerCandidate } from "@/lib/dsb/types";
 import { toast } from "sonner";
@@ -86,7 +78,6 @@ export function ParticipateForm({
   profile,
 }: Props) {
   const [isPending, startTransition] = useTransition();
-  const [deleteOpen, setDeleteOpen] = useState(false);
   const form = useForm<z.infer<typeof participantFormSchema>>({
     resolver: zodResolver(participantFormSchema),
     defaultValues: {
@@ -128,25 +119,19 @@ export function ParticipateForm({
     (candidate: DsbPlayerCandidate) => {
       startTransition(async () => {
         form.setValue("dsbPersonId", candidate.nuLigaPersonId);
+        form.setValue("dwzRating", candidate.dwzRating ?? undefined);
+        form.setValue("birthYear", candidate.birthYear ?? undefined);
+        form.setValue("gender", candidate.gender ?? undefined);
+        form.setValue("fideId", candidate.fideId ?? undefined);
 
-        if (candidate.dwzRating != null) {
-          form.setValue("dwzRating", candidate.dwzRating);
-        }
-        if (candidate.birthYear != null) {
-          form.setValue("birthYear", candidate.birthYear);
-        }
-        if (candidate.gender != null) {
-          form.setValue("gender", candidate.gender);
-        }
+        let fideRating: number | undefined;
         if (candidate.fideId != null) {
-          form.setValue("fideId", candidate.fideId);
           try {
-            const fideRating = await getFideRatingById(candidate.fideId);
-            if (fideRating != null) {
-              form.setValue("fideRating", fideRating);
-            }
+            fideRating =
+              (await getFideRatingById(candidate.fideId)) ?? undefined;
           } catch {}
         }
+        form.setValue("fideRating", fideRating);
 
         toast.success("Deine Daten wurden aus der DSB-Datenbank übernommen.");
       });
@@ -376,7 +361,6 @@ export function ParticipateForm({
                 firstName={profile.firstName}
                 lastName={profile.lastName}
                 vkz={chessClubType === DEFAULT_CLUB_KEY ? HSK_VKZ : null}
-                disabled={isPending}
                 autoApply={!hasInitialRatingData}
                 onSelect={handleDsbCandidateSelect}
               />
@@ -672,57 +656,14 @@ export function ParticipateForm({
           )}
         />
 
-        <div className="flex items-center gap-2">
-          <Button
-            disabled={isPending}
-            type="submit"
-            className="w-full sm:w-auto"
-          >
-            Änderungen speichern
-          </Button>
-          {canDelete && tournament.stage === "registration" ? (
-            <Dialog open={deleteOpen} onOpenChange={setDeleteOpen}>
-              <DialogTrigger asChild>
-                <Button
-                  disabled={isPending}
-                  type="button"
-                  className="w-full sm:w-auto"
-                  variant={"outline"}
-                >
-                  Anmeldung löschen
-                </Button>
-              </DialogTrigger>
-              <DialogContent>
-                <DialogHeader>
-                  <DialogTitle>Anmeldung löschen</DialogTitle>
-                  <DialogDescription>
-                    Möchtest du deine Anmeldung zum Klubturnier wirklich
-                    löschen? Deine Angaben werden entfernt. Du kannst dich
-                    während der Anmeldephase jederzeit erneut anmelden.
-                  </DialogDescription>
-                </DialogHeader>
-                <DialogFooter>
-                  <Button
-                    type="button"
-                    variant="outline"
-                    disabled={isPending}
-                    onClick={() => setDeleteOpen(false)}
-                  >
-                    Abbrechen
-                  </Button>
-                  <Button
-                    type="button"
-                    variant="destructive"
-                    disabled={isPending}
-                    onClick={handleDelete}
-                  >
-                    {isPending ? "Wird gelöscht..." : "Anmeldung löschen"}
-                  </Button>
-                </DialogFooter>
-              </DialogContent>
-            </Dialog>
-          ) : null}
-        </div>
+        <RoleFormActions
+          isPending={isPending}
+          onDelete={
+            canDelete && tournament.stage === "registration"
+              ? handleDelete
+              : undefined
+          }
+        />
       </form>
     </Form>
   );
