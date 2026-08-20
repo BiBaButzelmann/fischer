@@ -1,6 +1,6 @@
 "use server";
 
-import { eq, sql } from "drizzle-orm";
+import { and, eq, sql } from "drizzle-orm";
 import { db } from "../client";
 import { participant } from "../schema/participant";
 import { unionAll } from "drizzle-orm/pg-core";
@@ -20,33 +20,63 @@ import { getRefereeByProfileIdAndTournamentId } from "./referee";
 import { getSetupHelperByProfileIdAndTournamentId } from "./setup-helper";
 import { getTrainerByProfileIdAndTournamentId } from "./trainer";
 
-export async function getRolesByProfileId(profileId: number): Promise<Role[]> {
+export async function getRolesByProfileIdAndTournamentId(
+  profileId: number,
+  tournamentId: number,
+): Promise<Role[]> {
   const participantQuery = db
     .select({ tableName: sql<Role>`'participant'::text`.as("tableName") })
     .from(participant)
-    .where(eq(participant.profileId, profileId));
+    .where(
+      and(
+        eq(participant.profileId, profileId),
+        eq(participant.tournamentId, tournamentId),
+      ),
+    );
   const refereeQuery = db
     .select({ tableName: sql<Role>`'referee'::text`.as("tableName") })
     .from(referee)
-    .where(eq(referee.profileId, profileId));
+    .where(
+      and(
+        eq(referee.profileId, profileId),
+        eq(referee.tournamentId, tournamentId),
+      ),
+    );
   const jurorQuery = db
     .select({ tableName: sql<Role>`'juror'::text`.as("tableName") })
     .from(juror)
-    .where(eq(juror.profileId, profileId));
+    .where(
+      and(eq(juror.profileId, profileId), eq(juror.tournamentId, tournamentId)),
+    );
   const matchEnteringHelperQuery = db
     .select({
       tableName: sql<Role>`'matchEnteringHelper'::text`.as("tableName"),
     })
     .from(matchEnteringHelper)
-    .where(eq(matchEnteringHelper.profileId, profileId));
+    .where(
+      and(
+        eq(matchEnteringHelper.profileId, profileId),
+        eq(matchEnteringHelper.tournamentId, tournamentId),
+      ),
+    );
   const setupHelperQuery = db
     .select({ tableName: sql<Role>`'setupHelper'::text`.as("tableName") })
     .from(setupHelper)
-    .where(eq(setupHelper.profileId, profileId));
+    .where(
+      and(
+        eq(setupHelper.profileId, profileId),
+        eq(setupHelper.tournamentId, tournamentId),
+      ),
+    );
   const trainerQuery = db
     .select({ tableName: sql<Role>`'trainer'::text`.as("tableName") })
     .from(trainer)
-    .where(eq(trainer.profileId, profileId));
+    .where(
+      and(
+        eq(trainer.profileId, profileId),
+        eq(trainer.tournamentId, tournamentId),
+      ),
+    );
 
   const [unionResult, sessionResult] = await Promise.all([
     unionAll(
@@ -68,12 +98,15 @@ export async function getRolesByProfileId(profileId: number): Promise<Role[]> {
   ];
 }
 
-export async function getRolesByUserId(userId: string) {
+export async function getRolesByUserIdAndTournamentId(
+  userId: string,
+  tournamentId: number,
+): Promise<Role[]> {
   const profile = await getProfileByUserId(userId);
   if (!profile) {
     return [];
   }
-  return getRolesByProfileId(profile.id);
+  return getRolesByProfileIdAndTournamentId(profile.id, tournamentId);
 }
 
 export async function getRolesDataByProfileIdAndTournamentId(

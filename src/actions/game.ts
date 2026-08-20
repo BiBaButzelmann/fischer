@@ -22,7 +22,7 @@ import {
 import { sendGamePostponementEmails } from "@/actions/email/game-postponement";
 import { updateBoardNumbers } from "@/actions/board-number";
 import { getCurrentLocalDateTime } from "@/lib/date";
-import { getRolesByUserId } from "@/db/repositories/role";
+import { getRolesByUserIdAndTournamentId } from "@/db/repositories/role";
 
 export async function removeScheduledGamesForGroup(
   tournamentId: number,
@@ -346,7 +346,10 @@ export async function updateGameResult(
     gameId,
     session.user.id,
   );
-  const userRoles = await getRolesByUserId(session.user.id);
+  const userRoles = await getRolesByUserIdAndTournamentId(
+    session.user.id,
+    gameData.tournamentId,
+  );
   const isAdmin = userRoles.includes("admin");
   const isReferee = userRoles.includes("referee");
 

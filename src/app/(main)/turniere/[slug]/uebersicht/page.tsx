@@ -2,7 +2,7 @@ import { auth } from "@/auth/utils";
 import { TournamentDone } from "@/components/uebersicht/tournament-done";
 import { TournamentRegistration } from "@/components/uebersicht/registration/tournament-registration";
 import { TournamentRunning } from "@/components/uebersicht/running/tournament-running";
-import { getRolesByUserId } from "@/db/repositories/role";
+import { getRolesByUserIdAndTournamentId } from "@/db/repositories/role";
 import { getTournamentBySlug } from "@/db/repositories/tournament";
 import React from "react";
 
@@ -22,7 +22,10 @@ export default async function Page({
   }
 
   if (session) {
-    const rolesData = await getRolesByUserId(session.user.id);
+    const rolesData = await getRolesByUserIdAndTournamentId(
+      session.user.id,
+      tournament.id,
+    );
     if (rolesData.length === 0 && tournament.stage === "registration") {
       redirect("/klubturnier-anmeldung");
     }

@@ -9,7 +9,7 @@ import {
   CardHeader,
   CardTitle,
 } from "@/components/ui/card";
-import { getRolesByUserId } from "@/db/repositories/role";
+import { getRolesByUserIdAndTournamentId } from "@/db/repositories/role";
 import { getLatestTournament } from "@/db/repositories/tournament";
 import { ArrowLeft } from "lucide-react";
 import Link from "next/link";
@@ -20,10 +20,11 @@ export default async function Page() {
     await loginRedirect(session.user.id);
   }
 
-  const [tournament, roles] = await Promise.all([
-    session != null ? getLatestTournament() : undefined,
-    session != null ? getRolesByUserId(session.user.id) : undefined,
-  ]);
+  const tournament = session != null ? await getLatestTournament() : undefined;
+  const roles =
+    session != null && tournament != null
+      ? await getRolesByUserIdAndTournamentId(session.user.id, tournament.id)
+      : undefined;
 
   return (
     <div className="w-full max-w-md md:px-4 md:py-8 mx-auto">

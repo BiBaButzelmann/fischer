@@ -8,7 +8,7 @@ import { GamesList } from "@/components/partien/games-list";
 import { PrintGamesButton } from "@/components/partien/print-games-button";
 import { updateGameResult } from "@/actions/game";
 import { getParticipantsByGroupId } from "@/db/repositories/participant";
-import { getRolesByUserId } from "@/db/repositories/role";
+import { getRolesByUserIdAndTournamentId } from "@/db/repositories/role";
 import { ScrollArea, ScrollBar } from "@/components/ui/scroll-area";
 import { getAllMatchdaysByTournamentId } from "@/db/repositories/match-day";
 import { auth } from "@/auth/utils";
@@ -101,7 +101,9 @@ export default async function Page({
       queryData.round,
       queryData.participantId,
     ),
-    session?.user.id ? getRolesByUserId(session.user.id) : Promise.resolve([]),
+    session?.user.id
+      ? getRolesByUserIdAndTournamentId(session.user.id, tournament.id)
+      : Promise.resolve([]),
   ]);
 
   return (
