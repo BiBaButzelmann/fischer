@@ -108,7 +108,7 @@ export function ActivityFilters({
             >
               {selectedProfile
                 ? `${selectedProfile.lastName}, ${selectedProfile.firstName}`
-                : "Alle Nutzer"}
+                : "Nutzer auswählen"}
               <ChevronsUpDown className="h-4 w-4 opacity-50" />
             </Button>
           </PopoverTrigger>
@@ -118,21 +118,6 @@ export function ActivityFilters({
               <CommandList>
                 <CommandEmpty>Keine Treffer</CommandEmpty>
                 <CommandGroup>
-                  <CommandItem
-                    value="__all__"
-                    onSelect={() => {
-                      setProfilePickerOpen(false);
-                      router.push(buildUrl({ profileId: null }));
-                    }}
-                  >
-                    <Check
-                      className={cn(
-                        "mr-2 h-4 w-4",
-                        profileId == null ? "opacity-100" : "opacity-0",
-                      )}
-                    />
-                    Alle Nutzer
-                  </CommandItem>
                   {profiles.map((p) => (
                     <CommandItem
                       key={p.id}

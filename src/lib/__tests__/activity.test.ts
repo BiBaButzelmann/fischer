@@ -1,49 +1,60 @@
 import { describe, test, expect } from "vitest";
-import { buildActivityTimeline } from "../activity";
+import { buildActivityTimeline, computeParticipantChanges } from "../activity";
 
 describe("buildActivityTimeline", () => {
-  test("merges account, login and participant events sorted by timestamp descending", () => {
+  test("merges all event sources sorted by timestamp descending", () => {
     const timeline = buildActivityTimeline({
       accounts: [{ createdAt: new Date("2026-01-01T10:00:00Z") }],
       sessions: [{ createdAt: new Date("2026-01-05T09:00:00Z") }],
-      participants: [
+      registrations: [{ createdAt: new Date("2026-01-02T10:00:00Z") }],
+      changes: [
         {
-          createdAt: new Date("2026-01-02T10:00:00Z"),
-          updatedAt: new Date("2026-01-02T10:00:00Z"),
+          createdAt: new Date("2026-01-03T10:00:00Z"),
+          changes: { dwzRating: { old: 1850, new: 1870 } },
+        },
+      ],
+      pageViews: [
+        {
+          createdAt: new Date("2026-01-04T10:00:00Z"),
+          path: "/klubturnier-anmeldung",
         },
       ],
     });
 
     expect(timeline.map((e) => e.type)).toEqual([
       "login",
+      "page_view",
+      "updated",
       "registered",
       "account_created",
     ]);
-  });
-
-  test("emits an 'updated' event only when updatedAt meaningfully differs from createdAt", () => {
-    const justRegistered = buildActivityTimeline({
-      participants: [
-        {
-          createdAt: new Date("2026-01-02T10:00:00.000Z"),
-          updatedAt: new Date("2026-01-02T10:00:00.200Z"),
-        },
-      ],
-    });
-    expect(justRegistered.map((e) => e.type)).toEqual(["registered"]);
-
-    const laterEdited = buildActivityTimeline({
-      participants: [
-        {
-          createdAt: new Date("2026-01-02T10:00:00.000Z"),
-          updatedAt: new Date("2026-01-03T08:00:00.000Z"),
-        },
-      ],
-    });
-    expect(laterEdited.map((e) => e.type)).toEqual(["updated", "registered"]);
+    expect(timeline[1].path).toBe("/klubturnier-anmeldung");
+    expect(timeline[2].changes).toEqual({ dwzRating: { old: 1850, new: 1870 } });
   });
 
   test("returns an empty array when there is no activity", () => {
     expect(buildActivityTimeline({})).toEqual([]);
+  });
+});
+
+describe("computeParticipantChanges", () => {
+  test("captures only fields whose values actually differ", () => {
+    const changes = computeParticipantChanges(
+      { dwzRating: 1850, chessClub: "HSK", fideId: null },
+      { dwzRating: 1870, chessClub: "HSK", fideId: undefined },
+      ["dwzRating", "chessClub", "fideId"],
+    );
+
+    expect(changes).toEqual({ dwzRating: { old: 1850, new: 1870 } });
+  });
+
+  test("treats arrays as sets so reordering is not a change", () => {
+    const changes = computeParticipantChanges(
+      { secondaryMatchDays: ["tuesday", "friday"] },
+      { secondaryMatchDays: ["friday", "tuesday"] },
+      ["secondaryMatchDays"],
+    );
+
+    expect(changes).toEqual({});
   });
 });
