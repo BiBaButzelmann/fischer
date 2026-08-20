@@ -6,6 +6,7 @@ import { profile } from "../schema/profile";
 import { participant } from "../schema/participant";
 import { participantChangeLog } from "../schema/participantChangeLog";
 import { pageView } from "../schema/pageView";
+import { tournament } from "../schema/tournament";
 import {
   buildActivityTimeline,
   type ActivityEvent,
@@ -18,7 +19,6 @@ type ActivityFilter = {
   from?: Date;
   to?: Date;
   types?: ActivityEventType[];
-  tournamentId?: number;
   limit?: number;
 };
 
@@ -70,15 +70,16 @@ export async function getActivityTimelineForProfile(
       : Promise.resolve([]),
     wants(filter.types, "registered")
       ? db
-          .select({ createdAt: participant.createdAt })
+          .select({
+            createdAt: participant.createdAt,
+            tournamentName: tournament.name,
+          })
           .from(participant)
+          .innerJoin(tournament, eq(participant.tournamentId, tournament.id))
           .where(
             and(
               eq(participant.profileId, profileId),
               isNull(participant.deletedAt),
-              filter.tournamentId
-                ? eq(participant.tournamentId, filter.tournamentId)
-                : undefined,
               dateBounds(participant.createdAt),
             ),
           )
@@ -88,14 +89,16 @@ export async function getActivityTimelineForProfile(
           .select({
             createdAt: participantChangeLog.createdAt,
             changes: participantChangeLog.changes,
+            tournamentName: tournament.name,
           })
           .from(participantChangeLog)
+          .innerJoin(
+            tournament,
+            eq(participantChangeLog.tournamentId, tournament.id),
+          )
           .where(
             and(
               eq(participantChangeLog.profileId, profileId),
-              filter.tournamentId
-                ? eq(participantChangeLog.tournamentId, filter.tournamentId)
-                : undefined,
               dateBounds(participantChangeLog.createdAt),
             ),
           )

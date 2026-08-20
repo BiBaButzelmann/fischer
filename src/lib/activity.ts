@@ -23,13 +23,18 @@ export type ActivityEvent = {
   timestamp: Date;
   path?: string;
   changes?: ParticipantChanges;
+  tournamentName?: string;
 };
 
 export function buildActivityTimeline(input: {
   accounts?: { createdAt: Date }[];
   sessions?: { createdAt: Date }[];
-  registrations?: { createdAt: Date }[];
-  changes?: { createdAt: Date; changes: ParticipantChanges }[];
+  registrations?: { createdAt: Date; tournamentName?: string }[];
+  changes?: {
+    createdAt: Date;
+    changes: ParticipantChanges;
+    tournamentName?: string;
+  }[];
   pageViews?: { createdAt: Date; path: string }[];
 }): ActivityEvent[] {
   const events: ActivityEvent[] = [];
@@ -43,7 +48,11 @@ export function buildActivityTimeline(input: {
   }
 
   for (const registration of input.registrations ?? []) {
-    events.push({ type: "registered", timestamp: registration.createdAt });
+    events.push({
+      type: "registered",
+      timestamp: registration.createdAt,
+      tournamentName: registration.tournamentName,
+    });
   }
 
   for (const change of input.changes ?? []) {
@@ -51,6 +60,7 @@ export function buildActivityTimeline(input: {
       type: "updated",
       timestamp: change.createdAt,
       changes: change.changes,
+      tournamentName: change.tournamentName,
     });
   }
 

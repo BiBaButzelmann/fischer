@@ -2,7 +2,6 @@ import { authWithRedirect } from "@/auth/utils";
 import { redirect } from "next/navigation";
 import { tournamentPath } from "@/lib/navigation";
 import { getAllProfiles } from "@/db/repositories/admin";
-import { getTournamentBySlug } from "@/db/repositories/tournament";
 import { getActivityTimelineForProfile } from "@/db/repositories/activity";
 import {
   ACTIVITY_EVENT_TYPES,
@@ -36,10 +35,7 @@ export default async function Page({
   const query = await searchParams;
   const profileId = query.profileId ? Number(query.profileId) : undefined;
 
-  const [profiles, tournament] = await Promise.all([
-    getAllProfiles(),
-    getTournamentBySlug(slug),
-  ]);
+  const profiles = await getAllProfiles();
 
   const availableTypes: ActivityEventType[] = [...ACTIVITY_EVENT_TYPES];
   const types = parseTypes(query.types, availableTypes);
@@ -52,7 +48,6 @@ export default async function Page({
           from: from ? startOfDay(from) : undefined,
           to: to ? endOfDay(to) : undefined,
           types,
-          tournamentId: tournament?.id,
         })
       : null;
 
@@ -63,12 +58,8 @@ export default async function Page({
           Anmeldungsverlauf
         </h1>
         <p className="text-gray-600">
-          Konto-, Login- und Anmeldungsaktivität einzelner Nutzer einsehen
-          {tournament ? (
-            <>
-              : <strong>{tournament.name}</strong>
-            </>
-          ) : null}
+          Konto-, Login- und Anmeldungsaktivität einzelner Nutzer über alle
+          Turniere einsehen.
         </p>
       </div>
 

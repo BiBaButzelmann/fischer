@@ -107,12 +107,7 @@ export function ActivityTable({ events }: Props) {
                     </Badge>
                   </TableCell>
                   <TableCell className="text-sm text-muted-foreground">
-                    {event.path ??
-                      (isExpandable
-                        ? `${Object.keys(event.changes!).length} Feld${
-                            Object.keys(event.changes!).length === 1 ? "" : "er"
-                          } geändert`
-                        : "–")}
+                    {eventDetail(event)}
                   </TableCell>
                 </TableRow>
                 {isExpandable && isExpanded ? (
@@ -142,6 +137,22 @@ export function ActivityTable({ events }: Props) {
       </Table>
     </div>
   );
+}
+
+function eventDetail(event: ActivityEvent): string {
+  if (event.path) {
+    return event.path;
+  }
+
+  const parts: string[] = [];
+  if (event.tournamentName) {
+    parts.push(event.tournamentName);
+  }
+  if (event.changes != null) {
+    const count = Object.keys(event.changes).length;
+    parts.push(`${count} Feld${count === 1 ? "" : "er"} geändert`);
+  }
+  return parts.length > 0 ? parts.join(" · ") : "–";
 }
 
 function formatValue(field: string, value: unknown): string {
