@@ -64,6 +64,7 @@ import {
 } from "@/constants/constants";
 import { Switch } from "@/components/ui/switch";
 import type { PromotionEligibility } from "@/services/promotion";
+import { track } from "@vercel/analytics";
 
 type Props = {
   initialValues?: z.infer<typeof participantFormSchema>;
@@ -178,12 +179,14 @@ export function ParticipateForm({
   };
 
   const handleSubmit = (data: z.infer<typeof participantFormSchema>) => {
+    track("participant_form_submit", { tournamentId: tournament.id });
     startTransition(async () => {
       await onSubmit(data);
     });
   };
 
   const handleDelete = () => {
+    track("participant_delete_click", { tournamentId: tournament.id });
     startTransition(async () => {
       await onDelete();
     });

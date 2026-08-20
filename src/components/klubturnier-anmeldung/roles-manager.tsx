@@ -91,7 +91,14 @@ export function RolesManager({
 
   const handleDeleteParticipant = async () => {
     if (rolesData.participant) {
-      await deleteParticipant(tournament.id, rolesData.participant.id);
+      const result = await deleteParticipant(
+        tournament.id,
+        rolesData.participant.id,
+      );
+      if (isError(result)) {
+        toast.error("Deine Anmeldung konnte nicht gelöscht werden.");
+        return;
+      }
       router.refresh();
     }
   };
