@@ -16,8 +16,6 @@ import {
 import {
   formatEventDateTime,
   parseDateOnly,
-  toDateOnly,
-  todayDateOnly,
   toLocalDateTime,
 } from "@/lib/date";
 import {
@@ -32,7 +30,6 @@ import { Badge } from "@/components/ui/badge";
 import { ActivityFilters } from "@/components/admin/activity-filters";
 
 const OVERVIEW_DEFAULT_TYPES: ActivityEventType[] = ["registered", "updated"];
-const OVERVIEW_DEFAULT_WINDOW_DAYS = 30;
 
 type SearchParams = {
   profileId?: string;
@@ -68,10 +65,7 @@ export default async function Page({
     profileId != null ? availableTypes : OVERVIEW_DEFAULT_TYPES;
   const types = parseTypes(query.types, availableTypes, defaultTypes);
 
-  const fromIsDefault = profileId == null && !query.from;
-  const from = fromIsDefault
-    ? toDateOnlyMinusDays(OVERVIEW_DEFAULT_WINDOW_DAYS)
-    : query.from;
+  const from = query.from;
   const to = query.to;
 
   const filter = {
@@ -118,16 +112,9 @@ export default async function Page({
         availableTypes={availableTypes}
         defaultTypes={defaultTypes}
         from={from}
-        fromIsDefault={fromIsDefault}
         to={to}
       />
 
-      {fromIsDefault ? (
-        <p className="text-sm text-muted-foreground">
-          Zeigt die letzten {OVERVIEW_DEFAULT_WINDOW_DAYS} Tage. Über
-          &quot;Von&quot; lässt sich weiter in die Vergangenheit blicken.
-        </p>
-      ) : null}
       {truncated ? (
         <p className="text-sm text-muted-foreground">
           Es werden nur die neuesten Einträge angezeigt — bitte den Zeitraum
@@ -198,10 +185,6 @@ function parseTypes(
   const requested = raw.split(",");
   const valid = available.filter((type) => requested.includes(type));
   return valid.length > 0 ? valid : defaults;
-}
-
-function toDateOnlyMinusDays(days: number): string {
-  return toDateOnly(parseDateOnly(todayDateOnly()).minus({ days }));
 }
 
 function startOfDay(dateOnly: string): Date {

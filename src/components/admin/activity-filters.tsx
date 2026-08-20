@@ -37,7 +37,6 @@ type Props = {
   availableTypes: ActivityEventType[];
   defaultTypes: ActivityEventType[];
   from?: string;
-  fromIsDefault: boolean;
   to?: string;
 };
 
@@ -48,7 +47,6 @@ export function ActivityFilters({
   availableTypes,
   defaultTypes,
   from,
-  fromIsDefault,
   to,
 }: Props) {
   const router = useRouter();
@@ -68,8 +66,7 @@ export function ActivityFilters({
     const nextProfileId =
       overrides.profileId !== undefined ? overrides.profileId : profileId;
     const nextTypes = overrides.types ?? types;
-    const nextFrom =
-      overrides.from !== undefined ? overrides.from : fromIsDefault ? null : from;
+    const nextFrom = overrides.from !== undefined ? overrides.from : from;
     const nextTo = overrides.to !== undefined ? overrides.to : to;
 
     if (nextProfileId) {
@@ -173,7 +170,11 @@ export function ActivityFilters({
           }
         >
           {availableTypes.map((type) => (
-            <ToggleGroupItem key={type} value={type} className="px-3 text-xs">
+            <ToggleGroupItem
+              key={type}
+              value={type}
+              className="px-3 text-xs data-[state=on]:bg-secondary data-[state=on]:text-secondary-foreground"
+            >
               {ACTIVITY_EVENT_LABELS[type]}
             </ToggleGroupItem>
           ))}
