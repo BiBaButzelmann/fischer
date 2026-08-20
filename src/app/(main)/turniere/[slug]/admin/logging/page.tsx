@@ -2,13 +2,10 @@ import { authWithRedirect } from "@/auth/utils";
 import { redirect } from "next/navigation";
 import { tournamentPath } from "@/lib/navigation";
 import { getAllProfiles } from "@/db/repositories/admin";
-import {
-  getAllTournaments,
-  getTournamentBySlug,
-} from "@/db/repositories/tournament";
+import { getTournamentBySlug } from "@/db/repositories/tournament";
 import {
   getActivityTimelineForProfile,
-  getRecentParticipantActivity,
+  getRecentActivity,
 } from "@/db/repositories/activity";
 import {
   ACTIVITY_EVENT_LABELS,
@@ -34,12 +31,11 @@ import {
 import { Badge } from "@/components/ui/badge";
 import { ActivityFilters } from "@/components/admin/activity-filters";
 
-const OVERVIEW_TYPES: ActivityEventType[] = ["registered", "updated"];
+const OVERVIEW_DEFAULT_TYPES: ActivityEventType[] = ["registered", "updated"];
 const OVERVIEW_DEFAULT_WINDOW_DAYS = 30;
 
 type SearchParams = {
   profileId?: string;
-  tournamentId?: string;
   types?: string;
   from?: string;
   to?: string;
@@ -62,22 +58,15 @@ export default async function Page({
   const query = await searchParams;
   const profileId = query.profileId ? Number(query.profileId) : undefined;
 
-  const [profiles, tournaments, slugTournament] = await Promise.all([
+  const [profiles, tournament] = await Promise.all([
     getAllProfiles(),
-    getAllTournaments(),
     getTournamentBySlug(slug),
   ]);
 
-  const tournamentId =
-    query.tournamentId === "all"
-      ? undefined
-      : query.tournamentId
-        ? Number(query.tournamentId)
-        : slugTournament?.id;
-
-  const availableTypes: ActivityEventType[] =
-    profileId != null ? [...ACTIVITY_EVENT_TYPES] : OVERVIEW_TYPES;
-  const types = parseTypes(query.types, availableTypes);
+  const availableTypes: ActivityEventType[] = [...ACTIVITY_EVENT_TYPES];
+  const defaultTypes =
+    profileId != null ? availableTypes : OVERVIEW_DEFAULT_TYPES;
+  const types = parseTypes(query.types, availableTypes, defaultTypes);
 
   const fromIsDefault = profileId == null && !query.from;
   const from = fromIsDefault
@@ -85,21 +74,19 @@ export default async function Page({
     : query.from;
   const to = query.to;
 
-  const dateFilter = {
+  const filter = {
     from: from ? startOfDay(from) : undefined,
     to: to ? endOfDay(to) : undefined,
     types,
+    tournamentId: tournament?.id,
   };
 
   let events: ActivityEvent[];
   let truncated = false;
   if (profileId != null) {
-    events = await getActivityTimelineForProfile(profileId, dateFilter);
+    events = await getActivityTimelineForProfile(profileId, filter);
   } else {
-    const result = await getRecentParticipantActivity({
-      ...dateFilter,
-      tournamentId,
-    });
+    const result = await getRecentActivity(filter);
     events = result.events;
     truncated = result.truncated;
   }
@@ -111,7 +98,12 @@ export default async function Page({
           Anmeldungsverlauf
         </h1>
         <p className="text-gray-600">
-          Konto-, Login- und Klubturnier-Anmeldungsaktivität einsehen.
+          Konto-, Login- und Anmeldungsaktivität für das aktuelle Turnier
+          einsehen{tournament ? (
+            <>
+              : <strong>{tournament.name}</strong>
+            </>
+          ) : null}
         </p>
       </div>
 
@@ -121,11 +113,10 @@ export default async function Page({
           firstName: p.firstName,
           lastName: p.lastName,
         }))}
-        tournaments={tournaments.map((t) => ({ id: t.id, name: t.name }))}
         profileId={profileId}
-        tournamentId={tournamentId}
         types={types}
         availableTypes={availableTypes}
+        defaultTypes={defaultTypes}
         from={from}
         fromIsDefault={fromIsDefault}
         to={to}
@@ -139,8 +130,8 @@ export default async function Page({
       ) : null}
       {truncated ? (
         <p className="text-sm text-muted-foreground">
-          Es werden nur die zuletzt geänderten Anmeldungen angezeigt — bitte
-          den Zeitraum oder das Turnier weiter eingrenzen.
+          Es werden nur die neuesten Einträge angezeigt — bitte den Zeitraum
+          weiter eingrenzen.
         </p>
       ) : null}
 
@@ -172,7 +163,6 @@ function ActivityTable({
             <TableHead className="whitespace-nowrap">Zeitstempel</TableHead>
             <TableHead>Aktion</TableHead>
             {showProfileColumn ? <TableHead>Nutzer</TableHead> : null}
-            <TableHead>Turnier</TableHead>
           </TableRow>
         </TableHeader>
         <TableBody>
@@ -189,7 +179,6 @@ function ActivityTable({
               {showProfileColumn ? (
                 <TableCell>{event.profileName ?? "–"}</TableCell>
               ) : null}
-              <TableCell>{event.tournamentName ?? "–"}</TableCell>
             </TableRow>
           ))}
         </TableBody>
@@ -200,14 +189,15 @@ function ActivityTable({
 
 function parseTypes(
   raw: string | undefined,
-  fallback: ActivityEventType[],
+  available: ActivityEventType[],
+  defaults: ActivityEventType[],
 ): ActivityEventType[] {
   if (!raw) {
-    return fallback;
+    return defaults;
   }
   const requested = raw.split(",");
-  const valid = fallback.filter((type) => requested.includes(type));
-  return valid.length > 0 ? valid : fallback;
+  const valid = available.filter((type) => requested.includes(type));
+  return valid.length > 0 ? valid : defaults;
 }
 
 function toDateOnlyMinusDays(days: number): string {

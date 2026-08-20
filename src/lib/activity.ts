@@ -17,7 +17,6 @@ export const ACTIVITY_EVENT_LABELS: Record<ActivityEventType, string> = {
 export type ActivityEvent = {
   type: ActivityEventType;
   timestamp: Date;
-  tournamentName?: string;
   profileName?: string;
 };
 
@@ -27,30 +26,36 @@ export type ActivityEvent = {
 const MIN_EDIT_GAP_MS = 1000;
 
 export function buildActivityTimeline(input: {
-  accountCreatedAt?: Date | null;
-  sessions: { createdAt: Date }[];
-  participants: {
+  accounts?: { createdAt: Date; profileName?: string }[];
+  sessions?: { createdAt: Date; profileName?: string }[];
+  participants?: {
     createdAt: Date;
     updatedAt: Date;
-    tournamentName: string;
     profileName?: string;
   }[];
 }): ActivityEvent[] {
   const events: ActivityEvent[] = [];
 
-  if (input.accountCreatedAt) {
-    events.push({ type: "account_created", timestamp: input.accountCreatedAt });
+  for (const account of input.accounts ?? []) {
+    events.push({
+      type: "account_created",
+      timestamp: account.createdAt,
+      profileName: account.profileName,
+    });
   }
 
-  for (const session of input.sessions) {
-    events.push({ type: "login", timestamp: session.createdAt });
+  for (const session of input.sessions ?? []) {
+    events.push({
+      type: "login",
+      timestamp: session.createdAt,
+      profileName: session.profileName,
+    });
   }
 
-  for (const p of input.participants) {
+  for (const p of input.participants ?? []) {
     events.push({
       type: "registered",
       timestamp: p.createdAt,
-      tournamentName: p.tournamentName,
       profileName: p.profileName,
     });
 
@@ -58,7 +63,6 @@ export function buildActivityTimeline(input: {
       events.push({
         type: "updated",
         timestamp: p.updatedAt,
-        tournamentName: p.tournamentName,
         profileName: p.profileName,
       });
     }

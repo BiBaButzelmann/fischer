@@ -19,13 +19,6 @@ import {
   CommandItem,
   CommandList,
 } from "@/components/ui/command";
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select";
 import { ToggleGroup, ToggleGroupItem } from "@/components/ui/toggle-group";
 import {
   ACTIVITY_EVENT_LABELS,
@@ -36,15 +29,13 @@ import { tournamentPath } from "@/lib/navigation";
 import { useTournamentSlug } from "@/hooks/use-tournament-slug";
 
 type ProfileOption = { id: number; firstName: string; lastName: string };
-type TournamentOption = { id: number; name: string };
 
 type Props = {
   profiles: ProfileOption[];
-  tournaments: TournamentOption[];
   profileId?: number;
-  tournamentId?: number;
   types: ActivityEventType[];
   availableTypes: ActivityEventType[];
+  defaultTypes: ActivityEventType[];
   from?: string;
   fromIsDefault: boolean;
   to?: string;
@@ -52,11 +43,10 @@ type Props = {
 
 export function ActivityFilters({
   profiles,
-  tournaments,
   profileId,
-  tournamentId,
   types,
   availableTypes,
+  defaultTypes,
   from,
   fromIsDefault,
   to,
@@ -69,7 +59,6 @@ export function ActivityFilters({
 
   const buildUrl = (overrides: {
     profileId?: number | null;
-    tournamentId?: number | "all";
     types?: ActivityEventType[];
     from?: string | null;
     to?: string | null;
@@ -78,10 +67,6 @@ export function ActivityFilters({
 
     const nextProfileId =
       overrides.profileId !== undefined ? overrides.profileId : profileId;
-    const nextTournament =
-      overrides.tournamentId !== undefined
-        ? overrides.tournamentId
-        : (tournamentId ?? "all");
     const nextTypes = overrides.types ?? types;
     const nextFrom =
       overrides.from !== undefined ? overrides.from : fromIsDefault ? null : from;
@@ -89,12 +74,8 @@ export function ActivityFilters({
 
     if (nextProfileId) {
       params.set("profileId", String(nextProfileId));
-    } else if (nextTournament === "all") {
-      params.set("tournamentId", "all");
-    } else if (nextTournament != null) {
-      params.set("tournamentId", String(nextTournament));
     }
-    if (nextTypes.length > 0 && nextTypes.length < availableTypes.length) {
+    if (nextTypes.length > 0 && !sameSet(nextTypes, defaultTypes)) {
       params.set("types", nextTypes.join(","));
     }
     if (nextFrom) {
@@ -180,34 +161,6 @@ export function ActivityFilters({
         </Popover>
       </div>
 
-      {profileId == null && tournaments.length > 0 ? (
-        <div className="flex flex-col gap-2">
-          <Label htmlFor="activity-tournament">Turnier</Label>
-          <Select
-            value={tournamentId != null ? String(tournamentId) : "__all__"}
-            onValueChange={(value) =>
-              router.push(
-                buildUrl({
-                  tournamentId: value === "__all__" ? "all" : Number(value),
-                }),
-              )
-            }
-          >
-            <SelectTrigger id="activity-tournament" className="w-56">
-              <SelectValue />
-            </SelectTrigger>
-            <SelectContent>
-              <SelectItem value="__all__">Alle Turniere</SelectItem>
-              {tournaments.map((t) => (
-                <SelectItem key={t.id} value={String(t.id)}>
-                  {t.name}
-                </SelectItem>
-              ))}
-            </SelectContent>
-          </Select>
-        </div>
-      ) : null}
-
       <div className="flex flex-col gap-2">
         <Label id="activity-types-label">Aktionstyp</Label>
         <ToggleGroup
@@ -253,4 +206,8 @@ export function ActivityFilters({
       </div>
     </div>
   );
+}
+
+function sameSet(a: ActivityEventType[], b: ActivityEventType[]) {
+  return a.length === b.length && a.every((item) => b.includes(item));
 }
