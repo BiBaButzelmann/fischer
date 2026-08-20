@@ -27,6 +27,16 @@ import invariant from "tiny-invariant";
 import { alias } from "drizzle-orm/pg-core";
 import { PLAYED_GAME_RESULTS } from "../types/game";
 
+export async function getGameTournamentId(
+  gameId: number,
+): Promise<number | null> {
+  const result = await db.query.game.findFirst({
+    where: (game, { eq }) => eq(game.id, gameId),
+    columns: { tournamentId: true },
+  });
+  return result?.tournamentId ?? null;
+}
+
 export async function getGameById(gameId: number) {
   return await db.query.game.findFirst({
     where: (game, { eq }) => eq(game.id, gameId),

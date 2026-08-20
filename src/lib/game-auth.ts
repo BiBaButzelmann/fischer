@@ -1,6 +1,7 @@
 import {
   isUserParticipantInGame,
   isUserMatchEnteringHelperInGame,
+  getGameTournamentId,
 } from "@/db/repositories/game";
 import {
   GameResult,
@@ -8,7 +9,7 @@ import {
   PlayedGameResult,
   PLAYED_GAME_RESULTS,
 } from "@/db/types/game";
-import { getRolesByUserId } from "@/db/repositories/role";
+import { getRolesByUserIdAndTournamentId } from "@/db/repositories/role";
 import { Role } from "@/db/types/role";
 
 export const isGameActuallyPlayed = (
@@ -48,9 +49,14 @@ export const isWhite = (
 };
 
 export const getUserGameRights = async (gameId: number, userId: string) => {
+  const tournamentId = await getGameTournamentId(gameId);
+  if (tournamentId == null) {
+    return null;
+  }
+
   const [userRoles, isGameParticipant, isMatchEnteringHelper] =
     await Promise.all([
-      getRolesByUserId(userId),
+      getRolesByUserIdAndTournamentId(userId, tournamentId),
       isUserParticipantInGame(gameId, userId),
       isUserMatchEnteringHelperInGame(gameId, userId),
     ]);
