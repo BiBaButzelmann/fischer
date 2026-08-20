@@ -20,7 +20,14 @@ import {
 import { getParticipantByProfileIdAndTournamentId } from "@/db/repositories/participant";
 import { getPromotionEligibility } from "@/services/promotion";
 import { redirect } from "next/navigation";
-import { TournamentSwitcher } from "@/components/sidebar/tournament-switcher";
+import Link from "next/link";
+import { tournamentPath } from "@/lib/navigation";
+import {
+  Collapsible,
+  CollapsibleContent,
+  CollapsibleTrigger,
+} from "@/components/ui/collapsible";
+import { ChevronDownIcon } from "lucide-react";
 
 async function getPrefillEloData(
   profile: Profile,
@@ -81,6 +88,10 @@ export default async function RolesPage() {
     redirect("/willkommen");
   }
 
+  const viewableTournaments = tournaments.filter(
+    (t) => t.stage !== "registration",
+  );
+
   if (!tournament) {
     return (
       <div className="text-center space-y-2">
@@ -91,7 +102,7 @@ export default async function RolesPage() {
           Aktuell ist keine Anmeldung möglich – es befindet sich kein Turnier in
           der Anmeldephase.
         </p>
-        <PastTournamentsSwitcher tournaments={tournaments} />
+        <PastTournaments tournaments={viewableTournaments} />
       </div>
     );
   }
@@ -135,14 +146,12 @@ export default async function RolesPage() {
         previousParticipant={previousParticipant ?? null}
         prefillEloData={prefillEloData}
       />
-      <PastTournamentsSwitcher
-        tournaments={tournaments.filter((t) => t.id !== tournament.id)}
-      />
+      <PastTournaments tournaments={viewableTournaments} />
     </div>
   );
 }
 
-function PastTournamentsSwitcher({
+function PastTournaments({
   tournaments,
 }: {
   tournaments: { id: number; name: string; slug: string }[];
@@ -152,11 +161,22 @@ function PastTournamentsSwitcher({
   }
 
   return (
-    <div className="mx-auto max-w-xs space-y-2 text-center">
-      <p className="text-sm text-muted-foreground">
-        Ein vergangenes Turnier ansehen, ohne dich anzumelden:
-      </p>
-      <TournamentSwitcher tournaments={tournaments} />
-    </div>
+    <Collapsible className="mx-auto max-w-xs text-center">
+      <CollapsibleTrigger className="group inline-flex items-center gap-1.5 text-sm text-muted-foreground hover:text-foreground">
+        Frühere Turniere ansehen
+        <ChevronDownIcon className="h-4 w-4 transition-transform group-data-[state=open]:rotate-180" />
+      </CollapsibleTrigger>
+      <CollapsibleContent className="mt-2 flex flex-col items-center gap-1">
+        {tournaments.map((t) => (
+          <Link
+            key={t.id}
+            href={tournamentPath(t.slug, "/uebersicht")}
+            className="text-sm text-primary underline underline-offset-2 hover:text-primary/80"
+          >
+            {t.name}
+          </Link>
+        ))}
+      </CollapsibleContent>
+    </Collapsible>
   );
 }
