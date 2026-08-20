@@ -1,4 +1,4 @@
-import { and, desc, eq, gte, lte } from "drizzle-orm";
+import { and, desc, eq, gte, isNull, lte } from "drizzle-orm";
 import { db } from "../client";
 import { session } from "../schema/auth";
 import { profile } from "../schema/profile";
@@ -37,7 +37,7 @@ export async function getActivityTimelineForProfile(
   filter: ActivityFilter = {},
 ): Promise<ActivityEvent[]> {
   const profileRow = await db.query.profile.findFirst({
-    where: eq(profile.id, profileId),
+    where: and(eq(profile.id, profileId), isNull(profile.deletedAt)),
     columns: { userId: true, createdAt: true },
   });
 
@@ -56,7 +56,7 @@ export async function getActivityTimelineForProfile(
             filter.from ? gte(session.createdAt, filter.from) : undefined,
             filter.to ? lte(session.createdAt, filter.to) : undefined,
           ),
-          columns: { createdAt: true, ipAddress: true, userAgent: true },
+          columns: { createdAt: true },
         })
       : Promise.resolve([]),
     wantsParticipants
@@ -71,7 +71,12 @@ export async function getActivityTimelineForProfile(
           // a row can be relevant via either its create or its update
           // timestamp, so the date filter is applied per-event below
           // instead of narrowing this query
-          .where(eq(participant.profileId, profileId))
+          .where(
+            and(
+              eq(participant.profileId, profileId),
+              isNull(participant.deletedAt),
+            ),
+          )
       : Promise.resolve([]),
   ]);
 
@@ -88,7 +93,9 @@ export async function getActivityTimelineForProfile(
 
 export async function getRecentParticipantActivity(
   filter: ActivityFilter & { tournamentId?: number; limit?: number } = {},
-): Promise<ActivityEvent[]> {
+): Promise<{ events: ActivityEvent[]; truncated: boolean }> {
+  const limit = filter.limit ?? DEFAULT_RECENT_LIMIT;
+
   const rows = await db
     .select({
       createdAt: participant.createdAt,
@@ -102,19 +109,25 @@ export async function getRecentParticipantActivity(
     .innerJoin(profile, eq(participant.profileId, profile.id))
     .where(
       and(
+        isNull(participant.deletedAt),
+        isNull(profile.deletedAt),
         filter.tournamentId
           ? eq(participant.tournamentId, filter.tournamentId)
           : undefined,
         filter.from ? gte(participant.updatedAt, filter.from) : undefined,
-        filter.to ? lte(participant.updatedAt, filter.to) : undefined,
+        // bound by createdAt, not updatedAt: a row edited after "to" must
+        // still contribute its in-range "registered" event
+        filter.to ? lte(participant.createdAt, filter.to) : undefined,
       ),
     )
     .orderBy(desc(participant.updatedAt))
-    .limit(filter.limit ?? DEFAULT_RECENT_LIMIT);
+    .limit(limit + 1);
 
-  return buildActivityTimeline({
+  const truncated = rows.length > limit;
+
+  const events = buildActivityTimeline({
     sessions: [],
-    participants: rows.map((r) => ({
+    participants: rows.slice(0, limit).map((r) => ({
       createdAt: r.createdAt,
       updatedAt: r.updatedAt,
       tournamentName: r.tournamentName,
@@ -123,4 +136,6 @@ export async function getRecentParticipantActivity(
   }).filter(
     (event) => wants(filter.types, event.type) && inRange(event.timestamp, filter),
   );
+
+  return { events, truncated };
 }

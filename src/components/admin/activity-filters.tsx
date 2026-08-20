@@ -46,6 +46,7 @@ type Props = {
   types: ActivityEventType[];
   availableTypes: ActivityEventType[];
   from?: string;
+  fromIsDefault: boolean;
   to?: string;
 };
 
@@ -57,6 +58,7 @@ export function ActivityFilters({
   types,
   availableTypes,
   from,
+  fromIsDefault,
   to,
 }: Props) {
   const router = useRouter();
@@ -67,7 +69,7 @@ export function ActivityFilters({
 
   const buildUrl = (overrides: {
     profileId?: number | null;
-    tournamentId?: number | null;
+    tournamentId?: number | "all";
     types?: ActivityEventType[];
     from?: string | null;
     to?: string | null;
@@ -76,19 +78,21 @@ export function ActivityFilters({
 
     const nextProfileId =
       overrides.profileId !== undefined ? overrides.profileId : profileId;
-    const nextTournamentId =
+    const nextTournament =
       overrides.tournamentId !== undefined
         ? overrides.tournamentId
-        : tournamentId;
+        : (tournamentId ?? "all");
     const nextTypes = overrides.types ?? types;
-    const nextFrom = overrides.from !== undefined ? overrides.from : from;
+    const nextFrom =
+      overrides.from !== undefined ? overrides.from : fromIsDefault ? null : from;
     const nextTo = overrides.to !== undefined ? overrides.to : to;
 
     if (nextProfileId) {
       params.set("profileId", String(nextProfileId));
-    }
-    if (nextTournamentId) {
-      params.set("tournamentId", String(nextTournamentId));
+    } else if (nextTournament === "all") {
+      params.set("tournamentId", "all");
+    } else if (nextTournament != null) {
+      params.set("tournamentId", String(nextTournament));
     }
     if (nextTypes.length > 0 && nextTypes.length < availableTypes.length) {
       params.set("types", nextTypes.join(","));
@@ -104,13 +108,22 @@ export function ActivityFilters({
     return tournamentPath(slug, `/admin/logging${query ? `?${query}` : ""}`);
   };
 
+  const handleDateBlur = (field: "from" | "to", value: string) => {
+    const current = field === "from" ? from : to;
+    const next = value || null;
+    if ((next ?? "") !== (current ?? "")) {
+      router.push(buildUrl({ [field]: next }));
+    }
+  };
+
   return (
     <div className="flex flex-wrap items-end gap-4">
       <div className="flex flex-col gap-2">
-        <Label>Nutzer</Label>
+        <Label htmlFor="activity-profile">Nutzer</Label>
         <Popover open={profilePickerOpen} onOpenChange={setProfilePickerOpen}>
           <PopoverTrigger asChild>
             <Button
+              id="activity-profile"
               variant="outline"
               role="combobox"
               className="w-64 justify-between"
@@ -169,18 +182,18 @@ export function ActivityFilters({
 
       {profileId == null && tournaments.length > 0 ? (
         <div className="flex flex-col gap-2">
-          <Label>Turnier</Label>
+          <Label htmlFor="activity-tournament">Turnier</Label>
           <Select
-            value={tournamentId ? String(tournamentId) : "__all__"}
+            value={tournamentId != null ? String(tournamentId) : "__all__"}
             onValueChange={(value) =>
               router.push(
                 buildUrl({
-                  tournamentId: value === "__all__" ? null : Number(value),
+                  tournamentId: value === "__all__" ? "all" : Number(value),
                 }),
               )
             }
           >
-            <SelectTrigger className="w-56">
+            <SelectTrigger id="activity-tournament" className="w-56">
               <SelectValue />
             </SelectTrigger>
             <SelectContent>
@@ -196,10 +209,11 @@ export function ActivityFilters({
       ) : null}
 
       <div className="flex flex-col gap-2">
-        <Label>Aktionstyp</Label>
+        <Label id="activity-types-label">Aktionstyp</Label>
         <ToggleGroup
           type="multiple"
           variant="outline"
+          aria-labelledby="activity-types-label"
           value={types}
           onValueChange={(value) =>
             router.push(buildUrl({ types: value as ActivityEventType[] }))
@@ -220,10 +234,9 @@ export function ActivityFilters({
             id="activity-from"
             type="date"
             className="w-40"
-            value={from ?? ""}
-            onChange={(e) =>
-              router.push(buildUrl({ from: e.target.value || null }))
-            }
+            key={`from-${from ?? ""}`}
+            defaultValue={from ?? ""}
+            onBlur={(e) => handleDateBlur("from", e.target.value)}
           />
         </div>
         <div className="flex flex-col gap-2">
@@ -232,10 +245,9 @@ export function ActivityFilters({
             id="activity-to"
             type="date"
             className="w-40"
-            value={to ?? ""}
-            onChange={(e) =>
-              router.push(buildUrl({ to: e.target.value || null }))
-            }
+            key={`to-${to ?? ""}`}
+            defaultValue={to ?? ""}
+            onBlur={(e) => handleDateBlur("to", e.target.value)}
           />
         </div>
       </div>

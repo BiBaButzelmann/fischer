@@ -5,9 +5,7 @@ describe("buildActivityTimeline", () => {
   test("merges account, login and participant events sorted by timestamp descending", () => {
     const timeline = buildActivityTimeline({
       accountCreatedAt: new Date("2026-01-01T10:00:00Z"),
-      sessions: [
-        { createdAt: new Date("2026-01-05T09:00:00Z"), ipAddress: "1.2.3.4", userAgent: "Chrome" },
-      ],
+      sessions: [{ createdAt: new Date("2026-01-05T09:00:00Z") }],
       participants: [
         {
           createdAt: new Date("2026-01-02T10:00:00Z"),
@@ -22,7 +20,6 @@ describe("buildActivityTimeline", () => {
       "registered",
       "account_created",
     ]);
-    expect(timeline[0].detail).toBe("1.2.3.4 · Chrome");
   });
 
   test("emits an 'updated' event only when updatedAt meaningfully differs from createdAt", () => {

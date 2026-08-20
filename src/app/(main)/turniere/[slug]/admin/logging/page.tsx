@@ -2,7 +2,10 @@ import { authWithRedirect } from "@/auth/utils";
 import { redirect } from "next/navigation";
 import { tournamentPath } from "@/lib/navigation";
 import { getAllProfiles } from "@/db/repositories/admin";
-import { getAllTournaments } from "@/db/repositories/tournament";
+import {
+  getAllTournaments,
+  getTournamentBySlug,
+} from "@/db/repositories/tournament";
 import {
   getActivityTimelineForProfile,
   getRecentParticipantActivity,
@@ -13,7 +16,13 @@ import {
   type ActivityEvent,
   type ActivityEventType,
 } from "@/lib/activity";
-import { parseDateOnly, todayDateOnly, toLocalDateTime, formatEventDateTime } from "@/lib/date";
+import {
+  formatEventDateTime,
+  parseDateOnly,
+  toDateOnly,
+  todayDateOnly,
+  toLocalDateTime,
+} from "@/lib/date";
 import {
   Table,
   TableBody,
@@ -52,36 +61,48 @@ export default async function Page({
 
   const query = await searchParams;
   const profileId = query.profileId ? Number(query.profileId) : undefined;
-  const tournamentId = query.tournamentId
-    ? Number(query.tournamentId)
-    : undefined;
+
+  const [profiles, tournaments, slugTournament] = await Promise.all([
+    getAllProfiles(),
+    getAllTournaments(),
+    getTournamentBySlug(slug),
+  ]);
+
+  const tournamentId =
+    query.tournamentId === "all"
+      ? undefined
+      : query.tournamentId
+        ? Number(query.tournamentId)
+        : slugTournament?.id;
 
   const availableTypes: ActivityEventType[] =
     profileId != null ? [...ACTIVITY_EVENT_TYPES] : OVERVIEW_TYPES;
   const types = parseTypes(query.types, availableTypes);
 
-  const [profiles, tournaments] = await Promise.all([
-    getAllProfiles(),
-    getAllTournaments(),
-  ]);
-
-  const defaultFrom = toDateOnlyMinusDays(OVERVIEW_DEFAULT_WINDOW_DAYS);
-  const from = query.from ?? (profileId == null ? defaultFrom : undefined);
+  const fromIsDefault = profileId == null && !query.from;
+  const from = fromIsDefault
+    ? toDateOnlyMinusDays(OVERVIEW_DEFAULT_WINDOW_DAYS)
+    : query.from;
   const to = query.to;
 
-  const events =
-    profileId != null
-      ? await getActivityTimelineForProfile(profileId, {
-          from: from ? startOfDay(from) : undefined,
-          to: to ? endOfDay(to) : undefined,
-          types,
-        })
-      : await getRecentParticipantActivity({
-          from: from ? startOfDay(from) : undefined,
-          to: to ? endOfDay(to) : undefined,
-          types,
-          tournamentId,
-        });
+  const dateFilter = {
+    from: from ? startOfDay(from) : undefined,
+    to: to ? endOfDay(to) : undefined,
+    types,
+  };
+
+  let events: ActivityEvent[];
+  let truncated = false;
+  if (profileId != null) {
+    events = await getActivityTimelineForProfile(profileId, dateFilter);
+  } else {
+    const result = await getRecentParticipantActivity({
+      ...dateFilter,
+      tournamentId,
+    });
+    events = result.events;
+    truncated = result.truncated;
+  }
 
   return (
     <div className="space-y-6">
@@ -106,13 +127,20 @@ export default async function Page({
         types={types}
         availableTypes={availableTypes}
         from={from}
+        fromIsDefault={fromIsDefault}
         to={to}
       />
 
-      {profileId == null && !query.from ? (
+      {fromIsDefault ? (
         <p className="text-sm text-muted-foreground">
           Zeigt die letzten {OVERVIEW_DEFAULT_WINDOW_DAYS} Tage. Über
           &quot;Von&quot; lässt sich weiter in die Vergangenheit blicken.
+        </p>
+      ) : null}
+      {truncated ? (
+        <p className="text-sm text-muted-foreground">
+          Es werden nur die zuletzt geänderten Anmeldungen angezeigt — bitte
+          den Zeitraum oder das Turnier weiter eingrenzen.
         </p>
       ) : null}
 
@@ -137,7 +165,7 @@ function ActivityTable({
   }
 
   return (
-    <div className="border rounded-lg overflow-hidden overflow-x-auto">
+    <div className="border rounded-lg overflow-x-auto">
       <Table>
         <TableHeader>
           <TableRow>
@@ -145,7 +173,6 @@ function ActivityTable({
             <TableHead>Aktion</TableHead>
             {showProfileColumn ? <TableHead>Nutzer</TableHead> : null}
             <TableHead>Turnier</TableHead>
-            <TableHead>Details</TableHead>
           </TableRow>
         </TableHeader>
         <TableBody>
@@ -163,9 +190,6 @@ function ActivityTable({
                 <TableCell>{event.profileName ?? "–"}</TableCell>
               ) : null}
               <TableCell>{event.tournamentName ?? "–"}</TableCell>
-              <TableCell className="text-muted-foreground text-sm">
-                {event.detail ?? "–"}
-              </TableCell>
             </TableRow>
           ))}
         </TableBody>
@@ -187,7 +211,7 @@ function parseTypes(
 }
 
 function toDateOnlyMinusDays(days: number): string {
-  return parseDateOnly(todayDateOnly()).minus({ days }).toISODate()!;
+  return toDateOnly(parseDateOnly(todayDateOnly()).minus({ days }));
 }
 
 function startOfDay(dateOnly: string): Date {

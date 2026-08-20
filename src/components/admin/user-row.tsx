@@ -195,22 +195,24 @@ export function UserRow({
       </div>
       <div className="flex items-center gap-2">
         <div className="text-xs text-gray-500">ID: {user.id}</div>
-        <Button
-          asChild
-          variant="outline"
-          size="sm"
-          className="h-7 w-7 p-0"
-          title="Verlauf ansehen"
-        >
-          <Link
-            href={tournamentPath(
-              slug,
-              `/admin/logging?profileId=${user.id}`,
-            )}
+        {user.deletedAt == null ? (
+          <Button
+            asChild
+            variant="outline"
+            size="sm"
+            className="h-7 w-7 p-0"
+            title="Verlauf ansehen"
           >
-            <History className="h-4 w-4" />
-          </Link>
-        </Button>
+            <Link
+              href={tournamentPath(
+                slug,
+                `/admin/logging?profileId=${user.id}`,
+              )}
+            >
+              <History className="h-4 w-4" />
+            </Link>
+          </Button>
+        ) : null}
         {user.deletedAt != null ? (
           <Button
             variant="outline"

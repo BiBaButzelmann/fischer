@@ -17,7 +17,6 @@ export const ACTIVITY_EVENT_LABELS: Record<ActivityEventType, string> = {
 export type ActivityEvent = {
   type: ActivityEventType;
   timestamp: Date;
-  detail?: string;
   tournamentName?: string;
   profileName?: string;
 };
@@ -29,7 +28,7 @@ const MIN_EDIT_GAP_MS = 1000;
 
 export function buildActivityTimeline(input: {
   accountCreatedAt?: Date | null;
-  sessions: { createdAt: Date; ipAddress: string | null; userAgent: string | null }[];
+  sessions: { createdAt: Date }[];
   participants: {
     createdAt: Date;
     updatedAt: Date;
@@ -44,14 +43,7 @@ export function buildActivityTimeline(input: {
   }
 
   for (const session of input.sessions) {
-    const detailParts = [session.ipAddress, session.userAgent].filter(
-      (part): part is string => Boolean(part),
-    );
-    events.push({
-      type: "login",
-      timestamp: session.createdAt,
-      detail: detailParts.length > 0 ? detailParts.join(" · ") : undefined,
-    });
+    events.push({ type: "login", timestamp: session.createdAt });
   }
 
   for (const p of input.participants) {
