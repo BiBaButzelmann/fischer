@@ -18,7 +18,7 @@ import {
   DialogTrigger,
 } from "@/components/ui/dialog";
 import { ScrollArea, ScrollBar } from "@/components/ui/scroll-area";
-import { getRolesByUserId } from "@/db/repositories/role";
+import { getRolesByUserIdAndTournamentId } from "@/db/repositories/role";
 import { getLatestTournament } from "@/db/repositories/tournament";
 import { getTournamentWeeksByTournamentId } from "@/db/repositories/tournamentWeek";
 import {
@@ -46,10 +46,13 @@ export default async function Page() {
     ? tournamentPath(tournament.slug, "/uebersicht")
     : "/";
   if (session != null) {
-    if (tournament?.stage !== "registration") {
+    if (!tournament || tournament.stage !== "registration") {
       redirect(uebersichtHref);
     }
-    const userRoles = await getRolesByUserId(session.user.id);
+    const userRoles = await getRolesByUserIdAndTournamentId(
+      session.user.id,
+      tournament.id,
+    );
     if (userRoles.length > 0) {
       redirect(uebersichtHref);
     }
