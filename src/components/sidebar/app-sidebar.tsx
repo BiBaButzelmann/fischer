@@ -71,7 +71,7 @@ export function AppSidebar({ session, tournaments, userRoles, documentAvailabili
   const isActive = stage === "registration" || stage === "running";
   const isDone = stage === "done";
 
-  const isAdmin = userRoles.includes("admin");
+  const isAdmin = session?.user.role === "admin";
   const isParticipant = userRoles.includes("participant");
   const isMatchEnteringHelper = userRoles.includes("matchEnteringHelper");
   const isSetupHelper = userRoles.includes("setupHelper");
