@@ -26,6 +26,14 @@ function wants(types: ActivityEventType[] | undefined, type: ActivityEventType) 
   return types == null || types.includes(type);
 }
 
+function when<T>(
+  types: ActivityEventType[] | undefined,
+  type: ActivityEventType,
+  run: () => Promise<T[]>,
+): Promise<T[]> {
+  return wants(types, type) ? run() : Promise.resolve([]);
+}
+
 function inRange(date: Date, filter: ActivityFilter) {
   if (filter.from && date < filter.from) {
     return false;
@@ -58,66 +66,66 @@ export async function getActivityTimelineForProfile(
     );
 
   const [sessions, registrations, changes, pageViews] = await Promise.all([
-    wants(filter.types, "login")
-      ? db
-          .select({ createdAt: session.createdAt })
-          .from(session)
-          .where(
-            and(eq(session.userId, profileRow.userId), dateBounds(session.createdAt)),
-          )
-          .orderBy(desc(session.createdAt))
-          .limit(limit + 1)
-      : Promise.resolve([]),
-    wants(filter.types, "registered")
-      ? db
-          .select({
-            createdAt: participant.createdAt,
-            tournamentName: tournament.name,
-          })
-          .from(participant)
-          .innerJoin(tournament, eq(participant.tournamentId, tournament.id))
-          .where(
-            and(
-              eq(participant.profileId, profileId),
-              isNull(participant.deletedAt),
-              dateBounds(participant.createdAt),
-            ),
-          )
-      : Promise.resolve([]),
-    wants(filter.types, "updated")
-      ? db
-          .select({
-            createdAt: participantChangeLog.createdAt,
-            changes: participantChangeLog.changes,
-            tournamentName: tournament.name,
-          })
-          .from(participantChangeLog)
-          .innerJoin(
-            tournament,
-            eq(participantChangeLog.tournamentId, tournament.id),
-          )
-          .where(
-            and(
-              eq(participantChangeLog.profileId, profileId),
-              dateBounds(participantChangeLog.createdAt),
-            ),
-          )
-          .orderBy(desc(participantChangeLog.createdAt))
-          .limit(limit + 1)
-      : Promise.resolve([]),
-    wants(filter.types, "page_view")
-      ? db
-          .select({ createdAt: pageView.createdAt, path: pageView.path })
-          .from(pageView)
-          .where(
-            and(
-              eq(pageView.userId, profileRow.userId),
-              dateBounds(pageView.createdAt),
-            ),
-          )
-          .orderBy(desc(pageView.createdAt))
-          .limit(limit + 1)
-      : Promise.resolve([]),
+    when(filter.types, "login", () =>
+      db
+        .select({ createdAt: session.createdAt })
+        .from(session)
+        .where(
+          and(eq(session.userId, profileRow.userId), dateBounds(session.createdAt)),
+        )
+        .orderBy(desc(session.createdAt))
+        .limit(limit + 1),
+    ),
+    when(filter.types, "registered", () =>
+      db
+        .select({
+          createdAt: participant.createdAt,
+          tournamentName: tournament.name,
+        })
+        .from(participant)
+        .innerJoin(tournament, eq(participant.tournamentId, tournament.id))
+        .where(
+          and(
+            eq(participant.profileId, profileId),
+            isNull(participant.deletedAt),
+            dateBounds(participant.createdAt),
+          ),
+        ),
+    ),
+    when(filter.types, "updated", () =>
+      db
+        .select({
+          createdAt: participantChangeLog.createdAt,
+          changes: participantChangeLog.changes,
+          tournamentName: tournament.name,
+        })
+        .from(participantChangeLog)
+        .innerJoin(
+          tournament,
+          eq(participantChangeLog.tournamentId, tournament.id),
+        )
+        .where(
+          and(
+            eq(participantChangeLog.profileId, profileId),
+            dateBounds(participantChangeLog.createdAt),
+          ),
+        )
+        .orderBy(desc(participantChangeLog.createdAt))
+        .limit(limit + 1),
+    ),
+    when(filter.types, "page_view", () =>
+      db
+        .select({ createdAt: pageView.createdAt, path: pageView.path })
+        .from(pageView)
+        .where(
+          and(
+            eq(pageView.userId, profileRow.userId),
+            dateBounds(pageView.createdAt),
+          ),
+        )
+        .orderBy(desc(pageView.createdAt))
+        .limit(limit + 1),
+    ),
   ]);
 
   const truncated =

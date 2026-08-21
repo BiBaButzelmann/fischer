@@ -26,6 +26,16 @@ export function isValidDateOnly(date: string): boolean {
   return /^\d{4}-\d{2}-\d{2}$/.test(date) && parseDateOnly(date).isValid;
 }
 
+export function dateOnlyRange(
+  from?: string,
+  to?: string,
+): { from?: Date; to?: Date } {
+  return {
+    from: from ? parseDateOnly(from).toJSDate() : undefined,
+    to: to ? parseDateOnly(to).endOf("day").toJSDate() : undefined,
+  };
+}
+
 export function utcDateToDateOnly(date: Date): string {
   return date.toISOString().slice(0, 10);
 }

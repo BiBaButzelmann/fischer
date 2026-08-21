@@ -42,7 +42,6 @@ describe("computeParticipantChanges", () => {
     const changes = computeParticipantChanges(
       { dwzRating: 1850, chessClub: "HSK", fideId: null },
       { dwzRating: 1870, chessClub: "HSK", fideId: undefined },
-      ["dwzRating", "chessClub", "fideId"],
     );
 
     expect(changes).toEqual({ dwzRating: { old: 1850, new: 1870 } });
@@ -52,7 +51,6 @@ describe("computeParticipantChanges", () => {
     const changes = computeParticipantChanges(
       { secondaryMatchDays: ["tuesday", "friday"] },
       { secondaryMatchDays: ["friday", "tuesday"] },
-      ["secondaryMatchDays"],
     );
 
     expect(changes).toEqual({});

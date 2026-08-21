@@ -37,52 +37,50 @@ export function buildActivityTimeline(input: {
   }[];
   pageViews?: { createdAt: Date; path: string }[];
 }): ActivityEvent[] {
-  const events: ActivityEvent[] = [];
-
-  for (const account of input.accounts ?? []) {
-    events.push({ type: "account_created", timestamp: account.createdAt });
-  }
-
-  for (const session of input.sessions ?? []) {
-    events.push({ type: "login", timestamp: session.createdAt });
-  }
-
-  for (const registration of input.registrations ?? []) {
-    events.push({
-      type: "registered",
-      timestamp: registration.createdAt,
-      tournamentName: registration.tournamentName,
-    });
-  }
-
-  for (const change of input.changes ?? []) {
-    events.push({
-      type: "updated",
-      timestamp: change.createdAt,
-      changes: change.changes,
-      tournamentName: change.tournamentName,
-    });
-  }
-
-  for (const view of input.pageViews ?? []) {
-    events.push({
-      type: "page_view",
-      timestamp: view.createdAt,
-      path: view.path,
-    });
-  }
+  const events: ActivityEvent[] = [
+    ...(input.accounts ?? []).map(
+      ({ createdAt }): ActivityEvent => ({
+        type: "account_created",
+        timestamp: createdAt,
+      }),
+    ),
+    ...(input.sessions ?? []).map(
+      ({ createdAt }): ActivityEvent => ({ type: "login", timestamp: createdAt }),
+    ),
+    ...(input.registrations ?? []).map(
+      ({ createdAt, tournamentName }): ActivityEvent => ({
+        type: "registered",
+        timestamp: createdAt,
+        tournamentName,
+      }),
+    ),
+    ...(input.changes ?? []).map(
+      ({ createdAt, changes, tournamentName }): ActivityEvent => ({
+        type: "updated",
+        timestamp: createdAt,
+        changes,
+        tournamentName,
+      }),
+    ),
+    ...(input.pageViews ?? []).map(
+      ({ createdAt, path }): ActivityEvent => ({
+        type: "page_view",
+        timestamp: createdAt,
+        path,
+      }),
+    ),
+  ];
 
   return events.sort((a, b) => b.timestamp.getTime() - a.timestamp.getTime());
 }
 
-export function computeParticipantChanges<T extends Record<string, unknown>>(
-  oldValues: T,
-  newValues: Partial<Record<keyof T, unknown>>,
-  fields: (keyof T & string)[],
+export function computeParticipantChanges(
+  oldValues: Record<string, unknown>,
+  newValues: Record<string, unknown>,
 ): ParticipantChanges {
   const changes: ParticipantChanges = {};
 
-  for (const field of fields) {
+  for (const field of Object.keys(newValues)) {
     const oldValue = normalize(oldValues[field]);
     const newValue = normalize(newValues[field]);
     if (JSON.stringify(oldValue) !== JSON.stringify(newValue)) {

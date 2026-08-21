@@ -7,7 +7,7 @@ import {
   ACTIVITY_EVENT_TYPES,
   type ActivityEventType,
 } from "@/lib/activity";
-import { parseDateOnly } from "@/lib/date";
+import { dateOnlyRange } from "@/lib/date";
 import { ActivityFilters } from "@/components/admin/activity-filters";
 import { ActivityTable } from "@/components/admin/activity-table";
 
@@ -45,8 +45,7 @@ export default async function Page({
   const result =
     profileId != null
       ? await getActivityTimelineForProfile(profileId, {
-          from: from ? startOfDay(from) : undefined,
-          to: to ? endOfDay(to) : undefined,
+          ...dateOnlyRange(from, to),
           types,
         })
       : null;
@@ -106,12 +105,4 @@ function parseTypes(
   const requested = raw.split(",");
   const valid = available.filter((type) => requested.includes(type));
   return valid.length > 0 ? valid : available;
-}
-
-function startOfDay(dateOnly: string): Date {
-  return parseDateOnly(dateOnly).startOf("day").toJSDate();
-}
-
-function endOfDay(dateOnly: string): Date {
-  return parseDateOnly(dateOnly).endOf("day").toJSDate();
 }

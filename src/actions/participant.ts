@@ -102,11 +102,7 @@ export const createParticipant = action(async (
   );
 
   if (existing) {
-    const changes = computeParticipantChanges(
-      existing,
-      values,
-      Object.keys(values) as (keyof typeof values)[],
-    );
+    const changes = computeParticipantChanges(existing, values);
     if (Object.keys(changes).length === 0) {
       return;
     }
