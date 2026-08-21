@@ -231,7 +231,7 @@ export function AppSidebar({ session, tournaments, userRoles, documentAvailabili
                 href={tournamentPath(slug, "/admin/logging")}
                 icon={HistoryIcon}
               >
-                Anmeldungsverlauf
+                Verlauf
               </SidebarLink>
               <SidebarLink
                 href={tournamentPath(slug, "/admin/gruppen")}
