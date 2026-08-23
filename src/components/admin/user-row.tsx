@@ -18,7 +18,11 @@ import {
   Phone,
   Mail,
   Volleyball,
+  History,
 } from "lucide-react";
+import Link from "next/link";
+import { tournamentPath } from "@/lib/navigation";
+import { useTournamentSlug } from "@/hooks/use-tournament-slug";
 import { useState, useTransition } from "react";
 import {
   softDeleteUserProfile,
@@ -48,6 +52,7 @@ export function UserRow({
   const [softDeleteOpen, setSoftDeleteOpen] = useState(false);
   const [hardDeleteOpen, setHardDeleteOpen] = useState(false);
   const [isPending, startTransition] = useTransition();
+  const slug = useTournamentSlug();
 
   const getDisplayName = (user: ProfileWithName) => {
     return `${user.firstName} ${user.lastName}`;
@@ -190,6 +195,24 @@ export function UserRow({
       </div>
       <div className="flex items-center gap-2">
         <div className="text-xs text-gray-500">ID: {user.id}</div>
+        {user.deletedAt == null ? (
+          <Button
+            asChild
+            variant="outline"
+            size="sm"
+            className="h-7 w-7 p-0"
+            title="Verlauf ansehen"
+          >
+            <Link
+              href={tournamentPath(
+                slug,
+                `/admin/logging?profileId=${user.id}`,
+              )}
+            >
+              <History className="h-4 w-4" />
+            </Link>
+          </Button>
+        ) : null}
         {user.deletedAt != null ? (
           <Button
             variant="outline"

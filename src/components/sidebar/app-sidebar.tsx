@@ -22,6 +22,7 @@ import {
   CalendarIcon,
   Euro,
   FileCheck,
+  HistoryIcon,
   LayoutDashboard,
   Medal,
   SwordsIcon,
@@ -225,6 +226,12 @@ export function AppSidebar({ session, tournaments, userRoles, documentAvailabili
                 icon={UserRoundCogIcon}
               >
                 Nutzer verwalten
+              </SidebarLink>
+              <SidebarLink
+                href={tournamentPath(slug, "/admin/logging")}
+                icon={HistoryIcon}
+              >
+                Verlauf
               </SidebarLink>
               <SidebarLink
                 href={tournamentPath(slug, "/admin/gruppen")}

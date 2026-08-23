@@ -8,7 +8,12 @@ import { participantFormSchema } from "@/schema/participant";
 import { authWithRedirect } from "@/auth/utils";
 import { getTournamentById } from "@/db/repositories/tournament";
 import { getProfileByUserId } from "@/db/repositories/profile";
-import { getParticipantsWithDsbPersonIdByTournamentId } from "@/db/repositories/participant";
+import {
+  getParticipantByProfileIdAndTournamentId,
+  getParticipantsWithDsbPersonIdByTournamentId,
+} from "@/db/repositories/participant";
+import { participantChangeLog } from "@/db/schema/participantChangeLog";
+import { computeParticipantChanges } from "@/lib/activity";
 import { getPromotionEligibility } from "@/services/promotion";
 import { and, eq } from "drizzle-orm";
 import {
@@ -35,7 +40,7 @@ export const createParticipant = action(async (
       data.preferredMatchDay,
       data.secondaryMatchDays,
     ),
-    "Preferred match day cannot also be a secondary match day",
+    `Preferred match day cannot also be a secondary match day (tournament ${tournamentId})`,
   );
 
   const session = await authWithRedirect();
@@ -60,79 +65,90 @@ export const createParticipant = action(async (
   const tournament = await getTournamentById(tournamentId);
   invariant(
     tournament != null && tournament.stage === "registration",
-    "Tournament not found or not in registration stage",
+    `Tournament ${tournamentId} not found or not in registration stage`,
   );
 
   const currentProfile = await getProfileByUserId(session.user.id);
-  invariant(currentProfile, "Profile not found");
+  invariant(currentProfile, `Profile not found for user ${session.user.id}`);
 
   const promotionEligibility = await getPromotionEligibility(currentProfile.id);
   const exercisePromotionRight = promotionEligibility
     ? (data.exercisePromotionRight ?? false)
     : null;
 
+  const values = {
+    chessClub,
+    title: data.title === "noTitle" ? null : data.title,
+    gender: data.gender,
+    dwzRating: data.dwzRating,
+    fideRating: data.fideRating,
+    fideId: data.fideId,
+    nationality: data.nationality,
+    birthYear,
+    birthDate: data.birthDate,
+    preferredMatchDay: data.preferredMatchDay,
+    secondaryMatchDays: data.secondaryMatchDays,
+    notAvailableDays: data.notAvailableDays,
+    dsbPersonId: data.dsbPersonId,
+    zpsClubId: data.zpsClub,
+    zpsPlayerId: data.zpsPlayer,
+    entryFeePayed,
+    exercisePromotionRight,
+  };
+
+  const existing = await getParticipantByProfileIdAndTournamentId(
+    currentProfile.id,
+    tournament.id,
+  );
+
+  if (existing) {
+    const changes = computeParticipantChanges(existing, values);
+    if (Object.keys(changes).length === 0) {
+      return;
+    }
+
+    await db.transaction(async (tx) => {
+      await tx
+        .update(participant)
+        .set({ ...values, updatedAt: new Date() })
+        .where(eq(participant.id, existing.id));
+      await tx.insert(participantChangeLog).values({
+        profileId: currentProfile.id,
+        tournamentId: tournament.id,
+        changes,
+      });
+    });
+    return;
+  }
+
   await db
     .insert(participant)
     .values({
       profileId: currentProfile.id,
       tournamentId: tournament.id,
-      chessClub,
-      title: data.title === "noTitle" ? null : data.title,
-      gender: data.gender,
-      dwzRating: data.dwzRating,
-      fideRating: data.fideRating,
-      fideId: data.fideId,
-      nationality: data.nationality,
-      birthYear,
-      birthDate: data.birthDate,
-      preferredMatchDay: data.preferredMatchDay,
-      secondaryMatchDays: data.secondaryMatchDays,
-      notAvailableDays: data.notAvailableDays,
-      dsbPersonId: data.dsbPersonId,
-      zpsClubId: data.zpsClub,
-      zpsPlayerId: data.zpsPlayer,
-      entryFeePayed,
-      exercisePromotionRight,
+      ...values,
     })
     .onConflictDoUpdate({
       target: [participant.tournamentId, participant.profileId],
-      set: {
-        chessClub,
-        gender: data.gender,
-        dwzRating: data.dwzRating,
-        fideRating: data.fideRating,
-        fideId: data.fideId,
-        nationality: data.nationality,
-        title: data.title === "noTitle" ? null : data.title,
-        birthYear,
-        birthDate: data.birthDate,
-        preferredMatchDay: data.preferredMatchDay,
-        secondaryMatchDays: data.secondaryMatchDays,
-        notAvailableDays: data.notAvailableDays,
-        dsbPersonId: data.dsbPersonId,
-        zpsClubId: data.zpsClub,
-        zpsPlayerId: data.zpsPlayer,
-        entryFeePayed,
-        exercisePromotionRight,
-      },
+      set: { ...values, updatedAt: new Date() },
     });
 });
 
-export async function deleteParticipant(
+export const deleteParticipant = action(async (
   tournamentId: number,
   participantId: number,
-) {
+) => {
   const session = await authWithRedirect();
 
   const tournament = await getTournamentById(tournamentId);
-  invariant(tournament != null, "Tournament not found");
+  invariant(tournament != null, `Tournament ${tournamentId} not found`);
   invariant(
     tournament.stage === "registration",
-    "Cannot delete participant in this stage",
+    `Cannot delete participant ${participantId} in tournament ${tournamentId} (stage ${tournament.stage})`,
   );
 
   const currentProfile = await getProfileByUserId(session.user.id);
-  invariant(currentProfile, "Profile not found");
+  invariant(currentProfile, `Profile not found for user ${session.user.id}`);
 
   await db
     .delete(participant)
@@ -143,7 +159,7 @@ export async function deleteParticipant(
         eq(participant.tournamentId, tournament.id),
       ),
     );
-}
+});
 
 export async function searchDsbPlayers(
   firstName: string,

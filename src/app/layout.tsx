@@ -4,6 +4,7 @@ import "./globals.css";
 import { Providers } from "./providers";
 import { Toaster } from "@/components/ui/sonner";
 import { Analytics } from "@vercel/analytics/next";
+import { PageViewTracker } from "@/components/page-view-tracker";
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -36,6 +37,7 @@ export default function RootLayout({
           </div>
         ) : null}
         <Analytics />
+        <PageViewTracker />
         <Toaster position="top-right" />
         <Providers>{children}</Providers>
       </body>

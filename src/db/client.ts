@@ -15,6 +15,8 @@ import * as trainerSchema from "./schema/trainer";
 import * as matchEnteringHelperSchema from "./schema/matchEnteringHelper";
 import * as matchdaySchema from "./schema/matchday";
 import * as gamePostponementSchema from "./schema/gamePostponement";
+import * as participantChangeLogSchema from "./schema/participantChangeLog";
+import * as pageViewSchema from "./schema/pageView";
 
 const pool = new Pool({ connectionString: process.env.DATABASE_URL! });
 
@@ -35,5 +37,7 @@ export const db = drizzle(pool, {
     ...matchEnteringHelperSchema,
     ...matchdaySchema,
     ...gamePostponementSchema,
+    ...participantChangeLogSchema,
+    ...pageViewSchema,
   },
 });
