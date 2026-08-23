@@ -1,5 +1,6 @@
 "use server";
 
+import { after } from "next/server";
 import { db } from "@/db/client";
 import { pageView } from "@/db/schema/pageView";
 import { auth } from "@/auth/utils";
@@ -13,9 +14,11 @@ export async function logPageView(path: string) {
     return;
   }
 
-  try {
-    await db.insert(pageView).values({ userId: session.user.id, path });
-  } catch (error) {
-    console.error("Failed to log page view:", error);
-  }
+  after(async () => {
+    try {
+      await db.insert(pageView).values({ userId: session.user.id, path });
+    } catch (error) {
+      console.error("Failed to log page view:", error);
+    }
+  });
 }
