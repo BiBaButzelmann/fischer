@@ -7,7 +7,7 @@ import { getDsbPersonById, searchDsbPersons } from "@/lib/dsb/wertungsportal";
 import { mapDsbPersonToCandidate } from "@/lib/dsb/candidate";
 import { HSK_VKZ } from "@/lib/dsb/constants";
 import { DEFAULT_CLUB_LABEL } from "@/constants/constants";
-import { getFideProfile } from "@/lib/fide/profile";
+import { getFideStandardRating } from "@/lib/fide/profile";
 import { Participant } from "@/db/types/participant";
 import { Profile } from "@/db/types/profile";
 import { getProfileByUserId } from "@/db/repositories/profile";
@@ -44,23 +44,23 @@ async function getPrefillEloData(
 
     if (person) {
       const candidate = mapDsbPersonToCandidate(person);
-      const fideProfile = candidate.fideId
-        ? await getFideProfile(candidate.fideId)
+      const fideRating = candidate.fideId
+        ? await getFideStandardRating(candidate.fideId)
         : null;
       return {
         dsbPersonId: candidate.nuLigaPersonId,
         gender: candidate.gender,
         dwzRating: candidate.dwzRating,
         fideId: candidate.fideId,
-        fideRating: fideProfile?.fideRating ?? null,
+        fideRating,
         birthYear: candidate.birthYear,
       };
     }
 
     if (previousParticipant.fideId) {
-      const fideProfile = await getFideProfile(previousParticipant.fideId);
-      if (fideProfile?.fideRating != null) {
-        return { fideRating: fideProfile.fideRating };
+      const fideRating = await getFideStandardRating(previousParticipant.fideId);
+      if (fideRating != null) {
+        return { fideRating };
       }
     }
   } catch {}

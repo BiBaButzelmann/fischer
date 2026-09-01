@@ -121,19 +121,15 @@ export async function getParticipantsWithProfileByGroupId(groupId: number) {
     .orderBy(profile.lastName, profile.firstName);
 }
 
-export async function getParticipantsWithDsbPersonIdByTournamentId(
-  tournamentId: number,
-) {
-  return await db.query.participant.findMany({
-    where: (participant, { eq, and, isNotNull }) =>
-      and(
-        eq(participant.tournamentId, tournamentId),
-        isNotNull(participant.dsbPersonId),
-      ),
+export async function getParticipantRatingFieldsById(participantId: number) {
+  return await db.query.participant.findFirst({
+    where: (participant, { eq }) => eq(participant.id, participantId),
     columns: {
       id: true,
       dsbPersonId: true,
       fideId: true,
+      dwzRating: true,
+      fideRating: true,
     },
   });
 }

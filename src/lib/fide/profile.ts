@@ -14,6 +14,8 @@ const FIDE_TITLE_MAP: Record<string, string> = {
 const FIDE_FETCH_TIMEOUT_MS = 5000;
 const FIDE_CACHE_TTL_SECONDS = 60 * 60 * 24;
 
+class FideThrottledError extends Error {}
+
 const fetchFideProfileHtml = unstable_cache(
   async (id: string): Promise<string> => {
     const response = await fetch(`https://ratings.fide.com/profile/${id}`, {
@@ -22,7 +24,11 @@ const fetchFideProfileHtml = unstable_cache(
     if (!response.ok) {
       throw new Error(`FIDE profile request failed: ${response.status}`);
     }
-    return response.text();
+    const html = await response.text();
+    if (html.trim().length === 0) {
+      throw new FideThrottledError(`FIDE profile ${id} returned empty body`);
+    }
+    return html;
   },
   ["fide-profile-html"],
   { revalidate: FIDE_CACHE_TTL_SECONDS },
@@ -37,23 +43,32 @@ export type FideProfile = {
   title: string | null;
 };
 
+export type FideProfileLookup =
+  | { status: "found"; profile: FideProfile }
+  | { status: "notFound" }
+  | { status: "throttled" }
+  | { status: "error" };
+
 export async function getFideProfile(
   fideId: string,
-): Promise<FideProfile | null> {
+): Promise<FideProfileLookup> {
   const id = fideId.trim();
   if (!/^\d+$/.test(id)) {
-    return null;
+    return { status: "notFound" };
   }
 
   let html: string;
   try {
     html = await fetchFideProfileHtml(id);
-  } catch {
-    return null;
+  } catch (error) {
+    if (error instanceof FideThrottledError) {
+      return { status: "throttled" };
+    }
+    return { status: "error" };
   }
 
   if (html.includes("No record found")) {
-    return null;
+    return { status: "notFound" };
   }
 
   const std = matchRating(html, "standart");
@@ -74,7 +89,17 @@ export async function getFideProfile(
   const name =
     html.match(/<title>([^<]+?)\s*FIDE Profile<\/title>/i)?.[1]?.trim() ?? null;
 
-  return { name, fideId: id, fideRating: std, birthYear, gender, title };
+  return {
+    status: "found",
+    profile: { name, fideId: id, fideRating: std, birthYear, gender, title },
+  };
+}
+
+export async function getFideStandardRating(
+  fideId: string,
+): Promise<number | null> {
+  const lookup = await getFideProfile(fideId);
+  return lookup.status === "found" ? lookup.profile.fideRating : null;
 }
 
 function matchRating(html: string, cls: string): number | null {

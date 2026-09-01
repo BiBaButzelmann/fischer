@@ -19,7 +19,7 @@ import { DateTime } from "luxon";
 import invariant from "tiny-invariant";
 import { match } from "ts-pattern";
 import { getRefereeOfGroup } from "@/services/referee";
-import { getFideProfile } from "@/lib/fide/profile";
+import { getFideStandardRating } from "@/lib/fide/profile";
 
 export const generateFideReportFile = action(
   async (groupId: number, month: number) => {
@@ -280,9 +280,9 @@ export const generateFideReportFile = action(
 
 async function getCurrentElo(participant: Participant) {
   if (participant.fideId != null) {
-    const fideProfile = await getFideProfile(participant.fideId);
-    if (fideProfile?.fideRating != null) {
-      return fideProfile.fideRating;
+    const fideRating = await getFideStandardRating(participant.fideId);
+    if (fideRating != null) {
+      return fideRating;
     }
   }
   invariant(participant.fideRating != null, "FIDE rating cannot be null");
