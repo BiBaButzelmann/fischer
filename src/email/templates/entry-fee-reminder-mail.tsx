@@ -52,7 +52,7 @@ export function EntryFeeReminderMail({ firstName, lastName }: Props) {
         <p style={{ margin: "5px 0" }}>
           Verwendungszweck:{" "}
           <strong>
-            Klubturnier 2025 {firstName} {lastName}
+            Klubturnier 2026 {firstName} {lastName}
           </strong>
         </p>
       </div>
