@@ -11,7 +11,7 @@ const FIDE_TITLE_MAP: Record<string, string> = {
   "woman candidate master": "WCM",
 };
 
-const FIDE_FETCH_TIMEOUT_MS = 5000;
+const FIDE_FETCH_TIMEOUT_MS = 10000;
 const FIDE_CACHE_TTL_SECONDS = 60 * 60 * 24;
 
 class FideThrottledError extends Error {}
@@ -20,6 +20,13 @@ const fetchFideProfileHtml = unstable_cache(
   async (id: string): Promise<string> => {
     const response = await fetch(`https://ratings.fide.com/profile/${id}`, {
       signal: AbortSignal.timeout(FIDE_FETCH_TIMEOUT_MS),
+      headers: {
+        "User-Agent":
+          "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/128.0.0.0 Safari/537.36",
+        Accept:
+          "text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8",
+        "Accept-Language": "en-US,en;q=0.9",
+      },
     });
     if (!response.ok) {
       throw new Error(`FIDE profile request failed: ${response.status}`);
@@ -64,6 +71,7 @@ export async function getFideProfile(
     if (error instanceof FideThrottledError) {
       return { status: "throttled" };
     }
+    console.error(`FIDE profile fetch failed for ${id}:`, error);
     return { status: "error" };
   }
 
