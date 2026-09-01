@@ -32,7 +32,7 @@ import {
 } from "lucide-react";
 import { UserRow } from "@/components/admin/user-row";
 import { ParticipantRow } from "@/components/admin/participant-row";
-import { RatingUpdateButton } from "@/components/admin/rating-update-button";
+import { RatingUpdatePanel } from "@/components/admin/rating-update-panel";
 import { redirect } from "next/navigation";
 import { ProfileWithName } from "@/db/types/profile";
 import { ParticipantWithProfile } from "@/db/types/participant";
@@ -157,7 +157,6 @@ export default async function Page({
         <TabsContent value="participants" className="space-y-4">
           <ParticipantList
             participants={participants}
-            tournamentId={tournament.id}
             title="Teilnehmer"
             description={`${participants.length} Spieler sind für das Turnier angemeldet`}
             icon={User}
@@ -300,14 +299,12 @@ function UserList({
 
 function ParticipantList({
   participants,
-  tournamentId,
   title,
   description,
   icon: Icon,
   emptyMessage,
 }: {
   participants: ParticipantWithProfile[];
-  tournamentId: number;
   title: string;
   description: string;
   icon: LucideIcon;
@@ -316,33 +313,31 @@ function ParticipantList({
   return (
     <Card>
       <CardHeader>
-        <div className="flex items-center justify-between">
-          <div className="flex items-center gap-3">
-            <div className="p-2 bg-gray-100 border border-gray-200 rounded-lg">
-              <Icon className="h-5 w-5 text-gray-600" />
-            </div>
-            <div>
-              <CardTitle className="text-lg">{title}</CardTitle>
-              <CardDescription>{description}</CardDescription>
-            </div>
+        <div className="flex items-center gap-3">
+          <div className="p-2 bg-gray-100 border border-gray-200 rounded-lg">
+            <Icon className="h-5 w-5 text-gray-600" />
           </div>
-          {participants.length > 0 && (
-            <RatingUpdateButton tournamentId={tournamentId} />
-          )}
+          <div>
+            <CardTitle className="text-lg">{title}</CardTitle>
+            <CardDescription>{description}</CardDescription>
+          </div>
         </div>
       </CardHeader>
       <CardContent>
         {participants.length === 0 ? (
           <p className="text-gray-500 text-sm italic">{emptyMessage}</p>
         ) : (
-          <div className="space-y-1">
-            {participants.map((participant) => (
-              <ParticipantRow
-                key={participant.id}
-                participant={participant}
-                showDeleteActions={true}
-              />
-            ))}
+          <div className="space-y-4">
+            <RatingUpdatePanel participants={participants} />
+            <div className="space-y-1">
+              {participants.map((participant) => (
+                <ParticipantRow
+                  key={participant.id}
+                  participant={participant}
+                  showDeleteActions={true}
+                />
+              ))}
+            </div>
           </div>
         )}
       </CardContent>
