@@ -10,7 +10,7 @@ import {
   DialogTitle,
   DialogTrigger,
 } from "@/components/ui/dialog";
-import { User, Trash2, AlertTriangle, RotateCcw, Phone } from "lucide-react";
+import { User, Trash2, AlertTriangle, RotateCcw, Phone, Link } from "lucide-react";
 import { useState, useTransition } from "react";
 import {
   softDeleteUserProfile,
@@ -19,16 +19,27 @@ import {
 } from "@/actions/admin";
 import { toast } from "sonner";
 import { Badge } from "@/components/ui/badge";
+import {
+  Popover,
+  PopoverContent,
+  PopoverTrigger,
+} from "@/components/ui/popover";
+import { DsbLinkDialog } from "@/components/admin/dsb-link-dialog";
 import { ProfileWithName } from "@/db/types/profile";
 import { getParticipantFullName } from "@/lib/participant";
 import { formatDate, toLocalDateTime } from "@/lib/date";
 import { getTwz } from "@/lib/twz";
+import { DEFAULT_CLUB_LABEL } from "@/constants/constants";
+import { HSK_VKZ } from "@/lib/dsb/constants";
 
 type Props = {
   participant: {
     id: number;
     dwzRating: number | null;
     fideRating: number | null;
+    dsbPersonId: string | null;
+    fideId: string | null;
+    chessClub: string;
     profile: ProfileWithName;
   };
   showDeleteActions?: boolean;
@@ -40,7 +51,10 @@ export function ParticipantRow({
 }: Props) {
   const [softDeleteOpen, setSoftDeleteOpen] = useState(false);
   const [hardDeleteOpen, setHardDeleteOpen] = useState(false);
+  const [linkDialogOpen, setLinkDialogOpen] = useState(false);
   const [isPending, startTransition] = useTransition();
+
+  const isLinked = participant.dsbPersonId != null;
 
   const twz = getTwz(participant);
   const fideIsTwz =
@@ -140,6 +154,67 @@ export function ParticipantRow({
             >
               {getParticipantFullName(participant)}
             </span>
+            {isLinked ? (
+              <Popover>
+                <PopoverTrigger asChild>
+                  <Button
+                    variant="ghost"
+                    size="sm"
+                    className="h-6 w-6 p-0"
+                    title="DSB-Verknüpfung anzeigen"
+                  >
+                    <Link className="h-3.5 w-3.5 text-gray-700" />
+                  </Button>
+                </PopoverTrigger>
+                <PopoverContent align="start" className="w-auto space-y-2">
+                  <div className="text-sm">
+                    DSB-Personen-ID: {participant.dsbPersonId}
+                  </div>
+                  <div className="text-sm">
+                    FIDE-ID:{" "}
+                    {participant.fideId ? (
+                      <a
+                        href={`https://ratings.fide.com/profile/${participant.fideId}`}
+                        target="_blank"
+                        rel="noreferrer"
+                        className="text-blue-600 underline"
+                      >
+                        {participant.fideId}
+                      </a>
+                    ) : (
+                      "keine"
+                    )}
+                  </div>
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    onClick={() => setLinkDialogOpen(true)}
+                  >
+                    Verknüpfung ändern
+                  </Button>
+                </PopoverContent>
+              </Popover>
+            ) : (
+              <Button
+                variant="ghost"
+                size="sm"
+                className="h-6 w-6 p-0"
+                title="DSB-Verknüpfung herstellen"
+                onClick={() => setLinkDialogOpen(true)}
+              >
+                <Link className="h-3.5 w-3.5 text-gray-300" />
+              </Button>
+            )}
+            <DsbLinkDialog
+              participantId={participant.id}
+              firstName={participant.profile.firstName}
+              lastName={participant.profile.lastName}
+              vkz={
+                participant.chessClub === DEFAULT_CLUB_LABEL ? HSK_VKZ : null
+              }
+              open={linkDialogOpen}
+              onOpenChange={setLinkDialogOpen}
+            />
           </div>
 
           <div className="flex items-center gap-2">
