@@ -146,7 +146,9 @@ export function RatingUpdatePanel({ participants }: Props) {
         "muted",
         `Phase 1: DWZ über das DSB-Wertungsportal (${linked.length} Abfragen)`,
       );
-      const fideCandidates: RatingEntry[] = [];
+      const fideCandidates: RatingEntry[] = unlinked.filter(
+        (entry) => entry.fideId != null,
+      );
       for (const [index, entry] of linked.entries()) {
         setProgress(`Phase 1 · ${index + 1}/${linked.length}`);
         const result = await updateParticipantDwz(entry.participantId);
@@ -238,13 +240,13 @@ export function RatingUpdatePanel({ participants }: Props) {
         withoutRating: 0,
         unlinked: unlinked.length,
       };
-      for (const entry of linked) {
+      for (const entry of entries) {
         const outcome = outcomes.get(entry.participantId);
         if (outcome?.wrote) {
           result.updated++;
         } else if (outcome?.failed) {
           result.failed++;
-        } else {
+        } else if (entry.dsbPersonId != null) {
           result.withoutRating++;
         }
       }
