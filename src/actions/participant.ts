@@ -180,7 +180,7 @@ export async function getFideRatingById(
   return await getFideStandardRating(fideId);
 }
 
-export const updateParticipantDwz = action(async (participantId: number) => {
+export const updateParticipantFromDsb = action(async (participantId: number) => {
   const session = await authWithRedirect();
 
   invariant(

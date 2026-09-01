@@ -2,11 +2,11 @@
 
 import { useEffect, useRef, useState } from "react";
 import { useRouter } from "next/navigation";
-import { RefreshCw } from "lucide-react";
+import { RefreshCw, X } from "lucide-react";
 import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
 import {
-  updateParticipantDwz,
+  updateParticipantFromDsb,
   updateParticipantFide,
 } from "@/actions/participant";
 import { isError } from "@/lib/actions";
@@ -73,12 +73,14 @@ export function RatingUpdatePanel({ participants }: Props) {
   const [progress, setProgress] = useState<string | null>(null);
   const [pauseSecondsLeft, setPauseSecondsLeft] = useState<number | null>(null);
   const skipPauseRef = useRef(false);
+  const cancelRef = useRef(false);
+  const autoScrollRef = useRef(true);
   const nextLineIdRef = useRef(0);
   const logContainerRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
     const container = logContainerRef.current;
-    if (container) {
+    if (container && autoScrollRef.current) {
       container.scrollTop = container.scrollHeight;
     }
   }, [log]);
@@ -89,6 +91,7 @@ export function RatingUpdatePanel({ participants }: Props) {
     }
     const warnBeforeUnload = (event: BeforeUnloadEvent) => {
       event.preventDefault();
+      event.returnValue = "";
     };
     window.addEventListener("beforeunload", warnBeforeUnload);
     return () => window.removeEventListener("beforeunload", warnBeforeUnload);
@@ -98,27 +101,36 @@ export function RatingUpdatePanel({ participants }: Props) {
     setLog((lines) => [...lines, { id: nextLineIdRef.current++, level, text }]);
   };
 
-  const pauseForThrottle = async () => {
-    skipPauseRef.current = false;
-    for (
+  const pauseForThrottle = () =>
+    new Promise<void>((resolve) => {
+      skipPauseRef.current = false;
       let remaining = FIDE_THROTTLE_PAUSE_SECONDS;
-      remaining > 0;
-      remaining--
-    ) {
-      if (skipPauseRef.current) {
-        break;
-      }
       setPauseSecondsLeft(remaining);
-      await sleep(1000);
-    }
-    setPauseSecondsLeft(null);
-  };
+      const interval = setInterval(() => {
+        remaining--;
+        if (remaining <= 0 || skipPauseRef.current || cancelRef.current) {
+          clearInterval(interval);
+          setPauseSecondsLeft(null);
+          resolve();
+          return;
+        }
+        setPauseSecondsLeft(remaining);
+      }, 1000);
+    });
 
   const run = async () => {
     setIsRunning(true);
     setLog([]);
     setSummary(null);
     nextLineIdRef.current = 0;
+    cancelRef.current = false;
+    autoScrollRef.current = true;
+
+    const issues: string[] = [];
+    const appendIssue = (text: string) => {
+      issues.push(text);
+      appendLine("error", text);
+    };
 
     const outcomes = new Map<number, { wrote: boolean; failed: boolean }>();
     const mark = (participantId: number, key: "wrote" | "failed") => {
@@ -139,7 +151,7 @@ export function RatingUpdatePanel({ participants }: Props) {
         `${entries.length} Teilnehmer, davon ${linked.length} mit DSB-Verknüpfung`,
       );
       for (const entry of unlinked) {
-        appendLine("error", `${entry.name} · keine DSB-Verknüpfung`);
+        appendIssue(`${entry.name} · keine DSB-Verknüpfung`);
       }
 
       appendLine(
@@ -150,22 +162,26 @@ export function RatingUpdatePanel({ participants }: Props) {
         (entry) => entry.fideId != null,
       );
       for (const [index, entry] of linked.entries()) {
+        if (cancelRef.current) {
+          break;
+        }
         setProgress(`Phase 1 · ${index + 1}/${linked.length}`);
-        const result = await updateParticipantDwz(entry.participantId);
+        const result = await updateParticipantFromDsb(entry.participantId);
         if (isError(result)) {
           mark(entry.participantId, "failed");
-          appendLine("error", `${entry.name} · ${result.error}`);
+          appendIssue(`${entry.name} · ${result.error}`);
         } else if (result.status === "dsbNotFound") {
           mark(entry.participantId, "failed");
-          appendLine(
-            "error",
-            `${entry.name} · DSB-Person ${entry.dsbPersonId} nicht gefunden`,
+          appendIssue(
+            `${entry.name} · DSB-Person ${entry.dsbPersonId} nicht gefunden – Verknüpfung prüfen`,
           );
           if (entry.fideId) {
             fideCandidates.push(entry);
           }
         } else if (result.status === "noRating") {
-          appendLine("error", `${entry.name} · beim DSB ohne Wertung`);
+          appendIssue(
+            `${entry.name} · DSB-Person ${entry.dsbPersonId} gefunden, aber ohne DWZ-Wertung`,
+          );
           if (entry.fideId) {
             fideCandidates.push(entry);
           }
@@ -181,7 +197,7 @@ export function RatingUpdatePanel({ participants }: Props) {
           }
           appendLine("normal", `${entry.name} · ${parts.join(" · ")}`);
           if (result.fideId) {
-            fideCandidates.push(entry);
+            fideCandidates.push({ ...entry, fideId: result.fideId });
           }
         }
       }
@@ -192,6 +208,9 @@ export function RatingUpdatePanel({ participants }: Props) {
       );
       let index = 0;
       while (index < fideCandidates.length) {
+        if (cancelRef.current) {
+          break;
+        }
         const entry = fideCandidates[index];
         setProgress(`Phase 2 · ${index + 1}/${fideCandidates.length}`);
         const startedAt = Date.now();
@@ -202,12 +221,15 @@ export function RatingUpdatePanel({ participants }: Props) {
             `FIDE-Rate-Limit erreicht · Pause ${FIDE_THROTTLE_PAUSE_SECONDS} s`,
           );
           await pauseForThrottle();
+          if (cancelRef.current) {
+            break;
+          }
           appendLine("muted", `Pause beendet · weiter mit ${entry.name}`);
           continue;
         }
         if (isError(result)) {
           mark(entry.participantId, "failed");
-          appendLine("error", `${entry.name} · ${result.error}`);
+          appendIssue(`${entry.name} · ${result.error}`);
         } else if (result.status === "updated") {
           mark(entry.participantId, "wrote");
           appendLine(
@@ -216,13 +238,16 @@ export function RatingUpdatePanel({ participants }: Props) {
           );
         } else if (result.status === "error") {
           mark(entry.participantId, "failed");
-          appendLine("error", `${entry.name} · FIDE-Abfrage fehlgeschlagen`);
+          appendIssue(
+            `${entry.name} · FIDE-Abfrage für ID ${entry.fideId} fehlgeschlagen`,
+          );
         } else if (result.status === "notFound") {
-          appendLine("error", `${entry.name} · FIDE-Profil nicht gefunden`);
+          appendIssue(
+            `${entry.name} · kein FIDE-Profil zur ID ${entry.fideId} – FIDE-ID prüfen`,
+          );
         } else if (result.status === "noRating") {
-          appendLine(
-            "error",
-            `${entry.name} · FIDE-Profil ohne Standard-Rating`,
+          appendIssue(
+            `${entry.name} · FIDE-Profil ${entry.fideId} gefunden, aber ohne Standard-Elo`,
           );
         }
         index++;
@@ -234,7 +259,19 @@ export function RatingUpdatePanel({ participants }: Props) {
         }
       }
 
-      const result: Summary = {
+      if (cancelRef.current) {
+        appendLine(
+          "muted",
+          "Abgebrochen · bisherige Änderungen bleiben gespeichert",
+        );
+        toast.info(
+          "Lauf abgebrochen – bisherige Änderungen bleiben gespeichert",
+        );
+        router.refresh();
+        return;
+      }
+
+      const runSummary: Summary = {
         updated: 0,
         failed: 0,
         withoutRating: 0,
@@ -243,20 +280,26 @@ export function RatingUpdatePanel({ participants }: Props) {
       for (const entry of entries) {
         const outcome = outcomes.get(entry.participantId);
         if (outcome?.wrote) {
-          result.updated++;
+          runSummary.updated++;
         } else if (outcome?.failed) {
-          result.failed++;
+          runSummary.failed++;
         } else if (entry.dsbPersonId != null) {
-          result.withoutRating++;
+          runSummary.withoutRating++;
         }
       }
-      setSummary(result);
+      setSummary(runSummary);
+      if (issues.length > 0) {
+        appendLine("muted", `Fehlerübersicht (${issues.length}):`);
+        for (const issue of issues) {
+          appendLine("error", issue);
+        }
+      }
       appendLine(
         "muted",
-        `Fertig · ${result.updated} aktualisiert, ${result.failed} fehlgeschlagen, ${result.withoutRating} ohne Wertung, ${result.unlinked} ohne DSB-Verknüpfung`,
+        `Fertig · ${runSummary.updated} aktualisiert, ${runSummary.failed} fehlgeschlagen, ${runSummary.withoutRating} ohne Wertung, ${runSummary.unlinked} ohne DSB-Verknüpfung`,
       );
       toast.info(
-        `${result.updated} von ${entries.length} Wertungszahlen aktualisiert`,
+        `${runSummary.updated} von ${entries.length} Wertungszahlen aktualisiert`,
       );
       router.refresh();
     } catch {
@@ -278,19 +321,43 @@ export function RatingUpdatePanel({ participants }: Props) {
               ? `Aktualisiert ${summary.updated} · Fehlgeschlagen ${summary.failed} · Ohne Wertung ${summary.withoutRating} · Ohne DSB-Verknüpfung ${summary.unlinked}`
               : null}
         </div>
-        <Button
-          onClick={run}
-          disabled={isRunning}
-          variant="outline"
-          className="flex items-center gap-2"
-        >
-          <RefreshCw className={`h-4 w-4 ${isRunning ? "animate-spin" : ""}`} />
-          {isRunning ? "Wird aktualisiert..." : "Ratings aktualisieren"}
-        </Button>
+        <div className="flex items-center gap-2">
+          <Button
+            onClick={run}
+            disabled={isRunning}
+            variant="outline"
+            className="flex items-center gap-2"
+          >
+            <RefreshCw
+              className={`h-4 w-4 ${isRunning ? "animate-spin" : ""}`}
+            />
+            {isRunning ? "Wird aktualisiert..." : "Ratings aktualisieren"}
+          </Button>
+          {isRunning && (
+            <Button
+              variant="outline"
+              title="Lauf abbrechen"
+              onClick={() => {
+                cancelRef.current = true;
+                skipPauseRef.current = true;
+              }}
+            >
+              <X className="h-4 w-4" />
+            </Button>
+          )}
+        </div>
       </div>
       {log.length > 0 && (
         <div
           ref={logContainerRef}
+          onScroll={(event) => {
+            const container = event.currentTarget;
+            autoScrollRef.current =
+              container.scrollHeight -
+                container.scrollTop -
+                container.clientHeight <
+              24;
+          }}
           className="max-h-80 overflow-y-auto rounded-md border border-gray-800 bg-gray-950 p-3 font-mono text-xs leading-5"
         >
           {log.map((line) => (
