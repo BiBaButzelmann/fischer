@@ -260,6 +260,36 @@ export const updateParticipantFide = action(async (participantId: number) => {
   } as const;
 });
 
+export const linkParticipantDsb = action(
+  async (participantId: number, nuLigaPersonId: string) => {
+    const session = await authWithRedirect();
+
+    invariant(
+      session.user.role === "admin",
+      "Unauthorized: Admin access required",
+    );
+
+    const current = await getParticipantRatingFieldsById(participantId);
+    invariant(current != null, `Participant ${participantId} not found`);
+
+    const person = await getDsbPersonById(nuLigaPersonId);
+    if (person == null) {
+      throw new Error("DSB-Person nicht gefunden");
+    }
+
+    await db
+      .update(participant)
+      .set({
+        dsbPersonId: person.nuLigaPersonId,
+        fideId: person.fideId != null ? String(person.fideId) : current.fideId,
+        updatedAt: new Date(),
+      })
+      .where(eq(participant.id, participantId));
+
+    revalidatePath("/turniere/[slug]/admin/nutzerverwaltung", "page");
+  },
+);
+
 export async function updateEntryFeeStatus(
   participantId: number,
   entryFeePayed: boolean,
