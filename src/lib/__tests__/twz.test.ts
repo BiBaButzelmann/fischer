@@ -85,6 +85,17 @@ describe("sortParticipantsByTwz", () => {
     ]);
   });
 
+  test("sorts players without ratings by last name", () => {
+    const result = sortParticipantsByTwz([
+      makeParticipant(null, null, "Schmidt"),
+      makeParticipant(null, null, "Albers"),
+    ]);
+    expect(result.map((p) => p.profile.lastName)).toEqual([
+      "Albers",
+      "Schmidt",
+    ]);
+  });
+
   test("places players without any rating last", () => {
     const result = sortParticipantsByTwz([
       makeParticipant(null, null, "Ohne"),

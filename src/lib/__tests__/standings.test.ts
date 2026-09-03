@@ -3,6 +3,99 @@ import { calculateStandings } from "../standings";
 import type { Game } from "@/db/types/game";
 import type { ParticipantWithRating } from "@/db/types/participant";
 
+function makeParticipant(
+  id: number,
+  {
+    dwzRating = null,
+    fideRating = null,
+    firstName = "Test",
+    lastName,
+  }: {
+    dwzRating?: number | null;
+    fideRating?: number | null;
+    firstName?: string;
+    lastName: string;
+  },
+): ParticipantWithRating {
+  return {
+    id,
+    dwzRating,
+    fideRating,
+    profile: {
+      id,
+      userId: `user-${id}`,
+      academicTitle: null,
+      firstName,
+      lastName,
+      deletedAt: null,
+      phoneNumber: "",
+      email: `user-${id}@test.com`,
+    },
+  };
+}
+
+describe("Standings sorting", () => {
+  test("uses the higher of DWZ and FIDE rating as the TWZ tie-break", () => {
+    const higherTwz = makeParticipant(1, {
+      dwzRating: 1900,
+      fideRating: 2100,
+      lastName: "HigherTwz",
+    });
+    const higherDwz = makeParticipant(2, {
+      dwzRating: 2000,
+      lastName: "HigherDwz",
+    });
+
+    const standings = calculateStandings([], [higherDwz, higherTwz]);
+
+    expect(standings.map(({ participantId }) => participantId)).toEqual([
+      higherTwz.id,
+      higherDwz.id,
+    ]);
+  });
+
+  test("breaks equal TWZ ties by the second rating descending", () => {
+    const lowerSecondaryRating = makeParticipant(1, {
+      dwzRating: 1800,
+      fideRating: 2000,
+      lastName: "LowerSecondary",
+    });
+    const higherSecondaryRating = makeParticipant(2, {
+      dwzRating: 2000,
+      fideRating: 1900,
+      lastName: "HigherSecondary",
+    });
+
+    const standings = calculateStandings([], [
+      lowerSecondaryRating,
+      higherSecondaryRating,
+    ]);
+
+    expect(standings.map(({ participantId }) => participantId)).toEqual([
+      higherSecondaryRating.id,
+      lowerSecondaryRating.id,
+    ]);
+  });
+
+  test("breaks complete rating ties by last name", () => {
+    const laterFirstName = makeParticipant(1, {
+      firstName: "Zoe",
+      lastName: "Albers",
+    });
+    const earlierFirstName = makeParticipant(2, {
+      firstName: "Anna",
+      lastName: "Schmidt",
+    });
+
+    const standings = calculateStandings([], [earlierFirstName, laterFirstName]);
+
+    expect(standings.map(({ participantId }) => participantId)).toEqual([
+      laterFirstName.id,
+      earlierFirstName.id,
+    ]);
+  });
+});
+
 describe("Sonneborn-Berger Calculation", () => {
   test("should calculate correct Sonneborn-Berger scores for round robin tournament example", () => {
     // Test data based on the provided example:
