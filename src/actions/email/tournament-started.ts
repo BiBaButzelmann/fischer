@@ -5,7 +5,10 @@ import { getRolesDataByProfileIdAndTournamentId } from "@/db/repositories/role";
 import { authWithRedirect } from "@/auth/utils";
 import { getTournamentById } from "@/db/repositories/tournament";
 import invariant from "tiny-invariant";
-import { sendTournamentStartedMail } from "@/email/tournament-started";
+import {
+  sendTournamentStartedMail,
+  type TournamentEmailData,
+} from "@/email/tournament-started";
 import {
   getParticipantsWithProfileByGroupId,
   getParticipantWithGroupByProfileIdAndTournamentId,
@@ -24,7 +27,11 @@ export async function sendTournamentStartedEmails(tournamentId: number) {
   const mailsSent = await sendEmailsToProfiles(
     profiles,
     tournamentId,
-    tournament.slug,
+    {
+      name: tournament.name,
+      slug: tournament.slug,
+      email: tournament.email,
+    },
     false,
   );
 
@@ -55,7 +62,11 @@ export async function sendTournamentStartedEmailsToGroup(
   const mailsSent = await sendEmailsToProfiles(
     profiles,
     tournamentId,
-    tournament.slug,
+    {
+      name: tournament.name,
+      slug: tournament.slug,
+      email: tournament.email,
+    },
     true,
   );
 
@@ -75,7 +86,7 @@ async function sendEmailsToProfiles(
     phoneNumber: string;
   }[],
   tournamentId: number,
-  slug: string,
+  tournament: TournamentEmailData,
   isGroupUpdate: boolean = false,
 ) {
   let mailsSent = 0;
@@ -92,7 +103,7 @@ async function sendEmailsToProfiles(
       await sendTournamentStartedMail({
         name: profile1.firstName,
         email: profile1.email,
-        slug,
+        tournament,
         roles: dataProfile1.roles,
         participantData: dataProfile1.participantData,
         isGroupUpdate,
@@ -104,7 +115,7 @@ async function sendEmailsToProfiles(
       await sendTournamentStartedMail({
         name: profile2.firstName,
         email: profile2.email,
-        slug,
+        tournament,
         roles: dataProfile2.roles,
         participantData: dataProfile2.participantData,
         isGroupUpdate,
