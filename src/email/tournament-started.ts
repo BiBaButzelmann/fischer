@@ -1,19 +1,18 @@
 import { sendEmail } from "./client";
-import { RolesData } from "@/db/types/role";
+import type { RolesData } from "@/db/types/role";
 import {
   TournamentStartedMail,
-  ParticipantGroupData,
+  type ParticipantGroupData,
+  type TournamentEmailData,
 } from "./templates/tournament-started";
+
+export type { TournamentEmailData } from "./templates/tournament-started";
 
 type Props = {
   name: string;
   email: string;
   roles: RolesData;
-  tournament: {
-    name: string;
-    slug: string;
-    email: string;
-  };
+  tournament: TournamentEmailData;
   participantData?: ParticipantGroupData;
   isGroupUpdate?: boolean;
 };

@@ -1,7 +1,8 @@
 import * as React from "react";
-import { RolesData } from "@/db/types/role";
-import { DayOfWeek } from "@/db/types/group";
-import { ParticipantWithProfile } from "@/db/types/participant";
+import type { RolesData } from "@/db/types/role";
+import type { DayOfWeek } from "@/db/types/group";
+import type { ParticipantWithProfile } from "@/db/types/participant";
+import type { Tournament } from "@/db/types/tournament";
 import { ParticipantContent } from "./participant-content";
 import { JurorContent } from "./juror-content";
 import { MatchEnteringHelperContent } from "./match-entering-helper-content";
@@ -16,15 +17,13 @@ export type ParticipantGroupData = {
   participants: ParticipantWithProfile[];
 };
 
+export type TournamentEmailData = Pick<Tournament, "name" | "slug" | "email">;
+
 type Props = {
   name: string;
   roles: RolesData;
-  tournament: {
-    name: string;
-    slug: string;
-    email: string;
-  };
-  participantData: ParticipantGroupData | undefined;
+  tournament: TournamentEmailData;
+  participantData?: ParticipantGroupData;
   isGroupUpdate?: boolean;
 };
 

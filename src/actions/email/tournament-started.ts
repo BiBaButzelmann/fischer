@@ -5,7 +5,10 @@ import { getRolesDataByProfileIdAndTournamentId } from "@/db/repositories/role";
 import { authWithRedirect } from "@/auth/utils";
 import { getTournamentById } from "@/db/repositories/tournament";
 import invariant from "tiny-invariant";
-import { sendTournamentStartedMail } from "@/email/tournament-started";
+import {
+  sendTournamentStartedMail,
+  type TournamentEmailData,
+} from "@/email/tournament-started";
 import {
   getParticipantsWithProfileByGroupId,
   getParticipantWithGroupByProfileIdAndTournamentId,
@@ -83,11 +86,7 @@ async function sendEmailsToProfiles(
     phoneNumber: string;
   }[],
   tournamentId: number,
-  tournament: {
-    name: string;
-    slug: string;
-    email: string;
-  },
+  tournament: TournamentEmailData,
   isGroupUpdate: boolean = false,
 ) {
   let mailsSent = 0;
