@@ -1,6 +1,19 @@
 import { ParticipantWithName } from "@/db/types/participant";
 
 type RatingFields = { fideRating: number | null; dwzRating: number | null };
+type RatedParticipantWithName = RatingFields & {
+  profile: { lastName: string };
+};
+
+function compareRatingsDescending(
+  a: number | null,
+  b: number | null,
+): number {
+  if (a === b) return 0;
+  if (a === null) return 1;
+  if (b === null) return -1;
+  return b - a;
+}
 
 /**
  * Turnierwertungszahl (TWZ) = höhere Wertungszahl aus ELO (FIDE) und DWZ.
@@ -49,17 +62,21 @@ export function averageTwz(participants: RatingFields[]): number | null {
 export function sortParticipantsByTwz(
   participants: ParticipantWithName[],
 ): ParticipantWithName[] {
-  const orMissing = (value: number | null) =>
-    value === null ? -Infinity : value;
+  return [...participants].sort(compareParticipantsByTwz);
+}
 
-  return [...participants].sort((a, b) => {
-    const byTwz = orMissing(getTwz(b)) - orMissing(getTwz(a));
-    if (byTwz !== 0) return byTwz;
+export function compareParticipantsByTwz(
+  a: RatedParticipantWithName,
+  b: RatedParticipantWithName,
+): number {
+  const byTwz = compareRatingsDescending(getTwz(a), getTwz(b));
+  if (byTwz !== 0) return byTwz;
 
-    const bySecondary =
-      orMissing(getSecondaryRating(b)) - orMissing(getSecondaryRating(a));
-    if (bySecondary !== 0) return bySecondary;
+  const bySecondary = compareRatingsDescending(
+    getSecondaryRating(a),
+    getSecondaryRating(b),
+  );
+  if (bySecondary !== 0) return bySecondary;
 
-    return a.profile.lastName.localeCompare(b.profile.lastName);
-  });
+  return a.profile.lastName.localeCompare(b.profile.lastName);
 }

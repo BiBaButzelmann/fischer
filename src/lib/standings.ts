@@ -1,6 +1,7 @@
 import type { PlayerStats } from "@/db/types/standings";
 import type { ParticipantWithRating } from "@/db/types/participant";
 import type { Game, GameResult } from "@/db/types/game";
+import { compareParticipantsByTwz } from "@/lib/twz";
 import invariant from "tiny-invariant";
 
 export function calculatePointsFromResult(
@@ -113,14 +114,5 @@ function comparePlayerStats(
   const participantB = participantsMap.get(b.participantId);
   invariant(participantA && participantB);
 
-  if ((participantB.dwzRating || 0) !== (participantA.dwzRating || 0)) {
-    return (participantB.dwzRating || 0) - (participantA.dwzRating || 0);
-  }
-  if ((participantB.fideRating || 0) !== (participantA.fideRating || 0)) {
-    return (participantB.fideRating || 0) - (participantA.fideRating || 0);
-  }
-
-  const fullNameA = `${participantA.profile.firstName} ${participantA.profile.lastName}`;
-  const fullNameB = `${participantB.profile.firstName} ${participantB.profile.lastName}`;
-  return fullNameA.localeCompare(fullNameB);
+  return compareParticipantsByTwz(participantA, participantB);
 }
