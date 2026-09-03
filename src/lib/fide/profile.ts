@@ -112,7 +112,7 @@ export async function getFideStandardRating(
 
 function matchRating(html: string, cls: string): number | null {
   const m = html.match(
-    new RegExp(`profile-${cls}\\b[\\s\\S]*?<p>\\s*(\\d{1,4})\\s*</p>`, "i"),
+    new RegExp(`profile-${cls}\\b[\\s\\S]*?<p>\\s*([^<]*?)\\s*</p>`, "i"),
   );
   const value = m ? Number(m[1]) : NaN;
   return Number.isFinite(value) && value >= 1000 ? value : null;
