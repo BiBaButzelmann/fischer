@@ -19,7 +19,11 @@ export type ParticipantGroupData = {
 type Props = {
   name: string;
   roles: RolesData;
-  slug: string;
+  tournament: {
+    name: string;
+    slug: string;
+    email: string;
+  };
   participantData: ParticipantGroupData | undefined;
   isGroupUpdate?: boolean;
 };
@@ -27,7 +31,7 @@ type Props = {
 export function TournamentStartedMail({
   name,
   roles,
-  slug,
+  tournament,
   participantData,
   isGroupUpdate = false,
 }: Props) {
@@ -51,15 +55,15 @@ export function TournamentStartedMail({
       {isGroupUpdate ? (
         <>
           <p>
-            Aufgrund von verspäteten Anmeldungen wurde deine Gruppe leider
-            verändert. Hier findest du deine neuen Informationen:
+            Deine Gruppeneinteilung hat sich geändert. Hier findest du deine
+            aktuellen Informationen:
           </p>
         </>
       ) : (
         <>
           <p>
-            Das Klubturnier hat offiziell begonnen. Du kannst dich jetzt in das
-            Turniersystem einloggen und deine Partien verfolgen.
+            Das {tournament.name} hat offiziell begonnen. Du kannst dich jetzt
+            in das Turniersystem einloggen und deine Partien verfolgen.
           </p>
           <p>Besuche die Turnierwebsite unter folgendem Link:</p>
           <p>
@@ -75,14 +79,14 @@ export function TournamentStartedMail({
 
       {roles.participant && (
         <ParticipantContent
-          slug={slug}
+          slug={tournament.slug}
           participantGroup={participantData!}
         />
       )}
 
-      {roles.setupHelper && <SetupHelperContent slug={slug} />}
+      {roles.setupHelper && <SetupHelperContent slug={tournament.slug} />}
 
-      {roles.referee && <RefereeContent slug={slug} />}
+      {roles.referee && <RefereeContent slug={tournament.slug} />}
 
       {roles.matchEnteringHelper && <MatchEnteringHelperContent />}
 
@@ -90,16 +94,17 @@ export function TournamentStartedMail({
 
       <p>
         Bei Fragen oder Problemen wende Dich gerne an die Turnierleitung unter{" "}
-        <a href="mailto:klubturnier@hsk1830.de" style={{ color: "#2980b9" }}>
-          klubturnier@hsk1830.de
+        <a href={`mailto:${tournament.email}`} style={{ color: "#2980b9" }}>
+          {tournament.email}
         </a>
       </p>
 
       <p>
         Viele Grüße,
         <br />
-        Die Turnierleitung <br />
-        Arne Alpers, Arend Bothe und Kai Müller
+        Die Turnierleitung
+        <br />
+        {tournament.name}
       </p>
     </div>
   );
