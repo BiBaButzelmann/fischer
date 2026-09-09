@@ -231,7 +231,7 @@ describe("Sonneborn-Berger Calculation", () => {
         deletedAt: null,
         groupId: 1,
         pgnId: null,
-        boardNumber: null,
+        boardNumber: 1,
       },
       // A vs C: ½ (A: ½, C: ½)
       {
@@ -246,7 +246,7 @@ describe("Sonneborn-Berger Calculation", () => {
         deletedAt: null,
         groupId: 1,
         pgnId: null,
-        boardNumber: null,
+        boardNumber: 1,
       },
       // A vs D: 1 (A: 1, D: 0)
       {
@@ -261,7 +261,7 @@ describe("Sonneborn-Berger Calculation", () => {
         deletedAt: null,
         groupId: 1,
         pgnId: null,
-        boardNumber: null,
+        boardNumber: 1,
       },
       // A vs E: 1 (A: 1, E: 0)
       {
@@ -276,7 +276,7 @@ describe("Sonneborn-Berger Calculation", () => {
         deletedAt: null,
         groupId: 1,
         pgnId: null,
-        boardNumber: null,
+        boardNumber: 1,
       },
       // A vs F: 1 (A: 1, F: 0)
       {
@@ -291,7 +291,7 @@ describe("Sonneborn-Berger Calculation", () => {
         deletedAt: null,
         groupId: 1,
         pgnId: null,
-        boardNumber: null,
+        boardNumber: 1,
       },
       // A vs G: 1 (A: 1, G: 0)
       {
@@ -306,7 +306,7 @@ describe("Sonneborn-Berger Calculation", () => {
         deletedAt: null,
         groupId: 1,
         pgnId: null,
-        boardNumber: null,
+        boardNumber: 1,
       },
       // B vs C: ½ (B: ½, C: ½)
       {
@@ -321,7 +321,7 @@ describe("Sonneborn-Berger Calculation", () => {
         deletedAt: null,
         groupId: 1,
         pgnId: null,
-        boardNumber: null,
+        boardNumber: 1,
       },
       // B vs D: ½ (B: ½, D: ½)
       {
@@ -336,7 +336,7 @@ describe("Sonneborn-Berger Calculation", () => {
         deletedAt: null,
         groupId: 1,
         pgnId: null,
-        boardNumber: null,
+        boardNumber: 1,
       },
       // B vs E: 1 (B: 1, E: 0)
       {
@@ -351,7 +351,7 @@ describe("Sonneborn-Berger Calculation", () => {
         deletedAt: null,
         groupId: 1,
         pgnId: null,
-        boardNumber: null,
+        boardNumber: 1,
       },
       // B vs F: 1 (B: 1, F: 0)
       {
@@ -366,7 +366,7 @@ describe("Sonneborn-Berger Calculation", () => {
         deletedAt: null,
         groupId: 1,
         pgnId: null,
-        boardNumber: null,
+        boardNumber: 1,
       },
       // B vs G: 1 (B: 1, G: 0)
       {
@@ -381,7 +381,7 @@ describe("Sonneborn-Berger Calculation", () => {
         deletedAt: null,
         groupId: 1,
         pgnId: null,
-        boardNumber: null,
+        boardNumber: 1,
       },
       // C vs D: ½ (C: ½, D: ½)
       {
@@ -396,7 +396,7 @@ describe("Sonneborn-Berger Calculation", () => {
         deletedAt: null,
         groupId: 1,
         pgnId: null,
-        boardNumber: null,
+        boardNumber: 1,
       },
       // C vs E: ½ (C: ½, E: ½)
       {
@@ -411,7 +411,7 @@ describe("Sonneborn-Berger Calculation", () => {
         deletedAt: null,
         groupId: 1,
         pgnId: null,
-        boardNumber: null,
+        boardNumber: 1,
       },
       // C vs F: 1 (C: 1, F: 0)
       {
@@ -426,7 +426,7 @@ describe("Sonneborn-Berger Calculation", () => {
         deletedAt: null,
         groupId: 1,
         pgnId: null,
-        boardNumber: null,
+        boardNumber: 1,
       },
       // C vs G: 1 (C: 1, G: 0)
       {
@@ -441,7 +441,7 @@ describe("Sonneborn-Berger Calculation", () => {
         deletedAt: null,
         groupId: 1,
         pgnId: null,
-        boardNumber: null,
+        boardNumber: 1,
       },
       // D vs E: 1 (D: 1, E: 0)
       {
@@ -456,7 +456,7 @@ describe("Sonneborn-Berger Calculation", () => {
         deletedAt: null,
         groupId: 1,
         pgnId: null,
-        boardNumber: null,
+        boardNumber: 1,
       },
       // D vs F: 1 (D: 1, F: 0)
       {
@@ -471,7 +471,7 @@ describe("Sonneborn-Berger Calculation", () => {
         deletedAt: null,
         groupId: 1,
         pgnId: null,
-        boardNumber: null,
+        boardNumber: 1,
       },
       // D vs G: 1 (D: 1, G: 0)
       {
@@ -486,7 +486,7 @@ describe("Sonneborn-Berger Calculation", () => {
         deletedAt: null,
         groupId: 1,
         pgnId: null,
-        boardNumber: null,
+        boardNumber: 1,
       },
       // E vs F: 1 (E: 1, F: 0)
       {
@@ -501,7 +501,7 @@ describe("Sonneborn-Berger Calculation", () => {
         deletedAt: null,
         groupId: 1,
         pgnId: null,
-        boardNumber: null,
+        boardNumber: 1,
       },
       // E vs G: 1 (E: 1, G: 0)
       {
@@ -516,7 +516,7 @@ describe("Sonneborn-Berger Calculation", () => {
         deletedAt: null,
         groupId: 1,
         pgnId: null,
-        boardNumber: null,
+        boardNumber: 1,
       },
       // F vs G: 1 (F: 1, G: 0)
       {
@@ -531,7 +531,7 @@ describe("Sonneborn-Berger Calculation", () => {
         deletedAt: null,
         groupId: 1,
         pgnId: null,
-        boardNumber: null,
+        boardNumber: 1,
       },
     ];
 

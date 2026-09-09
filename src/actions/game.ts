@@ -108,7 +108,7 @@ export async function scheduleGamesForGroup(
 
   await db.transaction(async (tx) => {
     const gamesToInsert: InferInsertModel<typeof game>[] = [];
-    const matchdayGameRelations: InferInsertModel<typeof matchdayGame>[] = [];
+    const matchdayIdsByRound: number[] = [];
 
     const matchdays = await tx.query.matchday.findMany({
       where: (md, { eq, and }) =>
@@ -135,28 +135,28 @@ export async function scheduleGamesForGroup(
       }
 
       const pairsInRound = pairings[roundIdx];
+      matchdayIdsByRound[roundIdx] = matchday.id;
       let startingBoardNumber = 1;
 
       pairsInRound.forEach(([whiteNo, blackNo]) => {
+        if (whiteNo > n || blackNo > n) return;
+
         const whitePlayer = players[whiteNo - 1];
         const blackPlayer = players[blackNo - 1];
 
         invariant(
-          whitePlayer || blackPlayer,
-          `Invalid pairing: both players are null for pairing [${whiteNo}, ${blackNo}] in round ${roundIdx + 1}`,
+          whitePlayer && blackPlayer,
+          `Invalid pairing [${whiteNo}, ${blackNo}] in round ${roundIdx + 1}`,
         );
 
-        const isByeGame = !whitePlayer || !blackPlayer;
-        const boardNumber = isByeGame ? null : startingBoardNumber++;
-
         gamesToInsert.push({
-          whiteParticipantId: whitePlayer?.participant.id ?? null,
-          blackParticipantId: blackPlayer?.participant.id ?? null,
-          result: isByeGame ? (whitePlayer == null ? "-:+" : "+:-") : null,
+          whiteParticipantId: whitePlayer.participant.id,
+          blackParticipantId: blackPlayer.participant.id,
+          result: null,
           tournamentId,
           groupId: group.id,
           round: roundIdx + 1,
-          boardNumber,
+          boardNumber: startingBoardNumber++,
         });
       });
     }
@@ -164,30 +164,12 @@ export async function scheduleGamesForGroup(
     const insertedGames = await tx
       .insert(game)
       .values(gamesToInsert)
-      .returning({ id: game.id });
+      .returning({ id: game.id, round: game.round });
 
-    let gameIndex = 0;
-    for (let roundIdx = 0; roundIdx < pairings.length; roundIdx++) {
-      const tournamentWeekForRound = regularWeeks[roundIdx];
-      const matchday = matchdays.find(
-        (m) => m.tournamentWeekId === tournamentWeekForRound.id,
-      );
-
-      if (!matchday) {
-        return {
-          error: `Kein Spieltag gefunden für Turnier ${tournamentId}, Woche ${tournamentWeekForRound.weekNumber}, ${dayOfWeek}`,
-        };
-      }
-
-      const pairsInRound = pairings[roundIdx];
-      for (let boardIdx = 0; boardIdx < pairsInRound.length; boardIdx++) {
-        matchdayGameRelations.push({
-          matchdayId: matchday.id,
-          gameId: insertedGames[gameIndex].id,
-        });
-        gameIndex++;
-      }
-    }
+    const matchdayGameRelations = insertedGames.map(({ id, round }) => ({
+      matchdayId: matchdayIdsByRound[round - 1],
+      gameId: id,
+    }));
 
     await tx.insert(matchdayGame).values(matchdayGameRelations);
   });
@@ -226,14 +208,8 @@ export async function updateGameMatchdayAndBoardNumber(
     };
   }
 
-  invariant(
-    gameData.whiteParticipant,
-    "Weißer Spieler nicht gefunden - Freilose können nicht verschoben werden",
-  );
-  invariant(
-    gameData.blackParticipant,
-    "Schwarzer Spieler nicht gefunden - Freilose können nicht verschoben werden",
-  );
+  invariant(gameData.whiteParticipant, "Weißer Spieler nicht gefunden");
+  invariant(gameData.blackParticipant, "Schwarzer Spieler nicht gefunden");
 
   const isUserInGame =
     gameData.whiteParticipant.profile.userId === session.user.id ||

@@ -2,118 +2,58 @@ import {
   getCompletedGames,
   getParticipantsInGroup,
 } from "@/db/repositories/game";
-import { Game, GameWithMatchday } from "@/db/types/game";
+import type { Game } from "@/db/types/game";
 import type { GroupSummary } from "@/db/types/group";
-import { isGameActuallyPlayed } from "@/lib/game-auth";
-import { didParticipantForfeitGame } from "@/lib/game";
-import { getIndividualPlayerResult } from "@/lib/game-result-utils";
+import type { Participant } from "@/db/types/participant";
+import {
+  getIndividualPlayerResult,
+  isGameActuallyPlayed,
+} from "@/lib/game-result-utils";
 import { calculatePointsFromResult, calculateStandings } from "@/lib/standings";
-import invariant from "tiny-invariant";
 
 type GroupParticipants = Awaited<ReturnType<typeof getParticipantsInGroup>>;
 type GroupParticipant = GroupParticipants[number];
-type CompletedGames = Awaited<ReturnType<typeof getCompletedGames>>;
 
-function getRelevantGames(
-  participants: GroupParticipants,
-  games: CompletedGames,
-): Set<Game> {
-  const participantsMap = Object.fromEntries(
-    participants.map((p) => [p.id, p]),
-  );
-  const gamesPlayedPerParticipant = games.reduce(
-    (acc, game) => {
-      const { whiteParticipantId, blackParticipantId } = game;
+function filterGamesByWithdrawalRules(
+  participants: Pick<Participant, "id" | "deletedAt">[],
+  games: Game[],
+): Game[] {
+  const excludedParticipantIds = new Set(
+    participants
+      .filter((participant) => {
+        if (participant.deletedAt == null) return false;
 
-      if (whiteParticipantId == null || blackParticipantId == null) {
-        return acc;
-      }
+        const gamesPlayed = games.filter(
+          (game) =>
+            (game.whiteParticipantId === participant.id ||
+              game.blackParticipantId === participant.id) &&
+            !(
+              (game.whiteParticipantId === participant.id &&
+                (game.result === "-:+" || game.result === "-:-")) ||
+              (game.blackParticipantId === participant.id &&
+                (game.result === "+:-" || game.result === "-:-"))
+            ),
+        ).length;
 
-      const whiteParticipant = participantsMap[whiteParticipantId];
-      const blackParticipant = participantsMap[blackParticipantId];
-
-      // consider a game not played for deleted participants based on the result
-      if (
-        whiteParticipant.deletedAt == null ||
-        !didParticipantForfeitGame(whiteParticipantId, game)
-      ) {
-        if (!acc[whiteParticipantId]) {
-          acc[whiteParticipantId] = [];
-        }
-        acc[whiteParticipantId].push(game);
-      }
-      if (
-        blackParticipant.deletedAt == null ||
-        !didParticipantForfeitGame(blackParticipantId, game)
-      ) {
-        if (!acc[blackParticipantId]) {
-          acc[blackParticipantId] = [];
-        }
-        acc[blackParticipantId].push(game);
-      }
-
-      return acc;
-    },
-    {} as Record<number, GameWithMatchday[]>,
+        return gamesPlayed < (participants.length - 1) / 2;
+      })
+      .map((participant) => participant.id),
   );
 
-  const activeParticipants = new Set(
-    participants.filter((p) => p.deletedAt == null).map((p) => p.id),
+  return games.filter(
+    (game) =>
+      !excludedParticipantIds.has(game.whiteParticipantId) &&
+      !excludedParticipantIds.has(game.blackParticipantId),
   );
-  const inactiveParticipants = new Set(
-    participants.filter((p) => p.deletedAt != null).map((p) => p.id),
-  );
-
-  const totalGamesToPlay = participants.length - 1;
-  const relevantGames: Set<Game> = new Set();
-
-  // add all games to list except if one of the participants is inactive and has played less than 50% of their games
-  for (const game of games) {
-    const { whiteParticipantId, blackParticipantId } = game;
-    invariant(
-      whiteParticipantId != null && blackParticipantId != null,
-      "Both participants must be defined",
-    );
-
-    if (
-      activeParticipants.has(whiteParticipantId) &&
-      activeParticipants.has(blackParticipantId)
-    ) {
-      relevantGames.add(game);
-      continue;
-    }
-
-    let isRelevant = true;
-    if (inactiveParticipants.has(whiteParticipantId)) {
-      const gamesPlayed = gamesPlayedPerParticipant[whiteParticipantId] || [];
-      const gamesPlayedCount = gamesPlayed.length;
-      if (gamesPlayedCount / totalGamesToPlay < 0.5) {
-        isRelevant = false;
-      }
-    }
-    if (inactiveParticipants.has(blackParticipantId)) {
-      const gamesPlayed = gamesPlayedPerParticipant[blackParticipantId] || [];
-      const gamesPlayedCount = gamesPlayed.length;
-      if (gamesPlayedCount / totalGamesToPlay < 0.5) {
-        isRelevant = false;
-      }
-    }
-
-    if (isRelevant) {
-      relevantGames.add(game);
-    }
-  }
-
-  return relevantGames;
 }
 
 export async function getStandings(groupId: number, selectedRound?: number) {
-  const participants = await getParticipantsInGroup(groupId);
-  const games = await getCompletedGames(groupId, selectedRound);
-  return calculateStandings(
-    Array.from(getRelevantGames(participants, games)),
-    participants,
-  );
+  const [participants, completedGames] = await Promise.all([
+    getParticipantsInGroup(groupId),
+    getCompletedGames(groupId, selectedRound),
+  ]);
+  const games = filterGamesByWithdrawalRules(participants, completedGames);
+  return calculateStandings(games, participants);
 }
 
 export function resolveStandingsParams(
@@ -175,10 +115,12 @@ export async function getCrossTable(
   groupId: number,
   selectedRound?: number,
 ): Promise<CrossTable> {
-  const participants = await getParticipantsInGroup(groupId);
-  const games = await getCompletedGames(groupId, selectedRound);
-  const standings = await getStandings(groupId, selectedRound);
-  const relevantGames = getRelevantGames(participants, games);
+  const [participants, completedGames] = await Promise.all([
+    getParticipantsInGroup(groupId),
+    getCompletedGames(groupId, selectedRound),
+  ]);
+  const games = filterGamesByWithdrawalRules(participants, completedGames);
+  const standings = calculateStandings(games, participants);
 
   const participantsById = new Map(participants.map((p) => [p.id, p]));
   const orderedParticipants = standings
@@ -204,10 +146,7 @@ export async function getCrossTable(
 
   for (const game of games) {
     const { whiteParticipantId, blackParticipantId, result } = game;
-    if (whiteParticipantId == null || blackParticipantId == null || !result) {
-      continue;
-    }
-    if (!relevantGames.has(game)) {
+    if (!result) {
       continue;
     }
     const played = isGameActuallyPlayed(result);

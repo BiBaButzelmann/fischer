@@ -1,4 +1,15 @@
-import { GameResult } from "@/db/types/game";
+import {
+  GameResult,
+  PlayedGameResult,
+  PLAYED_GAME_RESULTS,
+} from "@/db/types/game";
+
+export const isGameActuallyPlayed = (
+  result: GameResult | null,
+): result is PlayedGameResult => {
+  if (!result) return false;
+  return PLAYED_GAME_RESULTS.includes(result as PlayedGameResult);
+};
 
 export function getIndividualPlayerResult(
   gameResult: GameResult,

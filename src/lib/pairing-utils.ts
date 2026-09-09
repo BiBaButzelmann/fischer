@@ -1,6 +1,6 @@
 export function bergerFide(n: number): Array<Array<[number, number]>> {
   if (n % 2) {
-    throw new Error("n must be even (add a bye for odd n)");
+    throw new Error("n must be even (add a virtual bye slot for odd n)");
   }
 
   const half = Math.floor(n / 2); // boards per round
