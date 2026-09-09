@@ -22,7 +22,7 @@ export default function RootLayout({
         <footer>
           <Separator />
           <div className="text-center p-6 text-xs text-muted-foreground">
-            <p>© 2025 HSK Klubturnier</p>
+            <p>© 2026 HSK Klubturnier</p>
             <p>Kontakt: klubturnier@hsk1830.de</p>
             <p>
               <a
