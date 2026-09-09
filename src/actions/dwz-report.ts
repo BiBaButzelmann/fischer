@@ -65,24 +65,6 @@ export const generateDwzReportFile = action(async (groupId: number) => {
     return game.result != null;
   });
 
-  const gamesAsWhiteParticipant = completedGames.reduce(
-    (acc, game) => {
-      acc[game.whiteParticipantId] ??= [];
-      acc[game.whiteParticipantId].push(game.id);
-      return acc;
-    },
-    {} as Record<number, number[]>,
-  );
-
-  const gamesAsBlackParticipant = completedGames.reduce(
-    (acc, game) => {
-      acc[game.blackParticipantId] ??= [];
-      acc[game.blackParticipantId].push(game.id);
-      return acc;
-    },
-    {} as Record<number, number[]>,
-  );
-
   const standings = await getStandings(groupId);
 
   const getInitialGroupPositionOfPlayer = (participantId: number) => {
@@ -108,11 +90,10 @@ export const generateDwzReportFile = action(async (groupId: number) => {
   };
 
   const entries = data.participants.map(({ participant }) => {
-    const whiteGameIds = gamesAsWhiteParticipant[participant.id] ?? [];
-    const blackGameIds = gamesAsBlackParticipant[participant.id] ?? [];
     const participantGames = completedGames.filter(
       (game) =>
-        whiteGameIds.includes(game.id) || blackGameIds.includes(game.id),
+        game.whiteParticipantId === participant.id ||
+        game.blackParticipantId === participant.id,
     );
 
     return {
@@ -130,7 +111,7 @@ export const generateDwzReportFile = action(async (groupId: number) => {
       zpsPlayerId: participant.zpsPlayerId ?? undefined,
       results: participantGames.map((game) => {
         invariant(game.result, `Game ${game.id} does not have a result`);
-        const isWhite = whiteGameIds.includes(game.id);
+        const isWhite = game.whiteParticipantId === participant.id;
         const opponentId = isWhite
           ? game.blackParticipantId
           : game.whiteParticipantId;

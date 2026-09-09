@@ -53,9 +53,7 @@ export const generateFideReportFile = action(
       return game.result != null;
     });
 
-    // Include results only while both participants were still active.
-    const reportGames = completedGames.filter((game) => {
-      // check for disabled participants
+    const gamesWithActiveParticipants = completedGames.filter((game) => {
       const date = game.matchday.date;
       const whiteParticipant = data.participants.find(
         (p) => p.participant.id === game.whiteParticipantId,
@@ -84,26 +82,8 @@ export const generateFideReportFile = action(
       return !isWhiteParticipantDisabled && !isBlackParticipantDisabled;
     });
 
-    const gamesAsWhiteParticipant = reportGames.reduce(
-      (acc, game) => {
-        acc[game.whiteParticipantId] ??= [];
-        acc[game.whiteParticipantId].push(game.id);
-        return acc;
-      },
-      {} as Record<number, number[]>,
-    );
-
-    const gamesAsBlackParticipant = reportGames.reduce(
-      (acc, game) => {
-        acc[game.blackParticipantId] ??= [];
-        acc[game.blackParticipantId].push(game.id);
-        return acc;
-      },
-      {} as Record<number, number[]>,
-    );
-
     const standings = calculateStandings(
-      reportGames,
+      gamesWithActiveParticipants,
       data.participants.map((p) => p.participant),
     );
 
@@ -140,11 +120,10 @@ export const generateFideReportFile = action(
 
     const entries = data.participants.map(
       async ({ groupPosition, participant }) => {
-        const whiteGameIds = gamesAsWhiteParticipant[participant.id] ?? [];
-        const blackGameIds = gamesAsBlackParticipant[participant.id] ?? [];
-        const participantGames = reportGames.filter(
+        const participantGames = gamesWithActiveParticipants.filter(
           (game) =>
-            whiteGameIds.includes(game.id) || blackGameIds.includes(game.id),
+            game.whiteParticipantId === participant.id ||
+            game.blackParticipantId === participant.id,
         );
 
         invariant(
@@ -185,7 +164,7 @@ export const generateFideReportFile = action(
           currentGroupPosition,
           results: participantGames.map((game) => {
             invariant(game.result, `Game ${game.id} does not have a result`);
-            const isWhite = whiteGameIds.includes(game.id);
+            const isWhite = game.whiteParticipantId === participant.id;
 
             return {
               scheduled: parseDateOnly(game.matchday.date),
