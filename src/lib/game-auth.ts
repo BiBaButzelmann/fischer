@@ -3,21 +3,9 @@ import {
   isUserMatchEnteringHelperInGame,
   getGameTournamentId,
 } from "@/db/repositories/game";
-import {
-  GameResult,
-  GameWithParticipants,
-  PlayedGameResult,
-  PLAYED_GAME_RESULTS,
-} from "@/db/types/game";
+import { GameWithParticipants } from "@/db/types/game";
 import { getRolesByUserIdAndTournamentId } from "@/db/repositories/role";
 import { Role } from "@/db/types/role";
-
-export const isGameActuallyPlayed = (
-  result: GameResult | null,
-): result is PlayedGameResult => {
-  if (!result) return false;
-  return PLAYED_GAME_RESULTS.includes(result as PlayedGameResult);
-};
 
 export const canUserViewGames = (userRoles: Role[]): boolean => {
   const isParticipant = userRoles.includes("participant");

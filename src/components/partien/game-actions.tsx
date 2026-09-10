@@ -11,7 +11,7 @@ import Link from "next/link";
 import { NotebookPen } from "lucide-react";
 import { PostponeGameDialog } from "./postpone-game-dialog";
 import { ReportResultDialog } from "./report-result-dialog";
-import { isGameActuallyPlayed } from "@/lib/game-auth";
+import { isGameActuallyPlayed } from "@/lib/game-result-utils";
 import { tournamentPath } from "@/lib/navigation";
 import { useTournamentSlug } from "@/hooks/use-tournament-slug";
 import { DateTime } from "luxon";

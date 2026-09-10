@@ -53,17 +53,7 @@ export const generateFideReportFile = action(
       return game.result != null;
     });
 
-    // a game is considered to have actually been played, if:
-    // - it is not a bye game
-    // - both participants were not disabled at the time of the game
-    const actuallyPlayedGames = completedGames.filter((game) => {
-      const isByeGame =
-        game.whiteParticipantId == null || game.blackParticipantId == null;
-      if (isByeGame) {
-        return false;
-      }
-
-      // check for disabled participants
+    const gamesWithActiveParticipants = completedGames.filter((game) => {
       const date = game.matchday.date;
       const whiteParticipant = data.participants.find(
         (p) => p.participant.id === game.whiteParticipantId,
@@ -92,38 +82,8 @@ export const generateFideReportFile = action(
       return !isWhiteParticipantDisabled && !isBlackParticipantDisabled;
     });
 
-    const gamesAsWhiteParticipant = actuallyPlayedGames.reduce(
-      (acc, game) => {
-        if (
-          game.whiteParticipantId === null ||
-          game.blackParticipantId === null
-        ) {
-          return acc;
-        }
-        acc[game.whiteParticipantId] ??= [];
-        acc[game.whiteParticipantId].push(game.id);
-        return acc;
-      },
-      {} as Record<number, number[]>,
-    );
-
-    const gamesAsBlackParticipant = actuallyPlayedGames.reduce(
-      (acc, game) => {
-        if (
-          game.whiteParticipantId === null ||
-          game.blackParticipantId === null
-        ) {
-          return acc;
-        }
-        acc[game.blackParticipantId] ??= [];
-        acc[game.blackParticipantId].push(game.id);
-        return acc;
-      },
-      {} as Record<number, number[]>,
-    );
-
     const standings = calculateStandings(
-      actuallyPlayedGames,
+      gamesWithActiveParticipants,
       data.participants.map((p) => p.participant),
     );
 
@@ -160,11 +120,10 @@ export const generateFideReportFile = action(
 
     const entries = data.participants.map(
       async ({ groupPosition, participant }) => {
-        const whiteGameIds = gamesAsWhiteParticipant[participant.id] ?? [];
-        const blackGameIds = gamesAsBlackParticipant[participant.id] ?? [];
-        const participantGames = actuallyPlayedGames.filter(
+        const participantGames = gamesWithActiveParticipants.filter(
           (game) =>
-            whiteGameIds.includes(game.id) || blackGameIds.includes(game.id),
+            game.whiteParticipantId === participant.id ||
+            game.blackParticipantId === participant.id,
         );
 
         invariant(
@@ -203,25 +162,19 @@ export const generateFideReportFile = action(
           birthYear: DateTime.local(participant.birthYear),
           currentPoints,
           currentGroupPosition,
-          results: participantGames
-            .filter(
-              (game) =>
-                game.whiteParticipantId !== null &&
-                game.blackParticipantId !== null,
-            )
-            .map((game) => {
-              invariant(game.result, `Game ${game.id} does not have a result`);
-              const isWhite = whiteGameIds.includes(game.id);
+          results: participantGames.map((game) => {
+            invariant(game.result, `Game ${game.id} does not have a result`);
+            const isWhite = game.whiteParticipantId === participant.id;
 
-              return {
-                scheduled: parseDateOnly(game.matchday.date),
-                opponentGroupPosition: getInitialGroupPositionOfPlayer(
-                  isWhite ? game.blackParticipantId! : game.whiteParticipantId!,
-                ),
-                pieceColor: isWhite ? "w" : "b",
-                result: mapResult(game.result, isWhite),
-              };
-            }),
+            return {
+              scheduled: parseDateOnly(game.matchday.date),
+              opponentGroupPosition: getInitialGroupPositionOfPlayer(
+                isWhite ? game.blackParticipantId : game.whiteParticipantId,
+              ),
+              pieceColor: isWhite ? "w" : "b",
+              result: mapResult(game.result, isWhite),
+            };
+          }),
         } as PlayerEntry;
       },
     );

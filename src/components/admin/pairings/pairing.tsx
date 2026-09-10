@@ -6,6 +6,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { ParticipantEntry } from "../groups/participant-entry";
 import { Bird } from "lucide-react";
 import { formatDateOnly } from "@/lib/date";
+import invariant from "tiny-invariant";
 
 export function Pairing({ group }: { group: GroupWithParticipantsAndGames }) {
   if (!group.games || group.games.length === 0) {
@@ -22,10 +23,6 @@ export function Pairing({ group }: { group: GroupWithParticipantsAndGames }) {
     );
   }
 
-  const findParticipant = (participantId: number) => {
-    return group.participants.find((p) => p.id === participantId);
-  };
-
   const ParticipantCell = ({
     participantId,
     matchdayDate,
@@ -33,18 +30,10 @@ export function Pairing({ group }: { group: GroupWithParticipantsAndGames }) {
     participantId: number;
     matchdayDate: string;
   }) => {
-    const participant = findParticipant(participantId);
-
-    if (!participant) {
-      return (
-        <div className="flex items-center gap-2 py-1">
-          <Bird className="h-4 w-4 text-amber-700" />
-          <p className="font-semibold flex-grow truncate text-red-700">
-            spielfrei
-          </p>
-        </div>
-      );
-    }
+    const participant = group.participants.find(
+      (participant) => participant.id === participantId,
+    );
+    invariant(participant, `Participant ${participantId} not found`);
 
     const isNotAvailable =
       participant.notAvailableDays?.includes(matchdayDate) || false;
@@ -64,6 +53,13 @@ export function Pairing({ group }: { group: GroupWithParticipantsAndGames }) {
     );
   };
 
+  const ByeCell = () => (
+    <div className="flex items-center gap-2 py-1">
+      <Bird className="h-4 w-4 text-amber-700" />
+      <p className="font-semibold flex-grow truncate text-red-700">spielfrei</p>
+    </div>
+  );
+
   const gamesByRound = group.games.reduce((acc, game) => {
     if (!acc.has(game.round)) {
       acc.set(game.round, []);
@@ -73,7 +69,6 @@ export function Pairing({ group }: { group: GroupWithParticipantsAndGames }) {
   }, new Map<number, GameWithMatchday[]>());
 
   const rounds = Array.from(gamesByRound.keys()).sort((a, b) => a - b);
-
   if (rounds.length === 0) {
     return (
       <div className="flex flex-col items-center justify-center gap-4 p-8 text-gray-500">
@@ -102,6 +97,16 @@ export function Pairing({ group }: { group: GroupWithParticipantsAndGames }) {
 
         {rounds.map((round) => {
           const games = gamesByRound.get(round) || [];
+          const byeParticipant =
+            group.participants.length % 2 === 1
+              ? group.participants.find((participant) =>
+                  games.every(
+                    (game) =>
+                      game.whiteParticipantId !== participant.id &&
+                      game.blackParticipantId !== participant.id,
+                  ),
+                )
+              : undefined;
 
           const matchdayDate = games[0].matchdayGame.matchday.date;
           const dateDisplay = formatDateOnly(matchdayDate);
@@ -135,18 +140,47 @@ export function Pairing({ group }: { group: GroupWithParticipantsAndGames }) {
                         </div>
                         <div>
                           <ParticipantCell
-                            participantId={game.whiteParticipantId!}
+                            participantId={game.whiteParticipantId}
                             matchdayDate={matchdayDate}
                           />
                         </div>
                         <div>
                           <ParticipantCell
-                            participantId={game.blackParticipantId!}
+                            participantId={game.blackParticipantId}
                             matchdayDate={matchdayDate}
                           />
                         </div>
                       </div>
                     ))}
+                    {byeParticipant && (
+                      <div
+                        className={`grid grid-cols-[80px_1fr_1fr] gap-6 px-6 py-4 hover:bg-gray-50 transition-colors ${
+                          games.length % 2 === 0 ? "bg-white" : "bg-gray-50/50"
+                        }`}
+                      >
+                        <div />
+                        <div>
+                          {round % 2 === 1 ? (
+                            <ParticipantCell
+                              participantId={byeParticipant.id}
+                              matchdayDate={matchdayDate}
+                            />
+                          ) : (
+                            <ByeCell />
+                          )}
+                        </div>
+                        <div>
+                          {round % 2 === 0 ? (
+                            <ParticipantCell
+                              participantId={byeParticipant.id}
+                              matchdayDate={matchdayDate}
+                            />
+                          ) : (
+                            <ByeCell />
+                          )}
+                        </div>
+                      </div>
+                    )}
                   </div>
                 </div>
               </div>

@@ -7,7 +7,6 @@ import {
   sql,
   getTableColumns,
   isNull,
-  isNotNull,
   lte,
 } from "drizzle-orm";
 import { todayDateOnly } from "@/lib/date";
@@ -24,7 +23,6 @@ import { participant } from "../schema/participant";
 import { profile } from "../schema/profile";
 import { getMatchEnteringHelperIdByUserId } from "./match-entering-helper";
 import invariant from "tiny-invariant";
-import { alias } from "drizzle-orm/pg-core";
 import { PLAYED_GAME_RESULTS } from "../types/game";
 
 export async function getGameTournamentId(
@@ -83,14 +81,10 @@ export async function getGameById(gameId: number) {
 
 export async function getParticipantGames(participantId: number) {
   return await db.query.game.findMany({
-    where: (game, { and, or, eq, isNotNull }) =>
-      and(
-        or(
-          eq(game.whiteParticipantId, participantId),
-          eq(game.blackParticipantId, participantId),
-        ),
-        isNotNull(game.whiteParticipantId),
-        isNotNull(game.blackParticipantId),
+    where: (game, { or, eq }) =>
+      or(
+        eq(game.whiteParticipantId, participantId),
+        eq(game.blackParticipantId, participantId),
       ),
     with: {
       whiteParticipant: {
@@ -174,37 +168,6 @@ export async function getGamesByTournamentId(
   round?: number,
   participantId?: number,
 ) {
-  const whiteParticipant = alias(participant, "whiteParticipant");
-  const blackParticipant = alias(participant, "blackParticipant");
-
-  const conditions = [
-    eq(game.tournamentId, tournamentId),
-    isNotNull(game.whiteParticipantId),
-    isNotNull(game.blackParticipantId),
-  ];
-
-  if (groupId !== undefined) {
-    conditions.push(eq(game.groupId, groupId));
-  }
-
-  if (round !== undefined) {
-    conditions.push(eq(game.round, round));
-  }
-
-  if (participantId !== undefined) {
-    const participantCondition = or(
-      eq(game.whiteParticipantId, participantId),
-      eq(game.blackParticipantId, participantId),
-    );
-    if (participantCondition) {
-      conditions.push(participantCondition);
-    }
-  }
-
-  if (matchdayId !== undefined) {
-    conditions.push(eq(matchdayGame.matchdayId, matchdayId));
-  }
-
   const result = await db
     .select({
       gameId: game.id,
@@ -217,15 +180,22 @@ export async function getGamesByTournamentId(
     .leftJoin(group, eq(game.groupId, group.id))
     .leftJoin(matchdayGame, eq(matchdayGame.gameId, game.id))
     .leftJoin(matchday, eq(matchdayGame.matchdayId, matchday.id))
-    .leftJoin(
-      whiteParticipant,
-      eq(whiteParticipant.id, game.whiteParticipantId),
+    .where(
+      and(
+        eq(game.tournamentId, tournamentId),
+        groupId !== undefined ? eq(game.groupId, groupId) : undefined,
+        round !== undefined ? eq(game.round, round) : undefined,
+        participantId !== undefined
+          ? or(
+              eq(game.whiteParticipantId, participantId),
+              eq(game.blackParticipantId, participantId),
+            )
+          : undefined,
+        matchdayId !== undefined
+          ? eq(matchdayGame.matchdayId, matchdayId)
+          : undefined,
+      ),
     )
-    .leftJoin(
-      blackParticipant,
-      eq(blackParticipant.id, game.blackParticipantId),
-    )
-    .where(and(...conditions))
     .orderBy(
       asc(matchday.date),
       asc(group.groupNumber),
@@ -239,12 +209,7 @@ export async function getGamesByTournamentId(
   }
 
   const games = await db.query.game.findMany({
-    where: (game, { inArray, isNotNull, and }) =>
-      and(
-        inArray(game.id, gameIds),
-        isNotNull(game.whiteParticipantId),
-        isNotNull(game.blackParticipantId),
-      ),
+    where: (game, { inArray }) => inArray(game.id, gameIds),
     with: {
       whiteParticipant: {
         columns: {
@@ -458,12 +423,7 @@ export async function getPendingGamesByRefereeId(refereeId: number) {
 
 export async function getGameWithParticipantsAndMatchday(gameId: number) {
   return await db.query.game.findFirst({
-    where: (game, { eq, and, isNotNull }) =>
-      and(
-        eq(game.id, gameId),
-        isNotNull(game.whiteParticipantId),
-        isNotNull(game.blackParticipantId),
-      ),
+    where: (game, { eq }) => eq(game.id, gameId),
     with: {
       whiteParticipant: {
         columns: {
@@ -575,10 +535,8 @@ export async function isUserMatchEnteringHelperInGame(
 
 export async function getGamesToEnterByUserId(userId: string) {
   return await db.query.game.findMany({
-    where: (game, { and, or, eq, isNotNull, exists, inArray }) =>
+    where: (game, { and, or, eq, exists, inArray }) =>
       and(
-        isNotNull(game.whiteParticipantId),
-        isNotNull(game.blackParticipantId),
         inArray(game.result, PLAYED_GAME_RESULTS),
         or(
           exists(

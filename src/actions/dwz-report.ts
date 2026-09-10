@@ -12,9 +12,19 @@ import { getStandings } from "@/services/standings";
 import invariant from "tiny-invariant";
 import { match } from "ts-pattern";
 
-// TODO: Bericht auf FIDE-TRF bzw. XML-Schema DSB_DWZ_Tournament_2_5.xsd (v2.5.3)
-// neu bauen. Das erzeugte Eloref/SWI-Format ist für Turniere nach 07.06.2026 beim
-// DSB nicht mehr zulässig; zpsClubId/zpsPlayerId können danach entfallen.
+// TODO: Rewrite this export using FIDE TRF or DSB_DWZ_Tournament_2_5.xsd (v2.5.3).
+// The legacy Eloref/SWI format is no longer accepted for tournaments ending after
+// 2026-06-07; zpsClubId/zpsPlayerId can be removed as part of that migration.
+// Preserve the full round schedule for odd-sized round-robin groups: nine players
+// have nine rounds but only eight actual opponents each. This export incorrectly
+// writes eight rounds in the header (participants.length - 1). Its player-section
+// renderer also allocates only eight columns (max results.length), then addresses
+// results by their original round number, silently dropping all four games from
+// round nine. Round-robin byes must contribute no points or rated games, while
+// retaining their round slots in the report. Do not confuse them with forfeits
+// between two real participants. Round-robin byes are no longer stored as games,
+// so derive their empty report slots from the original round numbers. Keep game
+// selection for rating reports separate from tournament-ranking exclusions.
 export const generateDwzReportFile = action(async (groupId: number) => {
   const session = await authWithRedirect();
   invariant(session?.user.role === "admin", "Unauthorized");
@@ -55,28 +65,6 @@ export const generateDwzReportFile = action(async (groupId: number) => {
     return game.result != null;
   });
 
-  const actuallyPlayedGames = completedGames.filter((game) => {
-    return game.whiteParticipantId != null && game.blackParticipantId != null;
-  });
-
-  const gamesAsWhiteParticipant = actuallyPlayedGames.reduce(
-    (acc, game) => {
-      acc[game.whiteParticipantId!] ??= [];
-      acc[game.whiteParticipantId!].push(game.id);
-      return acc;
-    },
-    {} as Record<number, number[]>,
-  );
-
-  const gamesAsBlackParticipant = actuallyPlayedGames.reduce(
-    (acc, game) => {
-      acc[game.blackParticipantId!] ??= [];
-      acc[game.blackParticipantId!].push(game.id);
-      return acc;
-    },
-    {} as Record<number, number[]>,
-  );
-
   const standings = await getStandings(groupId);
 
   const getInitialGroupPositionOfPlayer = (participantId: number) => {
@@ -102,11 +90,10 @@ export const generateDwzReportFile = action(async (groupId: number) => {
   };
 
   const entries = data.participants.map(({ participant }) => {
-    const whiteGameIds = gamesAsWhiteParticipant[participant.id] ?? [];
-    const blackGameIds = gamesAsBlackParticipant[participant.id] ?? [];
-    const participantGames = actuallyPlayedGames.filter(
+    const participantGames = completedGames.filter(
       (game) =>
-        whiteGameIds.includes(game.id) || blackGameIds.includes(game.id),
+        game.whiteParticipantId === participant.id ||
+        game.blackParticipantId === participant.id,
     );
 
     return {
@@ -124,10 +111,10 @@ export const generateDwzReportFile = action(async (groupId: number) => {
       zpsPlayerId: participant.zpsPlayerId ?? undefined,
       results: participantGames.map((game) => {
         invariant(game.result, `Game ${game.id} does not have a result`);
-        const isWhite = whiteGameIds.includes(game.id);
+        const isWhite = game.whiteParticipantId === participant.id;
         const opponentId = isWhite
-          ? game.blackParticipantId!
-          : game.whiteParticipantId!;
+          ? game.blackParticipantId
+          : game.whiteParticipantId;
 
         return {
           pieceColor: isWhite ? "W" : "B",

@@ -3,7 +3,8 @@ import { GameWithParticipantsAndPGNAndDate } from "@/db/types/game";
 import { getGameById } from "@/db/repositories/game";
 import { auth } from "@/auth/utils";
 import { redirect } from "next/navigation";
-import { getUserGameRights, isGameActuallyPlayed } from "@/lib/game-auth";
+import { getUserGameRights } from "@/lib/game-auth";
+import { isGameActuallyPlayed } from "@/lib/game-result-utils";
 import PgnViewer from "@/components/game/chessboard/pgn-viewer";
 import PgnEditor from "@/components/game/chessboard/pgn-editor";
 import { Suspense } from "react";
@@ -73,7 +74,7 @@ async function PgnContainer({
   if (!game.whiteParticipant || !game.blackParticipant) {
     return (
       <p className="p-4 text-red-600">
-        Bye Runden können nicht eingegeben werden.
+        Die Teilnehmer der Partie konnten nicht gefunden werden.
       </p>
     );
   }
