@@ -43,12 +43,20 @@ export async function getParticipantWithGroupByProfileIdAndTournamentId(
   });
 }
 
-export async function getParticipantByUserId(userId: string) {
+export async function getParticipantByUserIdAndTournamentId(
+  userId: string,
+  tournamentId: number,
+) {
   const rows = await db
     .select(getTableColumns(participant))
     .from(participant)
     .leftJoin(profile, eq(participant.profileId, profile.id))
-    .where(eq(profile.userId, userId));
+    .where(
+      and(
+        eq(profile.userId, userId),
+        eq(participant.tournamentId, tournamentId),
+      ),
+    );
   return rows.length > 0 ? rows[0] : undefined;
 }
 

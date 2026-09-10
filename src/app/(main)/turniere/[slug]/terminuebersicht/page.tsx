@@ -1,10 +1,10 @@
 import { authWithRedirect } from "@/auth/utils";
 import { getTournamentBySlug } from "@/db/repositories/tournament";
-import { getRefereeByUserId } from "@/db/repositories/referee";
-import { getSetupHelperByUserId } from "@/db/repositories/setup-helper";
-import { redirect } from "next/navigation";
+import { getRefereeByUserIdAndTournamentId } from "@/db/repositories/referee";
+import { getSetupHelperByUserIdAndTournamentId } from "@/db/repositories/setup-helper";
+import { notFound, redirect } from "next/navigation";
 import { AppointmentsList } from "@/components/terminuebersicht/appointments-list";
-import { getMatchdayAppointmentsByUserId } from "@/services/appointment";
+import { getMatchdayAppointmentsByUserIdAndTournamentId } from "@/services/appointment";
 import { tournamentPath } from "@/lib/navigation";
 
 export default async function Page({
@@ -15,10 +15,13 @@ export default async function Page({
   const { slug } = await params;
   const tournament = await getTournamentBySlug(slug);
   const session = await authWithRedirect();
+  if (!tournament) {
+    notFound();
+  }
 
   const [referee, setupHelper] = await Promise.all([
-    getRefereeByUserId(session.user.id),
-    getSetupHelperByUserId(session.user.id),
+    getRefereeByUserIdAndTournamentId(session.user.id, tournament.id),
+    getSetupHelperByUserIdAndTournamentId(session.user.id, tournament.id),
   ]);
 
   if (!referee && !setupHelper) {
@@ -29,7 +32,10 @@ export default async function Page({
     redirect(tournamentPath(slug, "/uebersicht"));
   }
 
-  const appointments = await getMatchdayAppointmentsByUserId(session.user.id);
+  const appointments = await getMatchdayAppointmentsByUserIdAndTournamentId(
+    session.user.id,
+    tournament.id,
+  );
 
   return (
     <div>

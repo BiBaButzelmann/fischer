@@ -57,12 +57,17 @@ export async function getRefereesByTournamentId(
   });
 }
 
-export async function getRefereeByUserId(userId: string) {
+export async function getRefereeByUserIdAndTournamentId(
+  userId: string,
+  tournamentId: number,
+) {
   const rows = await db
     .select()
     .from(referee)
     .leftJoin(profile, eq(referee.profileId, profile.id))
-    .where(eq(profile.userId, userId));
+    .where(
+      and(eq(profile.userId, userId), eq(referee.tournamentId, tournamentId)),
+    );
   return rows.length > 0 ? rows[0].referee : undefined;
 }
 

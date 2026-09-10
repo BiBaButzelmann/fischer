@@ -4,8 +4,8 @@ import {
   getSetupHelpersInfoByMatchdayIds,
 } from "@/db/repositories/appointment";
 import { getProfileByUserId } from "@/db/repositories/profile";
-import { getRefereeByUserId } from "@/db/repositories/referee";
-import { getSetupHelperByUserId } from "@/db/repositories/setup-helper";
+import { getRefereeByUserIdAndTournamentId } from "@/db/repositories/referee";
+import { getSetupHelperByUserIdAndTournamentId } from "@/db/repositories/setup-helper";
 import { todayDateOnly } from "@/lib/date";
 import invariant from "tiny-invariant";
 
@@ -35,12 +35,13 @@ export type MatchdayAppointment = {
   appointments: Appointment[];
 };
 
-export async function getMatchdayAppointmentsByUserId(
+export async function getMatchdayAppointmentsByUserIdAndTournamentId(
   userId: string,
+  tournamentId: number,
 ): Promise<MatchdayAppointment[]> {
   const [userReferee, userSetupHelper] = await Promise.all([
-    getRefereeByUserId(userId),
-    getSetupHelperByUserId(userId),
+    getRefereeByUserIdAndTournamentId(userId, tournamentId),
+    getSetupHelperByUserIdAndTournamentId(userId, tournamentId),
   ]);
 
   if (!userReferee && !userSetupHelper) {
