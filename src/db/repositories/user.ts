@@ -92,6 +92,7 @@ export async function softDeleteUser(userId: string) {
     const deletedParticipantIds = deletedParticipants.map((p) => p.id);
 
     if (participantData.length > 0) {
+      // TODO: Handle forfeits for all tournament participations, respecting archived tournaments.
       const [{ id: participantId }] = participantData;
 
       await tx

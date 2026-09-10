@@ -6,7 +6,10 @@ import {
 import { profile } from "../schema/profile";
 import { and, eq, count } from "drizzle-orm";
 
-export async function getMatchEnteringHelperIdByUserId(userId: string) {
+export async function getMatchEnteringHelperIdByUserIdAndTournamentId(
+  userId: string,
+  tournamentId: number,
+) {
   const userProfile = await db
     .select({ profileId: profile.id })
     .from(profile)
@@ -20,7 +23,12 @@ export async function getMatchEnteringHelperIdByUserId(userId: string) {
   const helper = await db
     .select({ id: matchEnteringHelper.id })
     .from(matchEnteringHelper)
-    .where(eq(matchEnteringHelper.profileId, userProfile[0].profileId))
+    .where(
+      and(
+        eq(matchEnteringHelper.profileId, userProfile[0].profileId),
+        eq(matchEnteringHelper.tournamentId, tournamentId),
+      ),
+    )
     .limit(1);
 
   return helper.length > 0 ? helper[0].id : null;

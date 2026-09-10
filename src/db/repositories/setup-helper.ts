@@ -56,12 +56,20 @@ export async function getAllSetupHelpersByTournamentId(tournamentId: number) {
   });
 }
 
-export async function getSetupHelperByUserId(userId: string) {
+export async function getSetupHelperByUserIdAndTournamentId(
+  userId: string,
+  tournamentId: number,
+) {
   const rows = await db
     .select()
     .from(setupHelper)
     .leftJoin(profile, eq(setupHelper.profileId, profile.id))
-    .where(eq(profile.userId, userId));
+    .where(
+      and(
+        eq(profile.userId, userId),
+        eq(setupHelper.tournamentId, tournamentId),
+      ),
+    );
   return rows.length > 0 ? rows[0].setup_helper : undefined;
 }
 

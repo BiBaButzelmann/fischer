@@ -1,9 +1,9 @@
 import { authWithRedirect } from "@/auth/utils";
 import { MatchEntryDashboard } from "@/components/partieneingabe/match-entry-dashboard";
 import { AssignedGroups } from "@/components/partieneingabe/assigned-groups";
-import { getGamesToEnterByUserId } from "@/db/repositories/game";
+import { getGamesToEnterByUserIdAndTournamentId } from "@/db/repositories/game";
 import { getRolesByUserIdAndTournamentId } from "@/db/repositories/role";
-import { getMatchEnteringHelperIdByUserId } from "@/db/repositories/match-entering-helper";
+import { getMatchEnteringHelperIdByUserIdAndTournamentId } from "@/db/repositories/match-entering-helper";
 import { getTournamentBySlug } from "@/db/repositories/tournament";
 import { getUserGameRights } from "@/lib/game-auth";
 import { notFound, redirect } from "next/navigation";
@@ -39,8 +39,11 @@ export default async function Page({
   }
 
   const [allGames, matchEnteringHelperId] = await Promise.all([
-    getGamesToEnterByUserId(session.user.id),
-    getMatchEnteringHelperIdByUserId(session.user.id),
+    getGamesToEnterByUserIdAndTournamentId(session.user.id, tournament.id),
+    getMatchEnteringHelperIdByUserIdAndTournamentId(
+      session.user.id,
+      tournament.id,
+    ),
   ]);
 
   const allRights = await Promise.all(

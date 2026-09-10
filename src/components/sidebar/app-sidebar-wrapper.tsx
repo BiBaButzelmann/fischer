@@ -3,26 +3,25 @@ import { getRolesByUserIdAndTournamentId } from "@/db/repositories/role";
 import { auth } from "@/auth/utils";
 import { AppSidebar } from "./app-sidebar";
 import { getTournamentDocumentAvailability } from "@/actions/document";
+import { Tournament } from "@/db/types/tournament";
 
-export async function AppSidebarWrapper() {
+export async function AppSidebarWrapper({
+  tournament,
+}: {
+  tournament: Tournament;
+}) {
   const session = await auth();
   const tournaments = await getAllTournaments();
 
-  const runningTournament = tournaments.find((t) => t.stage === "running");
   const userRoles =
-    session && runningTournament
-      ? await getRolesByUserIdAndTournamentId(
-          session.user.id,
-          runningTournament.id,
-        )
+    session && tournament.stage === "running"
+      ? await getRolesByUserIdAndTournamentId(session.user.id, tournament.id)
       : [];
 
-  const activeTournament = tournaments.find(
-    (t) => t.stage === "registration" || t.stage === "running",
-  );
-  const documentAvailability = activeTournament
-    ? await getTournamentDocumentAvailability(activeTournament.slug)
-    : { ausschreibung: false, turnierordnung: false };
+  const documentAvailability =
+    tournament.stage !== "done"
+      ? await getTournamentDocumentAvailability(tournament.slug)
+      : { ausschreibung: false, turnierordnung: false };
 
   return (
     <AppSidebar

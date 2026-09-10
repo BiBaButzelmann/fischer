@@ -21,7 +21,7 @@ import {
 } from "../schema/matchEnteringHelper";
 import { participant } from "../schema/participant";
 import { profile } from "../schema/profile";
-import { getMatchEnteringHelperIdByUserId } from "./match-entering-helper";
+import { getMatchEnteringHelperIdByUserIdAndTournamentId } from "./match-entering-helper";
 import invariant from "tiny-invariant";
 import { PLAYED_GAME_RESULTS } from "../types/game";
 
@@ -499,18 +499,20 @@ export async function isUserMatchEnteringHelperInGame(
   gameId: number,
   userId: string,
 ) {
-  const [groupData, matchEnteringHelperId] = await Promise.all([
-    db
-      .select({ groupId: game.groupId })
-      .from(game)
-      .where(eq(game.id, gameId))
-      .limit(1),
-    getMatchEnteringHelperIdByUserId(userId),
-  ]);
+  const groupData = await db
+    .select({ groupId: game.groupId, tournamentId: game.tournamentId })
+    .from(game)
+    .where(eq(game.id, gameId))
+    .limit(1);
 
   invariant(groupData && groupData.length > 0, "Group not found");
 
   const groupId = groupData[0].groupId;
+  const matchEnteringHelperId =
+    await getMatchEnteringHelperIdByUserIdAndTournamentId(
+      userId,
+      groupData[0].tournamentId,
+    );
 
   if (!groupId || !matchEnteringHelperId) {
     return false;
@@ -533,10 +535,14 @@ export async function isUserMatchEnteringHelperInGame(
   return assignment.length > 0;
 }
 
-export async function getGamesToEnterByUserId(userId: string) {
+export async function getGamesToEnterByUserIdAndTournamentId(
+  userId: string,
+  tournamentId: number,
+) {
   return await db.query.game.findMany({
     where: (game, { and, or, eq, exists, inArray }) =>
       and(
+        eq(game.tournamentId, tournamentId),
         inArray(game.result, PLAYED_GAME_RESULTS),
         or(
           exists(

@@ -5,14 +5,14 @@ import {
   getCalendarEventsForReferee,
   getCalendarEventsForSetupHelper,
 } from "@/db/repositories/calendar-events";
-import { getParticipantByUserId } from "@/db/repositories/participant";
-import { getRefereeByUserId } from "@/db/repositories/referee";
-import { getSetupHelperByUserId } from "@/db/repositories/setup-helper";
+import { getParticipantByUserIdAndTournamentId } from "@/db/repositories/participant";
+import { getRefereeByUserIdAndTournamentId } from "@/db/repositories/referee";
+import { getSetupHelperByUserIdAndTournamentId } from "@/db/repositories/setup-helper";
 import { getAllMatchdaysByTournamentId } from "@/db/repositories/match-day";
 import { getTournamentBySlug } from "@/db/repositories/tournament";
 import { getGroupAnnouncementDate } from "@/lib/tournament-schedule";
 import { tournamentPath } from "@/lib/navigation";
-import { redirect } from "next/navigation";
+import { notFound, redirect } from "next/navigation";
 
 export default async function Page({
   params,
@@ -21,18 +21,32 @@ export default async function Page({
 }) {
   const { slug } = await params;
   const session = await auth();
+  const activeTournament = await getTournamentBySlug(slug);
+  if (!activeTournament) {
+    notFound();
+  }
 
-  const [
-    currentParticipant,
-    currentReferee,
-    currentSetupHelper,
-    activeTournament,
-  ] = await Promise.all([
-    session ? getParticipantByUserId(session.user.id) : Promise.resolve(null),
-    session ? getRefereeByUserId(session.user.id) : Promise.resolve(null),
-    session ? getSetupHelperByUserId(session.user.id) : Promise.resolve(null),
-    getTournamentBySlug(slug),
-  ]);
+  const [currentParticipant, currentReferee, currentSetupHelper] =
+    await Promise.all([
+      session
+        ? getParticipantByUserIdAndTournamentId(
+            session.user.id,
+            activeTournament.id,
+          )
+        : Promise.resolve(null),
+      session
+        ? getRefereeByUserIdAndTournamentId(
+            session.user.id,
+            activeTournament.id,
+          )
+        : Promise.resolve(null),
+      session
+        ? getSetupHelperByUserIdAndTournamentId(
+            session.user.id,
+            activeTournament.id,
+          )
+        : Promise.resolve(null),
+    ]);
 
   if (activeTournament?.stage === "done") {
     redirect(tournamentPath(slug, "/uebersicht"));

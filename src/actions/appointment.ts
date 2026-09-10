@@ -3,10 +3,10 @@
 import { db } from "@/db/client";
 import { matchdayReferee, matchdaySetupHelper } from "@/db/schema/matchday";
 import { authWithRedirect } from "@/auth/utils";
-import { getRefereeByUserId } from "@/db/repositories/referee";
-import { getSetupHelperByUserId } from "@/db/repositories/setup-helper";
+import { getRefereeByUserIdAndTournamentId } from "@/db/repositories/referee";
+import { getSetupHelperByUserIdAndTournamentId } from "@/db/repositories/setup-helper";
 
-import { and, eq } from "drizzle-orm";
+import { and, eq, isNull, isNotNull } from "drizzle-orm";
 import { revalidatePath } from "next/cache";
 import invariant from "tiny-invariant";
 import {
@@ -14,14 +14,24 @@ import {
   sendRefereeAppointmentEmail,
 } from "@/actions/email/appointment";
 import { action } from "@/lib/actions";
+import { getMatchdayById } from "@/db/repositories/match-day";
+import { getTournamentById } from "@/db/repositories/tournament";
 
 export const cancelMatchdayAppointments = action(async (matchdayId: number) => {
   const session = await authWithRedirect();
+  const matchday = await getMatchdayById(matchdayId);
+  invariant(matchday, "Matchday not found");
 
-  const [referee, setupHelper] = await Promise.all([
-    getRefereeByUserId(session.user.id),
-    getSetupHelperByUserId(session.user.id),
+  const [referee, setupHelper, tournament] = await Promise.all([
+    getRefereeByUserIdAndTournamentId(session.user.id, matchday.tournamentId),
+    getSetupHelperByUserIdAndTournamentId(
+      session.user.id,
+      matchday.tournamentId,
+    ),
+    getTournamentById(matchday.tournamentId),
   ]);
+
+  invariant(tournament?.stage === "running", "Tournament is not running");
 
   invariant(
     referee || setupHelper,
@@ -39,9 +49,15 @@ export const cancelMatchdayAppointments = action(async (matchdayId: number) => {
           and(
             eq(matchdayReferee.matchdayId, matchdayId),
             eq(matchdayReferee.refereeId, referee.id),
+            isNull(matchdayReferee.canceledAt),
           ),
-        ),
-      sendRefereeAppointmentEmail(referee.id, matchdayId, true),
+        )
+        .returning()
+        .then((updated) => {
+          if (updated.length > 0) {
+            return sendRefereeAppointmentEmail(referee.id, matchdayId, true);
+          }
+        }),
     );
   }
 
@@ -54,9 +70,19 @@ export const cancelMatchdayAppointments = action(async (matchdayId: number) => {
           and(
             eq(matchdaySetupHelper.matchdayId, matchdayId),
             eq(matchdaySetupHelper.setupHelperId, setupHelper.id),
+            isNull(matchdaySetupHelper.canceledAt),
           ),
-        ),
-      sendSetupHelperAppointmentEmail(setupHelper.id, matchdayId, true),
+        )
+        .returning()
+        .then((updated) => {
+          if (updated.length > 0) {
+            return sendSetupHelperAppointmentEmail(
+              setupHelper.id,
+              matchdayId,
+              true,
+            );
+          }
+        }),
     );
   }
 
@@ -67,11 +93,19 @@ export const cancelMatchdayAppointments = action(async (matchdayId: number) => {
 export const uncancelMatchdayAppointments = action(
   async (matchdayId: number) => {
     const session = await authWithRedirect();
+    const matchday = await getMatchdayById(matchdayId);
+    invariant(matchday, "Matchday not found");
 
-    const [referee, setupHelper] = await Promise.all([
-      getRefereeByUserId(session.user.id),
-      getSetupHelperByUserId(session.user.id),
+    const [referee, setupHelper, tournament] = await Promise.all([
+      getRefereeByUserIdAndTournamentId(session.user.id, matchday.tournamentId),
+      getSetupHelperByUserIdAndTournamentId(
+        session.user.id,
+        matchday.tournamentId,
+      ),
+      getTournamentById(matchday.tournamentId),
     ]);
+
+    invariant(tournament?.stage === "running", "Tournament is not running");
 
     invariant(
       referee || setupHelper,
@@ -89,9 +123,15 @@ export const uncancelMatchdayAppointments = action(
             and(
               eq(matchdayReferee.matchdayId, matchdayId),
               eq(matchdayReferee.refereeId, referee.id),
+              isNotNull(matchdayReferee.canceledAt),
             ),
-          ),
-        sendRefereeAppointmentEmail(referee.id, matchdayId, false),
+          )
+          .returning()
+          .then((updated) => {
+            if (updated.length > 0) {
+              return sendRefereeAppointmentEmail(referee.id, matchdayId, false);
+            }
+          }),
       );
     }
 
@@ -104,9 +144,19 @@ export const uncancelMatchdayAppointments = action(
             and(
               eq(matchdaySetupHelper.matchdayId, matchdayId),
               eq(matchdaySetupHelper.setupHelperId, setupHelper.id),
+              isNotNull(matchdaySetupHelper.canceledAt),
             ),
-          ),
-        sendSetupHelperAppointmentEmail(setupHelper.id, matchdayId, false),
+          )
+          .returning()
+          .then((updated) => {
+            if (updated.length > 0) {
+              return sendSetupHelperAppointmentEmail(
+                setupHelper.id,
+                matchdayId,
+                false,
+              );
+            }
+          }),
       );
     }
 
