@@ -24,7 +24,6 @@ export const savePGN = action(async (newValue: string, gameId: number) => {
     userRights === "edit",
     "Du bist nicht berechtigt, diese Partie zu bearbeiten.",
   );
-  // wirft bei ungültiger PGN, damit nur standardkonforme PGNs gespeichert werden
   parsePgnMoves(newValue);
 
   await db
