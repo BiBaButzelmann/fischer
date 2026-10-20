@@ -2,16 +2,13 @@ import { NextRequest } from "next/server";
 import { z } from "zod";
 import { auth } from "@/auth/utils";
 import { getGamesByTournamentId } from "@/db/repositories/game";
-import { getGroupById } from "@/db/repositories/group";
-import { getMatchdayById } from "@/db/repositories/match-day";
-import { getParticipantsByGroupId } from "@/db/repositories/participant";
 import { getRolesByUserIdAndTournamentId } from "@/db/repositories/role";
 import { getTournamentBySlug } from "@/db/repositories/tournament";
-import { formatDateOnly } from "@/lib/date";
 import { canUserViewGames } from "@/lib/game-auth";
-import { getFullName } from "@/lib/participant";
+import { buildPgnFileName } from "@/lib/pgn/file-name";
 import { buildPgnHeaders } from "@/lib/pgn/headers";
-import { parsePgnMoves, toPgn } from "@/lib/pgn/movetext";
+import { parsePgnMoves } from "@/lib/pgn/movetext";
+import { toPgn } from "@/lib/pgn/pgn";
 
 const filtersSchema = z.object({
   groupId: z.coerce.number().int().positive().optional(),
@@ -19,8 +16,6 @@ const filtersSchema = z.object({
   participantId: z.coerce.number().int().positive().optional(),
   matchdayId: z.coerce.number().int().positive().optional(),
 });
-
-type PgnExportFilters = z.infer<typeof filtersSchema>;
 
 export async function GET(
   request: NextRequest,
@@ -53,29 +48,27 @@ export async function GET(
   }
 
   const { groupId, round, participantId, matchdayId } = filters.data;
-  const [games, fileName] = await Promise.all([
-    getGamesByTournamentId(
-      tournament.id,
-      groupId,
-      matchdayId,
-      round,
-      participantId,
-    ),
-    buildPgnFileName(tournament.name, filters.data),
-  ]);
+  const games = await getGamesByTournamentId(
+    tournament.id,
+    groupId,
+    matchdayId,
+    round,
+    participantId,
+  );
 
   const content = games
     .flatMap((game) =>
-      game.pgn
+      game.pgn?.value
         ? [
             toPgn(
               parsePgnMoves(game.pgn.value),
-              buildPgnHeaders(game, tournament.name),
+              buildPgnHeaders(game, tournament),
             ),
           ]
         : [],
     )
     .join("\n\n");
+  const fileName = buildPgnFileName(tournament.name, filters.data, games);
 
   return new Response(content, {
     headers: {
@@ -83,41 +76,4 @@ export async function GET(
       "Content-Disposition": `attachment; filename*=UTF-8''${encodeURIComponent(fileName)}`,
     },
   });
-}
-
-async function buildPgnFileName(
-  tournamentName: string,
-  { groupId, round, participantId, matchdayId }: PgnExportFilters,
-) {
-  const parts = [tournamentName];
-
-  if (groupId && !participantId) {
-    const group = await getGroupById(groupId);
-    if (group) {
-      parts.push(group.groupName);
-    }
-  }
-
-  if (round) {
-    parts.push(`Runde ${round}`);
-  }
-
-  if (matchdayId) {
-    const matchday = await getMatchdayById(matchdayId);
-    if (matchday) {
-      parts.push(formatDateOnly(matchday.date).replace(/\./g, "_"));
-    }
-  }
-
-  if (participantId && groupId) {
-    const participants = await getParticipantsByGroupId(groupId);
-    const participant = participants.find((p) => p.id === participantId);
-    if (participant) {
-      parts.push(
-        getFullName(participant.profile.firstName, participant.profile.lastName),
-      );
-    }
-  }
-
-  return `${parts.join("_").replace(/\s+/g, "_")}.pgn`;
 }

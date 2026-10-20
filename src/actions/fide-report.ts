@@ -1,7 +1,7 @@
 "use server";
 
 import { authWithRedirect } from "@/auth/utils";
-import { monthLabels } from "@/constants/constants";
+import { CLUB_FEDERATION, monthLabels } from "@/constants/constants";
 import { db } from "@/db/client";
 import { getGamesInMonth } from "@/db/repositories/game";
 import { GameResult } from "@/db/types/game";
@@ -184,7 +184,7 @@ export const generateFideReportFile = action(
     // 022
     const location = data.tournament.location;
     // 032
-    const federation = "GER";
+    const federation = CLUB_FEDERATION;
     // 042
     const startDate = data.tournament.startDate;
     // 052

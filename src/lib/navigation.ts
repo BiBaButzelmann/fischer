@@ -2,12 +2,14 @@ export function tournamentPath(slug: string, subPath = ""): string {
   return `/turniere/${slug}${subPath}`;
 }
 
-export function buildGameViewParams(params: {
+export type GameViewFilters = {
   groupId?: number;
   round?: number;
   participantId?: number;
   matchdayId?: number;
-}) {
+};
+
+function buildGameViewParams(params: GameViewFilters) {
   const searchParams = new URLSearchParams();
 
   if (params.groupId) {
@@ -29,18 +31,13 @@ export function buildGameViewParams(params: {
   return searchParams;
 }
 
-export function buildGameViewUrl({
-  slug,
-  ...params
-}: {
-  slug: string;
-  groupId?: number;
-  round?: number;
-  participantId?: number;
-  matchdayId?: number;
-}): string {
+export function buildGameViewUrl(
+  { slug, ...params }: { slug: string } & GameViewFilters,
+  subPath = "",
+): string {
   const query = buildGameViewParams(params).toString();
-  return tournamentPath(slug, query ? `/partien?${query}` : "/partien");
+  const path = `/partien${subPath}`;
+  return tournamentPath(slug, query ? `${path}?${query}` : path);
 }
 
 export type StandingsView = "tabelle" | "kreuztabelle";

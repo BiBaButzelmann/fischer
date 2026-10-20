@@ -63,7 +63,7 @@ export async function getGameById(gameId: number) {
       tournament: {
         columns: {
           name: true,
-          gameStartTime: true,
+          location: true,
         },
       },
       group: {

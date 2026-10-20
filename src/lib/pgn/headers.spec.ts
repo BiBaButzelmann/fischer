@@ -1,7 +1,5 @@
 import { describe, it, expect } from "vitest";
-import { buildPgnHeaders, type PgnGame } from "./headers";
-
-type PgnPlayer = NonNullable<PgnGame["whiteParticipant"]>;
+import { buildPgnHeaders, type PgnGame, type PgnPlayer } from "./headers";
 
 function player(
   firstName: string,
@@ -29,9 +27,11 @@ function game(overrides: Partial<PgnGame> = {}): PgnGame {
   };
 }
 
+const tournament = { name: "Klubturnier 2026", location: "Hamburg" };
+
 describe("buildPgnHeaders", () => {
   it("builds the seven tag roster from the game", () => {
-    expect(buildPgnHeaders(game(), "Klubturnier 2026")).toEqual({
+    expect(buildPgnHeaders(game(), tournament)).toEqual({
       Event: "HSK Klubturnier 2026 Gruppe B1",
       Site: "Hamburg GER",
       Date: "2026.10.15",
@@ -42,13 +42,22 @@ describe("buildPgnHeaders", () => {
     });
   });
 
+  it("takes the site from the tournament location", () => {
+    const headers = buildPgnHeaders(game(), {
+      ...tournament,
+      location: "Berlin",
+    });
+
+    expect(headers.Site).toBe("Berlin GER");
+  });
+
   it("normalizes whitespace in player names", () => {
     const headers = buildPgnHeaders(
       game({
         whiteParticipant: player("Dominik ", " Müller-Peters "),
         blackParticipant: player("\t Lionel", "von  Flottwell"),
       }),
-      "Klubturnier 2026",
+      tournament,
     );
 
     expect([headers.White, headers.Black]).toEqual([
@@ -61,11 +70,15 @@ describe("buildPgnHeaders", () => {
     ["0:1", "0-1"],
     ["½-½", "1/2-1/2"],
     ["0-½", "*"],
-  ] as const)("maps the game result %s to the PGN result %s", (result, pgnResult) => {
-    expect(buildPgnHeaders(game({ result }), "Klubturnier 2026").Result).toBe(
-      pgnResult,
-    );
-  });
+    [null, "*"],
+  ] as const)(
+    "maps the game result %s to the PGN result %s",
+    (result, pgnResult) => {
+      expect(buildPgnHeaders(game({ result }), tournament).Result).toBe(
+        pgnResult,
+      );
+    },
+  );
 
   it("adds FIDE title, rating and id for players that have them", () => {
     const headers = buildPgnHeaders(
@@ -76,7 +89,7 @@ describe("buildPgnHeaders", () => {
           fideId: " 4467248",
         }),
       }),
-      "Klubturnier 2026",
+      tournament,
     );
 
     expect(headers).toMatchObject({
@@ -94,7 +107,7 @@ describe("buildPgnHeaders", () => {
       game({
         whiteParticipant: player("Klaus", "von Bargen", { fideRating: 0 }),
       }),
-      "Klubturnier 2025",
+      tournament,
     );
 
     expect(headers.WhiteElo).toBeUndefined();

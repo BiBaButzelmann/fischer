@@ -1,17 +1,10 @@
 import { Button } from "@/components/ui/button";
 import { Download } from "lucide-react";
-import { buildGameViewParams, tournamentPath } from "@/lib/navigation";
+import { buildGameViewUrl, type GameViewFilters } from "@/lib/navigation";
 
-type Props = {
-  slug: string;
-  hasPgns: boolean;
-  groupId?: number;
-  round?: number;
-  participantId?: number;
-  matchdayId?: number;
-};
+type Props = { slug: string; hasPgns: boolean } & GameViewFilters;
 
-export function MassPgnDownloadButton({ slug, hasPgns, ...params }: Props) {
+export function MassPgnDownloadButton({ hasPgns, ...params }: Props) {
   const label = (
     <>
       <Download className="h-4 w-4 md:mr-2" />
@@ -27,17 +20,9 @@ export function MassPgnDownloadButton({ slug, hasPgns, ...params }: Props) {
     );
   }
 
-  const query = buildGameViewParams(params).toString();
-
   return (
     <Button variant="outline" asChild title="PGNs herunterladen">
-      <a
-        href={tournamentPath(
-          slug,
-          query ? `/partien/pgn?${query}` : "/partien/pgn",
-        )}
-        download
-      >
+      <a href={buildGameViewUrl(params, "/pgn")} download>
         {label}
       </a>
     </Button>

@@ -11,7 +11,8 @@ import React, {
 import { Move, Piece, Chess, Square } from "chess.js";
 import invariant from "tiny-invariant";
 import { buildPgnHeaders } from "@/lib/pgn/headers";
-import { parsePgnMoves, toPgn } from "@/lib/pgn/movetext";
+import { parsePgnMoves } from "@/lib/pgn/movetext";
+import { toPgn } from "@/lib/pgn/pgn";
 import { toast } from "sonner";
 import { START_FEN } from "@/constants/constants";
 import { GameWithParticipantsAndPGNAndDate } from "@/db/types/game";
@@ -39,10 +40,7 @@ type Props = {
 };
 
 export function ChessProvider({ children, game }: Props) {
-  const headers = useMemo(
-    () => buildPgnHeaders(game, game.tournament.name),
-    [game],
-  );
+  const headers = useMemo(() => buildPgnHeaders(game, game.tournament), [game]);
 
   const [moves, setMoves] = useState<Move[]>(() => {
     if (!game.pgn?.value) {

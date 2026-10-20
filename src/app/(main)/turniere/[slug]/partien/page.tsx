@@ -116,7 +116,7 @@ export default async function Page({
           {session?.user.id && canUserViewGames(userRoles) && (
             <MassPgnDownloadButton
               slug={slug}
-              hasPgns={games.some((game) => game.pgn)}
+              hasPgns={games.some((game) => game.pgn?.value)}
               groupId={queryData.groupId}
               round={queryData.round}
               participantId={queryData.participantId}

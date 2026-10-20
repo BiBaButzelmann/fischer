@@ -6,12 +6,12 @@ export function toFideSpelling(str: string): string {
   const result = removeAccents(pre);
   return result.replace(
     /[æÆœŒðÐøØßþÞĳĲйЙёЁ]/g,
-    (match) => specialCases[match as keyof typeof specialCases] || match,
+    (match) => specialCases[match as keyof typeof specialCases] ?? match,
   );
 }
 
 function removeAccents(str: string): string {
-  return str.normalize("NFD").replace(/[̀-ͯ]/g, "");
+  return str.normalize("NFD").replace(/[\u0300-\u036f]/g, "");
 }
 
 const specialCases = {
