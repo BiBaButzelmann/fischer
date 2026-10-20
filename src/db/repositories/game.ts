@@ -66,6 +66,11 @@ export async function getGameById(gameId: number) {
           gameStartTime: true,
         },
       },
+      group: {
+        columns: {
+          groupName: true,
+        },
+      },
       matchdayGame: {
         with: {
           matchday: {
@@ -215,6 +220,8 @@ export async function getGamesByTournamentId(
         columns: {
           fideRating: true,
           dwzRating: true,
+          title: true,
+          fideId: true,
           deletedAt: true,
         },
         with: {
@@ -233,6 +240,8 @@ export async function getGamesByTournamentId(
         columns: {
           fideRating: true,
           dwzRating: true,
+          title: true,
+          fideId: true,
           deletedAt: true,
         },
         with: {

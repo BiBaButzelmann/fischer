@@ -90,6 +90,9 @@ export type GameWithParticipantsAndPGNAndDate = GameWithParticipantsAndPGN & {
     name: string;
     gameStartTime: string;
   };
+  group: {
+    groupName: string;
+  };
   matchdayGame: {
     matchday: {
       date: string;

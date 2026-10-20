@@ -115,8 +115,8 @@ export default async function Page({
         <div className="flex items-center gap-2 mb-4">
           {session?.user.id && canUserViewGames(userRoles) && (
             <MassPgnDownloadButton
-              games={games}
-              tournamentId={queryData.tournamentId}
+              slug={slug}
+              hasPgns={games.some((game) => game.pgn)}
               groupId={queryData.groupId}
               round={queryData.round}
               participantId={queryData.participantId}

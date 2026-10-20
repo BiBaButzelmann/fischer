@@ -19,7 +19,7 @@ export const pgn = pgTable(
       .notNull()
       .references(() => game.id, { onDelete: "cascade" }),
 
-    value: text("value").notNull(), // the full PGN blob
+    value: text("value").notNull(), // movetext only, headers are built on export
 
     ...timestamps,
   },

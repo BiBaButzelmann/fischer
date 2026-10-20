@@ -10,21 +10,11 @@ import React, {
 } from "react";
 import { Move, Piece, Chess, Square } from "chess.js";
 import invariant from "tiny-invariant";
-import { computePGNFromMoves, getHeadersFromGame } from "@/lib/chess-utils";
-import { parsePgnMoves } from "@/lib/pgn/movetext";
+import { buildPgnHeaders } from "@/lib/pgn/headers";
+import { parsePgnMoves, toPgn } from "@/lib/pgn/movetext";
 import { toast } from "sonner";
 import { START_FEN } from "@/constants/constants";
 import { GameWithParticipantsAndPGNAndDate } from "@/db/types/game";
-
-export type PgnHeader = {
-  event: string;
-  site: string;
-  date: string;
-  round: string;
-  white: string;
-  black: string;
-  result: string;
-};
 
 type ChessContextType = {
   currentIndex: number;
@@ -49,7 +39,10 @@ type Props = {
 };
 
 export function ChessProvider({ children, game }: Props) {
-  const headers = useMemo(() => getHeadersFromGame(game), [game]);
+  const headers = useMemo(
+    () => buildPgnHeaders(game, game.tournament.name),
+    [game],
+  );
 
   const [moves, setMoves] = useState<Move[]>(() => {
     if (!game.pgn?.value) {
@@ -77,7 +70,7 @@ export function ChessProvider({ children, game }: Props) {
   }, [moves, currentIndex]);
 
   const pgn = useMemo(() => {
-    return computePGNFromMoves(moves, headers);
+    return toPgn(moves, headers);
   }, [moves, headers]);
 
   const setCurrentIndex = useCallback(
