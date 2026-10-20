@@ -14,6 +14,7 @@ import { getParticipantsByGroupId } from "@/db/repositories/participant";
 import { formatDateOnly } from "@/lib/date";
 import { getFullName } from "@/lib/participant";
 import { SearchParamsNumbers } from "@/components/partien/mass-pgn-download-button";
+import { parsePgnMoves } from "@/lib/pgn/movetext";
 
 export const savePGN = action(async (newValue: string, gameId: number) => {
   const session = await authWithRedirect();
@@ -23,6 +24,8 @@ export const savePGN = action(async (newValue: string, gameId: number) => {
     userRights === "edit",
     "Du bist nicht berechtigt, diese Partie zu bearbeiten.",
   );
+  // wirft bei ungültiger PGN, damit nur standardkonforme PGNs gespeichert werden
+  parsePgnMoves(newValue);
 
   await db
     .insert(pgn)
