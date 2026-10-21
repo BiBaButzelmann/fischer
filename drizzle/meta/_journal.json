@@ -211,6 +211,13 @@
       "when": 1787240016841,
       "tag": "0029_open_skrulls",
       "breakpoints": true
+    },
+    {
+      "idx": 30,
+      "version": "7",
+      "when": 1792524057960,
+      "tag": "0030_fix_pgn_half_point_result",
+      "breakpoints": true
     }
   ]
 }

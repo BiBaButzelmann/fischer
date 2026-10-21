@@ -11,6 +11,7 @@ import React, {
 import { Move, Piece, Chess, Square } from "chess.js";
 import invariant from "tiny-invariant";
 import { computePGNFromMoves, getHeadersFromGame } from "@/lib/chess-utils";
+import { parsePgnMoves } from "@/lib/pgn/movetext";
 import { toast } from "sonner";
 import { START_FEN } from "@/constants/constants";
 import { GameWithParticipantsAndPGNAndDate } from "@/db/types/game";
@@ -41,13 +42,6 @@ type ChessContextType = {
 };
 
 const ChessContext = createContext<ChessContextType | null>(null);
-function applyHeaders(chess: Chess, headerRecord: Record<string, string>) {
-  for (const [key, value] of Object.entries(headerRecord)) {
-    if (value) {
-      chess.setHeader(key, value);
-    }
-  }
-}
 
 type Props = {
   children: ReactNode;
@@ -58,18 +52,15 @@ export function ChessProvider({ children, game }: Props) {
   const headers = useMemo(() => getHeadersFromGame(game), [game]);
 
   const [moves, setMoves] = useState<Move[]>(() => {
-    const chess = new Chess();
-    applyHeaders(chess, headers);
-    if (game.pgn?.value) {
-      try {
-        //TODO: normalize PGN stored in DB
-        const normalizedPgn = game.pgn.value.replace(/½/g, "1/2");
-        chess.loadPgn(normalizedPgn);
-      } catch {
-        toast.error("Fehler beim Laden der gespeicherten PGN");
-      }
+    if (!game.pgn?.value) {
+      return [];
     }
-    return chess.history({ verbose: true });
+    try {
+      return parsePgnMoves(game.pgn.value);
+    } catch {
+      toast.error("Fehler beim Laden der gespeicherten PGN");
+      return [];
+    }
   });
 
   const [currentIndex, setCurrentIndexState] = useState(() =>
@@ -165,25 +156,18 @@ export function ChessProvider({ children, game }: Props) {
     [fen],
   );
 
-  const loadPgn = useCallback(
-    (pgn: string) => {
-      const chess = new Chess();
-      applyHeaders(chess, headers);
+  const loadPgn = useCallback((pgn: string) => {
+    let newMoves: Move[];
+    try {
+      newMoves = parsePgnMoves(pgn);
+    } catch {
+      return false;
+    }
 
-      try {
-        const normalizedPgn = pgn.replace(/½/g, "1/2");
-        chess.loadPgn(normalizedPgn);
-      } catch {
-        return false;
-      }
-
-      const newMoves = chess.history({ verbose: true });
-      setMoves(newMoves);
-      setCurrentIndexState(newMoves.length > 0 ? newMoves.length - 1 : -1);
-      return true;
-    },
-    [headers],
-  );
+    setMoves(newMoves);
+    setCurrentIndexState(newMoves.length > 0 ? newMoves.length - 1 : -1);
+    return true;
+  }, []);
 
   const contextValue = useMemo(
     (): ChessContextType => ({
