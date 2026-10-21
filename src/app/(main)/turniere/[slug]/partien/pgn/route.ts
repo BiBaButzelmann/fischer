@@ -1,7 +1,7 @@
 import { NextRequest } from "next/server";
 import { z } from "zod";
 import { auth } from "@/auth/utils";
-import { getGamesByTournamentId } from "@/db/repositories/game";
+import { getGamePgnsByTournamentId } from "@/db/repositories/game";
 import { getRolesByUserIdAndTournamentId } from "@/db/repositories/role";
 import { getTournamentBySlug } from "@/db/repositories/tournament";
 import { canUserViewGames } from "@/lib/game-auth";
@@ -48,7 +48,7 @@ export async function GET(
   }
 
   const { groupId, round, participantId, matchdayId } = filters.data;
-  const games = await getGamesByTournamentId(
+  const games = await getGamePgnsByTournamentId(
     tournament.id,
     groupId,
     matchdayId,
