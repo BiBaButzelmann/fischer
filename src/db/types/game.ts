@@ -54,9 +54,6 @@ export type GameWithParticipantProfilesAndGroupAndMatchday = Game & {
       date: string;
     };
   };
-  pgn: {
-    value: string;
-  } | null;
 };
 
 export type GameWithMatchday = Game & {
@@ -88,7 +85,10 @@ export type GameWithParticipantsAndDate = GameWithParticipants & {
 export type GameWithParticipantsAndPGNAndDate = GameWithParticipantsAndPGN & {
   tournament: {
     name: string;
-    gameStartTime: string;
+    location: string;
+  };
+  group: {
+    groupName: string;
   };
   matchdayGame: {
     matchday: {

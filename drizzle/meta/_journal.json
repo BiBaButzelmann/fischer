@@ -218,6 +218,13 @@
       "when": 1792524057960,
       "tag": "0030_fix_pgn_half_point_result",
       "breakpoints": true
+    },
+    {
+      "idx": 31,
+      "version": "7",
+      "when": 1792525092105,
+      "tag": "0031_pgn_movetext_only",
+      "breakpoints": true
     }
   ]
 }

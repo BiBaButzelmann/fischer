@@ -1,5 +1,5 @@
 import { describe, it, expect } from "vitest";
-import { parsePgnMoves } from "./movetext";
+import { parsePgnMoves, toMovetext } from "./movetext";
 
 describe("parsePgnMoves", () => {
   it("returns the moves of a standard PGN", () => {
@@ -23,5 +23,15 @@ describe("parsePgnMoves", () => {
 1. e4 e5 2. Nf3 Nc6 ½-½`;
 
     expect(() => parsePgnMoves(pgn)).toThrow();
+  });
+});
+
+describe("toMovetext", () => {
+  it("serializes moves as numbered movetext without headers and result", () => {
+    const moves = parsePgnMoves(`[White "?"]
+
+1. e4 e5 2. Nf3 *`);
+
+    expect(toMovetext(moves)).toBe("1. e4 e5 2. Nf3");
   });
 });

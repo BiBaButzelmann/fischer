@@ -2,6 +2,7 @@ import { getTournamentBySlug } from "@/db/repositories/tournament";
 import {
   getAllGroupNamesByTournamentId,
   getGamesByTournamentId,
+  hasPgnsByGameIds,
 } from "@/db/repositories/game";
 import { PartienSelector } from "@/components/partien/partien-selector";
 import { GamesList } from "@/components/partien/games-list";
@@ -106,6 +107,11 @@ export default async function Page({
       : Promise.resolve([]),
   ]);
 
+  const canDownloadPgns =
+    session?.user.id !== undefined && canUserViewGames(userRoles);
+  const hasPgns =
+    canDownloadPgns && (await hasPgnsByGameIds(games.map((game) => game.id)));
+
   return (
     <div>
       <div className="flex items-center w-full gap-2">
@@ -113,10 +119,10 @@ export default async function Page({
           Partien
         </h1>
         <div className="flex items-center gap-2 mb-4">
-          {session?.user.id && canUserViewGames(userRoles) && (
+          {canDownloadPgns && (
             <MassPgnDownloadButton
-              games={games}
-              tournamentId={queryData.tournamentId}
+              slug={slug}
+              hasPgns={hasPgns}
               groupId={queryData.groupId}
               round={queryData.round}
               participantId={queryData.participantId}

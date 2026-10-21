@@ -18,6 +18,7 @@ import { savePGN } from "@/actions/pgn";
 import { toast } from "sonner";
 import { useIsMobile } from "@/hooks/use-mobile";
 import { useChess } from "@/contexts/chess-context";
+import { toMovetext } from "@/lib/pgn/movetext";
 
 function downloadPGN(pgn: string, gameId: number) {
   const blob = new Blob([pgn], { type: "text/plain" });
@@ -119,27 +120,28 @@ type SaveButtonProps = {
 };
 
 function SaveButton({ gameId }: SaveButtonProps) {
-  const { pgn } = useChess();
+  const { moves } = useChess();
   const isMobile = useIsMobile();
   const [isPending, startTransition] = useTransition();
-  const [savedPGN, setSavedPGN] = useState(pgn);
+  const movetext = useMemo(() => toMovetext(moves), [moves]);
+  const [savedMovetext, setSavedMovetext] = useState(movetext);
 
   const hasUnsavedChanges = useMemo(() => {
-    return pgn !== savedPGN;
-  }, [pgn, savedPGN]);
+    return movetext !== savedMovetext;
+  }, [movetext, savedMovetext]);
 
   const handleSave = useCallback(() => {
     startTransition(async () => {
-      const result = await savePGN(pgn, gameId);
+      const result = await savePGN(movetext, gameId);
 
       if (result?.error) {
         toast.error("Fehler beim Speichern der Partie");
       } else {
         toast.success("Partie erfolgreich gespeichert");
-        setSavedPGN(pgn);
+        setSavedMovetext(movetext);
       }
     });
-  }, [pgn, gameId]);
+  }, [movetext, gameId]);
 
   return (
     <Tooltip>

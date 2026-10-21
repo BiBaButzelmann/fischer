@@ -63,7 +63,12 @@ export async function getGameById(gameId: number) {
       tournament: {
         columns: {
           name: true,
-          gameStartTime: true,
+          location: true,
+        },
+      },
+      group: {
+        columns: {
+          groupName: true,
         },
       },
       matchdayGame: {
@@ -161,7 +166,7 @@ export async function isUserParticipantInGame(
   );
 }
 
-export async function getGamesByTournamentId(
+async function getFilteredGameIds(
   tournamentId: number,
   groupId?: number,
   matchdayId?: number,
@@ -202,7 +207,23 @@ export async function getGamesByTournamentId(
       asc(game.boardNumber),
       asc(game.round),
     );
-  const gameIds = result.map((row) => row.gameId);
+  return result.map((row) => row.gameId);
+}
+
+export async function getGamesByTournamentId(
+  tournamentId: number,
+  groupId?: number,
+  matchdayId?: number,
+  round?: number,
+  participantId?: number,
+) {
+  const gameIds = await getFilteredGameIds(
+    tournamentId,
+    groupId,
+    matchdayId,
+    round,
+    participantId,
+  );
 
   if (gameIds.length === 0) {
     return [];
@@ -268,11 +289,6 @@ export async function getGamesByTournamentId(
           },
         },
       },
-      pgn: {
-        columns: {
-          value: true,
-        },
-      },
     },
   });
 
@@ -288,6 +304,104 @@ export async function getGamesByTournamentId(
   }));
 
   return gamesWithTime;
+}
+
+export async function getGamePgnsByTournamentId(
+  tournamentId: number,
+  groupId?: number,
+  matchdayId?: number,
+  round?: number,
+  participantId?: number,
+) {
+  const gameIds = await getFilteredGameIds(
+    tournamentId,
+    groupId,
+    matchdayId,
+    round,
+    participantId,
+  );
+
+  if (gameIds.length === 0) {
+    return [];
+  }
+
+  const games = await db.query.game.findMany({
+    where: (game, { inArray }) => inArray(game.id, gameIds),
+    columns: {
+      id: true,
+      round: true,
+      result: true,
+      whiteParticipantId: true,
+      blackParticipantId: true,
+    },
+    with: {
+      whiteParticipant: {
+        columns: {
+          title: true,
+          fideRating: true,
+          fideId: true,
+        },
+        with: {
+          profile: {
+            columns: {
+              firstName: true,
+              lastName: true,
+            },
+          },
+        },
+      },
+      blackParticipant: {
+        columns: {
+          title: true,
+          fideRating: true,
+          fideId: true,
+        },
+        with: {
+          profile: {
+            columns: {
+              firstName: true,
+              lastName: true,
+            },
+          },
+        },
+      },
+      group: {
+        columns: {
+          groupName: true,
+        },
+      },
+      matchdayGame: {
+        with: {
+          matchday: {
+            columns: {
+              date: true,
+            },
+          },
+        },
+      },
+      pgn: {
+        columns: {
+          value: true,
+        },
+      },
+    },
+  });
+
+  const gameMap = new Map(games.map((game) => [game.id, game]));
+  return gameIds.map((id) => gameMap.get(id)).filter(Boolean);
+}
+
+export async function hasPgnsByGameIds(gameIds: number[]) {
+  if (gameIds.length === 0) {
+    return false;
+  }
+
+  const result = await db.query.pgn.findFirst({
+    where: (pgn, { and, inArray, ne }) =>
+      and(inArray(pgn.gameId, gameIds), ne(pgn.value, "")),
+    columns: { gameId: true },
+  });
+  return result !== undefined;
 }
 
 export async function getCompletedGames(groupId: number, maxRound?: number) {

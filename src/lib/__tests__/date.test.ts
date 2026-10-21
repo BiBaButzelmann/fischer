@@ -5,6 +5,7 @@ import {
   utcDateToDateOnly,
   todayDateOnly,
   formatDateOnly,
+  toPgnDate,
 } from "../date";
 
 describe("parseDateOnly", () => {
@@ -42,6 +43,13 @@ describe("formatDateOnly", () => {
   test("formats German day.month.year with padding", () => {
     expect(formatDateOnly("2026-12-10")).toBe("10.12.2026");
     expect(formatDateOnly("2026-01-05")).toBe("05.01.2026");
+  });
+});
+
+describe("toPgnDate", () => {
+  test("serializes a calendar day as PGN date YYYY.MM.DD", () => {
+    expect(toPgnDate("2026-10-15")).toBe("2026.10.15");
+    expect(toPgnDate("2026-01-05")).toBe("2026.01.05");
   });
 });
 

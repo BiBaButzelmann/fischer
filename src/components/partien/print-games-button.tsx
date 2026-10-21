@@ -1,26 +1,15 @@
 import { Button } from "@/components/ui/button";
 import Link from "next/link";
-import { buildGameViewParams, tournamentPath } from "@/lib/navigation";
+import { buildGameViewUrl, type GameViewFilters } from "@/lib/navigation";
 import { Printer } from "lucide-react";
 
-type Props = {
-  slug: string;
-  groupId?: number;
-  round?: number;
-  participantId?: number;
-  matchdayId?: number;
-};
+type Props = { slug: string } & GameViewFilters;
 
-export function PrintGamesButton({ slug, ...params }: Props) {
-  const query = buildGameViewParams(params).toString();
-
+export function PrintGamesButton(props: Props) {
   return (
     <Button variant="outline" asChild title="Paarungen drucken">
       <Link
-        href={tournamentPath(
-          slug,
-          query ? `/partien/drucken?${query}` : "/partien/drucken",
-        )}
+        href={buildGameViewUrl(props, "/drucken")}
         target="_blank"
         rel="noopener noreferrer"
       >

@@ -22,6 +22,10 @@ export function toDateOnly(date: DateTime): string {
   return isoDate;
 }
 
+export function toPgnDate(date: string): string {
+  return parseDateOnly(date).toFormat("yyyy.MM.dd");
+}
+
 export function isValidDateOnly(date: string): boolean {
   return /^\d{4}-\d{2}-\d{2}$/.test(date) && parseDateOnly(date).isValid;
 }
