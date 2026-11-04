@@ -9,7 +9,7 @@ import { getRefereeOfGroup } from "@/services/referee";
 import { getStandings } from "@/services/standings";
 import invariant from "tiny-invariant";
 
-export const generateDwzReportFile = action(async (groupId: number) => {
+export const generateDwzReportFile = action(async (groupId: number, preview = false) => {
   const session = await authWithRedirect();
   invariant(session?.user.role === "admin", "Unauthorized");
 
@@ -81,7 +81,7 @@ export const generateDwzReportFile = action(async (groupId: number) => {
     })),
   });
 
-  const fileName = `DWZ_Export_${data.tournament.name.replaceAll(" ", "_")}_${data.groupName.replaceAll(" ", "_")}.trf`;
+  const fileName = `DWZ_Export_${data.tournament.name.replaceAll(" ", "_")}_${data.groupName.replaceAll(" ", "_")}${preview ? "_VORSCHAU" : ""}.trf`;
 
   return {
     dwzReport,
