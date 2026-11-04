@@ -2,29 +2,13 @@
 
 import { authWithRedirect } from "@/auth/utils";
 import { db } from "@/db/client";
-import { GameResult } from "@/db/types/game";
 import { action } from "@/lib/actions";
 import { generateDwzReport } from "@/lib/dwz-report/dwz-report";
-import { PlayerEntry, Result } from "@/lib/dwz-report/types";
-import { formatPlayerName } from "@/lib/fide-report/format-fide-name";
+import { formatRefereeName } from "@/lib/fide-report/format-fide-name";
 import { getRefereeOfGroup } from "@/services/referee";
 import { getStandings } from "@/services/standings";
 import invariant from "tiny-invariant";
-import { match } from "ts-pattern";
 
-// TODO: Rewrite this export using FIDE TRF or DSB_DWZ_Tournament_2_5.xsd (v2.5.3).
-// The legacy Eloref/SWI format is no longer accepted for tournaments ending after
-// 2026-06-07; zpsClubId/zpsPlayerId can be removed as part of that migration.
-// Preserve the full round schedule for odd-sized round-robin groups: nine players
-// have nine rounds but only eight actual opponents each. This export incorrectly
-// writes eight rounds in the header (participants.length - 1). Its player-section
-// renderer also allocates only eight columns (max results.length), then addresses
-// results by their original round number, silently dropping all four games from
-// round nine. Round-robin byes must contribute no points or rated games, while
-// retaining their round slots in the report. Do not confuse them with forfeits
-// between two real participants. Round-robin byes are no longer stored as games,
-// so derive their empty report slots from the original round numbers. Keep game
-// selection for rating reports separate from tournament-ranking exclusions.
 export const generateDwzReportFile = action(async (groupId: number) => {
   const session = await authWithRedirect();
   invariant(session?.user.role === "admin", "Unauthorized");
@@ -41,11 +25,7 @@ export const generateDwzReportFile = action(async (groupId: number) => {
           },
         },
       },
-      tournament: {
-        with: {
-          organizer: true,
-        },
-      },
+      tournament: true,
       games: {
         with: {
           matchdayGame: {
@@ -60,129 +40,51 @@ export const generateDwzReportFile = action(async (groupId: number) => {
   invariant(data, "Group not found");
 
   const groupReferee = await getRefereeOfGroup(groupId);
-
-  const completedGames = data.games.filter((game) => {
-    return game.result != null;
-  });
-
   const standings = await getStandings(groupId);
 
-  const getInitialGroupPositionOfPlayer = (participantId: number) => {
-    const participant = data.participants.find(
-      (p) => p.participant.id === participantId,
-    );
-    invariant(
-      participant != null,
-      `Participant ${participantId} could not be found in participants`,
-    );
-    return participant.groupPosition;
-  };
-
-  const getGroupPositionOfPlayer = (participantId: number) => {
-    const currentGroupPosition = standings.findIndex(
-      (s) => s.participantId === participantId,
-    );
-    invariant(
-      currentGroupPosition >= 0,
-      `Participant ${participantId} is not in the standings`,
-    );
-    return currentGroupPosition + 1;
-  };
-
-  const entries = data.participants.map(({ participant }) => {
-    const participantGames = completedGames.filter(
-      (game) =>
-        game.whiteParticipantId === participant.id ||
-        game.blackParticipantId === participant.id,
-    );
-
-    return {
-      endGroupPosition: getGroupPositionOfPlayer(participant.id),
-      startingGroupPosition: getInitialGroupPositionOfPlayer(participant.id),
-      name: formatPlayerName(
-        participant.profile.firstName,
-        participant.profile.lastName,
-        participant.profile.academicTitle,
-      ),
-      birthYear: participant.birthYear ?? undefined,
-      club: participant.chessClub.slice(0, 32),
-      fideId: participant.fideId ?? undefined,
-      zpsClubId: participant.zpsClubId ?? undefined,
-      zpsPlayerId: participant.zpsPlayerId ?? undefined,
-      results: participantGames.map((game) => {
-        invariant(game.result, `Game ${game.id} does not have a result`);
-        const isWhite = game.whiteParticipantId === participant.id;
-        const opponentId = isWhite
-          ? game.blackParticipantId
-          : game.whiteParticipantId;
-
-        return {
-          pieceColor: isWhite ? "W" : "B",
-          result: mapResult(game.result, isWhite),
-          opponentEndGroupPosition: getGroupPositionOfPlayer(opponentId),
-          round: game.round,
-        } satisfies Result;
-      }),
-    } satisfies PlayerEntry;
+  const dwzReport = generateDwzReport({
+    tournamentName: data.tournament.name,
+    groupName: data.groupName,
+    location: data.tournament.location,
+    startDate: data.tournament.startDate,
+    endDate: data.tournament.endDate,
+    timeLimit: data.tournament.timeLimit,
+    referee:
+      groupReferee != null
+        ? formatRefereeName(groupReferee.firstName, groupReferee.lastName)
+        : undefined,
+    participants: data.participants.map(({ groupPosition, participant }) => ({
+      id: participant.id,
+      startingPosition: groupPosition,
+      firstName: participant.profile.firstName,
+      lastName: participant.profile.lastName,
+      academicTitle: participant.profile.academicTitle,
+      title: participant.title,
+      gender: participant.gender,
+      birthYear: participant.birthYear,
+      birthDate: participant.birthDate,
+      nationality: participant.nationality,
+      fideId: participant.fideId,
+      fideRating: participant.fideRating,
+      dwzRating: participant.dwzRating,
+    })),
+    games: data.games.map((game) => ({
+      round: game.round,
+      whiteParticipantId: game.whiteParticipantId,
+      blackParticipantId: game.blackParticipantId,
+      result: game.result,
+      date: game.matchdayGame?.matchday.date ?? data.tournament.startDate,
+    })),
+    standings: standings.map((standing) => ({
+      participantId: standing.participantId,
+      points: standing.points,
+    })),
   });
 
-  const sortedEntries = entries.sort(
-    (entry1, entry2) => entry1.endGroupPosition - entry2.endGroupPosition,
-  );
-
-  const tournamentName = `${data.tournament.name} - ${data.groupName} Gruppe`;
-  const dwzReport = generateDwzReport(
-    {
-      groupNumber: data.groupNumber,
-      numberOfPlayers: data.participants.length,
-      numberOfRounds: data.participants.length - 1,
-      tournamentName,
-    },
-    sortedEntries,
-    {
-      tournamentName,
-      location: data.tournament.location,
-      startDate: data.tournament.startDate,
-      endDate: data.tournament.endDate,
-      timeLimit: data.tournament.timeLimit,
-      tournamentOrganizer:
-        data.tournament.organizer != null
-          ? formatName(
-              data.tournament.organizer.firstName,
-              data.tournament.organizer.lastName,
-            )
-          : undefined,
-      mainReferee:
-        groupReferee != null
-          ? formatName(groupReferee.firstName, groupReferee.lastName)
-          : undefined,
-    },
-  );
-
-  const fileName = `Eloref_${data.groupName}-Gruppe.txt`;
-
-  const reportWithoutNonAscii = dwzReport.replace(/[^\x00-\x7F]/g, "");
+  const fileName = `DWZ_Export_${data.tournament.name.replaceAll(" ", "_")}_${data.groupName.replaceAll(" ", "_")}.trf`;
 
   return {
-    dwzReport: reportWithoutNonAscii,
+    dwzReport,
     fileName,
   };
 });
-
-function formatName(firstName: string, lastName: string) {
-  return `${firstName} ${lastName}`;
-}
-
-function mapResult(result: GameResult, isWhite: boolean): Result["result"] {
-  // TODO: wie mit -/+ spielen umgehen
-  return match<GameResult, Result["result"]>(result)
-    .with("+:-", () => (isWhite ? "+:" : "-:"))
-    .with("-:-", () => (isWhite ? "-:" : "-:"))
-    .with("-:+", () => (isWhite ? "-:" : "+:"))
-    .with("0-½", () => (isWhite ? "0" : "R"))
-    .with("0:1", () => (isWhite ? "0" : "1"))
-    .with("1:0", () => (isWhite ? "1" : "0"))
-    .with("½-0", () => (isWhite ? "R" : "0"))
-    .with("½-½", () => (isWhite ? "R" : "R"))
-    .exhaustive();
-}

@@ -52,8 +52,8 @@ export default async function Page({
         <CardHeader>
           <CardTitle>DWZ-Auswertung</CardTitle>
           <CardDescription>
-            Wähle eine Gruppe aus, um die DWZ-Auswertung als .txt-Datei zu
-            generieren und herunterzuladen.
+            Wähle eine Gruppe aus, um die DWZ-Auswertung als TRF-Datei (.trf)
+            zu generieren und herunterzuladen.
           </CardDescription>
         </CardHeader>
         <CardContent>

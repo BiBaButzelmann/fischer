@@ -10,7 +10,10 @@ export function generateFideReport(
     tournamentSectionData,
     playerSectionData,
   );
-  const playerSection = generatePlayerSection(playerSectionData);
+  const playerSection = generatePlayerSection(
+    playerSectionData,
+    tournamentSectionData.roundDates,
+  );
 
   return `${tournamentSection}
 

@@ -51,7 +51,7 @@ export function GenerateDwzReportButton({
       disabled={!selectedGroupId || isPending || isDisabled}
     >
       <Download className="h-4 w-4" />
-      DWZ-Auswertung generieren
+      DWZ-Auswertung (TRF) generieren
     </Button>
   );
 }

@@ -1,54 +1,81 @@
-import { match } from "ts-pattern";
-import { Result, TableEntryKeyValue, PlayerSectionData } from "./types";
+import type { GameResult } from "@/db/types/game";
 import { DateTime } from "luxon";
+import { match } from "ts-pattern";
+import type { PlayerSectionData, Result } from "./types";
 
-export function getStringRepresentationForValue(value: TableEntryKeyValue) {
-  return match(value)
-    .with({ id: "index" }, ({ data }) => {
-      return data.toString().padStart(3, "0");
-    })
-    .with({ id: "startingGroupPosition" }, ({ data }) => {
-      return data.toString();
-    })
-    .with({ id: "gender" }, ({ data }) => {
-      return data;
-    })
-    .with({ id: "title" }, ({ data }) => {
-      return data;
-    })
-    .with({ id: "name" }, ({ data }) => {
-      return data;
-    })
-    .with({ id: "fideRating" }, ({ data }) => {
-      return data.toString();
-    })
-    .with({ id: "fideNation" }, ({ data }) => {
-      return data;
-    })
-    .with({ id: "fideId" }, ({ data }) => {
-      return data;
-    })
-    .with({ id: "birthYear" }, ({ data }) => {
-      return `${data.year}/00/00`;
-    })
-    .with({ id: "currentPoints" }, ({ data }) => {
-      return data.toFixed(1);
-    })
-    .with({ id: "currentGroupPosition" }, ({ data }) => {
-      return data.toString();
-    })
-    .with({ id: "results" }, () => {
-      throw new Error("Results have their own mapping");
-    })
-    .exhaustive();
+export type GameColumn = {
+  key: string;
+  title: string;
+  date?: DateTime;
+};
+
+export function getStringRepresentationForResult(result: Result) {
+  if (result.opponentStartingPosition == null) {
+    return `0000 - ${result.result}`;
+  }
+
+  const opponent = result.opponentStartingPosition
+    .toString()
+    .padStart(4, " ");
+  const playerResult = getPlayerResult(result.result, result.pieceColor);
+
+  return `${opponent} ${result.pieceColor} ${playerResult}`;
 }
 
-export function getStringRepresentationForResult(game: Result) {
-  return `${game.opponentGroupPosition.toString().padStart(4, " ")} ${game.pieceColor} ${game.result}`;
+function getPlayerResult(
+  result: GameResult,
+  pieceColor: "w" | "b",
+): "1" | "0" | "=" | "+" | "-" {
+  return match<GameResult, "1" | "0" | "=" | "+" | "-">(result)
+    .with("+:-", () => (pieceColor === "w" ? "+" : "-"))
+    .with("-:-", () => "-")
+    .with("-:+", () => (pieceColor === "w" ? "-" : "+"))
+    .with("0-½", () => (pieceColor === "w" ? "0" : "="))
+    .with("0:1", () => (pieceColor === "w" ? "0" : "1"))
+    .with("1:0", () => (pieceColor === "w" ? "1" : "0"))
+    .with("½-0", () => (pieceColor === "w" ? "=" : "0"))
+    .with("½-½", () => "=")
+    .exhaustive();
 }
 
 export function getStringRepresentationForScheduled(scheduled: DateTime) {
   return scheduled.toFormat("yyyy-MM-dd");
+}
+
+export function getGameColumns(
+  playerSectionData: PlayerSectionData,
+  roundDates?: Array<DateTime | undefined>,
+): GameColumn[] {
+  if (roundDates != null) {
+    const numberOfRounds = Math.max(
+      roundDates.length,
+      ...playerSectionData.flatMap((player) =>
+        player.results.map((result) => result.round ?? 0),
+      ),
+      0,
+    );
+
+    return Array.from({ length: numberOfRounds }, (_, index) => {
+      const round = index + 1;
+      const digit = round % 10;
+      return {
+        key: `round${round}`,
+        title: `${digit}${digit}${digit}${digit} ${digit} ${digit}`,
+        date: roundDates[index],
+      };
+    });
+  }
+
+  return getGamesGroupedByScheduledDate(playerSectionData).map(
+    ([dateString], index) => {
+      const digit = (index + 1) % 10;
+      return {
+        key: dateString,
+        title: `${digit}${digit}${digit}${digit} ${digit} ${digit}`,
+        date: DateTime.fromISO(dateString),
+      };
+    },
+  );
 }
 
 export function getGamesGroupedByScheduledDate(
@@ -58,6 +85,10 @@ export function getGamesGroupedByScheduledDate(
 
   playerSectionData.forEach((record) => {
     record.results.forEach((result) => {
+      if (result.scheduled == null) {
+        return;
+      }
+
       const dateKey = getStringRepresentationForScheduled(result.scheduled);
       if (!gamesByDate.has(dateKey)) {
         gamesByDate.set(dateKey, []);

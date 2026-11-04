@@ -4,7 +4,6 @@ import { authWithRedirect } from "@/auth/utils";
 import { CLUB_FEDERATION, monthLabels } from "@/constants/constants";
 import { db } from "@/db/client";
 import { getGamesInMonth } from "@/db/repositories/game";
-import { GameResult } from "@/db/types/game";
 import { Participant } from "@/db/types/participant";
 import { action } from "@/lib/actions";
 import { generateFideReport } from "@/lib/fide-report";
@@ -12,12 +11,10 @@ import {
   formatPlayerName,
   formatRefereeName,
 } from "@/lib/fide-report/format-fide-name";
-import { PlayerEntry, Result } from "@/lib/fide-report/types";
+import { PlayerEntry } from "@/lib/fide-report/types";
 import { calculateStandings } from "@/lib/standings";
 import { parseDateOnly, toDateOnly, toLocalDateTime } from "@/lib/date";
-import { DateTime } from "luxon";
 import invariant from "tiny-invariant";
-import { match } from "ts-pattern";
 import { getRefereeOfGroup } from "@/services/referee";
 import { getFideStandardRating } from "@/lib/fide/profile";
 
@@ -147,9 +144,8 @@ export const generateFideReportFile = action(
         const currentPoints = getPointsOfPlayer(participant.id);
 
         return {
-          index: 1,
-          startingGroupPosition: groupPosition,
-          gender: participant.gender,
+          startingPosition: groupPosition,
+          gender: participant.gender ?? undefined,
           title: participant.title ?? "",
           name: formatPlayerName(
             participant.profile.firstName,
@@ -159,23 +155,23 @@ export const generateFideReportFile = action(
           fideRating: await getCurrentElo(participant),
           fideNation: participant.nationality!,
           fideId: participant.fideId,
-          birthYear: DateTime.local(participant.birthYear),
-          currentPoints,
-          currentGroupPosition,
+          birthDate: `${participant.birthYear}/00/00`,
+          points: currentPoints,
+          rank: currentGroupPosition,
           results: participantGames.map((game) => {
             invariant(game.result, `Game ${game.id} does not have a result`);
             const isWhite = game.whiteParticipantId === participant.id;
 
             return {
               scheduled: parseDateOnly(game.matchday.date),
-              opponentGroupPosition: getInitialGroupPositionOfPlayer(
+              opponentStartingPosition: getInitialGroupPositionOfPlayer(
                 isWhite ? game.blackParticipantId : game.whiteParticipantId,
               ),
               pieceColor: isWhite ? "w" : "b",
-              result: mapResult(game.result, isWhite),
+              result: game.result,
             };
           }),
-        } as PlayerEntry;
+        } satisfies PlayerEntry;
       },
     );
 
@@ -240,17 +236,4 @@ async function getCurrentElo(participant: Participant) {
   }
   invariant(participant.fideRating != null, "FIDE rating cannot be null");
   return participant.fideRating;
-}
-
-function mapResult(result: GameResult, isWhite: boolean): Result["result"] {
-  return match<GameResult, Result["result"]>(result)
-    .with("+:-", () => (isWhite ? "+" : "-"))
-    .with("-:-", () => (isWhite ? "-" : "-"))
-    .with("-:+", () => (isWhite ? "-" : "+"))
-    .with("0-½", () => (isWhite ? "0" : "="))
-    .with("0:1", () => (isWhite ? "0" : "1"))
-    .with("1:0", () => (isWhite ? "1" : "0"))
-    .with("½-0", () => (isWhite ? "=" : "0"))
-    .with("½-½", () => (isWhite ? "=" : "="))
-    .exhaustive();
 }

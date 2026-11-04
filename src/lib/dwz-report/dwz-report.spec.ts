@@ -1,146 +1,130 @@
 import { describe, expect, it } from "vitest";
-import { generatePlayerSection } from "./player-section";
-import type {
-  HeaderSectionData,
-  PlayerSectionData,
-  Result,
-  TournamentSectionData,
-} from "./types";
-import { generatHeaderSection } from "./header-section";
-import { generateTournamentSection } from "./tournament-section";
 import { generateDwzReport } from "./dwz-report";
+import type { DwzReportInput } from "./types";
 
-describe("generateDWZReport", () => {
-  it("should generate the correct player section", () => {
-    const table = generatePlayerSection(playerSectionData);
-    expect(table).toBe(expectedPlayerSection);
-  });
+describe("generateDwzReport", () => {
+  it("generates a FIDE TRF report with all rounds and round-robin byes", () => {
+    const report = generateDwzReport(input);
 
-  it("should generate the correct header section", () => {
-    const header = generatHeaderSection(headerSectionData);
-    expect(header).toBe(expectedHeaderSection);
-  });
-
-  it("should generate the correct tournament section", () => {
-    const tournament = generateTournamentSection(tournamentSectionData);
-    expect(tournament).toBe(expectedTournamentSection);
-  });
-
-  it("should generate the correct dwz report", () => {
-    const report = generateDwzReport(
-      headerSectionData,
-      playerSectionData,
-      tournamentSectionData,
+    expect(report).toContain("012 HSK Klubturnier 2026 - A\r");
+    expect(report).toContain("062 3\r");
+    expect(report).toContain("072 2\r");
+    expect(report).toContain("092 Individual round robin\r");
+    expect(report).toContain("102 Thomas Stark\r");
+    expect(report).toContain(
+      "132                                                                                        26/09/01  26/09/08  26/09/15 \r",
     );
-    expect(report).toBe(expectedDwzReport);
+
+    const lines = report.split("\r\n");
+    const playerLine = (startingPosition: number) =>
+      lines.find((line) => line.startsWith(`001    ${startingPosition} `)) ??
+      "";
+
+    expect(playerLine(1)).toContain("Meissner,Felix");
+    expect(playerLine(1)).toContain("1990/00/00");
+    expect(playerLine(1)).toContain("2000 GER");
+    expect(playerLine(1)).toContain("24671827");
+    expect(playerLine(1)).toMatch(/2 w 1/);
+    expect(playerLine(1)).toContain("0000 - Z");
+    expect(playerLine(1)).toMatch(/3 b 1/);
+
+    expect(playerLine(2)).toContain("Spiric,Igor");
+    expect(playerLine(2)).toContain("1985/04/12");
+    expect(playerLine(2)).toMatch(/1 b 0/);
+    expect(playerLine(2)).toMatch(/3 w =/);
+    expect(playerLine(2)).toContain("0000 - Z");
+
+    expect(playerLine(3)).toContain("Muster,Anna");
+    expect(playerLine(3)).toContain("2000/00/00");
+    expect(playerLine(3)).toContain("0000 - Z");
+    expect(playerLine(3)).toMatch(/2 b =/);
+    expect(playerLine(3)).toMatch(/1 w 0/);
+
+    expect(report.match(/0000 - Z/g)).toHaveLength(3);
+    expect(report).not.toContain("0000 - -");
+  });
+
+  it("does not invent byes for even-sized groups", () => {
+    const report = generateDwzReport({
+      ...input,
+      participants: input.participants.slice(0, 2),
+      games: input.games.filter(
+        (game) =>
+          game.whiteParticipantId <= 2 && game.blackParticipantId <= 2,
+      ),
+      standings: input.standings.slice(0, 2),
+    });
+
+    expect(report).not.toContain("0000 - Z");
   });
 });
 
-const playerSectionData: PlayerSectionData = [
-  {
-    endGroupPosition: 1,
-    startingGroupPosition: 1,
-    name: "Meißner,Felix",
-    club: "HSK",
-    fideId: "24671827",
-    zpsClubId: "40023",
-    zpsPlayerId: "1237",
-    results: [
-      {
-        pieceColor: "W",
-        result: "1",
-        opponentEndGroupPosition: 10,
-        round: 1,
-      },
-      {
-        pieceColor: "W",
-        result: "1",
-        opponentEndGroupPosition: 2,
-        round: 2,
-      },
-      {
-        pieceColor: "B",
-        result: "1",
-        opponentEndGroupPosition: 3,
-        round: 3,
-      },
-      {
-        pieceColor: "W",
-        result: "1",
-        opponentEndGroupPosition: 4,
-        round: 4,
-      },
-    ] satisfies Result[],
-  },
-  {
-    endGroupPosition: 2,
-    startingGroupPosition: 4,
-    name: "Spiric,Igor",
-    club: "HSK",
-    fideId: "916609",
-    results: [
-      {
-        pieceColor: "W",
-        result: "R",
-        opponentEndGroupPosition: 9,
-        round: 1,
-      },
-      {
-        pieceColor: "B",
-        result: "0",
-        opponentEndGroupPosition: 1,
-        round: 2,
-      },
-      {
-        pieceColor: "W",
-        result: "1",
-        opponentEndGroupPosition: 10,
-        round: 3,
-      },
-      {
-        pieceColor: "W",
-        result: "R",
-        opponentEndGroupPosition: 3,
-        round: 4,
-      },
-    ] satisfies Result[],
-  },
-];
-
-const headerSectionData: HeaderSectionData = {
-  tournamentName: "HSK Klubturnier 2018 A-Gruppe",
-  numberOfPlayers: 10,
-  numberOfRounds: 9,
-  groupNumber: 1,
-};
-
-const tournamentSectionData: TournamentSectionData = {
-  tournamentName: "Klubturnier 2025",
+const input: DwzReportInput = {
+  tournamentName: "HSK Klubturnier 2026",
+  groupName: "A",
   location: "Hamburg",
-  startDate: "2025-09-16",
-  endDate: "2025-12-12",
+  startDate: "2026-09-01",
+  endDate: "2026-12-15",
   timeLimit:
-    "40 Züge in 90 Minuten, danach 0 Züge in 0 Minuten, 30 Minuten für die letzte Phase, Zugabe pro Zug in Sekunden: 30",
-  tournamentOrganizer: "Arne Alpers",
-  mainReferee: "Thomas Stark",
+    "40 Züge in 90 Minuten, danach 30 Minuten für die letzte Phase, Zugabe pro Zug in Sekunden: 30",
+  referee: "Thomas Stark",
+  participants: [
+    {
+      id: 1,
+      startingPosition: 1,
+      firstName: "Felix",
+      lastName: "Meißner",
+      gender: "m",
+      birthYear: 1990,
+      fideId: "24671827",
+      fideRating: 2000,
+      dwzRating: 1900,
+    },
+    {
+      id: 2,
+      startingPosition: 2,
+      firstName: "Igor",
+      lastName: "Spiric",
+      gender: "m",
+      birthDate: "1985-04-12",
+      nationality: "GER",
+      dwzRating: 1800,
+    },
+    {
+      id: 3,
+      startingPosition: 3,
+      firstName: "Anna",
+      lastName: "Muster",
+      gender: "f",
+      birthYear: 2000,
+    },
+  ],
+  games: [
+    {
+      round: 1,
+      whiteParticipantId: 1,
+      blackParticipantId: 2,
+      result: "1:0",
+      date: "2026-09-01",
+    },
+    {
+      round: 2,
+      whiteParticipantId: 2,
+      blackParticipantId: 3,
+      result: "½-½",
+      date: "2026-09-08",
+    },
+    {
+      round: 3,
+      whiteParticipantId: 3,
+      blackParticipantId: 1,
+      result: "0:1",
+      date: "2026-09-15",
+    },
+  ],
+  standings: [
+    { participantId: 1, points: 2.0 },
+    { participantId: 2, points: 0.5 },
+    { participantId: 3, points: 0.5 },
+  ],
 };
-
-const expectedPlayerSection = ` ttt. rrr nnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnn vvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvv lll ffffffffff pppppppppp gggggggg eeee dddd  zzzzz mmmm\u0020\u0020\u0020\u0020\u0020\u0020\u0020\u0020\u0020\u0020\u0020\u0020\u0020\u0020\u0020\u0020\u0020\u0020\u0020\u0020\u0020\u0020\u0020\u0020\u0020\r
-   1.   1 Meißner,Felix                    HSK                                    24671827                                40023 1237  1W 10 1W  2 1B  3 1W  4\r
-   2.   4 Spiric,Igor                      HSK                                      916609                                            RW  9 0B  1 1W 10 RW  3\r`;
-
-const expectedHeaderSection = `HSK Klubturnier 2018 A-Gruppe\r
-\r
-ER  10  9  1\r`;
-
-const expectedTournamentSection = `###\r
-Name: Klubturnier 2025\r
-Ort: Hamburg\r
-Datum(S):   16.9.2025           Datum(E):   12.12.2025\r
-Z¸ge: 40 Züge in 90 Minuten, danach 0 Züge in 0 Minuten, 30 Minuten für die letzte Phase, Zugabe pro Zug in Sekunden: 30\r
-Turnierorganisator: Arne Alpers\r
-Hauptschiedsrichter: Thomas Stark\r`;
-
-const expectedDwzReport = `${expectedHeaderSection}\r
-${expectedPlayerSection}\r
-${expectedTournamentSection}\r`;

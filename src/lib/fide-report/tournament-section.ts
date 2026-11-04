@@ -1,18 +1,16 @@
-import { DateTime } from "luxon";
-import { PlayerSectionData, TournamentSectionData } from "./types";
-import { getGamesGroupedByScheduledDate } from "./utils";
+import type { PlayerSectionData, TournamentSectionData } from "./types";
+import { getGameColumns } from "./utils";
 
 export function generateTournamentSection(
   tournamentSectionData: TournamentSectionData,
   playerSectionData: PlayerSectionData,
 ): string {
-  const games = getGamesGroupedByScheduledDate(playerSectionData);
-  const gameDates = Array.from(
-    games.map(([dateString]) => {
-      const date = DateTime.fromISO(dateString);
-      return ` ${date.toFormat("yy/MM/dd")} `;
-    }),
-  ).join("");
+  const gameDates = getGameColumns(
+    playerSectionData,
+    tournamentSectionData.roundDates,
+  )
+    .map((column) => ` ${column.date?.toFormat("yy/MM/dd") ?? "        "} `)
+    .join("");
 
   return `012 ${tournamentSectionData.tournamentName}\r
 022 ${tournamentSectionData.location}\r
@@ -24,5 +22,5 @@ export function generateTournamentSection(
 092 ${tournamentSectionData.tournamentType}\r
 102 ${tournamentSectionData.referee}\r
 122 ${tournamentSectionData.timeLimit}\r
-132                                                                                       ${gameDates}\r`;
+132${" ".repeat(87)}${gameDates}\r`;
 }
