@@ -31,9 +31,9 @@ export const participant = pgTable(
     birthDate: date("birth_date", { mode: "string" }),
     fideId: text("fide_id"),
     dsbPersonId: text("dsb_person_id"),
-    // TODO: zpsClubId/zpsPlayerId nur noch für den Legacy-Eloref-DWZ-Bericht.
-    // Entfernen, sobald der Bericht auf FIDE-TRF / XSD 2.5.3 (DSB_DWZ_Tournament_2_5.xsd)
-    // umgestellt ist; das alte Eloref/SWI-Format ist für Turniere nach 07.06.2026 abgeschafft.
+    // Legacy DSB/ZPS identifiers. The DWZ export now uses FIDE TRF; these
+    // columns are kept for registration/activity views and can be removed once
+    // they are no longer needed elsewhere.
     zpsClubId: text("zps_club_id"),
     zpsPlayerId: text("zps_player_id"),
 

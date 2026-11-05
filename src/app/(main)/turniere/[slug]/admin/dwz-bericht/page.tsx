@@ -17,6 +17,7 @@ import {
 } from "@/db/repositories/game";
 import { getTournamentBySlug } from "@/db/repositories/tournament";
 import { tournamentPath } from "@/lib/navigation";
+import Link from "next/link";
 import { redirect } from "next/navigation";
 
 export default async function Page({
@@ -24,7 +25,7 @@ export default async function Page({
   searchParams,
 }: {
   params: Promise<{ slug: string }>;
-  searchParams: Promise<{ groupId?: string }>;
+  searchParams: Promise<{ groupId?: string; preview?: string }>;
 }) {
   const session = await auth();
   const { slug } = await params;
@@ -32,7 +33,8 @@ export default async function Page({
     redirect(tournamentPath(slug, "/uebersicht"));
   }
 
-  const { groupId } = await searchParams;
+  const { groupId, preview } = await searchParams;
+  const isPreview = preview === "1";
 
   const tournament = await getTournamentBySlug(slug);
   if (!tournament) {
@@ -52,8 +54,8 @@ export default async function Page({
         <CardHeader>
           <CardTitle>DWZ-Auswertung</CardTitle>
           <CardDescription>
-            Wähle eine Gruppe aus, um die DWZ-Auswertung als .txt-Datei zu
-            generieren und herunterzuladen.
+            Wähle eine Gruppe aus, um die DWZ-Auswertung als TRF-Datei (.trf)
+            zu generieren und herunterzuladen.
           </CardDescription>
         </CardHeader>
         <CardContent>
@@ -63,7 +65,10 @@ export default async function Page({
           />
         </CardContent>
         <CardFooter>
-          <ButtonSection selectedGroupId={groupId} />
+          <ButtonSection
+            selectedGroupId={groupId}
+            isPreview={isPreview}
+          />
         </CardFooter>
       </Card>
     </div>
@@ -72,14 +77,16 @@ export default async function Page({
 
 type Props = {
   selectedGroupId: string | undefined;
+  isPreview: boolean;
 };
-async function ButtonSection({ selectedGroupId }: Props) {
+async function ButtonSection({ selectedGroupId, isPreview }: Props) {
   if (selectedGroupId == null) {
     return (
       <div className="flex justify-center">
         <GenerateDwzReportButton
           isDisabled
           selectedGroupId={selectedGroupId}
+          isPreview={isPreview}
         />
       </div>
     );
@@ -88,25 +95,40 @@ async function ButtonSection({ selectedGroupId }: Props) {
   const groupId = parseInt(selectedGroupId);
 
   const uncompletedGameIds = await getUncompletedGamesByGroup(groupId);
+  const hasUncompletedGames = uncompletedGameIds.length > 0;
 
   return (
     <div className="flex flex-col gap-4 w-full">
       <div className="flex justify-center">
         <GenerateDwzReportButton
           selectedGroupId={selectedGroupId}
-          isDisabled={uncompletedGameIds.length > 0}
+          isDisabled={hasUncompletedGames && !isPreview}
+          isPreview={isPreview}
         />
       </div>
-      {uncompletedGameIds.length > 0 && (
+      {hasUncompletedGames && (
         <div className="w-full">
           <div className="text-center mb-3">
             <h3 className="text-sm font-medium text-gray-900 dark:text-gray-100">
               Ausstehende Ergebnisse
             </h3>
             <p className="text-xs text-gray-500 dark:text-gray-400">
-              Diese Partien müssen abgeschlossen werden, bevor der Bericht
-              generiert werden kann.
+              {isPreview
+                ? "Vorschau: Der Bericht enthält nur die bereits gewerteten Partien. Offene Partien bleiben leer und dürfen nicht eingereicht werden."
+                : "Diese Partien müssen abgeschlossen werden, bevor der Bericht generiert werden kann."}
             </p>
+            <Link
+              href={
+                isPreview
+                  ? `?groupId=${groupId}`
+                  : `?groupId=${groupId}&preview=1`
+              }
+              className="mt-2 inline-block text-xs text-blue-600 underline dark:text-blue-400"
+            >
+              {isPreview
+                ? "Vorschau beenden"
+                : "Vorschau mit offenen Partien erlauben"}
+            </Link>
           </div>
           <div className="bg-white dark:bg-card border border-gray-200 dark:border-card-border rounded-lg">
             <div className="max-h-64 overflow-y-auto">

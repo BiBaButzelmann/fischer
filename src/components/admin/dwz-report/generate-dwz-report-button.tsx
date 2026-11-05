@@ -10,11 +10,13 @@ import { toast } from "sonner";
 type Props = {
   selectedGroupId: string | undefined;
   isDisabled?: boolean;
+  isPreview?: boolean;
 };
 
 export function GenerateDwzReportButton({
   selectedGroupId,
   isDisabled,
+  isPreview,
 }: Props) {
   const [isPending, startTransition] = useTransition();
 
@@ -24,7 +26,10 @@ export function GenerateDwzReportButton({
     }
 
     startTransition(async () => {
-      const result = await generateDwzReportFile(parseInt(selectedGroupId));
+      const result = await generateDwzReportFile(
+        parseInt(selectedGroupId),
+        isPreview,
+      );
       if (isError(result)) {
         toast.error(result.error);
         return;
@@ -51,7 +56,9 @@ export function GenerateDwzReportButton({
       disabled={!selectedGroupId || isPending || isDisabled}
     >
       <Download className="h-4 w-4" />
-      DWZ-Auswertung generieren
+      {isPreview
+        ? "Vorschau-Bericht (TRF) generieren"
+        : "DWZ-Auswertung (TRF) generieren"}
     </Button>
   );
 }

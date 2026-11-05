@@ -1,33 +1,36 @@
+import { DateTime } from "luxon";
 import { TableGenerator } from "../table-generator";
-import type { PlayerSectionData, TableEntryKeyValue } from "./types";
+import type { PlayerEntry, PlayerSectionData, Result } from "./types";
 import {
-  getStringRepresentationForScheduled,
-  getStringRepresentationForValue,
+  getGameColumns,
   getStringRepresentationForResult,
-  getGamesGroupedByScheduledDate,
+  getStringRepresentationForScheduled,
 } from "./utils";
 
-function getGameColumnIdentifier(date: string): string {
-  return `game${date}`;
+function getGameColumnIdentifier(key: string): string {
+  return `game${key}`;
 }
 
 export function generatePlayerSection(
   playerSectionData: PlayerSectionData,
+  roundDates?: Array<DateTime | undefined>,
 ): string {
-  const gamesTable = generateGamesTable(playerSectionData);
-  const columnHeaders = generateColumnHeaders(playerSectionData);
+  const columns = getGameColumns(playerSectionData, roundDates);
+  const columnHeaders = generateColumnHeaders(columns.length);
+  const gamesTable = generateGamesTable(playerSectionData, columns, roundDates);
 
   return `${columnHeaders}\n${gamesTable}`;
 }
 
-function generateGamesTable(playerSectionData: PlayerSectionData): string {
+function generateGamesTable(
+  playerSectionData: PlayerSectionData,
+  columns: ReturnType<typeof getGameColumns>,
+  roundDates?: Array<DateTime | undefined>,
+): string {
   const tableGenerator = new TableGenerator();
 
-  const games = getGamesGroupedByScheduledDate(playerSectionData);
-
-  // Define columns
-  tableGenerator.addColumn("index", "DDD", 3, "left");
-  tableGenerator.addColumn("startingGroupPosition", "SSSS", 4, "right");
+  tableGenerator.addColumn("dataId", "DDD", 3, "left");
+  tableGenerator.addColumn("startingPosition", "SSSS", 4, "right");
   tableGenerator.addColumn("gender", "s", 1, "left", true);
   tableGenerator.addColumn("title", "TTT", 3, "right");
   tableGenerator.addColumn(
@@ -39,32 +42,36 @@ function generateGamesTable(playerSectionData: PlayerSectionData): string {
   tableGenerator.addColumn("fideRating", "RRRR", 4, "right");
   tableGenerator.addColumn("fideNation", "FFF", 3, "left");
   tableGenerator.addColumn("fideId", "IIIIIIIIIII", 11, "right");
-  tableGenerator.addColumn("birthYear", "BBBB/BB/BB", 10, "left");
-  tableGenerator.addColumn("currentPoints", "PPPP", 4, "right");
-  tableGenerator.addColumn("currentGroupPosition", "RRRR", 4, "right");
-  games.forEach(([date], index) => {
-    const columnIndex = (index + 1) % 10;
+  tableGenerator.addColumn("birthDate", "BBBB/BB/BB", 10, "left");
+  tableGenerator.addColumn("points", "PPPP", 4, "right");
+  tableGenerator.addColumn("rank", "RRRR", 4, "right");
+
+  for (const column of columns) {
     tableGenerator.addColumn(
-      getGameColumnIdentifier(date),
-      `${columnIndex}${columnIndex}${columnIndex}${columnIndex} ${columnIndex} ${columnIndex}`,
+      getGameColumnIdentifier(column.key),
+      column.title,
       10,
       "center",
       true,
     );
-  });
+  }
 
-  for (const { results, ...record } of playerSectionData) {
+  for (const player of playerSectionData) {
     tableGenerator.addRowValues([
-      ...Object.entries(record).map(([key, value]) => ({
-        id: key,
-        data: getStringRepresentationForValue({
-          id: key,
-          data: value,
-        } as TableEntryKeyValue),
-      })),
-      ...results.map((result) => ({
+      { id: "dataId", data: "001" },
+      { id: "startingPosition", data: player.startingPosition.toString() },
+      { id: "gender", data: getTrfGender(player) },
+      { id: "title", data: player.title ?? "" },
+      { id: "name", data: player.name },
+      { id: "fideRating", data: formatFideRating(player) },
+      { id: "fideNation", data: player.fideNation ?? "" },
+      { id: "fideId", data: player.fideId ?? "" },
+      { id: "birthDate", data: player.birthDate ?? "" },
+      { id: "points", data: player.points.toFixed(1) },
+      { id: "rank", data: player.rank.toString() },
+      ...player.results.map((result) => ({
         id: getGameColumnIdentifier(
-          getStringRepresentationForScheduled(result.scheduled),
+          getResultColumnKey(result, roundDates != null),
         ),
         data: getStringRepresentationForResult(result),
       })),
@@ -74,12 +81,44 @@ function generateGamesTable(playerSectionData: PlayerSectionData): string {
   return tableGenerator.generateTable();
 }
 
-function generateColumnHeaders(playerSectionData: PlayerSectionData): string {
+function getTrfGender(player: PlayerEntry): string {
+  if (player.gender === "f") {
+    return "w";
+  }
+  if (player.gender === "m") {
+    return "m";
+  }
+  return "";
+}
+
+function formatFideRating(player: PlayerEntry): string {
+  if (player.fideRating == null || player.fideRating <= 0) {
+    return "";
+  }
+
+  return player.fideRating.toString();
+}
+
+function getResultColumnKey(result: Result, useRounds: boolean): string {
+  if (useRounds) {
+    if (result.round == null) {
+      throw new Error("Result is missing the round");
+    }
+
+    return `round${result.round}`;
+  }
+
+  if (result.scheduled == null) {
+    throw new Error("Result is missing the scheduled date");
+  }
+
+  return getStringRepresentationForScheduled(result.scheduled);
+}
+
+function generateColumnHeaders(gameColumnCount: number): string {
   const tableGenerator = new TableGenerator();
 
-  const games = getGamesGroupedByScheduledDate(playerSectionData);
-
-  const columnsCount = 9 + games.length;
+  const columnsCount = 9 + gameColumnCount;
   Array.from({ length: columnsCount }, (_, i) => i + 1).forEach((i) => {
     tableGenerator.addColumn(i.toString(), i.toString(), 10, "right", true);
   });
