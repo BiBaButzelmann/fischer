@@ -1,8 +1,17 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 
-type ErrorResponse = {
+import { unstable_rethrow } from "next/navigation";
+
+export type ErrorResponse = {
   error: string;
 };
+
+export class ActionError extends Error {
+  constructor(message: string) {
+    super(message);
+    this.name = "ActionError";
+  }
+}
 
 export function action<TParams extends any[], TReturn>(
   callback: (...args: TParams) => Promise<TReturn>,
@@ -12,12 +21,13 @@ export function action<TParams extends any[], TReturn>(
       const result = await callback(...args);
       return result;
     } catch (error) {
-      console.error("Unexpected error:", error);
-      if (error instanceof Error) {
+      unstable_rethrow(error);
+      if (error instanceof ActionError) {
         return {
           error: error.message,
         };
       }
+      console.error("Unexpected error:", error);
       return {
         error: "Ein unerwarteter Fehler ist aufgetreten",
       };

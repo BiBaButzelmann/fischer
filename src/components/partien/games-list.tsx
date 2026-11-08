@@ -1,5 +1,6 @@
 "use client";
 
+import type { updateGameResult } from "@/actions/game";
 import { Badge } from "@/components/ui/badge";
 import {
   Table,
@@ -9,10 +10,7 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
-import {
-  GameResult,
-  GameWithParticipantProfilesAndGroupAndMatchday,
-} from "@/db/types/game";
+import { GameWithParticipantProfilesAndGroupAndMatchday } from "@/db/types/game";
 import { useMemo, useCallback } from "react";
 import { useRouter } from "next/navigation";
 import { useTournamentSlug } from "@/hooks/use-tournament-slug";
@@ -21,15 +19,16 @@ import { MatchDay } from "@/db/types/match-day";
 import { authClient } from "@/auth-client";
 import { Role } from "@/db/types/role";
 import { GameActions } from "./game-actions";
-import { formatDateOnly, parseDateOnly, todayDateOnly } from "@/lib/date";
+import { formatDateOnly, parseDateOnly } from "@/lib/date";
 import { getParticipantFullName } from "@/lib/participant";
 import { getTwz } from "@/lib/twz";
 
 type Props = {
   games: GameWithParticipantProfilesAndGroupAndMatchday[];
-  onResultChange: (gameId: number, result: GameResult | null) => Promise<void>;
+  onResultChange: typeof updateGameResult;
   availableMatchdays: MatchDay[];
   userRoles: Role[];
+  startedGameIds: number[];
 };
 
 export function GamesList({
@@ -37,6 +36,7 @@ export function GamesList({
   onResultChange,
   availableMatchdays = [],
   userRoles = [],
+  startedGameIds,
 }: Props) {
   const router = useRouter();
   const slug = useTournamentSlug();
@@ -68,11 +68,6 @@ export function GamesList({
         userId || "",
       );
 
-      const game = games.find((g) => g.id === gameId);
-      const isGameInPastOrToday = game
-        ? game.matchdayGame.matchday.date <= todayDateOnly()
-        : false;
-
       return {
         canView:
           isParticipant ||
@@ -81,7 +76,8 @@ export function GamesList({
           isAdmin ||
           isTrainer,
         canSubmitResult:
-          (isGameParticipant || isReferee || isAdmin) && isGameInPastOrToday,
+          (isGameParticipant || isReferee || isAdmin) &&
+          startedGameIds.includes(gameId),
         canPostpone: isGameParticipant || isAdmin,
       };
     },
@@ -93,7 +89,7 @@ export function GamesList({
       isMatchEnteringHelper,
       isAdmin,
       isTrainer,
-      games,
+      startedGameIds,
     ],
   );
 
@@ -219,9 +215,7 @@ export function GamesList({
                       Runde {game.round}
                     </Badge>
                   </span>
-                  <span>
-                    {formatDateOnly(game.matchdayGame.matchday.date)}
-                  </span>
+                  <span>{formatDateOnly(game.matchdayGame.matchday.date)}</span>
                 </div>
                 <div className="flex items-center gap-2">
                   <div className="flex-1 flex-shrink">

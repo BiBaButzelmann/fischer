@@ -1,5 +1,4 @@
-import { GameWithMatchday } from "@/db/types/game";
-import { parseDateOnly } from "@/lib/date";
+import { getCurrentLocalDateTime, parseDateOnly } from "@/lib/date";
 import { DateTime } from "luxon";
 import invariant from "tiny-invariant";
 
@@ -47,19 +46,10 @@ export function getSetupHelperTimeFromTournamentTime(
   return setupDateTime;
 }
 
-/**
- * Creates a Date object for a game from a complete game object
- * @param game - The game object with matchdayGame relation and gameStartTime
- * @param gameStartTime - The game start time in HH:MM:SS format
- * @returns A Date object with the game date and time
- */
-export function getGameTimeFromGame(
-  game: GameWithMatchday,
-  gameStartTime: string,
-) {
-  return getDateTimeFromTournamentTime(
-    game.matchdayGame.matchday.date,
-    gameStartTime,
+export function hasGameStarted(matchdayDate: string, gameStartTime: string) {
+  return (
+    getDateTimeFromTournamentTime(matchdayDate, gameStartTime) <=
+    getCurrentLocalDateTime()
   );
 }
 

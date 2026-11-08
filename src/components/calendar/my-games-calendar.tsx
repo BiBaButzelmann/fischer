@@ -12,6 +12,7 @@ import type { DateClickArg } from "@fullcalendar/interaction/index.js";
 import { CalendarEvent } from "@/db/types/calendar";
 import { useTransition, useCallback } from "react";
 import { updateGameMatchdayAndBoardNumber } from "@/actions/game";
+import { isError } from "@/lib/actions";
 import { MatchDay } from "@/db/types/match-day";
 import { toast } from "sonner";
 import { Skeleton } from "@/components/ui/skeleton";
@@ -80,7 +81,7 @@ export function MyGamesCalendar({ events, matchdays = [] }: Props) {
             gameId,
             targetMatchday.id,
           );
-          if (result?.error) {
+          if (isError(result)) {
             toast.error(result.error);
             info.revert();
             return;

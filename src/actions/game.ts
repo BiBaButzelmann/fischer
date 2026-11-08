@@ -16,12 +16,14 @@ import invariant from "tiny-invariant";
 import { bergerFide, nextEvenNumber } from "@/lib/pairing-utils";
 import { redirect } from "next/navigation";
 import {
+  formatGameTimeByTournament,
   getDateTimeFromTournamentTime,
-  getGameTimeFromGame,
+  hasGameStarted,
 } from "@/lib/game-time";
 import { sendGamePostponementEmails } from "@/actions/email/game-postponement";
 import { updateBoardNumbers } from "@/actions/board-number";
-import { getCurrentLocalDateTime } from "@/lib/date";
+import { formatDateOnly } from "@/lib/date";
+import { action, ActionError } from "@/lib/actions";
 import { getRolesByUserIdAndTournamentId } from "@/db/repositories/role";
 
 export async function removeScheduledGamesForGroup(
@@ -177,115 +179,119 @@ export async function scheduleGamesForGroup(
   revalidatePath("/turniere/[slug]/admin/paarungen", "page");
 }
 
-export async function updateGameMatchdayAndBoardNumber(
-  gameId: number,
-  newMatchdayId: number,
-) {
-  const session = await authWithRedirect();
+export const updateGameMatchdayAndBoardNumber = action(
+  async (gameId: number, newMatchdayId: number) => {
+    const session = await authWithRedirect();
 
-  const gameData = await db.query.game.findFirst({
-    where: eq(game.id, gameId),
-    with: {
-      whiteParticipant: { with: { profile: true } },
-      blackParticipant: { with: { profile: true } },
-      tournament: {
-        columns: {
-          gameStartTime: true,
+    const gameData = await db.query.game.findFirst({
+      where: eq(game.id, gameId),
+      with: {
+        whiteParticipant: { with: { profile: true } },
+        blackParticipant: { with: { profile: true } },
+        tournament: {
+          columns: {
+            gameStartTime: true,
+          },
+        },
+        matchdayGame: {
+          with: {
+            matchday: true,
+          },
         },
       },
-      matchdayGame: {
-        with: {
-          matchday: true,
-        },
-      },
-    },
-  });
-  invariant(gameData, "Partie nicht gefunden");
+    });
+    if (!gameData) {
+      throw new ActionError("Partie nicht gefunden");
+    }
 
-  if (gameData.result !== null) {
-    return {
-      error: "Partie mit einem Ergebnis kann nicht mehr verschoben werden",
-    };
-  }
+    if (gameData.result !== null) {
+      throw new ActionError(
+        "Partie mit einem Ergebnis kann nicht mehr verschoben werden",
+      );
+    }
 
-  invariant(gameData.whiteParticipant, "Weißer Spieler nicht gefunden");
-  invariant(gameData.blackParticipant, "Schwarzer Spieler nicht gefunden");
+    invariant(gameData.whiteParticipant, "Weißer Spieler nicht gefunden");
+    invariant(gameData.blackParticipant, "Schwarzer Spieler nicht gefunden");
 
-  const isUserInGame =
-    gameData.whiteParticipant.profile.userId === session.user.id ||
-    gameData.blackParticipant.profile.userId === session.user.id;
-  invariant(
-    isUserInGame || session.user.role === "admin",
-    "Nicht berechtigt, diese Partie zu verschieben",
-  );
+    const isUserInGame =
+      gameData.whiteParticipant.profile.userId === session.user.id ||
+      gameData.blackParticipant.profile.userId === session.user.id;
+    if (!isUserInGame && session.user.role !== "admin") {
+      throw new ActionError(
+        "Du bist nicht berechtigt, diese Partie zu verschieben",
+      );
+    }
 
-  const currentMatchday = gameData.matchdayGame?.matchday;
-  invariant(currentMatchday, "Aktueller Spieltag nicht gefunden");
+    const currentMatchday = gameData.matchdayGame?.matchday;
+    invariant(currentMatchday, "Aktueller Spieltag nicht gefunden");
 
-  const newMatchday = await db.query.matchday.findFirst({
-    where: eq(matchday.id, newMatchdayId),
-  });
-  invariant(newMatchday, "Neuer Spieltag nicht gefunden");
+    const newMatchday = await db.query.matchday.findFirst({
+      where: eq(matchday.id, newMatchdayId),
+    });
+    if (!newMatchday) {
+      throw new ActionError("Der gewählte Spieltag existiert nicht mehr");
+    }
 
-  const postponingParticipant =
-    gameData.whiteParticipant.profile.userId === session.user.id
-      ? gameData.whiteParticipant
-      : gameData.blackParticipant;
+    const postponingParticipant =
+      gameData.whiteParticipant.profile.userId === session.user.id
+        ? gameData.whiteParticipant
+        : gameData.blackParticipant;
 
-  const userProfile = await db.query.profile.findFirst({
-    where: eq(profile.userId, session.user.id),
-  });
-  invariant(userProfile, "Benutzerprofil nicht gefunden");
+    const userProfile = await db.query.profile.findFirst({
+      where: eq(profile.userId, session.user.id),
+    });
+    invariant(userProfile, "Benutzerprofil nicht gefunden");
 
-  const fromTimestamp = getDateTimeFromTournamentTime(
-    currentMatchday.date,
-    gameData.tournament.gameStartTime,
-  );
-  const toTimestamp = getDateTimeFromTournamentTime(
-    newMatchday.date,
-    gameData.tournament.gameStartTime,
-  );
+    const fromTimestamp = getDateTimeFromTournamentTime(
+      currentMatchday.date,
+      gameData.tournament.gameStartTime,
+    );
+    const toTimestamp = getDateTimeFromTournamentTime(
+      newMatchday.date,
+      gameData.tournament.gameStartTime,
+    );
 
-  await db.transaction(async (tx) => {
-    await tx.insert(gamePostponement).values({
-      gameId,
-      postponingParticipantId: postponingParticipant.id,
-      postponedByProfileId: userProfile.id,
-      from: fromTimestamp.toJSDate(),
-      to: toTimestamp.toJSDate(),
+    await db.transaction(async (tx) => {
+      await tx.insert(gamePostponement).values({
+        gameId,
+        postponingParticipantId: postponingParticipant.id,
+        postponedByProfileId: userProfile.id,
+        from: fromTimestamp.toJSDate(),
+        to: toTimestamp.toJSDate(),
+      });
+
+      await tx
+        .update(matchdayGame)
+        .set({ matchdayId: newMatchdayId })
+        .where(eq(matchdayGame.gameId, gameId));
     });
 
-    await tx
-      .update(matchdayGame)
-      .set({ matchdayId: newMatchdayId })
-      .where(eq(matchdayGame.gameId, gameId));
-  });
-
-  await updateBoardNumbers(
-    gameId,
-    gameData.groupId,
-    gameData.boardNumber,
-    currentMatchday.id,
-    newMatchdayId,
-  );
-
-  try {
-    await sendGamePostponementEmails(
-      gameData,
-      postponingParticipant,
-      currentMatchday,
-      newMatchday,
+    await updateBoardNumbers(
+      gameId,
+      gameData.groupId,
+      gameData.boardNumber,
+      currentMatchday.id,
+      newMatchdayId,
     );
-  } catch (emailError) {
-    console.error(
-      "Failed to send postponement email notifications:",
-      emailError,
-    );
-  }
 
-  revalidatePath("/turniere/[slug]/kalender", "page");
-  revalidatePath("/turniere/[slug]/partien", "page");
-}
+    try {
+      await sendGamePostponementEmails(
+        gameData,
+        postponingParticipant,
+        currentMatchday,
+        newMatchday,
+      );
+    } catch (emailError) {
+      console.error(
+        "Failed to send postponement email notifications:",
+        emailError,
+      );
+    }
+
+    revalidatePath("/turniere/[slug]/kalender", "page");
+    revalidatePath("/turniere/[slug]/partien", "page");
+  },
+);
 
 export async function rescheduleGamesForGroup(
   tournamentId: number,
@@ -295,68 +301,67 @@ export async function rescheduleGamesForGroup(
   return await scheduleGamesForGroup(tournamentId, groupId);
 }
 
-export async function updateGameResult(
-  gameId: number,
-  result: GameResult | null,
-) {
-  const session = await authWithRedirect();
+export const updateGameResult = action(
+  async (gameId: number, result: GameResult | null) => {
+    const session = await authWithRedirect();
 
-  const gameData = await db.query.game.findFirst({
-    where: eq(game.id, gameId),
-    with: {
-      tournament: {
-        columns: {
-          gameStartTime: true,
+    const gameData = await db.query.game.findFirst({
+      where: eq(game.id, gameId),
+      with: {
+        tournament: {
+          columns: {
+            gameStartTime: true,
+          },
+        },
+        matchdayGame: {
+          with: {
+            matchday: true,
+          },
         },
       },
-      matchdayGame: {
-        with: {
-          matchday: true,
-        },
-      },
-    },
-  });
-  invariant(gameData, "Game not found");
+    });
+    if (!gameData) {
+      throw new ActionError("Partie nicht gefunden");
+    }
 
-  const isUserParticipating = await isUserParticipantInGame(
-    gameId,
-    session.user.id,
-  );
-  const userRoles = await getRolesByUserIdAndTournamentId(
-    session.user.id,
-    gameData.tournamentId,
-  );
-  const isAdmin = userRoles.includes("admin");
-  const isReferee = userRoles.includes("referee");
-
-  invariant(
-    isUserParticipating || isAdmin || isReferee,
-    "User is not authorized to update this game result",
-  );
-
-  if (result === null) {
-    invariant(
-      isAdmin || isReferee,
-      "Only admins or referees can set result to null",
+    const isUserParticipating = await isUserParticipantInGame(
+      gameId,
+      session.user.id,
     );
-  }
+    const userRoles = await getRolesByUserIdAndTournamentId(
+      session.user.id,
+      gameData.tournamentId,
+    );
+    const isAdmin = userRoles.includes("admin");
+    const isReferee = userRoles.includes("referee");
 
-  const gameDateTime = getGameTimeFromGame(
-    gameData,
-    gameData.tournament.gameStartTime,
-  );
-  const now = getCurrentLocalDateTime();
-  invariant(
-    gameDateTime <= now,
-    "Cannot submit result for games that haven't happened yet",
-  );
+    if (!isUserParticipating && !isAdmin && !isReferee) {
+      throw new ActionError(
+        "Du bist nicht berechtigt, das Ergebnis dieser Partie einzutragen",
+      );
+    }
 
-  await db
-    .update(game)
-    .set({
-      result,
-    })
-    .where(eq(game.id, gameId));
-  revalidatePath("/turniere/[slug]/partien", "page");
-  revalidatePath("/turniere/[slug]/partien/[partieId]", "page");
-}
+    if (result === null && !isAdmin && !isReferee) {
+      throw new ActionError(
+        "Nur Admins und Schiedsrichter können ein Ergebnis zurücksetzen",
+      );
+    }
+
+    const matchdayDate = gameData.matchdayGame.matchday.date;
+    const { gameStartTime } = gameData.tournament;
+    if (!hasGameStarted(matchdayDate, gameStartTime)) {
+      throw new ActionError(
+        `Das Ergebnis kann erst nach Partiebeginn am ${formatDateOnly(matchdayDate)} um ${formatGameTimeByTournament(gameStartTime)} eingetragen werden`,
+      );
+    }
+
+    await db
+      .update(game)
+      .set({
+        result,
+      })
+      .where(eq(game.id, gameId));
+    revalidatePath("/turniere/[slug]/partien", "page");
+    revalidatePath("/turniere/[slug]/partien/[partieId]", "page");
+  },
+);
