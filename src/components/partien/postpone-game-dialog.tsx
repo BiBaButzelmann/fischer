@@ -21,6 +21,7 @@ import { MatchDay } from "@/db/types/match-day";
 import { GameWithParticipantProfilesAndGroupAndMatchday } from "@/db/types/game";
 import { toast } from "sonner";
 import { cn } from "@/lib/utils";
+import { isError } from "@/lib/actions";
 import { Card, CardContent } from "../ui/card";
 import { Mail, Phone } from "lucide-react";
 import {
@@ -73,7 +74,7 @@ export function PostponeGameDialog({
           gameId,
           selectedMatchday.id,
         );
-        if (result?.error) {
+        if (isError(result)) {
           toast.error(result.error);
           return;
         }

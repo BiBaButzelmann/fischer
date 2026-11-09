@@ -1,8 +1,9 @@
-import { describe, test, expect } from "vitest";
+import { afterEach, describe, test, expect, vi } from "vitest";
 import {
   getDateTimeFromTournamentTime,
   getSetupHelperTimeFromTournamentTime,
   formatGameTimeByTournament,
+  hasGameStarted,
 } from "../game-time";
 
 describe("getDateTimeFromTournamentTime", () => {
@@ -38,5 +39,29 @@ describe("formatGameTimeByTournament", () => {
   test("formats HH:MM Uhr with padding", () => {
     expect(formatGameTimeByTournament("19:30:00")).toBe("19:30 Uhr");
     expect(formatGameTimeByTournament("9:05:00")).toBe("09:05 Uhr");
+  });
+});
+
+describe("hasGameStarted", () => {
+  afterEach(() => {
+    vi.useRealTimers();
+  });
+
+  test("is false on the matchday before the game start", () => {
+    vi.useFakeTimers();
+    vi.setSystemTime(new Date("2026-12-10T17:00:00Z"));
+    expect(hasGameStarted("2026-12-10", "19:30:00")).toBe(false);
+  });
+
+  test("is true at the game start in Berlin time", () => {
+    vi.useFakeTimers();
+    vi.setSystemTime(new Date("2026-12-10T18:30:00Z"));
+    expect(hasGameStarted("2026-12-10", "19:30:00")).toBe(true);
+  });
+
+  test("is true on a later day", () => {
+    vi.useFakeTimers();
+    vi.setSystemTime(new Date("2026-12-11T08:00:00Z"));
+    expect(hasGameStarted("2026-12-10", "19:30:00")).toBe(true);
   });
 });

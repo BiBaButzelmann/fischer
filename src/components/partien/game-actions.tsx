@@ -1,5 +1,6 @@
 "use client";
 
+import type { updateGameResult } from "@/actions/game";
 import {
   GameResult,
   GameWithParticipantProfilesAndGroupAndMatchday,
@@ -19,7 +20,7 @@ import { DateTime } from "luxon";
 type Props = {
   gameId: number;
   currentResult: GameResult | null;
-  onResultChange: (gameId: number, result: GameResult | null) => Promise<void>;
+  onResultChange: typeof updateGameResult;
   availableMatchdays: MatchDay[];
   currentGameDate: DateTime;
   game: GameWithParticipantProfilesAndGroupAndMatchday;

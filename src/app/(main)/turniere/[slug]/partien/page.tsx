@@ -16,6 +16,7 @@ import { auth } from "@/auth/utils";
 import { MassPgnDownloadButton } from "@/components/partien/mass-pgn-download-button";
 import { canUserViewGames } from "@/lib/game-auth";
 import { getGroupAnnouncementDate } from "@/lib/tournament-schedule";
+import { hasGameStarted } from "@/lib/game-time";
 import { notFound } from "next/navigation";
 
 export type SearchParams = {
@@ -107,6 +108,12 @@ export default async function Page({
       : Promise.resolve([]),
   ]);
 
+  const startedGameIds = games
+    .filter((game) =>
+      hasGameStarted(game.matchdayGame.matchday.date, tournament.gameStartTime),
+    )
+    .map((game) => game.id);
+
   const canDownloadPgns =
     session?.user.id !== undefined && canUserViewGames(userRoles);
   const hasPgns =
@@ -156,6 +163,7 @@ export default async function Page({
               onResultChange={updateGameResult}
               availableMatchdays={matchdays}
               userRoles={userRoles}
+              startedGameIds={startedGameIds}
             />
             <ScrollBar orientation="horizontal" />
           </ScrollArea>

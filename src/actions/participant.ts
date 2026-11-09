@@ -23,7 +23,7 @@ import {
   DEFAULT_CLUB_LABEL,
 } from "@/constants/constants";
 import { revalidatePath } from "next/cache";
-import { action } from "@/lib/actions";
+import { action, ActionError } from "@/lib/actions";
 import { hasSecondaryMatchDayConflict } from "@/lib/match-days";
 import { parseDateOnly } from "@/lib/date";
 import { getFideProfile, getFideStandardRating } from "@/lib/fide/profile";
@@ -48,7 +48,7 @@ export const createParticipant = action(async (
   let chessClub: string;
   if (data.chessClubType === "other") {
     if (!data.chessClub || data.chessClub.trim().length === 0) {
-      throw new Error("Schachverein ist erforderlich");
+      throw new ActionError("Schachverein ist erforderlich");
     }
     chessClub = data.chessClub;
   } else if (data.chessClubType === CLUBLESS_KEY) {
@@ -274,7 +274,7 @@ export const linkParticipantDsb = action(
 
     const person = await getDsbPersonById(nuLigaPersonId);
     if (person == null) {
-      throw new Error("DSB-Person nicht gefunden");
+      throw new ActionError("DSB-Person nicht gefunden");
     }
 
     await db

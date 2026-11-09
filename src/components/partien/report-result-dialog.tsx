@@ -1,5 +1,6 @@
 "use client";
 
+import type { updateGameResult } from "@/actions/game";
 import { Button } from "@/components/ui/button";
 import {
   Dialog,
@@ -28,13 +29,15 @@ import { GameResult } from "@/db/types/game";
 import { Handshake } from "lucide-react";
 import { useTransition, useState } from "react";
 import { authClient } from "@/auth-client";
+import { isError } from "@/lib/actions";
+import { toast } from "sonner";
 
 const NO_RESULT = "NO_RESULT";
 
 type Props = {
   gameId: number;
   currentResult: GameResult | null;
-  onResultChange: (gameId: number, result: GameResult | null) => Promise<void>;
+  onResultChange: typeof updateGameResult;
   isReferee?: boolean;
 };
 
@@ -57,8 +60,19 @@ export function ReportResultDialog({
     const result =
       resultValue === NO_RESULT ? null : (resultValue as GameResult);
     startTransition(async () => {
-      await onResultChange(gameId, result);
-      setIsOpen(false);
+      try {
+        const response = await onResultChange(gameId, result);
+        if (isError(response)) {
+          toast.error(response.error);
+          return;
+        }
+        toast.success("Ergebnis gespeichert");
+        setIsOpen(false);
+      } catch {
+        toast.error(
+          "Das Ergebnis konnte nicht gespeichert werden. Bitte prüfe deine Verbindung und versuche es erneut.",
+        );
+      }
     });
   };
 
