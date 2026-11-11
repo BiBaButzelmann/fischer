@@ -22,9 +22,6 @@ export const auth = betterAuth({
     },
   },
   session: {
-    // Keep the signed session payload in a cookie so page renders do not need
-    // two database round-trips per auth() call. Revoked sessions and role
-    // changes can take up to maxAge to become visible.
     cookieCache: {
       enabled: true,
       maxAge: 5 * 60,

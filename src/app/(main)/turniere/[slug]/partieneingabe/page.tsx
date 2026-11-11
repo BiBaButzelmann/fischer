@@ -60,8 +60,6 @@ export default async function Page({
   const isAdmin = userRoles.includes("admin");
   const isReferee = userRoles.includes("referee");
 
-  // Compute rights in memory. Calling getUserGameRights per game issued
-  // several queries for every played game (up to 85 for a helper).
   const editableGames = allGames.filter((game) => {
     const isGameParticipant =
       game.whiteParticipant?.profile.userId === session.user.id ||
