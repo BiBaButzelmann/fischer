@@ -3,9 +3,11 @@ import { MatchEntryDashboard } from "@/components/partieneingabe/match-entry-das
 import { AssignedGroups } from "@/components/partieneingabe/assigned-groups";
 import { getGamesToEnterByUserIdAndTournamentId } from "@/db/repositories/game";
 import { getRolesByUserIdAndTournamentId } from "@/db/repositories/role";
-import { getMatchEnteringHelperIdByUserIdAndTournamentId } from "@/db/repositories/match-entering-helper";
+import {
+  getAssignedGroupsByMatchEnteringHelperId,
+  getMatchEnteringHelperIdByUserIdAndTournamentId,
+} from "@/db/repositories/match-entering-helper";
 import { getTournamentBySlug } from "@/db/repositories/tournament";
-import { getUserGameRights } from "@/lib/game-auth";
 import { notFound, redirect } from "next/navigation";
 import { Card, CardContent } from "@/components/ui/card";
 import { tournamentPath } from "@/lib/navigation";
@@ -46,17 +48,32 @@ export default async function Page({
     ),
   ]);
 
-  const allRights = await Promise.all(
-    allGames.map((game) => getUserGameRights(game.id, session.user.id)),
-  );
+  const assignedGroupsData = matchEnteringHelperId
+    ? await getAssignedGroupsByMatchEnteringHelperId(matchEnteringHelperId)
+    : [];
+  const assignedGroups = assignedGroupsData.map((item) => ({
+    id: item.group.id,
+    groupName: item.group.groupName,
+  }));
+  const assignedGroupIds = new Set(assignedGroups.map((group) => group.id));
 
-  const gameRightsMap = new Map(
-    allGames.map((game, index) => [game.id, allRights[index]]),
-  );
+  const isAdmin = userRoles.includes("admin");
+  const isReferee = userRoles.includes("referee");
 
-  const editableGames = allGames.filter(
-    (game) => gameRightsMap.get(game.id) === "edit",
-  );
+  // Compute rights in memory. Calling getUserGameRights per game issued
+  // several queries for every played game (up to 85 for a helper).
+  const editableGames = allGames.filter((game) => {
+    const isGameParticipant =
+      game.whiteParticipant?.profile.userId === session.user.id ||
+      game.blackParticipant?.profile.userId === session.user.id;
+
+    return (
+      isGameParticipant ||
+      assignedGroupIds.has(game.groupId) ||
+      isAdmin ||
+      isReferee
+    );
+  });
 
   const pendingGames = editableGames.filter((game) => game.pgn === null);
   const completedGames = editableGames.filter((game) => game.pgn !== null);
@@ -74,9 +91,7 @@ export default async function Page({
                   Meine Partieneingabe
                 </h1>
                 {matchEnteringHelperId && (
-                  <AssignedGroups
-                    matchEnteringHelperId={matchEnteringHelperId}
-                  />
+                  <AssignedGroups groups={assignedGroups} />
                 )}
                 {!matchEnteringHelperId && isParticipant && (
                   <div className="mt-4">

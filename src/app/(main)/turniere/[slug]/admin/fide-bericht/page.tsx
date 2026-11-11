@@ -13,6 +13,7 @@ import {
 } from "@/components/ui/card";
 import {
   getAllGroupNamesByTournamentId,
+  getGamesWithParticipantsAndMatchdayByIds,
   getUncompletedGamesInMonth,
 } from "@/db/repositories/game";
 import { getTournamentBySlug } from "@/db/repositories/tournament";
@@ -92,6 +93,8 @@ async function ButtonSection({ selectedGroupId, selectedMonth }: Props) {
   const month = parseInt(selectedMonth);
 
   const uncompletedGameIds = await getUncompletedGamesInMonth(groupId, month);
+  const uncompletedGames =
+    await getGamesWithParticipantsAndMatchdayByIds(uncompletedGameIds);
 
   return (
     <div className="flex flex-col gap-4 w-full">
@@ -116,8 +119,8 @@ async function ButtonSection({ selectedGroupId, selectedMonth }: Props) {
           <div className="bg-white dark:bg-card border border-gray-200 dark:border-card-border rounded-lg">
             <div className="max-h-64 overflow-y-auto">
               <PendingResultsList
-                items={uncompletedGameIds.map((gameId) => (
-                  <PendingResultItem key={gameId} gameId={gameId} />
+                items={uncompletedGames.map((game) => (
+                  <PendingResultItem key={game.id} game={game} />
                 ))}
               />
             </div>

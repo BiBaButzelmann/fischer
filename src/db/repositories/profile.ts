@@ -1,13 +1,14 @@
+import { cache } from "react";
 import { getTableColumns, eq } from "drizzle-orm";
 import { db } from "../client";
 import { profile } from "../schema/profile";
 import { user } from "../schema/auth";
 
-export async function getProfileByUserId(userId: string) {
+export const getProfileByUserId = cache(async (userId: string) => {
   return await db.query.profile.findFirst({
     where: (profile, { eq }) => eq(profile.userId, userId),
   });
-}
+});
 
 export async function getProfilesByUserRole(role: "admin" | "user") {
   return await db

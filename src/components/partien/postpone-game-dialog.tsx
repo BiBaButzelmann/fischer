@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useTransition } from "react";
+import { useEffect, useState, useTransition } from "react";
 import { Calendar as CalendarIcon } from "lucide-react";
 import {
   Dialog,
@@ -16,9 +16,12 @@ import { Button } from "../ui/button";
 import { Popover, PopoverContent, PopoverTrigger } from "../ui/popover";
 import { Calendar } from "../ui/calendar";
 import { Tooltip, TooltipContent, TooltipTrigger } from "../ui/tooltip";
-import { updateGameMatchdayAndBoardNumber } from "@/actions/game";
+import {
+  getGameContacts,
+  updateGameMatchdayAndBoardNumber,
+} from "@/actions/game";
 import { MatchDay } from "@/db/types/match-day";
-import { GameWithParticipantProfilesAndGroupAndMatchday } from "@/db/types/game";
+import { GameContactPerson, GameContacts } from "@/db/types/game";
 import { toast } from "sonner";
 import { cn } from "@/lib/utils";
 import { isError } from "@/lib/actions";
@@ -30,30 +33,57 @@ import {
   toDateOnly,
   utcDateToDateOnly,
 } from "@/lib/date";
-import invariant from "tiny-invariant";
 import { DateTime } from "luxon";
 
 type Props = {
   gameId: number;
   availableMatchdays: MatchDay[];
   currentGameDate: DateTime;
-  game: GameWithParticipantProfilesAndGroupAndMatchday;
+  whiteName: string;
+  blackName: string;
 };
 
 export function PostponeGameDialog({
   gameId,
   availableMatchdays,
   currentGameDate,
-  game,
+  whiteName,
+  blackName,
 }: Props) {
   const [isPending, startTransition] = useTransition();
   const [selectedDate, setSelectedDate] = useState<Date | undefined>();
   const [isOpen, setIsOpen] = useState(false);
+  const [contacts, setContacts] = useState<GameContacts | null>(null);
+  const [isLoadingContacts, setIsLoadingContacts] = useState(false);
 
-  invariant(
-    game.whiteParticipant && game.blackParticipant,
-    "PostponeGameDialog should only be called with games that have both participants",
-  );
+  useEffect(() => {
+    if (!isOpen || contacts != null) {
+      return;
+    }
+
+    let cancelled = false;
+    setIsLoadingContacts(true);
+    getGameContacts(gameId)
+      .then((data) => {
+        if (!cancelled) {
+          setContacts(data);
+        }
+      })
+      .catch(() => {
+        if (!cancelled) {
+          toast.error("Kontaktdaten konnten nicht geladen werden.");
+        }
+      })
+      .finally(() => {
+        if (!cancelled) {
+          setIsLoadingContacts(false);
+        }
+      });
+
+    return () => {
+      cancelled = true;
+    };
+  }, [isOpen, contacts, gameId]);
 
   const handlePostponeFormSubmit = async (
     event: React.FormEvent<HTMLFormElement>,
@@ -132,39 +162,16 @@ export function PostponeGameDialog({
           </DialogHeader>
 
           <div className="space-y-4 my-4">
-            <Card>
-              <CardContent className="space-y-2 pt-6">
-                <h3 className="text-base">
-                  {game.whiteParticipant.profile.firstName}{" "}
-                  {game.whiteParticipant.profile.lastName}
-                </h3>
-                <div className="flex items-center gap-2 text-sm text-muted-foreground">
-                  <Mail className="h-3 w-3" />
-                  {game.whiteParticipant.profile.email}
-                </div>
-                <div className="flex items-center gap-2 text-sm text-muted-foreground">
-                  <Phone className="h-3 w-3" />
-                  {game.whiteParticipant.profile.phoneNumber}
-                </div>
-              </CardContent>
-            </Card>
-
-            <Card>
-              <CardContent className="space-y-2 pt-6">
-                <h3 className="text-base">
-                  {game.blackParticipant.profile.firstName}{" "}
-                  {game.blackParticipant.profile.lastName}
-                </h3>
-                <div className="flex items-center gap-2 text-sm text-muted-foreground">
-                  <Mail className="h-3 w-3" />
-                  {game.blackParticipant.profile.email}
-                </div>
-                <div className="flex items-center gap-2 text-sm text-muted-foreground">
-                  <Phone className="h-3 w-3" />
-                  {game.blackParticipant.profile.phoneNumber}
-                </div>
-              </CardContent>
-            </Card>
+            <ContactCard
+              name={whiteName}
+              contact={contacts?.white}
+              isLoading={isLoadingContacts}
+            />
+            <ContactCard
+              name={blackName}
+              contact={contacts?.black}
+              isLoading={isLoadingContacts}
+            />
           </div>
 
           <div className="flex flex-col gap-2 py-4">
@@ -207,5 +214,43 @@ export function PostponeGameDialog({
         </form>
       </DialogContent>
     </Dialog>
+  );
+}
+
+function ContactCard({
+  name,
+  contact,
+  isLoading,
+}: {
+  name: string;
+  contact: GameContactPerson | null | undefined;
+  isLoading: boolean;
+}) {
+  return (
+    <Card>
+      <CardContent className="space-y-2 pt-6">
+        <h3 className="text-base">{name}</h3>
+        {contact ? (
+          <>
+            {contact.email && (
+              <div className="flex items-center gap-2 text-sm text-muted-foreground">
+                <Mail className="h-3 w-3" />
+                {contact.email}
+              </div>
+            )}
+            {contact.phoneNumber && (
+              <div className="flex items-center gap-2 text-sm text-muted-foreground">
+                <Phone className="h-3 w-3" />
+                {contact.phoneNumber}
+              </div>
+            )}
+          </>
+        ) : (
+          <p className="text-sm text-muted-foreground">
+            {isLoading ? "Kontaktdaten werden geladen…" : ""}
+          </p>
+        )}
+      </CardContent>
+    </Card>
   );
 }

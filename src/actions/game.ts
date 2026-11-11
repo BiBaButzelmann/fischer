@@ -9,7 +9,7 @@ import { game } from "@/db/schema/game";
 import { gamePostponement } from "@/db/schema/gamePostponement";
 import { matchday, matchdayGame } from "@/db/schema/matchday";
 import { profile } from "@/db/schema/profile";
-import { GameResult } from "@/db/types/game";
+import { GameContacts, GameResult } from "@/db/types/game";
 import { and, eq, InferInsertModel, inArray } from "drizzle-orm";
 import { revalidatePath } from "next/cache";
 import invariant from "tiny-invariant";
@@ -292,6 +292,66 @@ export const updateGameMatchdayAndBoardNumber = action(
     revalidatePath("/turniere/[slug]/partien", "page");
   },
 );
+
+export async function getGameContacts(gameId: number): Promise<GameContacts> {
+  const session = await authWithRedirect();
+
+  const gameData = await db.query.game.findFirst({
+    where: eq(game.id, gameId),
+    with: {
+      whiteParticipant: {
+        with: {
+          profile: {
+            columns: {
+              userId: true,
+              firstName: true,
+              lastName: true,
+              email: true,
+              phoneNumber: true,
+            },
+          },
+        },
+      },
+      blackParticipant: {
+        with: {
+          profile: {
+            columns: {
+              userId: true,
+              firstName: true,
+              lastName: true,
+              email: true,
+              phoneNumber: true,
+            },
+          },
+        },
+      },
+    },
+  });
+  invariant(gameData, "Partie nicht gefunden");
+
+  const isUserInGame =
+    gameData.whiteParticipant?.profile.userId === session.user.id ||
+    gameData.blackParticipant?.profile.userId === session.user.id;
+  invariant(
+    isUserInGame || session.user.role === "admin",
+    "Nicht berechtigt, Kontaktdaten dieser Partie einzusehen",
+  );
+
+  const toContact = (participant: typeof gameData.whiteParticipant) =>
+    participant
+      ? {
+          firstName: participant.profile.firstName,
+          lastName: participant.profile.lastName,
+          email: participant.profile.email,
+          phoneNumber: participant.profile.phoneNumber,
+        }
+      : null;
+
+  return {
+    white: toContact(gameData.whiteParticipant),
+    black: toContact(gameData.blackParticipant),
+  };
+}
 
 export async function rescheduleGamesForGroup(
   tournamentId: number,

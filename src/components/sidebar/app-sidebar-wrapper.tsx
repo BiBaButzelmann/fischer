@@ -10,18 +10,18 @@ export async function AppSidebarWrapper({
 }: {
   tournament: Tournament;
 }) {
-  const session = await auth();
-  const tournaments = await getAllTournaments();
+  const [session, tournaments, documentAvailability] = await Promise.all([
+    auth(),
+    getAllTournaments(),
+    tournament.stage !== "done"
+      ? getTournamentDocumentAvailability(tournament.slug)
+      : Promise.resolve({ ausschreibung: false, turnierordnung: false }),
+  ]);
 
   const userRoles =
     session && tournament.stage === "running"
       ? await getRolesByUserIdAndTournamentId(session.user.id, tournament.id)
       : [];
-
-  const documentAvailability =
-    tournament.stage !== "done"
-      ? await getTournamentDocumentAvailability(tournament.slug)
-      : { ausschreibung: false, turnierordnung: false };
 
   return (
     <AppSidebar

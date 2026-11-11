@@ -1,10 +1,7 @@
 "use client";
 
 import type { updateGameResult } from "@/actions/game";
-import {
-  GameResult,
-  GameWithParticipantProfilesAndGroupAndMatchday,
-} from "@/db/types/game";
+import { GameResult } from "@/db/types/game";
 import { MatchDay } from "@/db/types/match-day";
 import { Tooltip, TooltipContent, TooltipTrigger } from "../ui/tooltip";
 import { Button } from "../ui/button";
@@ -23,7 +20,8 @@ type Props = {
   onResultChange: typeof updateGameResult;
   availableMatchdays: MatchDay[];
   currentGameDate: DateTime;
-  game: GameWithParticipantProfilesAndGroupAndMatchday;
+  whiteName: string;
+  blackName: string;
   isReferee: boolean;
   canView: boolean;
   canSubmitResult: boolean;
@@ -36,7 +34,8 @@ export function GameActions({
   onResultChange,
   availableMatchdays,
   currentGameDate,
-  game,
+  whiteName,
+  blackName,
   isReferee,
   canView,
   canSubmitResult,
@@ -59,7 +58,8 @@ export function GameActions({
           gameId={gameId}
           availableMatchdays={availableMatchdays}
           currentGameDate={currentGameDate}
-          game={game}
+          whiteName={whiteName}
+          blackName={blackName}
         />
       )}
       {canView && isGameActuallyPlayed(currentResult) && (

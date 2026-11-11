@@ -13,6 +13,7 @@ import {
 } from "@/components/ui/card";
 import {
   getAllGroupNamesByTournamentId,
+  getGamesWithParticipantsAndMatchdayByIds,
   getUncompletedGamesByGroup,
 } from "@/db/repositories/game";
 import { getTournamentBySlug } from "@/db/repositories/tournament";
@@ -95,6 +96,8 @@ async function ButtonSection({ selectedGroupId, isPreview }: Props) {
   const groupId = parseInt(selectedGroupId);
 
   const uncompletedGameIds = await getUncompletedGamesByGroup(groupId);
+  const uncompletedGames =
+    await getGamesWithParticipantsAndMatchdayByIds(uncompletedGameIds);
   const hasUncompletedGames = uncompletedGameIds.length > 0;
 
   return (
@@ -133,8 +136,8 @@ async function ButtonSection({ selectedGroupId, isPreview }: Props) {
           <div className="bg-white dark:bg-card border border-gray-200 dark:border-card-border rounded-lg">
             <div className="max-h-64 overflow-y-auto">
               <PendingResultsList
-                items={uncompletedGameIds.map((gameId: number) => (
-                  <PendingResultItem key={gameId} gameId={gameId} />
+                items={uncompletedGames.map((game) => (
+                  <PendingResultItem key={game.id} game={game} />
                 ))}
               />
             </div>
