@@ -15,19 +15,32 @@ import { TournamentRef } from "./types";
 type Props = {
   profile: ProfileWithName;
   tournament: TournamentRef;
+  displayName?: string;
   meta?: ReactNode;
+  aside?: ReactNode;
+  menuItems?: ReactNode;
+  children?: ReactNode;
 };
 
-export function RoleRow({ profile, tournament, meta }: Props) {
+export function RoleRow({
+  profile,
+  tournament,
+  displayName = getFullName(profile.firstName, profile.lastName),
+  meta,
+  aside,
+  menuItems,
+  children,
+}: Props) {
   const [deactivateOpen, setDeactivateOpen] = useState(false);
-  const displayName = getFullName(profile.firstName, profile.lastName);
 
   return (
     <PersonRow
       name={displayName}
       meta={meta}
+      aside={aside}
       actions={
         <RowActions displayName={displayName} profileId={profile.id}>
+          {menuItems}
           <HistoryMenuItem profileId={profile.id} />
           <DropdownMenuSeparator />
           <DropdownMenuItem onSelect={() => setDeactivateOpen(true)}>
@@ -43,6 +56,7 @@ export function RoleRow({ profile, tournament, meta }: Props) {
         displayName={displayName}
         tournament={tournament}
       />
+      {children}
     </PersonRow>
   );
 }
