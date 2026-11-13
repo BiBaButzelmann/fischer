@@ -10,7 +10,14 @@ import {
   DialogTitle,
   DialogTrigger,
 } from "@/components/ui/dialog";
-import { User, Trash2, AlertTriangle, RotateCcw, Phone, Link } from "lucide-react";
+import {
+  User,
+  Trash2,
+  AlertTriangle,
+  RotateCcw,
+  Phone,
+  Link,
+} from "lucide-react";
 import { useState, useTransition } from "react";
 import {
   softDeleteUserProfile,
@@ -43,11 +50,13 @@ type Props = {
     profile: ProfileWithName;
   };
   showDeleteActions?: boolean;
+  tournamentId: number;
 };
 
 export function ParticipantRow({
   participant,
   showDeleteActions = false,
+  tournamentId,
 }: Props) {
   const [softDeleteOpen, setSoftDeleteOpen] = useState(false);
   const [hardDeleteOpen, setHardDeleteOpen] = useState(false);
@@ -65,7 +74,10 @@ export function ParticipantRow({
   const handleSoftDelete = () => {
     startTransition(async () => {
       try {
-        const result = await softDeleteUserProfile(participant.profile.userId);
+        const result = await softDeleteUserProfile(
+          participant.profile.userId,
+          tournamentId,
+        );
         if (result.success) {
           toast.success("Benutzer wurde erfolgreich deaktiviert.");
           setSoftDeleteOpen(false);
@@ -105,7 +117,10 @@ export function ParticipantRow({
   const handleRestore = () => {
     startTransition(async () => {
       try {
-        const result = await restoreUserProfile(participant.profile.userId);
+        const result = await restoreUserProfile(
+          participant.profile.userId,
+          tournamentId,
+        );
         if (result.success) {
           toast.success("Benutzer wurde erfolgreich wiederhergestellt.");
         } else {
@@ -287,8 +302,9 @@ export function ParticipantRow({
                   <DialogDescription>
                     Möchten Sie den Benutzer &quot;
                     {getParticipantFullName(participant)}&quot; deaktivieren?
-                    Der Benutzer wird ausgeblendet, aber alle Daten bleiben
-                    erhalten und können später wiederhergestellt werden.
+                    Alle Rollen in diesem Turnier werden entfernt und offene
+                    Partien kampflos gewertet. Andere Turniere bleiben
+                    unverändert.
                   </DialogDescription>
                 </DialogHeader>
                 <DialogFooter>

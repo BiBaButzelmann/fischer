@@ -15,7 +15,7 @@ import {
   getAllMatchEnteringHelpersByTournamentId,
   getAllSetupHelpersByTournamentId,
   getAllTrainersByTournamentId,
-  getAllDisabledProfiles,
+  getDeactivatedProfilesByTournamentId,
 } from "@/db/repositories/admin";
 import { getTournamentBySlug } from "@/db/repositories/tournament";
 import { tournamentPath } from "@/lib/navigation";
@@ -49,10 +49,9 @@ export default async function Page({
     redirect(tournamentPath(slug, "/uebersicht"));
   }
 
-  const [tournament, allProfiles, disabledProfiles] = await Promise.all([
+  const [tournament, allProfiles] = await Promise.all([
     getTournamentBySlug(slug),
     getAllProfiles(),
-    getAllDisabledProfiles(),
   ]);
 
   if (!tournament) {
@@ -85,6 +84,7 @@ export default async function Page({
     matchEnteringHelpers,
     setupHelpers,
     trainers,
+    disabledProfiles,
   ] = await Promise.all([
     getAllParticipantsByTournamentId(tournament.id),
     getAllRefereesByTournamentId(tournament.id),
@@ -92,6 +92,7 @@ export default async function Page({
     getAllMatchEnteringHelpersByTournamentId(tournament.id),
     getAllSetupHelpersByTournamentId(tournament.id),
     getAllTrainersByTournamentId(tournament.id),
+    getDeactivatedProfilesByTournamentId(tournament.id),
   ]);
 
   return (
@@ -161,6 +162,7 @@ export default async function Page({
             description={`${participants.length} Spieler sind für das Turnier angemeldet`}
             icon={User}
             emptyMessage="Keine Teilnehmer für dieses Turnier gefunden."
+            tournamentId={tournament.id}
           />
         </TabsContent>
 
@@ -228,7 +230,7 @@ export default async function Page({
           <UserList
             users={disabledProfiles}
             title="Deaktivierte Benutzer"
-            description={`${disabledProfiles.length} Benutzer wurden deaktiviert (soft delete)`}
+            description={`${disabledProfiles.length} Benutzer sind in diesem Turnier deaktiviert`}
             icon={UserX}
             emptyMessage="Keine deaktivierten Benutzer gefunden."
             isDisabledUsers={true}
@@ -303,12 +305,14 @@ function ParticipantList({
   description,
   icon: Icon,
   emptyMessage,
+  tournamentId,
 }: {
   participants: ParticipantWithProfile[];
   title: string;
   description: string;
   icon: LucideIcon;
   emptyMessage: string;
+  tournamentId: number;
 }) {
   return (
     <Card>
@@ -335,6 +339,7 @@ function ParticipantList({
                   key={participant.id}
                   participant={participant}
                   showDeleteActions={true}
+                  tournamentId={tournamentId}
                 />
               ))}
             </div>

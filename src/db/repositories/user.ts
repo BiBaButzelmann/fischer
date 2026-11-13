@@ -1,16 +1,7 @@
 "use server";
 
 import { authWithRedirect } from "@/auth/utils";
-import {
-  and,
-  count,
-  eq,
-  inArray,
-  isNotNull,
-  isNull,
-  notInArray,
-  or,
-} from "drizzle-orm";
+import { and, count, eq, inArray, or } from "drizzle-orm";
 import { db } from "../client";
 import { game } from "../schema/game";
 import { gamePostponement } from "../schema/gamePostponement";
@@ -25,8 +16,70 @@ import { profile } from "../schema/profile";
 import { getProfileByUserId } from "./profile";
 import { user } from "../schema/auth";
 import { getCurrentLocalDateTime } from "@/lib/date";
+import { computeForfeitResults } from "@/lib/forfeit";
+import { getTournamentById } from "./tournament";
+import { tournamentRoleTables } from "../tournament-role-tables";
+import type { GameResult } from "../types/game";
 
-export async function softDeleteUser(userId: string) {
+type Transaction = Parameters<Parameters<typeof db.transaction>[0]>[0];
+
+async function isTournamentFinished(tournamentId: number) {
+  const found = await getTournamentById(tournamentId);
+  return found == null || found.stage === "done";
+}
+
+async function setTournamentRolesDeletedAt(
+  tx: Transaction,
+  profileId: number,
+  tournamentId: number,
+  deletedAt: Date | null,
+) {
+  for (const table of tournamentRoleTables) {
+    await tx
+      .update(table)
+      .set({ deletedAt })
+      .where(
+        and(
+          eq(table.profileId, profileId),
+          eq(table.tournamentId, tournamentId),
+        ),
+      );
+  }
+}
+
+async function applyForfeits(tx: Transaction, tournamentId: number) {
+  const games = await tx.query.game.findMany({
+    where: eq(game.tournamentId, tournamentId),
+    columns: { id: true, result: true },
+    with: {
+      whiteParticipant: { columns: { deletedAt: true } },
+      blackParticipant: { columns: { deletedAt: true } },
+    },
+  });
+
+  const updates = computeForfeitResults(
+    games.map((g) => ({
+      id: g.id,
+      result: g.result,
+      whiteDeactivated: g.whiteParticipant.deletedAt != null,
+      blackDeactivated: g.blackParticipant.deletedAt != null,
+    })),
+  );
+
+  const gameIdsByResult = new Map<GameResult, number[]>();
+  for (const { gameId, result } of updates) {
+    gameIdsByResult.set(result, [
+      ...(gameIdsByResult.get(result) ?? []),
+      gameId,
+    ]);
+  }
+
+  for (const [result, gameIds] of gameIdsByResult) {
+    await tx.update(game).set({ result }).where(inArray(game.id, gameIds));
+  }
+}
+
+export async function softDeleteUser(userId: string, tournamentId: number) {
   const session = await authWithRedirect();
   if (session.user.role !== "admin") {
     return {
@@ -41,100 +94,22 @@ export async function softDeleteUser(userId: string) {
       reason: "Profil nicht gefunden",
     };
   }
-  const { id: profileId } = profileData;
+  if (await isTournamentFinished(tournamentId)) {
+    return {
+      success: false,
+      reason: "Das Turnier ist abgeschlossen",
+    };
+  }
   const deletedAt = getCurrentLocalDateTime().toJSDate();
 
   return await db.transaction(async (tx) => {
-    await tx
-      .update(profile)
-      .set({ deletedAt })
-      .where(eq(profile.id, profileId));
-
-    const participantData = await tx
-      .update(participant)
-      .set({ deletedAt })
-      .where(eq(participant.profileId, profileId))
-      .returning();
-
-    await tx
-      .update(juror)
-      .set({ deletedAt })
-      .where(eq(juror.profileId, profileId));
-
-    await tx
-      .update(referee)
-      .set({ deletedAt })
-      .where(eq(referee.profileId, profileId));
-
-    await tx
-      .update(setupHelper)
-      .set({ deletedAt })
-      .where(eq(setupHelper.profileId, profileId));
-
-    await tx
-      .update(matchEnteringHelper)
-      .set({ deletedAt })
-      .where(eq(matchEnteringHelper.profileId, profileId));
-
-    await tx
-      .update(gamePostponement)
-      .set({ deletedAt })
-      .where(eq(gamePostponement.postponedByProfileId, profileId));
-
-    await tx
-      .update(tournament)
-      .set({ deletedAt })
-      .where(eq(tournament.organizerProfileId, profileId));
-
-    const deletedParticipants = await tx.query.participant.findMany({
-      where: isNotNull(participant.deletedAt),
-    });
-    const deletedParticipantIds = deletedParticipants.map((p) => p.id);
-
-    if (participantData.length > 0) {
-      // TODO: Handle forfeits for all tournament participations, respecting archived tournaments.
-      const [{ id: participantId }] = participantData;
-
-      await tx
-        .update(game)
-        .set({ result: "-:+" })
-        .where(
-          and(
-            isNull(game.result),
-            eq(game.whiteParticipantId, participantId),
-            notInArray(game.blackParticipantId, deletedParticipantIds),
-          ),
-        );
-      await tx
-        .update(game)
-        .set({ result: "+:-" })
-        .where(
-          and(
-            isNull(game.result),
-            eq(game.blackParticipantId, participantId),
-            notInArray(game.whiteParticipantId, deletedParticipantIds),
-          ),
-        );
-      await tx
-        .update(game)
-        .set({ result: "-:-" })
-        .where(
-          and(
-            or(eq(game.result, "+:-"), eq(game.result, "-:+")),
-            or(
-              and(
-                eq(game.whiteParticipantId, participantId),
-                inArray(game.blackParticipantId, deletedParticipantIds),
-              ),
-              and(
-                eq(game.blackParticipantId, participantId),
-                inArray(game.whiteParticipantId, deletedParticipantIds),
-              ),
-            ),
-          ),
-        );
-    }
-
+    await setTournamentRolesDeletedAt(
+      tx,
+      profileData.id,
+      tournamentId,
+      deletedAt,
+    );
+    await applyForfeits(tx, tournamentId);
     return { success: true, deletedAt };
   });
 }
@@ -215,7 +190,7 @@ export async function hardDeleteUser(userId: string) {
   });
 }
 
-export async function restoreUser(userId: string) {
+export async function restoreUser(userId: string, tournamentId: number) {
   const session = await authWithRedirect();
   if (session.user.role !== "admin") {
     return {
@@ -231,49 +206,15 @@ export async function restoreUser(userId: string) {
       reason: "Profil nicht gefunden",
     };
   }
-  const { id: profileId } = profileData;
+  if (await isTournamentFinished(tournamentId)) {
+    return {
+      success: false,
+      reason: "Das Turnier ist abgeschlossen",
+    };
+  }
 
   return await db.transaction(async (tx) => {
-    await tx
-      .update(profile)
-      .set({ deletedAt: null })
-      .where(eq(profile.id, profileId));
-
-    await tx
-      .update(participant)
-      .set({ deletedAt: null })
-      .where(eq(participant.profileId, profileId));
-
-    await tx
-      .update(juror)
-      .set({ deletedAt: null })
-      .where(eq(juror.profileId, profileId));
-
-    await tx
-      .update(referee)
-      .set({ deletedAt: null })
-      .where(eq(referee.profileId, profileId));
-
-    await tx
-      .update(setupHelper)
-      .set({ deletedAt: null })
-      .where(eq(setupHelper.profileId, profileId));
-
-    await tx
-      .update(matchEnteringHelper)
-      .set({ deletedAt: null })
-      .where(eq(matchEnteringHelper.profileId, profileId));
-
-    await tx
-      .update(gamePostponement)
-      .set({ deletedAt: null })
-      .where(eq(gamePostponement.postponedByProfileId, profileId));
-
-    await tx
-      .update(tournament)
-      .set({ deletedAt: null })
-      .where(eq(tournament.organizerProfileId, profileId));
-
+    await setTournamentRolesDeletedAt(tx, profileData.id, tournamentId, null);
     return { success: true, restoredAt: getCurrentLocalDateTime() };
   });
 }
