@@ -1,18 +1,34 @@
 import { ReactNode } from "react";
+import { cn } from "@/lib/utils";
 
 type Props = {
   name: ReactNode;
+  tags?: ReactNode;
+  muted?: boolean;
   meta?: ReactNode;
   aside?: ReactNode;
   actions?: ReactNode;
   children?: ReactNode;
 };
 
-export function PersonRow({ name, meta, aside, actions, children }: Props) {
+export function PersonRow({
+  name,
+  tags,
+  muted = false,
+  meta,
+  aside,
+  actions,
+  children,
+}: Props) {
   return (
     <li className="flex items-start gap-3 px-3 py-3 sm:px-4">
       <div className="min-w-0 flex-1">
-        <span className="font-medium">{name}</span>
+        <div className="flex flex-wrap items-baseline gap-x-2 gap-y-0.5">
+          <span className={cn("font-medium", muted && "text-muted-foreground")}>
+            {name}
+          </span>
+          {tags}
+        </div>
         {meta ? (
           <div className="mt-0.5 space-y-0.5 text-sm text-muted-foreground">
             {meta}
@@ -27,6 +43,14 @@ export function PersonRow({ name, meta, aside, actions, children }: Props) {
       ) : null}
       {children}
     </li>
+  );
+}
+
+export function RowTag({ children }: { children: ReactNode }) {
+  return (
+    <span className="rounded border px-1.5 text-xs font-medium text-muted-foreground">
+      {children}
+    </span>
   );
 }
 
