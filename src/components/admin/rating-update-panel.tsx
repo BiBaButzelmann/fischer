@@ -11,7 +11,7 @@ import {
 } from "@/actions/participant";
 import { isError } from "@/lib/actions";
 import { ParticipantWithName } from "@/db/types/participant";
-import { getParticipantFullName } from "@/lib/participant";
+import { compareByName, getParticipantFullName } from "@/lib/participant";
 
 const FIDE_REQUEST_INTERVAL_MS = 4000;
 const FIDE_THROTTLE_PAUSE_SECONDS = 120;
@@ -52,11 +52,7 @@ function formatChange(label: string, previous: number | null, next: number) {
 
 function toRatingEntries(participants: ParticipantWithName[]): RatingEntry[] {
   return [...participants]
-    .sort(
-      (a, b) =>
-        a.profile.lastName.localeCompare(b.profile.lastName, "de") ||
-        a.profile.firstName.localeCompare(b.profile.firstName, "de"),
-    )
+    .sort((a, b) => compareByName(a.profile, b.profile))
     .map((participant) => ({
       participantId: participant.id,
       name: getParticipantFullName(participant),
@@ -314,7 +310,7 @@ export function RatingUpdatePanel({ participants }: Props) {
   return (
     <div className="space-y-3">
       <div className="flex items-center justify-between gap-4">
-        <div className="text-sm text-gray-600">
+        <div className="text-sm text-muted-foreground">
           {isRunning
             ? progress
             : summary != null
@@ -377,7 +373,7 @@ export function RatingUpdatePanel({ participants }: Props) {
         </div>
       )}
       {pauseSecondsLeft != null && (
-        <div className="flex items-center gap-3 text-sm text-gray-600">
+        <div className="flex items-center gap-3 text-sm text-muted-foreground">
           <span>FIDE-Pause · weiter in {pauseSecondsLeft} s</span>
           <Button
             variant="outline"

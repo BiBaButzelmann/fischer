@@ -19,9 +19,8 @@ import {
 } from "@/db/repositories/admin";
 import { getTournamentBySlug } from "@/db/repositories/tournament";
 import { tournamentPath } from "@/lib/navigation";
-import { User, Users, UserX, LucideIcon } from "lucide-react";
+import { Users, UserX, LucideIcon } from "lucide-react";
 import { UserRow } from "@/components/admin/user-row";
-import { ParticipantRow } from "@/components/admin/participant-row";
 import { RatingUpdatePanel } from "@/components/admin/rating-update-panel";
 import { RoleRoster } from "@/components/admin/user-management/role-roster";
 import {
@@ -29,9 +28,12 @@ import {
   RosterTabsList,
 } from "@/components/admin/user-management/roster-tabs";
 import { formatMatchDays } from "@/lib/match-days";
+import { compareByName } from "@/lib/participant";
+import { Roster } from "@/components/admin/user-management/roster";
+import { RatingsHeader } from "@/components/admin/user-management/ratings";
+import { ParticipantRow } from "@/components/admin/user-management/participant-row";
 import { redirect } from "next/navigation";
 import { ProfileWithName } from "@/db/types/profile";
-import { ParticipantWithProfile } from "@/db/types/participant";
 
 export default async function Page({
   params,
@@ -91,6 +93,10 @@ export default async function Page({
     getDeactivatedProfilesByTournamentId(tournament.id),
   ]);
 
+  const sortedParticipants = [...participants].sort((a, b) =>
+    compareByName(a.profile, b.profile),
+  );
+
   return (
     <div className="space-y-6">
       <header className="space-y-1">
@@ -137,14 +143,21 @@ export default async function Page({
         </RosterTabsList>
 
         <TabsContent value="participants" className="mt-0">
-          <ParticipantList
-            participants={participants}
-            title="Teilnehmer"
-            description={`${participants.length} Spieler sind für das Turnier angemeldet`}
-            icon={User}
-            emptyMessage="Keine Teilnehmer für dieses Turnier gefunden."
-            tournamentId={tournament.id}
-          />
+          <Roster
+            count={participants.length}
+            emptyMessage="Für dieses Turnier hat sich noch niemand angemeldet."
+            description="Unterstrichen ist die Turnierwertungszahl (TWZ), die höhere der beiden Wertungen."
+            toolbar={<RatingUpdatePanel participants={participants} />}
+            header={<RatingsHeader />}
+          >
+            {sortedParticipants.map((participant) => (
+              <ParticipantRow
+                key={participant.id}
+                participant={participant}
+                tournament={tournament}
+              />
+            ))}
+          </Roster>
         </TabsContent>
 
         <TabsContent value="referees" className="mt-0">
@@ -287,57 +300,6 @@ function UserList({
                 />
               );
             })}
-          </div>
-        )}
-      </CardContent>
-    </Card>
-  );
-}
-
-function ParticipantList({
-  participants,
-  title,
-  description,
-  icon: Icon,
-  emptyMessage,
-  tournamentId,
-}: {
-  participants: ParticipantWithProfile[];
-  title: string;
-  description: string;
-  icon: LucideIcon;
-  emptyMessage: string;
-  tournamentId: number;
-}) {
-  return (
-    <Card>
-      <CardHeader>
-        <div className="flex items-center gap-3">
-          <div className="p-2 bg-gray-100 border border-gray-200 rounded-lg">
-            <Icon className="h-5 w-5 text-gray-600" />
-          </div>
-          <div>
-            <CardTitle className="text-lg">{title}</CardTitle>
-            <CardDescription>{description}</CardDescription>
-          </div>
-        </div>
-      </CardHeader>
-      <CardContent>
-        {participants.length === 0 ? (
-          <p className="text-gray-500 text-sm italic">{emptyMessage}</p>
-        ) : (
-          <div className="space-y-4">
-            <RatingUpdatePanel participants={participants} />
-            <div className="space-y-1">
-              {participants.map((participant) => (
-                <ParticipantRow
-                  key={participant.id}
-                  participant={participant}
-                  showDeleteActions={true}
-                  tournamentId={tournamentId}
-                />
-              ))}
-            </div>
           </div>
         )}
       </CardContent>

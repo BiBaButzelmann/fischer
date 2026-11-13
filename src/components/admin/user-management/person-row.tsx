@@ -3,11 +3,12 @@ import { ReactNode } from "react";
 type Props = {
   name: ReactNode;
   meta?: ReactNode;
+  aside?: ReactNode;
   actions?: ReactNode;
   children?: ReactNode;
 };
 
-export function PersonRow({ name, meta, actions, children }: Props) {
+export function PersonRow({ name, meta, aside, actions, children }: Props) {
   return (
     <li className="flex items-start gap-3 px-3 py-3 sm:px-4">
       <div className="min-w-0 flex-1">
@@ -18,6 +19,7 @@ export function PersonRow({ name, meta, actions, children }: Props) {
           </div>
         ) : null}
       </div>
+      {aside}
       {actions ? (
         <div className="-my-1.5 flex shrink-0 items-center gap-2">
           {actions}
