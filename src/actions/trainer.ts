@@ -7,21 +7,17 @@ import { authWithRedirect } from "@/auth/utils";
 import { getTournamentById } from "@/db/repositories/tournament";
 import { and, eq } from "drizzle-orm";
 import { revalidatePath } from "next/cache";
-import { action } from "@/lib/actions";
+import { action, ActionError } from "@/lib/actions";
 
 export const createTrainer = action(
   async (tournamentId: number, profileId: number) => {
     const session = await authWithRedirect();
-    invariant(
-      session.user.role === "admin",
-      "Nur Admins können Trainer zuweisen",
-    );
+    if (session.user.role !== "admin") {
+      throw new ActionError("Nur Admins können Trainer zuweisen");
+    }
 
     const tournament = await getTournamentById(tournamentId);
-    invariant(
-      tournament != null,
-      "Tournament not found",
-    );
+    invariant(tournament != null, "Tournament not found");
 
     await db
       .insert(trainer)
@@ -43,10 +39,9 @@ export const createTrainer = action(
 export const deleteTrainer = action(
   async (tournamentId: number, trainerId: number) => {
     const session = await authWithRedirect();
-    invariant(
-      session.user.role === "admin",
-      "Nur Admins können Trainer entfernen",
-    );
+    if (session.user.role !== "admin") {
+      throw new ActionError("Nur Admins können Trainer entfernen");
+    }
 
     const tournament = await getTournamentById(tournamentId);
     invariant(tournament != null, "Tournament not found");
@@ -54,10 +49,7 @@ export const deleteTrainer = action(
     await db
       .delete(trainer)
       .where(
-        and(
-          eq(trainer.id, trainerId),
-          eq(trainer.tournamentId, tournament.id),
-        ),
+        and(eq(trainer.id, trainerId), eq(trainer.tournamentId, tournament.id)),
       );
     revalidatePath("/turniere/[slug]/admin/nutzerverwaltung", "page");
   },
