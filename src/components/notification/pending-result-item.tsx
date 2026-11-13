@@ -1,28 +1,16 @@
 import Link from "next/link";
 import { buildGameViewUrl } from "@/lib/navigation";
 import { ParticipatingPlayerDisplay } from "./participating-player-display";
-import { getGameWithParticipantsAndMatchday } from "@/db/repositories/game";
-import { getTournamentById } from "@/db/repositories/tournament";
 import invariant from "tiny-invariant";
 import { formatDateOnly } from "@/lib/date";
+import { NotificationGame } from "@/db/types/game";
 
 type Props = {
-  gameId: number;
+  game: NotificationGame;
   participantId?: number;
-  onClick?: () => void;
 };
 
-export async function PendingResultItem({
-  gameId,
-  participantId: currentParticipantId,
-  onClick,
-}: Props) {
-  const game = await getGameWithParticipantsAndMatchday(gameId);
-
-  invariant(game, "Game not found");
-
-  const tournament = await getTournamentById(game.tournamentId);
-  invariant(tournament, "Tournament not found");
+export function PendingResultItem({ game, participantId }: Props) {
   invariant(
     game.whiteParticipant && game.blackParticipant,
     "Game should have both participants for pending results",
@@ -35,12 +23,11 @@ export async function PendingResultItem({
   return (
     <Link
       href={buildGameViewUrl({
-        slug: tournament.slug,
+        slug: game.tournament.slug,
         groupId: game.groupId,
         round: game.round,
         participantId: game.whiteParticipant.id,
       })}
-      onClick={onClick}
       className="block p-4 border-b border-gray-100 dark:border-card-border last:border-b-0 hover:bg-gray-50 dark:hover:bg-card/50 transition-colors"
     >
       <div className="flex items-start justify-between gap-3">
@@ -51,7 +38,7 @@ export async function PendingResultItem({
               {" "}
               <ParticipatingPlayerDisplay
                 game={game}
-                participantId={currentParticipantId}
+                participantId={participantId}
               />
             </span>
           </h4>

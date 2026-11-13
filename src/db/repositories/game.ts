@@ -23,7 +23,7 @@ import { participant } from "../schema/participant";
 import { profile } from "../schema/profile";
 import { getMatchEnteringHelperIdByUserIdAndTournamentId } from "./match-entering-helper";
 import invariant from "tiny-invariant";
-import { PLAYED_GAME_RESULTS } from "../types/game";
+import { NotificationGame, PLAYED_GAME_RESULTS } from "../types/game";
 
 export async function getGameTournamentId(
   gameId: number,
@@ -244,8 +244,6 @@ export async function getGamesByTournamentId(
               userId: true,
               firstName: true,
               lastName: true,
-              email: true,
-              phoneNumber: true,
             },
           },
         },
@@ -262,8 +260,6 @@ export async function getGamesByTournamentId(
               userId: true,
               firstName: true,
               lastName: true,
-              email: true,
-              phoneNumber: true,
             },
           },
         },
@@ -583,6 +579,66 @@ export async function getGameWithParticipantsAndMatchday(gameId: number) {
   });
 }
 
+export async function getGamesWithParticipantsAndMatchdayByIds(
+  gameIds: number[],
+): Promise<NotificationGame[]> {
+  if (gameIds.length === 0) {
+    return [];
+  }
+
+  const games = await db.query.game.findMany({
+    where: (game, { inArray }) => inArray(game.id, gameIds),
+    with: {
+      whiteParticipant: {
+        columns: {
+          id: true,
+        },
+        with: {
+          profile: {
+            columns: {
+              firstName: true,
+              lastName: true,
+            },
+          },
+        },
+      },
+      blackParticipant: {
+        columns: {
+          id: true,
+        },
+        with: {
+          profile: {
+            columns: {
+              firstName: true,
+              lastName: true,
+            },
+          },
+        },
+      },
+      tournament: {
+        columns: {
+          slug: true,
+        },
+      },
+      matchdayGame: {
+        with: {
+          matchday: {
+            columns: {
+              date: true,
+            },
+          },
+        },
+      },
+    },
+  });
+
+  const gamesById = new Map(games.map((game) => [game.id, game]));
+  return gameIds.flatMap((id) => {
+    const game = gamesById.get(id);
+    return game ? [game] : [];
+  });
+}
+
 export async function getParticipantsInGroup(groupId: number) {
   const participantsInGroup = await db.query.participantGroup.findMany({
     where: (participantGroup, { eq }) => eq(participantGroup.groupId, groupId),
@@ -700,6 +756,7 @@ export async function getGamesToEnterByUserIdAndTournamentId(
         with: {
           profile: {
             columns: {
+              userId: true,
               firstName: true,
               lastName: true,
             },
@@ -710,6 +767,7 @@ export async function getGamesToEnterByUserIdAndTournamentId(
         with: {
           profile: {
             columns: {
+              userId: true,
               firstName: true,
               lastName: true,
             },

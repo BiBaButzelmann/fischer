@@ -1,6 +1,7 @@
 import { auth } from "@/auth/utils";
 import { getParticipantByUserIdAndTournamentId } from "@/db/repositories/participant";
 import {
+  getGamesWithParticipantsAndMatchdayByIds,
   getPendingGamesByParticipantId,
   getPendingGamesByRefereeId,
 } from "@/db/repositories/game";
@@ -18,34 +19,31 @@ export async function NotificationCenter({
     return null;
   }
 
-  const participant = await getParticipantByUserIdAndTournamentId(
-    session.user.id,
-    tournamentId,
-  );
-  const participantGameIds = participant
-    ? await getPendingGamesByParticipantId(participant.id)
-    : [];
+  const [participant, referee] = await Promise.all([
+    getParticipantByUserIdAndTournamentId(session.user.id, tournamentId),
+    getRefereeByUserIdAndTournamentId(session.user.id, tournamentId),
+  ]);
 
-  const referee = await getRefereeByUserIdAndTournamentId(
-    session.user.id,
-    tournamentId,
-  );
-  const refereeGameIds = referee
-    ? await getPendingGamesByRefereeId(referee.id)
-    : [];
+  const [participantGameIds, refereeGameIds] = await Promise.all([
+    participant
+      ? getPendingGamesByParticipantId(participant.id)
+      : Promise.resolve([]),
+    referee ? getPendingGamesByRefereeId(referee.id) : Promise.resolve([]),
+  ]);
 
   if (!participant && !referee) {
     return null;
   }
 
   const gameIds = new Set([...participantGameIds, ...refereeGameIds]);
+  const games = await getGamesWithParticipantsAndMatchdayByIds([...gameIds]);
 
   return (
     <NotificationBell
-      gameItems={Array.from(gameIds).map((id) => (
+      gameItems={games.map((game) => (
         <PendingResultItem
-          key={id}
-          gameId={id}
+          key={game.id}
+          game={game}
           participantId={participant?.id}
         />
       ))}

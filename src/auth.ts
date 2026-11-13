@@ -21,6 +21,12 @@ export const auth = betterAuth({
       await sendConfirmRegistrationEmail(data.user.email, data.user.name);
     },
   },
+  session: {
+    cookieCache: {
+      enabled: true,
+      maxAge: 5 * 60,
+    },
+  },
   emailAndPassword: {
     minPasswordLength: 6,
     enabled: true,

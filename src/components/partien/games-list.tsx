@@ -179,7 +179,8 @@ export function GamesList({
                       currentGameDate={parseDateOnly(
                         game.matchdayGame.matchday.date,
                       )}
-                      game={game}
+                      whiteName={getParticipantFullName(game.whiteParticipant!)}
+                      blackName={getParticipantFullName(game.blackParticipant!)}
                       isReferee={isReferee}
                       {...getGameActionPermissions(game.id)}
                     />
@@ -256,7 +257,8 @@ export function GamesList({
                       currentGameDate={parseDateOnly(
                         game.matchdayGame.matchday.date,
                       )}
-                      game={game}
+                      whiteName={getParticipantFullName(game.whiteParticipant!)}
+                      blackName={getParticipantFullName(game.blackParticipant!)}
                       isReferee={isReferee}
                       {...permissions}
                     />

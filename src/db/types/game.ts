@@ -27,8 +27,6 @@ export type GameWithParticipantProfilesAndGroupAndMatchday = Game & {
       userId: string;
       firstName: string;
       lastName: string;
-      email: string;
-      phoneNumber: string;
     };
     fideRating: number | null;
     dwzRating: number | null;
@@ -38,8 +36,6 @@ export type GameWithParticipantProfilesAndGroupAndMatchday = Game & {
       userId: string;
       firstName: string;
       lastName: string;
-      email: string;
-      phoneNumber: string;
     };
     fideRating: number | null;
     dwzRating: number | null;
@@ -54,6 +50,18 @@ export type GameWithParticipantProfilesAndGroupAndMatchday = Game & {
       date: string;
     };
   };
+};
+
+export type GameContactPerson = {
+  firstName: string;
+  lastName: string;
+  email: string;
+  phoneNumber: string;
+};
+
+export type GameContacts = {
+  white: GameContactPerson | null;
+  black: GameContactPerson | null;
 };
 
 export type GameWithMatchday = Game & {
@@ -79,6 +87,12 @@ export type GameWithParticipantsAndDate = GameWithParticipants & {
     matchday: {
       date: string;
     };
+  };
+};
+
+export type NotificationGame = GameWithParticipantsAndDate & {
+  tournament: {
+    slug: string;
   };
 };
 

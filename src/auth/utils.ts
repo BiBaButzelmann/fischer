@@ -1,3 +1,4 @@
+import { cache } from "react";
 import { auth as betterAuth } from "@/auth";
 import { headers } from "next/headers";
 import { redirect } from "next/navigation";
@@ -12,9 +13,9 @@ export async function authWithRedirect() {
   return session;
 }
 
-export async function auth() {
+export const auth = cache(async () => {
   const session = await betterAuth.api.getSession({
     headers: await headers(),
   });
   return session;
-}
+});
