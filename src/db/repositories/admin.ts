@@ -1,7 +1,17 @@
 "use server";
 
 import { db } from "../client";
-import { and, eq, isNull, or, exists, sql } from "drizzle-orm";
+import {
+  and,
+  eq,
+  inArray,
+  isNotNull,
+  isNull,
+  or,
+  exists,
+  sql,
+} from "drizzle-orm";
+import { unionAll } from "drizzle-orm/pg-core";
 import { profile } from "../schema/profile";
 import { participant } from "../schema/participant";
 import { referee } from "../schema/referee";
@@ -9,6 +19,10 @@ import { juror } from "../schema/juror";
 import { matchEnteringHelper } from "../schema/matchEnteringHelper";
 import { setupHelper } from "../schema/setupHelper";
 import { DEFAULT_CLUB_LABEL } from "@/constants/constants";
+import {
+  tournamentRoleTables,
+  TournamentRoleTable,
+} from "../tournament-role-tables";
 
 export async function getAllProfiles() {
   return await db.query.profile.findMany({
@@ -97,15 +111,48 @@ export async function getAllTrainersByTournamentId(tournamentId: number) {
   });
 }
 
-export async function getAllDisabledProfiles() {
-  return await db.query.profile.findMany({
-    where: (profile, { isNotNull }) => isNotNull(profile.deletedAt),
-    orderBy: (profile, { desc, asc }) => [
-      desc(profile.deletedAt),
+function deactivatedRolesQuery(
+  table: TournamentRoleTable,
+  tournamentId: number,
+) {
+  return db
+    .select({ profileId: table.profileId, deletedAt: table.deletedAt })
+    .from(table)
+    .where(
+      and(eq(table.tournamentId, tournamentId), isNotNull(table.deletedAt)),
+    );
+}
+
+export async function getDeactivatedProfilesByTournamentId(
+  tournamentId: number,
+) {
+  const [first, second, ...rest] = tournamentRoleTables.map((table) =>
+    deactivatedRolesQuery(table, tournamentId),
+  );
+  const deactivatedRoles = await unionAll(first, second, ...rest);
+
+  const deactivatedAtByProfileId = new Map<number, Date>();
+  for (const { profileId, deletedAt } of deactivatedRoles) {
+    const earliest = deactivatedAtByProfileId.get(profileId);
+    if (deletedAt != null && (earliest == null || deletedAt < earliest)) {
+      deactivatedAtByProfileId.set(profileId, deletedAt);
+    }
+  }
+  if (deactivatedAtByProfileId.size === 0) {
+    return [];
+  }
+
+  const profiles = await db.query.profile.findMany({
+    where: inArray(profile.id, [...deactivatedAtByProfileId.keys()]),
+    orderBy: (profile, { asc }) => [
       asc(profile.lastName),
       asc(profile.firstName),
     ],
   });
+  return profiles.map((p) => ({
+    ...p,
+    deletedAt: deactivatedAtByProfileId.get(p.id) ?? null,
+  }));
 }
 
 export async function getAllProfilesWithRolesByTournamentId(

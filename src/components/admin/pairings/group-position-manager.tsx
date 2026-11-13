@@ -28,6 +28,7 @@ import { SortableContext, arrayMove } from "@dnd-kit/sortable";
 import { CSS } from "@dnd-kit/utilities";
 import { useSortable } from "@dnd-kit/sortable";
 import { rescheduleGamesForGroup } from "@/actions/game";
+import { toast } from "sonner";
 
 type GroupPositionManagerProps = {
   tournamentId: number;
@@ -130,6 +131,7 @@ export function GroupPositionManager({
       setError(undefined);
       if (response?.error != null) {
         setError(response.error);
+        toast.error(response.error);
       }
     });
   };
