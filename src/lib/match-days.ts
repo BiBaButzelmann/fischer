@@ -1,4 +1,5 @@
 import { DayOfWeek } from "@/db/types/group";
+import { matchDaysShort } from "@/constants/constants";
 
 export function hasSecondaryMatchDayConflict(
   preferredMatchDay: DayOfWeek,
@@ -12,4 +13,18 @@ export function removePreferredFromSecondary(
   secondaryMatchDays: DayOfWeek[],
 ): DayOfWeek[] {
   return secondaryMatchDays.filter((day) => day !== preferredMatchDay);
+}
+
+export function formatMatchDays(
+  preferredMatchDay: DayOfWeek,
+  secondaryMatchDays: DayOfWeek[],
+): string {
+  const secondary = removePreferredFromSecondary(
+    preferredMatchDay,
+    secondaryMatchDays,
+  ).map((day) => matchDaysShort[day]);
+
+  return secondary.length > 0
+    ? `Bevorzugt ${matchDaysShort[preferredMatchDay]} · auch ${secondary.join(", ")}`
+    : `Nur ${matchDaysShort[preferredMatchDay]}`;
 }

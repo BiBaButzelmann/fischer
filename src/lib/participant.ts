@@ -21,3 +21,13 @@ export function getFullNameWithTitle(
 ) {
   return `${title ? `${title} ` : ""}${getFullName(firstName, lastName)}`;
 }
+
+export function compareByName(
+  a: { firstName: string; lastName: string },
+  b: { firstName: string; lastName: string },
+) {
+  return (
+    a.lastName.localeCompare(b.lastName, "de") ||
+    a.firstName.localeCompare(b.firstName, "de")
+  );
+}
