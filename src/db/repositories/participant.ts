@@ -80,6 +80,7 @@ export async function getUnassignedParticipantsByTournamentId(
     .where(
       and(
         eq(participant.tournamentId, tournamentId),
+        isNull(participant.deletedAt),
         isNull(participantGroup.participantId),
       ),
     );

@@ -77,7 +77,7 @@ export function UserRow({
   const handleSoftDelete = () => {
     startTransition(async () => {
       try {
-        const result = await softDeleteUserProfile(user.userId);
+        const result = await softDeleteUserProfile(user.userId, tournamentId);
         if (result.success) {
           toast.success("Benutzer wurde erfolgreich deaktiviert.");
           setSoftDeleteOpen(false);
@@ -117,7 +117,7 @@ export function UserRow({
   const handleRestore = () => {
     startTransition(async () => {
       try {
-        const result = await restoreUserProfile(user.userId);
+        const result = await restoreUserProfile(user.userId, tournamentId);
         if (result.success) {
           toast.success("Benutzer wurde erfolgreich wiederhergestellt.");
         } else {
@@ -187,8 +187,7 @@ export function UserRow({
           </div>
           {user.deletedAt && (
             <span className="text-xs text-red-600">
-              Deaktiviert:{" "}
-              {formatDate(toLocalDateTime(user.deletedAt))}
+              Deaktiviert: {formatDate(toLocalDateTime(user.deletedAt))}
             </span>
           )}
         </div>
@@ -204,10 +203,7 @@ export function UserRow({
             title="Verlauf ansehen"
           >
             <Link
-              href={tournamentPath(
-                slug,
-                `/admin/logging?profileId=${user.id}`,
-              )}
+              href={tournamentPath(slug, `/admin/logging?profileId=${user.id}`)}
             >
               <History className="h-4 w-4" />
             </Link>
@@ -255,9 +251,9 @@ export function UserRow({
                   </DialogTitle>
                   <DialogDescription>
                     Möchten Sie den Benutzer &quot;{getDisplayName(user)}&quot;
-                    deaktivieren? Der Benutzer wird ausgeblendet, aber alle
-                    Daten bleiben erhalten und können später wiederhergestellt
-                    werden.
+                    für dieses Turnier deaktivieren? Alle Rollen in diesem
+                    Turnier werden entfernt und offene Partien kampflos
+                    gewertet. Andere Turniere bleiben unverändert.
                   </DialogDescription>
                 </DialogHeader>
                 <DialogFooter>

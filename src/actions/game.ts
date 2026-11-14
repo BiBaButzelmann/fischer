@@ -86,6 +86,21 @@ export async function scheduleGamesForGroup(
     .filter((p) => p.groupPosition !== null && p.groupPosition !== undefined)
     .sort((a, b) => (a.groupPosition ?? 0) - (b.groupPosition ?? 0));
 
+  const deactivatedPlayers = players.filter(
+    (p) => p.participant.deletedAt != null,
+  );
+  if (deactivatedPlayers.length > 0) {
+    const names = deactivatedPlayers
+      .map(
+        (p) =>
+          `${p.participant.profile.firstName} ${p.participant.profile.lastName}`,
+      )
+      .join(", ");
+    return {
+      error: `Paarungen für ${group.groupName} nicht möglich: ${names} ${deactivatedPlayers.length === 1 ? "ist" : "sind"} deaktiviert. Entferne die Person aus der Gruppe oder stelle sie wieder her.`,
+    };
+  }
+
   const n = players.length;
   if (n < 2) {
     return {

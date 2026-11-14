@@ -225,6 +225,13 @@
       "when": 1792525092105,
       "tag": "0031_pgn_movetext_only",
       "breakpoints": true
+    },
+    {
+      "idx": 32,
+      "version": "7",
+      "when": 1794589570256,
+      "tag": "0032_apply_forfeits_for_deactivated_participants",
+      "breakpoints": true
     }
   ]
 }
