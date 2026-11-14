@@ -1,5 +1,5 @@
 import { authWithRedirect } from "@/auth/utils";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { Tabs, TabsContent } from "@/components/ui/tabs";
 import {
   Card,
   CardContent,
@@ -19,20 +19,16 @@ import {
 } from "@/db/repositories/admin";
 import { getTournamentBySlug } from "@/db/repositories/tournament";
 import { tournamentPath } from "@/lib/navigation";
-import {
-  User,
-  Users,
-  Shield,
-  Gavel,
-  ClipboardEdit,
-  Wrench,
-  UserX,
-  LucideIcon,
-  Volleyball,
-} from "lucide-react";
+import { User, Users, UserX, LucideIcon } from "lucide-react";
 import { UserRow } from "@/components/admin/user-row";
 import { ParticipantRow } from "@/components/admin/participant-row";
 import { RatingUpdatePanel } from "@/components/admin/rating-update-panel";
+import { RoleRoster } from "@/components/admin/user-management/role-roster";
+import {
+  RosterTab,
+  RosterTabsList,
+} from "@/components/admin/user-management/roster-tabs";
+import { formatMatchDays } from "@/lib/match-days";
 import { redirect } from "next/navigation";
 import { ProfileWithName } from "@/db/types/profile";
 import { ParticipantWithProfile } from "@/db/types/participant";
@@ -97,65 +93,50 @@ export default async function Page({
 
   return (
     <div className="space-y-6">
-      <div>
-        <h1 className="text-3xl font-bold text-gray-900 mb-2">
+      <header className="space-y-1">
+        <h1 className="text-2xl font-semibold tracking-tight">
           Nutzerverwaltung
         </h1>
-        <p className="text-gray-600">
-          Verwalten Sie alle Benutzer und deren Rollen für das aktuelle Turnier:{" "}
-          <strong>{tournament.name}</strong>
-        </p>
-      </div>
+        <p className="text-sm text-muted-foreground">{tournament.name}</p>
+      </header>
 
-      <Tabs defaultValue="profiles" className="space-y-4">
-        <TabsList className="grid w-full grid-cols-8">
-          <TabsTrigger value="profiles" className="flex items-center gap-2">
-            <Users className="h-4 w-4" />
-            Profile
-          </TabsTrigger>
-          <TabsTrigger value="participants" className="flex items-center gap-2">
-            <User className="h-4 w-4" />
-            Teilnehmer
-          </TabsTrigger>
-          <TabsTrigger value="referees" className="flex items-center gap-2">
-            <Shield className="h-4 w-4" />
-            Schiedsrichter
-          </TabsTrigger>
-          <TabsTrigger value="jurors" className="flex items-center gap-2">
-            <Gavel className="h-4 w-4" />
-            Juroren
-          </TabsTrigger>
-          <TabsTrigger value="matchHelpers" className="flex items-center gap-2">
-            <ClipboardEdit className="h-4 w-4" />
-            Eingabehelfer
-          </TabsTrigger>
-          <TabsTrigger value="setupHelpers" className="flex items-center gap-2">
-            <Wrench className="h-4 w-4" />
-            Aufbauhelfer
-          </TabsTrigger>
-          <TabsTrigger value="trainers" className="flex items-center gap-2">
-            <Volleyball className="h-4 w-4" />
-            Trainer
-          </TabsTrigger>
-          <TabsTrigger value="disabled" className="flex items-center gap-2">
-            <UserX className="h-4 w-4" />
-            Deaktiviert
-          </TabsTrigger>
-        </TabsList>
-
-        <TabsContent value="profiles" className="space-y-4">
-          <UserList
-            users={allProfiles}
-            title="Alle Profile"
-            description={`Gesamtübersicht aller ${allProfiles.length} registrierten Benutzerprofile`}
-            icon={Users}
-            emptyMessage="Keine Profile gefunden."
-            tournamentId={tournament.id}
-            trainers={trainers}
+      <Tabs defaultValue="participants" className="space-y-5">
+        <RosterTabsList>
+          <RosterTab
+            value="participants"
+            label="Teilnehmer"
+            count={participants.length}
           />
-        </TabsContent>
+          <RosterTab
+            value="referees"
+            label="Schiedsrichter"
+            count={referees.length}
+          />
+          <RosterTab value="jurors" label="Juroren" count={jurors.length} />
+          <RosterTab
+            value="matchEnteringHelpers"
+            label="Eingabehelfer"
+            count={matchEnteringHelpers.length}
+          />
+          <RosterTab
+            value="setupHelpers"
+            label="Aufbauhelfer"
+            count={setupHelpers.length}
+          />
+          <RosterTab value="trainers" label="Trainer" count={trainers.length} />
+          <RosterTab
+            value="disabled"
+            label="Deaktiviert"
+            count={disabledProfiles.length}
+          />
+          <RosterTab
+            value="profiles"
+            label="Alle Profile"
+            count={allProfiles.length}
+          />
+        </RosterTabsList>
 
-        <TabsContent value="participants" className="space-y-4">
+        <TabsContent value="participants" className="mt-0">
           <ParticipantList
             participants={participants}
             title="Teilnehmer"
@@ -166,67 +147,69 @@ export default async function Page({
           />
         </TabsContent>
 
-        <TabsContent value="referees" className="space-y-4">
-          <UserList
-            users={referees.map((r) => r.profile)}
-            title="Schiedsrichter"
-            description={`${referees.length} Schiedsrichter sind für das Turnier verfügbar`}
-            icon={Shield}
-            emptyMessage="Keine Schiedsrichter für dieses Turnier gefunden."
-            tournamentId={tournament.id}
-            trainers={[]}
+        <TabsContent value="referees" className="mt-0">
+          <RoleRoster
+            members={referees.map((referee) => ({
+              id: referee.id,
+              profile: referee.profile,
+              meta: formatMatchDays(
+                referee.preferredMatchDay,
+                referee.secondaryMatchDays,
+              ),
+            }))}
+            tournament={tournament}
+            emptyMessage="Für dieses Turnier hat sich kein Schiedsrichter gemeldet."
           />
         </TabsContent>
 
-        <TabsContent value="jurors" className="space-y-4">
-          <UserList
-            users={jurors.map((j) => j.profile)}
-            title="Juroren"
-            description={`${jurors.length} Juroren sind Teil des Turniergerichts`}
-            icon={Gavel}
-            emptyMessage="Keine Juroren für dieses Turnier gefunden."
-            tournamentId={tournament.id}
-            trainers={[]}
+        <TabsContent value="jurors" className="mt-0">
+          <RoleRoster
+            members={jurors}
+            tournament={tournament}
+            emptyMessage="Für dieses Turnier gibt es noch kein Turniergericht."
           />
         </TabsContent>
 
-        <TabsContent value="matchHelpers" className="space-y-4">
-          <UserList
-            users={matchEnteringHelpers.map((m) => m.profile)}
-            title="Eingabehelfer"
-            description={`${matchEnteringHelpers.length} Eingabehelfer unterstützen bei der Spieleingabe`}
-            icon={ClipboardEdit}
-            emptyMessage="Keine Eingabehelfer für dieses Turnier gefunden."
-            tournamentId={tournament.id}
-            trainers={[]}
+        <TabsContent value="matchEnteringHelpers" className="mt-0">
+          <RoleRoster
+            members={matchEnteringHelpers.map((helper) => ({
+              id: helper.id,
+              profile: helper.profile,
+              meta:
+                helper.numberOfGroupsToEnter === 1
+                  ? "1 Gruppe"
+                  : `${helper.numberOfGroupsToEnter} Gruppen`,
+            }))}
+            tournament={tournament}
+            emptyMessage="Für dieses Turnier hat sich kein Eingabehelfer gemeldet."
           />
         </TabsContent>
 
-        <TabsContent value="setupHelpers" className="space-y-4">
-          <UserList
-            users={setupHelpers.map((s) => s.profile)}
-            title="Aufbauhelfer"
-            description={`${setupHelpers.length} Aufbauhelfer helfen bei der Turniervorbereitung`}
-            icon={Wrench}
-            emptyMessage="Keine Aufbauhelfer für dieses Turnier gefunden."
-            tournamentId={tournament.id}
-            trainers={[]}
+        <TabsContent value="setupHelpers" className="mt-0">
+          <RoleRoster
+            members={setupHelpers.map((helper) => ({
+              id: helper.id,
+              profile: helper.profile,
+              meta: formatMatchDays(
+                helper.preferredMatchDay,
+                helper.secondaryMatchDays,
+              ),
+            }))}
+            tournament={tournament}
+            emptyMessage="Für dieses Turnier hat sich kein Aufbauhelfer gemeldet."
           />
         </TabsContent>
 
-        <TabsContent value="trainers" className="space-y-4">
-          <UserList
-            users={trainers.map((t) => t.profile)}
-            title="Trainer"
-            description={`${trainers.length} Trainer können alle Partien sehen`}
-            icon={Volleyball}
-            emptyMessage="Keine Trainer für dieses Turnier gefunden."
-            tournamentId={tournament.id}
-            trainers={[]}
+        <TabsContent value="trainers" className="mt-0">
+          <RoleRoster
+            members={trainers}
+            tournament={tournament}
+            emptyMessage="Für dieses Turnier ist kein Trainer eingetragen."
+            description="Trainer sehen alle Partien des Turniers. Eintragen und entfernen unter „Alle Profile“."
           />
         </TabsContent>
 
-        <TabsContent value="disabled" className="space-y-4">
+        <TabsContent value="disabled" className="mt-0">
           <UserList
             users={disabledProfiles}
             title="Deaktivierte Benutzer"
@@ -236,6 +219,18 @@ export default async function Page({
             isDisabledUsers={true}
             tournamentId={tournament.id}
             trainers={[]}
+          />
+        </TabsContent>
+
+        <TabsContent value="profiles" className="mt-0">
+          <UserList
+            users={allProfiles}
+            title="Alle Profile"
+            description={`Gesamtübersicht aller ${allProfiles.length} registrierten Benutzerprofile`}
+            icon={Users}
+            emptyMessage="Keine Profile gefunden."
+            tournamentId={tournament.id}
+            trainers={trainers}
           />
         </TabsContent>
       </Tabs>
