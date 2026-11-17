@@ -1,13 +1,6 @@
 import { authWithRedirect } from "@/auth/utils";
 import { Tabs, TabsContent } from "@/components/ui/tabs";
 import {
-  Card,
-  CardContent,
-  CardDescription,
-  CardHeader,
-  CardTitle,
-} from "@/components/ui/card";
-import {
   getAllProfiles,
   getAllParticipantsByTournamentId,
   getAllRefereesByTournamentId,
@@ -19,8 +12,6 @@ import {
 } from "@/db/repositories/admin";
 import { getTournamentBySlug } from "@/db/repositories/tournament";
 import { tournamentPath } from "@/lib/navigation";
-import { Users, UserX, LucideIcon } from "lucide-react";
-import { UserRow } from "@/components/admin/user-row";
 import { RatingUpdatePanel } from "@/components/admin/rating-update-panel";
 import { RoleRoster } from "@/components/admin/user-management/role-roster";
 import {
@@ -32,8 +23,9 @@ import { compareByName } from "@/lib/participant";
 import { Roster } from "@/components/admin/user-management/roster";
 import { RatingsHeader } from "@/components/admin/user-management/ratings";
 import { ParticipantRow } from "@/components/admin/user-management/participant-row";
-import { redirect } from "next/navigation";
-import { ProfileWithName } from "@/db/types/profile";
+import { ProfileRow } from "@/components/admin/user-management/profile-row";
+import { DeactivatedRow } from "@/components/admin/user-management/deactivated-row";
+import { notFound, redirect } from "next/navigation";
 
 export default async function Page({
   params,
@@ -53,26 +45,7 @@ export default async function Page({
   ]);
 
   if (!tournament) {
-    return (
-      <div className="space-y-6">
-        <div>
-          <h1 className="text-3xl font-bold text-gray-900 mb-2">
-            Nutzerverwaltung
-          </h1>
-          <p className="text-gray-600">
-            Verwalten Sie alle Benutzer und deren Rollen im System.
-          </p>
-        </div>
-
-        <Card>
-          <CardContent className="pt-6">
-            <p className="text-center text-gray-500">
-              Kein aktives Turnier gefunden. Erstelle zuerst ein Turnier.
-            </p>
-          </CardContent>
-        </Card>
-      </div>
-    );
+    notFound();
   }
 
   const [
@@ -93,6 +66,9 @@ export default async function Page({
     getDeactivatedProfilesByTournamentId(tournament.id),
   ]);
 
+  const trainerIdByProfileId = new Map(
+    trainers.map((trainer) => [trainer.profile.id, trainer.id]),
+  );
   const sortedParticipants = [...participants].sort((a, b) =>
     compareByName(a.profile, b.profile),
   );
@@ -223,86 +199,38 @@ export default async function Page({
         </TabsContent>
 
         <TabsContent value="disabled" className="mt-0">
-          <UserList
-            users={disabledProfiles}
-            title="Deaktivierte Benutzer"
-            description={`${disabledProfiles.length} Benutzer sind in diesem Turnier deaktiviert`}
-            icon={UserX}
-            emptyMessage="Keine deaktivierten Benutzer gefunden."
-            isDisabledUsers={true}
-            tournamentId={tournament.id}
-            trainers={[]}
-          />
+          <Roster
+            count={disabledProfiles.length}
+            emptyMessage="In diesem Turnier ist niemand deaktiviert."
+            description="Deaktivierte Personen haben in diesem Turnier keine Rollen. Beim Wiederherstellen bleiben kampflos gewertete Partien bestehen."
+          >
+            {disabledProfiles.map((profile) => (
+              <DeactivatedRow
+                key={profile.id}
+                profile={profile}
+                tournament={tournament}
+              />
+            ))}
+          </Roster>
         </TabsContent>
 
         <TabsContent value="profiles" className="mt-0">
-          <UserList
-            users={allProfiles}
-            title="Alle Profile"
-            description={`Gesamtübersicht aller ${allProfiles.length} registrierten Benutzerprofile`}
-            icon={Users}
-            emptyMessage="Keine Profile gefunden."
-            tournamentId={tournament.id}
-            trainers={trainers}
-          />
+          <Roster
+            count={allProfiles.length}
+            emptyMessage="Es gibt noch keine registrierten Profile."
+            description="Alle registrierten Konten, unabhängig vom Turnier. Endgültig löschen lässt sich ein Profil nur ohne Partien, Verlegungen und organisierte Turniere."
+          >
+            {allProfiles.map((profile) => (
+              <ProfileRow
+                key={profile.id}
+                profile={profile}
+                tournament={tournament}
+                trainerId={trainerIdByProfileId.get(profile.id)}
+              />
+            ))}
+          </Roster>
         </TabsContent>
       </Tabs>
     </div>
-  );
-}
-
-function UserList({
-  users,
-  title,
-  description,
-  icon: Icon,
-  emptyMessage,
-  isDisabledUsers = false,
-  tournamentId,
-  trainers,
-}: {
-  users: ProfileWithName[];
-  title: string;
-  description: string;
-  icon: LucideIcon;
-  emptyMessage: string;
-  isDisabledUsers?: boolean;
-  tournamentId: number;
-  trainers: { profile: { id: number }; id: number }[];
-}) {
-  return (
-    <Card>
-      <CardHeader>
-        <div className="flex items-center gap-3">
-          <div className="p-2 bg-gray-100 border border-gray-200 rounded-lg">
-            <Icon className="h-5 w-5 text-gray-600" />
-          </div>
-          <div>
-            <CardTitle className="text-lg">{title}</CardTitle>
-            <CardDescription>{description}</CardDescription>
-          </div>
-        </div>
-      </CardHeader>
-      <CardContent>
-        {users.length === 0 ? (
-          <p className="text-gray-500 text-sm italic">{emptyMessage}</p>
-        ) : (
-          <div className="space-y-1">
-            {users.map((user) => {
-              const trainer = trainers.find((t) => t.profile.id === user.id);
-              return (
-                <UserRow
-                  key={user.id}
-                  user={user}
-                  showDeleteActions={!isDisabledUsers}
-                  tournamentId={tournamentId}
-                  trainerId={trainer?.id}
-                />
-              );
-            })}
-          </div>
-        )}
-      </CardContent>
-    </Card>
   );
 }
