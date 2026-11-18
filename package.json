@@ -10,6 +10,7 @@
     "test": "vitest"
   },
   "dependencies": {
+    "@base-ui/react": "1.8.0",
     "@daveyplate/better-auth-ui": "^2.0.12",
     "@dnd-kit/sortable": "^10.0.0",
     "@fullcalendar/core": "^6.1.17",
