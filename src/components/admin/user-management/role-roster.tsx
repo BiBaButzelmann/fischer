@@ -1,7 +1,7 @@
 import { ProfileWithName } from "@/db/types/profile";
 import { compareByName } from "@/lib/participant";
 import { ContactLinks } from "./person-row";
-import { Roster } from "./roster";
+import { Roster, RosterList } from "./roster";
 import { RoleRow } from "./role-row";
 import { TournamentRef } from "./types";
 
@@ -36,23 +36,25 @@ export function RoleRoster({
       emptyMessage={emptyMessage}
       description={description}
     >
-      {sortedMembers.map((member) => (
-        <RoleRow
-          key={member.id}
-          profile={member.profile}
-          tournament={tournament}
-          roles={rolesByProfileId[member.profile.id] ?? []}
-          meta={
-            <>
-              {member.meta ? <p>{member.meta}</p> : null}
-              <ContactLinks
-                email={member.profile.email}
-                phoneNumber={member.profile.phoneNumber}
-              />
-            </>
-          }
-        />
-      ))}
+      <RosterList>
+        {sortedMembers.map((member) => (
+          <RoleRow
+            key={member.id}
+            profile={member.profile}
+            tournament={tournament}
+            roles={rolesByProfileId[member.profile.id] ?? []}
+            meta={
+              <>
+                {member.meta ? <p>{member.meta}</p> : null}
+                <ContactLinks
+                  email={member.profile.email}
+                  phoneNumber={member.profile.phoneNumber}
+                />
+              </>
+            }
+          />
+        ))}
+      </RosterList>
     </Roster>
   );
 }

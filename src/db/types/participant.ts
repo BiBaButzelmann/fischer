@@ -1,6 +1,6 @@
 import { InferSelectModel } from "drizzle-orm";
 import { participant } from "../schema/participant";
-import { DayOfWeek } from "./group";
+import { DayOfWeek, GroupRef } from "./group";
 import { ProfileWithName } from "./profile";
 
 export type Participant = InferSelectModel<typeof participant>;
@@ -41,4 +41,8 @@ export type ParticipantWithRating = Pick<
 
 export type ParticipantWithProfile = Participant & {
   profile: ProfileWithName;
+};
+
+export type ParticipantWithProfileAndGroup = ParticipantWithProfile & {
+  group: { group: GroupRef } | null;
 };

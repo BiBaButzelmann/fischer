@@ -12,16 +12,14 @@ import {
 } from "@/db/repositories/admin";
 import { getTournamentBySlug } from "@/db/repositories/tournament";
 import { tournamentPath } from "@/lib/navigation";
-import { RatingUpdatePanel } from "@/components/admin/rating-update-panel";
 import { RoleRoster } from "@/components/admin/user-management/role-roster";
 import {
   RosterTab,
   RosterTabsList,
 } from "@/components/admin/user-management/roster-tabs";
 import { formatMatchDays } from "@/lib/match-days";
-import { compareByName } from "@/lib/participant";
-import { Roster } from "@/components/admin/user-management/roster";
-import { ParticipantRow } from "@/components/admin/user-management/participant-row";
+import { Roster, RosterList } from "@/components/admin/user-management/roster";
+import { ParticipantRoster } from "@/components/admin/user-management/participant-roster";
 import { ProfileRow } from "@/components/admin/user-management/profile-row";
 import { DeactivatedRow } from "@/components/admin/user-management/deactivated-row";
 import { collectRolesByProfileId } from "@/components/admin/user-management/roles";
@@ -77,9 +75,6 @@ export default async function Page({
     { label: "Aufbauhelfer", members: setupHelpers },
     { label: "Trainer", members: trainers },
   ]);
-  const sortedParticipants = [...participants].sort((a, b) =>
-    compareByName(a.profile, b.profile),
-  );
 
   return (
     <div className="space-y-6">
@@ -127,20 +122,11 @@ export default async function Page({
         </RosterTabsList>
 
         <TabsContent value="participants" className="mt-0">
-          <Roster
-            count={participants.length}
-            emptyMessage="Für dieses Turnier hat sich noch niemand angemeldet."
-            toolbar={<RatingUpdatePanel participants={participants} />}
-          >
-            {sortedParticipants.map((participant) => (
-              <ParticipantRow
-                key={participant.id}
-                participant={participant}
-                tournament={tournament}
-                roles={rolesByProfileId[participant.profile.id] ?? []}
-              />
-            ))}
-          </Roster>
+          <ParticipantRoster
+            participants={participants}
+            tournament={tournament}
+            rolesByProfileId={rolesByProfileId}
+          />
         </TabsContent>
 
         <TabsContent value="referees" className="mt-0">
@@ -216,13 +202,15 @@ export default async function Page({
             emptyMessage="In diesem Turnier ist niemand deaktiviert."
             description="Deaktivierte Personen haben in diesem Turnier keine Rollen. Beim Wiederherstellen bleiben kampflos gewertete Partien bestehen."
           >
-            {disabledProfiles.map((profile) => (
-              <DeactivatedRow
-                key={profile.id}
-                profile={profile}
-                tournament={tournament}
-              />
-            ))}
+            <RosterList>
+              {disabledProfiles.map((profile) => (
+                <DeactivatedRow
+                  key={profile.id}
+                  profile={profile}
+                  tournament={tournament}
+                />
+              ))}
+            </RosterList>
           </Roster>
         </TabsContent>
 
@@ -232,15 +220,17 @@ export default async function Page({
             emptyMessage="Es gibt noch keine registrierten Profile."
             description="Alle registrierten Konten, unabhängig vom Turnier. Endgültig löschen lässt sich ein Profil nur ohne Partien, Verlegungen und organisierte Turniere."
           >
-            {allProfiles.map((profile) => (
-              <ProfileRow
-                key={profile.id}
-                profile={profile}
-                tournament={tournament}
-                roles={rolesByProfileId[profile.id] ?? []}
-                trainerId={trainerIdByProfileId.get(profile.id)}
-              />
-            ))}
+            <RosterList>
+              {allProfiles.map((profile) => (
+                <ProfileRow
+                  key={profile.id}
+                  profile={profile}
+                  tournament={tournament}
+                  roles={rolesByProfileId[profile.id] ?? []}
+                  trainerId={trainerIdByProfileId.get(profile.id)}
+                />
+              ))}
+            </RosterList>
           </Roster>
         </TabsContent>
       </Tabs>

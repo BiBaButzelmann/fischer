@@ -3,9 +3,9 @@
 import { useState } from "react";
 import { DropdownMenuItem } from "@/components/ui/dropdown-menu";
 import { DsbLinkDialog } from "@/components/admin/dsb-link-dialog";
-import { ParticipantWithProfile } from "@/db/types/participant";
+import { ParticipantWithProfileAndGroup } from "@/db/types/participant";
 import { getFullNameWithTitle } from "@/lib/participant";
-import { DEFAULT_CLUB_LABEL } from "@/constants/constants";
+import { DEFAULT_CLUB_LABEL, matchDays } from "@/constants/constants";
 import { HSK_VKZ } from "@/lib/dsb/constants";
 import { ContactLinks } from "./person-row";
 import { RoleRow } from "./role-row";
@@ -13,7 +13,7 @@ import { RatingsSection } from "./ratings";
 import { TournamentRef } from "./types";
 
 type Props = {
-  participant: ParticipantWithProfile;
+  participant: ParticipantWithProfileAndGroup;
   tournament: TournamentRef;
   roles: string[];
 };
@@ -22,6 +22,7 @@ export function ParticipantRow({ participant, tournament, roles }: Props) {
   const [linkDialogOpen, setLinkDialogOpen] = useState(false);
   const { profile } = participant;
   const isLinked = participant.dsbPersonId != null;
+  const group = participant.group?.group ?? null;
 
   return (
     <RoleRow
@@ -38,6 +39,12 @@ export function ParticipantRow({ participant, tournament, roles }: Props) {
       }
       detailsSubtitle={
         <>
+          {group ? (
+            <span className="whitespace-nowrap">
+              Gruppe {group.groupName}
+              {group.dayOfWeek ? ` · ${matchDays[group.dayOfWeek]}` : null}
+            </span>
+          ) : null}
           <span>{participant.chessClub}</span>
           {participant.nationality ? (
             <span>{participant.nationality}</span>
