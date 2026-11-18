@@ -20,7 +20,7 @@ import {
 import { formatMatchDays } from "@/lib/match-days";
 import { Roster, RosterList } from "@/components/admin/user-management/roster";
 import { ParticipantRoster } from "@/components/admin/user-management/participant-roster";
-import { ProfileRow } from "@/components/admin/user-management/profile-row";
+import { ProfileRoster } from "@/components/admin/user-management/profile-roster";
 import { DeactivatedRow } from "@/components/admin/user-management/deactivated-row";
 import { collectRolesByProfileId } from "@/components/admin/user-management/roles";
 import { notFound, redirect } from "next/navigation";
@@ -64,7 +64,7 @@ export default async function Page({
     getDeactivatedProfilesByTournamentId(tournament.id),
   ]);
 
-  const trainerIdByProfileId = new Map(
+  const trainerIdByProfileId: Record<number, number> = Object.fromEntries(
     trainers.map((trainer) => [trainer.profile.id, trainer.id]),
   );
   const rolesByProfileId = collectRolesByProfileId([
@@ -215,23 +215,12 @@ export default async function Page({
         </TabsContent>
 
         <TabsContent value="profiles" className="mt-0">
-          <Roster
-            count={allProfiles.length}
-            emptyMessage="Es gibt noch keine registrierten Profile."
-            description="Alle registrierten Konten, unabhängig vom Turnier. Endgültig löschen lässt sich ein Profil nur ohne Partien, Verlegungen und organisierte Turniere."
-          >
-            <RosterList>
-              {allProfiles.map((profile) => (
-                <ProfileRow
-                  key={profile.id}
-                  profile={profile}
-                  tournament={tournament}
-                  roles={rolesByProfileId[profile.id] ?? []}
-                  trainerId={trainerIdByProfileId.get(profile.id)}
-                />
-              ))}
-            </RosterList>
-          </Roster>
+          <ProfileRoster
+            profiles={allProfiles}
+            tournament={tournament}
+            rolesByProfileId={rolesByProfileId}
+            trainerIdByProfileId={trainerIdByProfileId}
+          />
         </TabsContent>
       </Tabs>
     </div>

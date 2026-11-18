@@ -44,3 +44,32 @@ function compareGroupsByStrength(a: GroupRef | null, b: GroupRef | null) {
   }
   return a.groupNumber - b.groupNumber;
 }
+
+type SearchableProfile = {
+  firstName: string;
+  lastName: string;
+  email: string;
+  phoneNumber: string;
+};
+
+function normalizeForSearch(value: string) {
+  return value
+    .normalize("NFD")
+    .replace(/\p{Diacritic}/gu, "")
+    .toLowerCase()
+    .replaceAll("ß", "ss");
+}
+
+export function matchesSearch(profile: SearchableProfile, query: string) {
+  const words = normalizeForSearch(query).split(/\s+/).filter(Boolean);
+  const text = normalizeForSearch(
+    `${profile.firstName} ${profile.lastName} ${profile.email}`,
+  );
+  const phoneDigits = profile.phoneNumber.replace(/\D/g, "");
+
+  return words.every(
+    (word) =>
+      text.includes(word) ||
+      (/\d/.test(word) && phoneDigits.includes(word.replace(/\D/g, ""))),
+  );
+}
