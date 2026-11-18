@@ -52,7 +52,7 @@ export default async function Page({
           <div className="basis-14 text-center"></div>
           <div className="basis-[8rem] text-center">Datum</div>
           <div className="basis-16 text-center">Gruppe</div>
-          <div className="basis-20 text-center">Brett</div>
+          <div className="basis-20 text-center">Runde</div>
           <div className="flex-1">Weiß</div>
           <div className="basis-20 text-center">Ergebnis</div>
           <div className="flex-1 text-right pr-8">Schwarz</div>
@@ -73,7 +73,7 @@ export default async function Page({
                 <Badge variant="secondary">{game.group.groupName}</Badge>
               </div>
               <div className="basis-20 text-center">
-                <Badge variant="outline">{game.boardNumber}</Badge>
+                <Badge variant="outline">{game.round}</Badge>
               </div>
               <div className="flex-1 truncate">
                 {getParticipantFullName(game.whiteParticipant!)}
