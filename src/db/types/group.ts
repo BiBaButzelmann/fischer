@@ -7,6 +7,11 @@ export type DayOfWeek = InferEnum<typeof group.dayOfWeek>;
 
 export type Group = InferSelectModel<typeof group>;
 
+export type GroupRef = Pick<
+  Group,
+  "id" | "groupName" | "groupNumber" | "tier" | "dayOfWeek"
+>;
+
 export type GroupWithParticipants = Group & {
   participants: ParticipantWithName[];
 };

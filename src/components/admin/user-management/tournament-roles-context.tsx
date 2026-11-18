@@ -1,11 +1,11 @@
 "use client";
 
 import { createContext, ReactNode, useContext } from "react";
-import { ParticipantWithProfile } from "@/db/types/participant";
+import { ParticipantWithProfileAndGroup } from "@/db/types/participant";
 import { RolesData } from "@/db/types/role";
 
 export type TournamentRoles = Partial<Omit<RolesData, "participant">> & {
-  participant?: ParticipantWithProfile;
+  participant?: ParticipantWithProfileAndGroup;
 };
 
 type RolesByProfileId = Record<number, TournamentRoles>;

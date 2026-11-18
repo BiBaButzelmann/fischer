@@ -43,6 +43,19 @@ export async function getAllParticipantsByTournamentId(tournamentId: number) {
       ),
     with: {
       profile: true,
+      group: {
+        with: {
+          group: {
+            columns: {
+              id: true,
+              groupName: true,
+              groupNumber: true,
+              tier: true,
+              dayOfWeek: true,
+            },
+          },
+        },
+      },
     },
     orderBy: (participant, { asc }) => [asc(participant.id)],
   });
