@@ -1,4 +1,5 @@
 import { DayOfWeek } from "@/db/types/group";
+import { TournamentRole } from "@/db/types/role";
 
 export const matchDays: Record<DayOfWeek, string> = {
   tuesday: "Dienstag",
@@ -10,6 +11,15 @@ export const matchDaysShort: Record<DayOfWeek, string> = {
   tuesday: "Di",
   thursday: "Do",
   friday: "Fr",
+};
+
+export const tournamentRoleLabels: Record<TournamentRole, string> = {
+  participant: "Teilnehmer",
+  referee: "Schiedsrichter",
+  juror: "Juror",
+  matchEnteringHelper: "Eingabehelfer",
+  setupHelper: "Aufbauhelfer",
+  trainer: "Trainer",
 };
 
 export const DEFAULT_CLUB_KEY = "hsk";

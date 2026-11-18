@@ -2,7 +2,7 @@ import { ReactNode } from "react";
 import { ArrowUpRight } from "lucide-react";
 import { buttonVariants } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
-import { DetailsLabel, DetailsSection } from "./person-details";
+import { DetailsLabel, DetailsSection } from "./details-section";
 
 type Props = {
   fideRating: number | null;

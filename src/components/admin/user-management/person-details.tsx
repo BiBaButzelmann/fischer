@@ -1,6 +1,6 @@
 "use client";
 
-import { ReactNode, useEffect, useState } from "react";
+import { useEffect, useState } from "react";
 import Link from "next/link";
 import { Check, Copy, History, Mail, Phone, X } from "lucide-react";
 import { Button } from "@/components/ui/button";
@@ -17,46 +17,40 @@ import {
   DrawerDescription,
   DrawerTitle,
 } from "@/components/ui/drawer";
+import { matchDays, tournamentRoleLabels } from "@/constants/constants";
+import { ProfileWithName } from "@/db/types/profile";
+import { tournamentRoles } from "@/db/types/role";
 import { useIsMobile } from "@/hooks/use-mobile";
 import { useTournamentSlug } from "@/hooks/use-tournament-slug";
 import { tournamentPath } from "@/lib/navigation";
+import { getFullNameWithTitle } from "@/lib/participant";
 import { cn } from "@/lib/utils";
+import { DetailsLabel, DetailsSection } from "./details-section";
+import { RatingsSection } from "./ratings";
+import {
+  TournamentRoles,
+  useTournamentRoles,
+} from "./tournament-roles-context";
 
 const DESCRIPTION = "Kontakt, Rollen und Wertungen";
 
 type Props = {
   name: string;
-  subtitle?: ReactNode;
-  roles: string[];
-  email: string;
-  phoneNumber: string;
-  profileId: number;
-  children?: ReactNode;
+  profile: ProfileWithName;
 };
 
-export function PersonDetails({
-  name,
-  subtitle,
-  roles,
-  email,
-  phoneNumber,
-  profileId,
-  children,
-}: Props) {
+export function PersonDetails({ name, profile }: Props) {
   const [open, setOpen] = useState(false);
   const isMobile = useIsMobile();
+  const roles = useTournamentRoles(profile.id);
+  const fullName = getFullNameWithTitle(
+    roles.participant?.title ?? null,
+    profile.firstName,
+    profile.lastName,
+  );
 
   const body = (
-    <PersonDetailsBody
-      name={name}
-      subtitle={subtitle}
-      roles={roles}
-      email={email}
-      phoneNumber={phoneNumber}
-      profileId={profileId}
-    >
-      {children}
-    </PersonDetailsBody>
+    <PersonDetailsBody name={fullName} profile={profile} roles={roles} />
   );
 
   return (
@@ -85,7 +79,7 @@ export function PersonDetails({
             >
               <X className="h-4 w-4" />
             </DrawerClose>
-            <DrawerTitle className="sr-only">{name}</DrawerTitle>
+            <DrawerTitle className="sr-only">{fullName}</DrawerTitle>
             <DrawerDescription className="sr-only">
               {DESCRIPTION}
             </DrawerDescription>
@@ -100,7 +94,7 @@ export function PersonDetails({
       ) : (
         <Dialog open={open} onOpenChange={setOpen}>
           <DialogContent className="max-h-[85dvh] max-w-xl gap-0 overflow-y-auto p-0">
-            <DialogTitle className="sr-only">{name}</DialogTitle>
+            <DialogTitle className="sr-only">{fullName}</DialogTitle>
             <DialogDescription className="sr-only">
               {DESCRIPTION}
             </DialogDescription>
@@ -114,14 +108,19 @@ export function PersonDetails({
 
 function PersonDetailsBody({
   name,
-  subtitle,
+  profile,
   roles,
-  email,
-  phoneNumber,
-  profileId,
-  children,
-}: Props) {
+}: {
+  name: string;
+  profile: ProfileWithName;
+  roles: TournamentRoles;
+}) {
   const slug = useTournamentSlug();
+  const { participant } = roles;
+  const group = participant?.group?.group;
+  const roleLabels = tournamentRoles
+    .filter((role) => roles[role] != null)
+    .map((role) => tournamentRoleLabels[role]);
 
   return (
     <>
@@ -129,25 +128,43 @@ function PersonDetailsBody({
         <p className="text-lg font-semibold leading-tight tracking-tight">
           {name}
         </p>
-        {subtitle ? (
+        {participant ? (
           <p className="flex flex-wrap gap-x-3 gap-y-0.5 text-sm text-muted-foreground">
-            {subtitle}
+            {group ? (
+              <span className="whitespace-nowrap">
+                Gruppe {group.groupName}
+                {group.dayOfWeek ? ` · ${matchDays[group.dayOfWeek]}` : null}
+              </span>
+            ) : null}
+            <span>{participant.chessClub}</span>
+            {participant.nationality ? (
+              <span>{participant.nationality}</span>
+            ) : null}
+            {participant.birthYear ? (
+              <span className="whitespace-nowrap">
+                Jg. {participant.birthYear}
+              </span>
+            ) : null}
           </p>
         ) : null}
-        {roles.length > 0 ? (
-          <p className="text-sm">{roles.join(", ")}</p>
-        ) : null}
+        {roleLabels.length > 0 ? (
+          <p className="text-sm">{roleLabels.join(", ")}</p>
+        ) : (
+          <p className="text-sm text-muted-foreground">
+            Keine Rolle in diesem Turnier
+          </p>
+        )}
       </header>
 
       <div className="flex gap-2 overflow-x-auto border-b px-5 py-3 sm:px-6">
         <Button asChild variant="outline" size="sm">
-          <a href={`mailto:${email}`}>
+          <a href={`mailto:${profile.email}`}>
             <Mail />
             Mail schreiben
           </a>
         </Button>
         <Button asChild variant="outline" size="sm">
-          <a href={`tel:${phoneNumber}`}>
+          <a href={`tel:${profile.phoneNumber}`}>
             <Phone />
             Anrufen
           </a>
@@ -159,7 +176,10 @@ function PersonDetailsBody({
           className="text-muted-foreground"
         >
           <Link
-            href={tournamentPath(slug, `/admin/logging?profileId=${profileId}`)}
+            href={tournamentPath(
+              slug,
+              `/admin/logging?profileId=${profile.id}`,
+            )}
           >
             <History />
             Verlauf
@@ -168,49 +188,30 @@ function PersonDetailsBody({
       </div>
 
       <div className="grid gap-6 px-5 py-5 sm:px-6">
-        {children}
+        {participant ? (
+          <RatingsSection
+            fideRating={participant.fideRating}
+            dwzRating={participant.dwzRating}
+            fideId={participant.fideId}
+            dsbPersonId={participant.dsbPersonId}
+          />
+        ) : null}
         <DetailsSection title="Kontakt">
           <div className="grid gap-4 sm:grid-cols-2">
             <ContactValue
               label="E-Mail"
-              value={email}
-              href={`mailto:${email}`}
+              value={profile.email}
+              href={`mailto:${profile.email}`}
             />
             <ContactValue
               label="Telefon"
-              value={phoneNumber}
-              href={`tel:${phoneNumber}`}
+              value={profile.phoneNumber}
+              href={`tel:${profile.phoneNumber}`}
             />
           </div>
         </DetailsSection>
       </div>
     </>
-  );
-}
-
-export function DetailsSection({
-  title,
-  children,
-}: {
-  title: string;
-  children: ReactNode;
-}) {
-  return (
-    <section className="grid gap-3">
-      <h3 className="flex items-center gap-4 text-[0.72rem] font-medium uppercase tracking-[0.14em] text-primary">
-        <span className="shrink-0">{title}</span>
-        <span aria-hidden className="h-px flex-1 bg-primary/35" />
-      </h3>
-      {children}
-    </section>
-  );
-}
-
-export function DetailsLabel({ children }: { children: ReactNode }) {
-  return (
-    <p className="mt-0.5 text-[10px] font-medium uppercase tracking-wide text-muted-foreground">
-      {children}
-    </p>
   );
 }
 

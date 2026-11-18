@@ -13,14 +13,9 @@ import { TournamentRef } from "./types";
 type Props = {
   participants: ParticipantWithProfileAndGroup[];
   tournament: TournamentRef;
-  rolesByProfileId: Record<number, string[]>;
 };
 
-export function ParticipantRoster({
-  participants,
-  tournament,
-  rolesByProfileId,
-}: Props) {
+export function ParticipantRoster({ participants, tournament }: Props) {
   const [query, setQuery] = useState("");
   const sections = groupParticipantsByStrength(participants);
   const hasGroups = sections.some((section) => section.group != null);
@@ -72,7 +67,6 @@ export function ParticipantRoster({
                   key={participant.id}
                   participant={participant}
                   tournament={tournament}
-                  roles={rolesByProfileId[participant.profile.id] ?? []}
                 />
               ))}
             </RosterList>

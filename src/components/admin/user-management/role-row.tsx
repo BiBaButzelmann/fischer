@@ -17,10 +17,7 @@ type Props = {
   profile: ProfileWithName;
   tournament: TournamentRef;
   displayName?: string;
-  roles: string[];
   meta?: ReactNode;
-  detailsSubtitle?: ReactNode;
-  details?: ReactNode;
   menuItems?: ReactNode;
   children?: ReactNode;
 };
@@ -29,10 +26,7 @@ export function RoleRow({
   profile,
   tournament,
   displayName = getFullName(profile.firstName, profile.lastName),
-  roles,
   meta,
-  detailsSubtitle,
-  details,
   menuItems,
   children,
 }: Props) {
@@ -40,18 +34,7 @@ export function RoleRow({
 
   return (
     <PersonRow
-      name={
-        <PersonDetails
-          name={displayName}
-          subtitle={detailsSubtitle}
-          roles={roles}
-          email={profile.email}
-          phoneNumber={profile.phoneNumber}
-          profileId={profile.id}
-        >
-          {details}
-        </PersonDetails>
-      }
+      name={<PersonDetails name={displayName} profile={profile} />}
       meta={meta}
       actions={
         <RowActions displayName={displayName} profileId={profile.id}>

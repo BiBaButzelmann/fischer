@@ -11,16 +11,9 @@ import { TournamentRef } from "./types";
 type Props = {
   profiles: ProfileWithName[];
   tournament: TournamentRef;
-  rolesByProfileId: Record<number, string[]>;
-  trainerIdByProfileId: Record<number, number>;
 };
 
-export function ProfileRoster({
-  profiles,
-  tournament,
-  rolesByProfileId,
-  trainerIdByProfileId,
-}: Props) {
+export function ProfileRoster({ profiles, tournament }: Props) {
   const [query, setQuery] = useState("");
   const matches = profiles.filter((profile) => matchesSearch(profile, query));
 
@@ -46,8 +39,6 @@ export function ProfileRoster({
               key={profile.id}
               profile={profile}
               tournament={tournament}
-              roles={rolesByProfileId[profile.id] ?? []}
-              trainerId={trainerIdByProfileId[profile.id]}
             />
           ))}
         </RosterList>

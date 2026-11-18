@@ -37,16 +37,7 @@ export function DeactivatedRow({ profile, tournament }: Props) {
 
   return (
     <PersonRow
-      name={
-        <PersonDetails
-          name={displayName}
-          subtitle="In diesem Turnier deaktiviert"
-          roles={[]}
-          email={profile.email}
-          phoneNumber={profile.phoneNumber}
-          profileId={profile.id}
-        />
-      }
+      name={<PersonDetails name={displayName} profile={profile} />}
       muted
       meta={
         profile.deletedAt ? (
