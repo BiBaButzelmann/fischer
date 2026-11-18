@@ -20,7 +20,7 @@ import {
 import { formatMatchDays } from "@/lib/match-days";
 import { Roster, RosterList } from "@/components/admin/user-management/roster";
 import { ParticipantRoster } from "@/components/admin/user-management/participant-roster";
-import { ProfileRow } from "@/components/admin/user-management/profile-row";
+import { ProfileRoster } from "@/components/admin/user-management/profile-roster";
 import { DeactivatedRow } from "@/components/admin/user-management/deactivated-row";
 import { TournamentRolesProvider } from "@/components/admin/user-management/tournament-roles-context";
 import { groupRolesByProfileId } from "@/lib/roles";
@@ -212,21 +212,7 @@ export default async function Page({
           </TabsContent>
 
           <TabsContent value="profiles" className="mt-0">
-            <Roster
-              count={allProfiles.length}
-              emptyMessage="Es gibt noch keine registrierten Profile."
-              description="Alle registrierten Konten, unabhängig vom Turnier. Endgültig löschen lässt sich ein Profil nur ohne Partien, Verlegungen und organisierte Turniere."
-            >
-              <RosterList>
-                {allProfiles.map((profile) => (
-                  <ProfileRow
-                    key={profile.id}
-                    profile={profile}
-                    tournament={tournament}
-                  />
-                ))}
-              </RosterList>
-            </Roster>
+            <ProfileRoster profiles={allProfiles} tournament={tournament} />
           </TabsContent>
         </Tabs>
       </TournamentRolesProvider>
