@@ -5,7 +5,6 @@ type Props = {
   emptyMessage: string;
   description?: ReactNode;
   toolbar?: ReactNode;
-  header?: ReactNode;
   children: ReactNode;
 };
 
@@ -14,7 +13,6 @@ export function Roster({
   emptyMessage,
   description,
   toolbar,
-  header,
   children,
 }: Props) {
   return (
@@ -35,7 +33,6 @@ export function Roster({
         </p>
       ) : (
         <div className="overflow-hidden rounded-lg border">
-          {header}
           <ul className="divide-y">{children}</ul>
         </div>
       )}

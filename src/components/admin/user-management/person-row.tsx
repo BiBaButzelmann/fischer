@@ -6,7 +6,6 @@ type Props = {
   tags?: ReactNode;
   muted?: boolean;
   meta?: ReactNode;
-  aside?: ReactNode;
   actions?: ReactNode;
   children?: ReactNode;
 };
@@ -16,12 +15,11 @@ export function PersonRow({
   tags,
   muted = false,
   meta,
-  aside,
   actions,
   children,
 }: Props) {
   return (
-    <li className="flex items-start gap-3 px-3 py-3 sm:px-4">
+    <li className="group/person-row relative flex items-start gap-3 px-3 py-3 transition-colors duration-150 ease-out hover:bg-secondary/40 sm:px-4">
       <div className="min-w-0 flex-1">
         <div className="flex flex-wrap items-baseline gap-x-2 gap-y-0.5">
           <span className={cn("font-medium", muted && "text-muted-foreground")}>
@@ -35,9 +33,8 @@ export function PersonRow({
           </div>
         ) : null}
       </div>
-      {aside}
       {actions ? (
-        <div className="-my-1.5 flex shrink-0 items-center gap-2">
+        <div className="relative z-10 -my-1.5 flex shrink-0 items-center gap-2">
           {actions}
         </div>
       ) : null}
@@ -70,7 +67,7 @@ export function ContactLinks({
       {email ? (
         <a
           href={`mailto:${email}`}
-          className="max-w-full truncate underline-offset-4 hover:text-foreground hover:underline"
+          className="relative z-10 max-w-full truncate underline-offset-4 hover:text-foreground hover:underline"
         >
           {email}
         </a>
@@ -78,7 +75,7 @@ export function ContactLinks({
       {phoneNumber ? (
         <a
           href={`tel:${phoneNumber}`}
-          className="whitespace-nowrap underline-offset-4 hover:text-foreground hover:underline"
+          className="relative z-10 whitespace-nowrap underline-offset-4 hover:text-foreground hover:underline"
         >
           {phoneNumber}
         </a>
