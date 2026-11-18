@@ -1,5 +1,5 @@
 import { describe, test, expect } from "vitest";
-import { groupParticipantsByStrength } from "../roster";
+import { groupParticipantsByStrength, matchesSearch } from "../roster";
 
 function makeGroup(
   id: number,
@@ -68,5 +68,43 @@ describe("groupParticipantsByStrength", () => {
 
   test("returns no sections for no participants", () => {
     expect(groupParticipantsByStrength([])).toEqual([]);
+  });
+});
+
+describe("matchesSearch", () => {
+  const person = {
+    firstName: "Svenja",
+    lastName: "Thießen",
+    email: "svenja.thiessen@posteo.de",
+    phoneNumber: "0152 34907781",
+  };
+
+  test("matches every person for an empty query", () => {
+    expect(matchesSearch(person, "  ")).toBe(true);
+  });
+
+  test("matches first name, last name and email case-insensitively", () => {
+    expect(matchesSearch(person, "SVEN")).toBe(true);
+    expect(matchesSearch(person, "posteo")).toBe(true);
+    expect(matchesSearch(person, "petersen")).toBe(false);
+  });
+
+  test("ignores accents and spells ß as ss", () => {
+    expect(matchesSearch({ ...person, lastName: "Müller" }, "muller")).toBe(
+      true,
+    );
+    expect(matchesSearch(person, "thiessen")).toBe(true);
+    expect(matchesSearch(person, "Thießen")).toBe(true);
+  });
+
+  test("requires every word to match", () => {
+    expect(matchesSearch(person, "svenja thie")).toBe(true);
+    expect(matchesSearch(person, "svenja müller")).toBe(false);
+  });
+
+  test("matches phone numbers by digits regardless of spacing", () => {
+    expect(matchesSearch(person, "015234")).toBe(true);
+    expect(matchesSearch(person, "4907 781")).toBe(true);
+    expect(matchesSearch(person, "0170")).toBe(false);
   });
 });
