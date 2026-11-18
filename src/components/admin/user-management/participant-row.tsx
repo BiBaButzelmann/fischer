@@ -9,15 +9,16 @@ import { DEFAULT_CLUB_LABEL } from "@/constants/constants";
 import { HSK_VKZ } from "@/lib/dsb/constants";
 import { ContactLinks } from "./person-row";
 import { RoleRow } from "./role-row";
-import { Ratings } from "./ratings";
+import { RatingsSection } from "./ratings";
 import { TournamentRef } from "./types";
 
 type Props = {
   participant: ParticipantWithProfile;
   tournament: TournamentRef;
+  roles: string[];
 };
 
-export function ParticipantRow({ participant, tournament }: Props) {
+export function ParticipantRow({ participant, tournament, roles }: Props) {
   const [linkDialogOpen, setLinkDialogOpen] = useState(false);
   const { profile } = participant;
   const isLinked = participant.dsbPersonId != null;
@@ -31,35 +32,29 @@ export function ParticipantRow({ participant, tournament }: Props) {
         profile.firstName,
         profile.lastName,
       )}
+      roles={roles}
       meta={
+        <ContactLinks email={profile.email} phoneNumber={profile.phoneNumber} />
+      }
+      detailsSubtitle={
         <>
-          <p className="flex flex-wrap items-baseline gap-x-3">
-            <span>{participant.chessClub}</span>
-            {isLinked ? (
-              <span className="font-mono text-xs">
-                DSB {participant.dsbPersonId}
-              </span>
-            ) : (
-              <span>Keine DSB-Verknüpfung</span>
-            )}
-            {participant.fideId ? (
-              <a
-                href={`https://ratings.fide.com/profile/${participant.fideId}`}
-                target="_blank"
-                rel="noreferrer"
-                className="font-mono text-xs underline-offset-4 hover:text-foreground hover:underline"
-              >
-                FIDE {participant.fideId}
-              </a>
-            ) : null}
-          </p>
-          <ContactLinks phoneNumber={profile.phoneNumber} />
+          <span>{participant.chessClub}</span>
+          {participant.nationality ? (
+            <span>{participant.nationality}</span>
+          ) : null}
+          {participant.birthYear ? (
+            <span className="whitespace-nowrap">
+              Jg. {participant.birthYear}
+            </span>
+          ) : null}
         </>
       }
-      aside={
-        <Ratings
+      details={
+        <RatingsSection
           fideRating={participant.fideRating}
           dwzRating={participant.dwzRating}
+          fideId={participant.fideId}
+          dsbPersonId={participant.dsbPersonId}
         />
       }
       menuItems={

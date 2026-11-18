@@ -8,6 +8,7 @@ import { ProfileWithName } from "@/db/types/profile";
 import { formatDate, toLocalDateTime } from "@/lib/date";
 import { getFullName } from "@/lib/participant";
 import { PersonRow } from "./person-row";
+import { PersonDetails } from "./person-details";
 import { TournamentRef } from "./types";
 
 type Props = {
@@ -36,7 +37,16 @@ export function DeactivatedRow({ profile, tournament }: Props) {
 
   return (
     <PersonRow
-      name={displayName}
+      name={
+        <PersonDetails
+          name={displayName}
+          subtitle="In diesem Turnier deaktiviert"
+          roles={[]}
+          email={profile.email}
+          phoneNumber={profile.phoneNumber}
+          profileId={profile.id}
+        />
+      }
       muted
       meta={
         profile.deletedAt ? (

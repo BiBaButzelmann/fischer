@@ -11,6 +11,7 @@ import { ProfileWithName } from "@/db/types/profile";
 import { isError } from "@/lib/actions";
 import { getFullName } from "@/lib/participant";
 import { ContactLinks, PersonRow, RowTag } from "./person-row";
+import { PersonDetails } from "./person-details";
 import { HistoryMenuItem, RowActions } from "./row-actions";
 import { HardDeleteUserDialog } from "./hard-delete-user-dialog";
 import { TournamentRef } from "./types";
@@ -18,10 +19,11 @@ import { TournamentRef } from "./types";
 type Props = {
   profile: ProfileWithName;
   tournament: TournamentRef;
+  roles: string[];
   trainerId?: number;
 };
 
-export function ProfileRow({ profile, tournament, trainerId }: Props) {
+export function ProfileRow({ profile, tournament, roles, trainerId }: Props) {
   const [deleteOpen, setDeleteOpen] = useState(false);
   const [isPending, startTransition] = useTransition();
   const displayName = getFullName(profile.firstName, profile.lastName);
@@ -46,7 +48,16 @@ export function ProfileRow({ profile, tournament, trainerId }: Props) {
 
   return (
     <PersonRow
-      name={displayName}
+      name={
+        <PersonDetails
+          name={displayName}
+          subtitle={roles.length === 0 ? "Keine Rolle in diesem Turnier" : null}
+          roles={roles}
+          email={profile.email}
+          phoneNumber={profile.phoneNumber}
+          profileId={profile.id}
+        />
+      }
       tags={isTrainer ? <RowTag>Trainer</RowTag> : null}
       meta={
         <ContactLinks email={profile.email} phoneNumber={profile.phoneNumber} />

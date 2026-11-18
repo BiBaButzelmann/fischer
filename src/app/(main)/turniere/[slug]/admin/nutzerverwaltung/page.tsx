@@ -21,10 +21,10 @@ import {
 import { formatMatchDays } from "@/lib/match-days";
 import { compareByName } from "@/lib/participant";
 import { Roster } from "@/components/admin/user-management/roster";
-import { RatingsHeader } from "@/components/admin/user-management/ratings";
 import { ParticipantRow } from "@/components/admin/user-management/participant-row";
 import { ProfileRow } from "@/components/admin/user-management/profile-row";
 import { DeactivatedRow } from "@/components/admin/user-management/deactivated-row";
+import { collectRolesByProfileId } from "@/components/admin/user-management/roles";
 import { notFound, redirect } from "next/navigation";
 
 export default async function Page({
@@ -69,6 +69,14 @@ export default async function Page({
   const trainerIdByProfileId = new Map(
     trainers.map((trainer) => [trainer.profile.id, trainer.id]),
   );
+  const rolesByProfileId = collectRolesByProfileId([
+    { label: "Teilnehmer", members: participants },
+    { label: "Schiedsrichter", members: referees },
+    { label: "Juror", members: jurors },
+    { label: "Eingabehelfer", members: matchEnteringHelpers },
+    { label: "Aufbauhelfer", members: setupHelpers },
+    { label: "Trainer", members: trainers },
+  ]);
   const sortedParticipants = [...participants].sort((a, b) =>
     compareByName(a.profile, b.profile),
   );
@@ -122,15 +130,14 @@ export default async function Page({
           <Roster
             count={participants.length}
             emptyMessage="Für dieses Turnier hat sich noch niemand angemeldet."
-            description="Unterstrichen ist die Turnierwertungszahl (TWZ), die höhere der beiden Wertungen."
             toolbar={<RatingUpdatePanel participants={participants} />}
-            header={<RatingsHeader />}
           >
             {sortedParticipants.map((participant) => (
               <ParticipantRow
                 key={participant.id}
                 participant={participant}
                 tournament={tournament}
+                roles={rolesByProfileId[participant.profile.id] ?? []}
               />
             ))}
           </Roster>
@@ -147,6 +154,7 @@ export default async function Page({
               ),
             }))}
             tournament={tournament}
+            rolesByProfileId={rolesByProfileId}
             emptyMessage="Für dieses Turnier hat sich kein Schiedsrichter gemeldet."
           />
         </TabsContent>
@@ -155,6 +163,7 @@ export default async function Page({
           <RoleRoster
             members={jurors}
             tournament={tournament}
+            rolesByProfileId={rolesByProfileId}
             emptyMessage="Für dieses Turnier gibt es noch kein Turniergericht."
           />
         </TabsContent>
@@ -170,6 +179,7 @@ export default async function Page({
                   : `${helper.numberOfGroupsToEnter} Gruppen`,
             }))}
             tournament={tournament}
+            rolesByProfileId={rolesByProfileId}
             emptyMessage="Für dieses Turnier hat sich kein Eingabehelfer gemeldet."
           />
         </TabsContent>
@@ -185,6 +195,7 @@ export default async function Page({
               ),
             }))}
             tournament={tournament}
+            rolesByProfileId={rolesByProfileId}
             emptyMessage="Für dieses Turnier hat sich kein Aufbauhelfer gemeldet."
           />
         </TabsContent>
@@ -193,6 +204,7 @@ export default async function Page({
           <RoleRoster
             members={trainers}
             tournament={tournament}
+            rolesByProfileId={rolesByProfileId}
             emptyMessage="Für dieses Turnier ist kein Trainer eingetragen."
             description="Trainer sehen alle Partien des Turniers. Eintragen und entfernen unter „Alle Profile“."
           />
@@ -225,6 +237,7 @@ export default async function Page({
                 key={profile.id}
                 profile={profile}
                 tournament={tournament}
+                roles={rolesByProfileId[profile.id] ?? []}
                 trainerId={trainerIdByProfileId.get(profile.id)}
               />
             ))}

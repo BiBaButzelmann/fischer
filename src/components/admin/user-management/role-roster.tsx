@@ -14,6 +14,7 @@ type RoleMember = {
 type Props = {
   members: RoleMember[];
   tournament: TournamentRef;
+  rolesByProfileId: Record<number, string[]>;
   emptyMessage: string;
   description?: string;
 };
@@ -21,6 +22,7 @@ type Props = {
 export function RoleRoster({
   members,
   tournament,
+  rolesByProfileId,
   emptyMessage,
   description,
 }: Props) {
@@ -39,6 +41,7 @@ export function RoleRoster({
           key={member.id}
           profile={member.profile}
           tournament={tournament}
+          roles={rolesByProfileId[member.profile.id] ?? []}
           meta={
             <>
               {member.meta ? <p>{member.meta}</p> : null}
