@@ -11,33 +11,34 @@ import { ProfileWithName } from "@/db/types/profile";
 import { isError } from "@/lib/actions";
 import { getFullName } from "@/lib/participant";
 import { ContactLinks, PersonRow, RowTag } from "./person-row";
+import { PersonDetails } from "./person-details";
 import { HistoryMenuItem, RowActions } from "./row-actions";
 import { HardDeleteUserDialog } from "./hard-delete-user-dialog";
+import { useTournamentRoles } from "./tournament-roles-context";
 import { TournamentRef } from "./types";
 
 type Props = {
   profile: ProfileWithName;
   tournament: TournamentRef;
-  trainerId?: number;
 };
 
-export function ProfileRow({ profile, tournament, trainerId }: Props) {
+export function ProfileRow({ profile, tournament }: Props) {
   const [deleteOpen, setDeleteOpen] = useState(false);
   const [isPending, startTransition] = useTransition();
+  const { trainer } = useTournamentRoles(profile.id);
   const displayName = getFullName(profile.firstName, profile.lastName);
-  const isTrainer = trainerId != null;
 
   const handleTrainerToggle = () => {
     startTransition(async () => {
-      const result = isTrainer
-        ? await deleteTrainer(tournament.id, trainerId)
+      const result = trainer
+        ? await deleteTrainer(tournament.id, trainer.id)
         : await createTrainer(tournament.id, profile.id);
       if (isError(result)) {
         toast.error(result.error);
         return;
       }
       toast.success(
-        isTrainer
+        trainer
           ? `${displayName} ist kein Trainer mehr.`
           : `${displayName} ist Trainer.`,
       );
@@ -46,15 +47,15 @@ export function ProfileRow({ profile, tournament, trainerId }: Props) {
 
   return (
     <PersonRow
-      name={displayName}
-      tags={isTrainer ? <RowTag>Trainer</RowTag> : null}
+      name={<PersonDetails name={displayName} profile={profile} />}
+      tags={trainer ? <RowTag>Trainer</RowTag> : null}
       meta={
         <ContactLinks email={profile.email} phoneNumber={profile.phoneNumber} />
       }
       actions={
         <RowActions displayName={displayName} profileId={profile.id}>
           <DropdownMenuItem onSelect={handleTrainerToggle} disabled={isPending}>
-            {isTrainer ? "Trainer-Rolle entfernen" : "Als Trainer eintragen"}
+            {trainer ? "Trainer-Rolle entfernen" : "Als Trainer eintragen"}
           </DropdownMenuItem>
           <HistoryMenuItem profileId={profile.id} />
           <DropdownMenuSeparator />

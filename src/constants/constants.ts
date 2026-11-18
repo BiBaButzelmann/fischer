@@ -1,4 +1,5 @@
 import { DayOfWeek } from "@/db/types/group";
+import { TournamentRole } from "@/db/types/role";
 
 export const matchDays: Record<DayOfWeek, string> = {
   tuesday: "Dienstag",
@@ -10,6 +11,15 @@ export const matchDaysShort: Record<DayOfWeek, string> = {
   tuesday: "Di",
   thursday: "Do",
   friday: "Fr",
+};
+
+export const tournamentRoleLabels: Record<TournamentRole, string> = {
+  participant: "Teilnehmer",
+  referee: "Schiedsrichter",
+  juror: "Juror",
+  matchEnteringHelper: "Eingabehelfer",
+  setupHelper: "Aufbauhelfer",
+  trainer: "Trainer",
 };
 
 export const DEFAULT_CLUB_KEY = "hsk";
@@ -40,4 +50,5 @@ export const CALENDAR_EXPORT_DURATIONS = {
   SETUP_HELPER: 30 * 60 * 1000,
 } as const;
 
-export const START_FEN = "rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1";
+export const START_FEN =
+  "rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1";
