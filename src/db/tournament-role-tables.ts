@@ -4,14 +4,15 @@ import { participant } from "./schema/participant";
 import { referee } from "./schema/referee";
 import { setupHelper } from "./schema/setupHelper";
 import { trainer } from "./schema/trainer";
+import { TournamentRole } from "./types/role";
 
-export const tournamentRoleTables = [
+export const tournamentRoleTables = {
   participant,
   referee,
   juror,
-  setupHelper,
   matchEnteringHelper,
+  setupHelper,
   trainer,
-] as const;
+} satisfies Record<TournamentRole, unknown>;
 
-export type TournamentRoleTable = (typeof tournamentRoleTables)[number];
+export type TournamentRoleTable = (typeof tournamentRoleTables)[TournamentRole];

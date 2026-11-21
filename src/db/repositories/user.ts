@@ -34,7 +34,7 @@ async function setTournamentRolesDeletedAt(
   tournamentId: number,
   deletedAt: Date | null,
 ) {
-  for (const table of tournamentRoleTables) {
+  for (const table of Object.values(tournamentRoleTables)) {
     await tx
       .update(table)
       .set({ deletedAt })

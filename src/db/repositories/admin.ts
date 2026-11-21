@@ -126,8 +126,8 @@ function deactivatedRolesQuery(
 export async function getDeactivatedProfilesByTournamentId(
   tournamentId: number,
 ) {
-  const [first, second, ...rest] = tournamentRoleTables.map((table) =>
-    deactivatedRolesQuery(table, tournamentId),
+  const [first, second, ...rest] = Object.values(tournamentRoleTables).map(
+    (table) => deactivatedRolesQuery(table, tournamentId),
   );
   const deactivatedRoles = await unionAll(first, second, ...rest);
 
