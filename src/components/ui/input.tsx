@@ -8,20 +8,21 @@ type InputProps = React.ComponentProps<"input"> & {
 };
 
 const Input = React.forwardRef<HTMLInputElement, InputProps>(
-  ({ icon: Icon, ...props }, ref) => {
+  ({ icon: Icon, className, ...props }, ref) => {
     if (Icon != null) {
-      <div className="relative">
-        {Icon != null ? (
+      return (
+        <div className="relative">
           <Icon
             size={16}
-            className="absolute left-3 top-1/2 transform -translate-y-1/2 text-muted-foreground"
+            aria-hidden
+            className="pointer-events-none absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground"
           />
-        ) : null}
-        <BaseInput ref={ref} {...props} />
-      </div>;
+          <BaseInput ref={ref} className={cn("pl-9", className)} {...props} />
+        </div>
+      );
     }
 
-    return <BaseInput {...props} ref={ref} />;
+    return <BaseInput ref={ref} className={className} {...props} />;
   },
 );
 Input.displayName = "Input";
