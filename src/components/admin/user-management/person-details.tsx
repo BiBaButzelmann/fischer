@@ -17,7 +17,7 @@ import {
   DrawerDescription,
   DrawerTitle,
 } from "@/components/ui/drawer";
-import { tournamentRoleLabels } from "@/constants/constants";
+import { matchDays, tournamentRoleLabels } from "@/constants/constants";
 import { ProfileWithName } from "@/db/types/profile";
 import { tournamentRoles } from "@/db/types/role";
 import { useIsMobile } from "@/hooks/use-mobile";
@@ -117,6 +117,7 @@ function PersonDetailsBody({
 }) {
   const slug = useTournamentSlug();
   const { participant } = roles;
+  const group = participant?.group?.group;
   const roleLabels = tournamentRoles
     .filter((role) => roles[role] != null)
     .map((role) => tournamentRoleLabels[role]);
@@ -129,6 +130,12 @@ function PersonDetailsBody({
         </p>
         {participant ? (
           <p className="flex flex-wrap gap-x-3 gap-y-0.5 text-sm text-muted-foreground">
+            {group ? (
+              <span className="whitespace-nowrap">
+                Gruppe {group.groupName}
+                {group.dayOfWeek ? ` · ${matchDays[group.dayOfWeek]}` : null}
+              </span>
+            ) : null}
             <span>{participant.chessClub}</span>
             {participant.nationality ? (
               <span>{participant.nationality}</span>

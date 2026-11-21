@@ -8,6 +8,21 @@ type Props = {
   children: ReactNode;
 };
 
+export function RosterList({
+  header,
+  children,
+}: {
+  header?: ReactNode;
+  children: ReactNode;
+}) {
+  return (
+    <div className="overflow-hidden rounded-lg border">
+      {header}
+      <ul className="divide-y">{children}</ul>
+    </div>
+  );
+}
+
 export function Roster({
   count,
   emptyMessage,
@@ -24,7 +39,7 @@ export function Roster({
               {description}
             </p>
           ) : null}
-          {toolbar}
+          {toolbar ? <div className="sm:ml-auto">{toolbar}</div> : null}
         </div>
       ) : null}
       {count === 0 ? (
@@ -32,9 +47,7 @@ export function Roster({
           {emptyMessage}
         </p>
       ) : (
-        <div className="overflow-hidden rounded-lg border">
-          <ul className="divide-y">{children}</ul>
-        </div>
+        children
       )}
     </section>
   );

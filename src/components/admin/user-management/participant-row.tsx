@@ -3,7 +3,7 @@
 import { useState } from "react";
 import { DropdownMenuItem } from "@/components/ui/dropdown-menu";
 import { DsbLinkDialog } from "@/components/admin/dsb-link-dialog";
-import { ParticipantWithProfile } from "@/db/types/participant";
+import { ParticipantWithProfileAndGroup } from "@/db/types/participant";
 import { getFullNameWithTitle } from "@/lib/participant";
 import { DEFAULT_CLUB_LABEL } from "@/constants/constants";
 import { HSK_VKZ } from "@/lib/dsb/constants";
@@ -12,7 +12,7 @@ import { RoleRow } from "./role-row";
 import { TournamentRef } from "./types";
 
 type Props = {
-  participant: ParticipantWithProfile;
+  participant: ParticipantWithProfileAndGroup;
   tournament: TournamentRef;
 };
 
