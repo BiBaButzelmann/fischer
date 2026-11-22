@@ -8,6 +8,7 @@ import {
 import { ProfileWithName } from "@/db/types/profile";
 import { getFullName } from "@/lib/participant";
 import { PersonRow } from "./person-row";
+import { PersonDetails } from "./person-details";
 import { HistoryMenuItem, RowActions } from "./row-actions";
 import { DeactivateUserDialog } from "./deactivate-user-dialog";
 import { TournamentRef } from "./types";
@@ -17,7 +18,6 @@ type Props = {
   tournament: TournamentRef;
   displayName?: string;
   meta?: ReactNode;
-  aside?: ReactNode;
   menuItems?: ReactNode;
   children?: ReactNode;
 };
@@ -27,7 +27,6 @@ export function RoleRow({
   tournament,
   displayName = getFullName(profile.firstName, profile.lastName),
   meta,
-  aside,
   menuItems,
   children,
 }: Props) {
@@ -35,9 +34,8 @@ export function RoleRow({
 
   return (
     <PersonRow
-      name={displayName}
+      name={<PersonDetails name={displayName} profile={profile} />}
       meta={meta}
-      aside={aside}
       actions={
         <RowActions displayName={displayName} profileId={profile.id}>
           {menuItems}

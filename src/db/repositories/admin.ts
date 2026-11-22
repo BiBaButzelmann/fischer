@@ -43,6 +43,19 @@ export async function getAllParticipantsByTournamentId(tournamentId: number) {
       ),
     with: {
       profile: true,
+      group: {
+        with: {
+          group: {
+            columns: {
+              id: true,
+              groupName: true,
+              groupNumber: true,
+              tier: true,
+              dayOfWeek: true,
+            },
+          },
+        },
+      },
     },
     orderBy: (participant, { asc }) => [asc(participant.id)],
   });
@@ -126,8 +139,8 @@ function deactivatedRolesQuery(
 export async function getDeactivatedProfilesByTournamentId(
   tournamentId: number,
 ) {
-  const [first, second, ...rest] = tournamentRoleTables.map((table) =>
-    deactivatedRolesQuery(table, tournamentId),
+  const [first, second, ...rest] = Object.values(tournamentRoleTables).map(
+    (table) => deactivatedRolesQuery(table, tournamentId),
   );
   const deactivatedRoles = await unionAll(first, second, ...rest);
 

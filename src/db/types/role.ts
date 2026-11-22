@@ -5,14 +5,18 @@ import { Referee } from "./referee";
 import { SetupHelper } from "./setup-helper";
 import { Trainer } from "./trainer";
 
-export type Role =
-  | "admin"
-  | "participant"
-  | "referee"
-  | "juror"
-  | "trainer"
-  | "matchEnteringHelper"
-  | "setupHelper";
+export const tournamentRoles = [
+  "participant",
+  "referee",
+  "juror",
+  "matchEnteringHelper",
+  "setupHelper",
+  "trainer",
+] as const;
+
+export type TournamentRole = (typeof tournamentRoles)[number];
+
+export type Role = TournamentRole | "admin";
 
 export type RolesData = {
   participant: Participant | undefined;
