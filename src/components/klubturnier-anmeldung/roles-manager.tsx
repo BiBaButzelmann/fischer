@@ -13,7 +13,7 @@ import { hasAnyRole, RolesData } from "@/db/types/role";
 import { Tournament } from "@/db/types/tournament";
 import { useState, useTransition } from "react";
 import { z } from "zod";
-import { participantFormSchema } from "@/schema/participant";
+import type { ParticipantFormValues } from "@/schema/participant";
 import { refereeFormSchema } from "@/schema/referee";
 import { matchEnteringHelperFormSchema } from "@/schema/matchEnteringHelper";
 import { setupHelperFormSchema } from "@/schema/setupHelper";
@@ -37,17 +37,9 @@ import { createReferee, deleteReferee } from "@/actions/referee";
 import { Participant } from "@/db/types/participant";
 import type { PromotionEligibility } from "@/services/promotion";
 import { isError } from "@/lib/actions";
+import type { DsbPlayerCandidate } from "@/lib/dsb/types";
+import { candidateToFormValues } from "@/lib/participant-form";
 import { toast } from "sonner";
-
-export type ParticipantEloPrefill = {
-  dsbPersonId?: string;
-  title?: string | null;
-  gender?: "m" | "f" | null;
-  dwzRating?: number | null;
-  fideRating?: number | null;
-  fideId?: string | null;
-  birthYear?: number | null;
-};
 
 type Props = {
   userId: string;
@@ -56,7 +48,7 @@ type Props = {
   profile: Profile;
   promotionEligibility: PromotionEligibility | null;
   previousParticipant: Participant | null;
-  prefillEloData: ParticipantEloPrefill | null;
+  previousDsbCandidate: DsbPlayerCandidate | null;
 };
 
 export function RolesManager({
@@ -66,21 +58,19 @@ export function RolesManager({
   profile,
   promotionEligibility,
   previousParticipant,
-  prefillEloData,
+  previousDsbCandidate,
 }: Props) {
   const participantInitialValues = buildParticipantInitialValues(
     rolesData.participant,
     previousParticipant,
-    prefillEloData,
+    previousDsbCandidate,
   );
   const canDeleteParticipant = rolesData.participant != null;
   const [isPending, startTransition] = useTransition();
   const router = useRouter();
   const [accordionValue, setAccordionValue] = useState("");
 
-  const handleParticipateFormSubmit = async (
-    data: z.infer<typeof participantFormSchema>,
-  ) => {
+  const handleParticipateFormSubmit = async (data: ParticipantFormValues) => {
     const result = await createParticipant(tournament.id, data);
     if (isError(result)) {
       toast.error("Deine Anmeldung konnte nicht gespeichert werden.");
@@ -292,7 +282,7 @@ export function RolesManager({
 
 function chessClubTypeForLabel(
   chessClub: string,
-): z.infer<typeof participantFormSchema>["chessClubType"] {
+): ParticipantFormValues["chessClubType"] {
   if (chessClub === DEFAULT_CLUB_LABEL) {
     return DEFAULT_CLUB_KEY;
   }
@@ -305,13 +295,13 @@ function chessClubTypeForLabel(
 function buildParticipantInitialValues(
   current: RolesData["participant"],
   previous: Participant | null,
-  prefill: ParticipantEloPrefill | null,
-): z.infer<typeof participantFormSchema> | undefined {
+  candidate: DsbPlayerCandidate | null,
+): ParticipantFormValues | undefined {
   if (current) {
     return {
       chessClubType: chessClubTypeForLabel(current.chessClub),
       chessClub: current.chessClub,
-      title: current.title ?? "noTitle",
+      title: current.title ?? undefined,
       gender: current.gender ?? undefined,
       nationality: current.nationality ?? undefined,
       dwzRating: current.dwzRating ?? undefined,
@@ -327,26 +317,26 @@ function buildParticipantInitialValues(
   }
 
   if (previous) {
-    const fideId = prefill?.fideId ?? previous.fideId ?? undefined;
-    return {
+    const fromPrevious: ParticipantFormValues = {
       chessClubType: chessClubTypeForLabel(previous.chessClub),
       chessClub: previous.chessClub,
-      title: prefill?.title ?? previous.title ?? "noTitle",
-      gender: prefill?.gender ?? previous.gender ?? undefined,
+      title: previous.title ?? undefined,
+      gender: previous.gender ?? undefined,
       nationality: previous.nationality ?? undefined,
-      dwzRating: prefill?.dwzRating ?? undefined,
-      fideRating: prefill?.fideRating && fideId ? prefill.fideRating : undefined,
-      fideId,
-      birthYear: prefill?.birthYear ?? previous.birthYear ?? undefined,
+      fideId: previous.fideId ?? undefined,
+      birthYear: previous.birthYear ?? undefined,
       birthDate: previous.birthDate ?? undefined,
       preferredMatchDay: previous.preferredMatchDay,
       secondaryMatchDays: previous.secondaryMatchDays,
-      dsbPersonId: prefill?.dsbPersonId ?? previous.dsbPersonId ?? undefined,
+      dsbPersonId: previous.dsbPersonId ?? undefined,
       zpsClub: previous.zpsClubId ?? undefined,
       zpsPlayer: previous.zpsPlayerId ?? undefined,
       notAvailableDays: [],
       exercisePromotionRight: false,
     };
+    return candidate != null
+      ? { ...fromPrevious, ...candidateToFormValues(candidate, fromPrevious) }
+      : fromPrevious;
   }
 
   return undefined;

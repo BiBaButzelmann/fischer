@@ -1,6 +1,7 @@
 import { CLUBLESS_KEY, DEFAULT_CLUB_KEY } from "@/constants/constants";
 import { availableMatchDays } from "@/db/schema/columns.helpers";
 import { hasSecondaryMatchDayConflict } from "@/lib/match-days";
+import { TITLES } from "@/lib/title";
 import {
   getCurrentLocalDateTime,
   isValidDateOnly,
@@ -10,28 +11,25 @@ import z from "zod";
 
 const dateOnlySchema = z.string().refine(isValidDateOnly, "Ungültiges Datum");
 
+const ratingSchema = (message: string) =>
+  z.number().int().positive(message).optional();
+
 export const participantFormSchema = z
   .object({
     chessClubType: z.enum([DEFAULT_CLUB_KEY, "other", CLUBLESS_KEY], {
       errorMap: () => ({ message: "Schachverein ist erforderlich" }),
     }),
     chessClub: z.string().optional(),
-    title: z.string().optional(),
+    title: z.enum(TITLES).optional(),
     gender: z.enum(["m", "f"]).optional(),
-    dwzRating: z.coerce
-      .number()
-      .min(0, "DWZ-Punktzahl muss mindestens 0 sein")
-      .optional(),
-    fideRating: z.coerce
-      .number()
-      .min(0, "FIDE-Punktzahl muss mindestens 0 sein")
-      .optional(),
+    dwzRating: ratingSchema("DWZ muss größer als 0 sein"),
+    fideRating: ratingSchema("Elo muss größer als 0 sein"),
     fideId: z.string().optional(),
     nationality: z
       .string()
       .length(3, "3-Buchstaben-Ländercode benötigt")
       .toUpperCase()
-      .optional(), // nur vorhanden, wenn Elo eingegeben
+      .optional(),
     birthYear: z.coerce
       .number()
       .min(1900, "Geburtsjahr muss mindestens 1900 sein")
@@ -77,49 +75,6 @@ export const participantFormSchema = z
   )
   .refine(
     (data) => {
-      if (data.fideRating != null && data.fideRating > 0) {
-        return !!data.fideId && data.fideId.trim().length > 0;
-      }
-      return true;
-    },
-    {
-      message: "FIDE-ID ist erforderlich, wenn Elo angegeben ist",
-      path: ["fideId"],
-    },
-  )
-  .refine(
-    (data) => {
-      if (data.fideRating != null && data.fideRating > 0) {
-        return !!data.nationality && data.nationality.trim().length === 3;
-      }
-      return true;
-    },
-    {
-      message: "Nationalität ist erforderlich, wenn Elo angegeben ist",
-      path: ["nationality"],
-    },
-  )
-  .refine(
-    (data) => {
-      if (data.fideRating != null && data.fideRating > 0) {
-        if (data.birthDate != null) {
-          return true;
-        }
-        return (
-          !!data.birthYear &&
-          data.birthYear >= 1900 &&
-          data.birthYear <= getCurrentLocalDateTime().year
-        );
-      }
-      return true;
-    },
-    {
-      message: "Geburtsjahr ist erforderlich, wenn Elo angegeben ist",
-      path: ["birthYear"],
-    },
-  )
-  .refine(
-    (data) => {
       if (data.chessClubType === CLUBLESS_KEY) {
         return data.birthDate != null;
       }
@@ -154,3 +109,5 @@ export const participantFormSchema = z
       path: ["secondaryMatchDays"],
     },
   );
+
+export type ParticipantFormValues = z.infer<typeof participantFormSchema>;

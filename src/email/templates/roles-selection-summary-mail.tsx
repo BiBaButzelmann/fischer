@@ -19,8 +19,8 @@ export default function RoleSelectionSummaryMail({ name, roles }: Props) {
         <strong>Spieler</strong>
         <ul style={{ paddingLeft: 20, listStyleType: "circle" }}>
           <li>Schachverein: {p.chessClub}</li>
-          {p.dwzRating && <li>DWZ: {p.dwzRating}</li>}
-          {p.fideRating && <li>Elo: {p.fideRating}</li>}
+          {p.dwzRating != null && <li>DWZ: {p.dwzRating}</li>}
+          {p.fideRating != null && <li>Elo: {p.fideRating}</li>}
           {p.fideId && <li>FIDE‑ID: {p.fideId}</li>}
           <li>
             Bevorzugter Spieltag: {translateMatchDay(p.preferredMatchDay)}

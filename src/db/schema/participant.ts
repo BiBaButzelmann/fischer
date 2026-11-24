@@ -10,6 +10,7 @@ import {
   primaryKey,
 } from "drizzle-orm/pg-core";
 import { profile } from "./profile";
+import type { Title } from "../../lib/title";
 import { matchDay, timestamps, gender } from "./columns.helpers";
 import { group } from "./group";
 
@@ -22,7 +23,7 @@ export const participant = pgTable(
     tournamentId: integer("tournament_id").notNull(),
 
     chessClub: text("chess_club").notNull(),
-    title: text("title"),
+    title: text("title").$type<Title>(),
     nationality: text("nationality"),
     gender: gender("gender").default("m"),
     dwzRating: integer("dwz_rating"),
@@ -53,6 +54,8 @@ export const participant = pgTable(
       "participant_secondary_match_days_no_preferred",
       sql`NOT (${table.preferredMatchDay} = ANY(${table.secondaryMatchDays}))`,
     ),
+    check("participant_dwz_rating_positive", sql`${table.dwzRating} > 0`),
+    check("participant_fide_rating_positive", sql`${table.fideRating} > 0`),
   ],
 );
 

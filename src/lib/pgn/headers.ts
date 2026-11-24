@@ -81,7 +81,7 @@ export function buildPgnHeaders(
 }
 
 function toElo(fideRating: number | null): string | undefined {
-  return fideRating ? fideRating.toString() : undefined;
+  return fideRating?.toString();
 }
 
 function toFideId(fideId: string | null): string | undefined {

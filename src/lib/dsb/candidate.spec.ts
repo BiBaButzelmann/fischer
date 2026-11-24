@@ -1,6 +1,5 @@
 import { describe, it, expect } from "vitest";
 import {
-  mapDsbGender,
   mapDsbPersonToCandidate,
   selectPrimaryMembership,
   transliterateGermanUmlauts,
@@ -26,7 +25,6 @@ const inactiveMembership: DsbMembership = {
 };
 
 const person: DsbPerson = {
-  uuid: "e921e96e-4ff8-11ee-a699-0050561f324c",
   nuLigaPersonId: "NU4211295",
   firstname: "Andre",
   lastname: "Martin",
@@ -34,9 +32,10 @@ const person: DsbPerson = {
   gender: "MALE",
   fideId: 20660391,
   rating: 1764,
-  index: 10,
   memberships: [activeMembership],
-  weekOfLastTournamentEvaluation: "202418",
+  fideRatingStandard: 1802,
+  fideCountry: "GER",
+  fideTitle: "FM",
 };
 
 describe("selectPrimaryMembership", () => {
@@ -71,17 +70,6 @@ describe("transliterateGermanUmlauts", () => {
   });
 });
 
-describe("mapDsbGender", () => {
-  it("maps MALE and FEMALE to the domain gender", () => {
-    expect(mapDsbGender("MALE")).toBe("m");
-    expect(mapDsbGender("FEMALE")).toBe("f");
-  });
-
-  it("maps a missing gender to null", () => {
-    expect(mapDsbGender(null)).toBeNull();
-  });
-});
-
 describe("mapDsbPersonToCandidate", () => {
   it("maps an API person to a UI candidate", () => {
     expect(mapDsbPersonToCandidate(person)).toEqual({
@@ -91,20 +79,71 @@ describe("mapDsbPersonToCandidate", () => {
       birthYear: 1962,
       dwzRating: 1764,
       fideId: "20660391",
+      fideRating: 1802,
+      nationality: "GER",
+      title: "FM",
       gender: "m",
       clubName: "Glauchauer SC 1873",
     });
   });
 
-  it("keeps a missing rating and fide id as null", () => {
+  it("maps FEMALE to the domain gender", () => {
+    expect(
+      mapDsbPersonToCandidate({ ...person, gender: "FEMALE" }).gender,
+    ).toBe("f");
+  });
+
+  it("keeps missing ratings, fide data and club as null", () => {
     const candidate = mapDsbPersonToCandidate({
       ...person,
-      fideId: null,
-      rating: null,
+      fideId: undefined,
+      rating: undefined,
+      fideRatingStandard: undefined,
+      fideCountry: undefined,
+      fideTitle: undefined,
       memberships: [],
     });
     expect(candidate.fideId).toBeNull();
     expect(candidate.dwzRating).toBeNull();
+    expect(candidate.fideRating).toBeNull();
+    expect(candidate.nationality).toBeNull();
+    expect(candidate.title).toBeNull();
     expect(candidate.clubName).toBeNull();
+  });
+
+  it("prefers the open title over the women's title", () => {
+    const candidate = mapDsbPersonToCandidate({
+      ...person,
+      fideTitle: "GM",
+      fideWomenTitle: "WGM",
+    });
+    expect(candidate.title).toBe("GM");
+  });
+
+  it("falls back to the women's title", () => {
+    const candidate = mapDsbPersonToCandidate({
+      ...person,
+      fideTitle: undefined,
+      fideWomenTitle: "WIM",
+    });
+    expect(candidate.title).toBe("WIM");
+  });
+
+  it("ignores titles the app does not support", () => {
+    const candidate = mapDsbPersonToCandidate({
+      ...person,
+      fideTitle: "AGM",
+      fideWomenTitle: undefined,
+    });
+    expect(candidate.title).toBeNull();
+  });
+
+  it("skips an unsupported open title in favour of a supported women's title", () => {
+    const candidate = mapDsbPersonToCandidate({
+      ...person,
+      fideTitle: "AGM",
+      fideWomenTitle: "WIM",
+    });
+    expect(candidate.title).toBe("WIM");
   });
 });

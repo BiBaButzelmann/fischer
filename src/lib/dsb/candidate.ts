@@ -1,9 +1,15 @@
+import { isTitle, type Title } from "@/lib/title";
 import type {
   DsbGender,
   DsbMembership,
   DsbPerson,
   DsbPlayerCandidate,
 } from "./types";
+
+const GENDERS: Record<DsbGender, DsbPlayerCandidate["gender"]> = {
+  MALE: "m",
+  FEMALE: "f",
+};
 
 export function transliterateGermanUmlauts(value: string): string {
   return value
@@ -25,16 +31,6 @@ export function selectPrimaryMembership(
   return activeMembership ?? memberships[0] ?? null;
 }
 
-export function mapDsbGender(gender: DsbGender | null): "m" | "f" | null {
-  if (gender === "MALE") {
-    return "m";
-  }
-  if (gender === "FEMALE") {
-    return "f";
-  }
-  return null;
-}
-
 export function mapDsbPersonToCandidate(person: DsbPerson): DsbPlayerCandidate {
   const primaryMembership = selectPrimaryMembership(person.memberships);
   return {
@@ -42,9 +38,16 @@ export function mapDsbPersonToCandidate(person: DsbPerson): DsbPlayerCandidate {
     firstName: person.firstname,
     lastName: person.lastname,
     birthYear: person.birthyear,
-    dwzRating: person.rating,
+    dwzRating: person.rating ?? null,
     fideId: person.fideId != null ? String(person.fideId) : null,
-    gender: mapDsbGender(person.gender),
+    fideRating: person.fideRatingStandard ?? null,
+    nationality: person.fideCountry ?? null,
+    title: selectFideTitle(person),
+    gender: GENDERS[person.gender],
     clubName: primaryMembership?.clubName ?? null,
   };
+}
+
+function selectFideTitle(person: DsbPerson): Title | null {
+  return [person.fideTitle, person.fideWomenTitle].find(isTitle) ?? null;
 }

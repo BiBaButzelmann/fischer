@@ -5,7 +5,6 @@ import { useCallback, useTransition } from "react";
 import { useForm } from "react-hook-form";
 import { TZDate } from "react-day-picker";
 import { CalendarIcon } from "lucide-react";
-import z from "zod";
 import {
   Form,
   FormControl,
@@ -26,7 +25,10 @@ import {
 import { Button } from "../../ui/button";
 import { Calendar } from "../../ui/calendar";
 import { Popover, PopoverContent, PopoverTrigger } from "../../ui/popover";
-import { participantFormSchema } from "@/schema/participant";
+import {
+  participantFormSchema,
+  type ParticipantFormValues,
+} from "@/schema/participant";
 import { removePreferredFromSecondary } from "@/lib/match-days";
 import { DayOfWeek } from "@/db/types/group";
 import { MatchDaysCheckboxes } from "./matchday-selection";
@@ -41,11 +43,12 @@ import {
   utcDateToDateOnly,
 } from "@/lib/date";
 import { Tournament } from "@/db/types/tournament";
-import { getFideRatingById } from "@/actions/participant";
 import { DwzPlayerSelect } from "./dwz-player-select";
 import { RoleFormActions } from "./role-form-actions";
 import { HSK_VKZ } from "@/lib/dsb/constants";
 import type { DsbPlayerCandidate } from "@/lib/dsb/types";
+import { candidateToFormValues } from "@/lib/participant-form";
+import { isTitle, TITLES } from "@/lib/title";
 import { toast } from "sonner";
 import { Profile } from "@/db/types/profile";
 import {
@@ -58,11 +61,13 @@ import { Switch } from "@/components/ui/switch";
 import type { PromotionEligibility } from "@/services/promotion";
 import { track } from "@vercel/analytics";
 
+const NO_TITLE_OPTION = "noTitle";
+
 type Props = {
-  initialValues?: z.infer<typeof participantFormSchema>;
+  initialValues?: ParticipantFormValues;
   canDelete: boolean;
   promotionEligibility: PromotionEligibility | null;
-  onSubmit: (data: z.infer<typeof participantFormSchema>) => Promise<void>;
+  onSubmit: (data: ParticipantFormValues) => Promise<void>;
   onDelete: () => Promise<void>;
   tournament: Tournament;
   profile: Profile;
@@ -78,7 +83,7 @@ export function ParticipateForm({
   profile,
 }: Props) {
   const [isPending, startTransition] = useTransition();
-  const form = useForm<z.infer<typeof participantFormSchema>>({
+  const form = useForm<ParticipantFormValues>({
     resolver: zodResolver(participantFormSchema),
     defaultValues: {
       chessClubType: initialValues?.chessClubType,
@@ -102,6 +107,7 @@ export function ParticipateForm({
   });
 
   const fideRating = form.watch("fideRating");
+  const hasFideId = !!form.watch("fideId")?.trim();
   const chessClubType = form.watch("chessClubType");
   const preferredMatchDay = form.watch("preferredMatchDay");
 
@@ -117,26 +123,18 @@ export function ParticipateForm({
 
   const handleDsbCandidateSelect = useCallback(
     (candidate: DsbPlayerCandidate) => {
-      startTransition(async () => {
-        form.setValue("dsbPersonId", candidate.nuLigaPersonId);
-        form.setValue("dwzRating", candidate.dwzRating ?? undefined);
-        form.setValue("birthYear", candidate.birthYear ?? undefined);
-        form.setValue("gender", candidate.gender ?? undefined);
-        form.setValue("fideId", candidate.fideId ?? undefined);
-
-        let fideRating: number | undefined;
-        if (candidate.fideId != null) {
-          try {
-            fideRating =
-              (await getFideRatingById(candidate.fideId)) ?? undefined;
-          } catch {}
-        }
-        form.setValue("fideRating", fideRating);
-
-        toast.success("Deine Daten wurden aus der DSB-Datenbank übernommen.");
-      });
+      const values = candidateToFormValues(candidate, form.getValues());
+      form.setValue("dsbPersonId", values.dsbPersonId);
+      form.setValue("dwzRating", values.dwzRating);
+      form.setValue("fideRating", values.fideRating);
+      form.setValue("fideId", values.fideId);
+      form.setValue("title", values.title);
+      form.setValue("gender", values.gender);
+      form.setValue("nationality", values.nationality);
+      form.setValue("birthYear", values.birthYear);
+      toast.success("Deine Daten wurden aus der DSB-Datenbank übernommen.");
     },
-    [form, startTransition],
+    [form],
   );
 
   const handlePreferredMatchDayChange = (value: DayOfWeek) => {
@@ -163,7 +161,7 @@ export function ParticipateForm({
     }
   };
 
-  const handleSubmit = (data: z.infer<typeof participantFormSchema>) => {
+  const handleSubmit = (data: ParticipantFormValues) => {
     track("participant_form_submit", { tournamentId: tournament.id });
     startTransition(async () => {
       await onSubmit(data);
@@ -374,23 +372,23 @@ export function ParticipateForm({
                     <FormLabel>Titel</FormLabel>
                     <FormControl>
                       <Select
-                        defaultValue="noTitle"
-                        value={field.value}
-                        onValueChange={field.onChange}
+                        value={field.value ?? NO_TITLE_OPTION}
+                        onValueChange={(value) =>
+                          field.onChange(isTitle(value) ? value : undefined)
+                        }
                       >
                         <SelectTrigger>
                           <SelectValue placeholder="Titel" />
                         </SelectTrigger>
                         <SelectContent>
-                          <SelectItem value="noTitle">Kein Titel</SelectItem>
-                          <SelectItem value="GM">GM </SelectItem>
-                          <SelectItem value="IM">IM </SelectItem>
-                          <SelectItem value="FM">FM </SelectItem>
-                          <SelectItem value="CM">CM </SelectItem>
-                          <SelectItem value="WGM">WGM </SelectItem>
-                          <SelectItem value="WIM">WIM </SelectItem>
-                          <SelectItem value="WFM">WFM </SelectItem>
-                          <SelectItem value="WCM">WCM </SelectItem>
+                          <SelectItem value={NO_TITLE_OPTION}>
+                            Kein Titel
+                          </SelectItem>
+                          {TITLES.map((title) => (
+                            <SelectItem key={title} value={title}>
+                              {title}
+                            </SelectItem>
+                          ))}
                         </SelectContent>
                       </Select>
                     </FormControl>
@@ -414,6 +412,9 @@ export function ParticipateForm({
                         step="1"
                         {...field}
                         value={field.value ?? ""}
+                        onChange={(event) =>
+                          field.onChange(parseRatingInput(event.target.value))
+                        }
                       />
                     </FormControl>
                     <FormMessage />
@@ -425,9 +426,7 @@ export function ParticipateForm({
                 name="fideRating"
                 render={({ field }) => (
                   <FormItem className="flex-1">
-                    <FormLabel required={fideRating ? true : false}>
-                      Elo
-                    </FormLabel>
+                    <FormLabel>Elo</FormLabel>
                     <FormControl>
                       <Input
                         type="number"
@@ -438,12 +437,15 @@ export function ParticipateForm({
                         step="1"
                         {...field}
                         value={field.value ?? ""}
+                        onChange={(event) =>
+                          field.onChange(parseRatingInput(event.target.value))
+                        }
                       />
                     </FormControl>
                     <FormMessage />
                     <FormDescription>
                       Wer in den A-, B- und C-Gruppen spielen möchte, muss seine
-                      Elo angeben.
+                      FIDE-ID angeben.
                     </FormDescription>
                   </FormItem>
                 )}
@@ -458,14 +460,14 @@ export function ParticipateForm({
           </div>
         ) : null}
 
-        {fideRating ? (
+        {chessClubType != null ? (
           <div className="flex gap-4">
             <FormField
               control={form.control}
               name="fideId"
               render={({ field }) => (
                 <FormItem>
-                  <FormLabel required>FIDE ID</FormLabel>
+                  <FormLabel>FIDE ID</FormLabel>
                   <FormControl>
                     <Input
                       id="fideId"
@@ -488,45 +490,49 @@ export function ParticipateForm({
                 </FormItem>
               )}
             />
-            <FormField
-              control={form.control}
-              name="nationality"
-              render={({ field }) => (
-                <FormItem className="flex-grow">
-                  <FormLabel required>Nationalität</FormLabel>
-                  <FormControl>
-                    <CountryDropdown
-                      defaultValue={field.value || undefined}
-                      onChange={(c) => field.onChange(c.ioc)}
-                      placeholder="Land wählen"
-                    />
-                  </FormControl>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
-            <FormField
-              control={form.control}
-              name="birthYear"
-              render={({ field }) => (
-                <FormItem className="w-32">
-                  <FormLabel required>Geburtsjahr</FormLabel>
-                  <FormControl>
-                    <Input
-                      type="number"
-                      id="birthYear"
-                      placeholder="z.B. 1990"
-                      min="1900"
-                      max={new Date().getFullYear()}
-                      step="1"
-                      {...field}
-                      value={field.value ?? ""}
-                    />
-                  </FormControl>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
+            {fideRating != null || hasFideId ? (
+              <>
+                <FormField
+                  control={form.control}
+                  name="nationality"
+                  render={({ field }) => (
+                    <FormItem className="flex-grow">
+                      <FormLabel>Nationalität</FormLabel>
+                      <FormControl>
+                        <CountryDropdown
+                          defaultValue={field.value || undefined}
+                          onChange={(c) => field.onChange(c.ioc)}
+                          placeholder="Land wählen"
+                        />
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+                <FormField
+                  control={form.control}
+                  name="birthYear"
+                  render={({ field }) => (
+                    <FormItem className="w-32">
+                      <FormLabel>Geburtsjahr</FormLabel>
+                      <FormControl>
+                        <Input
+                          type="number"
+                          id="birthYear"
+                          placeholder="z.B. 1990"
+                          min="1900"
+                          max={new Date().getFullYear()}
+                          step="1"
+                          {...field}
+                          value={field.value ?? ""}
+                        />
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+              </>
+            ) : null}
           </div>
         ) : null}
         <FormField
@@ -681,4 +687,8 @@ function isDateDisabled(date: Date, min: string, max: string) {
   }
 
   return ![2, 4, 5].includes(dt.weekday);
+}
+
+function parseRatingInput(value: string): number | undefined {
+  return value === "" ? undefined : Number(value);
 }

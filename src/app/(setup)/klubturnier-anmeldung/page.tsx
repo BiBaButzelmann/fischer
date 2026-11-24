@@ -1,13 +1,10 @@
 import { authWithRedirect } from "@/auth/utils";
-import {
-  ParticipantEloPrefill,
-  RolesManager,
-} from "@/components/klubturnier-anmeldung/roles-manager";
+import { RolesManager } from "@/components/klubturnier-anmeldung/roles-manager";
 import { getDsbPersonById, searchDsbPersons } from "@/lib/dsb/wertungsportal";
 import { mapDsbPersonToCandidate } from "@/lib/dsb/candidate";
+import type { DsbPlayerCandidate } from "@/lib/dsb/types";
 import { HSK_VKZ } from "@/lib/dsb/constants";
 import { DEFAULT_CLUB_LABEL } from "@/constants/constants";
-import { getFideStandardRating } from "@/lib/fide/profile";
 import { Participant } from "@/db/types/participant";
 import { Profile } from "@/db/types/profile";
 import { getProfileByUserId } from "@/db/repositories/profile";
@@ -29,42 +26,18 @@ import {
 } from "@/components/ui/collapsible";
 import { ChevronDownIcon } from "lucide-react";
 
-async function getPrefillEloData(
+async function getPreviousDsbCandidate(
   profile: Profile,
   previousParticipant: Participant,
-): Promise<ParticipantEloPrefill | null> {
-  try {
-    const person = previousParticipant.dsbPersonId
-      ? await getDsbPersonById(previousParticipant.dsbPersonId)
-      : await findUniqueDsbPersonByName(
-          profile.firstName,
-          profile.lastName,
-          previousParticipant.chessClub === DEFAULT_CLUB_LABEL ? HSK_VKZ : null,
-        );
-
-    if (person) {
-      const candidate = mapDsbPersonToCandidate(person);
-      const fideRating = candidate.fideId
-        ? await getFideStandardRating(candidate.fideId)
-        : null;
-      return {
-        dsbPersonId: candidate.nuLigaPersonId,
-        gender: candidate.gender,
-        dwzRating: candidate.dwzRating,
-        fideId: candidate.fideId,
-        fideRating,
-        birthYear: candidate.birthYear,
-      };
-    }
-
-    if (previousParticipant.fideId) {
-      const fideRating = await getFideStandardRating(previousParticipant.fideId);
-      if (fideRating != null) {
-        return { fideRating };
-      }
-    }
-  } catch {}
-  return null;
+): Promise<DsbPlayerCandidate | null> {
+  const person = previousParticipant.dsbPersonId
+    ? await getDsbPersonById(previousParticipant.dsbPersonId)
+    : await findUniqueDsbPersonByName(
+        profile.firstName,
+        profile.lastName,
+        previousParticipant.chessClub === DEFAULT_CLUB_LABEL ? HSK_VKZ : null,
+      );
+  return person != null ? mapDsbPersonToCandidate(person) : null;
 }
 
 async function findUniqueDsbPersonByName(
@@ -120,9 +93,9 @@ export default async function RolesPage() {
       )
     : null;
 
-  const prefillEloData =
+  const previousDsbCandidate =
     initialValues.participant == null && previousParticipant != null
-      ? await getPrefillEloData(profile, previousParticipant)
+      ? await getPreviousDsbCandidate(profile, previousParticipant)
       : null;
 
   return (
@@ -144,7 +117,7 @@ export default async function RolesPage() {
         profile={profile}
         promotionEligibility={promotionEligibility}
         previousParticipant={previousParticipant ?? null}
-        prefillEloData={prefillEloData}
+        previousDsbCandidate={previousDsbCandidate}
       />
       <PastTournaments tournaments={viewableTournaments} />
     </div>

@@ -1,3 +1,5 @@
+import type { Title } from "@/lib/title";
+
 export type DsbMembership = {
   vkz: string;
   memberNo: string;
@@ -9,27 +11,32 @@ export type DsbMembership = {
 
 export type DsbGender = "MALE" | "FEMALE";
 
+// The Wertungsportal omits absent values instead of sending null.
 export type DsbPerson = {
-  uuid: string;
   nuLigaPersonId: string;
   firstname: string;
   lastname: string;
-  birthyear: number | null;
-  gender: DsbGender | null;
-  fideId: number | null;
-  rating: number | null;
-  index: number | null;
+  birthyear: number;
+  gender: DsbGender;
+  fideId?: number;
+  rating?: number;
   memberships: DsbMembership[];
-  weekOfLastTournamentEvaluation: string | null;
+  fideRatingStandard?: number;
+  fideCountry?: string;
+  fideTitle?: string;
+  fideWomenTitle?: string;
 };
 
 export type DsbPlayerCandidate = {
   nuLigaPersonId: string;
   firstName: string;
   lastName: string;
-  birthYear: number | null;
+  birthYear: number;
   dwzRating: number | null;
   fideId: string | null;
-  gender: "m" | "f" | null;
+  fideRating: number | null;
+  nationality: string | null;
+  title: Title | null;
+  gender: "m" | "f";
   clubName: string | null;
 };

@@ -91,3 +91,27 @@ describe("participantFormSchema notAvailableDays", () => {
     }
   });
 });
+
+describe("participantFormSchema ratings and FIDE data", () => {
+  function errorPaths(input: object) {
+    const result = participantFormSchema.safeParse({ ...validBase, ...input });
+    return result.success
+      ? []
+      : result.error.issues.map((issue) => issue.path.join("."));
+  }
+
+  test("rejects 0 as a rating", () => {
+    expect(errorPaths({ dwzRating: 0, fideRating: 0 })).toEqual([
+      "dwzRating",
+      "fideRating",
+    ]);
+  });
+
+  test("accepts an Elo without further FIDE data", () => {
+    expect(errorPaths({ fideRating: 1800 })).toEqual([]);
+  });
+
+  test("accepts a FIDE ID without Elo and without further FIDE data", () => {
+    expect(errorPaths({ fideId: "4467248" })).toEqual([]);
+  });
+});

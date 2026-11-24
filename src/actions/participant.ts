@@ -1,10 +1,9 @@
 "use server";
 
-import z from "zod";
 import { db } from "@/db/client";
 import invariant from "tiny-invariant";
 import { participant } from "@/db/schema/participant";
-import { participantFormSchema } from "@/schema/participant";
+import type { ParticipantFormValues } from "@/schema/participant";
 import { authWithRedirect } from "@/auth/utils";
 import { getTournamentById } from "@/db/repositories/tournament";
 import { getProfileByUserId } from "@/db/repositories/profile";
@@ -26,14 +25,20 @@ import { revalidatePath } from "next/cache";
 import { action, ActionError } from "@/lib/actions";
 import { hasSecondaryMatchDayConflict } from "@/lib/match-days";
 import { parseDateOnly } from "@/lib/date";
-import { getFideProfile, getFideStandardRating } from "@/lib/fide/profile";
 import { getDsbPersonById, searchDsbPersons } from "@/lib/dsb/wertungsportal";
 import { mapDsbPersonToCandidate } from "@/lib/dsb/candidate";
+import {
+  mergeDsbRatings,
+  pickRatings,
+  type Ratings,
+  type RatingSync,
+} from "@/lib/dsb/ratings";
 import type { DsbPlayerCandidate } from "@/lib/dsb/types";
+import type { Participant } from "@/db/types/participant";
 
 export const createParticipant = action(async (
   tournamentId: number,
-  data: z.infer<typeof participantFormSchema>,
+  data: ParticipantFormValues,
 ) => {
   invariant(
     !hasSecondaryMatchDayConflict(
@@ -78,7 +83,7 @@ export const createParticipant = action(async (
 
   const values = {
     chessClub,
-    title: data.title === "noTitle" ? null : data.title,
+    title: data.title ?? null,
     gender: data.gender,
     dwzRating: data.dwzRating,
     fideRating: data.fideRating,
@@ -172,14 +177,6 @@ export async function searchDsbPlayers(
   return persons.map(mapDsbPersonToCandidate);
 }
 
-export async function getFideRatingById(
-  fideId: string,
-): Promise<number | null> {
-  await authWithRedirect();
-
-  return await getFideStandardRating(fideId);
-}
-
 export const updateParticipantFromDsb = action(async (participantId: number) => {
   const session = await authWithRedirect();
 
@@ -188,76 +185,14 @@ export const updateParticipantFromDsb = action(async (participantId: number) => 
     "Unauthorized: Admin access required",
   );
 
-  const current = await getParticipantRatingFieldsById(participantId);
-  invariant(current != null, `Participant ${participantId} not found`);
+  const stored = await getParticipantRatingFieldsById(participantId);
+  invariant(stored != null, `Participant ${participantId} not found`);
   invariant(
-    current.dsbPersonId != null,
+    stored.dsbPersonId != null,
     `Participant ${participantId} has no DSB person id`,
   );
 
-  const person = await getDsbPersonById(current.dsbPersonId);
-  if (person == null) {
-    return { status: "dsbNotFound" } as const;
-  }
-
-  const values: { dwzRating?: number; fideId?: string } = {};
-  if (person.rating != null) {
-    values.dwzRating = person.rating;
-  }
-  if (!current.fideId && person.fideId != null) {
-    values.fideId = String(person.fideId);
-  }
-
-  if (Object.keys(values).length === 0) {
-    return { status: "noRating" } as const;
-  }
-
-  await db
-    .update(participant)
-    .set({ ...values, updatedAt: new Date() })
-    .where(eq(participant.id, participantId));
-
-  return {
-    status: "updated",
-    previousDwzRating: current.dwzRating,
-    dwzRating: values.dwzRating ?? current.dwzRating,
-    fideId: values.fideId ?? current.fideId,
-  } as const;
-});
-
-export const updateParticipantFide = action(async (participantId: number) => {
-  const session = await authWithRedirect();
-
-  invariant(
-    session.user.role === "admin",
-    "Unauthorized: Admin access required",
-  );
-
-  const current = await getParticipantRatingFieldsById(participantId);
-  invariant(current != null, `Participant ${participantId} not found`);
-
-  if (!current.fideId) {
-    return { status: "noFideId" } as const;
-  }
-
-  const lookup = await getFideProfile(current.fideId);
-  if (lookup.status !== "found") {
-    return { status: lookup.status } as const;
-  }
-  if (lookup.profile.fideRating == null) {
-    return { status: "noRating" } as const;
-  }
-
-  await db
-    .update(participant)
-    .set({ fideRating: lookup.profile.fideRating, updatedAt: new Date() })
-    .where(eq(participant.id, participantId));
-
-  return {
-    status: "updated",
-    previousFideRating: current.fideRating,
-    fideRating: lookup.profile.fideRating,
-  } as const;
+  return await syncDsbRatings(stored, stored.dsbPersonId);
 });
 
 export const linkParticipantDsb = action(
@@ -269,26 +204,39 @@ export const linkParticipantDsb = action(
       "Unauthorized: Admin access required",
     );
 
-    const current = await getParticipantRatingFieldsById(participantId);
-    invariant(current != null, `Participant ${participantId} not found`);
+    const stored = await getParticipantRatingFieldsById(participantId);
+    invariant(stored != null, `Participant ${participantId} not found`);
 
-    const person = await getDsbPersonById(nuLigaPersonId);
-    if (person == null) {
-      throw new ActionError("DSB-Person nicht gefunden");
-    }
-
-    await db
-      .update(participant)
-      .set({
-        dsbPersonId: person.nuLigaPersonId,
-        fideId: person.fideId != null ? String(person.fideId) : current.fideId,
-        updatedAt: new Date(),
-      })
-      .where(eq(participant.id, participantId));
+    const result = await syncDsbRatings(stored, nuLigaPersonId);
 
     revalidatePath("/turniere/[slug]/admin/nutzerverwaltung", "page");
+    return result;
   },
 );
+
+async function syncDsbRatings(
+  stored: Ratings & Pick<Participant, "id">,
+  nuLigaPersonId: string,
+) {
+  const person = await getDsbPersonById(nuLigaPersonId);
+  if (person == null) {
+    return { status: "dsbNotFound" } as const;
+  }
+
+  const sync: RatingSync = {
+    previous: pickRatings(stored),
+    dsb: pickRatings(mapDsbPersonToCandidate(person)),
+  };
+  await db
+    .update(participant)
+    .set({
+      ...mergeDsbRatings(sync),
+      dsbPersonId: person.nuLigaPersonId,
+      updatedAt: new Date(),
+    })
+    .where(eq(participant.id, stored.id));
+  return { status: "synced", ...sync } as const;
+}
 
 export async function updateEntryFeeStatus(
   participantId: number,

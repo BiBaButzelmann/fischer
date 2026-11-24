@@ -4,8 +4,7 @@ import { authWithRedirect } from "@/auth/utils";
 import { CLUB_FEDERATION, monthLabels } from "@/constants/constants";
 import { db } from "@/db/client";
 import { getGamesInMonth } from "@/db/repositories/game";
-import { Participant } from "@/db/types/participant";
-import { action } from "@/lib/actions";
+import { action, ActionError } from "@/lib/actions";
 import { generateFideReport } from "@/lib/fide-report";
 import {
   formatPlayerName,
@@ -16,7 +15,11 @@ import { calculateStandings } from "@/lib/standings";
 import { parseDateOnly, toDateOnly, toLocalDateTime } from "@/lib/date";
 import invariant from "tiny-invariant";
 import { getRefereeOfGroup } from "@/services/referee";
-import { getFideStandardRating } from "@/lib/fide/profile";
+import { getDsbPersonById } from "@/lib/dsb/wertungsportal";
+import { mapDsbPersonToCandidate } from "@/lib/dsb/candidate";
+import { resolveFideData, type FideData } from "@/lib/dsb/ratings";
+import { getParticipantFullName } from "@/lib/participant";
+import type { ParticipantWithName } from "@/db/types/participant";
 
 export const generateFideReportFile = action(
   async (groupId: number, month: number) => {
@@ -115,28 +118,26 @@ export const generateFideReportFile = action(
       return currentGroupPosition + 1;
     };
 
-    const entries = data.participants.map(
-      async ({ groupPosition, participant }) => {
+    const entries = await Promise.all(
+      data.participants.map(async ({ groupPosition, participant }) => {
         const participantGames = gamesWithActiveParticipants.filter(
           (game) =>
             game.whiteParticipantId === participant.id ||
             game.blackParticipantId === participant.id,
         );
 
+        const { fideId, fideRating, nationality, title, birthYear, gender } =
+          await getLiveFideData(participant);
         invariant(
-          participant.fideId != null,
+          fideId != null,
           `Participant ${participant.id} does not have a FIDE ID`,
         );
         invariant(
-          participant.fideRating != null,
-          `Participant ${participant.id} does not have a FIDE rating`,
-        );
-        invariant(
-          participant.birthYear != null,
+          birthYear != null,
           `Participant ${participant.id} does not have a birth year`,
         );
         invariant(
-          participant.nationality != null,
+          nationality != null,
           `Participant ${participant.id} does not have a nationality`,
         );
 
@@ -145,17 +146,17 @@ export const generateFideReportFile = action(
 
         return {
           startingPosition: groupPosition,
-          gender: participant.gender ?? undefined,
-          title: participant.title ?? "",
+          gender: gender ?? undefined,
+          title: title ?? "",
           name: formatPlayerName(
             participant.profile.firstName,
             participant.profile.lastName,
             participant.profile.academicTitle,
           ),
-          fideRating: await getCurrentElo(participant),
-          fideNation: participant.nationality!,
-          fideId: participant.fideId,
-          birthDate: `${participant.birthYear}/00/00`,
+          fideRating: fideRating ?? undefined,
+          fideNation: nationality,
+          fideId,
+          birthDate: `${birthYear}/00/00`,
           points: currentPoints,
           rank: currentGroupPosition,
           results: participantGames.map((game) => {
@@ -172,7 +173,7 @@ export const generateFideReportFile = action(
             };
           }),
         } satisfies PlayerEntry;
-      },
+      }),
     );
 
     // 012
@@ -188,8 +189,8 @@ export const generateFideReportFile = action(
     // 062
     const numberOfPlayers = data.participants.length;
     // 072
-    const numberOfRatedPlayers = data.participants.filter(
-      (p) => p.participant.fideId != null,
+    const numberOfRatedPlayers = entries.filter(
+      (entry) => entry.fideRating != null,
     ).length;
     // 092
     const tournamentType = "Individual round robin";
@@ -214,7 +215,7 @@ export const generateFideReportFile = action(
         referee,
         timeLimit,
       },
-      await Promise.all(entries),
+      entries,
     );
 
     const monthName = monthLabels[month - 1];
@@ -227,13 +228,17 @@ export const generateFideReportFile = action(
   },
 );
 
-async function getCurrentElo(participant: Participant) {
-  if (participant.fideId != null) {
-    const fideRating = await getFideStandardRating(participant.fideId);
-    if (fideRating != null) {
-      return fideRating;
-    }
+async function getLiveFideData(
+  participant: ParticipantWithName,
+): Promise<FideData> {
+  if (participant.dsbPersonId == null) {
+    return participant;
   }
-  invariant(participant.fideRating != null, "FIDE rating cannot be null");
-  return participant.fideRating;
+  const person = await getDsbPersonById(participant.dsbPersonId);
+  if (person == null) {
+    throw new ActionError(
+      `DSB-Daten für ${getParticipantFullName(participant)} nicht abrufbar`,
+    );
+  }
+  return resolveFideData(participant, mapDsbPersonToCandidate(person));
 }
