@@ -26,7 +26,6 @@ import { revalidatePath } from "next/cache";
 import { action, ActionError } from "@/lib/actions";
 import { hasSecondaryMatchDayConflict } from "@/lib/match-days";
 import { parseDateOnly } from "@/lib/date";
-import { getFideProfile, getFideStandardRating } from "@/lib/fide/profile";
 import { getDsbPersonById, searchDsbPersons } from "@/lib/dsb/wertungsportal";
 import { mapDsbPersonToCandidate } from "@/lib/dsb/candidate";
 import type { DsbPlayerCandidate } from "@/lib/dsb/types";
@@ -172,13 +171,7 @@ export async function searchDsbPlayers(
   return persons.map(mapDsbPersonToCandidate);
 }
 
-export async function getFideRatingById(
-  fideId: string,
-): Promise<number | null> {
-  await authWithRedirect();
-
-  return await getFideStandardRating(fideId);
-}
+type RatingChange = { previous: number | null; next: number };
 
 export const updateParticipantFromDsb = action(async (participantId: number) => {
   const session = await authWithRedirect();
@@ -200,16 +193,44 @@ export const updateParticipantFromDsb = action(async (participantId: number) => 
     return { status: "dsbNotFound" } as const;
   }
 
-  const values: { dwzRating?: number; fideId?: string } = {};
+  const dsbFideId = person.fideId != null ? String(person.fideId) : null;
+  const fideIdMismatch =
+    !!current.fideId && dsbFideId != null && current.fideId !== dsbFideId;
+  const dsbElo = fideIdMismatch ? null : (person.fideRatingStandard ?? null);
+
+  const values: { dwzRating?: number; fideRating?: number; fideId?: string } =
+    {};
   if (person.rating != null) {
     values.dwzRating = person.rating;
   }
-  if (!current.fideId && person.fideId != null) {
-    values.fideId = String(person.fideId);
+  if (dsbElo != null) {
+    values.fideRating = dsbElo;
+  }
+  if (!current.fideId && dsbFideId != null) {
+    values.fideId = dsbFideId;
   }
 
+  const dwz: RatingChange | null =
+    values.dwzRating != null
+      ? { previous: current.dwzRating, next: values.dwzRating }
+      : null;
+  const elo: RatingChange | null =
+    values.fideRating != null
+      ? { previous: current.fideRating, next: values.fideRating }
+      : null;
+
+  const outcome = {
+    dwz,
+    elo,
+    addedFideId: values.fideId ?? null,
+    dsbFideId,
+    fideIdMismatch,
+    unconfirmedElo:
+      !fideIdMismatch && dsbElo == null && current.fideRating != null,
+  };
+
   if (Object.keys(values).length === 0) {
-    return { status: "noRating" } as const;
+    return { status: "noRating", ...outcome } as const;
   }
 
   await db
@@ -217,47 +238,7 @@ export const updateParticipantFromDsb = action(async (participantId: number) => 
     .set({ ...values, updatedAt: new Date() })
     .where(eq(participant.id, participantId));
 
-  return {
-    status: "updated",
-    previousDwzRating: current.dwzRating,
-    dwzRating: values.dwzRating ?? current.dwzRating,
-    fideId: values.fideId ?? current.fideId,
-  } as const;
-});
-
-export const updateParticipantFide = action(async (participantId: number) => {
-  const session = await authWithRedirect();
-
-  invariant(
-    session.user.role === "admin",
-    "Unauthorized: Admin access required",
-  );
-
-  const current = await getParticipantRatingFieldsById(participantId);
-  invariant(current != null, `Participant ${participantId} not found`);
-
-  if (!current.fideId) {
-    return { status: "noFideId" } as const;
-  }
-
-  const lookup = await getFideProfile(current.fideId);
-  if (lookup.status !== "found") {
-    return { status: lookup.status } as const;
-  }
-  if (lookup.profile.fideRating == null) {
-    return { status: "noRating" } as const;
-  }
-
-  await db
-    .update(participant)
-    .set({ fideRating: lookup.profile.fideRating, updatedAt: new Date() })
-    .where(eq(participant.id, participantId));
-
-  return {
-    status: "updated",
-    previousFideRating: current.fideRating,
-    fideRating: lookup.profile.fideRating,
-  } as const;
+  return { status: "updated", ...outcome } as const;
 });
 
 export const linkParticipantDsb = action(

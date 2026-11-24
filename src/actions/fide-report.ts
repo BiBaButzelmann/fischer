@@ -4,7 +4,6 @@ import { authWithRedirect } from "@/auth/utils";
 import { CLUB_FEDERATION, monthLabels } from "@/constants/constants";
 import { db } from "@/db/client";
 import { getGamesInMonth } from "@/db/repositories/game";
-import { Participant } from "@/db/types/participant";
 import { action } from "@/lib/actions";
 import { generateFideReport } from "@/lib/fide-report";
 import {
@@ -16,7 +15,6 @@ import { calculateStandings } from "@/lib/standings";
 import { parseDateOnly, toDateOnly, toLocalDateTime } from "@/lib/date";
 import invariant from "tiny-invariant";
 import { getRefereeOfGroup } from "@/services/referee";
-import { getFideStandardRating } from "@/lib/fide/profile";
 
 export const generateFideReportFile = action(
   async (groupId: number, month: number) => {
@@ -116,7 +114,7 @@ export const generateFideReportFile = action(
     };
 
     const entries = data.participants.map(
-      async ({ groupPosition, participant }) => {
+      ({ groupPosition, participant }) => {
         const participantGames = gamesWithActiveParticipants.filter(
           (game) =>
             game.whiteParticipantId === participant.id ||
@@ -152,7 +150,7 @@ export const generateFideReportFile = action(
             participant.profile.lastName,
             participant.profile.academicTitle,
           ),
-          fideRating: await getCurrentElo(participant),
+          fideRating: participant.fideRating,
           fideNation: participant.nationality!,
           fideId: participant.fideId,
           birthDate: `${participant.birthYear}/00/00`,
@@ -214,7 +212,7 @@ export const generateFideReportFile = action(
         referee,
         timeLimit,
       },
-      await Promise.all(entries),
+      entries,
     );
 
     const monthName = monthLabels[month - 1];
@@ -226,14 +224,3 @@ export const generateFideReportFile = action(
     };
   },
 );
-
-async function getCurrentElo(participant: Participant) {
-  if (participant.fideId != null) {
-    const fideRating = await getFideStandardRating(participant.fideId);
-    if (fideRating != null) {
-      return fideRating;
-    }
-  }
-  invariant(participant.fideRating != null, "FIDE rating cannot be null");
-  return participant.fideRating;
-}

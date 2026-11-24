@@ -40,13 +40,14 @@ import { isError } from "@/lib/actions";
 import { toast } from "sonner";
 
 export type ParticipantEloPrefill = {
-  dsbPersonId?: string;
-  title?: string | null;
-  gender?: "m" | "f" | null;
-  dwzRating?: number | null;
-  fideRating?: number | null;
-  fideId?: string | null;
-  birthYear?: number | null;
+  dsbPersonId: string;
+  title: string | null;
+  gender: "m" | "f" | null;
+  dwzRating: number | null;
+  fideRating: number | null;
+  fideId: string | null;
+  nationality: string | null;
+  birthYear: number | null;
 };
 
 type Props = {
@@ -327,16 +328,15 @@ function buildParticipantInitialValues(
   }
 
   if (previous) {
-    const fideId = prefill?.fideId ?? previous.fideId ?? undefined;
     return {
       chessClubType: chessClubTypeForLabel(previous.chessClub),
       chessClub: previous.chessClub,
       title: prefill?.title ?? previous.title ?? "noTitle",
       gender: prefill?.gender ?? previous.gender ?? undefined,
-      nationality: previous.nationality ?? undefined,
+      nationality: prefill?.nationality ?? previous.nationality ?? undefined,
       dwzRating: prefill?.dwzRating ?? undefined,
-      fideRating: prefill?.fideRating && fideId ? prefill.fideRating : undefined,
-      fideId,
+      fideRating: prefill?.fideRating ?? undefined,
+      fideId: prefill?.fideId ?? previous.fideId ?? undefined,
       birthYear: prefill?.birthYear ?? previous.birthYear ?? undefined,
       birthDate: previous.birthDate ?? undefined,
       preferredMatchDay: previous.preferredMatchDay,

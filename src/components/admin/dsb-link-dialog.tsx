@@ -14,7 +14,6 @@ import { DwzPlayerSelect } from "@/components/klubturnier-anmeldung/forms/dwz-pl
 import {
   linkParticipantDsb,
   updateParticipantFromDsb,
-  updateParticipantFide,
 } from "@/actions/participant";
 import { isError } from "@/lib/actions";
 import { getFullName } from "@/lib/participant";
@@ -54,16 +53,14 @@ export function DsbLinkDialog({
           return;
         }
 
-        const dwz = await updateParticipantFromDsb(participantId);
-        const fide = await updateParticipantFide(participantId);
-        const ratings = [
-          !isError(dwz) && dwz.status === "updated" && dwz.dwzRating != null
-            ? `DWZ ${dwz.dwzRating}`
-            : null,
-          !isError(fide) && fide.status === "updated"
-            ? `FIDE ${fide.fideRating}`
-            : null,
-        ].filter(Boolean);
+        const update = await updateParticipantFromDsb(participantId);
+        const ratings =
+          !isError(update) && update.status !== "dsbNotFound"
+            ? [
+                update.dwz ? `DWZ ${update.dwz.next}` : null,
+                update.elo ? `Elo ${update.elo.next}` : null,
+              ].filter(Boolean)
+            : [];
 
         toast.success(
           `${fullName} verknüpft${ratings.length > 0 ? ` · ${ratings.join(" · ")}` : ""}`,

@@ -41,11 +41,10 @@ import {
   utcDateToDateOnly,
 } from "@/lib/date";
 import { Tournament } from "@/db/types/tournament";
-import { getFideRatingById } from "@/actions/participant";
 import { DwzPlayerSelect } from "./dwz-player-select";
 import { RoleFormActions } from "./role-form-actions";
 import { HSK_VKZ } from "@/lib/dsb/constants";
-import type { DsbPlayerCandidate } from "@/lib/dsb/types";
+import { FIDE_TITLES, type DsbPlayerCandidate } from "@/lib/dsb/types";
 import { toast } from "sonner";
 import { Profile } from "@/db/types/profile";
 import {
@@ -117,26 +116,17 @@ export function ParticipateForm({
 
   const handleDsbCandidateSelect = useCallback(
     (candidate: DsbPlayerCandidate) => {
-      startTransition(async () => {
-        form.setValue("dsbPersonId", candidate.nuLigaPersonId);
-        form.setValue("dwzRating", candidate.dwzRating ?? undefined);
-        form.setValue("birthYear", candidate.birthYear ?? undefined);
-        form.setValue("gender", candidate.gender ?? undefined);
-        form.setValue("fideId", candidate.fideId ?? undefined);
-
-        let fideRating: number | undefined;
-        if (candidate.fideId != null) {
-          try {
-            fideRating =
-              (await getFideRatingById(candidate.fideId)) ?? undefined;
-          } catch {}
-        }
-        form.setValue("fideRating", fideRating);
-
-        toast.success("Deine Daten wurden aus der DSB-Datenbank übernommen.");
-      });
+      form.setValue("dsbPersonId", candidate.nuLigaPersonId);
+      form.setValue("dwzRating", candidate.dwzRating ?? undefined);
+      form.setValue("birthYear", candidate.birthYear ?? undefined);
+      form.setValue("gender", candidate.gender ?? undefined);
+      form.setValue("fideId", candidate.fideId ?? undefined);
+      form.setValue("fideRating", candidate.fideRating ?? undefined);
+      form.setValue("nationality", candidate.nationality ?? undefined);
+      form.setValue("title", candidate.title ?? "noTitle");
+      toast.success("Deine Daten wurden aus der DSB-Datenbank übernommen.");
     },
-    [form, startTransition],
+    [form],
   );
 
   const handlePreferredMatchDayChange = (value: DayOfWeek) => {
@@ -383,14 +373,11 @@ export function ParticipateForm({
                         </SelectTrigger>
                         <SelectContent>
                           <SelectItem value="noTitle">Kein Titel</SelectItem>
-                          <SelectItem value="GM">GM </SelectItem>
-                          <SelectItem value="IM">IM </SelectItem>
-                          <SelectItem value="FM">FM </SelectItem>
-                          <SelectItem value="CM">CM </SelectItem>
-                          <SelectItem value="WGM">WGM </SelectItem>
-                          <SelectItem value="WIM">WIM </SelectItem>
-                          <SelectItem value="WFM">WFM </SelectItem>
-                          <SelectItem value="WCM">WCM </SelectItem>
+                          {FIDE_TITLES.map((title) => (
+                            <SelectItem key={title} value={title}>
+                              {title}
+                            </SelectItem>
+                          ))}
                         </SelectContent>
                       </Select>
                     </FormControl>

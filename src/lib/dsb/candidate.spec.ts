@@ -2,6 +2,7 @@ import { describe, it, expect } from "vitest";
 import {
   mapDsbGender,
   mapDsbPersonToCandidate,
+  selectFideTitle,
   selectPrimaryMembership,
   transliterateGermanUmlauts,
 } from "./candidate";
@@ -37,6 +38,9 @@ const person: DsbPerson = {
   index: 10,
   memberships: [activeMembership],
   weekOfLastTournamentEvaluation: "202418",
+  fideRatingStandard: 1802,
+  fideCountry: "GER",
+  fideTitle: "FM",
 };
 
 describe("selectPrimaryMembership", () => {
@@ -82,6 +86,24 @@ describe("mapDsbGender", () => {
   });
 });
 
+describe("selectFideTitle", () => {
+  it("prefers the open title over the women's title", () => {
+    expect(selectFideTitle({ fideTitle: "GM", fideWomenTitle: "WGM" })).toBe(
+      "GM",
+    );
+  });
+
+  it("falls back to the women's title", () => {
+    expect(selectFideTitle({ fideTitle: null, fideWomenTitle: "WIM" })).toBe(
+      "WIM",
+    );
+  });
+
+  it("ignores titles the app does not support", () => {
+    expect(selectFideTitle({ fideTitle: "AGM", fideWomenTitle: undefined })).toBeNull();
+  });
+});
+
 describe("mapDsbPersonToCandidate", () => {
   it("maps an API person to a UI candidate", () => {
     expect(mapDsbPersonToCandidate(person)).toEqual({
@@ -91,20 +113,29 @@ describe("mapDsbPersonToCandidate", () => {
       birthYear: 1962,
       dwzRating: 1764,
       fideId: "20660391",
+      fideRating: 1802,
+      nationality: "GER",
+      title: "FM",
       gender: "m",
       clubName: "Glauchauer SC 1873",
     });
   });
 
-  it("keeps a missing rating and fide id as null", () => {
+  it("keeps missing ratings, fide data and club as null", () => {
     const candidate = mapDsbPersonToCandidate({
       ...person,
       fideId: null,
       rating: null,
+      fideRatingStandard: undefined,
+      fideCountry: undefined,
+      fideTitle: undefined,
       memberships: [],
     });
     expect(candidate.fideId).toBeNull();
     expect(candidate.dwzRating).toBeNull();
+    expect(candidate.fideRating).toBeNull();
+    expect(candidate.nationality).toBeNull();
+    expect(candidate.title).toBeNull();
     expect(candidate.clubName).toBeNull();
   });
 });

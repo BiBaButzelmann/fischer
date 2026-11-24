@@ -21,6 +21,10 @@ export type DsbPerson = {
   index: number | null;
   memberships: DsbMembership[];
   weekOfLastTournamentEvaluation: string | null;
+  fideRatingStandard?: number | null;
+  fideCountry?: string | null;
+  fideTitle?: string | null;
+  fideWomenTitle?: string | null;
 };
 
 export type DsbPlayerCandidate = {
@@ -30,6 +34,22 @@ export type DsbPlayerCandidate = {
   birthYear: number | null;
   dwzRating: number | null;
   fideId: string | null;
+  fideRating: number | null;
+  nationality: string | null;
+  title: FideTitle | null;
   gender: "m" | "f" | null;
   clubName: string | null;
 };
+
+export const FIDE_TITLES = [
+  "GM",
+  "IM",
+  "FM",
+  "CM",
+  "WGM",
+  "WIM",
+  "WFM",
+  "WCM",
+] as const;
+
+export type FideTitle = (typeof FIDE_TITLES)[number];

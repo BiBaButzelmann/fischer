@@ -1,8 +1,10 @@
-import type {
-  DsbGender,
-  DsbMembership,
-  DsbPerson,
-  DsbPlayerCandidate,
+import {
+  FIDE_TITLES,
+  type DsbGender,
+  type DsbMembership,
+  type DsbPerson,
+  type DsbPlayerCandidate,
+  type FideTitle,
 } from "./types";
 
 export function transliterateGermanUmlauts(value: string): string {
@@ -35,6 +37,16 @@ export function mapDsbGender(gender: DsbGender | null): "m" | "f" | null {
   return null;
 }
 
+function isFideTitle(value: string | null | undefined): value is FideTitle {
+  return FIDE_TITLES.some((title) => title === value);
+}
+
+export function selectFideTitle(
+  person: Pick<DsbPerson, "fideTitle" | "fideWomenTitle">,
+): FideTitle | null {
+  return [person.fideTitle, person.fideWomenTitle].find(isFideTitle) ?? null;
+}
+
 export function mapDsbPersonToCandidate(person: DsbPerson): DsbPlayerCandidate {
   const primaryMembership = selectPrimaryMembership(person.memberships);
   return {
@@ -44,6 +56,9 @@ export function mapDsbPersonToCandidate(person: DsbPerson): DsbPlayerCandidate {
     birthYear: person.birthyear,
     dwzRating: person.rating,
     fideId: person.fideId != null ? String(person.fideId) : null,
+    fideRating: person.fideRatingStandard ?? null,
+    nationality: person.fideCountry ?? null,
+    title: selectFideTitle(person),
     gender: mapDsbGender(person.gender),
     clubName: primaryMembership?.clubName ?? null,
   };

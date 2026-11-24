@@ -5,16 +5,10 @@ import { useRouter } from "next/navigation";
 import { RefreshCw, X } from "lucide-react";
 import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
-import {
-  updateParticipantFromDsb,
-  updateParticipantFide,
-} from "@/actions/participant";
+import { updateParticipantFromDsb } from "@/actions/participant";
 import { isError } from "@/lib/actions";
 import { ParticipantWithName } from "@/db/types/participant";
 import { compareByName, getParticipantFullName } from "@/lib/participant";
-
-const FIDE_REQUEST_INTERVAL_MS = 4000;
-const FIDE_THROTTLE_PAUSE_SECONDS = 120;
 
 type RatingEntry = {
   participantId: number;
@@ -40,14 +34,13 @@ type Props = {
   participants: ParticipantWithName[];
 };
 
-function sleep(ms: number) {
-  return new Promise((resolve) => setTimeout(resolve, ms));
-}
-
-function formatChange(label: string, previous: number | null, next: number) {
-  return previous === next
-    ? `${label} ${next} unverändert`
-    : `${label} ${previous ?? "–"} → ${next}`;
+function formatChange(
+  label: string,
+  change: { previous: number | null; next: number },
+) {
+  return change.previous === change.next
+    ? `${label} ${change.next} unverändert`
+    : `${label} ${change.previous ?? "–"} → ${change.next}`;
 }
 
 function toRatingEntries(participants: ParticipantWithName[]): RatingEntry[] {
@@ -67,8 +60,6 @@ export function RatingUpdatePanel({ participants }: Props) {
   const [log, setLog] = useState<LogLine[]>([]);
   const [summary, setSummary] = useState<Summary | null>(null);
   const [progress, setProgress] = useState<string | null>(null);
-  const [pauseSecondsLeft, setPauseSecondsLeft] = useState<number | null>(null);
-  const skipPauseRef = useRef(false);
   const cancelRef = useRef(false);
   const autoScrollRef = useRef(true);
   const nextLineIdRef = useRef(0);
@@ -97,23 +88,6 @@ export function RatingUpdatePanel({ participants }: Props) {
     setLog((lines) => [...lines, { id: nextLineIdRef.current++, level, text }]);
   };
 
-  const pauseForThrottle = () =>
-    new Promise<void>((resolve) => {
-      skipPauseRef.current = false;
-      let remaining = FIDE_THROTTLE_PAUSE_SECONDS;
-      setPauseSecondsLeft(remaining);
-      const interval = setInterval(() => {
-        remaining--;
-        if (remaining <= 0 || skipPauseRef.current || cancelRef.current) {
-          clearInterval(interval);
-          setPauseSecondsLeft(null);
-          resolve();
-          return;
-        }
-        setPauseSecondsLeft(remaining);
-      }, 1000);
-    });
-
   const run = async () => {
     setIsRunning(true);
     setLog([]);
@@ -128,14 +102,7 @@ export function RatingUpdatePanel({ participants }: Props) {
       appendLine("error", text);
     };
 
-    const outcomes = new Map<number, { wrote: boolean; failed: boolean }>();
-    const mark = (participantId: number, key: "wrote" | "failed") => {
-      const outcome = outcomes.get(participantId) ?? {
-        wrote: false,
-        failed: false,
-      };
-      outcomes.set(participantId, { ...outcome, [key]: true });
-    };
+    const outcomes = new Map<number, "wrote" | "failed">();
 
     try {
       const entries = toRatingEntries(participants);
@@ -152,106 +119,50 @@ export function RatingUpdatePanel({ participants }: Props) {
 
       appendLine(
         "muted",
-        `Phase 1: DWZ über das DSB-Wertungsportal (${linked.length} Abfragen)`,
-      );
-      const fideCandidates: RatingEntry[] = unlinked.filter(
-        (entry) => entry.fideId != null,
+        `DWZ und Elo über das DSB-Wertungsportal (${linked.length} Abfragen)`,
       );
       for (const [index, entry] of linked.entries()) {
         if (cancelRef.current) {
           break;
         }
-        setProgress(`Phase 1 · ${index + 1}/${linked.length}`);
+        setProgress(`${index + 1}/${linked.length}`);
         const result = await updateParticipantFromDsb(entry.participantId);
         if (isError(result)) {
-          mark(entry.participantId, "failed");
+          outcomes.set(entry.participantId, "failed");
           appendIssue(`${entry.name} · ${result.error}`);
-        } else if (result.status === "dsbNotFound") {
-          mark(entry.participantId, "failed");
+          continue;
+        }
+        if (result.status === "dsbNotFound") {
+          outcomes.set(entry.participantId, "failed");
           appendIssue(
             `${entry.name} · DSB-Person ${entry.dsbPersonId} nicht gefunden – Verknüpfung prüfen`,
           );
-          if (entry.fideId) {
-            fideCandidates.push(entry);
-          }
-        } else if (result.status === "noRating") {
-          appendIssue(
-            `${entry.name} · DSB-Person ${entry.dsbPersonId} gefunden, aber ohne DWZ-Wertung`,
-          );
-          if (entry.fideId) {
-            fideCandidates.push(entry);
-          }
-        } else {
-          mark(entry.participantId, "wrote");
-          const parts = [
-            result.dwzRating != null
-              ? formatChange("DWZ", result.previousDwzRating, result.dwzRating)
-              : "DWZ –",
-          ];
-          if (result.fideId && !entry.fideId) {
-            parts.push(`FIDE-ID ${result.fideId} ergänzt`);
-          }
-          appendLine("normal", `${entry.name} · ${parts.join(" · ")}`);
-          if (result.fideId) {
-            fideCandidates.push({ ...entry, fideId: result.fideId });
-          }
-        }
-      }
-
-      appendLine(
-        "muted",
-        `Phase 2: FIDE-Ratings, gedrosselt auf 1 Abfrage je ${FIDE_REQUEST_INTERVAL_MS / 1000} s (${fideCandidates.length} Abfragen)`,
-      );
-      let index = 0;
-      while (index < fideCandidates.length) {
-        if (cancelRef.current) {
-          break;
-        }
-        const entry = fideCandidates[index];
-        setProgress(`Phase 2 · ${index + 1}/${fideCandidates.length}`);
-        const startedAt = Date.now();
-        const result = await updateParticipantFide(entry.participantId);
-        if (!isError(result) && result.status === "throttled") {
-          appendLine(
-            "error",
-            `FIDE-Rate-Limit erreicht · Pause ${FIDE_THROTTLE_PAUSE_SECONDS} s`,
-          );
-          await pauseForThrottle();
-          if (cancelRef.current) {
-            break;
-          }
-          appendLine("muted", `Pause beendet · weiter mit ${entry.name}`);
           continue;
         }
-        if (isError(result)) {
-          mark(entry.participantId, "failed");
-          appendIssue(`${entry.name} · ${result.error}`);
-        } else if (result.status === "updated") {
-          mark(entry.participantId, "wrote");
-          appendLine(
-            "normal",
-            `${entry.name} · ${formatChange("FIDE", result.previousFideRating, result.fideRating)}`,
-          );
-        } else if (result.status === "error") {
-          mark(entry.participantId, "failed");
+
+        if (result.status === "updated") {
+          outcomes.set(entry.participantId, "wrote");
+          const parts = [
+            result.dwz ? formatChange("DWZ", result.dwz) : "DWZ –",
+            result.elo ? formatChange("Elo", result.elo) : null,
+            result.addedFideId ? `FIDE-ID ${result.addedFideId} ergänzt` : null,
+          ].filter(Boolean);
+          appendLine("normal", `${entry.name} · ${parts.join(" · ")}`);
+        } else {
           appendIssue(
-            `${entry.name} · FIDE-Abfrage für ID ${entry.fideId} fehlgeschlagen`,
-          );
-        } else if (result.status === "notFound") {
-          appendIssue(
-            `${entry.name} · kein FIDE-Profil zur ID ${entry.fideId} – FIDE-ID prüfen`,
-          );
-        } else if (result.status === "noRating") {
-          appendIssue(
-            `${entry.name} · FIDE-Profil ${entry.fideId} gefunden, aber ohne Standard-Elo`,
+            `${entry.name} · DSB-Person ${entry.dsbPersonId} gefunden, aber ohne Wertung`,
           );
         }
-        index++;
-        if (index < fideCandidates.length) {
-          const elapsed = Date.now() - startedAt;
-          if (elapsed < FIDE_REQUEST_INTERVAL_MS) {
-            await sleep(FIDE_REQUEST_INTERVAL_MS - elapsed);
-          }
+
+        if (result.fideIdMismatch) {
+          appendIssue(
+            `${entry.name} · FIDE-ID ${entry.fideId} weicht vom DSB ab (${result.dsbFideId}) – Elo nicht übernommen`,
+          );
+        }
+        if (result.unconfirmedElo) {
+          appendIssue(
+            `${entry.name} · DSB liefert keine Standard-Elo – gespeicherte Elo prüfen`,
+          );
         }
       }
 
@@ -273,13 +184,13 @@ export function RatingUpdatePanel({ participants }: Props) {
         withoutRating: 0,
         unlinked: unlinked.length,
       };
-      for (const entry of entries) {
+      for (const entry of linked) {
         const outcome = outcomes.get(entry.participantId);
-        if (outcome?.wrote) {
+        if (outcome === "wrote") {
           runSummary.updated++;
-        } else if (outcome?.failed) {
+        } else if (outcome === "failed") {
           runSummary.failed++;
-        } else if (entry.dsbPersonId != null) {
+        } else {
           runSummary.withoutRating++;
         }
       }
@@ -303,7 +214,6 @@ export function RatingUpdatePanel({ participants }: Props) {
     } finally {
       setIsRunning(false);
       setProgress(null);
-      setPauseSecondsLeft(null);
     }
   };
 
@@ -335,7 +245,6 @@ export function RatingUpdatePanel({ participants }: Props) {
               title="Lauf abbrechen"
               onClick={() => {
                 cancelRef.current = true;
-                skipPauseRef.current = true;
               }}
             >
               <X className="h-4 w-4" />
@@ -370,20 +279,6 @@ export function RatingUpdatePanel({ participants }: Props) {
               {line.text}
             </div>
           ))}
-        </div>
-      )}
-      {pauseSecondsLeft != null && (
-        <div className="flex items-center gap-3 text-sm text-muted-foreground">
-          <span>FIDE-Pause · weiter in {pauseSecondsLeft} s</span>
-          <Button
-            variant="outline"
-            size="sm"
-            onClick={() => {
-              skipPauseRef.current = true;
-            }}
-          >
-            Jetzt fortsetzen
-          </Button>
         </div>
       )}
     </div>
