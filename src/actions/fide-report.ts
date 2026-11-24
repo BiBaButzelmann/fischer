@@ -16,7 +16,7 @@ import { parseDateOnly, toDateOnly, toLocalDateTime } from "@/lib/date";
 import invariant from "tiny-invariant";
 import { getRefereeOfGroup } from "@/services/referee";
 import { getDsbPersonById } from "@/lib/dsb/wertungsportal";
-import { currentFideData, diffDsbRatings } from "@/lib/dsb/ratings";
+import { resolveFideData } from "@/lib/dsb/ratings";
 
 export const generateFideReportFile = action(
   async (groupId: number, month: number) => {
@@ -115,33 +115,24 @@ export const generateFideReportFile = action(
       return currentGroupPosition + 1;
     };
 
-    const fideDataByParticipantId = new Map(
-      await Promise.all(
-        data.participants.map(async ({ participant }) => {
-          const person = participant.dsbPersonId
-            ? await getDsbPersonById(participant.dsbPersonId)
-            : null;
-          const diff = person ? diffDsbRatings(participant, person) : null;
-          return [participant.id, currentFideData(participant, diff)] as const;
-        }),
-      ),
-    );
-
-    const entries = data.participants.map(
-      ({ groupPosition, participant }) => {
+    const entries = await Promise.all(
+      data.participants.map(async ({ groupPosition, participant }) => {
         const participantGames = gamesWithActiveParticipants.filter(
           (game) =>
             game.whiteParticipantId === participant.id ||
             game.blackParticipantId === participant.id,
         );
 
-        const fide = fideDataByParticipantId.get(participant.id);
+        const dsbPerson = participant.dsbPersonId
+          ? await getDsbPersonById(participant.dsbPersonId)
+          : null;
+        const { fideId, fideRating } = resolveFideData(participant, dsbPerson);
         invariant(
-          fide?.fideId != null,
+          fideId != null,
           `Participant ${participant.id} does not have a FIDE ID`,
         );
         invariant(
-          fide.fideRating != null,
+          fideRating != null,
           `Participant ${participant.id} does not have a FIDE rating`,
         );
         invariant(
@@ -165,9 +156,9 @@ export const generateFideReportFile = action(
             participant.profile.lastName,
             participant.profile.academicTitle,
           ),
-          fideRating: fide.fideRating,
-          fideNation: participant.nationality!,
-          fideId: fide.fideId,
+          fideRating,
+          fideNation: participant.nationality,
+          fideId,
           birthDate: `${participant.birthYear}/00/00`,
           points: currentPoints,
           rank: currentGroupPosition,
@@ -185,7 +176,7 @@ export const generateFideReportFile = action(
             };
           }),
         } satisfies PlayerEntry;
-      },
+      }),
     );
 
     // 012
@@ -201,9 +192,7 @@ export const generateFideReportFile = action(
     // 062
     const numberOfPlayers = data.participants.length;
     // 072
-    const numberOfRatedPlayers = [...fideDataByParticipantId.values()].filter(
-      (fide) => fide.fideId != null,
-    ).length;
+    const numberOfRatedPlayers = numberOfPlayers;
     // 092
     const tournamentType = "Individual round robin";
     // 102

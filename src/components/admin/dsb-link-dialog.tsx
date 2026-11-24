@@ -15,6 +15,7 @@ import { linkParticipantDsb } from "@/actions/participant";
 import { isError } from "@/lib/actions";
 import { getFullName } from "@/lib/participant";
 import type { DsbPlayerCandidate } from "@/lib/dsb/types";
+import { ELO_MISSING_AT_DSB_WARNING } from "@/lib/dsb/ratings";
 
 type Props = {
   participantId: number;
@@ -59,9 +60,7 @@ export function DsbLinkDialog({
           `${fullName} verknüpft${ratings.length > 0 ? ` · ${ratings.join(" · ")}` : ""}`,
         );
         if (linked.eloMissingAtDsb) {
-          toast.warning(
-            "DSB liefert keine Standard-Elo – gespeicherte Elo prüfen",
-          );
+          toast.warning(ELO_MISSING_AT_DSB_WARNING);
         }
         onOpenChange(false);
         router.refresh();

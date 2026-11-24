@@ -10,6 +10,7 @@ import {
   primaryKey,
 } from "drizzle-orm/pg-core";
 import { profile } from "./profile";
+import type { Title } from "../../lib/title";
 import { matchDay, timestamps, gender } from "./columns.helpers";
 import { group } from "./group";
 
@@ -22,7 +23,7 @@ export const participant = pgTable(
     tournamentId: integer("tournament_id").notNull(),
 
     chessClub: text("chess_club").notNull(),
-    title: text("title"),
+    title: text("title").$type<Title>(),
     nationality: text("nationality"),
     gender: gender("gender").default("m"),
     dwzRating: integer("dwz_rating"),

@@ -1,6 +1,7 @@
 import { CLUBLESS_KEY, DEFAULT_CLUB_KEY } from "@/constants/constants";
 import { availableMatchDays } from "@/db/schema/columns.helpers";
 import { hasSecondaryMatchDayConflict } from "@/lib/match-days";
+import { TITLES } from "@/lib/title";
 import {
   getCurrentLocalDateTime,
   isValidDateOnly,
@@ -16,7 +17,7 @@ export const participantFormSchema = z
       errorMap: () => ({ message: "Schachverein ist erforderlich" }),
     }),
     chessClub: z.string().optional(),
-    title: z.string().optional(),
+    title: z.enum(TITLES).optional(),
     gender: z.enum(["m", "f"]).optional(),
     dwzRating: z.coerce
       .number()

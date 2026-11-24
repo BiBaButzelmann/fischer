@@ -1,12 +1,15 @@
+import type { Participant } from "@/db/types/participant";
 import type { DsbPerson } from "./types";
 
-export type Change<T> = { previous: T | null; next: T };
+export const ELO_MISSING_AT_DSB_WARNING =
+  "DSB liefert keine Standard-Elo – gespeicherte Elo prüfen";
 
-export type StoredRatings = {
-  dwzRating: number | null;
-  fideRating: number | null;
-  fideId: string | null;
-};
+export type StoredRatings = Pick<
+  Participant,
+  "dwzRating" | "fideRating" | "fideId"
+>;
+
+export type Change<T> = { previous: T | null; next: T };
 
 export type DsbRatingDiff = {
   dwz: Change<number> | null;
@@ -15,23 +18,38 @@ export type DsbRatingDiff = {
   eloMissingAtDsb: boolean;
 };
 
+export type DsbRatingOutcome = "updated" | "unchanged" | "withoutRating";
+
 export function diffDsbRatings(
   stored: StoredRatings,
   person: DsbPerson,
 ): DsbRatingDiff {
-  const dsbFideId = person.fideId != null ? String(person.fideId) : null;
-  const dsbElo = person.fideRatingStandard ?? null;
+  const dsb = toDsbRatings(person);
   return {
     dwz:
-      person.rating != null
-        ? { previous: stored.dwzRating, next: person.rating }
+      dsb.dwzRating != null
+        ? { previous: stored.dwzRating, next: dsb.dwzRating }
         : null,
-    elo: dsbElo != null ? { previous: stored.fideRating, next: dsbElo } : null,
+    elo:
+      dsb.fideRating != null
+        ? { previous: stored.fideRating, next: dsb.fideRating }
+        : null,
     fideId:
-      dsbFideId != null && dsbFideId !== stored.fideId
-        ? { previous: stored.fideId, next: dsbFideId }
+      dsb.fideId != null && dsb.fideId !== stored.fideId
+        ? { previous: stored.fideId, next: dsb.fideId }
         : null,
-    eloMissingAtDsb: dsbElo == null && stored.fideRating != null,
+    eloMissingAtDsb: dsb.fideRating == null && stored.fideRating != null,
+  };
+}
+
+export function resolveFideData(
+  stored: StoredRatings,
+  person: DsbPerson | null,
+): Pick<StoredRatings, "fideId" | "fideRating"> {
+  const dsb = person != null ? toDsbRatings(person) : null;
+  return {
+    fideId: dsb?.fideId ?? stored.fideId,
+    fideRating: dsb?.fideRating ?? stored.fideRating,
   };
 }
 
@@ -45,16 +63,22 @@ export function toStoredRatingUpdate(
   };
 }
 
-export function hasRatingData(diff: DsbRatingDiff): boolean {
-  return diff.dwz != null || diff.elo != null || diff.fideId != null;
+export function getRatingOutcome(diff: DsbRatingDiff): DsbRatingOutcome {
+  const changes = [diff.dwz, diff.elo, diff.fideId].filter(
+    (change) => change != null,
+  );
+  if (changes.length === 0) {
+    return "withoutRating";
+  }
+  return changes.some((change) => change.previous !== change.next)
+    ? "updated"
+    : "unchanged";
 }
 
-export function currentFideData(
-  stored: StoredRatings,
-  diff: DsbRatingDiff | null,
-): { fideId: string | null; fideRating: number | null } {
+function toDsbRatings(person: DsbPerson): StoredRatings {
   return {
-    fideId: diff?.fideId?.next ?? stored.fideId,
-    fideRating: diff?.elo?.next ?? stored.fideRating,
+    dwzRating: person.rating ?? null,
+    fideRating: person.fideRatingStandard ?? null,
+    fideId: person.fideId != null ? String(person.fideId) : null,
   };
 }

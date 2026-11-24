@@ -1,8 +1,8 @@
 import { describe, expect, it } from "vitest";
 import {
-  currentFideData,
   diffDsbRatings,
-  hasRatingData,
+  getRatingOutcome,
+  resolveFideData,
   toStoredRatingUpdate,
   type StoredRatings,
 } from "./ratings";
@@ -63,7 +63,12 @@ describe("diffDsbRatings", () => {
   it("reports nothing when the DSB has no ratings", () => {
     const diff = diffDsbRatings(
       { dwzRating: null, fideRating: null, fideId: null },
-      { ...person, rating: null, fideId: null, fideRatingStandard: undefined },
+      {
+        ...person,
+        rating: undefined,
+        fideId: undefined,
+        fideRatingStandard: undefined,
+      },
     );
     expect(diff).toEqual({
       dwz: null,
@@ -71,7 +76,29 @@ describe("diffDsbRatings", () => {
       fideId: null,
       eloMissingAtDsb: false,
     });
-    expect(hasRatingData(diff)).toBe(false);
+  });
+});
+
+describe("getRatingOutcome", () => {
+  it("is updated when a DSB value differs from the stored one", () => {
+    expect(getRatingOutcome(diffDsbRatings(stored, person))).toBe("updated");
+  });
+
+  it("is unchanged when the DSB confirms every stored value", () => {
+    const confirmed = { dwzRating: 2073, fideRating: 2053, fideId: "1234567" };
+    expect(getRatingOutcome(diffDsbRatings(confirmed, person))).toBe(
+      "unchanged",
+    );
+  });
+
+  it("is withoutRating when the DSB delivers nothing", () => {
+    const diff = diffDsbRatings(stored, {
+      ...person,
+      rating: undefined,
+      fideId: undefined,
+      fideRatingStandard: undefined,
+    });
+    expect(getRatingOutcome(diff)).toBe("withoutRating");
   });
 });
 
@@ -79,7 +106,7 @@ describe("toStoredRatingUpdate", () => {
   it("contains only the values the DSB delivered", () => {
     const diff = diffDsbRatings({ ...stored, fideId: null }, {
       ...person,
-      rating: null,
+      rating: undefined,
     });
     expect(toStoredRatingUpdate(diff)).toEqual({
       fideRating: 2053,
@@ -88,17 +115,25 @@ describe("toStoredRatingUpdate", () => {
   });
 });
 
-describe("currentFideData", () => {
+describe("resolveFideData", () => {
   it("prefers the DSB values", () => {
-    const diff = diffDsbRatings({ ...stored, fideId: null }, person);
-    expect(currentFideData(stored, diff)).toEqual({
+    expect(resolveFideData({ ...stored, fideId: null }, person)).toEqual({
       fideId: "1234567",
       fideRating: 2053,
     });
   });
 
-  it("falls back to the stored values without DSB data", () => {
-    expect(currentFideData(stored, null)).toEqual({
+  it("keeps stored values the DSB does not deliver", () => {
+    expect(
+      resolveFideData(stored, { ...person, fideRatingStandard: undefined }),
+    ).toEqual({
+      fideId: "1234567",
+      fideRating: 2056,
+    });
+  });
+
+  it("falls back to the stored values without a DSB person", () => {
+    expect(resolveFideData(stored, null)).toEqual({
       fideId: "1234567",
       fideRating: 2056,
     });

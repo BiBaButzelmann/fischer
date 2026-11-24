@@ -11,6 +11,7 @@ export type DsbMembership = {
 
 export type DsbGender = "MALE" | "FEMALE";
 
+// The Wertungsportal omits absent values instead of sending null.
 export type DsbPerson = {
   uuid: string;
   nuLigaPersonId: string;
@@ -18,15 +19,15 @@ export type DsbPerson = {
   lastname: string;
   birthyear: number | null;
   gender: DsbGender | null;
-  fideId: number | null;
-  rating: number | null;
-  index: number | null;
+  fideId?: number;
+  rating?: number;
+  index?: number;
   memberships: DsbMembership[];
-  weekOfLastTournamentEvaluation: string | null;
-  fideRatingStandard?: number | null;
-  fideCountry?: string | null;
-  fideTitle?: string | null;
-  fideWomenTitle?: string | null;
+  weekOfLastTournamentEvaluation?: string;
+  fideRatingStandard?: number;
+  fideCountry?: string;
+  fideTitle?: string;
+  fideWomenTitle?: string;
 };
 
 export type DsbPlayerCandidate = {

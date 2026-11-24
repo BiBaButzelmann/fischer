@@ -38,6 +38,7 @@ import { Participant } from "@/db/types/participant";
 import type { PromotionEligibility } from "@/services/promotion";
 import { isError } from "@/lib/actions";
 import type { DsbPlayerCandidate } from "@/lib/dsb/types";
+import { candidateToFormValues } from "@/lib/dsb/candidate";
 import { toast } from "sonner";
 
 type Props = {
@@ -302,7 +303,7 @@ function buildParticipantInitialValues(
     return {
       chessClubType: chessClubTypeForLabel(current.chessClub),
       chessClub: current.chessClub,
-      title: current.title ?? "noTitle",
+      title: current.title ?? undefined,
       gender: current.gender ?? undefined,
       nationality: current.nationality ?? undefined,
       dwzRating: current.dwzRating ?? undefined,
@@ -318,26 +319,26 @@ function buildParticipantInitialValues(
   }
 
   if (previous) {
-    return {
+    const fromPrevious: z.infer<typeof participantFormSchema> = {
       chessClubType: chessClubTypeForLabel(previous.chessClub),
       chessClub: previous.chessClub,
-      title: candidate?.title ?? previous.title ?? "noTitle",
-      gender: candidate?.gender ?? previous.gender ?? undefined,
-      nationality: candidate?.nationality ?? previous.nationality ?? undefined,
-      dwzRating: candidate?.dwzRating ?? undefined,
-      fideRating: candidate?.fideRating ?? undefined,
-      fideId: candidate?.fideId ?? previous.fideId ?? undefined,
-      birthYear: candidate?.birthYear ?? previous.birthYear ?? undefined,
+      title: previous.title ?? undefined,
+      gender: previous.gender ?? undefined,
+      nationality: previous.nationality ?? undefined,
+      fideId: previous.fideId ?? undefined,
+      birthYear: previous.birthYear ?? undefined,
       birthDate: previous.birthDate ?? undefined,
       preferredMatchDay: previous.preferredMatchDay,
       secondaryMatchDays: previous.secondaryMatchDays,
-      dsbPersonId:
-        candidate?.nuLigaPersonId ?? previous.dsbPersonId ?? undefined,
+      dsbPersonId: previous.dsbPersonId ?? undefined,
       zpsClub: previous.zpsClubId ?? undefined,
       zpsPlayer: previous.zpsPlayerId ?? undefined,
       notAvailableDays: [],
       exercisePromotionRight: false,
     };
+    return candidate != null
+      ? { ...fromPrevious, ...candidateToFormValues(candidate, fromPrevious) }
+      : fromPrevious;
   }
 
   return undefined;

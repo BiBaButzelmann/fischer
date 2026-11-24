@@ -1,3 +1,5 @@
+import type z from "zod";
+import type { participantFormSchema } from "@/schema/participant";
 import { isTitle, type Title } from "@/lib/title";
 import type {
   DsbGender,
@@ -5,6 +7,16 @@ import type {
   DsbPerson,
   DsbPlayerCandidate,
 } from "./types";
+
+type ParticipantFormValues = z.infer<typeof participantFormSchema>;
+
+type PersonFormFields = Pick<
+  ParticipantFormValues,
+  "fideId" | "title" | "gender" | "nationality" | "birthYear"
+>;
+
+type DsbFormFields = PersonFormFields &
+  Pick<ParticipantFormValues, "dsbPersonId" | "dwzRating" | "fideRating">;
 
 export function transliterateGermanUmlauts(value: string): string {
   return value
@@ -36,12 +48,6 @@ export function mapDsbGender(gender: DsbGender | null): "m" | "f" | null {
   return null;
 }
 
-export function selectFideTitle(
-  person: Pick<DsbPerson, "fideTitle" | "fideWomenTitle">,
-): Title | null {
-  return [person.fideTitle, person.fideWomenTitle].find(isTitle) ?? null;
-}
-
 export function mapDsbPersonToCandidate(person: DsbPerson): DsbPlayerCandidate {
   const primaryMembership = selectPrimaryMembership(person.memberships);
   return {
@@ -49,7 +55,7 @@ export function mapDsbPersonToCandidate(person: DsbPerson): DsbPlayerCandidate {
     firstName: person.firstname,
     lastName: person.lastname,
     birthYear: person.birthyear,
-    dwzRating: person.rating,
+    dwzRating: person.rating ?? null,
     fideId: person.fideId != null ? String(person.fideId) : null,
     fideRating: person.fideRatingStandard ?? null,
     nationality: person.fideCountry ?? null,
@@ -57,4 +63,24 @@ export function mapDsbPersonToCandidate(person: DsbPerson): DsbPlayerCandidate {
     gender: mapDsbGender(person.gender),
     clubName: primaryMembership?.clubName ?? null,
   };
+}
+
+export function candidateToFormValues(
+  candidate: DsbPlayerCandidate,
+  fallback: PersonFormFields,
+): DsbFormFields {
+  return {
+    dsbPersonId: candidate.nuLigaPersonId,
+    dwzRating: candidate.dwzRating ?? undefined,
+    fideRating: candidate.fideRating ?? undefined,
+    fideId: candidate.fideId ?? fallback.fideId,
+    title: candidate.title ?? fallback.title,
+    gender: candidate.gender ?? fallback.gender,
+    nationality: candidate.nationality ?? fallback.nationality,
+    birthYear: candidate.birthYear ?? fallback.birthYear,
+  };
+}
+
+function selectFideTitle(person: DsbPerson): Title | null {
+  return [person.fideTitle, person.fideWomenTitle].find(isTitle) ?? null;
 }

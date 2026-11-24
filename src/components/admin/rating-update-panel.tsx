@@ -7,7 +7,12 @@ import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
 import { updateParticipantFromDsb } from "@/actions/participant";
 import { isError } from "@/lib/actions";
-import { hasRatingData, type Change } from "@/lib/dsb/ratings";
+import {
+  ELO_MISSING_AT_DSB_WARNING,
+  getRatingOutcome,
+  type Change,
+  type DsbRatingOutcome,
+} from "@/lib/dsb/ratings";
 import { ParticipantWithName } from "@/db/types/participant";
 import { compareByName, getParticipantFullName } from "@/lib/participant";
 
@@ -24,7 +29,7 @@ type LogLine = {
   text: string;
 };
 
-type Outcome = "updated" | "failed" | "withoutRating";
+type Outcome = DsbRatingOutcome | "failed";
 
 type Summary = Record<Outcome, number> & { unlinked: number };
 
@@ -139,24 +144,22 @@ export function RatingUpdatePanel({ participants }: Props) {
           continue;
         }
 
-        if (hasRatingData(result)) {
-          outcomes.set(entry.participantId, "updated");
+        const outcome = getRatingOutcome(result);
+        outcomes.set(entry.participantId, outcome);
+        if (outcome === "withoutRating") {
+          appendIssue(
+            `${entry.name} · DSB-Person ${entry.dsbPersonId} gefunden, aber ohne Wertung`,
+          );
+        } else {
           const parts = [
             result.dwz ? formatChange("DWZ", result.dwz) : "DWZ –",
             result.elo ? formatChange("Elo", result.elo) : null,
             result.fideId ? formatChange("FIDE-ID", result.fideId) : null,
           ].filter(Boolean);
           appendLine("normal", `${entry.name} · ${parts.join(" · ")}`);
-        } else {
-          outcomes.set(entry.participantId, "withoutRating");
-          appendIssue(
-            `${entry.name} · DSB-Person ${entry.dsbPersonId} gefunden, aber ohne Wertung`,
-          );
         }
         if (result.eloMissingAtDsb) {
-          appendIssue(
-            `${entry.name} · DSB liefert keine Standard-Elo – gespeicherte Elo prüfen`,
-          );
+          appendIssue(`${entry.name} · ${ELO_MISSING_AT_DSB_WARNING}`);
         }
       }
 
@@ -174,6 +177,7 @@ export function RatingUpdatePanel({ participants }: Props) {
 
       const runSummary: Summary = {
         updated: 0,
+        unchanged: 0,
         failed: 0,
         withoutRating: 0,
         unlinked: unlinked.length,
@@ -190,7 +194,7 @@ export function RatingUpdatePanel({ participants }: Props) {
       }
       appendLine(
         "muted",
-        `Fertig · ${runSummary.updated} aktualisiert, ${runSummary.failed} fehlgeschlagen, ${runSummary.withoutRating} ohne Wertung, ${runSummary.unlinked} ohne DSB-Verknüpfung`,
+        `Fertig · ${runSummary.updated} aktualisiert, ${runSummary.unchanged} unverändert, ${runSummary.failed} fehlgeschlagen, ${runSummary.withoutRating} ohne Wertung, ${runSummary.unlinked} ohne DSB-Verknüpfung`,
       );
       toast.info(
         `${runSummary.updated} von ${entries.length} Wertungszahlen aktualisiert`,
@@ -211,7 +215,7 @@ export function RatingUpdatePanel({ participants }: Props) {
           {isRunning
             ? progress
             : summary != null
-              ? `Aktualisiert ${summary.updated} · Fehlgeschlagen ${summary.failed} · Ohne Wertung ${summary.withoutRating} · Ohne DSB-Verknüpfung ${summary.unlinked}`
+              ? `Aktualisiert ${summary.updated} · Unverändert ${summary.unchanged} · Fehlgeschlagen ${summary.failed} · Ohne Wertung ${summary.withoutRating} · Ohne DSB-Verknüpfung ${summary.unlinked}`
               : null}
         </div>
         <div className="flex items-center gap-2">

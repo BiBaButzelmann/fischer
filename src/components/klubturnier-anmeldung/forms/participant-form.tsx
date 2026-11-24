@@ -45,7 +45,8 @@ import { DwzPlayerSelect } from "./dwz-player-select";
 import { RoleFormActions } from "./role-form-actions";
 import { HSK_VKZ } from "@/lib/dsb/constants";
 import type { DsbPlayerCandidate } from "@/lib/dsb/types";
-import { TITLES } from "@/lib/title";
+import { candidateToFormValues } from "@/lib/dsb/candidate";
+import { isTitle, TITLES } from "@/lib/title";
 import { toast } from "sonner";
 import { Profile } from "@/db/types/profile";
 import {
@@ -57,6 +58,8 @@ import {
 import { Switch } from "@/components/ui/switch";
 import type { PromotionEligibility } from "@/services/promotion";
 import { track } from "@vercel/analytics";
+
+const NO_TITLE_OPTION = "noTitle";
 
 type Props = {
   initialValues?: z.infer<typeof participantFormSchema>;
@@ -117,21 +120,18 @@ export function ParticipateForm({
 
   const handleDsbCandidateSelect = useCallback(
     (candidate: DsbPlayerCandidate) => {
-      form.setValue("dsbPersonId", candidate.nuLigaPersonId);
-      form.setValue("dwzRating", candidate.dwzRating ?? undefined);
-      form.setValue("birthYear", candidate.birthYear ?? undefined);
-      form.setValue("gender", candidate.gender ?? undefined);
-      form.setValue("fideId", candidate.fideId ?? undefined);
-      form.setValue("fideRating", candidate.fideRating ?? undefined);
-      if (candidate.nationality != null) {
-        form.setValue("nationality", candidate.nationality);
-      }
-      if (candidate.title != null) {
-        form.setValue("title", candidate.title);
-      }
+      const values = candidateToFormValues(candidate, initialValues ?? {});
+      form.setValue("dsbPersonId", values.dsbPersonId);
+      form.setValue("dwzRating", values.dwzRating);
+      form.setValue("fideRating", values.fideRating);
+      form.setValue("fideId", values.fideId);
+      form.setValue("title", values.title);
+      form.setValue("gender", values.gender);
+      form.setValue("nationality", values.nationality);
+      form.setValue("birthYear", values.birthYear);
       toast.success("Deine Daten wurden aus der DSB-Datenbank übernommen.");
     },
-    [form],
+    [form, initialValues],
   );
 
   const handlePreferredMatchDayChange = (value: DayOfWeek) => {
@@ -369,15 +369,18 @@ export function ParticipateForm({
                     <FormLabel>Titel</FormLabel>
                     <FormControl>
                       <Select
-                        defaultValue="noTitle"
-                        value={field.value}
-                        onValueChange={field.onChange}
+                        value={field.value ?? NO_TITLE_OPTION}
+                        onValueChange={(value) =>
+                          field.onChange(isTitle(value) ? value : undefined)
+                        }
                       >
                         <SelectTrigger>
                           <SelectValue placeholder="Titel" />
                         </SelectTrigger>
                         <SelectContent>
-                          <SelectItem value="noTitle">Kein Titel</SelectItem>
+                          <SelectItem value={NO_TITLE_OPTION}>
+                            Kein Titel
+                          </SelectItem>
                           {TITLES.map((title) => (
                             <SelectItem key={title} value={title}>
                               {title}

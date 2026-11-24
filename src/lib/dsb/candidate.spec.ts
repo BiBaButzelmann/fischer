@@ -1,8 +1,8 @@
 import { describe, it, expect } from "vitest";
 import {
+  candidateToFormValues,
   mapDsbGender,
   mapDsbPersonToCandidate,
-  selectFideTitle,
   selectPrimaryMembership,
   transliterateGermanUmlauts,
 } from "./candidate";
@@ -86,30 +86,6 @@ describe("mapDsbGender", () => {
   });
 });
 
-describe("selectFideTitle", () => {
-  it("prefers the open title over the women's title", () => {
-    expect(selectFideTitle({ fideTitle: "GM", fideWomenTitle: "WGM" })).toBe(
-      "GM",
-    );
-  });
-
-  it("falls back to the women's title", () => {
-    expect(selectFideTitle({ fideTitle: null, fideWomenTitle: "WIM" })).toBe(
-      "WIM",
-    );
-  });
-
-  it("ignores titles the app does not support", () => {
-    expect(selectFideTitle({ fideTitle: "AGM", fideWomenTitle: undefined })).toBeNull();
-  });
-
-  it("skips an unsupported open title in favour of a supported women's title", () => {
-    expect(selectFideTitle({ fideTitle: "AGM", fideWomenTitle: "WIM" })).toBe(
-      "WIM",
-    );
-  });
-});
-
 describe("mapDsbPersonToCandidate", () => {
   it("maps an API person to a UI candidate", () => {
     expect(mapDsbPersonToCandidate(person)).toEqual({
@@ -130,8 +106,8 @@ describe("mapDsbPersonToCandidate", () => {
   it("keeps missing ratings, fide data and club as null", () => {
     const candidate = mapDsbPersonToCandidate({
       ...person,
-      fideId: null,
-      rating: null,
+      fideId: undefined,
+      rating: undefined,
       fideRatingStandard: undefined,
       fideCountry: undefined,
       fideTitle: undefined,
@@ -143,5 +119,85 @@ describe("mapDsbPersonToCandidate", () => {
     expect(candidate.nationality).toBeNull();
     expect(candidate.title).toBeNull();
     expect(candidate.clubName).toBeNull();
+  });
+
+  it("prefers the open title over the women's title", () => {
+    const candidate = mapDsbPersonToCandidate({
+      ...person,
+      fideTitle: "GM",
+      fideWomenTitle: "WGM",
+    });
+    expect(candidate.title).toBe("GM");
+  });
+
+  it("falls back to the women's title", () => {
+    const candidate = mapDsbPersonToCandidate({
+      ...person,
+      fideTitle: undefined,
+      fideWomenTitle: "WIM",
+    });
+    expect(candidate.title).toBe("WIM");
+  });
+
+  it("ignores titles the app does not support", () => {
+    const candidate = mapDsbPersonToCandidate({
+      ...person,
+      fideTitle: "AGM",
+      fideWomenTitle: undefined,
+    });
+    expect(candidate.title).toBeNull();
+  });
+
+  it("skips an unsupported open title in favour of a supported women's title", () => {
+    const candidate = mapDsbPersonToCandidate({
+      ...person,
+      fideTitle: "AGM",
+      fideWomenTitle: "WIM",
+    });
+    expect(candidate.title).toBe("WIM");
+  });
+});
+
+describe("candidateToFormValues", () => {
+  const fallback = {
+    fideId: "1234567",
+    title: "IM",
+    gender: "f",
+    nationality: "AUT",
+    birthYear: 1980,
+  } as const;
+
+  it("takes every value the DSB delivers", () => {
+    expect(
+      candidateToFormValues(mapDsbPersonToCandidate(person), fallback),
+    ).toEqual({
+      dsbPersonId: "NU4211295",
+      dwzRating: 1764,
+      fideRating: 1802,
+      fideId: "20660391",
+      title: "FM",
+      gender: "m",
+      nationality: "GER",
+      birthYear: 1962,
+    });
+  });
+
+  it("keeps person data the DSB lacks but never falls back for ratings", () => {
+    const candidate = mapDsbPersonToCandidate({
+      ...person,
+      birthyear: null,
+      gender: null,
+      fideId: undefined,
+      rating: undefined,
+      fideRatingStandard: undefined,
+      fideCountry: undefined,
+      fideTitle: undefined,
+    });
+    expect(candidateToFormValues(candidate, fallback)).toEqual({
+      dsbPersonId: "NU4211295",
+      dwzRating: undefined,
+      fideRating: undefined,
+      ...fallback,
+    });
   });
 });

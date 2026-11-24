@@ -83,7 +83,7 @@ export const createParticipant = action(async (
 
   const values = {
     chessClub,
-    title: data.title === "noTitle" ? null : data.title,
+    title: data.title ?? null,
     gender: data.gender,
     dwzRating: data.dwzRating,
     fideRating: data.fideRating,
@@ -181,16 +181,16 @@ async function writeDsbRatings(
   participantId: number,
   stored: StoredRatings,
   person: DsbPerson,
-  link: { dsbPersonId?: string } = {},
 ): Promise<DsbRatingDiff> {
   const diff = diffDsbRatings(stored, person);
-  const values = { ...toStoredRatingUpdate(diff), ...link };
-  if (Object.keys(values).length > 0) {
-    await db
-      .update(participant)
-      .set({ ...values, updatedAt: new Date() })
-      .where(eq(participant.id, participantId));
-  }
+  await db
+    .update(participant)
+    .set({
+      ...toStoredRatingUpdate(diff),
+      dsbPersonId: person.nuLigaPersonId,
+      updatedAt: new Date(),
+    })
+    .where(eq(participant.id, participantId));
   return diff;
 }
 
@@ -235,9 +235,7 @@ export const linkParticipantDsb = action(
       throw new ActionError("DSB-Person nicht gefunden");
     }
 
-    const diff = await writeDsbRatings(participantId, current, person, {
-      dsbPersonId: person.nuLigaPersonId,
-    });
+    const diff = await writeDsbRatings(participantId, current, person);
 
     revalidatePath("/turniere/[slug]/admin/nutzerverwaltung", "page");
     return diff;
