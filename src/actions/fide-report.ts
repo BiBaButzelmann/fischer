@@ -140,13 +140,17 @@ export const generateFideReportFile = action(
           nationality != null,
           `Participant ${participant.id} does not have a nationality`,
         );
+        invariant(
+          gender != null,
+          `Participant ${participant.id} does not have a gender`,
+        );
 
         const currentGroupPosition = getGroupPositionOfPlayer(participant.id);
         const currentPoints = getPointsOfPlayer(participant.id);
 
         return {
           startingPosition: groupPosition,
-          gender: gender ?? undefined,
+          gender,
           title: title ?? "",
           name: formatPlayerName(
             participant.profile.firstName,
