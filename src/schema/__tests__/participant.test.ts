@@ -101,27 +101,17 @@ describe("participantFormSchema ratings and FIDE data", () => {
   }
 
   test("rejects 0 as a rating", () => {
-    expect(errorPaths({ dwzRating: 0, fideRating: 0 })).toEqual(
-      expect.arrayContaining(["dwzRating", "fideRating"]),
-    );
-  });
-
-  test("requires a FIDE ID when an Elo is given", () => {
-    expect(
-      errorPaths({ fideRating: 1800, nationality: "GER", birthYear: 1990 }),
-    ).toEqual(["fideId"]);
-  });
-
-  test("requires nationality and birth year for a FIDE ID without Elo", () => {
-    expect(errorPaths({ fideId: "4467248" })).toEqual([
-      "nationality",
-      "birthYear",
+    expect(errorPaths({ dwzRating: 0, fideRating: 0 })).toEqual([
+      "dwzRating",
+      "fideRating",
     ]);
   });
 
-  test("accepts a FIDE ID without Elo", () => {
-    expect(
-      errorPaths({ fideId: "4467248", nationality: "GER", birthYear: 1990 }),
-    ).toEqual([]);
+  test("accepts an Elo without further FIDE data", () => {
+    expect(errorPaths({ fideRating: 1800 })).toEqual([]);
+  });
+
+  test("accepts a FIDE ID without Elo and without further FIDE data", () => {
+    expect(errorPaths({ fideId: "4467248" })).toEqual([]);
   });
 });

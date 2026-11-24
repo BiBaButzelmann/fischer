@@ -426,7 +426,7 @@ export function ParticipateForm({
                 name="fideRating"
                 render={({ field }) => (
                   <FormItem className="flex-1">
-                    <FormLabel required={fideRating != null}>Elo</FormLabel>
+                    <FormLabel>Elo</FormLabel>
                     <FormControl>
                       <Input
                         type="number"
@@ -445,7 +445,7 @@ export function ParticipateForm({
                     <FormMessage />
                     <FormDescription>
                       Wer in den A-, B- und C-Gruppen spielen möchte, muss seine
-                      Elo angeben.
+                      FIDE-ID angeben.
                     </FormDescription>
                   </FormItem>
                 )}
@@ -460,14 +460,14 @@ export function ParticipateForm({
           </div>
         ) : null}
 
-        {fideRating != null || hasFideId ? (
+        {chessClubType != null ? (
           <div className="flex gap-4">
             <FormField
               control={form.control}
               name="fideId"
               render={({ field }) => (
                 <FormItem>
-                  <FormLabel required>FIDE ID</FormLabel>
+                  <FormLabel>FIDE ID</FormLabel>
                   <FormControl>
                     <Input
                       id="fideId"
@@ -490,45 +490,49 @@ export function ParticipateForm({
                 </FormItem>
               )}
             />
-            <FormField
-              control={form.control}
-              name="nationality"
-              render={({ field }) => (
-                <FormItem className="flex-grow">
-                  <FormLabel required>Nationalität</FormLabel>
-                  <FormControl>
-                    <CountryDropdown
-                      defaultValue={field.value || undefined}
-                      onChange={(c) => field.onChange(c.ioc)}
-                      placeholder="Land wählen"
-                    />
-                  </FormControl>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
-            <FormField
-              control={form.control}
-              name="birthYear"
-              render={({ field }) => (
-                <FormItem className="w-32">
-                  <FormLabel required>Geburtsjahr</FormLabel>
-                  <FormControl>
-                    <Input
-                      type="number"
-                      id="birthYear"
-                      placeholder="z.B. 1990"
-                      min="1900"
-                      max={new Date().getFullYear()}
-                      step="1"
-                      {...field}
-                      value={field.value ?? ""}
-                    />
-                  </FormControl>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
+            {fideRating != null || hasFideId ? (
+              <>
+                <FormField
+                  control={form.control}
+                  name="nationality"
+                  render={({ field }) => (
+                    <FormItem className="flex-grow">
+                      <FormLabel>Nationalität</FormLabel>
+                      <FormControl>
+                        <CountryDropdown
+                          defaultValue={field.value || undefined}
+                          onChange={(c) => field.onChange(c.ioc)}
+                          placeholder="Land wählen"
+                        />
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+                <FormField
+                  control={form.control}
+                  name="birthYear"
+                  render={({ field }) => (
+                    <FormItem className="w-32">
+                      <FormLabel>Geburtsjahr</FormLabel>
+                      <FormControl>
+                        <Input
+                          type="number"
+                          id="birthYear"
+                          placeholder="z.B. 1990"
+                          min="1900"
+                          max={new Date().getFullYear()}
+                          step="1"
+                          {...field}
+                          value={field.value ?? ""}
+                        />
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+              </>
+            ) : null}
           </div>
         ) : null}
         <FormField

@@ -73,35 +73,6 @@ export const participantFormSchema = z
       path: ["chessClub"],
     },
   )
-  .refine((data) => data.fideRating == null || hasFideId(data.fideId), {
-    message: "FIDE-ID ist erforderlich, wenn Elo angegeben ist",
-    path: ["fideId"],
-  })
-  .refine(
-    (data) =>
-      !hasFideId(data.fideId) ||
-      (!!data.nationality && data.nationality.trim().length === 3),
-    {
-      message: "Nationalität ist erforderlich, wenn eine FIDE-ID angegeben ist",
-      path: ["nationality"],
-    },
-  )
-  .refine(
-    (data) => {
-      if (!hasFideId(data.fideId) || data.birthDate != null) {
-        return true;
-      }
-      return (
-        !!data.birthYear &&
-        data.birthYear >= 1900 &&
-        data.birthYear <= getCurrentLocalDateTime().year
-      );
-    },
-    {
-      message: "Geburtsjahr ist erforderlich, wenn eine FIDE-ID angegeben ist",
-      path: ["birthYear"],
-    },
-  )
   .refine(
     (data) => {
       if (data.chessClubType === CLUBLESS_KEY) {
@@ -140,7 +111,3 @@ export const participantFormSchema = z
   );
 
 export type ParticipantFormValues = z.infer<typeof participantFormSchema>;
-
-function hasFideId(fideId: string | undefined): boolean {
-  return fideId != null && fideId.trim().length > 0;
-}
