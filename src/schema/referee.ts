@@ -8,7 +8,7 @@ export const refereeFormSchema = z
       errorMap: () => ({ message: "Bevorzugter Spieltag ist erforderlich" }),
     }),
     secondaryMatchDays: z.array(z.enum(availableMatchDays)),
-    fideId: z.string().min(1, "FIDE ID ist erforderlich"),
+    fideId: z.string().trim().min(1, "FIDE ID ist erforderlich"),
   })
   .refine(
     (data) =>

@@ -56,6 +56,10 @@ export const participant = pgTable(
     ),
     check("participant_dwz_rating_positive", sql`${table.dwzRating} > 0`),
     check("participant_fide_rating_positive", sql`${table.fideRating} > 0`),
+    check(
+      "participant_fide_id_trimmed",
+      sql`${table.fideId} = btrim(${table.fideId}) AND ${table.fideId} <> ''`,
+    ),
   ],
 );
 

@@ -55,7 +55,7 @@ export function generateDwzReport(input: DwzReportInput): string {
         ),
         fideRating: participant.fideRating ?? undefined,
         fideNation: participant.nationality?.trim() || CLUB_FEDERATION,
-        fideId: participant.fideId?.trim() || undefined,
+        fideId: participant.fideId ?? undefined,
         birthDate: formatBirthDate(participant),
         points: input.standings[standingsIndex].points,
         rank: standingsIndex + 1,
@@ -92,10 +92,7 @@ export function generateDwzReport(input: DwzReportInput): string {
 
 function getNumberOfRounds(input: DwzReportInput): number {
   if (input.games.length > 0) {
-    return Math.max(
-      Math.max(...input.games.map((game) => game.round)),
-      1,
-    );
+    return Math.max(Math.max(...input.games.map((game) => game.round)), 1);
   }
 
   return Math.max(nextEvenNumber(input.participants.length) - 1, 1);

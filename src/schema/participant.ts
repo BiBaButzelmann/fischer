@@ -24,7 +24,11 @@ export const participantFormSchema = z
     gender: z.enum(["m", "f"]).optional(),
     dwzRating: ratingSchema("DWZ muss größer als 0 sein"),
     fideRating: ratingSchema("Elo muss größer als 0 sein"),
-    fideId: z.string().optional(),
+    fideId: z
+      .string()
+      .trim()
+      .transform((id) => id || undefined)
+      .optional(),
     nationality: z
       .string()
       .length(3, "3-Buchstaben-Ländercode benötigt")

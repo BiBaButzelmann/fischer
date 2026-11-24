@@ -85,8 +85,7 @@ function toElo(fideRating: number | null): string | undefined {
 }
 
 function toFideId(fideId: string | null): string | undefined {
-  const id = fideId?.trim();
-  return id && /^\d+$/.test(id) ? id : undefined;
+  return fideId != null && /^\d+$/.test(fideId) ? fideId : undefined;
 }
 
 function toPgnPlayerName({

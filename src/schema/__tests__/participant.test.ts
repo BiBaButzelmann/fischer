@@ -114,4 +114,17 @@ describe("participantFormSchema ratings and FIDE data", () => {
   test("accepts a FIDE ID without Elo and without further FIDE data", () => {
     expect(errorPaths({ fideId: "4467248" })).toEqual([]);
   });
+
+  test("trims the FIDE ID", () => {
+    const result = participantFormSchema.parse({
+      ...validBase,
+      fideId: " 4467248 ",
+    });
+    expect(result.fideId).toBe("4467248");
+  });
+
+  test("treats a blank FIDE ID as missing", () => {
+    const result = participantFormSchema.parse({ ...validBase, fideId: "  " });
+    expect(result.fideId).toBeUndefined();
+  });
 });
