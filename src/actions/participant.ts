@@ -1,10 +1,9 @@
 "use server";
 
-import z from "zod";
 import { db } from "@/db/client";
 import invariant from "tiny-invariant";
 import { participant } from "@/db/schema/participant";
-import { participantFormSchema } from "@/schema/participant";
+import type { ParticipantFormValues } from "@/schema/participant";
 import { authWithRedirect } from "@/auth/utils";
 import { getTournamentById } from "@/db/repositories/tournament";
 import { getProfileByUserId } from "@/db/repositories/profile";
@@ -29,16 +28,17 @@ import { parseDateOnly } from "@/lib/date";
 import { getDsbPersonById, searchDsbPersons } from "@/lib/dsb/wertungsportal";
 import { mapDsbPersonToCandidate } from "@/lib/dsb/candidate";
 import {
-  diffDsbRatings,
-  toStoredRatingUpdate,
-  type DsbRatingDiff,
-  type StoredRatings,
+  mergeDsbRatings,
+  pickRatings,
+  type Ratings,
+  type RatingSync,
 } from "@/lib/dsb/ratings";
-import type { DsbPerson, DsbPlayerCandidate } from "@/lib/dsb/types";
+import type { DsbPlayerCandidate } from "@/lib/dsb/types";
+import type { Participant } from "@/db/types/participant";
 
 export const createParticipant = action(async (
   tournamentId: number,
-  data: z.infer<typeof participantFormSchema>,
+  data: ParticipantFormValues,
 ) => {
   invariant(
     !hasSecondaryMatchDayConflict(
@@ -177,23 +177,6 @@ export async function searchDsbPlayers(
   return persons.map(mapDsbPersonToCandidate);
 }
 
-async function writeDsbRatings(
-  participantId: number,
-  stored: StoredRatings,
-  person: DsbPerson,
-): Promise<DsbRatingDiff> {
-  const diff = diffDsbRatings(stored, person);
-  await db
-    .update(participant)
-    .set({
-      ...toStoredRatingUpdate(diff),
-      dsbPersonId: person.nuLigaPersonId,
-      updatedAt: new Date(),
-    })
-    .where(eq(participant.id, participantId));
-  return diff;
-}
-
 export const updateParticipantFromDsb = action(async (participantId: number) => {
   const session = await authWithRedirect();
 
@@ -202,20 +185,14 @@ export const updateParticipantFromDsb = action(async (participantId: number) => 
     "Unauthorized: Admin access required",
   );
 
-  const current = await getParticipantRatingFieldsById(participantId);
-  invariant(current != null, `Participant ${participantId} not found`);
+  const stored = await getParticipantRatingFieldsById(participantId);
+  invariant(stored != null, `Participant ${participantId} not found`);
   invariant(
-    current.dsbPersonId != null,
+    stored.dsbPersonId != null,
     `Participant ${participantId} has no DSB person id`,
   );
 
-  const person = await getDsbPersonById(current.dsbPersonId);
-  if (person == null) {
-    return { status: "dsbNotFound" } as const;
-  }
-
-  const diff = await writeDsbRatings(participantId, current, person);
-  return { status: "found", ...diff } as const;
+  return await syncDsbRatings(stored, stored.dsbPersonId);
 });
 
 export const linkParticipantDsb = action(
@@ -227,20 +204,39 @@ export const linkParticipantDsb = action(
       "Unauthorized: Admin access required",
     );
 
-    const current = await getParticipantRatingFieldsById(participantId);
-    invariant(current != null, `Participant ${participantId} not found`);
+    const stored = await getParticipantRatingFieldsById(participantId);
+    invariant(stored != null, `Participant ${participantId} not found`);
 
-    const person = await getDsbPersonById(nuLigaPersonId);
-    if (person == null) {
-      throw new ActionError("DSB-Person nicht gefunden");
-    }
-
-    const diff = await writeDsbRatings(participantId, current, person);
+    const result = await syncDsbRatings(stored, nuLigaPersonId);
 
     revalidatePath("/turniere/[slug]/admin/nutzerverwaltung", "page");
-    return diff;
+    return result;
   },
 );
+
+async function syncDsbRatings(
+  stored: Ratings & Pick<Participant, "id">,
+  nuLigaPersonId: string,
+) {
+  const person = await getDsbPersonById(nuLigaPersonId);
+  if (person == null) {
+    return { status: "dsbNotFound" } as const;
+  }
+
+  const sync: RatingSync = {
+    previous: pickRatings(stored),
+    dsb: pickRatings(mapDsbPersonToCandidate(person)),
+  };
+  await db
+    .update(participant)
+    .set({
+      ...mergeDsbRatings(sync),
+      dsbPersonId: person.nuLigaPersonId,
+      updatedAt: new Date(),
+    })
+    .where(eq(participant.id, stored.id));
+  return { status: "synced", ...sync } as const;
+}
 
 export async function updateEntryFeeStatus(
   participantId: number,

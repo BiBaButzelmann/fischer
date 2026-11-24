@@ -155,3 +155,5 @@ export const participantFormSchema = z
       path: ["secondaryMatchDays"],
     },
   );
+
+export type ParticipantFormValues = z.infer<typeof participantFormSchema>;

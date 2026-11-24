@@ -1,7 +1,5 @@
 import { describe, it, expect } from "vitest";
 import {
-  candidateToFormValues,
-  mapDsbGender,
   mapDsbPersonToCandidate,
   selectPrimaryMembership,
   transliterateGermanUmlauts,
@@ -27,7 +25,6 @@ const inactiveMembership: DsbMembership = {
 };
 
 const person: DsbPerson = {
-  uuid: "e921e96e-4ff8-11ee-a699-0050561f324c",
   nuLigaPersonId: "NU4211295",
   firstname: "Andre",
   lastname: "Martin",
@@ -35,9 +32,7 @@ const person: DsbPerson = {
   gender: "MALE",
   fideId: 20660391,
   rating: 1764,
-  index: 10,
   memberships: [activeMembership],
-  weekOfLastTournamentEvaluation: "202418",
   fideRatingStandard: 1802,
   fideCountry: "GER",
   fideTitle: "FM",
@@ -75,17 +70,6 @@ describe("transliterateGermanUmlauts", () => {
   });
 });
 
-describe("mapDsbGender", () => {
-  it("maps MALE and FEMALE to the domain gender", () => {
-    expect(mapDsbGender("MALE")).toBe("m");
-    expect(mapDsbGender("FEMALE")).toBe("f");
-  });
-
-  it("maps a missing gender to null", () => {
-    expect(mapDsbGender(null)).toBeNull();
-  });
-});
-
 describe("mapDsbPersonToCandidate", () => {
   it("maps an API person to a UI candidate", () => {
     expect(mapDsbPersonToCandidate(person)).toEqual({
@@ -101,6 +85,12 @@ describe("mapDsbPersonToCandidate", () => {
       gender: "m",
       clubName: "Glauchauer SC 1873",
     });
+  });
+
+  it("maps FEMALE to the domain gender", () => {
+    expect(
+      mapDsbPersonToCandidate({ ...person, gender: "FEMALE" }).gender,
+    ).toBe("f");
   });
 
   it("keeps missing ratings, fide data and club as null", () => {
@@ -155,49 +145,5 @@ describe("mapDsbPersonToCandidate", () => {
       fideWomenTitle: "WIM",
     });
     expect(candidate.title).toBe("WIM");
-  });
-});
-
-describe("candidateToFormValues", () => {
-  const fallback = {
-    fideId: "1234567",
-    title: "IM",
-    gender: "f",
-    nationality: "AUT",
-    birthYear: 1980,
-  } as const;
-
-  it("takes every value the DSB delivers", () => {
-    expect(
-      candidateToFormValues(mapDsbPersonToCandidate(person), fallback),
-    ).toEqual({
-      dsbPersonId: "NU4211295",
-      dwzRating: 1764,
-      fideRating: 1802,
-      fideId: "20660391",
-      title: "FM",
-      gender: "m",
-      nationality: "GER",
-      birthYear: 1962,
-    });
-  });
-
-  it("keeps person data the DSB lacks but never falls back for ratings", () => {
-    const candidate = mapDsbPersonToCandidate({
-      ...person,
-      birthyear: null,
-      gender: null,
-      fideId: undefined,
-      rating: undefined,
-      fideRatingStandard: undefined,
-      fideCountry: undefined,
-      fideTitle: undefined,
-    });
-    expect(candidateToFormValues(candidate, fallback)).toEqual({
-      dsbPersonId: "NU4211295",
-      dwzRating: undefined,
-      fideRating: undefined,
-      ...fallback,
-    });
   });
 });

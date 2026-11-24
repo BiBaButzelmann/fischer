@@ -13,7 +13,7 @@ import { hasAnyRole, RolesData } from "@/db/types/role";
 import { Tournament } from "@/db/types/tournament";
 import { useState, useTransition } from "react";
 import { z } from "zod";
-import { participantFormSchema } from "@/schema/participant";
+import type { ParticipantFormValues } from "@/schema/participant";
 import { refereeFormSchema } from "@/schema/referee";
 import { matchEnteringHelperFormSchema } from "@/schema/matchEnteringHelper";
 import { setupHelperFormSchema } from "@/schema/setupHelper";
@@ -38,7 +38,7 @@ import { Participant } from "@/db/types/participant";
 import type { PromotionEligibility } from "@/services/promotion";
 import { isError } from "@/lib/actions";
 import type { DsbPlayerCandidate } from "@/lib/dsb/types";
-import { candidateToFormValues } from "@/lib/dsb/candidate";
+import { candidateToFormValues } from "@/lib/participant-form";
 import { toast } from "sonner";
 
 type Props = {
@@ -70,9 +70,7 @@ export function RolesManager({
   const router = useRouter();
   const [accordionValue, setAccordionValue] = useState("");
 
-  const handleParticipateFormSubmit = async (
-    data: z.infer<typeof participantFormSchema>,
-  ) => {
+  const handleParticipateFormSubmit = async (data: ParticipantFormValues) => {
     const result = await createParticipant(tournament.id, data);
     if (isError(result)) {
       toast.error("Deine Anmeldung konnte nicht gespeichert werden.");
@@ -284,7 +282,7 @@ export function RolesManager({
 
 function chessClubTypeForLabel(
   chessClub: string,
-): z.infer<typeof participantFormSchema>["chessClubType"] {
+): ParticipantFormValues["chessClubType"] {
   if (chessClub === DEFAULT_CLUB_LABEL) {
     return DEFAULT_CLUB_KEY;
   }
@@ -298,7 +296,7 @@ function buildParticipantInitialValues(
   current: RolesData["participant"],
   previous: Participant | null,
   candidate: DsbPlayerCandidate | null,
-): z.infer<typeof participantFormSchema> | undefined {
+): ParticipantFormValues | undefined {
   if (current) {
     return {
       chessClubType: chessClubTypeForLabel(current.chessClub),
@@ -319,7 +317,7 @@ function buildParticipantInitialValues(
   }
 
   if (previous) {
-    const fromPrevious: z.infer<typeof participantFormSchema> = {
+    const fromPrevious: ParticipantFormValues = {
       chessClubType: chessClubTypeForLabel(previous.chessClub),
       chessClub: previous.chessClub,
       title: previous.title ?? undefined,

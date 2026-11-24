@@ -5,7 +5,6 @@ import { useCallback, useTransition } from "react";
 import { useForm } from "react-hook-form";
 import { TZDate } from "react-day-picker";
 import { CalendarIcon } from "lucide-react";
-import z from "zod";
 import {
   Form,
   FormControl,
@@ -26,7 +25,10 @@ import {
 import { Button } from "../../ui/button";
 import { Calendar } from "../../ui/calendar";
 import { Popover, PopoverContent, PopoverTrigger } from "../../ui/popover";
-import { participantFormSchema } from "@/schema/participant";
+import {
+  participantFormSchema,
+  type ParticipantFormValues,
+} from "@/schema/participant";
 import { removePreferredFromSecondary } from "@/lib/match-days";
 import { DayOfWeek } from "@/db/types/group";
 import { MatchDaysCheckboxes } from "./matchday-selection";
@@ -45,7 +47,7 @@ import { DwzPlayerSelect } from "./dwz-player-select";
 import { RoleFormActions } from "./role-form-actions";
 import { HSK_VKZ } from "@/lib/dsb/constants";
 import type { DsbPlayerCandidate } from "@/lib/dsb/types";
-import { candidateToFormValues } from "@/lib/dsb/candidate";
+import { candidateToFormValues } from "@/lib/participant-form";
 import { isTitle, TITLES } from "@/lib/title";
 import { toast } from "sonner";
 import { Profile } from "@/db/types/profile";
@@ -62,10 +64,10 @@ import { track } from "@vercel/analytics";
 const NO_TITLE_OPTION = "noTitle";
 
 type Props = {
-  initialValues?: z.infer<typeof participantFormSchema>;
+  initialValues?: ParticipantFormValues;
   canDelete: boolean;
   promotionEligibility: PromotionEligibility | null;
-  onSubmit: (data: z.infer<typeof participantFormSchema>) => Promise<void>;
+  onSubmit: (data: ParticipantFormValues) => Promise<void>;
   onDelete: () => Promise<void>;
   tournament: Tournament;
   profile: Profile;
@@ -81,7 +83,7 @@ export function ParticipateForm({
   profile,
 }: Props) {
   const [isPending, startTransition] = useTransition();
-  const form = useForm<z.infer<typeof participantFormSchema>>({
+  const form = useForm<ParticipantFormValues>({
     resolver: zodResolver(participantFormSchema),
     defaultValues: {
       chessClubType: initialValues?.chessClubType,
@@ -120,7 +122,7 @@ export function ParticipateForm({
 
   const handleDsbCandidateSelect = useCallback(
     (candidate: DsbPlayerCandidate) => {
-      const values = candidateToFormValues(candidate, initialValues ?? {});
+      const values = candidateToFormValues(candidate, form.getValues());
       form.setValue("dsbPersonId", values.dsbPersonId);
       form.setValue("dwzRating", values.dwzRating);
       form.setValue("fideRating", values.fideRating);
@@ -131,7 +133,7 @@ export function ParticipateForm({
       form.setValue("birthYear", values.birthYear);
       toast.success("Deine Daten wurden aus der DSB-Datenbank übernommen.");
     },
-    [form, initialValues],
+    [form],
   );
 
   const handlePreferredMatchDayChange = (value: DayOfWeek) => {
@@ -158,7 +160,7 @@ export function ParticipateForm({
     }
   };
 
-  const handleSubmit = (data: z.infer<typeof participantFormSchema>) => {
+  const handleSubmit = (data: ParticipantFormValues) => {
     track("participant_form_submit", { tournamentId: tournament.id });
     startTransition(async () => {
       await onSubmit(data);

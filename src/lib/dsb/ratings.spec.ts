@@ -1,141 +1,141 @@
 import { describe, expect, it } from "vitest";
 import {
-  diffDsbRatings,
-  getRatingOutcome,
+  getRatingSyncOutcome,
+  isEloMissingAtDsb,
+  mergeDsbRatings,
   resolveFideData,
-  toStoredRatingUpdate,
-  type StoredRatings,
+  type FideData,
+  type Ratings,
 } from "./ratings";
-import type { DsbPerson } from "./types";
 
-const person: DsbPerson = {
-  uuid: "f3495840-4ff8-11ee-a699-0050561f324c",
-  nuLigaPersonId: "NU4009059",
-  firstname: "Max",
-  lastname: "Mustermann",
-  birthyear: 1990,
-  gender: "MALE",
-  fideId: 1234567,
-  rating: 2073,
-  index: 70,
-  memberships: [],
-  weekOfLastTournamentEvaluation: "202644",
-  fideRatingStandard: 2053,
-  fideCountry: "GER",
-};
-
-const stored: StoredRatings = {
+const previous: Ratings = {
   dwzRating: 2050,
   fideRating: 2056,
   fideId: "1234567",
 };
 
-describe("diffDsbRatings", () => {
-  it("takes DWZ and Elo from the DSB person", () => {
-    expect(diffDsbRatings(stored, person)).toEqual({
-      dwz: { previous: 2050, next: 2073 },
-      elo: { previous: 2056, next: 2053 },
-      fideId: null,
-      eloMissingAtDsb: false,
-    });
-  });
+const dsb: Ratings = {
+  dwzRating: 2073,
+  fideRating: 2053,
+  fideId: "1234567",
+};
 
-  it("adds the DSB FIDE ID when none is stored", () => {
-    const diff = diffDsbRatings({ ...stored, fideId: null }, person);
-    expect(diff.fideId).toEqual({ previous: null, next: "1234567" });
+const nothing: Ratings = { dwzRating: null, fideRating: null, fideId: null };
+
+describe("mergeDsbRatings", () => {
+  it("takes every value the DSB delivers", () => {
+    expect(mergeDsbRatings({ previous, dsb })).toEqual(dsb);
   });
 
   it("replaces a stored FIDE ID that differs from the DSB", () => {
-    const diff = diffDsbRatings({ ...stored, fideId: "7654321" }, person);
-    expect(diff.fideId).toEqual({ previous: "7654321", next: "1234567" });
-    expect(diff.elo).toEqual({ previous: 2056, next: 2053 });
+    expect(
+      mergeDsbRatings({ previous: { ...previous, fideId: "7654321" }, dsb })
+        .fideId,
+    ).toBe("1234567");
   });
 
-  it("flags a stored Elo the DSB does not confirm", () => {
-    const diff = diffDsbRatings(stored, {
-      ...person,
-      fideRatingStandard: undefined,
-    });
-    expect(diff.elo).toBeNull();
-    expect(diff.eloMissingAtDsb).toBe(true);
-  });
-
-  it("reports nothing when the DSB has no ratings", () => {
-    const diff = diffDsbRatings(
-      { dwzRating: null, fideRating: null, fideId: null },
-      {
-        ...person,
-        rating: undefined,
-        fideId: undefined,
-        fideRatingStandard: undefined,
-      },
-    );
-    expect(diff).toEqual({
-      dwz: null,
-      elo: null,
-      fideId: null,
-      eloMissingAtDsb: false,
-    });
+  it("keeps stored values the DSB does not deliver", () => {
+    expect(mergeDsbRatings({ previous, dsb: nothing })).toEqual(previous);
   });
 });
 
-describe("getRatingOutcome", () => {
+describe("getRatingSyncOutcome", () => {
   it("is updated when a DSB value differs from the stored one", () => {
-    expect(getRatingOutcome(diffDsbRatings(stored, person))).toBe("updated");
+    expect(getRatingSyncOutcome({ previous, dsb })).toBe("updated");
   });
 
-  it("is unchanged when the DSB confirms every stored value", () => {
-    const confirmed = { dwzRating: 2073, fideRating: 2053, fideId: "1234567" };
-    expect(getRatingOutcome(diffDsbRatings(confirmed, person))).toBe(
-      "unchanged",
-    );
+  it("is updated when the DSB adds a FIDE ID", () => {
+    expect(
+      getRatingSyncOutcome({
+        previous: { ...dsb, fideId: null },
+        dsb,
+      }),
+    ).toBe("updated");
+  });
+
+  it("is unchanged when the DSB confirms every delivered value", () => {
+    expect(
+      getRatingSyncOutcome({
+        previous: dsb,
+        dsb: { ...dsb, fideRating: null },
+      }),
+    ).toBe("unchanged");
   });
 
   it("is withoutRating when the DSB delivers nothing", () => {
-    const diff = diffDsbRatings(stored, {
-      ...person,
-      rating: undefined,
-      fideId: undefined,
-      fideRatingStandard: undefined,
-    });
-    expect(getRatingOutcome(diff)).toBe("withoutRating");
+    expect(getRatingSyncOutcome({ previous, dsb: nothing })).toBe(
+      "withoutRating",
+    );
+  });
+
+  it("is withoutRating when the DSB only confirms the FIDE ID", () => {
+    expect(
+      getRatingSyncOutcome({
+        previous,
+        dsb: { ...nothing, fideId: previous.fideId },
+      }),
+    ).toBe("withoutRating");
+  });
+
+  it("is updated when the DSB only corrects the FIDE ID", () => {
+    expect(
+      getRatingSyncOutcome({
+        previous,
+        dsb: { ...nothing, fideId: "7654321" },
+      }),
+    ).toBe("updated");
   });
 });
 
-describe("toStoredRatingUpdate", () => {
-  it("contains only the values the DSB delivered", () => {
-    const diff = diffDsbRatings({ ...stored, fideId: null }, {
-      ...person,
-      rating: undefined,
-    });
-    expect(toStoredRatingUpdate(diff)).toEqual({
-      fideRating: 2053,
-      fideId: "1234567",
-    });
+describe("isEloMissingAtDsb", () => {
+  it("flags a stored Elo the DSB does not confirm", () => {
+    expect(
+      isEloMissingAtDsb({ previous, dsb: { ...dsb, fideRating: null } }),
+    ).toBe(true);
+  });
+
+  it("does not flag a player without any Elo", () => {
+    expect(
+      isEloMissingAtDsb({
+        previous: { ...previous, fideRating: null },
+        dsb: nothing,
+      }),
+    ).toBe(false);
   });
 });
 
 describe("resolveFideData", () => {
-  it("prefers the DSB values", () => {
-    expect(resolveFideData({ ...stored, fideId: null }, person)).toEqual({
-      fideId: "1234567",
+  const stored: FideData = {
+    fideId: "1234567",
+    fideRating: 2056,
+    nationality: "AUT",
+    title: "IM",
+    birthYear: 1990,
+    gender: "m",
+  };
+
+  it("prefers every value the DSB delivers", () => {
+    const fromDsb: FideData = {
+      fideId: "7654321",
       fideRating: 2053,
-    });
+      nationality: "GER",
+      title: "FM",
+      birthYear: 1991,
+      gender: "f",
+    };
+    expect(resolveFideData(stored, fromDsb)).toEqual(fromDsb);
   });
 
   it("keeps stored values the DSB does not deliver", () => {
     expect(
-      resolveFideData(stored, { ...person, fideRatingStandard: undefined }),
-    ).toEqual({
-      fideId: "1234567",
-      fideRating: 2056,
-    });
-  });
-
-  it("falls back to the stored values without a DSB person", () => {
-    expect(resolveFideData(stored, null)).toEqual({
-      fideId: "1234567",
-      fideRating: 2056,
-    });
+      resolveFideData(stored, {
+        fideId: null,
+        fideRating: null,
+        nationality: null,
+        title: null,
+        birthYear: null,
+        gender: null,
+      }),
+    ).toEqual(stored);
   });
 });

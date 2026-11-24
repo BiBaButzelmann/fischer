@@ -9,9 +9,10 @@ import { updateParticipantFromDsb } from "@/actions/participant";
 import { isError } from "@/lib/actions";
 import {
   ELO_MISSING_AT_DSB_WARNING,
-  getRatingOutcome,
-  type Change,
-  type DsbRatingOutcome,
+  getRatingSyncOutcome,
+  isEloMissingAtDsb,
+  type RatingSync,
+  type RatingSyncOutcome,
 } from "@/lib/dsb/ratings";
 import { ParticipantWithName } from "@/db/types/participant";
 import { compareByName, getParticipantFullName } from "@/lib/participant";
@@ -29,18 +30,31 @@ type LogLine = {
   text: string;
 };
 
-type Outcome = DsbRatingOutcome | "failed";
-
-type Summary = Record<Outcome, number> & { unlinked: number };
+type Summary = Record<RatingSyncOutcome | "failed" | "unlinked", number>;
 
 type Props = {
   participants: ParticipantWithName[];
 };
 
-function formatChange(label: string, change: Change<number | string>) {
-  return change.previous === change.next
-    ? `${label} ${change.next} unverändert`
-    : `${label} ${change.previous ?? "–"} → ${change.next}`;
+function formatRatingSync({ previous, dsb }: RatingSync) {
+  return [
+    formatChange("DWZ", previous.dwzRating, dsb.dwzRating),
+    formatChange("Elo", previous.fideRating, dsb.fideRating),
+    dsb.fideId !== previous.fideId
+      ? formatChange("FIDE-ID", previous.fideId, dsb.fideId)
+      : null,
+  ]
+    .filter(Boolean)
+    .join(" · ");
+}
+
+function formatChange<T>(label: string, previous: T | null, next: T | null) {
+  if (next == null) {
+    return null;
+  }
+  return previous === next
+    ? `${label} ${next} unverändert`
+    : `${label} ${previous ?? "–"} → ${next}`;
 }
 
 function toRatingEntries(participants: ParticipantWithName[]): RatingEntry[] {
@@ -102,12 +116,17 @@ export function RatingUpdatePanel({ participants }: Props) {
       appendLine("error", text);
     };
 
-    const outcomes = new Map<number, Outcome>();
-
     try {
       const entries = toRatingEntries(participants);
       const linked = entries.filter((entry) => entry.dsbPersonId != null);
       const unlinked = entries.filter((entry) => entry.dsbPersonId == null);
+      const runSummary: Summary = {
+        updated: 0,
+        unchanged: 0,
+        failed: 0,
+        withoutRating: 0,
+        unlinked: unlinked.length,
+      };
 
       appendLine(
         "muted",
@@ -132,33 +151,28 @@ export function RatingUpdatePanel({ participants }: Props) {
         setProgress(`${index + 1}/${linked.length}`);
         const result = await updateParticipantFromDsb(entry.participantId);
         if (isError(result)) {
-          outcomes.set(entry.participantId, "failed");
+          runSummary.failed++;
           appendIssue(`${entry.name} · ${result.error}`);
           continue;
         }
         if (result.status === "dsbNotFound") {
-          outcomes.set(entry.participantId, "failed");
+          runSummary.failed++;
           appendIssue(
             `${entry.name} · DSB-Person ${entry.dsbPersonId} nicht gefunden – Verknüpfung prüfen`,
           );
           continue;
         }
 
-        const outcome = getRatingOutcome(result);
-        outcomes.set(entry.participantId, outcome);
+        const outcome = getRatingSyncOutcome(result);
+        runSummary[outcome]++;
         if (outcome === "withoutRating") {
           appendIssue(
             `${entry.name} · DSB-Person ${entry.dsbPersonId} gefunden, aber ohne Wertung`,
           );
         } else {
-          const parts = [
-            result.dwz ? formatChange("DWZ", result.dwz) : "DWZ –",
-            result.elo ? formatChange("Elo", result.elo) : null,
-            result.fideId ? formatChange("FIDE-ID", result.fideId) : null,
-          ].filter(Boolean);
-          appendLine("normal", `${entry.name} · ${parts.join(" · ")}`);
+          appendLine("normal", `${entry.name} · ${formatRatingSync(result)}`);
         }
-        if (result.eloMissingAtDsb) {
+        if (isEloMissingAtDsb(result)) {
           appendIssue(`${entry.name} · ${ELO_MISSING_AT_DSB_WARNING}`);
         }
       }
@@ -175,16 +189,6 @@ export function RatingUpdatePanel({ participants }: Props) {
         return;
       }
 
-      const runSummary: Summary = {
-        updated: 0,
-        unchanged: 0,
-        failed: 0,
-        withoutRating: 0,
-        unlinked: unlinked.length,
-      };
-      for (const outcome of outcomes.values()) {
-        runSummary[outcome]++;
-      }
       setSummary(runSummary);
       if (issues.length > 0) {
         appendLine("muted", `Fehlerübersicht (${issues.length}):`);

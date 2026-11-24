@@ -1,5 +1,3 @@
-import type z from "zod";
-import type { participantFormSchema } from "@/schema/participant";
 import { isTitle, type Title } from "@/lib/title";
 import type {
   DsbGender,
@@ -8,15 +6,10 @@ import type {
   DsbPlayerCandidate,
 } from "./types";
 
-type ParticipantFormValues = z.infer<typeof participantFormSchema>;
-
-type PersonFormFields = Pick<
-  ParticipantFormValues,
-  "fideId" | "title" | "gender" | "nationality" | "birthYear"
->;
-
-type DsbFormFields = PersonFormFields &
-  Pick<ParticipantFormValues, "dsbPersonId" | "dwzRating" | "fideRating">;
+const GENDERS: Record<DsbGender, DsbPlayerCandidate["gender"]> = {
+  MALE: "m",
+  FEMALE: "f",
+};
 
 export function transliterateGermanUmlauts(value: string): string {
   return value
@@ -38,16 +31,6 @@ export function selectPrimaryMembership(
   return activeMembership ?? memberships[0] ?? null;
 }
 
-export function mapDsbGender(gender: DsbGender | null): "m" | "f" | null {
-  if (gender === "MALE") {
-    return "m";
-  }
-  if (gender === "FEMALE") {
-    return "f";
-  }
-  return null;
-}
-
 export function mapDsbPersonToCandidate(person: DsbPerson): DsbPlayerCandidate {
   const primaryMembership = selectPrimaryMembership(person.memberships);
   return {
@@ -60,24 +43,8 @@ export function mapDsbPersonToCandidate(person: DsbPerson): DsbPlayerCandidate {
     fideRating: person.fideRatingStandard ?? null,
     nationality: person.fideCountry ?? null,
     title: selectFideTitle(person),
-    gender: mapDsbGender(person.gender),
+    gender: GENDERS[person.gender],
     clubName: primaryMembership?.clubName ?? null,
-  };
-}
-
-export function candidateToFormValues(
-  candidate: DsbPlayerCandidate,
-  fallback: PersonFormFields,
-): DsbFormFields {
-  return {
-    dsbPersonId: candidate.nuLigaPersonId,
-    dwzRating: candidate.dwzRating ?? undefined,
-    fideRating: candidate.fideRating ?? undefined,
-    fideId: candidate.fideId ?? fallback.fideId,
-    title: candidate.title ?? fallback.title,
-    gender: candidate.gender ?? fallback.gender,
-    nationality: candidate.nationality ?? fallback.nationality,
-    birthYear: candidate.birthYear ?? fallback.birthYear,
   };
 }
 

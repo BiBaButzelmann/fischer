@@ -15,7 +15,10 @@ import { linkParticipantDsb } from "@/actions/participant";
 import { isError } from "@/lib/actions";
 import { getFullName } from "@/lib/participant";
 import type { DsbPlayerCandidate } from "@/lib/dsb/types";
-import { ELO_MISSING_AT_DSB_WARNING } from "@/lib/dsb/ratings";
+import {
+  ELO_MISSING_AT_DSB_WARNING,
+  isEloMissingAtDsb,
+} from "@/lib/dsb/ratings";
 
 type Props = {
   participantId: number;
@@ -50,16 +53,20 @@ export function DsbLinkDialog({
           toast.error(linked.error);
           return;
         }
+        if (linked.status === "dsbNotFound") {
+          toast.error("DSB-Person nicht gefunden");
+          return;
+        }
 
         const ratings = [
-          linked.dwz ? `DWZ ${linked.dwz.next}` : null,
-          linked.elo ? `Elo ${linked.elo.next}` : null,
+          linked.dsb.dwzRating != null ? `DWZ ${linked.dsb.dwzRating}` : null,
+          linked.dsb.fideRating != null ? `Elo ${linked.dsb.fideRating}` : null,
         ].filter(Boolean);
 
         toast.success(
           `${fullName} verknüpft${ratings.length > 0 ? ` · ${ratings.join(" · ")}` : ""}`,
         );
-        if (linked.eloMissingAtDsb) {
+        if (isEloMissingAtDsb(linked)) {
           toast.warning(ELO_MISSING_AT_DSB_WARNING);
         }
         onOpenChange(false);

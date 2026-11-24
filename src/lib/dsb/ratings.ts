@@ -1,84 +1,62 @@
 import type { Participant } from "@/db/types/participant";
-import type { DsbPerson } from "./types";
 
 export const ELO_MISSING_AT_DSB_WARNING =
   "DSB liefert keine Standard-Elo – gespeicherte Elo prüfen";
 
-export type StoredRatings = Pick<
+const RATING_KEYS = ["dwzRating", "fideRating", "fideId"] as const;
+
+export type Ratings = Pick<Participant, (typeof RATING_KEYS)[number]>;
+
+export type RatingSync = { previous: Ratings; dsb: Ratings };
+
+export type RatingSyncOutcome = "updated" | "unchanged" | "withoutRating";
+
+export type FideData = Pick<
   Participant,
-  "dwzRating" | "fideRating" | "fideId"
+  "fideId" | "fideRating" | "nationality" | "title" | "birthYear" | "gender"
 >;
 
-export type Change<T> = { previous: T | null; next: T };
+export function pickRatings({
+  dwzRating,
+  fideRating,
+  fideId,
+}: Ratings): Ratings {
+  return { dwzRating, fideRating, fideId };
+}
 
-export type DsbRatingDiff = {
-  dwz: Change<number> | null;
-  elo: Change<number> | null;
-  fideId: Change<string> | null;
-  eloMissingAtDsb: boolean;
-};
-
-export type DsbRatingOutcome = "updated" | "unchanged" | "withoutRating";
-
-export function diffDsbRatings(
-  stored: StoredRatings,
-  person: DsbPerson,
-): DsbRatingDiff {
-  const dsb = toDsbRatings(person);
+export function mergeDsbRatings({ previous, dsb }: RatingSync): Ratings {
   return {
-    dwz:
-      dsb.dwzRating != null
-        ? { previous: stored.dwzRating, next: dsb.dwzRating }
-        : null,
-    elo:
-      dsb.fideRating != null
-        ? { previous: stored.fideRating, next: dsb.fideRating }
-        : null,
-    fideId:
-      dsb.fideId != null && dsb.fideId !== stored.fideId
-        ? { previous: stored.fideId, next: dsb.fideId }
-        : null,
-    eloMissingAtDsb: dsb.fideRating == null && stored.fideRating != null,
+    dwzRating: dsb.dwzRating ?? previous.dwzRating,
+    fideRating: dsb.fideRating ?? previous.fideRating,
+    fideId: dsb.fideId ?? previous.fideId,
   };
 }
 
-export function resolveFideData(
-  stored: StoredRatings,
-  person: DsbPerson | null,
-): Pick<StoredRatings, "fideId" | "fideRating"> {
-  const dsb = person != null ? toDsbRatings(person) : null;
-  return {
-    fideId: dsb?.fideId ?? stored.fideId,
-    fideRating: dsb?.fideRating ?? stored.fideRating,
-  };
-}
-
-export function toStoredRatingUpdate(
-  diff: DsbRatingDiff,
-): Partial<StoredRatings> {
-  return {
-    ...(diff.dwz && { dwzRating: diff.dwz.next }),
-    ...(diff.elo && { fideRating: diff.elo.next }),
-    ...(diff.fideId && { fideId: diff.fideId.next }),
-  };
-}
-
-export function getRatingOutcome(diff: DsbRatingDiff): DsbRatingOutcome {
-  const changes = [diff.dwz, diff.elo, diff.fideId].filter(
-    (change) => change != null,
-  );
-  if (changes.length === 0) {
-    return "withoutRating";
+export function getRatingSyncOutcome({
+  previous,
+  dsb,
+}: RatingSync): RatingSyncOutcome {
+  if (
+    RATING_KEYS.some((key) => dsb[key] != null && dsb[key] !== previous[key])
+  ) {
+    return "updated";
   }
-  return changes.some((change) => change.previous !== change.next)
-    ? "updated"
+  return dsb.dwzRating == null && dsb.fideRating == null
+    ? "withoutRating"
     : "unchanged";
 }
 
-function toDsbRatings(person: DsbPerson): StoredRatings {
+export function isEloMissingAtDsb({ previous, dsb }: RatingSync): boolean {
+  return dsb.fideRating == null && previous.fideRating != null;
+}
+
+export function resolveFideData(stored: FideData, dsb: FideData): FideData {
   return {
-    dwzRating: person.rating ?? null,
-    fideRating: person.fideRatingStandard ?? null,
-    fideId: person.fideId != null ? String(person.fideId) : null,
+    fideId: dsb.fideId ?? stored.fideId,
+    fideRating: dsb.fideRating ?? stored.fideRating,
+    nationality: dsb.nationality ?? stored.nationality,
+    title: dsb.title ?? stored.title,
+    birthYear: dsb.birthYear ?? stored.birthYear,
+    gender: dsb.gender ?? stored.gender,
   };
 }

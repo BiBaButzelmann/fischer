@@ -158,9 +158,7 @@ export function DwzPlayerSelect({
                       {candidate.firstName} {candidate.lastName}
                     </p>
                     <div className="flex flex-wrap gap-x-3 gap-y-1 text-xs text-muted-foreground">
-                      {candidate.birthYear != null ? (
-                        <span>Jahrgang {candidate.birthYear}</span>
-                      ) : null}
+                      <span>Jahrgang {candidate.birthYear}</span>
                       {candidate.clubName != null ? (
                         <span>{candidate.clubName}</span>
                       ) : null}
