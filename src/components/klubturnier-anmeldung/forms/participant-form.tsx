@@ -44,7 +44,8 @@ import { Tournament } from "@/db/types/tournament";
 import { DwzPlayerSelect } from "./dwz-player-select";
 import { RoleFormActions } from "./role-form-actions";
 import { HSK_VKZ } from "@/lib/dsb/constants";
-import { FIDE_TITLES, type DsbPlayerCandidate } from "@/lib/dsb/types";
+import type { DsbPlayerCandidate } from "@/lib/dsb/types";
+import { TITLES } from "@/lib/title";
 import { toast } from "sonner";
 import { Profile } from "@/db/types/profile";
 import {
@@ -122,8 +123,12 @@ export function ParticipateForm({
       form.setValue("gender", candidate.gender ?? undefined);
       form.setValue("fideId", candidate.fideId ?? undefined);
       form.setValue("fideRating", candidate.fideRating ?? undefined);
-      form.setValue("nationality", candidate.nationality ?? undefined);
-      form.setValue("title", candidate.title ?? "noTitle");
+      if (candidate.nationality != null) {
+        form.setValue("nationality", candidate.nationality);
+      }
+      if (candidate.title != null) {
+        form.setValue("title", candidate.title);
+      }
       toast.success("Deine Daten wurden aus der DSB-Datenbank übernommen.");
     },
     [form],
@@ -373,7 +378,7 @@ export function ParticipateForm({
                         </SelectTrigger>
                         <SelectContent>
                           <SelectItem value="noTitle">Kein Titel</SelectItem>
-                          {FIDE_TITLES.map((title) => (
+                          {TITLES.map((title) => (
                             <SelectItem key={title} value={title}>
                               {title}
                             </SelectItem>

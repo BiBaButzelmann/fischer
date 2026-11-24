@@ -7,6 +7,7 @@ import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
 import { updateParticipantFromDsb } from "@/actions/participant";
 import { isError } from "@/lib/actions";
+import { hasRatingData, type Change } from "@/lib/dsb/ratings";
 import { ParticipantWithName } from "@/db/types/participant";
 import { compareByName, getParticipantFullName } from "@/lib/participant";
 
@@ -23,21 +24,15 @@ type LogLine = {
   text: string;
 };
 
-type Summary = {
-  updated: number;
-  failed: number;
-  withoutRating: number;
-  unlinked: number;
-};
+type Outcome = "updated" | "failed" | "withoutRating";
+
+type Summary = Record<Outcome, number> & { unlinked: number };
 
 type Props = {
   participants: ParticipantWithName[];
 };
 
-function formatChange(
-  label: string,
-  change: { previous: number | null; next: number },
-) {
+function formatChange(label: string, change: Change<number | string>) {
   return change.previous === change.next
     ? `${label} ${change.next} unverändert`
     : `${label} ${change.previous ?? "–"} → ${change.next}`;
@@ -102,7 +97,7 @@ export function RatingUpdatePanel({ participants }: Props) {
       appendLine("error", text);
     };
 
-    const outcomes = new Map<number, "wrote" | "failed">();
+    const outcomes = new Map<number, Outcome>();
 
     try {
       const entries = toRatingEntries(participants);
@@ -114,7 +109,11 @@ export function RatingUpdatePanel({ participants }: Props) {
         `${entries.length} Teilnehmer, davon ${linked.length} mit DSB-Verknüpfung`,
       );
       for (const entry of unlinked) {
-        appendIssue(`${entry.name} · keine DSB-Verknüpfung`);
+        appendIssue(
+          entry.fideId
+            ? `${entry.name} · keine DSB-Verknüpfung – Elo wird nicht aktualisiert`
+            : `${entry.name} · keine DSB-Verknüpfung`,
+        );
       }
 
       appendLine(
@@ -140,26 +139,21 @@ export function RatingUpdatePanel({ participants }: Props) {
           continue;
         }
 
-        if (result.status === "updated") {
-          outcomes.set(entry.participantId, "wrote");
+        if (hasRatingData(result)) {
+          outcomes.set(entry.participantId, "updated");
           const parts = [
             result.dwz ? formatChange("DWZ", result.dwz) : "DWZ –",
             result.elo ? formatChange("Elo", result.elo) : null,
-            result.addedFideId ? `FIDE-ID ${result.addedFideId} ergänzt` : null,
+            result.fideId ? formatChange("FIDE-ID", result.fideId) : null,
           ].filter(Boolean);
           appendLine("normal", `${entry.name} · ${parts.join(" · ")}`);
         } else {
+          outcomes.set(entry.participantId, "withoutRating");
           appendIssue(
             `${entry.name} · DSB-Person ${entry.dsbPersonId} gefunden, aber ohne Wertung`,
           );
         }
-
-        if (result.fideIdMismatch) {
-          appendIssue(
-            `${entry.name} · FIDE-ID ${entry.fideId} weicht vom DSB ab (${result.dsbFideId}) – Elo nicht übernommen`,
-          );
-        }
-        if (result.unconfirmedElo) {
+        if (result.eloMissingAtDsb) {
           appendIssue(
             `${entry.name} · DSB liefert keine Standard-Elo – gespeicherte Elo prüfen`,
           );
@@ -184,15 +178,8 @@ export function RatingUpdatePanel({ participants }: Props) {
         withoutRating: 0,
         unlinked: unlinked.length,
       };
-      for (const entry of linked) {
-        const outcome = outcomes.get(entry.participantId);
-        if (outcome === "wrote") {
-          runSummary.updated++;
-        } else if (outcome === "failed") {
-          runSummary.failed++;
-        } else {
-          runSummary.withoutRating++;
-        }
+      for (const outcome of outcomes.values()) {
+        runSummary[outcome]++;
       }
       setSummary(runSummary);
       if (issues.length > 0) {

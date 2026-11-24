@@ -1,10 +1,9 @@
-import {
-  FIDE_TITLES,
-  type DsbGender,
-  type DsbMembership,
-  type DsbPerson,
-  type DsbPlayerCandidate,
-  type FideTitle,
+import { isTitle, type Title } from "@/lib/title";
+import type {
+  DsbGender,
+  DsbMembership,
+  DsbPerson,
+  DsbPlayerCandidate,
 } from "./types";
 
 export function transliterateGermanUmlauts(value: string): string {
@@ -37,14 +36,10 @@ export function mapDsbGender(gender: DsbGender | null): "m" | "f" | null {
   return null;
 }
 
-function isFideTitle(value: string | null | undefined): value is FideTitle {
-  return FIDE_TITLES.some((title) => title === value);
-}
-
 export function selectFideTitle(
   person: Pick<DsbPerson, "fideTitle" | "fideWomenTitle">,
-): FideTitle | null {
-  return [person.fideTitle, person.fideWomenTitle].find(isFideTitle) ?? null;
+): Title | null {
+  return [person.fideTitle, person.fideWomenTitle].find(isTitle) ?? null;
 }
 
 export function mapDsbPersonToCandidate(person: DsbPerson): DsbPlayerCandidate {

@@ -11,10 +11,7 @@ import {
   DialogTitle,
 } from "@/components/ui/dialog";
 import { DwzPlayerSelect } from "@/components/klubturnier-anmeldung/forms/dwz-player-select";
-import {
-  linkParticipantDsb,
-  updateParticipantFromDsb,
-} from "@/actions/participant";
+import { linkParticipantDsb } from "@/actions/participant";
 import { isError } from "@/lib/actions";
 import { getFullName } from "@/lib/participant";
 import type { DsbPlayerCandidate } from "@/lib/dsb/types";
@@ -53,18 +50,19 @@ export function DsbLinkDialog({
           return;
         }
 
-        const update = await updateParticipantFromDsb(participantId);
-        const ratings =
-          !isError(update) && update.status !== "dsbNotFound"
-            ? [
-                update.dwz ? `DWZ ${update.dwz.next}` : null,
-                update.elo ? `Elo ${update.elo.next}` : null,
-              ].filter(Boolean)
-            : [];
+        const ratings = [
+          linked.dwz ? `DWZ ${linked.dwz.next}` : null,
+          linked.elo ? `Elo ${linked.elo.next}` : null,
+        ].filter(Boolean);
 
         toast.success(
           `${fullName} verknüpft${ratings.length > 0 ? ` · ${ratings.join(" · ")}` : ""}`,
         );
+        if (linked.eloMissingAtDsb) {
+          toast.warning(
+            "DSB liefert keine Standard-Elo – gespeicherte Elo prüfen",
+          );
+        }
         onOpenChange(false);
         router.refresh();
       } catch {

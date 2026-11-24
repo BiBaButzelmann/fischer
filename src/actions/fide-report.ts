@@ -15,6 +15,8 @@ import { calculateStandings } from "@/lib/standings";
 import { parseDateOnly, toDateOnly, toLocalDateTime } from "@/lib/date";
 import invariant from "tiny-invariant";
 import { getRefereeOfGroup } from "@/services/referee";
+import { getDsbPersonById } from "@/lib/dsb/wertungsportal";
+import { currentFideData, diffDsbRatings } from "@/lib/dsb/ratings";
 
 export const generateFideReportFile = action(
   async (groupId: number, month: number) => {
@@ -113,6 +115,18 @@ export const generateFideReportFile = action(
       return currentGroupPosition + 1;
     };
 
+    const fideDataByParticipantId = new Map(
+      await Promise.all(
+        data.participants.map(async ({ participant }) => {
+          const person = participant.dsbPersonId
+            ? await getDsbPersonById(participant.dsbPersonId)
+            : null;
+          const diff = person ? diffDsbRatings(participant, person) : null;
+          return [participant.id, currentFideData(participant, diff)] as const;
+        }),
+      ),
+    );
+
     const entries = data.participants.map(
       ({ groupPosition, participant }) => {
         const participantGames = gamesWithActiveParticipants.filter(
@@ -121,12 +135,13 @@ export const generateFideReportFile = action(
             game.blackParticipantId === participant.id,
         );
 
+        const fide = fideDataByParticipantId.get(participant.id);
         invariant(
-          participant.fideId != null,
+          fide?.fideId != null,
           `Participant ${participant.id} does not have a FIDE ID`,
         );
         invariant(
-          participant.fideRating != null,
+          fide.fideRating != null,
           `Participant ${participant.id} does not have a FIDE rating`,
         );
         invariant(
@@ -150,9 +165,9 @@ export const generateFideReportFile = action(
             participant.profile.lastName,
             participant.profile.academicTitle,
           ),
-          fideRating: participant.fideRating,
+          fideRating: fide.fideRating,
           fideNation: participant.nationality!,
-          fideId: participant.fideId,
+          fideId: fide.fideId,
           birthDate: `${participant.birthYear}/00/00`,
           points: currentPoints,
           rank: currentGroupPosition,
@@ -186,8 +201,8 @@ export const generateFideReportFile = action(
     // 062
     const numberOfPlayers = data.participants.length;
     // 072
-    const numberOfRatedPlayers = data.participants.filter(
-      (p) => p.participant.fideId != null,
+    const numberOfRatedPlayers = [...fideDataByParticipantId.values()].filter(
+      (fide) => fide.fideId != null,
     ).length;
     // 092
     const tournamentType = "Individual round robin";

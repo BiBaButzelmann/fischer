@@ -28,7 +28,13 @@ import { hasSecondaryMatchDayConflict } from "@/lib/match-days";
 import { parseDateOnly } from "@/lib/date";
 import { getDsbPersonById, searchDsbPersons } from "@/lib/dsb/wertungsportal";
 import { mapDsbPersonToCandidate } from "@/lib/dsb/candidate";
-import type { DsbPlayerCandidate } from "@/lib/dsb/types";
+import {
+  diffDsbRatings,
+  toStoredRatingUpdate,
+  type DsbRatingDiff,
+  type StoredRatings,
+} from "@/lib/dsb/ratings";
+import type { DsbPerson, DsbPlayerCandidate } from "@/lib/dsb/types";
 
 export const createParticipant = action(async (
   tournamentId: number,
@@ -171,7 +177,22 @@ export async function searchDsbPlayers(
   return persons.map(mapDsbPersonToCandidate);
 }
 
-type RatingChange = { previous: number | null; next: number };
+async function writeDsbRatings(
+  participantId: number,
+  stored: StoredRatings,
+  person: DsbPerson,
+  link: { dsbPersonId?: string } = {},
+): Promise<DsbRatingDiff> {
+  const diff = diffDsbRatings(stored, person);
+  const values = { ...toStoredRatingUpdate(diff), ...link };
+  if (Object.keys(values).length > 0) {
+    await db
+      .update(participant)
+      .set({ ...values, updatedAt: new Date() })
+      .where(eq(participant.id, participantId));
+  }
+  return diff;
+}
 
 export const updateParticipantFromDsb = action(async (participantId: number) => {
   const session = await authWithRedirect();
@@ -193,52 +214,8 @@ export const updateParticipantFromDsb = action(async (participantId: number) => 
     return { status: "dsbNotFound" } as const;
   }
 
-  const dsbFideId = person.fideId != null ? String(person.fideId) : null;
-  const fideIdMismatch =
-    !!current.fideId && dsbFideId != null && current.fideId !== dsbFideId;
-  const dsbElo = fideIdMismatch ? null : (person.fideRatingStandard ?? null);
-
-  const values: { dwzRating?: number; fideRating?: number; fideId?: string } =
-    {};
-  if (person.rating != null) {
-    values.dwzRating = person.rating;
-  }
-  if (dsbElo != null) {
-    values.fideRating = dsbElo;
-  }
-  if (!current.fideId && dsbFideId != null) {
-    values.fideId = dsbFideId;
-  }
-
-  const dwz: RatingChange | null =
-    values.dwzRating != null
-      ? { previous: current.dwzRating, next: values.dwzRating }
-      : null;
-  const elo: RatingChange | null =
-    values.fideRating != null
-      ? { previous: current.fideRating, next: values.fideRating }
-      : null;
-
-  const outcome = {
-    dwz,
-    elo,
-    addedFideId: values.fideId ?? null,
-    dsbFideId,
-    fideIdMismatch,
-    unconfirmedElo:
-      !fideIdMismatch && dsbElo == null && current.fideRating != null,
-  };
-
-  if (Object.keys(values).length === 0) {
-    return { status: "noRating", ...outcome } as const;
-  }
-
-  await db
-    .update(participant)
-    .set({ ...values, updatedAt: new Date() })
-    .where(eq(participant.id, participantId));
-
-  return { status: "updated", ...outcome } as const;
+  const diff = await writeDsbRatings(participantId, current, person);
+  return { status: "found", ...diff } as const;
 });
 
 export const linkParticipantDsb = action(
@@ -258,16 +235,12 @@ export const linkParticipantDsb = action(
       throw new ActionError("DSB-Person nicht gefunden");
     }
 
-    await db
-      .update(participant)
-      .set({
-        dsbPersonId: person.nuLigaPersonId,
-        fideId: person.fideId != null ? String(person.fideId) : current.fideId,
-        updatedAt: new Date(),
-      })
-      .where(eq(participant.id, participantId));
+    const diff = await writeDsbRatings(participantId, current, person, {
+      dsbPersonId: person.nuLigaPersonId,
+    });
 
     revalidatePath("/turniere/[slug]/admin/nutzerverwaltung", "page");
+    return diff;
   },
 );
 

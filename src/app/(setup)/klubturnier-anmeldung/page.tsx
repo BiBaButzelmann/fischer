@@ -1,10 +1,8 @@
 import { authWithRedirect } from "@/auth/utils";
-import {
-  ParticipantEloPrefill,
-  RolesManager,
-} from "@/components/klubturnier-anmeldung/roles-manager";
+import { RolesManager } from "@/components/klubturnier-anmeldung/roles-manager";
 import { getDsbPersonById, searchDsbPersons } from "@/lib/dsb/wertungsportal";
 import { mapDsbPersonToCandidate } from "@/lib/dsb/candidate";
+import type { DsbPlayerCandidate } from "@/lib/dsb/types";
 import { HSK_VKZ } from "@/lib/dsb/constants";
 import { DEFAULT_CLUB_LABEL } from "@/constants/constants";
 import { Participant } from "@/db/types/participant";
@@ -28,10 +26,10 @@ import {
 } from "@/components/ui/collapsible";
 import { ChevronDownIcon } from "lucide-react";
 
-async function getPrefillEloData(
+async function getPreviousDsbCandidate(
   profile: Profile,
   previousParticipant: Participant,
-): Promise<ParticipantEloPrefill | null> {
+): Promise<DsbPlayerCandidate | null> {
   const person = previousParticipant.dsbPersonId
     ? await getDsbPersonById(previousParticipant.dsbPersonId)
     : await findUniqueDsbPersonByName(
@@ -39,21 +37,7 @@ async function getPrefillEloData(
         profile.lastName,
         previousParticipant.chessClub === DEFAULT_CLUB_LABEL ? HSK_VKZ : null,
       );
-  if (person == null) {
-    return null;
-  }
-
-  const candidate = mapDsbPersonToCandidate(person);
-  return {
-    dsbPersonId: candidate.nuLigaPersonId,
-    gender: candidate.gender,
-    dwzRating: candidate.dwzRating,
-    fideId: candidate.fideId,
-    fideRating: candidate.fideRating,
-    nationality: candidate.nationality,
-    title: candidate.title,
-    birthYear: candidate.birthYear,
-  };
+  return person != null ? mapDsbPersonToCandidate(person) : null;
 }
 
 async function findUniqueDsbPersonByName(
@@ -109,9 +93,9 @@ export default async function RolesPage() {
       )
     : null;
 
-  const prefillEloData =
+  const previousDsbCandidate =
     initialValues.participant == null && previousParticipant != null
-      ? await getPrefillEloData(profile, previousParticipant)
+      ? await getPreviousDsbCandidate(profile, previousParticipant)
       : null;
 
   return (
@@ -133,7 +117,7 @@ export default async function RolesPage() {
         profile={profile}
         promotionEligibility={promotionEligibility}
         previousParticipant={previousParticipant ?? null}
-        prefillEloData={prefillEloData}
+        previousDsbCandidate={previousDsbCandidate}
       />
       <PastTournaments tournaments={viewableTournaments} />
     </div>

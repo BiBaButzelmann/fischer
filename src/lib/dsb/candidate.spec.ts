@@ -102,6 +102,12 @@ describe("selectFideTitle", () => {
   it("ignores titles the app does not support", () => {
     expect(selectFideTitle({ fideTitle: "AGM", fideWomenTitle: undefined })).toBeNull();
   });
+
+  it("skips an unsupported open title in favour of a supported women's title", () => {
+    expect(selectFideTitle({ fideTitle: "AGM", fideWomenTitle: "WIM" })).toBe(
+      "WIM",
+    );
+  });
 });
 
 describe("mapDsbPersonToCandidate", () => {

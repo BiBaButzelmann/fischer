@@ -37,18 +37,8 @@ import { createReferee, deleteReferee } from "@/actions/referee";
 import { Participant } from "@/db/types/participant";
 import type { PromotionEligibility } from "@/services/promotion";
 import { isError } from "@/lib/actions";
+import type { DsbPlayerCandidate } from "@/lib/dsb/types";
 import { toast } from "sonner";
-
-export type ParticipantEloPrefill = {
-  dsbPersonId: string;
-  title: string | null;
-  gender: "m" | "f" | null;
-  dwzRating: number | null;
-  fideRating: number | null;
-  fideId: string | null;
-  nationality: string | null;
-  birthYear: number | null;
-};
 
 type Props = {
   userId: string;
@@ -57,7 +47,7 @@ type Props = {
   profile: Profile;
   promotionEligibility: PromotionEligibility | null;
   previousParticipant: Participant | null;
-  prefillEloData: ParticipantEloPrefill | null;
+  previousDsbCandidate: DsbPlayerCandidate | null;
 };
 
 export function RolesManager({
@@ -67,12 +57,12 @@ export function RolesManager({
   profile,
   promotionEligibility,
   previousParticipant,
-  prefillEloData,
+  previousDsbCandidate,
 }: Props) {
   const participantInitialValues = buildParticipantInitialValues(
     rolesData.participant,
     previousParticipant,
-    prefillEloData,
+    previousDsbCandidate,
   );
   const canDeleteParticipant = rolesData.participant != null;
   const [isPending, startTransition] = useTransition();
@@ -306,7 +296,7 @@ function chessClubTypeForLabel(
 function buildParticipantInitialValues(
   current: RolesData["participant"],
   previous: Participant | null,
-  prefill: ParticipantEloPrefill | null,
+  candidate: DsbPlayerCandidate | null,
 ): z.infer<typeof participantFormSchema> | undefined {
   if (current) {
     return {
@@ -331,17 +321,18 @@ function buildParticipantInitialValues(
     return {
       chessClubType: chessClubTypeForLabel(previous.chessClub),
       chessClub: previous.chessClub,
-      title: prefill?.title ?? previous.title ?? "noTitle",
-      gender: prefill?.gender ?? previous.gender ?? undefined,
-      nationality: prefill?.nationality ?? previous.nationality ?? undefined,
-      dwzRating: prefill?.dwzRating ?? undefined,
-      fideRating: prefill?.fideRating ?? undefined,
-      fideId: prefill?.fideId ?? previous.fideId ?? undefined,
-      birthYear: prefill?.birthYear ?? previous.birthYear ?? undefined,
+      title: candidate?.title ?? previous.title ?? "noTitle",
+      gender: candidate?.gender ?? previous.gender ?? undefined,
+      nationality: candidate?.nationality ?? previous.nationality ?? undefined,
+      dwzRating: candidate?.dwzRating ?? undefined,
+      fideRating: candidate?.fideRating ?? undefined,
+      fideId: candidate?.fideId ?? previous.fideId ?? undefined,
+      birthYear: candidate?.birthYear ?? previous.birthYear ?? undefined,
       birthDate: previous.birthDate ?? undefined,
       preferredMatchDay: previous.preferredMatchDay,
       secondaryMatchDays: previous.secondaryMatchDays,
-      dsbPersonId: prefill?.dsbPersonId ?? previous.dsbPersonId ?? undefined,
+      dsbPersonId:
+        candidate?.nuLigaPersonId ?? previous.dsbPersonId ?? undefined,
       zpsClub: previous.zpsClubId ?? undefined,
       zpsPlayer: previous.zpsPlayerId ?? undefined,
       notAvailableDays: [],

@@ -1,3 +1,5 @@
+import type { Title } from "@/lib/title";
+
 export type DsbMembership = {
   vkz: string;
   memberNo: string;
@@ -36,20 +38,7 @@ export type DsbPlayerCandidate = {
   fideId: string | null;
   fideRating: number | null;
   nationality: string | null;
-  title: FideTitle | null;
+  title: Title | null;
   gender: "m" | "f" | null;
   clubName: string | null;
 };
-
-export const FIDE_TITLES = [
-  "GM",
-  "IM",
-  "FM",
-  "CM",
-  "WGM",
-  "WIM",
-  "WFM",
-  "WCM",
-] as const;
-
-export type FideTitle = (typeof FIDE_TITLES)[number];
