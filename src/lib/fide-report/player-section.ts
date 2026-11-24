@@ -92,11 +92,7 @@ function getTrfGender(player: PlayerEntry): string {
 }
 
 function formatFideRating(player: PlayerEntry): string {
-  if (player.fideRating == null || player.fideRating <= 0) {
-    return "";
-  }
-
-  return player.fideRating.toString();
+  return player.fideRating?.toString() ?? "";
 }
 
 function getResultColumnKey(result: Result, useRounds: boolean): string {

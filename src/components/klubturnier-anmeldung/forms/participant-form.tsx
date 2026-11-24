@@ -107,6 +107,7 @@ export function ParticipateForm({
   });
 
   const fideRating = form.watch("fideRating");
+  const hasFideId = !!form.watch("fideId")?.trim();
   const chessClubType = form.watch("chessClubType");
   const preferredMatchDay = form.watch("preferredMatchDay");
 
@@ -411,6 +412,9 @@ export function ParticipateForm({
                         step="1"
                         {...field}
                         value={field.value ?? ""}
+                        onChange={(event) =>
+                          field.onChange(parseRatingInput(event.target.value))
+                        }
                       />
                     </FormControl>
                     <FormMessage />
@@ -422,9 +426,7 @@ export function ParticipateForm({
                 name="fideRating"
                 render={({ field }) => (
                   <FormItem className="flex-1">
-                    <FormLabel required={fideRating ? true : false}>
-                      Elo
-                    </FormLabel>
+                    <FormLabel required={fideRating != null}>Elo</FormLabel>
                     <FormControl>
                       <Input
                         type="number"
@@ -435,6 +437,9 @@ export function ParticipateForm({
                         step="1"
                         {...field}
                         value={field.value ?? ""}
+                        onChange={(event) =>
+                          field.onChange(parseRatingInput(event.target.value))
+                        }
                       />
                     </FormControl>
                     <FormMessage />
@@ -455,7 +460,7 @@ export function ParticipateForm({
           </div>
         ) : null}
 
-        {fideRating ? (
+        {fideRating != null || hasFideId ? (
           <div className="flex gap-4">
             <FormField
               control={form.control}
@@ -678,4 +683,8 @@ function isDateDisabled(date: Date, min: string, max: string) {
   }
 
   return ![2, 4, 5].includes(dt.weekday);
+}
+
+function parseRatingInput(value: string): number | undefined {
+  return value === "" ? undefined : Number(value);
 }

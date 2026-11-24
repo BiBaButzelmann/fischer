@@ -54,6 +54,8 @@ export const participant = pgTable(
       "participant_secondary_match_days_no_preferred",
       sql`NOT (${table.preferredMatchDay} = ANY(${table.secondaryMatchDays}))`,
     ),
+    check("participant_dwz_rating_positive", sql`${table.dwzRating} > 0`),
+    check("participant_fide_rating_positive", sql`${table.fideRating} > 0`),
   ],
 );
 

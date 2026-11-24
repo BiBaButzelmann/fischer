@@ -11,6 +11,9 @@ import z from "zod";
 
 const dateOnlySchema = z.string().refine(isValidDateOnly, "Ungültiges Datum");
 
+const ratingSchema = (message: string) =>
+  z.number().int().positive(message).optional();
+
 export const participantFormSchema = z
   .object({
     chessClubType: z.enum([DEFAULT_CLUB_KEY, "other", CLUBLESS_KEY], {
@@ -19,20 +22,14 @@ export const participantFormSchema = z
     chessClub: z.string().optional(),
     title: z.enum(TITLES).optional(),
     gender: z.enum(["m", "f"]).optional(),
-    dwzRating: z.coerce
-      .number()
-      .min(0, "DWZ-Punktzahl muss mindestens 0 sein")
-      .optional(),
-    fideRating: z.coerce
-      .number()
-      .min(0, "FIDE-Punktzahl muss mindestens 0 sein")
-      .optional(),
+    dwzRating: ratingSchema("DWZ muss größer als 0 sein"),
+    fideRating: ratingSchema("Elo muss größer als 0 sein"),
     fideId: z.string().optional(),
     nationality: z
       .string()
       .length(3, "3-Buchstaben-Ländercode benötigt")
       .toUpperCase()
-      .optional(), // nur vorhanden, wenn Elo eingegeben
+      .optional(),
     birthYear: z.coerce
       .number()
       .min(1900, "Geburtsjahr muss mindestens 1900 sein")
@@ -76,46 +73,32 @@ export const participantFormSchema = z
       path: ["chessClub"],
     },
   )
+  .refine((data) => data.fideRating == null || hasFideId(data.fideId), {
+    message: "FIDE-ID ist erforderlich, wenn Elo angegeben ist",
+    path: ["fideId"],
+  })
   .refine(
-    (data) => {
-      if (data.fideRating != null && data.fideRating > 0) {
-        return !!data.fideId && data.fideId.trim().length > 0;
-      }
-      return true;
-    },
+    (data) =>
+      !hasFideId(data.fideId) ||
+      (!!data.nationality && data.nationality.trim().length === 3),
     {
-      message: "FIDE-ID ist erforderlich, wenn Elo angegeben ist",
-      path: ["fideId"],
-    },
-  )
-  .refine(
-    (data) => {
-      if (data.fideRating != null && data.fideRating > 0) {
-        return !!data.nationality && data.nationality.trim().length === 3;
-      }
-      return true;
-    },
-    {
-      message: "Nationalität ist erforderlich, wenn Elo angegeben ist",
+      message: "Nationalität ist erforderlich, wenn eine FIDE-ID angegeben ist",
       path: ["nationality"],
     },
   )
   .refine(
     (data) => {
-      if (data.fideRating != null && data.fideRating > 0) {
-        if (data.birthDate != null) {
-          return true;
-        }
-        return (
-          !!data.birthYear &&
-          data.birthYear >= 1900 &&
-          data.birthYear <= getCurrentLocalDateTime().year
-        );
+      if (!hasFideId(data.fideId) || data.birthDate != null) {
+        return true;
       }
-      return true;
+      return (
+        !!data.birthYear &&
+        data.birthYear >= 1900 &&
+        data.birthYear <= getCurrentLocalDateTime().year
+      );
     },
     {
-      message: "Geburtsjahr ist erforderlich, wenn Elo angegeben ist",
+      message: "Geburtsjahr ist erforderlich, wenn eine FIDE-ID angegeben ist",
       path: ["birthYear"],
     },
   )
@@ -157,3 +140,7 @@ export const participantFormSchema = z
   );
 
 export type ParticipantFormValues = z.infer<typeof participantFormSchema>;
+
+function hasFideId(fideId: string | undefined): boolean {
+  return fideId != null && fideId.trim().length > 0;
+}

@@ -53,10 +53,7 @@ export function generateDwzReport(input: DwzReportInput): string {
           participant.lastName,
           participant.academicTitle,
         ),
-        fideRating:
-          participant.fideRating != null && participant.fideRating > 0
-            ? participant.fideRating
-            : undefined,
+        fideRating: participant.fideRating ?? undefined,
         fideNation: participant.nationality?.trim() || CLUB_FEDERATION,
         fideId: participant.fideId?.trim() || undefined,
         birthDate: formatBirthDate(participant),
@@ -82,8 +79,7 @@ export function generateDwzReport(input: DwzReportInput): string {
     numberOfPlayers: input.participants.length,
     numberOfRatedPlayers: input.participants.filter(
       (participant) =>
-        (participant.dwzRating != null && participant.dwzRating > 0) ||
-        (participant.fideRating != null && participant.fideRating > 0),
+        participant.dwzRating != null || participant.fideRating != null,
     ).length,
     tournamentType: "Individual round robin",
     referee: input.referee ?? "",

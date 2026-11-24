@@ -101,15 +101,4 @@ describe("buildPgnHeaders", () => {
       [undefined, undefined, undefined],
     );
   });
-
-  it("omits the Elo of unrated players stored with rating 0", () => {
-    const headers = buildPgnHeaders(
-      game({
-        whiteParticipant: player("Klaus", "von Bargen", { fideRating: 0 }),
-      }),
-      tournament,
-    );
-
-    expect(headers.WhiteElo).toBeUndefined();
-  });
 });

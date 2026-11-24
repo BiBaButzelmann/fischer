@@ -232,6 +232,13 @@
       "when": 1794589570256,
       "tag": "0032_apply_forfeits_for_deactivated_participants",
       "breakpoints": true
+    },
+    {
+      "idx": 33,
+      "version": "7",
+      "when": 1795533407613,
+      "tag": "0033_rating_positive",
+      "breakpoints": true
     }
   ]
 }

@@ -133,10 +133,6 @@ export const generateFideReportFile = action(
           `Participant ${participant.id} does not have a FIDE ID`,
         );
         invariant(
-          fideRating != null,
-          `Participant ${participant.id} does not have a FIDE rating`,
-        );
-        invariant(
           birthYear != null,
           `Participant ${participant.id} does not have a birth year`,
         );
@@ -157,7 +153,7 @@ export const generateFideReportFile = action(
             participant.profile.lastName,
             participant.profile.academicTitle,
           ),
-          fideRating,
+          fideRating: fideRating ?? undefined,
           fideNation: nationality,
           fideId,
           birthDate: `${birthYear}/00/00`,
@@ -193,7 +189,9 @@ export const generateFideReportFile = action(
     // 062
     const numberOfPlayers = data.participants.length;
     // 072
-    const numberOfRatedPlayers = numberOfPlayers;
+    const numberOfRatedPlayers = entries.filter(
+      (entry) => entry.fideRating != null,
+    ).length;
     // 092
     const tournamentType = "Individual round robin";
     // 102
