@@ -26,16 +26,16 @@ import {
 } from "@/components/ui/collapsible";
 import { ChevronDownIcon } from "lucide-react";
 
-async function getPreviousDsbCandidate(
+async function findDsbCandidate(
   profile: Profile,
-  previousParticipant: Participant,
+  participant: Participant,
 ): Promise<DsbPlayerCandidate | null> {
-  const person = previousParticipant.dsbPersonId
-    ? await getDsbPersonById(previousParticipant.dsbPersonId)
+  const person = participant.dsbPersonId
+    ? await getDsbPersonById(participant.dsbPersonId)
     : await findUniqueDsbPersonByName(
         profile.firstName,
         profile.lastName,
-        previousParticipant.chessClub === DEFAULT_CLUB_LABEL ? HSK_VKZ : null,
+        participant.chessClub === DEFAULT_CLUB_LABEL ? HSK_VKZ : null,
       );
   return person != null ? mapDsbPersonToCandidate(person) : null;
 }
@@ -93,9 +93,9 @@ export default async function RolesPage() {
       )
     : null;
 
-  const previousDsbCandidate =
+  const dsbCandidate =
     initialValues.participant == null && previousParticipant != null
-      ? await getPreviousDsbCandidate(profile, previousParticipant)
+      ? await findDsbCandidate(profile, previousParticipant)
       : null;
 
   return (
@@ -117,7 +117,7 @@ export default async function RolesPage() {
         profile={profile}
         promotionEligibility={promotionEligibility}
         previousParticipant={previousParticipant ?? null}
-        previousDsbCandidate={previousDsbCandidate}
+        dsbCandidate={dsbCandidate}
       />
       <PastTournaments tournaments={viewableTournaments} />
     </div>
