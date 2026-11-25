@@ -86,7 +86,7 @@ describe("buildPgnHeaders", () => {
         whiteParticipant: player("Andrés Mauricio", "Reyes Mantilla", {
           title: "FM",
           fideRating: 2105,
-          fideId: " 4467248",
+          fideId: "4467248",
         }),
       }),
       tournament,

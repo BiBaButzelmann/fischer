@@ -239,6 +239,13 @@
       "when": 1795533407613,
       "tag": "0033_rating_positive",
       "breakpoints": true
+    },
+    {
+      "idx": 34,
+      "version": "7",
+      "when": 1795557600130,
+      "tag": "0034_fide_id_trimmed",
+      "breakpoints": true
     }
   ]
 }

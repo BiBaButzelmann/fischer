@@ -48,7 +48,7 @@ type Props = {
   profile: Profile;
   promotionEligibility: PromotionEligibility | null;
   previousParticipant: Participant | null;
-  previousDsbCandidate: DsbPlayerCandidate | null;
+  dsbCandidate: DsbPlayerCandidate | null;
 };
 
 export function RolesManager({
@@ -58,12 +58,12 @@ export function RolesManager({
   profile,
   promotionEligibility,
   previousParticipant,
-  previousDsbCandidate,
+  dsbCandidate,
 }: Props) {
   const participantInitialValues = buildParticipantInitialValues(
     rolesData.participant,
     previousParticipant,
-    previousDsbCandidate,
+    dsbCandidate,
   );
   const canDeleteParticipant = rolesData.participant != null;
   const [isPending, startTransition] = useTransition();
